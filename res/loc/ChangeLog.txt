@@ -15,7 +15,9 @@ o v3.14 (2021.03.31)
   - *NEW*      MSG_309 "Compressed archive"
   // MSG_310 can be tested with https://github.com/pbatard/rufus/raw/master/res/loc/test/esp_test.iso
   - *NEW*      MSG_310 "The ISO you have selected uses UEFI and is small enough to be written as (...)"
+  // MSG_311 can be seen after selecting an ISO (such as the previous one) and clicking the (✓) button
   - *NEW*      MSG_311 "Use %s (in the main application window) to enable."
+  // MSG_312 Can be tested with <Alt>-<H>
   - *NEW*      MSG_312 "Extra hashes (SHA512)"
   // The following are accessibility labels for some UI elements.
   // They can be tested with https://accessibilityinsights.io/docs/en/windows/overview

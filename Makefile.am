@@ -12,13 +12,3 @@ release: all
 	@upx --lzma --best $(TARGET)$(EXEEXT)
 	@mv $(TARGET)$(EXEEXT) $(TARGET)-$(VERSION)$(SUFFIX)$(EXEEXT)
 	@cmd.exe //c _sign.cmd $(TARGET)-$(VERSION)$(SUFFIX)$(EXEEXT)
-
-appx:
-	$(file > cmd.sed,$(SEDCMD))
-	@sed -i -e "s/@@TAGVER@@/$(TAGVER)/g" cmd.sed
-	@sed -b -i -f cmd.sed res/appstore/AppxManifest.xml
-	@rm cmd.sed
-	@cd res/appstore; cmd.exe //c packme.cmd
-	@mv arm/Release/$(TARGET)$(EXEEXT) $(TARGET)-$(VERSION)_arm$(EXEEXT)
-	@mv arm64/Release/$(TARGET)$(EXEEXT) $(TARGET)-$(VERSION)_arm64$(EXEEXT)
-	@mv res/appstore/Rufus-$(VERSION).appx .

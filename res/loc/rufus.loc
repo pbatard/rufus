@@ -13,7 +13,7 @@
 # • v3.5  "da-DK" "Danish (Dansk)"
 # • v3.5  "nl-NL" "Dutch (Nederlands)"
 # • v3.5  "fi-FI" "Finnish (Suomi)"
-# • v3.5  "fr-FR" "French (Français)"
+# • v3.14 "fr-FR" "French (Français)"
 # • v3.5  "de-DE" "German (Deutsch)"
 # • v3.5  "el-GR" "Greek (Ελληνικά)"
 # • v3.5  "he-IL" "Hebrew (עברית)"
@@ -3838,7 +3838,7 @@ t MSG_307 "Tämä voi viedä hetken"
 
 #########################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 3.5
+v 3.14
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -3994,7 +3994,7 @@ t MSG_096 "Le système de fichiers sélectionné ne peut pas être utilisé avec
 t MSG_097 "'%s' peut seulement être appliqué pour un système de fichiers NTFS."
 t MSG_098 "IMPORTANT : Vous essayez d'installer 'Windows To Go', mais votre périphérique de destination ne possède pas l'attribut 'FIXE'. A cause de cela, Windows va très probablement geler lors du démarrage, car Microsoft ne l'a pas conçu pour fonctionner avec des périphériques qui possèdent l'attribut 'AMOVIBLE'.\n\nVoulez vous continuer malgré celà ?\n\nNote : L'attribut 'FIXE/AMOVIBLE' est une propriété matérielle qui peut uniquement être changée avec des outils propriétaires, que les fabriquants de périphériques ne fournissent PRESQUE JAMAIS au public..."
 t MSG_099 "Limitation du système de fichiers"
-t MSG_100 "Cette image ISO contient un fichier de plus de 4 Go, ce qui est plus que la taille maximum supportée par le système de fichiers FAT ou FAT32."
+t MSG_100 "Cette image ISO contient un fichier de plus de 4 Go, soit plus que la taille maximale autorisée pour un système de fichiers FAT ou FAT32."
 t MSG_101 "Support pour archives WIM non disponible"
 t MSG_102 "Votre plateforme ne peut pas extraire les fichiers depuis les archives WIM. L'extraction de données WIM est nécessaire pour créer des médias USB démarrable avec EFI pour Windows 7/8 ou Windows Vista. Vous pouvez adresser ce problème en téléchargeant une version récente de l'utilitaire 7-Zip.\nVoulez-vous visiter la page de téléchargements de 7-zip ?"
 t MSG_103 "Télécharger %s ?"
@@ -4124,7 +4124,7 @@ t MSG_235 "Test de défauts : %s %d/%d - %0.2f%% (%d/%d/%d erreurs)"
 t MSG_236 "Test de défauts : Test avec motif aléatoire"
 t MSG_237 "Test de défauts : Test avec motif 0x%02X"
 t MSG_238 "Partitionnement (%s)..."
-t MSG_239 "Effacement des partitions (%s)..."
+t MSG_239 "Suppression des partitions (%s)..."
 t MSG_240 "La signature de la mise à jour qui vient d’être téléchargée ne peut pas être validée. Cela peut indiquer que votre système n’est pas configuré correctement pour la validation de signatures digitales, ou que le téléchargement contient un fichier malicieux.\n\nLe téléchargement va être supprimé. Veuillez consulter le log pour plus de détails."
 t MSG_241 "Téléchargement : %s"
 t MSG_242 "Echec de téléchargement du fichier."
@@ -4192,7 +4192,21 @@ t MSG_303 "Affiche le log"
 t MSG_304 "Crée une image disque à partir du périphérique sélectionné"
 t MSG_305 "Utilisez cette option pour indiquer si vous voulez utiliser ce périphérique pour installer Windows sur un autre disque, ou bien exécuter Windows directement depuis votre périphérique (Windows To Go)."
 t MSG_306 "Effacement 'rapide' à zéro : %s"
-t MSG_307 "peut prendre du temps"
+t MSG_307 "Peut prendre du temps"
+t MSG_308 "Détection VHD"
+t MSG_309 "Archive compressée"
+t MSG_310 "L’image ISO que vous avez sélectionnée utilise EFI et est suffisamment petite pour être contenue entièrement dans une ESP (EFI System Partition). L’écriture en ESP, plutôt qu’en partition générique occupant la totalité de l’espace disque, peut s’avérer préférable pour certaines méthodes d’installation.\nVeuillez sélectionner le mode d’écriture que vous souhaitez utiliser pour écrire cette image :"
+t MSG_311 "Utilisez %s (dans la fenêtre d’application principale) pour active."
+t MSG_312 "Checksum hash supplémentaire (SHA512)"
+t MSG_313 "Sauver en image VHD"
+t MSG_314 "Calculer les checksums the l’image sélectionnée"
+t MSG_315 "Multiples boutons"
+t MSG_316 "Nombre de passes"
+t MSG_317 "ID disque"
+t MSG_318 "Priorité de thread part default : %d"
+t MSG_319 "Ignorer le marqueur de démarrage"
+t MSG_320 "Rafraichissement du schéma de partition (%s)..."
+t MSG_321 "L’image que vous avez sélectionnée est de type ISOHybrid, mais ses créateurs ne l’ont pas rendue compatible avec le mode ISO (i.e. copie de fichier).\nA cause de cela, seule l’écriture en mode DD est applicable."
 
 #########################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
