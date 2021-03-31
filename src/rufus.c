@@ -1264,7 +1264,8 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		// If we have an ISOHybrid, but without an ISO method we support, disable ISO support altogether
 		if (IS_DD_BOOTABLE(img_report) && (img_report.disable_iso ||
 				(!IS_BIOS_BOOTABLE(img_report) && !IS_EFI_BOOTABLE(img_report)))) {
-			MessageBoxExU(hMainDialog, lmprintf(MSG_321), lmprintf(MSG_274), MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
+			MessageBoxExU(hMainDialog, lmprintf(MSG_321), lmprintf(MSG_274, "ISOHybrid"),
+				MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
 			uprintf("Note: DD image mode enforced since this ISOHybrid is not ISO mode compatible.");
 			img_report.is_iso = FALSE;
 		}
@@ -1369,7 +1370,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
 					(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
 					char* choices[3] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP"), lmprintf(MSG_277, dd_image) };
-					i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+					i = SelectionDialog(lmprintf(MSG_274, "ISOHybrid"), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
 						choices, 3);
 					if (i < 0)	// Cancel
 						goto out;
@@ -1379,7 +1380,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 						write_as_image = TRUE;
 				} else {
 					char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
-					i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
+					i = SelectionDialog(lmprintf(MSG_274, "ISOHybrid"), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
 						choices, 2);
 					if (i < 0)	// Cancel
 						goto out;
@@ -1455,7 +1456,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			// so ask the users if they want to write it as an ESP.
 			char* iso_image = lmprintf(MSG_036);
 			char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP") };
-			i = SelectionDialog(lmprintf(MSG_274), lmprintf(MSG_310), choices, 2);
+			i = SelectionDialog(lmprintf(MSG_274, "ESP"), lmprintf(MSG_310), choices, 2);
 			if (i < 0)	// Cancel
 				goto out;
 			else if (i == 2)

@@ -5,26 +5,31 @@ To edit a translation, please make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translation
 Or simply download https://rufus-web.akeo.ie/locale/pollock.exe and follow its directions.
 
-o v3.*
+o v3.14 (2021.03.31)
   - *UPDATED*  MSG_068 "Error while partitioning drive." -> "Could not partition drive."
-  You can test this new message with <Alt>-<G>
+  - *UPDATED*  MGS_274 "IsoHybrid image detected" -> "%s image detected"
+  // MSG_308 can be tested with <Alt>-<G>
   - *NEW*      MSG_308 "VHD detection"
+  // MSG_309 can be seen in the file selection dialog *after* having selected an ISO (e.g. esp_test.iso below)
+  // and pressing <Ctrl>-<SELECT> (i.e. clicking on the 'SELECT' button while maintaining the <Ctrl> key pressed)
   - *NEW*      MSG_309 "Compressed archive"
-  // TODO: Add a test ISO for this.
+  // MSG_310 can be tested with https://github.com/pbatard/rufus/raw/master/res/loc/test/esp_test.iso
   - *NEW*      MSG_310 "The ISO you have selected uses UEFI and is small enough to be written as (...)"
   - *NEW*      MSG_311 "Use %s (in the main application window) to enable."
   - *NEW*      MSG_312 "Extra hashes (SHA512)"
-  // The following are accessibility labels for some UI elements
-  // Can be tested with https://accessibilityinsights.io/docs/en/windows/overview
+  // The following are accessibility labels for some UI elements.
+  // They can be tested with https://accessibilityinsights.io/docs/en/windows/overview
   - *NEW*      MSG_313 "Save to VHD"
   - *NEW*      MSG_314 "Compute image checksums"
   - *NEW*      MSG_315 "Multiple buttons"
   - *NEW*      MSG_316 "Number of passes"
   - *NEW*      MSG_317 "Disk ID"
-  // The following can be tested with <Alt>-<+> and <Alt>-<->
+  // MSG_318 can be tested with <Alt>-<+> and <Alt>-<->
   - *NEW*      MSG_318 "Default thread priority: %d"
+  // MSG_319 can be tested with <Alt>-<M>
   - *NEW*      MSG_319 "Ignore Boot Marker"
   - *NEW*      MSG_320 "Refreshing partition layout"
+  // MSG_321 can be tested with https://manjaro.org/downloads/official/xfce/
   - *NEW*      MSG_321 "The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO mode (...)
 
 o v3.5 (2019.03.12)
