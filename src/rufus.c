@@ -22,7 +22,6 @@
 #include <crtdbg.h>
 #endif
 
-
 #include <windows.h>
 #include <windowsx.h>
 #include <stdlib.h>
@@ -51,6 +50,9 @@
 #include "cdio/logging.h"
 #include "../res/grub/grub_version.h"
 #include "../res/grub2/grub2_version.h"
+
+#define rufus    0
+#define appstore 1
 
 enum bootcheck_return {
 	BOOTCHECK_PROCEED = 0,
@@ -134,6 +136,7 @@ char *archive_path = NULL, image_option_txt[128], *fido_url = NULL;
 StrArray DriveId, DriveName, DriveLabel, DriveHub, BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
+const char* appstore_chunk[2] = { "\\WindowsApps\\19453.net.Rufus", "y8nh7bq2a8dtt\\rufus" };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
 
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
@@ -1446,10 +1449,6 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			goto out;
 		}
 
-		// If the selected target doesn't include include BIOS, skip file downloads for GRUB/Syslinux
-		if (target_type != TT_BIOS)
-			goto uefi_target;
-
 		if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
 			(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
 			// The ISO is small enough to be written as an ESP and we are using GPT
@@ -1462,6 +1461,10 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			else if (i == 2)
 				write_as_esp = TRUE;
 		}
+
+		// If the selected target doesn't include BIOS, skip file downloads for GRUB/Syslinux
+		if (target_type != TT_BIOS)
+			goto uefi_target;
 
 		if ((partition_type == PARTITION_STYLE_MBR) && (img_report.has_grub2) && (img_report.grub2_version[0] != 0) &&
 			(strcmp(img_report.grub2_version, GRUB2_PACKAGE_VERSION) != 0)) {
@@ -3176,16 +3179,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 #endif
 
-	// Look for a rufus.app file in the current app directory
-	// Since Microsoft makes it downright impossible to pass an arg in the app manifest
-	// and the automated VS2019 package building process doesn't like renaming the .exe
-	// right under its nose (else we would use the same trick as for portable vs regular)
-	// we use yet another workaround to detect if we are running the AppStore version...
-	static_sprintf(ini_path, "%s\\rufus.app", app_dir);
-	if (PathFileExistsU(ini_path)) {
-		appstore_version = TRUE;
-		goto skip_args_processing;
-	}
+#if (SOLUTION == appstore)
+	appstore_version = TRUE;
+	for (i = 0; i < ARRAYSIZE(appstore_chunk); i++)
+		if (strstr(app_dir, appstore_chunk[0]) == NULL)
+			goto out;
+	goto skip_args_processing;
+#endif
 
 	// We have to process the arguments before we acquire the lock and process the locale
 	PF_INIT(__wgetmainargs, Msvcrt);
