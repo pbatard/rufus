@@ -7,7 +7,7 @@ Or simply download https://rufus-web.akeo.ie/locale/pollock.exe and follow its d
 
 o v3.14 (2021.03.31)
   - *UPDATED*  MSG_068 "Error while partitioning drive." -> "Could not partition drive."
-  - *UPDATED*  MGS_274 "IsoHybrid image detected" -> "%s image detected"
+  - *UPDATED*  MSG_274 "IsoHybrid image detected" -> "%s image detected"
   // MSG_308 can be tested with <Alt>-<G>
   - *NEW*      MSG_308 "VHD detection"
   // MSG_309 can be seen in the file selection dialog *after* having selected an ISO (e.g. esp_test.iso below)
