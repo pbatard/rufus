@@ -32,7 +32,7 @@
 # • v3.5  "pt-PT" "Portuguese Standard (Português)"
 # • v3.5  "ro-RO" "Romanian (Română)"
 # • v3.5  "ru-RU" "Russian (Русский)"
-# • v3.5  "sr-SP" "Serbian (Srpski)"
+# • v3.14 "sr-SP" "Serbian (Srpski)"
 # • v3.5  "sk-SK" "Slovak (Slovensky)"
 # • v3.5  "sl-SI" "Slovenian (Slovenščina)"
 # • v3.5  "es-ES" "Spanish (Español)"
@@ -10789,7 +10789,7 @@ t MSG_307 "Это может занять время"
 
 #########################################################################
 l "sr-SP" "Serbian (Srpski)" 0x241a, 0x081a, 0x181a, 0x2c1a, 0x701a, 0x7c1a
-v 3.5
+v 3.14
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -11146,8 +11146,22 @@ t MSG_302 "Prikaži informacije o ovoj aplikacije"
 t MSG_303 "Prikaži ispisani fajl"
 t MSG_304 "Napravi disk sliku od izabranog fajla"
 t MSG_305 "Izaberite ovu opciju kako bi odlučili da li želite koristiti ovaj uređaj kako bi instalirati Windows na drugi disk, ili da li želite koristiti Windows direktno sa ovog uređaja (Windows To Go)."
-t MSG_306 "Brže-popunavanje nulom diska: %s"
-t MSG_307 "ovo može potrajati"
+t MSG_306 "Brže-popunjavanje nulom diska: %s"
+t MSG_307 "Ovo može potrajati"
+t MSG_308 "VHD detektovan"
+t MSG_309 "Kompresovana arhiva"
+t MSG_310 "ISO koji ste odabrali koristi UEFI I dovoljno da je malo da bude napisano kao EFI sistemska particija (ESP). Pisanje na ESP umesto pisanje na genetičnu particiju koja zauzima celi disk može biti poželjnije za neke vrste instalacije \n\nMolimo odaberite model koj želite da koristite za pisanje ove slike:"
+t MSG_311 "Koristi %s (u glavnoj aplikaciji) da bi uključio."
+t MSG_312 "Dodatni heševi (SHA512)"
+t MSG_313 "Sačuvaj u VHD direktoriju"
+t MSG_314 "Računaj kontrolni zbir slike"
+t MSG_315 "Mnoštvo dugmadi"
+t MSG_316 "Broj prelazaka"
+t MSG_317 "ID dika"
+t MSG_318 "Podrazumevana prioritetna nit: %d"
+t MSG_319 "Ignoriši boot marker"
+t MSG_320 "Osvežavanje participnog rasporeda (%s)..."
+t MSG_321 "Slika koju si odabrao je ISOHibrid, ali njeni kreatori ga nisu napravili kompatibilnim sa ISO/File copy mode-om.\nKao rezultat toga, DD režim pisanje slike će biti primenjen."
 
 #########################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
