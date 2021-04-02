@@ -14,7 +14,7 @@
 # • v3.14 "nl-NL" "Dutch (Nederlands)"
 # • v3.5  "fi-FI" "Finnish (Suomi)"
 # • v3.14 "fr-FR" "French (Français)"
-# • v3.5  "de-DE" "German (Deutsch)"
+# • v3.14 "de-DE" "German (Deutsch)"
 # • v3.5  "el-GR" "Greek (Ελληνικά)"
 # • v3.14 "he-IL" "Hebrew (עברית)"
 # • v3.5  "hu-HU" "Hungarian (Magyar)"
@@ -4224,7 +4224,7 @@ t MSG_321 "L’image que vous avez sélectionnée est de type ISOHybrid, mais se
 
 #########################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
-v 3.5
+v 3.14
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -4340,7 +4340,7 @@ t MSG_064 "Lesefehler."
 t MSG_065 "Schreibfehler."
 t MSG_066 "Installationsfehler"
 t MSG_067 "Datenträger konnte nicht geöffnet werden. Möglicherweise wird er von einem anderen Prozess verwendet. Bitte legen Sie den Datenträger noch einmal ein und versuchen Sie es erneut."
-t MSG_068 "Fehler beim Partitionieren des Laufwerks."
+t MSG_068 "Laufwerk konnte nicht partitioniert werden"
 t MSG_069 "Dateien konnten nicht auf das Ziellaufwerk kopiert werden."
 t MSG_070 "Vom Benutzer abgebrochen."
 t MSG_071 "Thread konnte nicht gestartet werden."
@@ -4548,7 +4548,7 @@ t MSG_282 "Exklusive Sperre für das USB-Laufwerk"
 t MSG_283 "Ungültige Signatur"
 t MSG_284 "Der heruntergeladenen ausführbaren Datei fehlt eine digitale Signatur."
 t MSG_285 "Die heruntergeladene ausführbare Datei ist mit '%s' signiert.\nDiese Signatur ist nicht akzeptiert und könnte auf eine böswillige Aktivität hindeuten.\nSind Sie sicher, dass Sie diese Datei ausführen wollen?"
-t MSG_286 "Überschreiben mit Nullen: %s"
+t MSG_286 "Laufwerk mit Nullen überschreiben: %s"
 t MSG_287 "Erkennung nicht wechselbarer USB-Laufwerke"
 t MSG_288 "Administrative Rechte nicht vorhanden"
 t MSG_289 "Dieses Programm kann nur mit administrativen Rechten ausgeführt werden"
@@ -4568,8 +4568,22 @@ t MSG_302 "Informationen über dieses Programm anzeigen"
 t MSG_303 "Log anzeigen"
 t MSG_304 "Ein Abbild des gewählten Laufwerks erstellen"
 t MSG_305 "Wollen Sie Windows auf einem anderen Laufwerk installieren oder Windows direkt nutzen (Windows To Go)"
-t MSG_306 "Laufwerk mit Nullen überschreiben: %s"
-t MSG_307 "kann etwas dauern"
+t MSG_306 "Laufwerk mit Nullen überschreiben (schnell): %s"
+t MSG_307 "Der Vorgang nimmt einige Zeit in Anspruch"
+t MSG_308 "VHD-Erkennung"
+t MSG_309 "Archivdatei"
+t MSG_310 "Das ausgewählte ISO-Abbild verwendet UEFI und ist klein genug, um auf eine EFI System-Partition (ESP) geschrieben zu werden. Es auf eine ESP- anstelle einer normalen Partition zu schrieben, kann für bestimmte Installationsarten vorteilhaft sein.\n\nBitte wählen Sie einen Modus aus."
+t MSG_311 "Verwende  %s (Hauptfenster der Anwendung) zum aktivieren."
+t MSG_312 "Zusätzliche Prüfsummen (SHA512)"
+t MSG_313 "als VHD speichern"
+t MSG_314 "Prüfsumme des Abbilds errechnen"
+t MSG_315 "Mehrere Schaltflächen"
+t MSG_316 "Anzahl der Durchläufe"
+t MSG_317 "Disk-ID"
+t MSG_318 "Standardmäßige Thread-Priorität: %d"
+t MSG_319 "Boot-Markierung ignorieren"
+t MSG_320 "Liste der Partitionen aktualisieren (%s)..."
+t MSG_321 "Das ausgewählte Abbild ist vom Typ ISOHybrid, aber der Ersteller hat es nicht mit dem ISO/Datei Kopier-Modus kompatibel gemacht.\nDeswegen wird der DD-Schreibmodus verwendet."
 
 #########################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
