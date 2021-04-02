@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.5\n"
+"Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-04-16 00:16+0300\n"
-"PO-Revision-Date: 2020-04-16 00:32+0300\n"
+"POT-Creation-Date: 2021-04-01 23:36+0300\n"
+"PO-Revision-Date: 2021-04-02 15:39+0300\n"
 "Language: he_IL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x040d\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -485,7 +485,7 @@ msgstr "לא ניתן לפתוח את המדיה. יתכן שהיא בשימוש
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "שגיאה בחלוקת הכונן למחיצות."
+msgstr "לא ניתן לחלק את הכונן למחיצות."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
@@ -717,7 +717,7 @@ msgstr ""
 
 #. • MSG_106
 msgid "Please select folder"
-msgstr "נא לבחור תיקיה"
+msgstr "נא לבחור תיקייה"
 
 #. • MSG_107
 msgid "All files"
@@ -966,7 +966,7 @@ msgstr "מריץ תסריט הורדה..."
 
 #. • MSG_149
 msgid "Download ISO Image"
-msgstr "הורדת תמונת ISO"
+msgstr "הורדת קובץ ISO"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
@@ -1309,8 +1309,8 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "מאתחל (%s) - משך זמן משוער %d:%02d..."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "מגדיר תווית (זה עשוי לקחת זמן)..."
+msgid "Setting label (%s)..."
+msgstr "מגדיר תווית (%s)..."
 
 #. • MSG_222
 #.
@@ -1354,9 +1354,10 @@ msgstr "מעתיק קובצי DOS..."
 msgid "Copying ISO files: %s"
 msgstr "מעתיק קובצי ISO: ‏%s"
 
+# RLM is not needed here as the placeholder is fully localized (the "this may take a while" string).
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "מגדיר אתחול EFI של Win7 (זה עשוי לקחת זמן)..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "מגדיר אתחול EFI של Win7 (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1391,8 +1392,8 @@ msgid "Partitioning (%s)..."
 msgstr "יוצר מחיצות (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "מוחק מחיצות..."
+msgid "Deleting partitions (%s)..."
+msgstr "מוחק מחיצות (%s)..."
 
 #. • MSG_240
 #.
@@ -1452,6 +1453,7 @@ msgstr "%s מופעל"
 msgid "%s disabled"
 msgstr "%s מושבת"
 
+# This was translated with "mode" as this string is a placeholder for "%s disabled/enabled", to match masculinity for both.
 #. • MSG_252
 msgid "Size checks"
 msgstr "מצב בדיקות גודל"
@@ -1460,6 +1462,7 @@ msgstr "מצב בדיקות גודל"
 msgid "Hard disk detection"
 msgstr "זיהוי כוננים קשיחים"
 
+# This was translated with "mode" as this string is a placeholder for "%s disabled/enabled", to match masculinity for both.
 #. • MSG_254
 msgid "Force large FAT32 formatting"
 msgstr "מצב כפיית אתחול כ־Large FAT32"
@@ -1472,18 +1475,22 @@ msgstr "NoDriveTypeAutorun יימחק ביציאה"
 msgid "Fake drive detection"
 msgstr "זיהוי כוננים מזוייפים"
 
+# This was translated with "mode" as this string is a placeholder for "%s disabled/enabled", to match masculinity for both.
 #. • MSG_257
 msgid "Joliet support"
 msgstr "מצב תמיכה ב־Joliet"
 
+# This was translated with "mode" as this string is a placeholder for "%s disabled/enabled", to match masculinity for both.
 #. • MSG_258
 msgid "Rock Ridge support"
 msgstr "מצב תמיכה ב־Rock Ridge"
 
+# This was translated with "mode" as this string is a placeholder for "%s disabled/enabled", to match masculinity for both.
 #. • MSG_259
 msgid "Force update"
 msgstr "מצב כפיית עדכון"
 
+# This was translated with "mode" as this string is a placeholder for "%s disabled/enabled", to match masculinity for both.
 #. • MSG_260
 msgid "NTFS compression"
 msgstr "מצב דחיסת NTFS"
@@ -1492,6 +1499,7 @@ msgstr "מצב דחיסת NTFS"
 msgid "Writing image: %s"
 msgstr "כותב קובץ תמונה: %s"
 
+# This was translated with "mode" as this string is a placeholder for "%s disabled/enabled", to match masculinity for both.
 #. • MSG_262
 #.
 #. Cheat mode message to disable ISO Support, so that only DD images can be opened
@@ -1506,7 +1514,7 @@ msgstr "שימוש ביחידות מידה תקינות"
 
 #. • MSG_264
 msgid "Deleting directory '%s'"
-msgstr "מוחק את התיקיה '%s'"
+msgstr "מוחק את התיקייה '%s'"
 
 #. • MSG_265
 msgid "VMWare disk detection"
@@ -1545,8 +1553,8 @@ msgid "Change the application language"
 msgstr "שינוי שפת היישום"
 
 #. • MSG_274
-msgid "ISOHybrid image detected"
-msgstr "זוהה קובץ תמונה מסוג ISOHybrid"
+msgid "%s image detected"
+msgstr "זוהה קובץ תמונה מסוג %s"
 
 #. • MSG_275
 #.
@@ -1592,6 +1600,7 @@ msgstr "דיסק או קובץ תמונה ISO"
 msgid "%s (Please select)"
 msgstr "%s (נא לבחור)"
 
+# This was translated with "mode" as this string is a placeholder for "%s disabled/enabled", to match masculinity for both.
 #. • MSG_282
 msgid "Exclusive USB drive locking"
 msgstr "מצב נעילת כונן USB בלעדית"
@@ -1722,3 +1731,73 @@ msgstr "ניתן להשתמש באפשרות זו כדי לציין האם בר�
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
 msgstr "מבצע איפוס מהיר לכונן: %s"
+
+#. • MSG_307
+msgid "This may take a while"
+msgstr "זה עשוי לקחת זמן"
+
+#. • MSG_308
+msgid "VHD detection"
+msgstr "איתור VHD"
+
+#. • MSG_309
+msgid "Compressed archive"
+msgstr "ארכיון מכווץ"
+
+#. • MSG_310
+msgid ""
+"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"קובץ ה־ISO שבחרת משתמש ב־UEFI והוא בגודל מספיק קטן כדי להיכתב כ־EFI System Partition (ESP). כתיבה למחיצה מסוג ESP, בניגוד לכתיבה למחיצת נתונים רגילה המתפרסת על כל שטח הדיסק, עשויה להיות מועדפת עבור סוגי התקנות מסויימים.\n"
+"\n"
+"נא לבחור במצב שברצונך להשתמש כדי לכתוב את קובץ התמונה הזה:"
+
+#. • MSG_311
+msgid "Use %s (in the main application window) to enable."
+msgstr "יש להשתמש ב־%s (בחלון היישום הראשי) כדי להפעיל."
+
+#. • MSG_312
+msgid "Extra hashes (SHA512)"
+msgstr "חישוב גיבובים נוספים (SHA512)"
+
+#. • MSG_313
+msgid "Save to VHD"
+msgstr "שמירה ל־VHD"
+
+#. • MSG_314
+msgid "Compute image checksums"
+msgstr "חישוב סיכומי ביקורת של קובץ התמונה"
+
+#. • MSG_315
+msgid "Multiple buttons"
+msgstr "כפתורים מרובים"
+
+#. • MSG_316
+msgid "Number of passes"
+msgstr "מספר המעברים"
+
+#. • MSG_317
+msgid "Disk ID"
+msgstr "מזהה דיסק"
+
+#. • MSG_318
+msgid "Default thread priority: %d"
+msgstr "עדיפות תהליכון ברירת מחדל: %d"
+
+#. • MSG_319
+msgid "Ignore Boot Marker"
+msgstr "מצב התעלמות מסמן האתחול (Boot Marker)"
+
+#. • MSG_320
+msgid "Refreshing partition layout (%s)..."
+msgstr "מרענן את מבנה המחיצות (%s)..."
+
+#. • MSG_321
+msgid ""
+"The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
+"As a result, DD image writing mode will be enforced."
+msgstr ""
+"קובץ התמונה שבחרת הוא מסוג ISOHybrid, אבל היוצרים שלו לא תכננו אותו בצורה שיהיה נתמך במצב העתקת קבצים מ־ISO.\n"
+"כתוצאה מכך, ייאכף שימוש במצב כתיבה כקובץ תמונה DD."
