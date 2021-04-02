@@ -22,7 +22,7 @@
 # • v3.14 "it-IT" "Italian (Italiano)"
 # • v3.5  "ja-JP" "Japanese (日本語)"
 # • v3.14 "ko-KR" "Korean (한국어)"
-# • v3.5  "lv-LV" "Latvian (Latviešu)"
+# • v3.14 "lv-LV" "Latvian (Latviešu)"
 # • v3.5  "lt-LT" "Lithuanian (Lietuvių)"
 # • v3.5  "ms-MY" "Malay (Bahasa Malaysia)"
 # • v3.5  "nb-NO" "Norwegian (Norsk)"
@@ -7132,7 +7132,7 @@ t MSG_321 "선택한 이미지는 ISOHybrid이지만, 이미지 작성자가 ISO
 
 #########################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
-v 3.5
+v 3.14
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -7213,8 +7213,8 @@ t MSG_016 "Ik mēnesi"
 t MSG_017 "Citādi"
 t MSG_018 "Jūsu versija: %d.%d (Build %d)"
 t MSG_019 "Pēdējā versija: %d.%d (Build %d)"
-t MSG_020 "B"
-t MSG_026 "B"
+t MSG_020 "baiti"
+t MSG_026 "baiti"
 t MSG_027 "kilobaiti"
 t MSG_028 "megabaiti"
 t MSG_029 "Noklusējums"
@@ -7356,7 +7356,7 @@ t MSG_166 "Atzīmējiet starptautisko simbolu atbalstam un ierīces ikonas izvei
 t MSG_167 "Instalēt MBR, kur var izvēlēties ielādi un kurš var maskēties BIOS'ā ar ierīces identifikatoru"
 t MSG_168 "Mēģināt maskēt pirmo USB ielādes ierīci (parasti 0x80) kā citu disku.\nTas nepieciešams, kad instalējat Windows XP un izmantojat vairāk nekā vienu dieskus."
 t MSG_169 "IZveidot papildus slēpto partīciju un izlīdzināt partīciju robežas.\nŠī opcija var atvieglot ielādes noteikšanu vecākās BIOS versijās."
-t MSG_170 "Rādīt ārējos USB pieslēguma HDD."
+t MSG_170 "Rādīt ārējos USB pieslēguma HDD. IZMANTOJAT UZ SAVAS ATBILDĪBAS!!!"
 t MSG_171 "Tiks sākta formatēšana.\nVisi dati no nesēja tiks IZNĪCINĀTI!!!"
 t MSG_172 "Nekorekts lejupielādes paraksts"
 t MSG_173 "Piespiediet izvēlei..."
@@ -7491,7 +7491,21 @@ t MSG_303 "Rādīt atskaiti"
 t MSG_304 "Veidot virtuālo attēlu no izvēlētās iekārtas"
 t MSG_305 "Izmantojiet šo opciju, lai norādīt vai vēlaties izmantot ierīci Windows instalēšanai uz cita diska, vai vēlaties startēt Windows no šīs ierīces (Windows To Go)."
 t MSG_306 "Ātrā diska nullēšana: %s"
-t MSG_307 "var aizņemt laiku"
+t MSG_307 "Šī darbība var aizņemt laiku"
+t MSG_308 "Noteikts VHD"
+t MSG_309 "Saspiests arhīvs"
+t MSG_310 "Izvēlētais  ISO-fails izmanto UEFI un ir pietiekoši mazs, lai varētu tikt ierakstīts, kā EFI (ESP) sistēmas sadaļa. Ieraksts iekš ESP, nevis kopējā datu sadaļā, kas aizņem visu disku, var būt ieteicamāks dažu ielāžu tipiem.\n\nIzvēlieties to režīmu, kuru nepieciešams izmantot lai ierakstīt šo virtuālo attēlu:"
+t MSG_311 "Lai ieslēgt, izmantojiet %s programmas galvenajā izvēlnē."
+t MSG_312 "Ekstra heši (SHA512)"
+t MSG_313 "Saglabāt VHD"
+t MSG_314 "Izskaitļo virtuālo attēlu kontrolsummas"
+t MSG_315 "Vairāk pogu"
+t MSG_316 "Mēģinājumu skaits"
+t MSG_317 "Diska ID"
+t MSG_318 "Noklusējuma prioritāte: %d"
+t MSG_319 "Ignorēt ielādes marķeri"
+t MSG_320 "Atjauno sadaļas izkārtojumu (%s)..."
+t MSG_321 "Izvēlētais virtuālais attēls ir ISOHybrid, bet tā veidotājs nav izveidojis ISO/Failu kopēšanas .\nTiks izmantots DD virtuālā attēla kopēšanas režīms."
 
 #########################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
