@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.5\n"
+"Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-04-17 12:17+0100\n"
-"PO-Revision-Date: 2020-04-17 12:30+0100\n"
+"POT-Creation-Date: 2021-04-03 17:18+0800\n"
+"PO-Revision-Date: 2021-04-03 18:47+0800\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0404, 0x0c04, 0x1404, 0x7c04\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.4.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -60,7 +60,7 @@ msgstr "相容性模式"
 #. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
 #. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
 msgid "Use Rufus MBR with BIOS ID"
-msgstr "客製 MBR 並設 ID 為"
+msgstr "使用 Rufus MBR 並設定 BIOS ID 為"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -405,7 +405,7 @@ msgstr "多個磁碟分割區"
 
 #. • MSG_048
 msgid "Rufus - Flushing buffers"
-msgstr "Rufus - 清理緩衝區"
+msgstr "Rufus - 正在清空緩衝區"
 
 #. • MSG_049
 msgid "Rufus - Cancellation"
@@ -417,7 +417,7 @@ msgstr "完成。"
 
 #. • MSG_051
 msgid "Undetermined error while formatting."
-msgstr "格式化發生不明錯誤。"
+msgstr "格式化中發生不明錯誤。"
 
 #. • MSG_052
 msgid "Cannot use the selected file system for this media."
@@ -485,7 +485,7 @@ msgstr "無法開啟裝置，可能被其他程序占用。請重新插拔一次
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "分割磁碟發生錯誤。"
+msgstr "無法分割磁碟。"
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
@@ -1285,7 +1285,7 @@ msgstr "已儲存: %s"
 #.
 #. Formatting status
 msgid "Formatting: %s"
-msgstr "格式化中，已完成: %s"
+msgstr "格式化中: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1304,8 +1304,8 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "格式化 (%s) - 剩餘時間: %d:%02d..."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "設定標籤中 (可能要一段時間，請耐心等候)..."
+msgid "Setting label (%s)..."
+msgstr "正在設定標籤 (%s)..."
 
 #. • MSG_222
 #.
@@ -1350,8 +1350,8 @@ msgid "Copying ISO files: %s"
 msgstr "複製 ISO 檔案: %s"
 
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "建置 Win7 EFI 開機架構 (可能要一段時間，請耐心等候)..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "建置 Win7 EFI 開機 (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1386,8 +1386,8 @@ msgid "Partitioning (%s)..."
 msgstr "磁區分割中 (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "刪除磁區分割..."
+msgid "Deleting partitions (%s)..."
+msgstr "正在刪除磁區分割 (%s)..."
 
 #. • MSG_240
 #.
@@ -1485,7 +1485,7 @@ msgstr "NTFS 壓縮"
 
 #. • MSG_261
 msgid "Writing image: %s"
-msgstr "映像檔寫入中，已完成: %s"
+msgstr "映像檔寫入中: %s"
 
 #. • MSG_262
 #.
@@ -1540,8 +1540,8 @@ msgid "Change the application language"
 msgstr "更改應用程式語言"
 
 #. • MSG_274
-msgid "ISOHybrid image detected"
-msgstr "偵測到 ISOHybrid 映像檔"
+msgid "%s image detected"
+msgstr "偵測到 %s 映像檔"
 
 #. • MSG_275
 #.
@@ -1717,3 +1717,73 @@ msgstr "是否要使用此裝置來安裝 Windows 在另一個磁碟上，或是
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
 msgstr "正在快速寫入零: %s"
+
+#. • MSG_307
+msgid "This may take a while"
+msgstr "可能需要一段時間"
+
+#. • MSG_308
+msgid "VHD detection"
+msgstr "虛擬硬碟偵測"
+
+#. • MSG_309
+msgid "Compressed archive"
+msgstr "壓縮檔"
+
+#. • MSG_310
+msgid ""
+"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"你選擇的 ISO 使用 UEFI 可以直接當作 EFI System Partition (ESP)。比起占用整個通用磁區，使用 ESP 有時是更好的選擇。\n"
+"\n"
+"請選擇此映象檔的寫入模式:"
+
+#. • MSG_311
+msgid "Use %s (in the main application window) to enable."
+msgstr "在主程式視窗按下 %s 以啟用。"
+
+#. • MSG_312
+msgid "Extra hashes (SHA512)"
+msgstr "額外雜湊值 (SHA512)"
+
+#. • MSG_313
+msgid "Save to VHD"
+msgstr "儲存至虛擬硬碟"
+
+#. • MSG_314
+msgid "Compute image checksums"
+msgstr "計算映像檔總和檢查碼"
+
+#. • MSG_315
+msgid "Multiple buttons"
+msgstr "數個按鈕"
+
+#. • MSG_316
+msgid "Number of passes"
+msgstr "檢查次數"
+
+#. • MSG_317
+msgid "Disk ID"
+msgstr "磁碟 ID"
+
+#. • MSG_318
+msgid "Default thread priority: %d"
+msgstr "預設執行緒優先順序: %d"
+
+#. • MSG_319
+msgid "Ignore Boot Marker"
+msgstr "忽略 Boot Marker"
+
+#. • MSG_320
+msgid "Refreshing partition layout (%s)..."
+msgstr "正在重新整理磁區分割 (%s)..."
+
+#. • MSG_321
+msgid ""
+"The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
+"As a result, DD image writing mode will be enforced."
+msgstr ""
+"你選擇的映象檔是 ISOHybrid，但是檔案作者沒有使之與 ISO/檔案複製 模式相容。\n"
+"因此強制使用 DD 映象寫入模式。"
