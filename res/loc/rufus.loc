@@ -12,7 +12,7 @@
 # • v3.5  "cs-CZ" "Czech (Čeština)"
 # • v3.5  "da-DK" "Danish (Dansk)"
 # • v3.14 "nl-NL" "Dutch (Nederlands)"
-# • v3.5  "fi-FI" "Finnish (Suomi)"
+# • v3.14 "fi-FI" "Finnish (Suomi)"
 # • v3.14 "fr-FR" "French (Français)"
 # • v3.14 "de-DE" "German (Deutsch)"
 # • v3.5  "el-GR" "Greek (Ελληνικά)"
@@ -3518,7 +3518,7 @@ t MSG_321 "De image die u hebt geselecteerd is een ISOHybrid, maar de makers erv
 
 #########################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
-v 3.5
+v 3.14
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -3641,7 +3641,7 @@ t MSG_064 "Virhe lukiessa."
 t MSG_065 "Virhe kirjoittaessa."
 t MSG_066 "Asennus epäonnistui"
 t MSG_067 "Tietovälinettä ei voitu avata. Se voi olla toisen prosessin käytössä. Irroita ja yhdistä tietoväline ja yritä uudelleen."
-t MSG_068 "Virhe osioidessa levyä."
+t MSG_068 "Levyä ei voitu osioida."
 t MSG_069 "Tietoja ei voitu kopioida kohdelevylle."
 t MSG_070 "Käyttäjä peruutti."
 t MSG_071 "Säiettä ei voitu käynnistää."
@@ -3673,7 +3673,7 @@ t MSG_096 "Valittua tiedostojärjestelmää ei voida käyttää tämäntyyppisen
 t MSG_097 "'%s' on käytettävissä vain NTFS-tiedostojärjestelmän kanssa."
 t MSG_098 "TÄRKEÄÄ: Olet asentamassa 'Windows To Go' -järjestelmää, mutta kohdeasemaa ei ole määritelty kiinteäksi. Tästä johtuen Windows todennäköisesti pysähtyy käynnistyksessä, sillä Microsoft ei ole suunnitellut sitä toimivaksi asemilla, jotka ovat merkitty irroitettaviksi.\n\nHaluatko kuitenkin jatkaa?\n\nHuomio: 'Kiinteä/irroitettava' -määritys on laitteiston ominaisuus, joka voidaan vaihtaa vain aseman valmistajan erityisohjelmistolla. Näitä työkaluja ei kuitenkaan lähes milloinkaan levitetä julkiseen käyttöön..."
 t MSG_099 "Tiedostojärjestelmärajoitus"
-t MSG_100 "Tämä ISO-levykuva sisältää yli 4 GB-kokoisen tiedoston, joka ylittää FAT ja FAT32 -tiedostojärjestelmien maksimikoon."
+t MSG_100 "Tämä ISO-levykuva sisältää yli 4 GB-kokoisen tiedoston, joka ylittää FAT ja FAT32 -tiedostojärjestelmien enimmäiskoon."
 t MSG_101 "WIM-tuki puuttuu"
 t MSG_102 "Käytössä oleva alusta ei kykene purkamaan tiedostoja WIM-arkistoista. WIM-purkaminen on välttämätöntä EFI-bootattavien Windows 7 ja Windows Vista USB-asemien luomisessa. Voit korjata tilanteenasentamalla viimeaikaisen version 7-Zip-ohjelmasta.\nHaluatko vierailla 7-Zip-lataussivustolla?"
 t MSG_103 "Ladataanko %s?"
@@ -3877,6 +3877,20 @@ t MSG_304 "Luo levykuva valitusta laitteesta"
 t MSG_305 "Käytä tätä vaihtoehtoa valitaksesi haluatko käyttää valittua laitetta Windowsin asentamiseen toiselle levylle, vai haluatko käyttää Windowsia suoraan tältä asemalta (Windows To Go)."
 t MSG_306 "Pikanollataan asemaa: %s"
 t MSG_307 "Tämä voi viedä hetken"
+t MSG_308 "VHD-tunnistus"
+t MSG_309 "Pakattu arkisto"
+t MSG_310 "Valitsemasi ISO-levykuva on UEFI-muotoinen ja tarpeeksi pienikokoinen kirjoitettavaksi EFI-järjestelmäosiona (ESP). ESP-osioon kirjoittaminen voi soveltua paremmin tietyille asennustavoille sen sijaan, että kirjoitus tapahtuisi yleiseen dataosioon käyttäen kaiken levytilan.\n\nValitse tila, jota haluat käyttää tämän levykuvan kirjoittamiseen:"
+t MSG_311 "Paina %s (ohjelman pääikkunassa) ottaaksesi ominaisuuden käyttöön."
+t MSG_312 "Lisähajautusarvot (SHA512)"
+t MSG_313 "Tallenna VHD:lle"
+t MSG_314 "Laske levykuvan tarkistussummat"
+t MSG_315 "Useita painikkeita"
+t MSG_316 "Testien lukumäärä"
+t MSG_317 "Levyn tunniste"
+t MSG_318 "Säikeiden vakioprioriteetti: %d"
+t MSG_319 "Sivuuta Boot Marker"
+t MSG_320 "Päivitetään osioiden sijoittelua (%s)..."
+t MSG_321 "Valitsemasi levykuva on ISOHybrid-muotoinen, mutta sen tekijät eivät ole tehneet siitä yhteensopivaa ISO/tiedostotyyppisen kopiointitilan kanssa.\nTämän vuoksi käyttöön otetaan DD-kuvan kirjoitustila."
 
 #########################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
