@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.5\n"
+"Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-04-17 12:18+0100\n"
-"PO-Revision-Date: 2020-04-17 12:25+0100\n"
+"POT-Creation-Date: 2021-04-06 17:15+0200\n"
+"PO-Revision-Date: 2021-04-06 21:34+0200\n"
 "Language: sk_SK\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x041B\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -60,7 +60,7 @@ msgstr "Pridať úpravy pre staré BIOSy"
 #. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
 #. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
 msgid "Use Rufus MBR with BIOS ID"
-msgstr "Použiť MBR s BIOS ID"
+msgstr "Použiť Rufus MBR s BIOS ID"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -84,7 +84,7 @@ msgstr "Rýchle formátovanie"
 
 #. • IDD_DIALOG → IDC_BAD_BLOCKS
 msgid "Check device for bad blocks"
-msgstr "Skontrolovať chybné bloky"
+msgstr "Skontrolovať chybné bloky zariadenia"
 
 #. • IDD_DIALOG → IDC_EXTENDED_LABEL
 msgid "Create extended label and icon files"
@@ -117,7 +117,7 @@ msgstr "Licencia"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
@@ -290,31 +290,31 @@ msgstr "bajtov"
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr ""
+msgstr "KB"
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr "BP"
+msgstr "PB"
 
 #. • MSG_027
 msgid "kilobytes"
@@ -332,7 +332,7 @@ msgstr "Predvolené"
 #.
 #. This gets appended to the file system, cluster size, etc.
 msgid "%s (Default)"
-msgstr "%s (Predvolené)"
+msgstr "%s (predvolené)"
 
 #. • MSG_031
 msgid "BIOS (or UEFI-CSM)"
@@ -397,7 +397,7 @@ msgstr "Úložné zariadenie USB (Generic)"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
-msgstr ""
+msgstr "%s (Disk %d) [%s]"
 
 #. • MSG_047
 #.
@@ -415,7 +415,7 @@ msgstr "Rufus - Ukončovanie operácie"
 
 #. • MSG_050
 msgid "Success."
-msgstr "Hotovo."
+msgstr "Dokončené."
 
 #. • MSG_051
 msgid "Undetermined error while formatting."
@@ -487,7 +487,7 @@ msgstr "Nie je možné otvoriť zariadenie. Možno je používané iným proceso
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "Chyba počas vytvárania oddielov."
+msgstr "Nie je možné vytvoriť oddiely."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
@@ -735,7 +735,7 @@ msgstr "Záznam programu Rufus"
 
 #. • MSG_109
 msgid "0x%02X (Disk %d)"
-msgstr ""
+msgstr "0x%02X (Disk %d)"
 
 #. • MSG_110
 #.
@@ -1317,8 +1317,8 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "Formátovanie (%s) - zostávajúci čas: %d:%02d..."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "Nastavovanie menovky (môže chvíľu trvať)..."
+msgid "Setting label (%s)..."
+msgstr "Nastavovanie menovky (%s)..."
 
 #. • MSG_222
 #.
@@ -1328,7 +1328,7 @@ msgstr "Formátovanie (%s)..."
 
 #. • MSG_223
 msgid "NTFS Fixup (Checkdisk)..."
-msgstr "NTFS Fixup (Kontrola disku)..."
+msgstr "NTFS Fixup (kontrola disku)..."
 
 #. • MSG_224
 msgid "Clearing MBR/PBR/GPT structures..."
@@ -1348,7 +1348,7 @@ msgstr "Uzatváranie existujúceho zväzku..."
 
 #. • MSG_228
 msgid "Writing Master Boot Record..."
-msgstr "Zapisovanie hlavného boot záznamu..."
+msgstr "Zapisovanie hlavného zavádzacieho záznamu (MBR)..."
 
 #. • MSG_229
 msgid "Writing Partition Boot Record..."
@@ -1363,12 +1363,12 @@ msgid "Copying ISO files: %s"
 msgstr "Kopírovanie súborov z ISO obrazu: %s"
 
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "Win7 EFI boot inštalácia (môže chvíľu trvať)..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "Win7 EFI boot inštalácia (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
-msgstr "Dokončovanie, čakajte..."
+msgstr "Prebieha dokončovanie, čakajte..."
 
 #. • MSG_234
 #.
@@ -1399,8 +1399,8 @@ msgid "Partitioning (%s)..."
 msgstr "Vytváranie oddielov (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "Vymazávanie oddielov..."
+msgid "Deleting partitions (%s)..."
+msgstr "Vymazávanie oddielov (%s)..."
 
 #. • MSG_240
 #.
@@ -1514,7 +1514,7 @@ msgstr "Použiť PROPER veľkosť jednotiek"
 
 #. • MSG_264
 msgid "Deleting directory '%s'"
-msgstr "Vymazávanie priečinku: '%s'"
+msgstr "Vymazávanie priečinku: „%s\""
 
 #. • MSG_265
 msgid "VMWare disk detection"
@@ -1553,8 +1553,8 @@ msgid "Change the application language"
 msgstr "Zmeniť jazyk programu"
 
 #. • MSG_274
-msgid "ISOHybrid image detected"
-msgstr "Bol zistený hybridný ISO obraz"
+msgid "%s image detected"
+msgstr "Bol zistený obraz %s"
 
 #. • MSG_275
 #.
@@ -1590,7 +1590,7 @@ msgstr "Vyhľadávanie konfliktných procesov..."
 
 #. • MSG_279
 msgid "Non bootable"
-msgstr "Bez bootovania (Iba formátovanie)"
+msgstr "Bez bootovania (iba formátovanie)"
 
 #. • MSG_280
 msgid "Disk or ISO image"
@@ -1598,7 +1598,7 @@ msgstr "Disk alebo ISO obraz"
 
 #. • MSG_281
 msgid "%s (Please select)"
-msgstr "%s (Vybrať obraz)"
+msgstr "%s (vybrať obraz)"
 
 #. • MSG_282
 msgid "Exclusive USB drive locking"
@@ -1730,3 +1730,73 @@ msgstr "Použite túto možnosť, ak chcete použiť toto zariadenie na inštal�
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
 msgstr "Rýchle vymazávanie zariadenia: %s"
+
+#. • MSG_307
+msgid "This may take a while"
+msgstr "Môže to chvíľu trvať"
+
+#. • MSG_308
+msgid "VHD detection"
+msgstr "Detekcia VHD"
+
+#. • MSG_309
+msgid "Compressed archive"
+msgstr "Komprimovaný archív"
+
+#. • MSG_310
+msgid ""
+"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"Vami vybraný ISO obraz používa UEFI a je dostatočne malý na to, aby sa zapísal do systémovej oblasti EFI (ESP). Zápisom do ESP namiesto zápisu do všeobecnej oblasti zaberajúcej celý disk, môže byť vhodnejšie pre niektoré typy inštalácií.\n"
+"\n"
+"Vyberte režim, ktorý chcete použiť na zápis tohto obrazu:"
+
+#. • MSG_311
+msgid "Use %s (in the main application window) to enable."
+msgstr "Pre povolenie použite %s (v hlavnom okne aplikácie)."
+
+#. • MSG_312
+msgid "Extra hashes (SHA512)"
+msgstr "Extra hash (SHA512)"
+
+#. • MSG_313
+msgid "Save to VHD"
+msgstr "Uložiť do VHD"
+
+#. • MSG_314
+msgid "Compute image checksums"
+msgstr "Prebieha výpočet kontrolného súčtu"
+
+#. • MSG_315
+msgid "Multiple buttons"
+msgstr "Viacero tlačidiel"
+
+#. • MSG_316
+msgid "Number of passes"
+msgstr "Počet prechodov"
+
+#. • MSG_317
+msgid "Disk ID"
+msgstr "ID disku"
+
+#. • MSG_318
+msgid "Default thread priority: %d"
+msgstr "Predvolená priorita vlákna: %d"
+
+#. • MSG_319
+msgid "Ignore Boot Marker"
+msgstr "Ignorovať zavádzaciu značku"
+
+#. • MSG_320
+msgid "Refreshing partition layout (%s)..."
+msgstr "Obnovuje sa rozloženie oblasti (%s)..."
+
+#. • MSG_321
+msgid ""
+"The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
+"As a result, DD image writing mode will be enforced."
+msgstr ""
+"Obráz, ktorý ste vybrali, je ISOHybrid a nie je kompatibilný s ISO/režim kopírovania súboru.\n"
+"V dôsledku toho sa vynúti režim zápisu obrazu DD."
