@@ -643,6 +643,7 @@ static void SetFSFromISO(void)
 static void SetMBRProps(void)
 {
 	BOOL needs_masquerading = HAS_WINPE(img_report) && (!img_report.uses_minint);
+	fs_type = (int)ComboBox_GetCurItemData(hFileSystem);
 
 	if ((!mbr_selected_by_user) && ((image_path == NULL) || (boot_type != BT_IMAGE) || (fs_type != FS_NTFS) || HAS_GRUB(img_report) ||
 		((image_options & IMOP_WINTOGO) && ComboBox_GetCurItemData(hImageOption)) )) {
@@ -1328,7 +1329,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	FILE *fd;
 	DWORD len;
 	WPARAM ret = BOOTCHECK_CANCEL;
-	BOOL in_files_dir = FALSE;
+	BOOL in_files_dir = FALSE, esp_already_asked = FALSE;
 	const char* grub = "grub";
 	const char* core_img = "core.img";
 	const char* ldlinux = "ldlinux";
@@ -1378,6 +1379,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 						write_as_esp = TRUE;
 					else if (i == 3)
 						write_as_image = TRUE;
+					esp_already_asked = TRUE;
 				} else {
 					char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
 					i = SelectionDialog(lmprintf(MSG_274, "ISOHybrid"), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
@@ -1451,7 +1453,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		}
 
 		if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
-			(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
+			(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type) && !esp_already_asked) {
 			// The ISO is small enough to be written as an ESP and we are using GPT
 			// so ask the users if they want to write it as an ESP.
 			char* iso_image = lmprintf(MSG_036);
@@ -2379,6 +2381,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			partition_type = (int)ComboBox_GetCurItemData(hPartitionScheme);
 			SetPartitionSchemeAndTargetSystem(TRUE);
 			SetFileSystemAndClusterSize(NULL);
+			SetMBRProps();
 			EnableMBRBootOptions(TRUE, TRUE);
 			selected_pt = partition_type;
 			break;
@@ -2778,21 +2781,23 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case WM_DROPFILES:
-		droppedFileInfo = (HDROP)wParam;
-		wbuffer = calloc(MAX_PATH, sizeof(wchar_t));
-		if (wbuffer == NULL) {
-			uprintf("Failed to alloc buffer for drag-n-drop");
-			break;
-		}
-		DragQueryFileW(droppedFileInfo, 0, wbuffer, MAX_PATH);
-		safe_free(image_path);
-		image_path = wchar_to_utf8(wbuffer);
-		safe_free(wbuffer);
+		if (format_thread == NULL) {
+			droppedFileInfo = (HDROP)wParam;
+				wbuffer = calloc(MAX_PATH, sizeof(wchar_t));
+				if (wbuffer == NULL) {
+					uprintf("Failed to alloc buffer for drag-n-drop");
+						break;
+				}
+			DragQueryFileW(droppedFileInfo, 0, wbuffer, MAX_PATH);
+				safe_free(image_path);
+				image_path = wchar_to_utf8(wbuffer);
+				safe_free(wbuffer);
 
-		if (image_path != NULL) {
-			img_provided = TRUE;
-			// Simulate image selection click
-			SendMessage(hDlg, WM_COMMAND, IDC_SELECT, 0);
+				if (image_path != NULL) {
+					img_provided = TRUE;
+					// Simulate image selection click
+					SendMessage(hDlg, WM_COMMAND, IDC_SELECT, 0);
+				}
 		}
 		break;
 
