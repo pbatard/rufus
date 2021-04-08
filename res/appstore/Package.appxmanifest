@@ -11,7 +11,7 @@
   <Identity
     Name="19453.net.Rufus"
     Publisher="CN=7AC86D13-3E5A-491A-ADD5-80095C212740"
-    Version="3.14.1768.0" />
+    Version="3.14.1769.0" />
 
   <Properties>
     <DisplayName>Rufus</DisplayName>
@@ -33,7 +33,7 @@
       EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
         DisplayName="Rufus"
-        Description="Rufus"
+        Description="The Reliable USB Formatting Utility"
         BackgroundColor="transparent"
         Square150x150Logo="Images\Square150x150Logo.png"
         Square44x44Logo="Images\Square44x44Logo.png">
