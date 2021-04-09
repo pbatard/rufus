@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright © 2012-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -279,7 +279,7 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 	PF_INIT_OR_OUT(InternetSetOptionA, WinInet);
 
 	// Create a NetworkListManager Instance to check the network connection
-	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
 	hr = CoCreateInstance(&CLSID_NetworkListManager, NULL, CLSCTX_ALL,
 		&IID_INetworkListManager, (LPVOID*)&pNetworkListManager);
 	if (hr == S_OK) {
@@ -308,6 +308,7 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 	pfInternetSetOptionA(hSession, INTERNET_OPTION_ENABLE_HTTP_PROTOCOL, (LPVOID)&dwProtocolSupport, sizeof(dwProtocolSupport));
 
 out:
+	CoUninitialize();
 	return hSession;
 }
 
@@ -644,7 +645,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 
 	verbose = ReadSetting32(SETTING_VERBOSE_UPDATES);
 	// Without this the FileDialog will produce error 0x8001010E when compiled for Vista or later
-	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
 	// Unless the update was forced, wait a while before performing the update check
 	if (!force_update_check) {
 		// It would of course be a lot nicer to use a timer and wake the thread, but my
@@ -851,6 +852,7 @@ out:
 	}
 	force_update_check = FALSE;
 	update_check_thread = NULL;
+	CoUninitialize();
 	ExitThread(0);
 }
 
@@ -887,7 +889,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	GUID guid;
 
 	dialog_showing++;
-	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
 
 	// Use a GUID as random unique string, else ill-intentioned security "researchers"
 	// may either spam our pipe or replace our script to fool antivirus solutions into
@@ -1047,6 +1049,7 @@ out:
 	free(url);
 	SendMessage(hMainDialog, UM_ENABLE_CONTROLS, 0, 0);
 	dialog_showing--;
+	CoUninitialize();
 	ExitThread(dwExitCode);
 }
 

@@ -458,7 +458,7 @@ BOOL RefreshLayout(DWORD DriveIndex)
 	wnsprintf(wPhysicalName, ARRAYSIZE(wPhysicalName), L"\\\\?\\PhysicalDrive%lu", DriveIndex);
 
 	// Initialize COM
-	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
 	IGNORE_RETVAL(CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_CONNECT,
 		RPC_C_IMP_LEVEL_IMPERSONATE, NULL, 0, NULL));
 
@@ -517,6 +517,7 @@ out:
 		IVdsService_Release(pService);
 	if (pLoader != NULL)
 		IVdsServiceLoader_Release(pLoader);
+	CoUninitialize();
 	VDS_SET_ERROR(hr);
 	return (hr == S_OK);
 }
@@ -541,7 +542,7 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 	wnsprintf(wPhysicalName, ARRAYSIZE(wPhysicalName), L"\\\\?\\PhysicalDrive%lu", DriveIndex);
 
 	// Initialize COM
-	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
 	IGNORE_RETVAL(CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_CONNECT,
 		RPC_C_IMP_LEVEL_IMPERSONATE, NULL, 0, NULL));
 
@@ -673,6 +674,7 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 	IEnumVdsObject_Release(pEnum);
 
 out:
+	CoUninitialize();
 	VDS_SET_ERROR(hr);
 	return (hr == S_OK);
 }
@@ -689,7 +691,7 @@ BOOL VdsRescan(DWORD dwRescanType, DWORD dwSleepTime, BOOL bSilent)
 	IVdsServiceLoader* pLoader;
 	IVdsService* pService;
 
-	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
 	IGNORE_RETVAL(CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_CONNECT,
 		RPC_C_IMP_LEVEL_IMPERSONATE, NULL, 0, NULL));
 
@@ -739,6 +741,7 @@ BOOL VdsRescan(DWORD dwRescanType, DWORD dwSleepTime, BOOL bSilent)
 	if (dwSleepTime != 0)
 		Sleep(dwSleepTime);
 
+	CoUninitialize();
 	return ret;
 }
 
@@ -806,7 +809,7 @@ BOOL ListVdsVolumes(BOOL bSilent)
 	IUnknown* pUnk;
 
 	// Initialize COM
-	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED));
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
 	IGNORE_RETVAL(CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_CONNECT,
 		RPC_C_IMP_LEVEL_IMPERSONATE, NULL, 0, NULL));
 
@@ -945,6 +948,7 @@ BOOL ListVdsVolumes(BOOL bSilent)
 	IEnumVdsObject_Release(pEnum);
 
 out:
+	CoUninitialize();
 	VDS_SET_ERROR(hr);
 	return (hr == S_OK);
 }

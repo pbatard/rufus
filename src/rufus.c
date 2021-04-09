@@ -3898,6 +3898,7 @@ out:
 	for (i = 0; (!DeleteFileA(cmdline_hogger)) && (i <= 10); i++)
 		Sleep(200);
 	CloseHandle(mutex);
+	CoUninitialize();
 	CLOSE_OPENED_LIBRARIES;
 	if (attached_console) {
 		SetWindowPos(GetConsoleWindow(), HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
