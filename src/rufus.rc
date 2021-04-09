@@ -414,6 +414,7 @@ BEGIN
             VALUE "Comments", "https://rufus.ie"
             VALUE "CompanyName", "Akeo Consulting"
             VALUE "FileDescription", "The Reliable USB Formatting Utility"
+            VALUE "FileDescription", "Rufus"
             VALUE "FileVersion", "3.14.1769"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2021 Pete Batard (GPL v3)"

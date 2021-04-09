@@ -2047,7 +2047,7 @@ void SetAlertPromptMessages(void)
 	// Fetch the localized strings in the relevant MUI
 	// Must use sysnative_dir rather than system_dir as we may not find the MUI's otherwise
 	static_sprintf(mui_path, "%s\\%s\\shell32.dll.mui", sysnative_dir, GetCurrentMUI());
-	mui_lib = LoadLibraryU(mui_path);
+	mui_lib = LoadLibraryExU(mui_path, NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
 	if (mui_lib != NULL) {
 		// 4097 = "You need to format the disk in drive %c: before you can use it." (dialog text)
 		// 4125 = "Microsoft Windows" (dialog title)
@@ -2063,7 +2063,7 @@ void SetAlertPromptMessages(void)
 		FreeLibrary(mui_lib);
 	}
 	static_sprintf(mui_path, "%s\\%s\\urlmon.dll.mui", sysnative_dir, GetCurrentMUI());
-	mui_lib = LoadLibraryU(mui_path);
+	mui_lib = LoadLibraryExU(mui_path, NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
 	if (mui_lib != NULL) {
 		// 2070 = "Windows Security Warning" (yes, that's what MS uses for a stupid cookie!)
 		if (LoadStringU(mui_lib, 2070, title_str[1], sizeof(title_str[1])) <= 0) {
