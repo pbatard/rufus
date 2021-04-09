@@ -658,7 +658,7 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 		if (OpenedLibrariesHandleSize >= MAX_LIBRARY_HANDLES) {
 			uprintf("Error: MAX_LIBRARY_HANDLES is too small\n");
 		} else {
-			h = LoadLibraryA(szLibraryName);
+			h = LoadLibraryExA(szLibraryName, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
 			if (h != NULL)
 				OpenedLibrariesHandle[OpenedLibrariesHandleSize++] = h;
 		}

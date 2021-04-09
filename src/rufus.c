@@ -3148,7 +3148,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// nail... Also, no, Coverity, we never need to care about freeing kernel32 as a library.
 	// coverity[leaked_storage]
 	pfSetDefaultDllDirectories = (SetDefaultDllDirectories_t)
-		GetProcAddress(LoadLibraryW(kernel32_path), "SetDefaultDllDirectories");
+		GetProcAddress(LoadLibraryExW(kernel32_path, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32),
+			"SetDefaultDllDirectories");
 	if (pfSetDefaultDllDirectories != NULL)
 		pfSetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 

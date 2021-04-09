@@ -317,6 +317,18 @@ static __inline HMODULE LoadLibraryU(LPCSTR lpFileName)
 	return ret;
 }
 
+static __inline HMODULE LoadLibraryExU(LPCSTR lpFileName, HANDLE hFile, DWORD dwFlags)
+{
+	HMODULE ret;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpFileName);
+	ret = LoadLibraryExW(wlpFileName, hFile, dwFlags);
+	err = GetLastError();
+	wfree(lpFileName);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline int DrawTextU(HDC hDC, LPCSTR lpText, int nCount, LPRECT lpRect, UINT uFormat)
 {
 	int ret;
