@@ -184,10 +184,7 @@ static int bb_u64_list_find(bb_u64_list bb, blk64_t blk)
  */
 static int bb_u64_list_test(bb_u64_list bb, blk64_t blk)
 {
-	if (bb_u64_list_find(bb, blk) < 0)
-		return 0;
-	else
-		return 1;
+	return bb_u64_list_find(bb, blk) < 0 ? 0 : 1;
 }
 
 static int bb_badblocks_list_test(bb_badblocks_list bb, blk64_t blk)
