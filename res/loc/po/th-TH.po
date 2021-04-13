@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.5\n"
+"Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-04-17 12:18+0100\n"
-"PO-Revision-Date: 2020-04-17 12:29+0100\n"
+"POT-Creation-Date: 2021-04-12 20:29+0700\n"
+"PO-Revision-Date: 2021-04-12 21:35+0700\n"
 "Language: th_TH\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,11 +13,11 @@ msgstr ""
 "X-Rufus-LCID: 0x041e\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
-msgstr "คุณสมบัติไดร์ฟ"
+msgstr "คุณสมบัติของไดร์ฟ"
 
 #. • IDD_DIALOG → IDS_DEVICE_TXT
 msgid "Device"
@@ -45,7 +45,7 @@ msgstr "รูปแบบเครื่องเป้าหมาย"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
-msgstr "แสดงฮาร์ดไดร์ฟ USB"
+msgstr "แสดงรายการ USB Drive"
 
 #. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
 #.
@@ -139,7 +139,7 @@ msgstr "ไม่ใช่"
 
 #. • IDD_LOG → IDD_LOG
 msgid "Log"
-msgstr ""
+msgstr "รายการ Log"
 
 #. • IDD_LOG → IDC_LOG_CLEAR
 msgid "Clear"
@@ -159,11 +159,11 @@ msgstr "ตั้งค่า"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
 msgid "Check for updates"
-msgstr "ตรวจหาการปรับรุ่น"
+msgstr "ตรวจหาการอัพเดต"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
 msgid "Include beta versions"
-msgstr "รวมเวอร์ชั่นทดสอบ"
+msgstr "รวมเวอร์ชั่นทดสอบด้วย"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
@@ -171,11 +171,11 @@ msgstr "ตรวจสอบ"
 
 #. • IDD_NEW_VERSION → IDD_NEW_VERSION
 msgid "Check For Updates - Rufus"
-msgstr "การปรับรุ่นของ Rufus"
+msgstr "ตรวจหาการอัพเดต - Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
 msgid "A newer version is available. Please download the latest version!"
-msgstr "พบ Rufus รุ่นใหม่กว่า! โปรดปรับรุ่นโปรแกรมให้เป็นรุ่นล่าสุด!"
+msgstr "พบ Rufus รุ่นใหม่กว่า! โปรดอัพเดตโปรแกรมให้เป็นรุ่นล่าสุด!"
 
 #. • IDD_NEW_VERSION → IDC_WEBSITE
 msgid "Click here to go to the website"
@@ -213,11 +213,11 @@ msgstr ""
 
 #. • MSG_004
 msgid "Rufus update policy"
-msgstr "นโยบายการปรับรุ่นของ Rufus"
+msgstr "นโยบายการอัพเดตของ Rufus"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
-msgstr "คุณต้องการให้ Rufus ตรวจหาการปรับรุ่นออนไลน์หรือไม่?"
+msgstr "คุณต้องการให้ Rufus ตรวจหาการอัพเดตออนไลน์หรือไม่?"
 
 #. • MSG_007
 msgid "Cancel"
@@ -253,7 +253,7 @@ msgstr ""
 
 #. • MSG_013
 msgid "Disabled"
-msgstr "ปิดใช้งาน"
+msgstr "ถูกปิดใช้งาน"
 
 #. • MSG_014
 msgid "Daily"
@@ -282,37 +282,37 @@ msgstr "รุ่นล่าสุด: %d.%d (Build %d)"
 #. • MSG_020
 #. • MSG_026
 msgid "bytes"
-msgstr ""
+msgstr "ไบต์"
 
 #. • MSG_021
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr ""
+msgstr "KB"
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr ""
+msgstr "PB"
 
 #. • MSG_027
 msgid "kilobytes"
@@ -391,11 +391,11 @@ msgstr "ดาวน์โหลดไฟล์"
 
 #. • MSG_045
 msgid "USB Storage Device (Generic)"
-msgstr ""
+msgstr "อุปกรณ์ USB"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
-msgstr ""
+msgstr "%s (ดิสก์ที่ %d) [%s]"
 
 #. • MSG_047
 #.
@@ -666,7 +666,7 @@ msgstr "ข้อจำกัดของแต่ละระบบไฟล์
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "อิมเมจไฟล์นี้ประกอบไปด้วยไฟล์ที่มีขนาดใหญ่กว่า 4 GB ซึ่งมากกว่าขนาดสูงสุดที่รองรับได้ของระบบไฟล์แบบ FAT หรือ FAT32"
+msgstr "อิมเมจไฟล์นี้ประกอบไปด้วยไฟล์ที่มีขนาดใหญ่กว่า 4 GB ซึ่งมากกว่าขนาดสูงสุดที่ระบบไฟล์แบบ FAT หรือ FAT32 จะรองรับได้"
 
 #. • MSG_101
 msgid "Missing WIM support"
@@ -725,11 +725,11 @@ msgstr "ไฟล์ทั้งหมด"
 
 #. • MSG_108
 msgid "Rufus log"
-msgstr ""
+msgstr "Rufus log"
 
 #. • MSG_109
 msgid "0x%02X (Disk %d)"
-msgstr ""
+msgstr "0x%02X (ดิสก์ที่ %d)"
 
 #. • MSG_110
 #.
@@ -811,7 +811,7 @@ msgstr "ตัวติดตั้ง Windows มาตรฐาน"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr ""
+msgstr "Windows To Go"
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -1085,7 +1085,7 @@ msgstr "คลิกเพื่อเลือก..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr ""
+msgstr "Rufus - ยูทิลิตี้การฟอร์แมต USB ที่เชื่อถือได้"
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
@@ -1236,7 +1236,7 @@ msgstr "ไม่พบไฟล์ %s"
 #. The name proposed by Windows' Computer Management → Disk Management when you try to format
 #. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
 msgid "New Volume"
-msgstr ""
+msgstr "โวลุ่มใหม่"
 
 #. • MSG_208
 #.
@@ -1307,8 +1307,9 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "กำลังฟอร์แมท (%s) - เวลาคงเหลือ %d:%02d..."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "กำลังตั้งชื่อไดร์ฟ..."
+#, fuzzy
+msgid "Setting label (%s)..."
+msgstr "กำลังตั้งชื่อไดร์ฟ (%s)..."
 
 #. • MSG_222
 #.
@@ -1338,11 +1339,11 @@ msgstr "กำลังปิดโวลุ่มปัจจุบัน..."
 
 #. • MSG_228
 msgid "Writing Master Boot Record..."
-msgstr "กำลังเขียน Master Boot Record..."
+msgstr "กำลังเขียนระบบ Master Boot Record..."
 
 #. • MSG_229
 msgid "Writing Partition Boot Record..."
-msgstr "กำลังเขียน Partition Boot Record..."
+msgstr "กำลังเขียนระบบ Partition Boot Record..."
 
 #. • MSG_230
 msgid "Copying DOS files..."
@@ -1353,8 +1354,8 @@ msgid "Copying ISO files: %s"
 msgstr "กำลังคัดลอกไฟล์ ISO: %s"
 
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "Win7 EFI boot setup..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "ตั้งค่าการบูตระบบ Windows 7 EFI (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1389,8 +1390,8 @@ msgid "Partitioning (%s)..."
 msgstr "กำลังแบ่งพาร์ทิชั่น (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "กำลังลบพาร์ทิชั่น..."
+msgid "Deleting partitions (%s)..."
+msgstr "กำลังลบพาร์ทิชั่น (%s)..."
 
 #. • MSG_240
 #.
@@ -1406,7 +1407,7 @@ msgstr ""
 
 #. • MSG_241
 msgid "Downloading: %s"
-msgstr "ดาวน์โหลดแล้ว: %s"
+msgstr "กำลังดาวน์โหลด: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1480,7 +1481,7 @@ msgstr "รองรับ Rock Ridge"
 
 #. • MSG_259
 msgid "Force update"
-msgstr "บังคับปรับรุ่น"
+msgstr "บังคับอัพเดต"
 
 #. • MSG_260
 msgid "NTFS compression"
@@ -1508,7 +1509,7 @@ msgstr "กำลังลบไดเรคทอรี่ '%s'"
 
 #. • MSG_265
 msgid "VMWare disk detection"
-msgstr "กำลังตรวจหาดิสก์ VMWare"
+msgstr "การตรวจหาดิสก์ VMWare"
 
 #. • MSG_266
 msgid "Dual UEFI/BIOS mode"
@@ -1524,11 +1525,11 @@ msgstr "กำลังใช้อิมเมจ Windows..."
 
 #. • MSG_269
 msgid "Preserve timestamps"
-msgstr ""
+msgstr "แสดงบันทึกเวลา"
 
 #. • MSG_270
 msgid "USB debug"
-msgstr ""
+msgstr "ดีบัก USB"
 
 #. • MSG_271
 msgid "Computing image checksums: %s"
@@ -1543,8 +1544,9 @@ msgid "Change the application language"
 msgstr "เปลี่ยนภาษา"
 
 #. • MSG_274
-msgid "ISOHybrid image detected"
-msgstr "พบอิมเมจแบบ ISOHybrid"
+#, fuzzy
+msgid "%s image detected"
+msgstr "พบอิมเมจแบบ %s"
 
 #. • MSG_275
 #.
@@ -1591,8 +1593,9 @@ msgid "%s (Please select)"
 msgstr "%s (กรุณาเลือก)"
 
 #. • MSG_282
+#, fuzzy
 msgid "Exclusive USB drive locking"
-msgstr ""
+msgstr "การล็อค Exclusive USB Drive"
 
 #. • MSG_283
 msgid "Invalid signature"
@@ -1613,6 +1616,7 @@ msgstr ""
 "คุณต้องการจะเปิดไฟล์นี้หรือไม่?"
 
 #. • MSG_286
+#, fuzzy
 msgid "Zeroing drive: %s"
 msgstr "กำลังเขียนไดร์ฟด้วย zero byte: %s"
 
@@ -1718,5 +1722,79 @@ msgstr "เลือกตัวเลือกนี้หากต้องก
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
+#, fuzzy
 msgid "Fast-zeroing drive: %s"
 msgstr "กำลังล้างไดร์ฟแบบรวดเร็ว: สำเร็จแล้ว: %s"
+
+#. • MSG_307
+msgid "This may take a while"
+msgstr "อาจใช้เวลาสักครู่"
+
+#. • MSG_308
+msgid "VHD detection"
+msgstr "การตรวจหา VHD"
+
+#. • MSG_309
+#, fuzzy
+msgid "Compressed archive"
+msgstr "ไฟล์บีบอัด"
+
+#. • MSG_310
+#, fuzzy
+msgid ""
+"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"อิมเมจไฟล์ที่คุณเลือกใช้ระบบ UEFI และมีขนาดเล็กพอที่จะเขียนเป็น EFI System Partition (ESP) การเขียนเป็น ESP แทนการเขียนเป็นพาร์ทิชั่นแบบทั่วไปที่จะใช้พื่นที่ข้อมูลไปทั้งหมดซึ่งจะดีกว่าสำหรับการติดตั้งบางประเภท\n"
+"\n"
+"โปรดเลือกโหมดที่คุณต้องการใช้ในการเขียนอิมเมจไฟล์นี้:"
+
+#. • MSG_311
+#, fuzzy
+msgid "Use %s (in the main application window) to enable."
+msgstr "ใช้ %s (ในหน้าต่างโปรแกรมหลัก) เพื่อเปิดการใช้งาน"
+
+#. • MSG_312
+msgid "Extra hashes (SHA512)"
+msgstr "การแฮชเพิ่มเติม (SHA-512)"
+
+#. • MSG_313
+msgid "Save to VHD"
+msgstr "บันทึกลง VHD"
+
+#. • MSG_314
+msgid "Compute image checksums"
+msgstr "ตรวจสอบความถูกต้องของอิมเมจ"
+
+#. • MSG_315
+msgid "Multiple buttons"
+msgstr "ปุ่มตั้งค่า และเพิ่มเติม"
+
+#. • MSG_316
+msgid "Number of passes"
+msgstr "จำนวนรอบที่ผ่าน"
+
+#. • MSG_317
+msgid "Disk ID"
+msgstr "ID ของดิสก์"
+
+#. • MSG_318
+msgid "Default thread priority: %d"
+msgstr "ค่าลำดับความสำคัญเริ่มต้นของเธรด: %d"
+
+#. • MSG_319
+msgid "Ignore Boot Marker"
+msgstr "การละเว้นการทำ Boot Marker"
+
+#. • MSG_320
+msgid "Refreshing partition layout (%s)..."
+msgstr "กำลังรีเฟรชเค้าโครงพาร์ทิชั่น (%s)..."
+
+#. • MSG_321
+msgid ""
+"The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
+"As a result, DD image writing mode will be enforced."
+msgstr ""
+"อิมเมจไฟล์ที่คุณใช้เป็นแบบ ISOHybrid แต่ผู้ผลิตไม่ได้ทำให้รองรับกับการคัดลอกไฟล์ ISO\n"
+"นั่นทำให้โหมดการเขียนอิมเมจแบบ DD image writing จะถูกเรียกใช้งาน"
