@@ -517,7 +517,6 @@ out:
 		IVdsService_Release(pService);
 	if (pLoader != NULL)
 		IVdsServiceLoader_Release(pLoader);
-	CoUninitialize();
 	VDS_SET_ERROR(hr);
 	return (hr == S_OK);
 }
@@ -674,7 +673,6 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 	IEnumVdsObject_Release(pEnum);
 
 out:
-	CoUninitialize();
 	VDS_SET_ERROR(hr);
 	return (hr == S_OK);
 }
@@ -741,7 +739,6 @@ BOOL VdsRescan(DWORD dwRescanType, DWORD dwSleepTime, BOOL bSilent)
 	if (dwSleepTime != 0)
 		Sleep(dwSleepTime);
 
-	CoUninitialize();
 	return ret;
 }
 
@@ -948,7 +945,6 @@ BOOL ListVdsVolumes(BOOL bSilent)
 	IEnumVdsObject_Release(pEnum);
 
 out:
-	CoUninitialize();
 	VDS_SET_ERROR(hr);
 	return (hr == S_OK);
 }

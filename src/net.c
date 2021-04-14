@@ -308,7 +308,6 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 	pfInternetSetOptionA(hSession, INTERNET_OPTION_ENABLE_HTTP_PROTOCOL, (LPVOID)&dwProtocolSupport, sizeof(dwProtocolSupport));
 
 out:
-	CoUninitialize();
 	return hSession;
 }
 
