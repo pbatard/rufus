@@ -748,9 +748,9 @@ BOOL VdsRescan(DWORD dwRescanType, DWORD dwSleepTime, BOOL bSilent)
 BOOL DeletePartition(DWORD DriveIndex, ULONGLONG PartitionOffset, BOOL bSilent)
 {
 	HRESULT hr = S_FALSE;
-	VDS_PARTITION_PROP* prop_array;
+	VDS_PARTITION_PROP* prop_array = NULL;
 	LONG i, prop_array_size;
-	IVdsAdvancedDisk *pAdvancedDisk;
+	IVdsAdvancedDisk *pAdvancedDisk = NULL;
 
 	if (!GetVdsDiskInterface(DriveIndex, &IID_IVdsAdvancedDisk, (void**)&pAdvancedDisk, bSilent))
 		return FALSE;

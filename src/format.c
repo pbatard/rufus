@@ -1484,12 +1484,13 @@ static int sector_write(int fd, const void* _buf, unsigned int count)
 }
 
 /* Write an image file or zero a drive */
-static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
+static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 {
 	BOOL s, ret = FALSE;
 	LARGE_INTEGER li;
-	DWORD i, rSize, wSize, xSize, BufSize;
-	uint64_t wb, target_size = hSourceImage?img_report.image_size:SelectedDrive.DiskSize;
+	HANDLE hSourceImage = INVALID_HANDLE_VALUE;
+	DWORD i, read_size, write_size, comp_size, buf_size;
+	uint64_t wb, target_size = bZeroDrive ? SelectedDrive.DiskSize : img_report.image_size;
 	uint64_t cur_value, last_value = UINT64_MAX;
 	int64_t bled_ret;
 	uint8_t* buffer = NULL;
@@ -1507,51 +1508,23 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 		uprintf("Warning: Unable to rewind image position - wrong data might be copied!");
 	UpdateProgressWithInfoInit(NULL, FALSE);
 
-	if (img_report.compression_type != BLED_COMPRESSION_NONE) {
-		uprintf("Writing compressed image:");
-		sec_buf = (uint8_t*)_mm_malloc(SelectedDrive.SectorSize, SelectedDrive.SectorSize);
-		if (sec_buf == NULL) {
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
-			uprintf("Could not allocate disk write buffer");
-			goto out;
-		}
-		assert((uintptr_t)sec_buf % SelectedDrive.SectorSize == 0);
-		sec_buf_pos = 0;
-		bled_init(_uprintf, NULL, sector_write, update_progress, NULL, &FormatStatus);
-		bled_ret = bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
-		bled_exit();
-		if ((bled_ret >= 0) && (sec_buf_pos != 0)) {
-			// A disk image that doesn't end up on disk boundary should be a rare
-			// enough case, so we dont bother checking the write operation and
-			// just issue a notice about it in the log.
-			uprintf("Notice: Compressed image data didn't end on block boundary.");
-			// Gonna assert that WriteFile() and _write() share the same file offset
-			WriteFile(hPhysicalDrive, sec_buf, SelectedDrive.SectorSize, &wSize, NULL);
-		}
-		safe_mm_free(sec_buf);
-		if ((bled_ret < 0) && (SCODE_CODE(FormatStatus) != ERROR_CANCELLED)) {
-			// Unfortunately, different compression backends return different negative error codes
-			uprintf("Could not write compressed image: %lld", bled_ret);
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
-			goto out;
-		}
-	} else {
-		uprintf(hSourceImage?"Writing Image:":fast_zeroing?"Fast-zeroing drive:":"Zeroing drive:");
+	if (bZeroDrive) {
+		uprintf(fast_zeroing ? "Fast-zeroing drive:" : "Zeroing drive:");
 		// Our buffer size must be a multiple of the sector size and *ALIGNED* to the sector size
-		BufSize = ((DD_BUFFER_SIZE + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
-		buffer = (uint8_t*)_mm_malloc(BufSize, SelectedDrive.SectorSize);
+		buf_size = ((DD_BUFFER_SIZE + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
+		buffer = (uint8_t*)_mm_malloc(buf_size, SelectedDrive.SectorSize);
 		if (buffer == NULL) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
-			uprintf("Could not allocate disk write buffer");
+			uprintf("Could not allocate disk zeroing buffer");
 			goto out;
 		}
 		assert((uintptr_t)buffer % SelectedDrive.SectorSize == 0);
 
 		// Clear buffer
-		memset(buffer, fast_zeroing ? 0xff : 0x00, BufSize);
+		memset(buffer, fast_zeroing ? 0xff : 0x00, buf_size);
 
 		if (fast_zeroing) {
-			cmp_buffer = (uint32_t*)_mm_malloc(BufSize, SelectedDrive.SectorSize);
+			cmp_buffer = (uint32_t*)_mm_malloc(buf_size, SelectedDrive.SectorSize);
 			if (cmp_buffer == NULL) {
 				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
 				uprintf("Could not allocate disk comparison buffer");
@@ -1560,35 +1533,22 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 			assert((uintptr_t)cmp_buffer % SelectedDrive.SectorSize == 0);
 		}
 
-		// Don't bother trying for something clever, using double buffering overlapped and whatnot:
-		// With Windows' default optimizations, sync read + sync write for sequential operations
-		// will be as fast, if not faster, than whatever async scheme you can come up with.
-		rSize = BufSize;
-		for (wb = 0, wSize = 0; wb < target_size; wb += wSize) {
-			UpdateProgressWithInfo(OP_FORMAT, hSourceImage ? MSG_261 : fast_zeroing ? MSG_306 : MSG_286, wb, target_size);
+		read_size = buf_size;
+		for (wb = 0, write_size = 0; wb < target_size; wb += write_size) {
+			UpdateProgressWithInfo(OP_FORMAT, fast_zeroing ? MSG_306 : MSG_286, wb, target_size);
 			cur_value = (wb * min(80, target_size)) / target_size;
 			if (cur_value != last_value) {
 				last_value = cur_value;
 				uprintfs("+");
 			}
-			if (hSourceImage != NULL) {
-				s = ReadFile(hSourceImage, buffer, BufSize, &rSize, NULL);
-				if (!s) {
-					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
-					uprintf("Read error: %s", WindowsErrorString());
-					goto out;
-				}
-				if (rSize == 0)
-					break;
-			}
 			// Don't overflow our projected size (mostly for VHDs)
-			if (wb + rSize > target_size) {
-				rSize = (DWORD)(target_size - wb);
+			if (wb + read_size > target_size) {
+				read_size = (DWORD)(target_size - wb);
 			}
 
 			// WriteFile fails unless the size is a multiple of sector size
-			if (rSize % SelectedDrive.SectorSize != 0)
-				rSize = ((rSize + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
+			if (read_size % SelectedDrive.SectorSize != 0)
+				read_size = ((read_size + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
 
 			// Fast-zeroing: Depending on your hardware, reading from flash may be much faster than writing, so
 			// we might speed things up by skipping empty blocks, or skipping the write if the data is the same.
@@ -1601,8 +1561,8 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 				CHECK_FOR_USER_CANCEL;
 
 				// Read block and compare against the block that needs to be written
-				s = ReadFile(hPhysicalDrive, cmp_buffer, rSize, &xSize, NULL);
-				if ((!s) || (xSize != rSize) ) {
+				s = ReadFile(hPhysicalDrive, cmp_buffer, read_size, &comp_size, NULL);
+				if ((!s) || (comp_size != read_size)) {
 					uprintf("Read error: Could not read data for fast zeroing comparison - %s", WindowsErrorString());
 					goto out;
 				}
@@ -1612,10 +1572,10 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 				// Check all bits are the same
 				if ((zero_data == 0) || (zero_data == 0xffffffff)) {
 					// Compare the rest of the block against the first element
-					for (i = 1; (i < rSize / sizeof(uint32_t)) && (cmp_buffer[i] == zero_data); i++);
-					if (i >= rSize / sizeof(uint32_t)) {
+					for (i = 1; (i < read_size / sizeof(uint32_t)) && (cmp_buffer[i] == zero_data); i++);
+					if (i >= read_size / sizeof(uint32_t)) {
 						// Block is empty, skip write
-						wSize = rSize;
+						write_size = read_size;
 						continue;
 					}
 				}
@@ -1632,11 +1592,11 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 
 			for (i = 1; i <= WRITE_RETRIES; i++) {
 				CHECK_FOR_USER_CANCEL;
-				s = WriteFile(hPhysicalDrive, buffer, rSize, &wSize, NULL);
-				if ((s) && (wSize == rSize))
+				s = WriteFile(hPhysicalDrive, buffer, read_size, &write_size, NULL);
+				if ((s) && (write_size == read_size))
 					break;
 				if (s)
-					uprintf("Write error: Wrote %d bytes, expected %d bytes", wSize, rSize);
+					uprintf("Write error: Wrote %d bytes, expected %d bytes", write_size, read_size);
 				else
 					uprintf("Write error at sector %lld: %s", wb / SelectedDrive.SectorSize, WindowsErrorString());
 				if (i < WRITE_RETRIES) {
@@ -1656,10 +1616,120 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, HANDLE hSourceImage)
 			if (i > WRITE_RETRIES)
 				goto out;
 		}
+	} else if (img_report.compression_type != BLED_COMPRESSION_NONE) {
+		uprintf("Writing compressed image:");
+		hSourceImage = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL,
+			OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+		if (hSourceImage == INVALID_HANDLE_VALUE) {
+			uprintf("Could not open image '%s': %s", image_path, WindowsErrorString());
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
+			goto out;
+		}
+		sec_buf = (uint8_t*)_mm_malloc(SelectedDrive.SectorSize, SelectedDrive.SectorSize);
+		if (sec_buf == NULL) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
+			uprintf("Could not allocate disk write buffer");
+			goto out;
+		}
+		assert((uintptr_t)sec_buf % SelectedDrive.SectorSize == 0);
+		sec_buf_pos = 0;
+		bled_init(_uprintf, NULL, sector_write, update_progress, NULL, &FormatStatus);
+		bled_ret = bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
+		bled_exit();
+		if ((bled_ret >= 0) && (sec_buf_pos != 0)) {
+			// A disk image that doesn't end up on disk boundary should be a rare
+			// enough case, so we dont bother checking the write operation and
+			// just issue a notice about it in the log.
+			uprintf("Notice: Compressed image data didn't end on block boundary.");
+			// Gonna assert that WriteFile() and _write() share the same file offset
+			WriteFile(hPhysicalDrive, sec_buf, SelectedDrive.SectorSize, &write_size, NULL);
+		}
+		safe_mm_free(sec_buf);
+		if ((bled_ret < 0) && (SCODE_CODE(FormatStatus) != ERROR_CANCELLED)) {
+			// Unfortunately, different compression backends return different negative error codes
+			uprintf("Could not write compressed image: %lld", bled_ret);
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+			goto out;
+		}
+	} else {
+		hSourceImage = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL,
+			OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+		if (hSourceImage == INVALID_HANDLE_VALUE) {
+			uprintf("Could not open image '%s': %s", image_path, WindowsErrorString());
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
+			goto out;
+		}
+
+		// Our buffer size must be a multiple of the sector size and *ALIGNED* to the sector size
+		buf_size = ((DD_BUFFER_SIZE + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
+		buffer = (uint8_t*)_mm_malloc(buf_size, SelectedDrive.SectorSize);
+		if (buffer == NULL) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
+			uprintf("Could not allocate disk write buffer");
+			goto out;
+		}
+		assert((uintptr_t)buffer % SelectedDrive.SectorSize == 0);
+
+		// Don't bother trying for something clever, using double buffering overlapped and whatnot:
+		// With Windows' default optimizations, sync read + sync write for sequential operations
+		// will be as fast, if not faster, than whatever async scheme you can come up with.
+		read_size = buf_size;
+		for (wb = 0, write_size = 0; wb < target_size; wb += write_size) {
+			UpdateProgressWithInfo(OP_FORMAT, MSG_261, wb, target_size);
+			cur_value = (wb * min(80, target_size)) / target_size;
+			if (cur_value != last_value) {
+				last_value = cur_value;
+				uprintfs("+");
+			}
+			s = ReadFile(hSourceImage, buffer, buf_size, &read_size, NULL);
+			if (!s) {
+				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
+				uprintf("Read error: %s", WindowsErrorString());
+				goto out;
+			}
+			if (read_size == 0)
+				break;
+			// Don't overflow our projected size (mostly for VHDs)
+			if (wb + read_size > target_size) {
+				read_size = (DWORD)(target_size - wb);
+			}
+
+			// WriteFile fails unless the size is a multiple of sector size
+			if (read_size % SelectedDrive.SectorSize != 0)
+				read_size = ((read_size + SelectedDrive.SectorSize - 1) / SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
+
+			for (i = 1; i <= WRITE_RETRIES; i++) {
+				CHECK_FOR_USER_CANCEL;
+				s = WriteFile(hPhysicalDrive, buffer, read_size, &write_size, NULL);
+				if ((s) && (write_size == read_size))
+					break;
+				if (s)
+					uprintf("Write error: Wrote %d bytes, expected %d bytes", write_size, read_size);
+				else
+					uprintf("Write error at sector %lld: %s", wb / SelectedDrive.SectorSize, WindowsErrorString());
+				if (i < WRITE_RETRIES) {
+					li.QuadPart = wb;
+					uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
+					Sleep(WRITE_TIMEOUT);
+					if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN)) {
+						uprintf("Write error: Could not reset position - %s", WindowsErrorString());
+						goto out;
+					}
+				} else {
+					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+					goto out;
+				}
+				Sleep(200);
+			}
+			if (i > WRITE_RETRIES)
+				goto out;
+		}
+		
 	}
 	RefreshDriveLayout(hPhysicalDrive);
 	ret = TRUE;
 out:
+	safe_closehandle(hSourceImage);
 	safe_mm_free(buffer);
 	safe_mm_free(cmp_buffer);
 	return ret;
@@ -1684,7 +1754,6 @@ DWORD WINAPI FormatThread(void* param)
 	DWORD cr, DriveIndex = (DWORD)(uintptr_t)param, ClusterSize, Flags;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
-	HANDLE hSourceImage = INVALID_HANDLE_VALUE;
 	SYSTEMTIME lt;
 	FILE* log_fd;
 	uint8_t *buffer = NULL, extra_partitions = 0;
@@ -1791,7 +1860,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 	if (zero_drive) {
-		WriteDrive(hPhysicalDrive, NULL);
+		WriteDrive(hPhysicalDrive, TRUE);
 		goto out;
 	}
 
@@ -1875,15 +1944,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	// Write an image file
 	if ((boot_type == BT_IMAGE) && write_as_image) {
-		hSourceImage = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL,
-			OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-		if (hSourceImage == INVALID_HANDLE_VALUE) {
-			uprintf("Could not open image '%s': %s", image_path, WindowsErrorString());
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
-			goto out;
-		}
-
-		WriteDrive(hPhysicalDrive, hSourceImage);
+		WriteDrive(hPhysicalDrive, FALSE);
 
 		// If the image contains a partition we might be able to access, try to re-mount it
 		safe_unlockclose(hPhysicalDrive);
@@ -2188,7 +2249,6 @@ out:
 	}
 	safe_free(volume_name);
 	safe_free(buffer);
-	safe_closehandle(hSourceImage);
 	safe_unlockclose(hLogicalVolume);
 	safe_unlockclose(hPhysicalDrive);	// This can take a while
 	if (IS_ERROR(FormatStatus)) {
