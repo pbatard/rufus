@@ -354,6 +354,7 @@
     <ClCompile Include="..\src\parser.c" />
     <ClCompile Include="..\src\pki.c" />
     <ClCompile Include="..\src\process.c" />
+    <ClCompile Include="..\src\re.c" />
     <ClCompile Include="..\src\rufus.c" />
     <ClCompile Include="..\src\checksum.c" />
     <ClCompile Include="..\src\smart.c" />
@@ -375,6 +376,7 @@
     <ClInclude Include="..\src\mbr_types.h" />
     <ClInclude Include="..\src\missing.h" />
     <ClInclude Include="..\src\process.h" />
+    <ClInclude Include="..\src\re.h" />
     <ClInclude Include="..\src\settings.h" />
     <ClInclude Include="..\src\libcdio\cdio\cdio.h" />
     <ClInclude Include="..\src\libcdio\cdio\iso9660.h" />

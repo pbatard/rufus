@@ -94,11 +94,11 @@ am_rufus_OBJECTS = rufus-badblocks.$(OBJEXT) rufus-checksum.$(OBJEXT) \
 	rufus-format_fat32.$(OBJEXT) rufus-icon.$(OBJEXT) \
 	rufus-iso.$(OBJEXT) rufus-localization.$(OBJEXT) \
 	rufus-net.$(OBJEXT) rufus-parser.$(OBJEXT) rufus-pki.$(OBJEXT) \
-	rufus-process.$(OBJEXT) rufus-rufus.$(OBJEXT) \
-	rufus-smart.$(OBJEXT) rufus-stdfn.$(OBJEXT) \
-	rufus-stdio.$(OBJEXT) rufus-stdlg.$(OBJEXT) \
-	rufus-syslinux.$(OBJEXT) rufus-ui.$(OBJEXT) \
-	rufus-vhd.$(OBJEXT)
+	rufus-process.$(OBJEXT) rufus-re.$(OBJEXT) \
+	rufus-rufus.$(OBJEXT) rufus-smart.$(OBJEXT) \
+	rufus-stdfn.$(OBJEXT) rufus-stdio.$(OBJEXT) \
+	rufus-stdlg.$(OBJEXT) rufus-syslinux.$(OBJEXT) \
+	rufus-ui.$(OBJEXT) rufus-vhd.$(OBJEXT)
 rufus_OBJECTS = $(am_rufus_OBJECTS)
 rufus_DEPENDENCIES = rufus_rc.o bled/libbled.a ext2fs/libext2fs.a \
 	ms-sys/libmssys.a syslinux/libfat/libfat.a \
@@ -275,7 +275,7 @@ AM_V_WINDRES_1 = $(WINDRES)
 AM_V_WINDRES_ = $(AM_V_WINDRES_$(AM_DEFAULT_VERBOSITY))
 AM_V_WINDRES = $(AM_V_WINDRES_$(V))
 rufus_SOURCES = badblocks.c checksum.c dev.c dos.c dos_locale.c drive.c format.c format_ext.c format_fat32.c icon.c iso.c localization.c \
-	net.c parser.c pki.c process.c rufus.c smart.c stdfn.c stdio.c stdlg.c syslinux.c ui.c vhd.c
+	net.c parser.c pki.c process.c re.c rufus.c smart.c stdfn.c stdio.c stdlg.c syslinux.c ui.c vhd.c
 
 rufus_CFLAGS = -I$(srcdir)/ms-sys/inc -I$(srcdir)/syslinux/libfat -I$(srcdir)/syslinux/libinstaller -I$(srcdir)/syslinux/win -I$(srcdir)/libcdio $(AM_CFLAGS) \
 	-DEXT2_FLAT_INCLUDES=0 -DSOLUTION=rufus
@@ -433,6 +433,12 @@ rufus-process.o: process.c
 
 rufus-process.obj: process.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-process.obj `if test -f 'process.c'; then $(CYGPATH_W) 'process.c'; else $(CYGPATH_W) '$(srcdir)/process.c'; fi`
+
+rufus-re.o: re.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-re.o `test -f 're.c' || echo '$(srcdir)/'`re.c
+
+rufus-re.obj: re.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-re.obj `if test -f 're.c'; then $(CYGPATH_W) 're.c'; else $(CYGPATH_W) '$(srcdir)/re.c'; fi`
 
 rufus-rufus.o: rufus.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-rufus.o `test -f 'rufus.c' || echo '$(srcdir)/'`rufus.c

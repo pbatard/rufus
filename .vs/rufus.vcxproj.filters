@@ -87,6 +87,9 @@
     <ClCompile Include="..\src\format_fat32.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\re.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\rufus.h">
@@ -168,6 +171,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\winio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\re.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

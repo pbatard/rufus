@@ -134,6 +134,9 @@ const char* additional_copyrights =
 "https://tortoisesvn.net/, https://tortoisegit.org/\\line\n"
 "GNU General Public License (GPL) v2 or later\\line\n"
 "\\line\n"
+"Regular Expression handling from tiny-regex-c by kokke:\\line\n"
+"https://github.com/kokke/tiny-regex-c\\line\n"
+"Public Domain\\line\n"
 "\\line\n"
 "All other references can be found in the source.\\line\n}";
 
