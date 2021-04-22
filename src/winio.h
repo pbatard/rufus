@@ -25,7 +25,7 @@
 
 // https://docs.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-overlapped
 // See Microsoft? It's not THAT hard to define an OVERLAPPED struct in a manner that
-// doesn't qualify as an example of "Crimes against humanity" for the Geneva convention.
+// doesn't qualify as an example of "Crimes against humanity" in the Geneva convention.
 typedef struct {
 	ULONG_PTR                           Internal[2];
 	ULONG64                             Offset;
@@ -57,7 +57,7 @@ typedef struct {
 /// <param name="dwCreationDisposition">Action to take on a file or device that exists or does not exist</param>
 /// <param name="dwFlagsAndAttributes">The file or device attributes and flags</param>
 /// <returns>Non NULL on success</returns>
-static __inline VOID* CreateFileAsync(LPCSTR lpFileName, DWORD dwDesiredAccess,
+static __inline HANDLE CreateFileAsync(LPCSTR lpFileName, DWORD dwDesiredAccess,
 	DWORD dwShareMode, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes)
 {
 	ASYNC_FD* fd = calloc(sizeof(ASYNC_FD), 1);
@@ -79,77 +79,97 @@ static __inline VOID* CreateFileAsync(LPCSTR lpFileName, DWORD dwDesiredAccess,
 /// <summary>
 /// Close a previously opened asynchronous file
 /// </summary>
-/// <param name="fd">The file descriptor</param>
-static __inline VOID CloseFileAsync(VOID* fd)
+/// <param name="h">An async handle, created by a call to CreateFileAsync()</param>
+static __inline VOID CloseFileAsync(HANDLE h)
 {
-	ASYNC_FD* _fd = (ASYNC_FD*)fd;
-	if (_fd == NULL)
+	ASYNC_FD* fd = (ASYNC_FD*)h;
+	if (fd == NULL || fd == INVALID_HANDLE_VALUE)
 		return;
-	CloseHandle(_fd->hFile);
-	CloseHandle(_fd->Overlapped.hEvent);
-	free(_fd);
+	CloseHandle(fd->hFile);
+	CloseHandle(fd->Overlapped.hEvent);
+	free(fd);
 }
 
 /// <summary>
 /// Initiate a read operation for asynchronous I/O.
 /// </summary>
-/// <param name="fd">The file descriptor</param>
+/// <param name="h">An async handle, created by a call to CreateFileAsync()</param>
 /// <param name="lpBuffer">The buffer that receives the data</param>
 /// <param name="nNumberOfBytesToRead">Number of bytes requested</param>
 /// <returns>TRUE on success, FALSE on error</returns>
-static __inline BOOL ReadFileAsync(VOID* fd, LPVOID lpBuffer, DWORD nNumberOfBytesToRead)
+static __inline BOOL ReadFileAsync(HANDLE h, LPVOID lpBuffer, DWORD nNumberOfBytesToRead)
 {
-	ASYNC_FD* _fd = (ASYNC_FD*)fd;
-	_fd->Overlapped.bOffsetUpdated = FALSE;
-	if (!ReadFile(_fd->hFile, lpBuffer, nNumberOfBytesToRead, NULL,
-		(OVERLAPPED*)&_fd->Overlapped))
+	ASYNC_FD* fd = (ASYNC_FD*)h;
+	fd->Overlapped.bOffsetUpdated = FALSE;
+	if (!ReadFile(fd->hFile, lpBuffer, nNumberOfBytesToRead, NULL,
+		(OVERLAPPED*)&fd->Overlapped))
 		// TODO: Is it possible to get ERROR_HANDLE_EOF here?
-		_fd->iStatus = (GetLastError() == ERROR_IO_PENDING) ? -1 : 0;
+		fd->iStatus = (GetLastError() == ERROR_IO_PENDING) ? -1 : 0;
 	else
-		_fd->iStatus = 1;
-	return (_fd->iStatus != 0);
+		fd->iStatus = 1;
+	return (fd->iStatus != 0);
+}
+
+/// <summary>
+/// Initiate a write operation for asynchronous I/O.
+/// </summary>
+/// <param name="h">An async handle, created by a call to CreateFileAsync()</param>
+/// <param name="lpBuffer">The buffer that contains the data</param>
+/// <param name="nNumberOfBytesToWrite">Number of bytes to write</param>
+/// <returns>TRUE on success, FALSE on error</returns>
+static __inline BOOL WriteFileAsync(HANDLE h, LPVOID lpBuffer, DWORD nNumberOfBytesToWrite)
+{
+	ASYNC_FD* fd = (ASYNC_FD*)h;
+	fd->Overlapped.bOffsetUpdated = FALSE;
+	if (!WriteFile(fd->hFile, lpBuffer, nNumberOfBytesToWrite, NULL,
+		(OVERLAPPED*)&fd->Overlapped))
+		// TODO: Is it possible to get ERROR_HANDLE_EOF here?
+		fd->iStatus = (GetLastError() == ERROR_IO_PENDING) ? -1 : 0;
+	else
+		fd->iStatus = 1;
+	return (fd->iStatus != 0);
 }
 
 /// <summary>
 /// Wait for an asynchronous operation to complete, with timeout.
 /// This function also succeeds if the I/O already completed synchronously.
 /// </summary>
-/// <param name="fd">The file descriptor</param>
+/// <param name="h">An async handle, created by a call to CreateFileAsync()</param>
 /// <param name="dwTimeout">A timeout value, in ms</param>
 /// <returns>TRUE on success, FALSE on error</returns>
-static __inline BOOL WaitFileAsync(VOID* fd, DWORD dwTimeout)
+static __inline BOOL WaitFileAsync(HANDLE h, DWORD dwTimeout)
 {
-	ASYNC_FD* _fd = (ASYNC_FD*)fd;
-	if (_fd->iStatus > 0)	// Read completed synchronously
+	ASYNC_FD* fd = (ASYNC_FD*)h;
+	if (fd->iStatus > 0)	// Read completed synchronously
 		return TRUE;
-	return (WaitForSingleObject(_fd->Overlapped.hEvent, dwTimeout) == WAIT_OBJECT_0);
+	return (WaitForSingleObject(fd->Overlapped.hEvent, dwTimeout) == WAIT_OBJECT_0);
 }
 
 /// <summary>
-/// Return the number of bytes read and keep track/update the current offset
-/// for an asynchronous read operation.
+/// Return the number of bytes read or written and keep track/update the
+/// current offset for an asynchronous read operation.
 /// </summary>
-/// <param name="fd">The file descriptor</param>
-/// <param name="lpNumberOfBytesRead">A pointer that receives the number of bytes read.</param>
+/// <param name="h">An async handle, created by a call to CreateFileAsync()</param>
+/// <param name="lpNumberOfBytes">A pointer that receives the number of bytes transferred.</param>
 /// <returns>TRUE on success, FALSE on error</returns>
-static __inline BOOL GetSizeAsync(VOID* fd, LPDWORD lpNumberOfBytesRead)
+static __inline BOOL GetSizeAsync(HANDLE h, LPDWORD lpNumberOfBytes)
 {
-	ASYNC_FD* _fd = (ASYNC_FD*)fd;
-	// Previous call to ReadFileAsync() failed
-	if (_fd->iStatus == 0) {
-		*lpNumberOfBytesRead = 0;
+	ASYNC_FD* fd = (ASYNC_FD*)h;
+	// Previous call to [Read/Write]FileAsync() failed
+	if (fd->iStatus == 0) {
+		*lpNumberOfBytes = 0;
 		return FALSE;
 	}
 	// Detect if we already read the size and updated the offset
-	if (_fd->Overlapped.bOffsetUpdated) {
+	if (fd->Overlapped.bOffsetUpdated) {
 		SetLastError(ERROR_NO_MORE_ITEMS);
 		return FALSE;
 	}
 	// TODO: Use a timeout and call GetOverlappedResultEx() on Windows 8 and later
-	if (!GetOverlappedResult(_fd->hFile, (OVERLAPPED*)&_fd->Overlapped,
-		lpNumberOfBytesRead, (_fd->iStatus < 0)))
+	if (!GetOverlappedResult(fd->hFile, (OVERLAPPED*)&fd->Overlapped,
+		lpNumberOfBytes, (fd->iStatus < 0)))
 		return (GetLastError() == ERROR_HANDLE_EOF);
-	_fd->Overlapped.Offset += *lpNumberOfBytesRead;
-	_fd->Overlapped.bOffsetUpdated = TRUE;
+	fd->Overlapped.Offset += *lpNumberOfBytes;
+	fd->Overlapped.bOffsetUpdated = TRUE;
 	return TRUE;
 }

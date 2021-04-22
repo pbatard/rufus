@@ -98,7 +98,7 @@
 #define BADBLOCK_PATTERN_SLC        {0x00, 0xff, 0x55, 0xaa}
 #define BADCLOCK_PATTERN_MLC        {0x00, 0xff, 0x33, 0xcc}
 #define BADBLOCK_PATTERN_TLC        {0x00, 0xff, 0x1c71c7, 0xe38e38}
-#define BADBLOCK_BLOCK_SIZE         (128 * 1024)
+#define BADBLOCK_BLOCK_SIZE         (512 * 1024)
 #define LARGE_FAT32_SIZE            (32 * 1073741824LL)	// Size at which we need to use fat32format
 #define UDF_FORMAT_SPEED            3.1f		// Speed estimate at which we expect UDF drives to be formatted (GB/s)
 #define UDF_FORMAT_WARN             20			// Duration (in seconds) above which we warn about long UDF formatting times
