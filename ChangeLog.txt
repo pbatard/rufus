@@ -1,3 +1,14 @@
+o Version 3.14 (2021.04.??)
+    Improve DD write speed (uncompressed images only)
+    Improve checksum computation speed
+    Improve network connectivity detection
+    Only prompt for additional GRUB/Syslinux downloads when not writing in DD mode
+    Fix potential "loss" of disk after writing Ubuntu 20.10 in DD mode
+    Fix GRUB compatibility issue with Ubuntu 21.04
+    Fix Rufus MBR not being selected by default for Windows ISOs
+    Fix drag and drop being enabled during drive creation
+    Add more "exceptions" for forced DD image writing
+
 o Version 3.13 (2020.11.20)
     Add a cheat mode (Alt-M) to accept disk images without a Boot Marker
     Add marquee operation progress to the taskbar icon

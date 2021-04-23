@@ -564,7 +564,7 @@ t MSG_305 "Use this option to indicate whether you want to use this device to in
 # You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 # It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 t MSG_306 "Fast-zeroing drive: %s"
-t MSG_307 "This may take a while"
+t MSG_307 "this may take a while"
 t MSG_308 "VHD detection"
 t MSG_309 "Compressed archive"
 t MSG_310 "The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). "
