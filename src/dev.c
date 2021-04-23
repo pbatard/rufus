@@ -419,9 +419,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x0BDA
-#define FORCED_PID 0x0306
-#define FORCED_NAME "SDXC Card"
+#define FORCED_VID 0x048D
+#define FORCED_PID 0x1234
+#define FORCED_NAME "VendorCo Disk USB Device"
 #endif
 
 /*

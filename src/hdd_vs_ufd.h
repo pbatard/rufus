@@ -113,7 +113,7 @@ static vid_score_t vid_score[] = {
 	{ 0x0420, -5 },		// Chipsbank
 	{ 0x046d, -5 },		// Logitech
 	{ 0x0480, 5 },		// Toshiba
-	{ 0x048d, -5 },		// ITE
+	{ 0x048d, -10 },	// ITE
 	{ 0x04b4, 10 },		// Cypress
 	{ 0x04c5, 7 },		// Fujitsu
 	{ 0x04e8, 5 },		// Samsung

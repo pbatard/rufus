@@ -451,7 +451,7 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 
 	// Adjust the score depending on the size
 	drive_size = GetDriveSize(DriveIndex);
-	if (drive_size > 400 * GB)
+	if (drive_size > 800 * GB)
 		score += 10;
 	else if (drive_size < 32 * GB)
 		score -= 10;
