@@ -44,6 +44,7 @@
 #include "localization.h"
 
 #include "ui.h"
+#include "re.h"
 #include "drive.h"
 #include "settings.h"
 #include "bled/bled.h"
@@ -1202,7 +1203,18 @@ out:
 // The scanning process can be blocking for message processing => use a thread
 DWORD WINAPI ImageScanThread(LPVOID param)
 {
-	int i;
+	// Regexp patterns used to match ISO labels for distros whose
+	// maintainers have drunk the "ISOHybrid = DD only" kool aid...
+	const char* dd_koolaid_drinkers[] = {
+		"^CentOS-8-[3-9].*",	// CentOS 8.3 or later
+		"^CentOS-9-.*",			// CentOS 9.x
+		"^OL-.*-BaseOS-.*",		// Oracle Linux
+		"^RHEL-8.[2-9].*",		// Red Hat 8.2 or later
+		"^RHEL-9.*",			// Red Hat 9.x
+		// Don't bother with Fedora for now, even as they use
+		// the same problematic Anaconda...
+	};
+	int i, len;
 	uint8_t arch;
 	char tmp_path[MAX_PATH];
 
@@ -1262,6 +1274,14 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 
 	if (img_report.is_iso) {
 		DisplayISOProps();
+
+		for (i = 0; i < ARRAYSIZE(dd_koolaid_drinkers); i++) {
+			if (re_match(dd_koolaid_drinkers[i], img_report.label, &len) >= 0) {
+				img_report.disable_iso = TRUE;
+				break;
+			}
+		}
+
 		// If we have an ISOHybrid, but without an ISO method we support, disable ISO support altogether
 		if (IS_DD_BOOTABLE(img_report) && (img_report.disable_iso ||
 				(!IS_BIOS_BOOTABLE(img_report) && !IS_EFI_BOOTABLE(img_report)))) {
