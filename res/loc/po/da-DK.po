@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.5\n"
+"Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-04-17 12:17+0100\n"
-"PO-Revision-Date: 2020-04-17 12:19+0100\n"
+"POT-Creation-Date: 2021-04-29 06:14+0200\n"
+"PO-Revision-Date: 2021-04-29 15:35+0200\n"
 "Language: da_DK\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Rufus-LCID: 0x0406\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.4.3\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -486,7 +486,7 @@ msgstr "Kan ikke åbne medie. Det kan være i brug af en anden proces. Fjern og 
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "Fejl ved partitionering af drev."
+msgstr "Der kunne ikke partitioneres drev."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
@@ -667,7 +667,7 @@ msgstr "Filsystem begrænsning"
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Dette ISO-image indeholder en fil der er større end 4 GB, hvilket er mere end den maksimale størrelse filsystemet FAT eller FAT32 tillader."
+msgstr "Dette ISO-image indeholder en fil, der er større end 4 GB, hvilket er mere end den maksimale størrelse, der er tilladt for et FAT- eller FAT32 filsystem."
 
 #. • MSG_101
 msgid "Missing WIM support"
@@ -1291,7 +1291,7 @@ msgstr "Gemt %s"
 #.
 #. Formatting status
 msgid "Formatting: %s"
-msgstr "Formatering: %s"
+msgstr "Formaterer: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1310,8 +1310,8 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "Formaterer (%s) - estimeret varighed %d:%02d..."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "Opretter etiket (dette kan tage et stykke tid)..."
+msgid "Setting label (%s)..."
+msgstr "Opretter etiket (%s)..."
 
 #. • MSG_222
 #.
@@ -1341,11 +1341,11 @@ msgstr "Lukker eksisterende volume..."
 
 #. • MSG_228
 msgid "Writing Master Boot Record..."
-msgstr "Skriver Master Boot Record..."
+msgstr "Skriver Master boot record..."
 
 #. • MSG_229
 msgid "Writing Partition Boot Record..."
-msgstr "Skriver Partition Boot Record..."
+msgstr "Skriver partitionsstartpost"
 
 #. • MSG_230
 msgid "Copying DOS files..."
@@ -1356,8 +1356,8 @@ msgid "Copying ISO files: %s"
 msgstr "Kopierer ISO-filer: %s"
 
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "Win7 EFI boot setup (dette kan tage noget tid)..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "Win7 EFI boot setup (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1392,8 +1392,8 @@ msgid "Partitioning (%s)..."
 msgstr "Partitionerer (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "Sletter partitioner..."
+msgid "Deleting partitions (%s)..."
+msgstr "Sletter partitioner (%s)..."
 
 #. • MSG_240
 #.
@@ -1409,7 +1409,7 @@ msgstr ""
 
 #. • MSG_241
 msgid "Downloading: %s"
-msgstr "Henter: %s"
+msgstr "Downloader: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1546,8 +1546,8 @@ msgid "Change the application language"
 msgstr "Skift programsprog"
 
 #. • MSG_274
-msgid "ISOHybrid image detected"
-msgstr "ISOHybrid-diskbillede opdaget"
+msgid "%s image detected"
+msgstr "%s-diskbillede opdaget"
 
 #. • MSG_275
 #.
@@ -1617,7 +1617,7 @@ msgstr ""
 
 #. • MSG_286
 msgid "Zeroing drive: %s"
-msgstr "Skriver 0-er til stationer: %s"
+msgstr "Nulstilled drev: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1722,4 +1722,74 @@ msgstr "Brug dette alternativ for at angive om du vil bruge denne enhed til at i
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
-msgstr "Hurtigt-nulstilling drev: %s"
+msgstr "Hurtigt-nulstilling af drev: %s"
+
+#. • MSG_307
+msgid "this may take a while"
+msgstr "dette kan tage noget tid"
+
+#. • MSG_308
+msgid "VHD detection"
+msgstr "Opdager VHDD"
+
+#. • MSG_309
+msgid "Compressed archive"
+msgstr "Komprimeret arkiv"
+
+#. • MSG_310
+msgid ""
+"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"Den ISO, du har valgt, bruger UEFI og er lille nok til at blive skrevet som en EFI systempartition (ESP). Skrivning til en ESP i stedet for at skrive til en generisk datapartition, der optager hele disken, kan være at foretrække for nogle typer installationer.\n"
+"\n"
+"Vælg den metode, du vil bruge til at skrive dette billede:"
+
+#. • MSG_311
+msgid "Use %s (in the main application window) to enable."
+msgstr "Brug %s (i hovedprogramvinduet) til at aktivere"
+
+#. • MSG_312
+msgid "Extra hashes (SHA512)"
+msgstr "Ekstra checksumme (SHA512)"
+
+#. • MSG_313
+msgid "Save to VHD"
+msgstr "Gem på VHDD"
+
+#. • MSG_314
+msgid "Compute image checksums"
+msgstr "Beregn billedechecksumme"
+
+#. • MSG_315
+msgid "Multiple buttons"
+msgstr "Flere knapper"
+
+#. • MSG_316
+msgid "Number of passes"
+msgstr "Antal gennemløb"
+
+#. • MSG_317
+msgid "Disk ID"
+msgstr ""
+
+#. • MSG_318
+msgid "Default thread priority: %d"
+msgstr "Standard trådpriorietet: %d"
+
+#. • MSG_319
+msgid "Ignore Boot Marker"
+msgstr "Ignorer boot markering"
+
+#. • MSG_320
+msgid "Refreshing partition layout (%s)..."
+msgstr "Genindlæser partition layout (%s)"
+
+#. • MSG_321
+msgid ""
+"The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
+"As a result, DD image writing mode will be enforced."
+msgstr ""
+"Det valgte billede er et ISOHybrid, men dets skabere har ikke gjort det kompatibelt med ISO / Fil kopi måde.\n"
+"Derfor bruges DD-billedskrivningstilstand."
