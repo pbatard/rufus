@@ -1,4 +1,4 @@
-o Version 3.14 (2021.04.??)
+o Version 3.14 (2021.04.30)
     Improve DD write speed (uncompressed images only)
     Improve checksum computation speed
     Improve network connectivity detection
