@@ -8,7 +8,7 @@
 # • v3.5  "bg-BG" "Bulgarian (Български)"
 # • v3.14 "zh-CN" "Chinese Simplified (简体中文)"
 # • v3.14 "zh-TW" "Chinese Traditional (正體中文)"
-# • v3.5  "hr-HR" "Croatian (Hrvatski)"
+# • v3.14 "hr-HR" "Croatian (Hrvatski)"
 # • v3.5  "cs-CZ" "Czech (Čeština)"
 # • v3.14 "da-DK" "Danish (Dansk)"
 # • v3.14 "nl-NL" "Dutch (Nederlands)"
@@ -2072,7 +2072,7 @@ t MSG_321 "你選擇的映象檔是 ISOHybrid，但是檔案作者沒有使之�
 
 #########################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
-v 3.5
+v 3.14
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -2251,7 +2251,7 @@ t MSG_120 "napredne mogućnosti formatiranja"
 t MSG_121 "Prikaži %s"
 t MSG_122 "Sakrij %s"
 t MSG_123 "Veličina trajne particije"
-t MSG_124 "Bez trajne part."
+t MSG_124 "Bez trajne part"
 t MSG_125 "Zadaj veličinu trajne particije za \"live\" USB medij. Ako je zadana veličina 0, isključuje se trajna particija."
 t MSG_126 "Zadati jedinicu veličine particije."
 t MSG_127 "Više ne prikazuj ovu poruku"
@@ -2356,7 +2356,6 @@ t MSG_228 "Zapisujem Master Boot Record..."
 t MSG_229 "Zapisujem Partition Boot Record..."
 t MSG_230 "Kopiram DOS datoteke..."
 t MSG_231 "Kopiram ISO datoteku: %s"
-t MSG_232 "Win7 EFI boot setup (%s)..."
 t MSG_233 "Završavanje... pričekajte."
 t MSG_234 "Instaliram Syslinux %s..."
 t MSG_235 "Loši blokovi: %s %d/%d - %0.2f%% (%d/%d/%d greška(e))"
@@ -2431,7 +2430,21 @@ t MSG_303 "Prikaži zapisnik"
 t MSG_304 "Stvori sliku diska iz odabranog uređaja"
 t MSG_305 "Ovom opcijom naznačite ako želite koristiti ovaj uređaj kako bi instalirali Windows na drugi disk, ili ako želite podići Windows direktno s ovog uređaja (Windows To Go)."
 t MSG_306 "\"Fast-zeroing\" pogona: %s"
-t MSG_307 "Ovo može potrajati neko vrijeme"
+t MSG_307 "ovo može potrajati neko vrijeme"
+t MSG_308 "VHD detekcija"
+t MSG_309 "Komprimirana arhiva"
+t MSG_310 "ISO datoteka koju ste odabrali koristi UEFI i dovoljno je mala da bi bila zapisana kao \"EFI System Partition\" (ESP). Zapisanje u ESP, umjesto zapisivanje u generičku podatkovnu particiju, možda je bolji izbor za neke tipove instalacija.\n\nOdaberite mod koji želite koristi za kreiranje slike:"
+t MSG_311 "Koristi %s (u glavnom prozoru aplikacije) za uključenje."
+t MSG_312 "\"Ekstra hashes\" (SHA512)"
+t MSG_313 "Snimi u VHD"
+t MSG_314 "Izračunaj \"checksum\" slike"
+t MSG_315 "Višestruki gumbi"
+t MSG_316 "Broj prolaza"
+t MSG_317 "ID uređaja"
+t MSG_318 "DPrioritet glavne niti: %d"
+t MSG_319 "Zanemari Boot Marker"
+t MSG_320 "Osvježavam raspored particija (%s)..."
+t MSG_321 "Slika koju ste odabrali je \"ISOHybrid\", ali nije kompatibilna s \"ISO/File\" mod kopiranja.\nZbog toga će DD mod zapisivanja slike biti korišten."
 
 #########################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
