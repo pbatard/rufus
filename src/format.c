@@ -1546,9 +1546,8 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 				uprintfs("+");
 			}
 			// Don't overflow our projected size (mostly for VHDs)
-			if (wb + read_size[0] > target_size) {
+			if (wb + read_size[0] > target_size)
 				read_size[0] = (DWORD)(target_size - wb);
-			}
 
 			// WriteFile fails unless the size is a multiple of sector size
 			if (read_size[0] % SelectedDrive.SectorSize != 0)
@@ -1561,7 +1560,6 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 			if (throttle_fast_zeroing) {
 				throttle_fast_zeroing--;
 			} else if (fast_zeroing) {
-				assert(hSourceImage == NULL);	// Only enabled for zeroing
 				CHECK_FOR_USER_CANCEL;
 
 				// Read block and compare against the block that needs to be written
