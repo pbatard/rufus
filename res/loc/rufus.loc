@@ -9471,7 +9471,7 @@ t MSG_317 "Identyfikator dysku"
 t MSG_318 "Domyślny priorytet wątku: %d"
 t MSG_319 "Zignoruj znacznik 'boot'"
 t MSG_320 "Odświeżanie układu partycji (%s)..."
-t MSG_321 "Obraz, który został wybrany jes Hybrydą ISO i nie jest zgodny z trybem kopiowania ISO.\nWynikiem tego będzie przymusowe zapisywanie w trybie DD."
+t MSG_321 "Obraz, który został wybrany jest Hybrydą ISO i nie jest zgodny z trybem kopiowania ISO.\nWynikiem tego będzie przymusowe zapisywanie w trybie DD."
 
 #########################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
