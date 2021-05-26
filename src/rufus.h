@@ -572,7 +572,7 @@ extern uint8_t IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int SetWinToGoIndex(void);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
-extern char* GetSignatureName(const char* path, const char* country_code);
+extern char* GetSignatureName(const char* path, const char* country_code, BOOL bSilent);
 extern uint64_t GetSignatureTimeStamp(const char* path);
 extern LONG ValidateSignature(HWND hDlg, const char* path);
 extern BOOL ValidateOpensslSignature(BYTE* pbBuffer, DWORD dwBufferLen, BYTE* pbSignature, DWORD dwSigLen);

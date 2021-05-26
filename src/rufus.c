@@ -3335,7 +3335,7 @@ skip_args_processing:
 	static_sprintf(ini_path, "%s\\rufus.ini", app_dir);
 	fd = fopenU(ini_path, ini_flags);	// Will create the file if portable mode is requested
 	// Using the string directly in safe_strcmp() would call GetSignatureName() twice
-	tmp = GetSignatureName(NULL, NULL);
+	tmp = GetSignatureName(NULL, NULL, FALSE);
 	vc |= (safe_strcmp(tmp, cert_name[0]) == 0);
 	if (fd != NULL) {
 		ini_file = ini_path;

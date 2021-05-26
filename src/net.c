@@ -52,7 +52,7 @@ HANDLE update_check_thread = NULL;
 
 extern loc_cmd* selected_locale;
 extern HANDLE dialog_handle;
-extern BOOL is_x86_32, close_fido_cookie_prompts;
+extern BOOL is_x86_32;
 static DWORD error_code, fido_len = 0;
 static BOOL force_update_check = FALSE;
 static const char* request_headers = "Accept-Encoding: gzip, deflate";
@@ -918,7 +918,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		static_sprintf(sig_url, "%s.sig", fido_url);
 		dwSize = (DWORD)DownloadToFileOrBuffer(sig_url, NULL, &sig, NULL, FALSE);
 		if ((dwSize != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(compressed, dwCompressedSize, sig, dwSize))) {
-			uprintf("FATAL: Signature is invalid ✗");
+			uprintf("FATAL: Download signature is invalid ✗");
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE);
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
@@ -927,7 +927,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 			goto out;
 		}
 		free(sig);
-		uprintf("Signature is valid ✓");
+		uprintf("Download signature is valid ✓");
 		uncompressed_size = *((uint64_t*)&compressed[5]);
 		if ((uncompressed_size < 1 * MB) && (bled_init(_uprintf, NULL, NULL, NULL, NULL, &FormatStatus) >= 0)) {
 			fido_script = malloc((size_t)uncompressed_size);
@@ -983,13 +983,22 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	}
 
 	static_sprintf(cmdline, "\"%s\" -NonInteractive -Sta -NoProfile –ExecutionPolicy Bypass "
-		"-File \"%s\" -DisableFirstRunCustomize -PipeName %s -LocData \"%s\" -Icon \"%s\" -AppTitle \"%s\"",
+		"-File \"%s\" -PipeName %s -LocData \"%s\" -Icon \"%s\" -AppTitle \"%s\"",
 		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_149));
-	// Signal our Windows alert hook that it should close the IE cookie prompts from Fido
-	close_fido_cookie_prompts = TRUE;
+
+	// For extra security, even after we validated that the LZMA download is properly
+	// signed, we also validate the Authenticode signature of the local script.
+	if (ValidateSignature(INVALID_HANDLE_VALUE, script_path) != NO_ERROR) {
+		uprintf("FATAL: Script signature is invalid ✗");
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE);
+		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
+		SetTaskbarProgressState(TASKBAR_ERROR);
+		goto out;
+	}
+	uprintf("Script signature is valid ✓");
+
 	dwExitCode = RunCommand(cmdline, app_dir, TRUE);
 	uprintf("Exited download script with code: %d", dwExitCode);
-	close_fido_cookie_prompts = FALSE;
 	if ((dwExitCode == 0) && PeekNamedPipe(hPipe, NULL, dwPipeSize, NULL, &dwAvail, NULL) && (dwAvail != 0)) {
 		url = malloc(dwAvail + 1);
 		dwSize = 0;
