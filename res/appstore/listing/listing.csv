@@ -1,20 +1,21 @@
-﻿Field,ID,Type (Type),default,en-us
-Description,2,Text,,"Rufus is a utility that helps format and create bootable USB flash drives.
+﻿Field,ID,Type (Type),default,fr-fr
+Description,2,Text,"Rufus is a utility that helps format and create bootable USB flash drives.
 
-IMPORTANT: This is an EXPERIMENTAL App Store version. If you have issues, please download Rufus from the official web site.
+Official site: https://rufus.ie
+Source Code: https://github.com/pbatard/rufus/","Rufus est un utilitaire permettant de formater et de créer des médias USB démarrables.
 
-Official Web site: https://rufus.ie
-Source Code: https://github.com/pbatard/rufus/"
-ReleaseNotes,3,Text,,Release notes: https://github.com/pbatard/rufus/releases
-Title,4,Text,,Rufus
+Site officiel : https://rufus.ie
+Code source : https://github.com/pbatard/rufus/"
+ReleaseNotes,3,Text,https://github.com/pbatard/rufus/blob/master/ChangeLog.txt,
+Title,4,Text,Rufus,
 ShortTitle,5,Text,,
 SortTitle,6,Text,,
 VoiceTitle,7,Text,,
 ShortDescription,8,Text,,
 DevStudio,9,Text,,
-CopyrightTrademarkInformation,12,Text,,© 2011-2021 Pete Batard/Akeo Consulting
-AdditionalLicenseTerms,13,Text,,
-DesktopScreenshot1,100,Relative path (or URL to file in Partner Center),,https://developer.microsoft.com/en-us/dashboard/apps/9PC3H3V7Q9CH/submissions/1152921505693093840/listings/1152922700005959199/listingassets/2000000000082289093
+CopyrightTrademarkInformation,12,Text,© 2011-2021 Pete Batard,
+AdditionalLicenseTerms,13,Text,https://www.gnu.org/licenses/gpl-3.0.html,
+DesktopScreenshot1,100,Relative path (or URL to file in Partner Center),listing/Rufus-en.png,listing/Rufus-fr.png
 DesktopScreenshot2,101,Relative path (or URL to file in Partner Center),,
 DesktopScreenshot3,102,Relative path (or URL to file in Partner Center),,
 DesktopScreenshot4,103,Relative path (or URL to file in Partner Center),,
@@ -96,7 +97,7 @@ HolographicScreenshotCaption9,458,Text,,
 HolographicScreenshotCaption10,459,Text,,
 StoreLogo720x1080,600,Relative path (or URL to file in Partner Center),,
 StoreLogo1080x1080,601,Relative path (or URL to file in Partner Center),,
-StoreLogo300x300,602,Relative path (or URL to file in Partner Center),,https://developer.microsoft.com/en-us/dashboard/apps/9PC3H3V7Q9CH/submissions/1152921505693093840/listings/1152922700005959199/listingassets/2000000000082758754
+StoreLogo300x300,602,Relative path (or URL to file in Partner Center),listing/Rufus-Icon-300.png,
 OverrideLogosForWin10,603,True/False,,False
 StoreLogoOverride150x150,604,Relative path (or URL to file in Partner Center),,
 StoreLogoOverride71x71,605,Relative path (or URL to file in Partner Center),,
@@ -108,17 +109,17 @@ XboxFeaturedPromo1080x1080,610,Relative path (or URL to file in Partner Center),
 OptionalPromo358x358,611,Relative path (or URL to file in Partner Center),,
 OptionalPromo1000x800,612,Relative path (or URL to file in Partner Center),,
 OptionalPromo414x180,613,Relative path (or URL to file in Partner Center),,
-Feature1,700,Text,,"Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
-Feature2,701,Text,,"Create DOS bootable USB drives, using FreeDOS or MS-DOS (Windows 8.1 or earlier)"
-Feature3,702,Text,,"Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
-Feature4,703,Text,,"Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
-Feature5,704,Text,,"Create bootable drives from bootable disk images, including compressed ones"
-Feature6,705,Text,,Create Windows To Go drives
-Feature7,706,Text,,Create persistent Linux partitions
-Feature8,707,Text,,Download official Microsoft Windows 8 or Windows 10 retail ISOs
-Feature9,708,Text,,"Compute MD5, SHA-1 and SHA-256 checksums of the selected image"
-Feature10,709,Text,,"Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO → USB creation"
-Feature11,710,Text,,"Perform bad blocks checks, including detection of ""fake"" flash drives"
+Feature1,700,Text,"Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3",Formate des médias USB, cartes flash et disques virtuels en FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+Feature2,701,Text,"Create DOS bootable USB drives, using FreeDOS or MS-DOS (Windows 8.1 or earlier)","Crée des médias démarrables DOS, avec FreeDOS ou MS-DOS (Windows 8.1 ou antérieur)"
+Feature3,702,Text,"Create BIOS or UEFI bootable drives, including UEFI bootable NTFS","Crée des médias démarrables BIOS ou UEFI, y compris NTFS démarrables sous UEFI"
+Feature4,703,Text,"Create bootable drives from bootable ISOs (Windows, Linux, etc.)","Crée des médias démarrables à partir d'images ISO (Windows, Linux, etc.)"
+Feature5,704,Text,"Create bootable drives from bootable disk images, including compressed ones","Crée des médias démarrables à partir d'images disque, y compris compressées"
+Feature6,705,Text,"Create Windows To Go drives","Crée des médias 'Windows To Go'"
+Feature7,706,Text,"Create persistent Linux partitions","Crée des partitions Linux persistentes"
+Feature8,707,Text,"Download official Microsoft Windows 8 or Windows 10 retail ISOs","Télécharges les ISOs officielles de Windows 8 ou Windows 10"
+Feature9,708,Text,"Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image","Calcule les check-sums MD5, SHA-1, SHA-256 et SHA-512 de l'image sélectionnée"
+Feature10,709,Text,"Perform bad blocks checks, including detection of 'fake' flash drives","Effectue une verification de mauvais secteurs, incluant la détection de 'fake drives'"
+Feature11,710,Text,,
 Feature12,711,Text,,
 Feature13,712,Text,,
 Feature14,713,Text,,
