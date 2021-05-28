@@ -98,7 +98,7 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <None Include="appstore.listing.csv" />
+    <None Include="listing\listing.csv" />
     <Content Include="Images\LargeTile.scale-100.png" />
     <Content Include="Images\LargeTile.scale-125.png" />
     <Content Include="Images\LargeTile.scale-150.png" />
