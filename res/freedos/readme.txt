@@ -1,5 +1,5 @@
-o KERNEL.SYS was taken from KERNL386.SYS in FreeDOS Kernel 2042:
-  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/kernel.zip
+o KERNEL.SYS is FreeDOS Kernel 2.43 (build 2043) compiled for 386 with FAT12/16/32 support:
+  https://github.com/FDOS/kernel
   It was modified to have FORCELBA enabled (byte offset 0x0D set to 0x01)
 
 o COMMAND.COM was extracted from FreeCom 0.84 pre 2:
