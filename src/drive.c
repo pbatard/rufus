@@ -2175,7 +2175,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// Should end on a track boundary
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart = DriveLayoutEx.PartitionEntry[pn-1].StartingOffset.QuadPart +
 			DriveLayoutEx.PartitionEntry[pn-1].PartitionLength.QuadPart;
-		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (extra_partitions & XP_UEFI_NTFS)?uefi_ntfs_size:
+		DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart = (extra_partitions & XP_UEFI_NTFS) ? uefi_ntfs_size :
 			extra_part_size_in_tracks * bytes_per_track;
 		uprintf("● Creating %S Partition (offset: %lld, size: %s)", extra_part_name, DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart,
 			SizeToHumanReadable(DriveLayoutEx.PartitionEntry[pn].PartitionLength.QuadPart, TRUE, FALSE));
@@ -2188,6 +2188,14 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 
 		if (partition_style == PARTITION_STYLE_GPT) {
 			DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionType = (extra_partitions & XP_ESP) ? PARTITION_GENERIC_ESP : PARTITION_MICROSOFT_DATA;
+			if (extra_partitions & XP_UEFI_NTFS) {
+				// Prevent a drive letter to be assigned to the UEFI:NTFS partition
+				DriveLayoutEx.PartitionEntry[pn].Gpt.Attributes = GPT_BASIC_DATA_ATTRIBUTE_NO_DRIVE_LETTER;
+#if !defined(_DEBUG)
+				// Also make the partition read-only for release versions
+				DriveLayoutEx.PartitionEntry[pn].Gpt.Attributes += GPT_BASIC_DATA_ATTRIBUTE_READ_ONLY;
+#endif
+			}
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[pn].Gpt.PartitionId));
 			wcsncpy(DriveLayoutEx.PartitionEntry[pn].Gpt.Name, (extra_partitions & XP_ESP) ? L"EFI System Partition" : extra_part_name,
 				ARRAYSIZE(DriveLayoutEx.PartitionEntry[pn].Gpt.Name));
