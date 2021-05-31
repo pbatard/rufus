@@ -997,7 +997,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	}
 	uprintf("Script signature is valid ✓");
 
-	dwExitCode = RunCommand(cmdline, app_dir, TRUE);
+	dwExitCode = RunCommand(cmdline, app_data_dir, TRUE);
 	uprintf("Exited download script with code: %d", dwExitCode);
 	if ((dwExitCode == 0) && PeekNamedPipe(hPipe, NULL, dwPipeSize, NULL, &dwAvail, NULL) && (dwAvail != 0)) {
 		url = malloc(dwAvail + 1);

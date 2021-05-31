@@ -129,6 +129,7 @@ int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection
 int default_fs, fs_type, boot_type, partition_type, target_type; // file system, boot type, partition type, target type
 int force_update = 0, default_thread_priority = THREAD_PRIORITY_ABOVE_NORMAL;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
+char app_data_dir[MAX_PATH];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
@@ -982,6 +983,7 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 				log_size = GetDlgItemTextU(hDlg, IDC_LOG_EDIT, log_buffer, log_size);
 				if (log_size != 0) {
 					log_size--;	// remove NUL terminator
+					// TODO: Ideally we want to use user dir here
 					filepath =  FileDialog(TRUE, app_dir, &log_ext, 0);
 					if (filepath != NULL) {
 						FileIO(TRUE, filepath, &log_buffer, &log_size);
@@ -1492,7 +1494,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		if ((partition_type == PARTITION_STYLE_MBR) && (img_report.has_grub2) && (img_report.grub2_version[0] != 0) &&
 			(strcmp(img_report.grub2_version, GRUB2_PACKAGE_VERSION) != 0)) {
 			// We may have to download a different Grub2 version if we can find one
-			IGNORE_RETVAL(_chdirU(app_dir));
+			IGNORE_RETVAL(_chdirU(app_data_dir));
 			IGNORE_RETVAL(_mkdir(FILES_DIR));
 			IGNORE_RETVAL(_chdir(FILES_DIR));
 			static_sprintf(tmp, "%s-%s/%s", grub, img_report.grub2_version, core_img);
@@ -1560,7 +1562,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 
 		if ((partition_type == PARTITION_STYLE_MBR) && HAS_SYSLINUX(img_report)) {
 			if (SL_MAJOR(img_report.sl_version) < 5) {
-				IGNORE_RETVAL(_chdirU(app_dir));
+				IGNORE_RETVAL(_chdirU(app_data_dir));
 				for (i=0; i<NB_OLD_C32; i++) {
 					if (img_report.has_old_c32[i]) {
 						if (!in_files_dir) {
@@ -1596,7 +1598,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			} else if ((img_report.sl_version != embedded_sl_version[1]) ||
 				(safe_strcmp(img_report.sl_version_ext, embedded_sl_version_ext[1]) != 0)) {
 				// Unlike what was the case for v4 and earlier, Syslinux v5+ versions are INCOMPATIBLE with one another!
-				IGNORE_RETVAL(_chdirU(app_dir));
+				IGNORE_RETVAL(_chdirU(app_data_dir));
 				IGNORE_RETVAL(_mkdir(FILES_DIR));
 				IGNORE_RETVAL(_chdir(FILES_DIR));
 				for (i=0; i<2; i++) {
@@ -1662,7 +1664,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			}
 		}
 	} else if (boot_type == BT_SYSLINUX_V6) {
-		IGNORE_RETVAL(_chdirU(app_dir));
+		IGNORE_RETVAL(_chdirU(app_data_dir));
 		IGNORE_RETVAL(_mkdir(FILES_DIR));
 		IGNORE_RETVAL(_chdir(FILES_DIR));
 		static_sprintf(tmp, "%s-%s/%s.%s", syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
@@ -1695,7 +1697,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			goto out;
 		}
 	} else if (boot_type == BT_GRUB4DOS) {
-		IGNORE_RETVAL(_chdirU(app_dir));
+		IGNORE_RETVAL(_chdirU(app_data_dir));
 		IGNORE_RETVAL(_mkdir(FILES_DIR));
 		IGNORE_RETVAL(_chdir(FILES_DIR));
 		static_sprintf(tmp, "grub4dos-%s/grldr", GRUB4DOS_VERSION);
@@ -3011,7 +3013,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 							for (i = 0; i < ARRAYSIZE(ps_cmd); i++) {
 								// Run the PowerShell commands
 								static_sprintf(cmdline, "%s -NonInteractive -NoProfile -Command %s", tmp, ps_cmd[i]);
-								if (RunCommand(cmdline, app_dir, TRUE) != 1)
+								if (RunCommand(cmdline, app_data_dir, TRUE) != 1)
 									break;
 							}
 							if (i == ARRAYSIZE(ps_cmd)) {
@@ -3190,6 +3192,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (GetTempPathU(sizeof(temp_dir), temp_dir) == 0) {
 		uprintf("Could not get temp directory: %s", WindowsErrorString());
 		static_strcpy(temp_dir, ".\\");
+	}
+	if (!SHGetSpecialFolderPathU(NULL, app_data_dir, CSIDL_LOCAL_APPDATA, FALSE)) {
+		uprintf("Could not get app data directory: %s", WindowsErrorString());
+		static_strcpy(app_data_dir, temp_dir);
 	}
 	// Construct Sysnative ourselves as there is no GetSysnativeDirectory() call
 	// By default (64bit app running on 64 bit OS or 32 bit app running on 32 bit OS)
@@ -3640,7 +3646,7 @@ relaunch:
 			}
 			// Alt-D => Delete the 'rufus_files' subdirectory
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
-				static_sprintf(tmp_path, "%s\\%s", app_dir, FILES_DIR);
+				static_sprintf(tmp_path, "%s\\%s", app_data_dir, FILES_DIR);
 				PrintStatus(STATUS_MSG_TIMEOUT, MSG_264, tmp_path);
 				SHDeleteDirectoryExU(NULL, tmp_path, FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION);
 				continue;

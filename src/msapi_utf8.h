@@ -6,7 +6,7 @@
  *
  * See also: https://utf8everywhere.org
  *
- * Copyright © 2010-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2010-2021 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -638,6 +638,19 @@ static __inline UINT GetSystemWindowsDirectoryU(char* lpBuffer, UINT uSize)
 		err = GetLastError();
 	}
 	wfree(lpBuffer);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline BOOL SHGetSpecialFolderPathU(HWND hwnd, char* pszPath, int csidl, BOOL fCreate)
+{
+	BOOL ret;
+	DWORD err = ERROR_INVALID_DATA;
+	// pszPath is at least MAX_PATH characters in size
+	WCHAR wpszPath[MAX_PATH] = { 0 };
+	ret = SHGetSpecialFolderPathW(hwnd, wpszPath, csidl, fCreate);
+	err = GetLastError();
+	wchar_to_utf8_no_alloc(wpszPath, pszPath, MAX_PATH);
 	SetLastError(err);
 	return ret;
 }

@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Standard User I/O Routines (logging, status, error, etc.)
  * Copyright © 2020 Mattiwatti <mattiwatti@gmail.com>
- * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -650,11 +650,11 @@ const char *WindowsErrorString(void)
 		&err_string[presize], sizeof(err_string)-(DWORD)strlen(err_string), NULL);
 	if (size == 0) {
 		format_error = GetLastError();
-		if ((format_error) && (format_error != 0x13D))		// 0x13D, decode error, is returned for unknown codes
+		if ((format_error) && (format_error != ERROR_MR_MID_NOT_FOUND) && (format_error != ERROR_MUI_FILE_NOT_LOADED))
 			static_sprintf(err_string, "Windows error code 0x%08lX (FormatMessage error code 0x%08lX)",
 				error_code, format_error);
 		else
-			static_sprintf(err_string, "Unknown error 0x%08lX", error_code);
+			static_sprintf(err_string, "Windows error code 0x%08lX", error_code);
 	} else {
 		// Microsoft may suffix CRLF to error messages, which we need to remove...
 		assert(presize > 2);

@@ -1323,7 +1323,7 @@ out:
 	return wintogo_index;
 }
 
-// http://technet.microsoft.com/en-ie/library/jj721578.aspx
+// https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-8.1-and-8/jj721578(v=ws.11)
 // As opposed to the technet guide above, we don't set internal drives offline,
 // due to people wondering why they can't see them by default and we also use
 // bcdedit rather than 'unattend.xml' to disable the recovery environment.
@@ -2189,7 +2189,7 @@ DWORD WINAPI FormatThread(void* param)
 			}
 		} else if (boot_type == BT_GRUB4DOS) {
 			grub4dos_dst[0] = drive_name[0];
-			IGNORE_RETVAL(_chdirU(app_dir));
+			IGNORE_RETVAL(_chdirU(app_data_dir));
 			uprintf("Installing: %s (Grub4DOS loader) %s", grub4dos_dst,
 				IsFileInDB(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr")?"✓":"✗");
 			if (!CopyFileU(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr", grub4dos_dst, FALSE))

@@ -2,7 +2,7 @@
  *
  *   Copyright 2003 Lars Munch Christensen - All Rights Reserved
  *   Copyright 1998-2008 H. Peter Anvin - All Rights Reserved
- *   Copyright 2012-2020 Pete Batard
+ *   Copyright 2012-2021 Pete Batard
  *
  *   Based on the Linux installer program for SYSLINUX by H. Peter Anvin
  *
@@ -161,7 +161,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 
 	/* Access a copy of the ldlinux.sys & ldlinux.bss resources (downloaded or embedded) */
 	if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
-		IGNORE_RETVAL(_chdirU(app_dir));
+		IGNORE_RETVAL(_chdirU(app_data_dir));
 		for (i=0; i<2; i++) {
 			syslinux_ldlinux[i] = (unsigned char*) malloc(syslinux_ldlinux_len[i]);
 			if (syslinux_ldlinux[i] == NULL)
@@ -330,7 +330,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	uprintf("Successfully wrote Syslinux boot record");
 
 	if (boot_type == BT_SYSLINUX_V6) {
-		IGNORE_RETVAL(_chdirU(app_dir));
+		IGNORE_RETVAL(_chdirU(app_data_dir));
 		static_sprintf(path, "%s/%s-%s", FILES_DIR, syslinux, embedded_sl_version_str[1]);
 		IGNORE_RETVAL(_chdir(path));
 		static_sprintf(path, "%C:\\%s.%s", drive_letter, ldlinux, ldlinux_ext[2]);
