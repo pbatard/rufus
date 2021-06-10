@@ -726,7 +726,7 @@ void SetPersistenceSize(void)
 	uint64_t max = 0, pos = 0;
 
 	if (ComboBox_GetCurSel(hDeviceList) >= 0) {
-		max = SelectedDrive.DiskSize - img_report.projected_size;
+		max = SelectedDrive.DiskSize - PERCENTAGE(PROJECTED_SIZE_RATIO, img_report.projected_size);
 		persistence_size = min(persistence_size, max);
 		pos = persistence_size;
 

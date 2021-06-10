@@ -2342,14 +2342,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				persistence_size = lPos * MB;
 				for (i = 0; i < persistence_unit_selection; i++)
 					persistence_size *= 1024;
-				if (persistence_size > SelectedDrive.DiskSize - img_report.projected_size)
-					persistence_size = SelectedDrive.DiskSize - img_report.projected_size;
+				if (persistence_size > SelectedDrive.DiskSize - PERCENTAGE(PROJECTED_SIZE_RATIO, img_report.projected_size))
+					persistence_size = SelectedDrive.DiskSize - PERCENTAGE(PROJECTED_SIZE_RATIO, img_report.projected_size);
 				pos = persistence_size / MB;
 				for (i = 0; i < persistence_unit_selection; i++)
 					pos /= 1024;
 				lPos = (LONG)pos;
 				SendMessage(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SLIDER), TBM_SETPOS, TRUE, lPos);
-				if (persistence_size >= (SelectedDrive.DiskSize - img_report.projected_size)) {
+				if (persistence_size >= (SelectedDrive.DiskSize - PERCENTAGE(PROJECTED_SIZE_RATIO, img_report.projected_size))) {
 					static_sprintf(tmp, "%ld", lPos);
 					app_changed_size = TRUE;
 					SetWindowTextU(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp);
@@ -3184,6 +3184,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (GetCurrentDirectoryU(sizeof(app_dir), app_dir) == 0) {
 		uprintf("Could not get current directory: %s", WindowsErrorString());
 		app_dir[0] = 0;
+	}
+	// Microsoft has a bad habit of making some of its APIs (_chdir/_wchdir) break
+	// when app_dir is a drive letter that doesn't have a trailing backslash. For
+	// instance _chdir("F:") does not change the directory, whereas _chdir("F:\\")
+	// does. So make sure we add a trailing backslash if the app_dir is a drive.
+	if ((app_dir[1] == ':') && (app_dir[2] == 0)) {
+		app_dir[2] = '\\';
+		app_dir[3] = 0;
 	}
 	if (GetSystemDirectoryU(system_dir, sizeof(system_dir)) == 0) {
 		uprintf("Could not get system directory: %s", WindowsErrorString());

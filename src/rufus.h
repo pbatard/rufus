@@ -79,6 +79,7 @@
 #define MAX_WININST                 4			// Max number of install[.wim|.esd] we can handle on an image
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
 #define MORE_INFO_URL               0xFFFF
+#define PROJECTED_SIZE_RATIO        110			// Percentage by which we inflate projected_size to prevent persistence overflow
 #define STATUS_MSG_TIMEOUT          3500		// How long should cheat mode messages appear for on the status bar
 #define WRITE_RETRIES               4
 #define WRITE_TIMEOUT               5000		// How long we should wait between write retries (in ms)
@@ -129,6 +130,7 @@
 #ifndef STRINGIFY
 #define STRINGIFY(x)                #x
 #endif
+#define PERCENTAGE(percent, value)  ((1ULL * percent * value) / 100ULL)
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
 #define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING|MB_RIGHT:0)
 #define CHECK_FOR_USER_CANCEL       if (IS_ERROR(FormatStatus) && (SCODE_CODE(FormatStatus) == ERROR_CANCELLED)) goto out
