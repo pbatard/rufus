@@ -1638,6 +1638,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 		bled_init(_uprintf, NULL, sector_write, update_progress, NULL, &FormatStatus);
 		bled_ret = bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
 		bled_exit();
+		uprintfs("\r\n");
 		if ((bled_ret >= 0) && (sec_buf_pos != 0)) {
 			// A disk image that doesn't end up on disk boundary should be a rare
 			// enough case, so we dont bother checking the write operation and
