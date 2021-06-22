@@ -1961,22 +1961,22 @@ DWORD WINAPI FormatThread(void* param)
 	if ((boot_type == BT_IMAGE) && write_as_image) {
 		WriteDrive(hPhysicalDrive, FALSE);
 
-	// Trying to mount accessible partitions after writing an image leads to the
-	// creation of the infamous 'System Volume Information' folder on ESPs, which
-	// in turn leads to checksum errors for Ubuntu's boot/grub/efi.img (that maps
-	// to the Ubuntu ESP). So we no longer call on the code below...
-#if 0
-		// If the image contains a partition we might be able to access, try to re-mount it
-		safe_unlockclose(hPhysicalDrive);
-		safe_unlockclose(hLogicalVolume);
-		Sleep(200);
-		WaitForLogical(DriveIndex, 0);
-		if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE)) {
-			volume_name = GetLogicalName(DriveIndex, 0, TRUE, TRUE);
-			if ((volume_name != NULL) && (MountVolume(drive_name, volume_name)))
-				uprintf("Remounted %s as %C:", volume_name, drive_name[0]);
+		// Trying to mount accessible partitions after writing an image leads to the
+		// creation of the infamous 'System Volume Information' folder on ESPs, which
+		// in turn leads to checksum errors for Ubuntu's boot/grub/efi.img (that maps
+		// to the Ubuntu ESP). So we only call the code below for Ventoy's vtsi images.
+		if (img_report.compression_type == BLED_COMPRESSION_VTSI) {
+			// If the image contains a partition we might be able to access, try to re-mount it
+			safe_unlockclose(hPhysicalDrive);
+			safe_unlockclose(hLogicalVolume);
+			Sleep(200);
+			WaitForLogical(DriveIndex, 0);
+			if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE)) {
+				volume_name = GetLogicalName(DriveIndex, 0, TRUE, TRUE);
+				if ((volume_name != NULL) && (MountVolume(drive_name, volume_name)))
+					uprintf("Remounted %s as %C:", volume_name, drive_name[0]);
+			}
 		}
-#endif
 		goto out;
 	}
 

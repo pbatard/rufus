@@ -84,6 +84,9 @@
     <ClCompile Include="..\src\bled\decompress_unzip.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\bled\decompress_vtsi.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\bled\bb_archive.h">

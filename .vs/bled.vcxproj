@@ -46,6 +46,7 @@
     <ClCompile Include="..\src\bled\decompress_unlzma.c" />
     <ClCompile Include="..\src\bled\decompress_unxz.c" />
     <ClCompile Include="..\src\bled\decompress_unzip.c" />
+    <ClCompile Include="..\src\bled\decompress_vtsi.c" />
     <ClCompile Include="..\src\bled\filter_accept_all.c" />
     <ClCompile Include="..\src\bled\filter_accept_list.c" />
     <ClCompile Include="..\src\bled\filter_accept_reject_list.c" />

@@ -30,6 +30,7 @@ typedef enum {
 	BLED_COMPRESSION_BZIP2,		// .bz2
 	BLED_COMPRESSION_XZ,		// .xz
 	BLED_COMPRESSION_7ZIP,		// .7z
+	BLED_COMPRESSION_VTSI,		// .vtsi
 	BLED_COMPRESSION_MAX
 } bled_compression_type;
 

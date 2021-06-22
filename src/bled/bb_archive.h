@@ -266,6 +266,7 @@ IF_DESKTOP(long long) int unpack_gz_stream(transformer_state_t *xstate) FAST_FUN
 IF_DESKTOP(long long) int unpack_bz2_stream(transformer_state_t *xstate) FAST_FUNC;
 IF_DESKTOP(long long) int unpack_lzma_stream(transformer_state_t *xstate) FAST_FUNC;
 IF_DESKTOP(long long) int unpack_xz_stream(transformer_state_t *xstate) FAST_FUNC;
+IF_DESKTOP(long long) int unpack_vtsi_stream(transformer_state_t *xstate) FAST_FUNC;
 
 char* append_ext(char *filename, const char *expected_ext) FAST_FUNC;
 int bbunpack(char **argv,

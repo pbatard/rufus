@@ -103,6 +103,7 @@ am_libbled_a_OBJECTS = libbled_a-bled.$(OBJEXT) \
 	libbled_a-decompress_unlzma.$(OBJEXT) \
 	libbled_a-decompress_unxz.$(OBJEXT) \
 	libbled_a-decompress_unzip.$(OBJEXT) \
+	libbled_a-decompress_vtsi.$(OBJEXT) \
 	libbled_a-filter_accept_all.$(OBJEXT) \
 	libbled_a-filter_accept_list.$(OBJEXT) \
 	libbled_a-filter_accept_reject_list.$(OBJEXT) \
@@ -267,7 +268,7 @@ top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libbled.a
 libbled_a_SOURCES = bled.c crc32.c data_align.c data_extract_all.c data_skip.c decompress_bunzip2.c \
   decompress_gunzip.c decompress_uncompress.c decompress_unlzma.c decompress_unxz.c decompress_unzip.c \
-  filter_accept_all.c filter_accept_list.c filter_accept_reject_list.c find_list_entry.c \
+  decompress_vtsi.c filter_accept_all.c filter_accept_list.c filter_accept_reject_list.c find_list_entry.c \
   header_list.c header_skip.c header_verbose_list.c init_handle.c open_transformer.c \
   seek_by_jump.c seek_by_read.c xz_dec_bcj.c xz_dec_lzma2.c xz_dec_stream.c
 
@@ -392,6 +393,12 @@ libbled_a-decompress_unzip.o: decompress_unzip.c
 
 libbled_a-decompress_unzip.obj: decompress_unzip.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-decompress_unzip.obj `if test -f 'decompress_unzip.c'; then $(CYGPATH_W) 'decompress_unzip.c'; else $(CYGPATH_W) '$(srcdir)/decompress_unzip.c'; fi`
+
+libbled_a-decompress_vtsi.o: decompress_vtsi.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-decompress_vtsi.o `test -f 'decompress_vtsi.c' || echo '$(srcdir)/'`decompress_vtsi.c
+
+libbled_a-decompress_vtsi.obj: decompress_vtsi.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-decompress_vtsi.obj `if test -f 'decompress_vtsi.c'; then $(CYGPATH_W) 'decompress_vtsi.c'; else $(CYGPATH_W) '$(srcdir)/decompress_vtsi.c'; fi`
 
 libbled_a-filter_accept_all.o: filter_accept_all.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-filter_accept_all.o `test -f 'filter_accept_all.c' || echo '$(srcdir)/'`filter_accept_all.c

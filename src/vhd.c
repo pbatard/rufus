@@ -237,6 +237,7 @@ static comp_assoc file_assoc[] = {
 	{ ".lzma", BLED_COMPRESSION_LZMA },
 	{ ".bz2", BLED_COMPRESSION_BZIP2 },
 	{ ".xz", BLED_COMPRESSION_XZ },
+	{ ".vtsi", BLED_COMPRESSION_VTSI },
 };
 
 // For now we consider that an image that matches a known extension is bootable
