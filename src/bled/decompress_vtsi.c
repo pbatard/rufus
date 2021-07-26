@@ -120,7 +120,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_vtsi_stream(transformer_state_t* xsta
 	size_t wsize = 0;
 	ssize_t retval = 0;
 	uint64_t seg = 0;
-	uint64_t datalen = 0;
+	int64_t datalen = 0;
 	uint64_t phy_offset = 0;
 	size_t max_buflen = MAX_READ_BUF;
 	uint8_t* buf = NULL;
@@ -149,6 +149,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_vtsi_stream(transformer_state_t* xsta
 	buf = (uint8_t*)segment + footer.segment_num * sizeof(VTSI_SEGMENT);
 
 	lseek(src_fd, footer.segment_offset, SEEK_SET);
+	/* coverity[tainted_data_argument] */
 	safe_read(src_fd, segment, footer.segment_num * sizeof(VTSI_SEGMENT));
 
 	if (!check_vtsi_segment(&footer, segment))
@@ -158,7 +159,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_vtsi_stream(transformer_state_t* xsta
 	lseek(src_fd, 0, SEEK_SET);
 	for (seg = 0; seg < footer.segment_num; seg++) {
 		cur_seg = segment + seg;
-		datalen = cur_seg->sector_num * 512;
+		datalen = (int64_t)cur_seg->sector_num * 512;
 		phy_offset = cur_seg->disk_start_sector * 512;
 
 		if (xstate->mem_output_size_max == 0 && xstate->dst_fd >= 0)
