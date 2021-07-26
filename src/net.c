@@ -363,7 +363,7 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 	short_name = (file != NULL) ? PathFindFileNameU(file) : PathFindFileNameU(url);
 
 	if (hProgressDialog != NULL) {
-		PrintInfo(0, MSG_085, short_name);
+		PrintInfo(5000, MSG_085, short_name);
 		uprintf("Downloading %s", url);
 	}
 
@@ -422,7 +422,7 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 			static_sprintf(msg, "(%s) %s", SizeToHumanReadable(total_size, FALSE, FALSE), GetShortName(url));
 		else
 			static_sprintf(msg, "%s (%s)", GetShortName(url), SizeToHumanReadable(total_size, FALSE, FALSE));
-		PrintStatus(0, MSG_085, msg);
+		PrintStatus(5000, MSG_085, msg);
 	}
 
 	if (file != NULL) {
