@@ -961,8 +961,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	}
 
 	// Ensure that we have sufficient space for the SBR
-	max_size = IsChecked(IDC_OLD_BIOS_FIXES) ?
-		(DWORD)(SelectedDrive.SectorsPerTrack * SelectedDrive.SectorSize) : 1 * MB;
+	max_size = (DWORD)SelectedDrive.PartitionOffset[0];
 	if (br_size + size > max_size) {
 		uprintf("  SBR size is too large - You may need to uncheck 'Add fixes for old BIOSes'.");
 		if (sub_type == BT_MAX)
@@ -1059,6 +1058,10 @@ BOOL WritePBR(HANDLE hLogicalVolume)
 		// Note: NTFS requires a full remount after writing the PBR. We dismount when we lock
 		// and also go through a forced remount, so that shouldn't be an issue.
 		// But with NTFS, if you don't remount, you don't boot!
+		return TRUE;
+	case FS_EXT2:
+	case FS_EXT3:
+	case FS_EXT4:
 		return TRUE;
 	default:
 		uprintf("Unsupported FS for FS BR processing - aborting\n");

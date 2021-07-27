@@ -188,13 +188,17 @@ static void SetAllowedFileSystems(void)
 			}
 		}
 		break;
+	case BT_GRUB2:
+		allowed_filesystem[FS_EXT2] = TRUE;
+		allowed_filesystem[FS_EXT3] = TRUE;
+		allowed_filesystem[FS_EXT4] = TRUE;
+		// Fall through
 	case BT_SYSLINUX_V6:
 	case BT_GRUB4DOS:
 		allowed_filesystem[FS_NTFS] = TRUE;
 		// Fall through
 	case BT_SYSLINUX_V4:
 	case BT_REACTOS:
-	case BT_GRUB2:
 		allowed_filesystem[FS_FAT16] = TRUE;
 		allowed_filesystem[FS_FAT32] = TRUE;
 		break;

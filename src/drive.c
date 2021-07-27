@@ -1698,8 +1698,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 					SelectedDrive.PartitionOffset[i] = DriveLayout->PartitionEntry[i].StartingOffset.QuadPart;
 					SelectedDrive.PartitionSize[i] = DriveLayout->PartitionEntry[i].PartitionLength.QuadPart;
 				}
-				// NB: MinGW's gcc 4.9.2 broke "%lld" printout on XP so we use the inttypes.h "PRI##" qualifiers
-				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Boot: %s",
+				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %lld, Boot: %s",
 					((part_type == 0x07 || super_floppy_disk) && (FileSystemName[0] != 0)) ?
 					FileSystemName : GetMBRPartitionType(part_type), super_floppy_disk ? 0: part_type,
 					SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
@@ -2041,6 +2040,9 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			ClusterSize = 0x200;
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart =
 			((bytes_per_track + (ClusterSize - 1)) / ClusterSize) * ClusterSize;
+		// GRUB2 no longer fits in the usual 31½ KB that the above computation provides
+		// so just unconditionally double that size and get on with it.
+		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart *= 2;
 	}
 
 	// Having the ESP up front may help (and is the Microsoft recommended way) but this
