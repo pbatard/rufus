@@ -129,7 +129,7 @@ int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection
 int default_fs, fs_type, boot_type, partition_type, target_type; // file system, boot type, partition type, target type
 int force_update = 0, default_thread_priority = THREAD_PRIORITY_ABOVE_NORMAL;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
-char app_data_dir[MAX_PATH];
+char app_data_dir[MAX_PATH], user_dir[MAX_PATH];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
@@ -987,11 +987,9 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 				log_size = GetDlgItemTextU(hDlg, IDC_LOG_EDIT, log_buffer, log_size);
 				if (log_size != 0) {
 					log_size--;	// remove NUL terminator
-					// TODO: Ideally we want to use user dir here
-					filepath =  FileDialog(TRUE, app_dir, &log_ext, 0);
-					if (filepath != NULL) {
+					filepath =  FileDialog(TRUE, user_dir, &log_ext, 0);
+					if (filepath != NULL)
 						FileIO(TRUE, filepath, &log_buffer, &log_size);
-					}
 					safe_free(filepath);
 				}
 				safe_free(log_buffer);
@@ -2155,8 +2153,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	RECT rc, DialogRect, DesktopRect;
 	HDC hDC;
 	PAINTSTRUCT ps;
+	DWORD log_size;
 	int nDeviceIndex, i, nWidth, nHeight, nb_devices, selected_language, offset, tb_state, tb_flags;
-	char tmp[128];
+	char tmp[MAX_PATH], *log_buffer = NULL;
 	wchar_t* wbuffer = NULL;
 	loc_cmd* lcmd = NULL;
 	wchar_t wtooltip[128];
@@ -2219,6 +2218,18 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
 				return (INT_PTR)TRUE;
 			}
+
+			// Save the current log to %LocalAppData%\Rufus\rufus.log
+			log_size = GetWindowTextLengthU(hLog);
+			if ((log_size > 0) && ((log_buffer = (char*)malloc(log_size)) != NULL)) {
+				log_size = GetDlgItemTextU(hLogDialog, IDC_LOG_EDIT, log_buffer, log_size);
+				if (log_size-- > 1) {
+					static_sprintf(tmp, "%s\\%s\\rufus.log", app_data_dir, FILES_DIR);
+					FileIO(TRUE, tmp, &log_buffer, &log_size);
+				}
+				safe_free(log_buffer);
+			}
+
 			if (ulRegister != 0)
 				SHChangeNotifyDeregister(ulRegister);
 			PostQuitMessage(0);
@@ -2837,9 +2848,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_CLIENTSHUTDOWN:
 	case WM_QUERYENDSESSION:
 	case WM_ENDSESSION:
-		if (op_in_progress) {
+		if (op_in_progress)
 			return (INT_PTR)TRUE;
-		}
 		if (message == WM_CLOSE) {
 			// We must use PostQuitMessage() on WM_CLOSE, to prevent notification sound...
 			PostQuitMessage(0);
@@ -3208,6 +3218,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (!SHGetSpecialFolderPathU(NULL, app_data_dir, CSIDL_LOCAL_APPDATA, FALSE)) {
 		uprintf("Could not get app data directory: %s", WindowsErrorString());
 		static_strcpy(app_data_dir, temp_dir);
+	}
+	if (!SHGetSpecialFolderPathU(NULL, user_dir, CSIDL_PROFILE, FALSE)) {
+		uprintf("Could not get user directory: %s", WindowsErrorString());
+		static_strcpy(user_dir, temp_dir);
 	}
 	// Construct Sysnative ourselves as there is no GetSysnativeDirectory() call
 	// By default (64bit app running on 64 bit OS or 32 bit app running on 32 bit OS)
