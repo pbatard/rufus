@@ -1,7 +1,8 @@
 Rufus: The Reliable USB Formatting Utility
 ==========================================
 
-[![Build status](https://img.shields.io/appveyor/ci/pbatard/rufus.svg?style=flat-square)](https://ci.appveyor.com/project/pbatard/rufus)
+[![Build status](https://img.shields.io/github/workflow/status/pbatard/rufus/VS2019.svg?style=flat-square&label=VS2019)](https://github.com/pbatard/rufus/actions/workflows/vs2019.yml)
+[![Build status](https://img.shields.io/github/workflow/status/pbatard/rufus/MinGW.svg?style=flat-square&label=MinGW)](https://github.com/pbatard/rufus/actions/workflows/mingw.yml)
 [![Coverity Scan Build Status](https://img.shields.io/coverity/scan/2172.svg?style=flat-square)](https://scan.coverity.com/projects/pbatard-rufus)
 [![Build contributors](https://img.shields.io/github/contributors/pbatard/rufus.svg?style=flat-square)](https://github.com/pbatard/rufus/graphs/contributors)
 [![Github stats](https://img.shields.io/github/downloads/pbatard/rufus/total.svg?label=downloads%20%28since%202019%29&style=flat-square)](https://github.com/pbatard/rufus/releases)

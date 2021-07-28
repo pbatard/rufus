@@ -1,0 +1,72 @@
+name: MinGW
+
+on: 
+  push:
+    paths-ignore:
+      - '.gitignore'
+      - '.gitattributes'
+      - 'res/**'
+      - '**.cmd'
+      - '**.md'
+      - '**.rc'
+      - '**.sh'
+      - '**.txt'
+      - '**.xml'
+  pull_request:
+    paths-ignore:
+      - '.gitignore'
+      - '.gitattributes'
+      - 'res/**'
+      - '**.cmd'
+      - '**.md'
+      - '**.rc'
+      - '**.sh'
+      - '**.txt'
+      - '**.xml'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        include:
+          - { sys: mingw64, env: x86_64 }
+          - { sys: mingw32, env: i686 }
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - name: Install MinGW
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{matrix.sys}}
+        update: true
+        install: >-
+          mingw-w64-${{matrix.env}}-toolchain
+          base-devel
+          git
+          upx
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Build
+      run: |
+        ./configure --disable-debug
+        make -j4
+        mv src/rufus.exe .
+        strip rufus.exe
+        upx --lzma --best rufus.exe
+
+    - name: Upload artifacts
+      if: ${{ matrix.env == 'i686' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: MinGW
+        path: ./*.exe

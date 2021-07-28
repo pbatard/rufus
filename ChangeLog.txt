@@ -1,6 +1,6 @@
 o Version 3.15 (2021.08.??)
     Update GRUB to version 2.06
-    Add support for .vtsi files (Ventoy Sparse Image)
+    Add support for .vtsi files (Ventoy Sparse Image, courtesy of longpanda/ventoy)
     Move default app directory to %LocalAppData%\Rufus\ and always save a log there on exit
     Fix AppStore version of Rufus not being able to store downloaded files
     Fix failure to open Syslinux/GRUB files when Rufus is located at the root of a drive

@@ -1,5 +1,5 @@
 # Configuration for https://github.com/dessant/lock-threads
-name: 'Lock Threads'
+name: '[cron] Lock stale issues'
 
 on:
   schedule:
