@@ -60,12 +60,21 @@ jobs:
       run: |
         ./configure --disable-debug
         make -j4
-        mv src/rufus.exe .
-        strip rufus.exe
-        upx --lzma --best rufus.exe
+        mv ./src/rufus.exe .
+        strip ./rufus.exe
+        upx --lzma --best ./rufus.exe
+
+    - name: Display SHA-256
+      run: sha256sum ./rufus.exe
+
+    - name: Upload to VirusTotal
+      if: ${{ matrix.env == 'i686' && github.event_name == 'push' }}
+      run: |
+        curl --request POST --url https://www.virustotal.com/vtapi/v2/file/scan --form apikey=${{secrets.VIRUSTOTAL_API_KEY}} --form file=@./rufus.exe
+        curl --request POST --url https://www.virustotal.com/api/v3/monitor/items --header 'x-apikey: ${{secrets.VIRUSTOTAL_API_KEY}}' --form path='/rufus.exe' --form file=@./rufus.exe
 
     - name: Upload artifacts
-      if: ${{ matrix.env == 'i686' }}
+      if: ${{ matrix.env == 'i686' && github.event_name == 'push' }}
       uses: actions/upload-artifact@v2
       with:
         name: MinGW
