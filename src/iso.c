@@ -353,7 +353,11 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 			if (props->is_grub_cfg) {
 				// Older versions of GRUB EFI used "linuxefi", newer just use "linux"
 				if ((replace_in_token_data(src, "linux", iso_label, usb_label, TRUE) != NULL) ||
-					(replace_in_token_data(src, "linuxefi", iso_label, usb_label, TRUE) != NULL)) {
+					(replace_in_token_data(src, "linuxefi", iso_label, usb_label, TRUE) != NULL) ||
+					// In their great wisdom, the openSUSE maintainers added a 'set linux=linux'
+					// line to their grub.cfg, which means that their kernel option token is no
+					// longer 'linux' but '$linux'... and we have to add a workaround for that.
+					(replace_in_token_data(src, "$linux", iso_label, usb_label, TRUE) != NULL)) {
 					uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
 					modified = TRUE;
 				}
