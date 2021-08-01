@@ -52,9 +52,6 @@
 #include "../res/grub/grub_version.h"
 #include "../res/grub2/grub2_version.h"
 
-#define rufus    0
-#define appstore 1
-
 enum bootcheck_return {
 	BOOTCHECK_PROCEED = 0,
 	BOOTCHECK_CANCEL = -1,
@@ -138,7 +135,6 @@ char *archive_path = NULL, image_option_txt[128], *fido_url = NULL;
 StrArray DriveId, DriveName, DriveLabel, DriveHub, BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
-const char* appstore_chunk[2] = { "\\WindowsApps\\19453.net.Rufus", "y8nh7bq2a8dtt\\rufus" };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
 
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
@@ -3238,13 +3234,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 #endif
 
-#if (SOLUTION == appstore)
-	appstore_version = TRUE;
-	for (i = 0; i < ARRAYSIZE(appstore_chunk); i++)
-		if (strstr(app_dir, appstore_chunk[0]) == NULL)
-			goto out;
-	goto skip_args_processing;
-#endif
+	// Look for a rufus.app file in the current app directory
+	// Since Microsoft makes it downright impossible to pass an arg in the app manifest
+	// and the automated VS2019 package building process doesn't like renaming the .exe
+	// right under its nose (else we would use the same trick as for portable vs regular)
+	// we use yet another workaround to detect if we are running the AppStore version...
+	static_sprintf(ini_path, "%s\\rufus.app", app_dir);
+	if (PathFileExistsU(ini_path)) {
+		appstore_version = TRUE;
+		goto skip_args_processing;
+	}
 
 	// We have to process the arguments before we acquire the lock and process the locale
 	PF_INIT(__wgetmainargs, Msvcrt);
