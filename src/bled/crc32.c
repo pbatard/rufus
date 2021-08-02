@@ -119,7 +119,7 @@ uint32_t* crc32_filltable(uint32_t *crc_table, int endian)
 {
 	/* Expects the caller to do the cleanup */
 	if (!crc_table)
-		crc_table = malloc((1 << CRC_LE_BITS) * sizeof(uint32_t));
+		crc_table = calloc(1 << CRC_LE_BITS, sizeof(uint32_t));
 	if (crc_table) {
 		if (endian)
 			crc32init_be(crc_table);

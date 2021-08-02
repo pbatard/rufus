@@ -1526,9 +1526,11 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 				written = 0;
 				s = libfat_clustertosector(lf_fs, dirpos.cluster);
 				while ((s != 0) && (s < 0xFFFFFFFFULL) && (written < diritem.size)) {
+					buf = libfat_get_sector(lf_fs, s);
+					if (buf == NULL)
+						FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_SECTOR_NOT_FOUND;
 					if (FormatStatus)
 						goto out;
-					buf = libfat_get_sector(lf_fs, s);
 					size = MIN(LIBFAT_SECTOR_SIZE, diritem.size - written);
 					if (!WriteFileWithRetry(handle, buf, size, &size, WRITE_RETRIES) ||
 						(size != MIN(LIBFAT_SECTOR_SIZE, diritem.size - written))) {

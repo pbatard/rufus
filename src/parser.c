@@ -283,6 +283,7 @@ BOOL get_supported_locales(const char* filename)
 		if ((line[i] != 'l') && (line[i] != 'v') && (line[i] != 'a'))
 			continue;
 		// line[i] is not NUL so i+1 is safe to access
+		// coverity[tainted_data]
 		lcmd = get_loc_cmd(line[i], &line[i+1]);
 		if ((lcmd == NULL) || ((lcmd->command != LC_LOCALE) && (lcmd->command != LC_VERSION) && (lcmd->command != LC_ATTRIBUTES))) {
 			free_loc_cmd(lcmd);
@@ -446,6 +447,7 @@ BOOL get_loc_data_file(const char* filename, loc_cmd* lcmd)
 			buf[i] = 0;
 			if (!eol)
 				loc_line_nr += line_nr_incr;
+			// coverity[tainted_data]
 			get_loc_data_line(buf);
 			break;
 		case '\r':
