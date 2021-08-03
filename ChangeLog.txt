@@ -1,4 +1,4 @@
-o Version 3.15 (2021.08.??)
+o Version 3.15 (2021.08.03)
     Update GRUB to version 2.06
     Add support for .vtsi files (Ventoy Sparse Image, courtesy of longpanda/ventoy)
     Add workaround for openSUSE Live ISOs

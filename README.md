@@ -23,8 +23,8 @@ Features
 * Create bootable drives from bootable disk images, including compressed ones
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
 * Create persistent Linux partitions
-* Download official Microsoft Windows 8 or Windows 10 retail ISOs
-* Compute MD5, SHA-1 and SHA-256 checksums of the selected image
+* Download official Microsoft Windows 7, Windows 8 or Windows 10 retail ISOs
+* Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image
 * Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO → USB creation <sup>(1)</sup>
 * Perform bad blocks checks, including detection of "fake" flash drives
 * Modern and familiar UI, with [38 languages natively supported](https://github.com/pbatard/rufus/wiki/FAQ#What_languages_are_natively_supported_by_Rufus)
@@ -35,10 +35,10 @@ Features
 Compilation
 -----------
 
-Use either Visual Studio 2019 (version 16.0 or later with SDK 10.0.18362 installed) or MinGW and
-then invoke the `.sln` or `configure`/`make` respectively.
+Use either Visual Studio 2019 or MinGW and then invoke the `.sln` or `configure`/`make` respectively.
 
 #### Visual Studio
+
 Rufus is an OSI compliant Open Source project. You are entitled to
 download and use the *freely available* [Visual Studio Community Edition](https://www.visualstudio.com/vs/community/)
 to build, run or develop for Rufus. As per the Visual Studio Community Edition license,
