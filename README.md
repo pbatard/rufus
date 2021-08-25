@@ -24,6 +24,7 @@ Features
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
 * Create persistent Linux partitions
 * Download official Microsoft Windows 7, Windows 8 or Windows 10 retail ISOs
+* Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs
 * Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image
 * Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO → USB creation <sup>(1)</sup>
 * Perform bad blocks checks, including detection of "fake" flash drives
