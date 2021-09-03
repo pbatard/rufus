@@ -28,7 +28,7 @@ env:
   SOLUTION_FILE_PATH: ./rufus.sln
 
 jobs:
-  build:
+  VS2019-Build:
     runs-on: windows-latest
 
     strategy:

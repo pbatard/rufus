@@ -25,7 +25,7 @@ on:
       - '**.xml'
 
 jobs:
-  build:
+  MinGW-Build:
     runs-on: windows-latest
 
     strategy:

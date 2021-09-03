@@ -18,7 +18,7 @@ env:
   EMAIL: pete@akeo.ie
 
 jobs:
-  build:
+  Coverity-Build:
     runs-on: windows-latest
 
     steps:
