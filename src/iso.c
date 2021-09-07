@@ -177,6 +177,12 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		}
 	}
 
+	// Check for archiso loader/entries/*.conf files
+	if (safe_stricmp(psz_dirname, "/loader/entries") == 0) {
+		size_t len = strlen(psz_basename);
+		props->is_conf = ((len > 4) && (stricmp(&psz_basename[len - 5], ".conf") == 0));
+	}
+
 	// Check for an old incompatible c32 file anywhere
 	for (i = 0; i < NB_OLD_C32; i++) {
 		if ((safe_stricmp(psz_basename, old_c32_name[i]) == 0) && (file_length <= old_c32_threshold[i]))
@@ -571,7 +577,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			// The drawback however is with cancellation. With a large file, CloseHandle()
 			// may take forever to complete and is not interruptible. We try to detect this.
 			ISO_BLOCKING(safe_closehandle(file_handle));
-			if (props.is_cfg)
+			if (props.is_cfg || props.is_conf)
 				fix_config(psz_sanpath, psz_path, psz_basename, &props);
 			safe_free(psz_sanpath);
 		}
@@ -797,7 +803,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					uprintf("  Could not set timestamp: %s", WindowsErrorString());
 			}
 			ISO_BLOCKING(safe_closehandle(file_handle));
-			if (props.is_cfg)
+			if (props.is_cfg || props.is_conf)
 				fix_config(psz_sanpath, psz_path, psz_basename, &props);
 			safe_free(psz_sanpath);
 		}
