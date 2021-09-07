@@ -26,6 +26,7 @@ on:
 
 env:
   SOLUTION_FILE_PATH: ./rufus.sln
+  BUILD_CONFIGURATION: Release
 
 jobs:
   VS2019-Build:
@@ -47,17 +48,17 @@ jobs:
 
     - name: Build
       run: |
-        msbuild ${{env.SOLUTION_FILE_PATH}} /m /p:Configuration=Release,Platform=${{matrix.TARGET_PLATFORM}}
-        move ./${{matrix.TARGET_PLATFORM}}/Release/rufus.exe ./rufus_${{matrix.TARGET_PLATFORM}}.exe
+        msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ matrix.TARGET_PLATFORM }}
+        move ./${{ matrix.TARGET_PLATFORM }}/Release/rufus.exe ./rufus_${{ matrix.TARGET_PLATFORM }}.exe
 
     - name: Display SHA-256
-      run: sha256sum ./rufus_${{matrix.TARGET_PLATFORM}}.exe
+      run: sha256sum ./rufus_${{ matrix.TARGET_PLATFORM }}.exe
 
     - name: Upload to VirusTotal
       if: ${{ github.event_name == 'push' }}
       run: |
-        curl --request POST --url https://www.virustotal.com/vtapi/v2/file/scan --form apikey=${{secrets.VIRUSTOTAL_API_KEY}} --form file=@./rufus_${{matrix.TARGET_PLATFORM}}.exe
-        curl --request POST --url https://www.virustotal.com/api/v3/monitor/items --header 'x-apikey: ${{secrets.VIRUSTOTAL_API_KEY}}' --form path='/rufus_${{matrix.TARGET_PLATFORM}}.exe' --form file=@./rufus_${{matrix.TARGET_PLATFORM}}.exe
+        curl --request POST --url https://www.virustotal.com/vtapi/v2/file/scan --form apikey=${{ secrets.VIRUSTOTAL_API_KEY }} --form file=@./rufus_${{ matrix.TARGET_PLATFORM }}.exe
+        curl --request POST --url https://www.virustotal.com/api/v3/monitor/items --header 'x-apikey: ${{ secrets.VIRUSTOTAL_API_KEY }}' --form path='/rufus_${{ matrix.TARGET_PLATFORM }}.exe' --form file=@./rufus_${{ matrix.TARGET_PLATFORM }}.exe
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
