@@ -16,7 +16,7 @@ on:
 env:
   SOLUTION_FILE_PATH: ./rufus.sln
   EMAIL: pete@akeo.ie
-  BUILD_CONFIGURATION: Debug
+  BUILD_CONFIGURATION: Release
   TARGET_PLATFORM: x64
   COVERITY_PROJECT_NAME: pbatard%2Frufus
 

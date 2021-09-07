@@ -95,6 +95,9 @@ timegm(struct tm *tm)
 static struct tm *
 gmtime_r(const time_t *timer, struct tm *result)
 {
+#ifdef WIN32
+    return (gmtime_s(result, timer) == 0) ? result : NULL;
+#else
     struct tm *tmp = gmtime(timer);
 
     if (tmp) {
@@ -102,6 +105,7 @@ gmtime_r(const time_t *timer, struct tm *result)
         return result;
     }
     return tmp;
+#endif
 }
 #endif
 
@@ -109,6 +113,9 @@ gmtime_r(const time_t *timer, struct tm *result)
 static struct tm *
 localtime_r(const time_t *timer, struct tm *result)
 {
+#ifdef WIN32
+    return (localtime_s(result, timer) == 0) ? result : NULL;
+#else
     struct tm *tmp = localtime(timer);
 
     if (tmp) {
@@ -116,6 +123,7 @@ localtime_r(const time_t *timer, struct tm *result)
         return result;
     }
     return tmp;
+#endif
 }
 #endif
 

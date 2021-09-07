@@ -946,7 +946,7 @@ errcode_t ext2fs_count_used_clusters(ext2_filsys fs, blk64_t start,
 {
 	blk64_t		next;
 	blk64_t		tot_set = 0;
-	errcode_t	retval;
+	errcode_t	retval = 0;
 
 	while (start < end) {
 		retval = ext2fs_find_first_set_block_bitmap2(fs->block_map,

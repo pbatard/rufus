@@ -139,7 +139,7 @@ static DWORD GetFATSizeSectors(DWORD DskSize, DWORD ReservedSecCnt, DWORD SecPer
 	ULONGLONG FatSz;
 
 	Numerator = DskSize - ReservedSecCnt + ReservedClusCnt * SecPerClus;
-	Denominator = SecPerClus * BytesPerSect / FatElementSize + NumFATs;
+	Denominator = (ULONGLONG)SecPerClus * BytesPerSect / FatElementSize + NumFATs;
 	FatSz = Numerator / Denominator + 1;	// +1 to ensure we are rounded up
 
 	return (DWORD)FatSz;

@@ -130,7 +130,7 @@ errcode_t io_channel_alloc_buf(io_channel io, int count, void *ptr)
 	if (count == 0)
 		size = io->block_size;
 	else if (count > 0)
-		size = io->block_size * count;
+		size = (size_t)io->block_size * count;
 	else
 		size = -count;
 

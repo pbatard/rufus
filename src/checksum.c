@@ -1351,7 +1351,7 @@ int TestChecksum(void)
 	int i, j, errors = 0;
 	uint8_t sum[MAX_HASHSIZE], *sum_expected;
 	size_t full_msg_len = strlen(test_msg);
-	char* msg = malloc(full_msg_len);
+	char* msg = malloc(full_msg_len + 1);
 	if (msg == NULL)
 		return -1;
 
@@ -1364,7 +1364,7 @@ int TestChecksum(void)
 		copy_msg_len[2] = blocksize[j] - (blocksize[j] >> 3);
 		copy_msg_len[3] = full_msg_len;
 		for (i = 0; i < 4; i++) {
-			memset(msg, 0, full_msg_len);
+			memset(msg, 0, full_msg_len + 1);
 			if (i != 0)
 				memcpy(msg, test_msg, copy_msg_len[i]);
 			HashBuffer(j, msg, copy_msg_len[i], sum);

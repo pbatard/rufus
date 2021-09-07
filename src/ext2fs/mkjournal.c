@@ -185,12 +185,12 @@ errcode_t ext2fs_zero_blocks2(ext2_filsys fs, blk64_t blk, int num,
 
 		if (new_stride > MAX_STRIDE_LENGTH)
 			new_stride = MAX_STRIDE_LENGTH;
-		p = realloc(buf, fs->blocksize * new_stride);
+		p = realloc(buf, (size_t)fs->blocksize * new_stride);
 		if (!p)
 			return EXT2_ET_NO_MEMORY;
 		buf = p;
 		stride_length = new_stride;
-		memset(buf, 0, fs->blocksize * stride_length);
+		memset(buf, 0, (size_t)fs->blocksize * stride_length);
 	}
 	/* OK, do the write loop */
 	j=0;

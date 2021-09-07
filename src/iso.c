@@ -179,7 +179,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 
 	// Check for archiso loader/entries/*.conf files
 	if (safe_stricmp(psz_dirname, "/loader/entries") == 0) {
-		size_t len = strlen(psz_basename);
+		len = strlen(psz_basename);
 		props->is_conf = ((len > 4) && (stricmp(&psz_basename[len - 5], ".conf") == 0));
 	}
 

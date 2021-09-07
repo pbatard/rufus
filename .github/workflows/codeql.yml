@@ -28,7 +28,7 @@ on:
 
 env:
   SOLUTION_FILE_PATH: ./rufus.sln
-  BUILD_CONFIGURATION: Debug
+  BUILD_CONFIGURATION: Release
   TARGET_PLATFORM: x64
 
 jobs:
