@@ -450,7 +450,7 @@ BOOL GetDevices(DWORD devnum)
 		// Also  http://www.carrona.org/dvrref.php. NB: All members from this list should have
 		// been reported as enumerators by Rufus, when Enum Debug is enabled.
 		"SD", "PCISTOR", "RTSOR", "JMCR", "JMCF", "RIMMPTSK", "RIMSPTSK", "RISD", "RIXDPTSK",
-		"TI21SONY", "ESD7SK", "ESM7SK", "O2MD", "O2SD", "VIACR"
+		"TI21SONY", "ESD7SK", "ESM7SK", "O2MD", "O2SD", "VIACR", "GLREADER"
 	};
 	// Oh, and we also have card devices (e.g. 'SCSI\DiskO2Micro_SD_...') under the SCSI enumerator...
 	const char* scsi_disk_prefix = "SCSI\\Disk";
@@ -636,7 +636,7 @@ BOOL GetDevices(DWORD devnum)
 
 		uuprintf("Processing '%s' device:", buffer);
 		if ((!props.is_USB) && (!props.is_SCSI)) {
-			uuprintf("  Disabled by policy");
+			uuprintf("  Unsupported or disabled by policy");
 			continue;
 		}
 
@@ -887,6 +887,11 @@ BOOL GetDevices(DWORD devnum)
 					if (!list_non_usb_removable_drives)
 						uprintf("If this device is not a Hard Drive, please e-mail the author of this application");
 					uprintf("NOTE: You can enable the listing of Hard Drives under 'advanced drive properties'");
+					safe_free(devint_detail_data);
+					break;
+				} else if ((!enable_HDDs) && (props.is_CARD) && (GetDriveSize(drive_index) > MAX_DEFAULT_LIST_CARD_SIZE * GB)) {
+					uprintf("Device eliminated because it was detected as a card larger than %d GB", MAX_DEFAULT_LIST_CARD_SIZE);
+					uprintf("To use such a card, check 'List USB Hard Drives' under 'advanced drive properties'");
 					safe_free(devint_detail_data);
 					break;
 				}
