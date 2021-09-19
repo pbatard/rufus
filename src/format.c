@@ -739,10 +739,12 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 		goto out;
 	CHECK_FOR_USER_CANCEL;
 	liFilePointer.QuadPart = DiskSize - (LONGLONG)SectorSize * MAX_SECTORS_TO_CLEAR;
-	SetFilePointerEx(hPhysicalDrive, liFilePointer, &liFilePointer, FILE_BEGIN);
 	// Windows seems to be an ass about keeping a lock on a backup GPT,
 	// so we try to be lenient about not being able to clear it.
-	WriteFileWithRetry(hPhysicalDrive, pZeroBuf, SectorSize * MAX_SECTORS_TO_CLEAR, NULL, WRITE_RETRIES);
+	if (SetFilePointerEx(hPhysicalDrive, liFilePointer, &liFilePointer, FILE_BEGIN)) {
+		IGNORE_RETVAL(WriteFileWithRetry(hPhysicalDrive, pZeroBuf,
+			SectorSize * MAX_SECTORS_TO_CLEAR, NULL, WRITE_RETRIES));
+	}
 	r = TRUE;
 
 out:

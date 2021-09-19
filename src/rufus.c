@@ -72,6 +72,7 @@ static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
 static BOOL dont_display_image_name = FALSE;
 static BOOL user_changed_label = FALSE;
+static BOOL user_deleted_rufus_dir = FALSE;
 static BOOL app_changed_label = FALSE;
 static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
@@ -2217,11 +2218,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 			// Save the current log to %LocalAppData%\Rufus\rufus.log
 			log_size = GetWindowTextLengthU(hLog);
-			if ((log_size > 0) && ((log_buffer = (char*)malloc(log_size)) != NULL)) {
+			if ((!user_deleted_rufus_dir) && (log_size > 0) && ((log_buffer = (char*)malloc(log_size)) != NULL)) {
 				log_size = GetDlgItemTextU(hLogDialog, IDC_LOG_EDIT, log_buffer, log_size);
 				if (log_size-- > 1) {
-					static_sprintf(tmp, "%s\\%s\\rufus.log", app_data_dir, FILES_DIR);
-					FileIO(TRUE, tmp, &log_buffer, &log_size);
+					IGNORE_RETVAL(_chdirU(app_data_dir));
+					IGNORE_RETVAL(_mkdir(FILES_DIR));
+					IGNORE_RETVAL(_chdir(FILES_DIR));
+					FileIO(TRUE, "rufus.log", &log_buffer, &log_size);
 				}
 				safe_free(log_buffer);
 			}
@@ -3669,11 +3672,12 @@ relaunch:
 					CyclePort(index);
 				continue;
 			}
-			// Alt-D => Delete the 'rufus_files' subdirectory
+			// Alt-D => Delete the subdirectory where Rufus keeps its files
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
 				static_sprintf(tmp_path, "%s\\%s", app_data_dir, FILES_DIR);
-				PrintStatus(STATUS_MSG_TIMEOUT, MSG_264, tmp_path);
+				PrintStatusDebug(STATUS_MSG_TIMEOUT, MSG_264, tmp_path);
 				SHDeleteDirectoryExU(NULL, tmp_path, FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION);
+				user_deleted_rufus_dir = TRUE;
 				continue;
 			}
 			// Alt-E => Enhanced installation mode (allow dual UEFI/BIOS mode and FAT32 for Windows)

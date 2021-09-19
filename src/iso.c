@@ -894,7 +894,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	p_udf = udf_open(src_iso);
 	if (p_udf == NULL)
 		goto try_iso;
-	uprintf("%sImage is an UDF image", spacing);
+	uprintf("%sImage is a UDF image", spacing);
 
 	p_udf_root = udf_get_root(p_udf, true, 0);
 	if (p_udf_root == NULL) {
