@@ -710,19 +710,16 @@ out:
 static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSize, BOOL add1MB)
 {
 	BOOL r = FALSE;
-	uint64_t i, last_sector = DiskSize/SectorSize, num_sectors_to_clear;
-	unsigned char* pBuf = (unsigned char*) calloc(SectorSize, 1);
+	LARGE_INTEGER liFilePointer;
+	uint64_t num_sectors_to_clear;
+	unsigned char* pZeroBuf = NULL;
 
 	PrintInfoDebug(0, MSG_224);
-	if (pBuf == NULL) {
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY;
-		goto out;
-	}
 	// http://en.wikipedia.org/wiki/GUID_Partition_Table tells us we should clear 34 sectors at the
 	// beginning and 33 at the end. We bump these values to MAX_SECTORS_TO_CLEAR each end to help
 	// with reluctant access to large drive.
 
-	// We try to clear at least 1MB + the PBR when Large FAT32 is selected (add1MB), but
+	// We try to clear at least 1MB + the VBR when Large FAT32 is selected (add1MB), but
 	// don't do it otherwise, as it seems unnecessary and may take time for slow drives.
 	// Also, for various reasons (one of which being that Windows seems to have issues
 	// with GPT drives that contain a lot of small partitions) we try not not to clear
@@ -733,22 +730,23 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 		num_sectors_to_clear = (DWORD)((add1MB ? 2048 : 0) + MAX_SECTORS_TO_CLEAR);
 
 	uprintf("Erasing %d sectors", num_sectors_to_clear);
-	for (i = 0; i < num_sectors_to_clear; i++) {
-		CHECK_FOR_USER_CANCEL;
-		if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)
-			goto out;
+	pZeroBuf = calloc(SectorSize, num_sectors_to_clear);
+	if (pZeroBuf == NULL) {
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
+		goto out;
 	}
-	for (i = last_sector - MAX_SECTORS_TO_CLEAR; i < last_sector; i++) {
-		CHECK_FOR_USER_CANCEL;
-		// Windows seems to be an ass about keeping a lock on a backup GPT,
-		// so we try to be lenient about not being able to clear it.
-		if (write_sectors(hPhysicalDrive, SectorSize, i, 1, pBuf) != SectorSize)
-			break;
-	}
+	if (!WriteFileWithRetry(hPhysicalDrive, pZeroBuf, (DWORD)(SectorSize * num_sectors_to_clear), NULL, WRITE_RETRIES))
+		goto out;
+	CHECK_FOR_USER_CANCEL;
+	liFilePointer.QuadPart = DiskSize - (LONGLONG)SectorSize * MAX_SECTORS_TO_CLEAR;
+	SetFilePointerEx(hPhysicalDrive, liFilePointer, &liFilePointer, FILE_BEGIN);
+	// Windows seems to be an ass about keeping a lock on a backup GPT,
+	// so we try to be lenient about not being able to clear it.
+	WriteFileWithRetry(hPhysicalDrive, pZeroBuf, SectorSize * MAX_SECTORS_TO_CLEAR, NULL, WRITE_RETRIES);
 	r = TRUE;
 
 out:
-	safe_free(pBuf);
+	safe_free(pZeroBuf);
 	return r;
 }
 

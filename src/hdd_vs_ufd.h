@@ -91,7 +91,6 @@ static str_score_t str_adjust[] = {
 	{ "Gadget", -10 },
 	{ "Flash", -10 },
 	{ "HDD", +20 },
-	{ "SDXC", +10 },
 	{ "SSD", +20 }
 };
 

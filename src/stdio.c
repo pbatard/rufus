@@ -855,6 +855,10 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 	DWORD nTry;
 	BOOL readFilePointer;
 	LARGE_INTEGER liFilePointer, liZero = { { 0,0 } };
+	DWORD NumberOfBytesWritten;
+
+	if (lpNumberOfBytesWritten == NULL)
+		lpNumberOfBytesWritten = &NumberOfBytesWritten;
 
 	// Need to get the current file pointer in case we need to retry
 	readFilePointer = SetFilePointerEx(hFile, liZero, &liFilePointer, FILE_CURRENT);
