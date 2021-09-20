@@ -1187,8 +1187,10 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 
 		// Skip whitespaces after token (while making sure there's at least one)
 		ns = wcsspn(&buf[i], wspace);
-		if (ns == 0)
+		if (ns == 0) {
+			fputws(buf, fd_out);
 			continue;
+		}
 		i += ns;
 
 		// p[x] = starting position of the fragment with the replaceable string
