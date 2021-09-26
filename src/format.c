@@ -730,7 +730,7 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 		num_sectors_to_clear = (DWORD)((add1MB ? 2048 : 0) + MAX_SECTORS_TO_CLEAR);
 
 	uprintf("Erasing %d sectors", num_sectors_to_clear);
-	pZeroBuf = calloc(SectorSize, num_sectors_to_clear);
+	pZeroBuf = calloc(SectorSize, (size_t)num_sectors_to_clear);
 	if (pZeroBuf == NULL) {
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
 		goto out;
