@@ -47,10 +47,22 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
 
+    - name: Set ALPHA
+      id: set_alpha
+      if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      run: echo "::set-output name=option::/DALPHA"
+
+    - name: Set BETA
+      id: set_beta
+      if: ${{ startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'BETA') }}
+      run: echo "::set-output name=option::/DBETA"
+
     - name: Build
+      shell: cmd
       run: |
+        set ExternalCompilerOptions=${{ steps.set_alpha.outputs.option }} ${{ steps.set_beta.outputs.option }}
         msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ matrix.TARGET_PLATFORM }}
-        move ./${{ matrix.TARGET_PLATFORM }}/Release/rufus.exe ./rufus_${{ matrix.TARGET_PLATFORM }}.exe
+        move .\${{ matrix.TARGET_PLATFORM }}\Release\rufus.exe .\rufus_${{ matrix.TARGET_PLATFORM }}.exe
 
     - name: Display SHA-256
       run: sha256sum ./rufus_${{ matrix.TARGET_PLATFORM }}.exe
