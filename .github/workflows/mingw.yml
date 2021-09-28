@@ -13,6 +13,7 @@ on:
       - '**.txt'
       - '**.xml'
   pull_request:
+    branches: [master]
     paths-ignore:
       - '.gitignore'
       - '.gitattributes'
@@ -56,9 +57,19 @@ jobs:
         fetch-depth: 0
         submodules: recursive
 
+    - name: Set ALPHA
+      id: set_alpha
+      if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      run: echo "::set-output name=option::--enable-alpha"
+
+    - name: Set BETA
+      id: set_beta
+      if: ${{ startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'BETA') }}
+      run: echo "::set-output name=option::--enable-beta"
+
     - name: Build
       run: |
-        ./configure --disable-debug
+        ./configure --disable-debug ${{ steps.set_alpha.outputs.option }} ${{ steps.set_beta.outputs.option }}
         make -j4
         mv ./src/rufus.exe .
         strip ./rufus.exe
