@@ -1807,6 +1807,10 @@ DWORD WINAPI FormatThread(void* param)
 	// too well with Windows. Same with ESPs. Relaxing our locking rules seems to help...
 	if ((extra_partitions & (XP_ESP | XP_CASPER)) || (fs_type >= FS_EXT2))
 		actual_lock_drive = FALSE;
+	// Windows 11 is a lot more proactive in locking ESPs and MSRs than previous versions
+	// were, meaning that we also can't lock the drive without incurring errors...
+	if ((nWindowsVersion >= WINDOWS_11) && extra_partitions)
+		actual_lock_drive = FALSE;
 
 	PrintInfoDebug(0, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, actual_lock_drive, FALSE, !actual_lock_drive);
@@ -1841,6 +1845,8 @@ DWORD WINAPI FormatThread(void* param)
 		// If we couldn't delete partitions, Windows give us trouble unless we
 		// request access to the logical drive. Don't ask me why!
 		need_logical = TRUE;
+		// Also, since we couldn't clean the disk, we need to disable drive locking
+		actual_lock_drive = FALSE;
 	}
 
 	// An extra refresh of the (now empty) partition data here appears to be helpful
