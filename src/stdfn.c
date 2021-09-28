@@ -310,7 +310,9 @@ static const char* GetEdition(DWORD ProductType)
 	}
 }
 
-// From smartmontools os_win32.cpp
+/*
+ * Modified from smartmontools' os_win32.cpp
+ */
 void GetWindowsVersion(void)
 {
 	OSVERSIONINFOEXA vi, vi2;
@@ -371,27 +373,32 @@ void GetWindowsVersion(void)
 			ws = (vi.wProductType <= VER_NT_WORKSTATION);
 			nWindowsVersion = vi.dwMajorVersion << 4 | vi.dwMinorVersion;
 			switch (nWindowsVersion) {
-			case 0x51: w = "XP";
+			case WINDOWS_XP: w = "XP";
 				break;
-			case 0x52: w = (!GetSystemMetrics(89)?"Server 2003":"Server 2003_R2");
+			case WINDOWS_2003: w = (ws ? "XP_64" : (!GetSystemMetrics(89) ? "Server 2003" : "Server 2003_R2"));
 				break;
-			case 0x60: w = (ws?"Vista":"Server 2008");
+			case WINDOWS_VISTA: w = (ws ? "Vista" : "Server 2008");
 				break;
-			case 0x61: w = (ws?"7":"Server 2008_R2");
+			case WINDOWS_7: w = (ws ? "7" : "Server 2008_R2");
 				break;
-			case 0x62: w = (ws?"8":"Server 2012");
+			case WINDOWS_8: w = (ws ? "8" : "Server 2012");
 				break;
-			case 0x63: w = (ws?"8.1":"Server 2012_R2");
+			case WINDOWS_8_1: w = (ws ? "8.1" : "Server 2012_R2");
 				break;
-			case 0x64: w = (ws?"10 (Preview 1)":"Server 10 (Preview 1)");
+			case WINDOWS_10_PREVIEW1: w = (ws ? "10 (Preview 1)" : "Server 10 (Preview 1)");
 				break;
 			// Starting with Windows 10 Preview 2, the major is the same as the public-facing version
-			case 0xA0: w = (ws?((vi.dwBuildNumber<20000)?"10":"11"):((vi.dwBuildNumber<17763)?"Server 2016":"Server 2019"));
-				break;
-			case 0xB0: w = (ws?"11":"Server 2022");
+			case WINDOWS_10:
+				if (vi.dwBuildNumber < 20000) {
+					w = (ws ? "10" : ((vi.dwBuildNumber < 17763) ? "Server 2016" : "Server 2019"));
+					break;
+				}
+				nWindowsVersion = WINDOWS_11;
+				// Fall through
+			case WINDOWS_11: w = (ws ? "11" : "Server 2022");
 				break;
 			default:
-				if (nWindowsVersion < 0x51)
+				if (nWindowsVersion < WINDOWS_XP)
 					nWindowsVersion = WINDOWS_UNSUPPORTED;
 				else
 					w = "12 or later";

@@ -61,9 +61,12 @@ static __inline BOOL IsRegistryNode(HKEY key_root, const char* key_name)
 	return r;
 }
 
-/* Read a generic registry key value. If a short key_name is used, assume that it belongs to
-   the application and create the app subkey if required */
-static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD reg_type, LPBYTE dest, DWORD dest_size)
+/*
+ * Read a generic registry key value. If a short key_name is used, assume that
+ * it belongs to the application and create the app subkey if required
+ */
+static __inline BOOL _GetRegistryKey(HKEY key_root, const char* key_name, DWORD reg_type,
+	LPBYTE dest, DWORD dest_size)
 {
 	const char software_prefix[] = "SOFTWARE\\";
 	char long_key_name[MAX_PATH] = { 0 };
