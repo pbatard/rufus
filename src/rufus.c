@@ -121,7 +121,7 @@ BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fa
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
 BOOL write_as_image = FALSE, write_as_esp = FALSE, installed_uefi_ntfs = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
-BOOL windows_to_go_selected = FALSE, appstore_version = FALSE;
+BOOL windows_to_go_selected = FALSE, appstore_version = FALSE, is_vds_available = TRUE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1;
 int default_fs, fs_type, boot_type, partition_type, target_type; // file system, boot type, partition type, target type
@@ -1839,6 +1839,8 @@ static void InitDialog(HWND hDlg)
 			"one. Because of this, some messages will only be displayed in English.", selected_locale->txt[1]);
 		uprintf("If you think you can help update this translation, please e-mail the author of this application");
 	}
+	if (!is_vds_available)
+		uprintf("Notice: Windows VDS is unavailable");
 
 	CreateTaskbarList();
 	SetTaskbarProgressState(TASKBAR_NORMAL);
@@ -3371,7 +3373,8 @@ skip_args_processing:
 	advanced_mode_format = ReadSettingBool(SETTING_ADVANCED_MODE_FORMAT);
 	preserve_timestamps = ReadSettingBool(SETTING_PRESERVE_TIMESTAMPS);
 	use_fake_units = !ReadSettingBool(SETTING_USE_PROPER_SIZE_UNITS);
-	use_vds = ReadSettingBool(SETTING_USE_VDS);
+	is_vds_available = IsVdsAvailable(FALSE);
+	use_vds = ReadSettingBool(SETTING_USE_VDS) && is_vds_available;
 	usb_debug = ReadSettingBool(SETTING_ENABLE_USB_DEBUG);
 	cdio_loglevel_default = usb_debug ? CDIO_LOG_DEBUG : CDIO_LOG_WARN;
 	detect_fakes = !ReadSettingBool(SETTING_DISABLE_FAKE_DRIVES_CHECK);
@@ -3801,9 +3804,11 @@ relaunch:
 			}
 			// Alt-V => Use VDS facilities for formatting
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'V')) {
-				use_vds = !use_vds;
-				WriteSettingBool(SETTING_USE_VDS, use_vds);
-				PrintStatusTimeout("VDS", use_vds);
+				if (is_vds_available) {
+					use_vds = !use_vds;
+					WriteSettingBool(SETTING_USE_VDS, use_vds);
+					PrintStatusTimeout("VDS", use_vds);
+				}
 				continue;
 			}
 			// Alt-W => Enable VMWare disk detection

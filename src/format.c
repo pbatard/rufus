@@ -70,7 +70,7 @@ extern uint32_t dur_mins, dur_secs;
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 static int actual_fs_type, wintogo_index = -1, wininst_index = 0;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing, write_as_image;
-extern BOOL use_vds, write_as_esp;
+extern BOOL use_vds, write_as_esp, is_vds_available;
 uint8_t *grub2_buf = NULL, *sec_buf = NULL;
 long grub2_len;
 
@@ -1769,7 +1769,9 @@ DWORD WINAPI FormatThread(void* param)
 {
 	int r;
 	BOOL ret, use_large_fat32, windows_to_go, actual_lock_drive = lock_drive;
-	BOOL need_logical = FALSE;
+	// Windows 11 and VDS (which I suspect is what fmifs.dll's FormatEx() is now calling behind the
+	// scenes) require us to unlock the physical drive to format the drive, else access denied is re
+	BOOL need_logical = FALSE, must_unlock_physical = (use_vds || nWindowsVersion >= WINDOWS_11);
 	DWORD cr, DriveIndex = (DWORD)(uintptr_t)param, ClusterSize, Flags;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
@@ -1839,7 +1841,8 @@ DWORD WINAPI FormatThread(void* param)
 	// for VDS to be able to delete the partitions that reside on it...
 	safe_unlockclose(hPhysicalDrive);
 	PrintInfo(0, MSG_239, lmprintf(MSG_307));
-	if (!DeletePartition(DriveIndex, 0, FALSE)) {
+	if (!is_vds_available || !DeletePartition(DriveIndex, 0, TRUE)) {
+		uprintf("Warning: Could not delete partition(s): %s", is_vds_available ? WindowsErrorString() : "VDS is not available");
 		SetLastError(FormatStatus);
 		FormatStatus = 0;
 		// If we couldn't delete partitions, Windows give us trouble unless we
@@ -2011,9 +2014,10 @@ DWORD WINAPI FormatThread(void* param)
 	}
 	hLogicalVolume = INVALID_HANDLE_VALUE;
 
-	// VDS wants us to unlock the phys
-	if (use_vds) {
+	if (must_unlock_physical)
 		safe_unlockclose(hPhysicalDrive);
+
+	if (use_vds) {
 		uprintf("Refreshing drive layout...");
 		// Note: This may leave the device disabled on re-plug or reboot
 		// so only do this for the experimental VDS path for now...
@@ -2078,7 +2082,7 @@ DWORD WINAPI FormatThread(void* param)
 		goto out;
 	}
 
-	if (use_vds) {
+	if (must_unlock_physical) {
 		// Get RW access back to the physical drive...
 		hPhysicalDrive = GetPhysicalHandle(DriveIndex, actual_lock_drive, TRUE, !actual_lock_drive);
 		if (hPhysicalDrive == INVALID_HANDLE_VALUE) {

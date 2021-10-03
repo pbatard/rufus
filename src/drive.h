@@ -375,6 +375,7 @@ BOOL SetAutoMount(BOOL enable);
 BOOL GetAutoMount(BOOL* enabled);
 char* GetPhysicalName(DWORD DriveIndex);
 BOOL DeletePartition(DWORD DriveIndex, ULONGLONG PartitionOffset, BOOL bSilent);
+BOOL IsVdsAvailable(BOOL bSilent);
 BOOL ListVdsVolumes(BOOL bSilent);
 BOOL VdsRescan(DWORD dwRescanType, DWORD dwSleepTime, BOOL bSilent);
 HANDLE GetPhysicalHandle(DWORD DriveIndex, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWriteShare);
