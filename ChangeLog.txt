@@ -1,3 +1,13 @@
+o Version 3.16 (2021.10.??)
+    Fix ISO mode support for Red Hat 8.2+ and derivatives
+    Fix BIOS boot support for Arch derivatives
+    Fix removal of some boot entries for Ubuntu derivatives
+    Fix log not being saved on exit
+    Add support for Intel NUC card readers
+    Improve Windows version reporting
+    Improve Windows 11 support
+    Speed up clearing of MBR/GPT
+
 o Version 3.15 (2021.08.03)
     Update GRUB to version 2.06
     Add support for .vtsi files (Ventoy Sparse Image, courtesy of longpanda/ventoy)
