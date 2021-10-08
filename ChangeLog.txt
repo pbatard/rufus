@@ -3,6 +3,7 @@ o Version 3.16 (2021.10.??)
     Fix BIOS boot support for Arch derivatives
     Fix removal of some boot entries for Ubuntu derivatives
     Fix log not being saved on exit
+    Add UEFI Shell ISO downloads
     Add support for Intel NUC card readers
     Improve Windows version reporting
     Improve Windows 11 support

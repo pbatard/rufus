@@ -334,6 +334,13 @@ enum checksum_type {
 #define SYMLINKS_UDF        0x02
 
 typedef struct {
+	uint16_t major;
+	uint16_t minor;
+	uint16_t build;
+	uint16_t revision;
+} winver_t;
+
+typedef struct {
 	char label[192];					// 3*64 to account for UTF-8
 	char usb_label[192];				// converted USB label for workaround
 	char cfg_path[128];					// path to the ISO's isolinux.cfg
@@ -367,10 +374,12 @@ typedef struct {
 	BOOLEAN needs_syslinux_overwrite;
 	BOOLEAN has_grub4dos;
 	BOOLEAN has_grub2;
+	BOOLEAN has_compatresources_dll;
 	BOOLEAN has_kolibrios;
 	BOOLEAN uses_casper;
 	BOOLEAN uses_minint;
 	BOOLEAN compression_type;
+	winver_t win_version;	// Windows ISO version
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
 	char sl_version_ext[32];

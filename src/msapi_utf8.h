@@ -720,6 +720,32 @@ static __inline DWORD GetModuleFileNameExU(HANDLE hProcess, HMODULE hModule, cha
 	return ret;
 }
 
+static __inline DWORD GetFileVersionInfoSizeU(const char* lpFileName, LPDWORD lpdwHandle)
+{
+	DWORD ret = 0, err = ERROR_INVALID_DATA;
+	wconvert(lpFileName);
+	ret = GetFileVersionInfoSizeW(wlpFileName, lpdwHandle);
+	err = GetLastError();
+	wfree(lpFileName);
+	SetLastError(err);
+	return ret;
+}
+
+static __inline BOOL GetFileVersionInfoU(const char* lpFileName, DWORD dwHandle, DWORD dwLen, LPVOID lpData)
+{
+	BOOL ret = FALSE;
+	DWORD err = ERROR_INVALID_DATA;
+	wconvert(lpFileName);
+	if (dwHandle != 0)
+		SetLastError(ERROR_INVALID_PARAMETER);
+	else
+		ret = GetFileVersionInfoW(wlpFileName, dwHandle, dwLen, lpData);
+	err = GetLastError();
+	wfree(lpFileName);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline DWORD GetFullPathNameU(const char* lpFileName, DWORD nBufferLength, char* lpBuffer, char** lpFilePart)
 {
 	DWORD ret = 0, err = ERROR_INVALID_DATA;

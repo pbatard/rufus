@@ -1055,6 +1055,15 @@ static void DisplayISOProps(void)
 	int i;
 
 	uprintf("ISO label: '%s'", img_report.label);
+	if (img_report.win_version.major != 0) {
+		if (img_report.win_version.minor == 0)
+			uprintf("  Detected: Windows %d ISO (Build %d.%d)", img_report.win_version.major,
+				img_report.win_version.build, img_report.win_version.revision);
+		else
+			uprintf("  Detected: Windows %d.%d ISO (Build %d.%d)", img_report.win_version.major,
+				img_report.win_version.minor, img_report.win_version.build, img_report.win_version.revision);
+	}
+
 	uprintf("  Size: %s (Projected)", SizeToHumanReadable(img_report.projected_size, FALSE, FALSE));
 	if (img_report.mismatch_size > 0) {
 		uprintf("  ERROR: Detected that file on disk has been truncated by %s!",

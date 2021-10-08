@@ -342,10 +342,12 @@ static BOOL FormatNativeVds(DWORD DriveIndex, uint64_t PartitionOffset, DWORD Cl
 	WCHAR *wVolumeName = NULL, *wLabel = utf8_to_wchar(Label), *wFSName = utf8_to_wchar(FSName);
 
 	if ((strcmp(FSName, FileSystemLabel[FS_EXFAT]) == 0) && !((dur_mins == 0) && (dur_secs == 0))) {
-		PrintInfoDebug(0, MSG_220, FSName, dur_mins, dur_secs);
+		PrintInfo(0, MSG_220, FSName, dur_mins, dur_secs);
 	} else {
-		PrintInfoDebug(0, MSG_222, FSName);
+		PrintInfo(0, MSG_222, FSName);
 	}
+	uprintf("Formatting to %s (using VDS)", FSName);
+
 	UpdateProgressWithInfoInit(NULL, TRUE);
 	VolumeName = GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
@@ -585,10 +587,12 @@ static BOOL FormatNative(DWORD DriveIndex, uint64_t PartitionOffset, DWORD Clust
 	size_t i;
 
 	if ((strcmp(FSName, FileSystemLabel[FS_EXFAT]) == 0) && !((dur_mins == 0) && (dur_secs == 0))) {
-		PrintInfoDebug(0, MSG_220, FSName, dur_mins, dur_secs);
+		PrintInfo(0, MSG_220, FSName, dur_mins, dur_secs);
 	} else {
-		PrintInfoDebug(0, MSG_222, FSName);
+		PrintInfo(0, MSG_222, FSName);
 	}
+	uprintf("Formatting to %s (using IFS)", FSName);
+
 	VolumeName = GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
