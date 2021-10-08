@@ -24,6 +24,7 @@
 #include <windows.h>
 #include <sddl.h>
 #include <gpedit.h>
+#include <assert.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -996,4 +997,88 @@ char* GetCurrentMUI(void)
 		static_strcpy(mui_str, "en-US");
 	}
 	return mui_str;
+}
+
+/*
+ * From: https://stackoverflow.com/a/40390858/1069307
+ */
+BOOL SetPrivilege(HANDLE hToken, LPCWSTR pwzPrivilegeName, BOOL bEnable)
+{
+	TOKEN_PRIVILEGES tp;
+	LUID luid;
+
+	if (!LookupPrivilegeValue(NULL, pwzPrivilegeName, &luid)) {
+		uprintf("Could not lookup '%S' privilege: %s", pwzPrivilegeName, WindowsErrorString());
+		return FALSE;
+	}
+
+	tp.PrivilegeCount = 1;
+	tp.Privileges[0].Luid = luid;
+	tp.Privileges[0].Attributes = bEnable ? SE_PRIVILEGE_ENABLED : 0;
+
+	if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), NULL, NULL)) {
+		uprintf("Could not %s '%S' privilege: %s",
+			bEnable ? "enable" : "disable", pwzPrivilegeName, WindowsErrorString());
+		return FALSE;
+	}
+
+	if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) {
+		uprintf("Error assigning privileges: %s", WindowsErrorString());
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/*
+ * Mount an offline registry hive located at <pszHivePath> into <key>\<pszHiveName>.
+ * <key> should be HKEY_LOCAL_MACHINE or HKEY_USERS.
+ */
+BOOL MountRegistryHive(const HKEY key, const char* pszHiveName, const char* pszHivePath)
+{
+	LSTATUS status;
+	HANDLE token = INVALID_HANDLE_VALUE;
+
+	assert((key == HKEY_LOCAL_MACHINE) || (key == HKEY_USERS));
+
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token)) {
+		uprintf("Could not get current process token: %s", WindowsErrorString());
+		return FALSE;
+	}
+
+	// Ignore errors on those in case we can proceed without...
+	SetPrivilege(token, SE_RESTORE_NAME, TRUE);
+	SetPrivilege(token, SE_BACKUP_NAME, TRUE);
+
+	status = RegLoadKeyA(key, pszHiveName, pszHivePath);
+	if (status != ERROR_SUCCESS) {
+		SetLastError(status);
+		uprintf("Could not mount offline registry hive '%s': %s", pszHivePath, WindowsErrorString());
+	} else
+		uprintf("Mounted offline registry hive '%s' to '%s\\%s'",
+			pszHivePath, (key == HKEY_LOCAL_MACHINE) ? "HKLM" : "HKCU", pszHiveName);
+
+	safe_closehandle(token);
+	return (status == ERROR_SUCCESS);
+}
+
+/*
+ * Unmount an offline registry hive.
+ * <key> should be HKEY_LOCAL_MACHINE or HKEY_USERS.
+ */
+BOOL UnmountRegistryHive(const HKEY key, const char* pszHiveName)
+{
+	LSTATUS status;
+
+	assert((key == HKEY_LOCAL_MACHINE) || (key == HKEY_USERS));
+
+	status = RegUnLoadKeyA(key, pszHiveName);
+	if (status != ERROR_SUCCESS) {
+		SetLastError(status);
+		uprintf("Could not unmount offline registry hive: %s", WindowsErrorString());
+	} else
+		uprintf("Unmounted offline registry hive '%s\\%s'",
+			(key == HKEY_LOCAL_MACHINE) ? "HKLM" : "HKCU", pszHiveName);
+
+	return (status == ERROR_SUCCESS);
 }

@@ -559,8 +559,9 @@ t MSG_301 "Show application settings"
 t MSG_302 "Show information about this application"
 t MSG_303 "Show the log"
 t MSG_304 "Create a disk image of the selected device"
-t MSG_305 "Use this option to indicate whether you want to use this device to install Windows on another disk, "
-	"or if you want to run Windows directly from this drive (Windows To Go)."
+t MSG_305 "Use this option to indicate if you want to run Windows directly from this drive (Windows To Go) or if you "
+	"want to install Windows to a different disk.\r\nIn 'Extended Windows 11 Installation' mode, Rufus patches the "
+	"media so that Windows 11 can be installed on platforms that don't meet the TPM 2.0 or Secure Boot requirements."
 # You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 # It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 t MSG_306 "Fast-zeroing drive: %s"
@@ -581,7 +582,10 @@ t MSG_318 "Default thread priority: %d"
 t MSG_319 "Ignore Boot Marker"
 t MSG_320 "Refreshing partition layout (%s)..."
 t MSG_321 "The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File "
-	"copy mode.\nAs a result, DD image writing mode will be enforced." 
+	"copy mode.\nAs a result, DD image writing mode will be enforced."
+t MSG_322 "Standard Windows 11 Installation (TPM 2.0 / Secure Boot / 8GB+ RAM)"
+t MSG_323 "Extended Windows 11 Installation (no TPM / no Secure Boot / 8GB- RAM)"
+t MSG_324 "Removing Windows 11 installation restrictions (%s)"
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001
@@ -5009,7 +5013,7 @@ t MSG_303 "Εμφάνιση καταγραφών εφαρμογής (log)"
 t MSG_304 "Δημιουργία ειδώλου δίσκου από την επιλεγμένη συσκευή"
 t MSG_305 "Επιλέξτε αυτό αν θέλετε να χρησιμοποιήσετε αυτή τη συσκευή για να εγκαταστήσετε τα Windows σε κάποιο δίσκο, ή θέλετε να τα τρέχετε κατευθείαν από την συσκευή (Windows To Go)."
 t MSG_306 "Γρήγορος μηδενισμός μονάδας δίσκου: %s"
-t MSG_307 "η διαδικασία ίσως διαρκέσει αρκετά" 
+t MSG_307 "η διαδικασία ίσως διαρκέσει αρκετά"
 
 #########################################################################
 l "he-IL" "Hebrew (עברית)" 0x040d

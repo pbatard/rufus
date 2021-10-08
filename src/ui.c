@@ -45,6 +45,7 @@
 UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 HIMAGELIST hUpImageList, hDownImageList;
 extern BOOL use_vds, appstore_version;
+extern int imop_win_sel;
 int update_progress_type = UPT_PERCENT;
 int advanced_device_section_height, advanced_format_section_height;
 // (empty) check box width, (empty) drop down width, button height (for and without dropdown match)
@@ -273,6 +274,8 @@ void GetFullWidth(HWND hDlg)
 	// Go through the Image Options for Windows To Go
 	fw = max(fw, GetTextSize(hImageOption, lmprintf(MSG_117)).cx);
 	fw = max(fw, GetTextSize(hImageOption, lmprintf(MSG_118)).cx);
+	fw = max(fw, GetTextSize(hImageOption, lmprintf(MSG_322)).cx);
+	fw = max(fw, GetTextSize(hImageOption, lmprintf(MSG_323)).cx);
 
 	// Now deal with full length checkbox lines
 	for (i = 0; i<ARRAYSIZE(full_width_checkboxes); i++)
@@ -790,7 +793,7 @@ void ToggleImageOptions(void)
 		image_options ^= IMOP_WINTOGO;
 		if (image_options & IMOP_WINTOGO) {
 			// Set the Windows To Go selection in the dropdown
-			IGNORE_RETVAL(ComboBox_SetCurSel(hImageOption, (img_report.is_windows_img || !windows_to_go_selected) ? 0 : 1));
+			IGNORE_RETVAL(ComboBox_SetCurSel(hImageOption, imop_win_sel));
 		}
 	}
 

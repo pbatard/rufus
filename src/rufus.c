@@ -86,7 +86,7 @@ static char szTimer[12] = "00:00:00";
 static unsigned int timer;
 static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], uppercase_cancel[64];
 
-extern HANDLE update_check_thread, apply_wim_thread;
+extern HANDLE update_check_thread, wim_thread;
 extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes;
 extern BYTE* fido_script;
 extern HWND hFidoDlg;
@@ -121,9 +121,9 @@ BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fa
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
 BOOL write_as_image = FALSE, write_as_esp = FALSE, installed_uefi_ntfs = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
-BOOL windows_to_go_selected = FALSE, appstore_version = FALSE, is_vds_available = TRUE;
+BOOL appstore_version = FALSE, is_vds_available = TRUE;
 float fScale = 1.0f;
-int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1;
+int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1, imop_win_sel = 0;
 int default_fs, fs_type, boot_type, partition_type, target_type; // file system, boot type, partition type, target type
 int force_update = 0, default_thread_priority = THREAD_PRIORITY_ABOVE_NORMAL;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
@@ -179,7 +179,7 @@ static void SetAllowedFileSystems(void)
 		if ((image_path != NULL) && (img_report.has_4GB_file))
 			break;
 		if (!HAS_WINDOWS(img_report) || (target_type != TT_BIOS) || allow_dual_uefi_bios) {
-			if (!HAS_WINTOGO(img_report) || (!ComboBox_GetCurItemData(hImageOption))) {
+			if (!HAS_WINTOGO(img_report) || (ComboBox_GetCurItemData(hImageOption) != IMOP_WIN_TO_GO)) {
 				allowed_filesystem[FS_FAT16] = TRUE;
 				allowed_filesystem[FS_FAT32] = TRUE;
 			}
@@ -258,7 +258,7 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 
 	boot_type = (int)ComboBox_GetCurItemData(hBootType);
 	is_windows_to_go_selected = (boot_type == BT_IMAGE) && (image_path != NULL) && HAS_WINTOGO(img_report) &&
-		ComboBox_GetCurItemData(hImageOption);
+		(ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO);
 	// If no device is selected, don't populate anything
 	if (ComboBox_GetCurSel(hDeviceList) < 0)
 		return;
@@ -589,7 +589,7 @@ static void SetFSFromISO(void)
 	int i, fs_tmp, preferred_fs = FS_UNKNOWN;
 	uint32_t fs_mask = FS_FAT32 | FS_NTFS;
 	BOOL windows_to_go = (image_options & IMOP_WINTOGO) && (boot_type == BT_IMAGE) &&
-		HAS_WINTOGO(img_report) && ComboBox_GetCurItemData(hImageOption);
+		HAS_WINTOGO(img_report) && (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO);
 
 	if (image_path == NULL)
 		return;
@@ -649,7 +649,7 @@ static void SetMBRProps(void)
 	fs_type = (int)ComboBox_GetCurItemData(hFileSystem);
 
 	if ((!mbr_selected_by_user) && ((image_path == NULL) || (boot_type != BT_IMAGE) || (fs_type != FS_NTFS) || HAS_GRUB(img_report) ||
-		((image_options & IMOP_WINTOGO) && ComboBox_GetCurItemData(hImageOption)) )) {
+		((image_options & IMOP_WINTOGO) && (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO)) )) {
 		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
 		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 		return;
@@ -1129,10 +1129,17 @@ static void UpdateImage(BOOL update_image_option_only)
 	}
 
 	ComboBox_ResetContent(hImageOption);
-	if (!img_report.is_windows_img)
-		IGNORE_RETVAL(ComboBox_SetItemData(hImageOption, ComboBox_AddStringU(hImageOption, lmprintf(MSG_117)), FALSE));
-	IGNORE_RETVAL(ComboBox_SetItemData(hImageOption, ComboBox_AddStringU(hImageOption, lmprintf(MSG_118)), TRUE));
-	IGNORE_RETVAL(ComboBox_SetCurSel(hImageOption, (img_report.is_windows_img || !windows_to_go_selected) ? 0 : 1));
+
+	if (!img_report.is_windows_img) {	// Straight install.wim/install.esd only have Windows To Go option
+		if (img_report.win_version.major == 11) {
+			IGNORE_RETVAL(ComboBox_SetItemData(hImageOption, ComboBox_AddStringU(hImageOption, lmprintf(MSG_322)), IMOP_WIN_STANDARD));
+			IGNORE_RETVAL(ComboBox_SetItemData(hImageOption, ComboBox_AddStringU(hImageOption, lmprintf(MSG_323)), IMOP_WIN_EXTENDED));
+		} else {
+			IGNORE_RETVAL(ComboBox_SetItemData(hImageOption, ComboBox_AddStringU(hImageOption, lmprintf(MSG_117)), IMOP_WIN_STANDARD));
+		}
+	}
+	IGNORE_RETVAL(ComboBox_SetItemData(hImageOption, ComboBox_AddStringU(hImageOption, lmprintf(MSG_118)), IMOP_WIN_TO_GO));
+	IGNORE_RETVAL(ComboBox_SetCurSel(hImageOption, imop_win_sel));
 }
 
 static uint8_t FindArch(const char* filename)
@@ -1226,6 +1233,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 	img_report.is_iso = (BOOLEAN)ExtractISO(image_path, "", TRUE);
 	img_report.is_bootable_img = IsBootableImage(image_path);
 	ComboBox_ResetContent(hImageOption);
+	imop_win_sel = 0;
 
 	if ((FormatStatus == (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)) ||
 		(img_report.image_size == 0) ||
@@ -1409,7 +1417,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				goto out;
 		}
 
-		if ((image_options & IMOP_WINTOGO) && ComboBox_GetCurItemData(hImageOption)) {
+		if ((image_options & IMOP_WINTOGO) && (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO)) {
 			if (fs_type != FS_NTFS) {
 				// Windows To Go only works for NTFS
 				MessageBoxExU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
@@ -2119,6 +2127,24 @@ out:
 	return ret;
 }
 
+#ifdef RUFUS_TEST
+extern BOOL RemoveWindows11Restrictions(char drive_letter);
+
+static DWORD WINAPI TestThread(LPVOID param)
+{
+	static BOOL processing = FALSE;
+
+	if (processing) {
+		uprintf("Test thread is already in progress!");
+		ExitThread(1);
+	}
+	processing = TRUE;
+	RemoveWindows11Restrictions('B');
+	processing = FALSE;
+	ExitThread(0);
+}
+#endif
+
 /*
  * Main dialog callback
  */
@@ -2155,8 +2181,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			DWORD DriveIndex = (DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList));
-			uprintf("label = '%s'", GetExtFsLabel(DriveIndex, 1));
+			CreateThread(NULL, 0, TestThread, NULL, 0, NULL);
 			break;
 		}
 #endif
@@ -2333,7 +2358,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			SetFileSystemAndClusterSize(NULL);
-			windows_to_go_selected = (BOOL)ComboBox_GetCurItemData(hImageOption);
+			imop_win_sel = ComboBox_GetCurSel(hImageOption);
 			break;
 		case IDC_PERSISTENCE_SIZE:
 			if (HIWORD(wParam) == EN_CHANGE) {
@@ -3624,8 +3649,8 @@ relaunch:
 				WriteSetting32(SETTING_DEFAULT_THREAD_PRIORITY, default_thread_priority - THREAD_PRIORITY_ABOVE_NORMAL);
 				if (format_thread != NULL)
 					SetThreadPriority(format_thread, default_thread_priority);
-				if (apply_wim_thread != NULL)
-					SetThreadPriority(apply_wim_thread, default_thread_priority);
+				if (wim_thread != NULL)
+					SetThreadPriority(wim_thread, default_thread_priority);
 			}
 			PrintStatus(STATUS_MSG_TIMEOUT, MSG_318, default_thread_priority);
 			continue;

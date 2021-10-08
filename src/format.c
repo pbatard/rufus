@@ -1417,7 +1417,7 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 
 	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, wim_proc_files + 2 * wim_extra_files, wim_nb_files);
 
-	uprintf("Disable the use of the Windows Recovery Environment using command:");
+	uprintf("Disabling use of the Windows Recovery Environment using command:");
 	static_sprintf(cmd, "%s\\bcdedit.exe /store %s\\EFI\\Microsoft\\Boot\\BCD /set {default} recoveryenabled no",
 		sysnative_dir, (use_esp) ? ms_efi : drive_name);
 	uprintf(cmd);
@@ -1431,6 +1431,80 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	}
 
 	return TRUE;
+}
+
+/*
+ * Edit sources/boot.wim registry to remove Windows 11 install restrictions
+ */
+BOOL RemoveWindows11Restrictions(char drive_letter)
+{
+	BOOL r = FALSE, is_hive_mounted = FALSE;
+	int i;
+	const int wim_index = 2;
+	const char* offline_hive_name = "RUFUS_OFFLINE_HIVE";
+	const char* key_name[] = { "BypassTPMCheck", "BypassSecureBootCheck", "BypassRAMCheck" };
+	char boot_wim_path[] = "#:\\sources\\boot.wim", key_path[64];
+	char* mount_path = NULL;
+	char path[MAX_PATH];
+	HKEY hKey = NULL, hSubKey = NULL;
+	LSTATUS status;
+	DWORD dwDisp, dwVal = 1;
+
+	boot_wim_path[0] = drive_letter;
+
+	PrintInfo(0, MSG_324, lmprintf(MSG_307));
+	uprintf("Mounting '%s'...", boot_wim_path);
+
+	mount_path = WimMountImage(boot_wim_path, wim_index);
+	if (mount_path == NULL)
+		goto out;
+
+	static_sprintf(path, "%s\\Windows\\System32\\config\\SYSTEM", mount_path);
+	if (!MountRegistryHive(HKEY_LOCAL_MACHINE, offline_hive_name, path))
+		goto out;
+	is_hive_mounted = TRUE;
+
+	static_sprintf(key_path, "%s\\Setup", offline_hive_name);
+	status = RegOpenKeyExA(HKEY_LOCAL_MACHINE, key_path, 0, KEY_READ | KEY_CREATE_SUB_KEY, &hKey);
+	if (status != ERROR_SUCCESS) {
+		SetLastError(status);
+		uprintf("Could not open 'HKLM\\SYSTEM\\Setup' registry key: %s", WindowsErrorString());
+		goto out;
+	}
+
+	status = RegCreateKeyExA(hKey, "LabConfig", 0, NULL, 0,
+		KEY_SET_VALUE | KEY_QUERY_VALUE | KEY_CREATE_SUB_KEY, NULL, &hSubKey, &dwDisp);
+	if (status != ERROR_SUCCESS) {
+		SetLastError(status);
+		uprintf("Could not create 'HKLM\\SYSTEM\\Setup\\LabConfig' registry key: %s", WindowsErrorString());
+		goto out;
+	}
+
+	for (i = 0; i < ARRAYSIZE(key_name); i++) {
+		status = RegSetValueExA(hSubKey, key_name[i], 0, REG_DWORD, (LPBYTE)&dwVal, sizeof(DWORD));
+		if (status != ERROR_SUCCESS) {
+			SetLastError(status);
+			uprintf("Could not set 'HKLM\\SYSTEM\\Setup\\LabConfig\\%s' registry key: %s",
+				key_name[i], WindowsErrorString());
+			goto out;
+		}
+		uprintf("Created 'HKLM\\SYSTEM\\Setup\\LabConfig\\%s' registry key", key_name[i]);
+	}
+	r = TRUE;
+
+out:
+	if (hSubKey != NULL)
+		RegCloseKey(hSubKey);
+	if (hKey != NULL)
+		RegCloseKey(hKey);
+	if (is_hive_mounted)
+		UnmountRegistryHive(HKEY_LOCAL_MACHINE, offline_hive_name);
+	if (mount_path) {
+		uprintf("Unmounting '%s'...", boot_wim_path, wim_index);
+		WimUnmountImage(boot_wim_path, wim_index);
+	}
+	free(mount_path);
+	return r;
 }
 
 static void update_progress(const uint64_t processed_bytes)
@@ -1792,7 +1866,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	use_large_fat32 = (fs_type == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 	windows_to_go = (image_options & IMOP_WINTOGO) && (boot_type == BT_IMAGE) && HAS_WINTOGO(img_report) &&
-		ComboBox_GetCurItemData(hImageOption);
+		(ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO);
 	large_drive = (SelectedDrive.DiskSize > (1*TB));
 	if (large_drive)
 		uprintf("Notice: Large drive detected (may produce short writes)");
@@ -2256,9 +2330,13 @@ DWORD WINAPI FormatThread(void* param)
 					}
 				}
 				if ( (target_type == TT_BIOS) && HAS_WINPE(img_report) ) {
-					// Apply WinPe fixup
+					// Apply WinPE fixup
 					if (!SetupWinPE(drive_name[0]))
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
+				}
+				if (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_EXTENDED) {
+					if (!RemoveWindows11Restrictions(drive_name[0]))
+						FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_PATCH);
 				}
 			}
 		}

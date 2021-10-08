@@ -74,7 +74,7 @@ enum update_progress_type {
 extern HWND hMultiToolbar, hSaveToolbar, hHashToolbar, hAdvancedDeviceToolbar, hAdvancedFormatToolbar;
 extern HFONT hInfoFont;
 extern UINT_PTR UM_LANGUAGE_MENU_MAX;
-extern BOOL advanced_mode_device, advanced_mode_format, force_large_fat32, app_changed_size, windows_to_go_selected;
+extern BOOL advanced_mode_device, advanced_mode_format, force_large_fat32, app_changed_size;
 extern loc_cmd* selected_locale;
 extern uint64_t persistence_size;
 extern const char *sfd_name, *flash_type[BADLOCKS_PATTERN_TYPES];

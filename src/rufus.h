@@ -292,6 +292,13 @@ enum target_type {
 // For the partition types we'll use Microsoft's PARTITION_STYLE_### constants
 #define PARTITION_STYLE_SFD PARTITION_STYLE_RAW
 
+enum image_option_type {
+	IMOP_WIN_STANDARD = 0,
+	IMOP_WIN_EXTENDED,
+	IMOP_WIN_TO_GO,
+	IMOP_MAX
+};
+
 enum checksum_type {
 	CHECKSUM_MD5 = 0,
 	CHECKSUM_SHA1,
@@ -552,6 +559,8 @@ extern unsigned char* GetResource(HMODULE module, char* name, char* type, const 
 extern DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc);
 extern DWORD RunCommand(const char* cmdline, const char* dir, BOOL log);
 extern BOOL CompareGUID(const GUID *guid1, const GUID *guid2);
+extern BOOL MountRegistryHive(const HKEY key, const char* pszHiveName, const char* pszHivePath);
+extern BOOL UnmountRegistryHive(const HKEY key, const char* pszHiveName);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
 extern uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress);
@@ -581,6 +590,8 @@ extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, co
 extern BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst, BOOL bSilent);
 extern BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst, BOOL bSilent);
 extern BOOL WimApplyImage(const char* image, int index, const char* dst);
+extern char* WimMountImage(const char* image, int index);
+extern BOOL WimUnmountImage(const char* image, int index);
 extern uint8_t IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int SetWinToGoIndex(void);
@@ -594,7 +605,7 @@ extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBy
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries);
 extern BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads);
 extern BOOL HashFile(const unsigned type, const char* path, uint8_t* sum);
-extern BOOL HashBuffer(const unsigned type, const unsigned char* buf, const size_t len, uint8_t* sum);
+extern BOOL HashBuffer(const unsigned type, const uint8_t* buf, const size_t len, uint8_t* sum);
 extern BOOL IsFileInDB(const char* path);
 extern BOOL IsBufferInDB(const unsigned char* buf, const size_t len);
 #define printbits(x) _printbits(sizeof(x), &x, 0)

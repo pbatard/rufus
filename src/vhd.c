@@ -109,15 +109,18 @@ PF_TYPE_DECL(WINAPI, DWORD, WIMUnregisterMessageCallback, (HANDLE, FARPROC));
 PF_TYPE_DECL(RPC_ENTRY, RPC_STATUS, UuidCreate, (UUID __RPC_FAR*));
 
 uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
-HANDLE apply_wim_thread = NULL;
+HANDLE wim_thread = NULL;
 extern int default_thread_priority;
 extern BOOL ignore_boot_marker;
 
 static uint8_t wim_flags = 0;
-static wchar_t wmount_path[MAX_PATH] = { 0 };
+static wchar_t wmount_path[MAX_PATH] = { 0 }, wmount_track[MAX_PATH] = { 0 };
 static char sevenzip_path[MAX_PATH];
 static const char conectix_str[] = VHD_FOOTER_COOKIE;
 static BOOL count_files;
+// Apply/Mount image functionality
+static const char *_image, *_dst;
+static int _index;
 
 static BOOL Get7ZipPath(void)
 {
@@ -381,55 +384,115 @@ uint8_t WimExtractCheck(BOOL bSilent)
 	return wim_flags;
 }
 
-// Looks like Microsoft's idea of "mount" for WIM images is to just *extract* all
-// files to a mounpoint and pretend it is "mounted", even if you do specify that
-// you're not planning to change the content. So, yeah, this is both super slow
-// and super wasteful of space... These calls are a complete waste of time.
-BOOL WimMountImage(char* pszWimFileName, DWORD dwImageIndex)
+// Looks like Microsoft's idea of "mount" for WIM images involves the creation
+// of a as many virtual junctions as there exist directories on the image...
+// So, yeah, this is both very slow and wasteful of space.
+static DWORD WINAPI WimMountImageThread(LPVOID param)
 {
 	BOOL r = FALSE;
 	wconvert(temp_dir);
-	wconvert(pszWimFileName);
+	wchar_t* wimage = utf8_to_wchar(_image);
 	PF_INIT_OR_OUT(WIMMountImage, Wimgapi);
 
 	if (wmount_path[0] != 0) {
 		uprintf("WimMountImage: An image is already mounted");
 		goto out;
 	}
-	if (GetTempFileNameW(wtemp_dir, L"Rufus", 0, wmount_path) == 0) {
-		uprintf("WimMountImage: Can not create mount directory");
+	if (GetTempFileNameW(wtemp_dir, L"Ruf", 0, wmount_path) == 0) {
+		uprintf("WimMountImage: Can not generate mount directory: %s", WindowsErrorString());
 		goto out;
 	}
 	DeleteFileW(wmount_path);
 	if (!CreateDirectoryW(wmount_path, 0)) {
-		uprintf("WimMountImage: Can not create mount directory");
+		uprintf("WimMountImage: Can not create mount directory '%S': %s", wmount_path, WindowsErrorString());
+		goto out;
+	}
+	if (GetTempFileNameW(wtemp_dir, L"Ruf", 0, wmount_track) == 0) {
+		uprintf("WimMountImage: Can not generate tracking directory: %s", WindowsErrorString());
+		goto out;
+	}
+	DeleteFileW(wmount_track);
+	if (!CreateDirectoryW(wmount_track, 0)) {
+		uprintf("WimMountImage: Can not create tracking directory '%S': %s", wmount_track, WindowsErrorString());
 		goto out;
 	}
 
-	r = pfWIMMountImage(wmount_path, wpszWimFileName, dwImageIndex, NULL);
-	if (!r)
-		uprintf("Could not mount %S on %S: %s", wpszWimFileName, wmount_path, WindowsErrorString());
+	r = pfWIMMountImage(wmount_path, wimage, _index, wmount_track);
+	if (!r) {
+		uprintf("Could not mount '%S [%d]' on '%S': %s", wimage, _index, wmount_path, WindowsErrorString());
+		goto out;
+	}
+	uprintf("mounted '%S [%d]' on '%S'", wimage, _index, wmount_path);
 
 out:
 	wfree(temp_dir);
-	wfree(pszWimFileName);
-	return r;
+	safe_free(wimage);
+	ExitThread((DWORD)r);
 }
 
-BOOL WimUnmountImage(void)
+// Returns the temporary mount path on success, NULL on error.
+// Returned path must be freed by the caller.
+char* WimMountImage(const char* image, int index)
+{
+	DWORD dw = 0;
+	_image = image;
+	_index = index;
+
+	wim_thread = CreateThread(NULL, 0, WimMountImageThread, NULL, 0, NULL);
+	if (wim_thread == NULL) {
+		uprintf("Unable to start mount-image thread");
+		return NULL;
+	}
+	SetThreadPriority(wim_thread, default_thread_priority);
+	WaitForSingleObject(wim_thread, INFINITE);
+	if (!GetExitCodeThread(wim_thread, &dw))
+		dw = 0;
+	wim_thread = NULL;
+	return (dw) ? wchar_to_utf8(wmount_path) : NULL;
+}
+
+static DWORD WINAPI WimUnmountImageThread(LPVOID param)
 {
 	BOOL r = FALSE;
+	wchar_t* wimage = utf8_to_wchar(_image);
 	PF_INIT_OR_OUT(WIMUnmountImage, Wimgapi);
+
 	if (wmount_path[0] == 0) {
 		uprintf("WimUnmountImage: No image is mounted");
 		goto out;
 	}
-	r = pfWIMUnmountImage(wmount_path, NULL, 0, FALSE);
-	if (!r)
-		uprintf("Could not unmount %S: %s", wmount_path, WindowsErrorString());
+	r = pfWIMUnmountImage(wmount_path, wimage, _index, TRUE);
+	if (!r) {
+		uprintf("Could not unmount '%S': %s", wmount_path, WindowsErrorString());
+		goto out;
+	}
+	uprintf("Unmounted '%S [%d]'", wmount_path, _index);
+	RemoveDirectoryW(wmount_path);
 	wmount_path[0] = 0;
+	RemoveDirectoryW(wmount_track);
+	wmount_track[0] = 0;
 out:
-	return r;
+	safe_free(wimage);
+	ExitThread((DWORD)r);
+}
+
+BOOL WimUnmountImage(const char* image, int index)
+{
+	DWORD dw = 0;
+	_image = image;
+	_index = index;
+
+	wim_thread = CreateThread(NULL, 0, WimUnmountImageThread, NULL, 0, NULL);
+	if (wim_thread == NULL) {
+		uprintf("Unable to start unmount-image thread");
+		return FALSE;
+	}
+	SetThreadPriority(wim_thread, default_thread_priority);
+	WaitForSingleObject(wim_thread, INFINITE);
+	if (!GetExitCodeThread(wim_thread, &dw))
+		dw = 0;
+	wim_thread = NULL;
+	return dw;
 }
 
 // Extract a file from a WIM image using wimgapi.dll (Windows 7 or later)
@@ -589,12 +652,8 @@ BOOL WimExtractFile(const char* image, int index, const char* src, const char* d
 		  || ((wim_flags & WIM_HAS_API_EXTRACT) && WimExtractFile_API(image, index, src, dst, bSilent)) );
 }
 
-// Apply image functionality
-static const char *_image, *_dst;
-static int _index;
-
-// From http://msdn.microsoft.com/en-us/library/windows/desktop/dd834960.aspx
-// as well as http://www.msfn.org/board/topic/150700-wimgapi-wimmountimage-progressbar/
+// From https://docs.microsoft.com/en-us/previous-versions/msdn10/dd834960(v=msdn.10)
+// as well as https://msfn.org/board/topic/150700-wimgapi-wimmountimage-progressbar/
 enum WIMMessage {
 	WIM_MSG = WM_APP + 0x1476,
 	WIM_MSG_TEXT,
@@ -700,7 +759,7 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 }
 
 // Apply a WIM image using wimgapi.dll (Windows 7 or later)
-// http://msdn.microsoft.com/en-us/library/windows/desktop/dd851944.aspx
+// https://docs.microsoft.com/en-us/previous-versions/msdn10/dd851944(v=msdn.10)
 // To get progress, we must run this call within its own thread
 static DWORD WINAPI WimApplyImageThread(LPVOID param)
 {
@@ -800,15 +859,15 @@ BOOL WimApplyImage(const char* image, int index, const char* dst)
 	_index = index;
 	_dst = dst;
 
-	apply_wim_thread = CreateThread(NULL, 0, WimApplyImageThread, NULL, 0, NULL);
-	if (apply_wim_thread == NULL) {
+	wim_thread = CreateThread(NULL, 0, WimApplyImageThread, NULL, 0, NULL);
+	if (wim_thread == NULL) {
 		uprintf("Unable to start apply-image thread");
 		return FALSE;
 	}
-	SetThreadPriority(apply_wim_thread, default_thread_priority);
-	WaitForSingleObject(apply_wim_thread, INFINITE);
-	if (!GetExitCodeThread(apply_wim_thread, &dw))
+	SetThreadPriority(wim_thread, default_thread_priority);
+	WaitForSingleObject(wim_thread, INFINITE);
+	if (!GetExitCodeThread(wim_thread, &dw))
 		dw = 0;
-	apply_wim_thread = NULL;
+	wim_thread = NULL;
 	return dw;
 }

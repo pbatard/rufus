@@ -5,8 +5,9 @@ o Version 3.16 (2021.10.??)
     Fix log not being saved on exit
     Add UEFI Shell ISO downloads
     Add support for Intel NUC card readers
-    Improve Windows version reporting
+    Add Windows 11 extended installation support (disables TPM or Secure Boot requirement)
     Improve Windows 11 support
+    Improve Windows version reporting
     Speed up clearing of MBR/GPT
 
 o Version 3.15 (2021.08.03)
