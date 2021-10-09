@@ -37,6 +37,8 @@
 #include "msapi_utf8.h"
 #include "localization.h"
 
+#define FACILITY_WIM 322
+
 /*
  * Globals
  */
@@ -627,6 +629,16 @@ static const char *GetVdsError(DWORD error_code)
 	}
 }
 
+static const char* GetVimError(DWORD error_code)
+{
+	switch (error_code) {
+	case 0xC1420127:
+		return "The specified image in the specified wim is already mounted for read and write access.";
+	default:
+		return NULL;
+	}
+}
+
 // Convert a windows error to human readable string
 const char *WindowsErrorString(void)
 {
@@ -637,11 +649,14 @@ const char *WindowsErrorString(void)
 
 	error_code = GetLastError();
 	// Check for VDS error codes
-	if ((SCODE_FACILITY(error_code) == FACILITY_ITF) && (GetVdsError(error_code) != NULL)) {
+	if ((HRESULT_FACILITY(error_code) == FACILITY_ITF) && (GetVdsError(error_code) != NULL)) {
 		static_sprintf(err_string, "[0x%08lX] %s", error_code, GetVdsError(error_code));
 		return err_string;
 	}
-
+	if ((HRESULT_FACILITY(error_code) == FACILITY_WIM) && (GetVimError(error_code) != NULL)) {
+		static_sprintf(err_string, "[0x%08lX] %s", error_code, GetVimError(error_code));
+		return err_string;
+	}
 	static_sprintf(err_string, "[0x%08lX] ", error_code);
 	presize = (DWORD)strlen(err_string);
 

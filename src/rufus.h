@@ -69,6 +69,7 @@
 #define MAX_SIZE_SUFFIXES           6			// bytes, KB, MB, GB, TB, PB
 #define MAX_CLUSTER_SIZES           18
 #define MAX_PROGRESS                0xFFFF
+#define PATCH_PROGRESS_TOTAL        207
 #define MAX_LOG_SIZE                0x7FFFFFFE
 #define MAX_REFRESH                 25			// How long we should wait to refresh UI elements (in ms)
 #define MAX_GUID_STRING_LENGTH      40
@@ -251,6 +252,7 @@ enum action_type {
 	OP_CREATE_FS,
 	OP_FIX_MBR,
 	OP_FILE_COPY,
+	OP_PATCH,
 	OP_FINALIZE,
 	OP_MAX
 };
@@ -516,7 +518,9 @@ extern void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int ms
 #define PrintInfo(...) PrintStatusInfo(TRUE, FALSE, __VA_ARGS__)
 #define PrintInfoDebug(...) PrintStatusInfo(TRUE, TRUE, __VA_ARGS__)
 extern void UpdateProgress(int op, float percent);
-extern void UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total);
+extern void _UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total, BOOL force);
+#define UpdateProgressWithInfo(op, msg, processed, total) _UpdateProgressWithInfo(op, msg, processed, total, FALSE)
+#define UpdateProgressWithInfoForce(op, msg, processed, total) _UpdateProgressWithInfo(op, msg, processed, total, TRUE)
 #define UpdateProgressWithInfoInit(hProgressDialog, bNoAltMode) UpdateProgressWithInfo(OP_INIT, (int)bNoAltMode, (uint64_t)(uintptr_t)hProgressDialog, 0);
 extern const char* StrError(DWORD error_code, BOOL use_default_locale);
 extern char* GuidToString(const GUID* guid);

@@ -1452,7 +1452,7 @@ BOOL RemoveWindows11Restrictions(char drive_letter)
 
 	boot_wim_path[0] = drive_letter;
 
-	PrintInfo(0, MSG_324, lmprintf(MSG_307));
+	UpdateProgressWithInfoForce(OP_PATCH, MSG_324, 0, PATCH_PROGRESS_TOTAL);
 	uprintf("Mounting '%s'...", boot_wim_path);
 
 	mount_path = WimMountImage(boot_wim_path, wim_index);
@@ -1462,6 +1462,7 @@ BOOL RemoveWindows11Restrictions(char drive_letter)
 	static_sprintf(path, "%s\\Windows\\System32\\config\\SYSTEM", mount_path);
 	if (!MountRegistryHive(HKEY_LOCAL_MACHINE, offline_hive_name, path))
 		goto out;
+	UpdateProgressWithInfoForce(OP_PATCH, MSG_324, 102, PATCH_PROGRESS_TOTAL);
 	is_hive_mounted = TRUE;
 
 	static_sprintf(key_path, "%s\\Setup", offline_hive_name);
@@ -1490,6 +1491,7 @@ BOOL RemoveWindows11Restrictions(char drive_letter)
 		}
 		uprintf("Created 'HKLM\\SYSTEM\\Setup\\LabConfig\\%s' registry key", key_name[i]);
 	}
+	UpdateProgressWithInfoForce(OP_PATCH, MSG_324, 103, PATCH_PROGRESS_TOTAL);
 	r = TRUE;
 
 out:
@@ -1497,12 +1499,15 @@ out:
 		RegCloseKey(hSubKey);
 	if (hKey != NULL)
 		RegCloseKey(hKey);
-	if (is_hive_mounted)
+	if (is_hive_mounted) {
 		UnmountRegistryHive(HKEY_LOCAL_MACHINE, offline_hive_name);
+		UpdateProgressWithInfoForce(OP_PATCH, MSG_324, 104, PATCH_PROGRESS_TOTAL);
+	}
 	if (mount_path) {
 		uprintf("Unmounting '%s'...", boot_wim_path, wim_index);
 		WimUnmountImage(boot_wim_path, wim_index);
 	}
+	UpdateProgressWithInfo(OP_PATCH, MSG_324, PATCH_PROGRESS_TOTAL, PATCH_PROGRESS_TOTAL);
 	free(mount_path);
 	return r;
 }

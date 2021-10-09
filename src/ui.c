@@ -1181,6 +1181,8 @@ void InitProgress(BOOL bOnlyFormat)
 				break;
 			case BT_IMAGE:
 				nb_slots[OP_FILE_COPY] = (img_report.is_iso || img_report.is_windows_img) ? -1 : 0;
+				if (HAS_WINDOWS(img_report) && ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_EXTENDED)
+					nb_slots[OP_PATCH] = -1;
 				break;
 			default:
 				nb_slots[OP_FILE_COPY] = 2 + 1;
@@ -1387,7 +1389,7 @@ static void bar_update(struct bar_progress* bp, uint64_t howmuch, uint64_t dltim
 // display percentage completed, rate of transfer and estimated remaining duration.
 // During init (op = OP_INIT) an optional HWND can be passed on which to look for
 // a progress bar. Part of the code (eta, speed) comes from GNU wget.
-void UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total)
+void _UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total, BOOL force)
 {
 	static int last_update_progress_type = UPT_PERCENT;
 	static struct bar_progress bp = { 0 };
@@ -1486,7 +1488,7 @@ void UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total)
 			static_sprintf(msg_data, "%0.1f%%", percent);
 			break;
 		}
-		if ((bp.count == bp.total_length) || (current_time > last_refresh + MAX_REFRESH)) {
+		if ((force) || (bp.count == bp.total_length) || (current_time > last_refresh + MAX_REFRESH)) {
 			if (op < 0) {
 				SendMessage(hProgressBar, PBM_SETPOS, (WPARAM)(MAX_PROGRESS * percent / 100.0f), 0);
 				if (op == OP_NOOP_WITH_TASKBAR)
@@ -1494,8 +1496,8 @@ void UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total)
 			} else {
 				UpdateProgress(op, (float)percent);
 			}
-			if ((msg >= 0) && ((current_time > bp.last_screen_update + SCREEN_REFRESH_INTERVAL) ||
-				(last_update_progress_type != update_progress_type) || (bp.count == bp.total_length))) {
+			if ((force) || ((msg >= 0) && ((current_time > bp.last_screen_update + SCREEN_REFRESH_INTERVAL) ||
+				(last_update_progress_type != update_progress_type) || (bp.count == bp.total_length)))) {
 				PrintInfo(0, msg, msg_data);
 				bp.last_screen_update = current_time;
 			}

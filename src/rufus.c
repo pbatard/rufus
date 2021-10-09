@@ -2707,6 +2707,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		InitDialog(hDlg);
 		GetDevices(0);
 		EnableControls(TRUE, FALSE);
+		UpdateImage(FALSE);
 		// The AppStore version does not need the internal check for updates
 		if (!appstore_version)
 			CheckForUpdates(FALSE);

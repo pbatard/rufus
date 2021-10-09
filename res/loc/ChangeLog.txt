@@ -5,6 +5,12 @@ To edit a translation, please make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translation
 Or simply download https://rufus-web.akeo.ie/locale/pollock.exe and follow its directions.
 
+o v3.?? (????.??.??)
+  - *UPDATED*  MSG_305 Reworked the message to mention the new Windows 11 Extended option
+  - *NEW*      MSG_322 "Standard Windows 11 Installation (TPM 2.0, Secure Boot, 8GB+ RAM)"
+  - *NEW*      MSG_323 "Extended Windows 11 Installation (no TPM/no Secure Boot/8GB- RAM)"
+  - *NEW*      MSG_324 "Removing Windows 11 installation restrictions: %s"
+
 o v3.14 (2021.03.31)
   - *UPDATED*  MSG_068 "Error while partitioning drive." -> "Could not partition drive."
   - *UPDATED*  MSG_274 "IsoHybrid image detected" -> "%s image detected"
