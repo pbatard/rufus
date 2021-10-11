@@ -1517,8 +1517,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			fd = fopen(tmp, "rb");
 			if (fd != NULL) {
 				// If a file already exists in the current directory, use that one
-				uprintf("Will reuse '%s' from './" FILES_DIR "/%s-%s/' for Grub 2.x installation",
-					core_img, grub, img_report.grub2_version);
+				uprintf("Will reuse '%s' from '%s\\%s\\%s-%s\\' for Grub 2.x installation",
+					core_img, app_data_dir, FILES_DIR, grub, img_report.grub2_version);
 				fseek(fd, 0, SEEK_END);
 				grub2_len = ftell(fd);
 				fseek(fd, 0, SEEK_SET);
@@ -1590,7 +1590,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 						fd = fopen(tmp, "rb");
 						if (fd != NULL) {
 							// If a file already exists in the current directory, use that one
-							uprintf("Will replace obsolete '%s' from ISO with the one found in './" FILES_DIR "/%s'", old_c32_name[i], tmp);
+							uprintf("Will replace obsolete '%s' from ISO with the one found in '%s\\%s\\%s'",
+								old_c32_name[i], app_data_dir, FILES_DIR, tmp);
 							fclose(fd);
 							use_own_c32[i] = TRUE;
 						} else {
@@ -1629,8 +1630,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					}
 				}
 				if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
-					uprintf("Will reuse '%s.%s' and '%s.%s' from './" FILES_DIR "/%s/%s-%s%s/' for Syslinux installation",
-						ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], FILES_DIR, syslinux,
+					uprintf("Will reuse '%s.%s' and '%s.%s' from '%s\\%s\\%s-%s%s\\' for Syslinux installation",
+						ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], app_data_dir, FILES_DIR, syslinux,
 						img_report.sl_version_str, img_report.sl_version_ext);
 				} else {
 					r = MessageBoxExU(hMainDialog, lmprintf(MSG_114, img_report.sl_version_str, img_report.sl_version_ext,
@@ -1686,7 +1687,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		static_sprintf(tmp, "%s-%s/%s.%s", syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
 		fd = fopenU(tmp, "rb");
 		if (fd != NULL) {
-			uprintf("Will reuse './%s/%s' for Syslinux installation", FILES_DIR, tmp);
+			uprintf("Will reuse '%s\\%s\\%s' for Syslinux installation", app_data_dir, FILES_DIR, tmp);
 			fclose(fd);
 		} else {
 			static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[2]);
@@ -1719,7 +1720,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		static_sprintf(tmp, "grub4dos-%s/grldr", GRUB4DOS_VERSION);
 		fd = fopenU(tmp, "rb");
 		if (fd != NULL) {
-			uprintf("Will reuse './%s/%s' for Grub4DOS installation", FILES_DIR, tmp);
+			uprintf("Will reuse '%s\\%s\\%s' for Grub4DOS installation", app_data_dir, FILES_DIR, tmp);
 			fclose(fd);
 		} else {
 			static_sprintf(tmp, "grldr");
@@ -3410,6 +3411,8 @@ skip_args_processing:
 	vc |= (safe_strcmp(tmp, cert_name[0]) == 0);
 	if (fd != NULL) {
 		ini_file = ini_path;
+		// In portable mode, use the app directory for all local storage
+		static_strcpy(app_data_dir, app_dir);
 		fclose(fd);
 	}
 	uprintf("Will use settings from %s", (ini_file != NULL)?"INI file":"registry");

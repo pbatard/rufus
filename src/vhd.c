@@ -160,7 +160,7 @@ static uint64_t progress_offset = 0, progress_total = 100;
 static wchar_t wmount_path[MAX_PATH] = { 0 }, wmount_track[MAX_PATH] = { 0 };
 static char sevenzip_path[MAX_PATH];
 static const char conectix_str[] = VHD_FOOTER_COOKIE;
-static BOOL count_files, use_msg_progress = FALSE;
+static BOOL count_files;
 // Apply/Mount image functionality
 static const char *_image, *_dst;
 static int _index, progress_op = OP_FILE_COPY, progress_msg = MSG_267;
@@ -506,7 +506,7 @@ uint8_t WimExtractCheck(BOOL bSilent)
 // So, yeah, this is both very slow and wasteful of space.
 //
 // NB: You can see mounted WIMs, along with their mountpoint, by checking:
-// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WIMMount\Mounted Images\
+// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WIMMount\Mounted Images
 // You can also mount/unmount images from an elevated prompt with something like:
 // dism /mount-image [/readonly] /imagefile:F:\sources\boot.wim /index:2 /mountdir:C:\test\offline
 // dism /unmount-image /discard /mountdir:C:\test\offline

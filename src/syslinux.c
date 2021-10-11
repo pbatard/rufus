@@ -179,7 +179,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 				uprintf("Could not read %s", path);
 				goto out;
 			}
-			uprintf("Using existing './%s' %s", path,
+			uprintf("Using existing '%s\\%s' %s", app_data_dir, path,
 				IsBufferInDB(syslinux_ldlinux[i], (size_t)syslinux_ldlinux_len[i])?"✓":"✗");
 		}
 	} else {
