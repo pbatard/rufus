@@ -380,10 +380,11 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 			}
 			//
 			// Since version 8.2, and https://github.com/rhinstaller/anaconda/commit/a7661019546ec1d8b0935f9cb0f151015f2e1d95,
-			// Red Hat derivatives have changed their CD-ROM detection policy which leads to the installation source not
-			// being found. So we need to use 'inst.repo' instead of 'inst.stage2' in the kernel options.
+			// Red Hat derivatives have changed their CD-ROM detection policy which leads to the installation source
+			// not being found. So we need to use 'inst.repo' instead of 'inst.stage2' in the kernel options.
 			//
-			if (replace_in_token_data(src, props->is_grub_cfg ? "linuxefi" : "append", "inst.stage2", "inst.repo", TRUE) != NULL) {
+			if (img_report.rh8_derivative && (replace_in_token_data(src, props->is_grub_cfg ?
+				"linuxefi" : "append", "inst.stage2", "inst.repo", TRUE) != NULL)) {
 				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, "inst.stage2", "inst.repo");
 				modified = TRUE;
 			}

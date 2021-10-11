@@ -366,6 +366,7 @@ typedef struct {
 	BOOLEAN is_vhd;
 	BOOLEAN is_windows_img;
 	BOOLEAN disable_iso;
+	BOOLEAN rh8_derivative;
 	uint16_t winpe;
 	uint16_t has_efi;
 	uint8_t has_md5sum;

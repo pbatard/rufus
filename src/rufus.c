@@ -1220,7 +1220,18 @@ out:
 // The scanning process can be blocking for message processing => use a thread
 DWORD WINAPI ImageScanThread(LPVOID param)
 {
-	int i;
+	// Regexp patterns used to match ISO labels for the Red Hat 8 derivatives
+	// where we should apply an inst.stage2 ➔ inst.repo workaround for ISO
+	// mode (per: https://github.com/rhinstaller/anaconda/pull/3529).
+	const char* redhat8_derivative[] = {
+		"^AlmaLinux-8.*",		// AlmaLinux 8.x
+		"^Fedora.*-3[3-9].*",	// Fedora 33-39
+		"^CentOS-8.*",			// CentOS 8.x
+		"^OL-8.*",				// Oracle Linux 8.x
+		"^RHEL-8.*",			// Red Hat 8.x
+		"^Rocky-8.*",			// Rocky Linux 8.x
+	};
+	int i, len;
 	uint8_t arch;
 	char tmp_path[MAX_PATH];
 
@@ -1281,6 +1292,13 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 
 	if (img_report.is_iso) {
 		DisplayISOProps();
+
+		for (i = 0; i < ARRAYSIZE(redhat8_derivative); i++) {
+			if (re_match(redhat8_derivative[i], img_report.label, &len) >= 0) {
+				img_report.rh8_derivative = TRUE;
+				break;
+			}
+		}
 
 		// If we have an ISOHybrid, but without an ISO method we support, disable ISO support altogether
 		if (IS_DD_BOOTABLE(img_report) && (img_report.disable_iso ||
