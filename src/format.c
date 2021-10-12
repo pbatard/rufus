@@ -1442,7 +1442,7 @@ BOOL RemoveWindows11Restrictions(char drive_letter)
 	int i;
 	const int wim_index = 2;
 	const char* offline_hive_name = "RUFUS_OFFLINE_HIVE";
-	const char* key_name[] = { "BypassTPMCheck", "BypassSecureBootCheck", "BypassRAMCheck" };
+	const char* key_name[] = { "BypassTPMCheck", "BypassSecureBootCheck", "BypassRAMCheck", "BypassCPUCheck", "BypassStorageCheck" };
 	char boot_wim_path[] = "#:\\sources\\boot.wim", key_path[64];
 	char* mount_path = NULL;
 	char path[MAX_PATH];
