@@ -4279,7 +4279,7 @@ t MSG_303 "Affiche le log"
 t MSG_304 "Crée une image disque à partir du périphérique sélectionné"
 t MSG_305 "Utilisez cette option pour indiquer si vous voulez utiliser ce périphérique pour installer Windows sur un autre disque, ou bien exécuter Windows directement depuis votre périphérique (Windows To Go)."
 t MSG_306 "Effacement 'rapide' à zéro : %s"
-t MSG_307 "Peut prendre du temps"
+t MSG_307 "peut prendre du temps"
 t MSG_308 "Détection VHD"
 t MSG_309 "Archive compressée"
 t MSG_310 "L’image ISO que vous avez sélectionnée utilise EFI et est suffisamment petite pour être contenue entièrement dans une ESP (EFI System Partition). L’écriture en ESP, plutôt qu’en partition générique occupant la totalité de l’espace disque, peut s’avérer préférable pour certaines méthodes d’installation.\nVeuillez sélectionner le mode d’écriture que vous souhaitez utiliser pour écrire cette image :"
@@ -4294,6 +4294,9 @@ t MSG_318 "Priorité de thread part default : %d"
 t MSG_319 "Ignorer le marqueur de démarrage"
 t MSG_320 "Rafraichissement du schéma de partition (%s)..."
 t MSG_321 "L’image que vous avez sélectionnée est de type ISOHybrid, mais ses créateurs ne l’ont pas rendue compatible avec le mode ISO (i.e. copie de fichier).\nA cause de cela, seule l’écriture en mode DD est applicable."
+t MSG_322 "Installation standard de Windows 11 (TPM 2.0, Secure Boot, 8Go+ RAM)"
+t MSG_323 "Installation Windows 11 étendue (sans TPM/Secure Boot/8Go+ RAM)"
+t MSG_324 "Elimination des restrictions d’installation de Windows 11: %s"
 
 #########################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407

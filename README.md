@@ -22,6 +22,7 @@ Features
 * Create bootable drives from bootable ISOs (Windows, Linux, etc.)
 * Create bootable drives from bootable disk images, including compressed ones
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
+* Create Windows 11 installation drives for PCs that don't have TPM
 * Create persistent Linux partitions
 * Download official Microsoft Windows 7, Windows 8 or Windows 10 retail ISOs
 * Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs

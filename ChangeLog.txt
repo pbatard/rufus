@@ -1,4 +1,4 @@
-o Version 3.16 (2021.10.??)
+o Version 3.16 (2021.10.13)
     Fix ISO mode support for Red Hat 8.2+ and derivatives
     Fix BIOS boot support for Arch derivatives
     Fix removal of some boot entries for Ubuntu derivatives
