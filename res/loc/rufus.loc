@@ -584,8 +584,8 @@ t MSG_319 "Ignore Boot Marker"
 t MSG_320 "Refreshing partition layout (%s)..."
 t MSG_321 "The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File "
 	"copy mode.\nAs a result, DD image writing mode will be enforced."
-t MSG_322 "Standard Windows 11 Installation (TPM 2.0, Secure Boot, 8GB+ RAM)"
-t MSG_323 "Extended Windows 11 Installation (no TPM/no Secure Boot/8GB- RAM)"
+t MSG_322 "Standard Windows 11 Installation (TPM 2.0 + Secure Boot)"
+t MSG_323 "Extended Windows 11 Installation (no TPM / no Secure Boot)"
 t MSG_324 "Removing Windows 11 installation restrictions: %s"
 
 #########################################################################
@@ -4294,8 +4294,8 @@ t MSG_318 "Priorité de thread part default : %d"
 t MSG_319 "Ignorer le marqueur de démarrage"
 t MSG_320 "Rafraichissement du schéma de partition (%s)..."
 t MSG_321 "L’image que vous avez sélectionnée est de type ISOHybrid, mais ses créateurs ne l’ont pas rendue compatible avec le mode ISO (i.e. copie de fichier).\nA cause de cela, seule l’écriture en mode DD est applicable."
-t MSG_322 "Installation standard de Windows 11 (TPM 2.0, Secure Boot, 8Go+ RAM)"
-t MSG_323 "Installation Windows 11 étendue (sans TPM/Secure Boot/8Go+ RAM)"
+t MSG_322 "Installation standard de Windows 11 (TPM 2.0 + Secure Boot)"
+t MSG_323 "Installation Windows 11 étendue (sans TPM / sans Secure Boot)"
 t MSG_324 "Elimination des restrictions d’installation de Windows 11: %s"
 
 #########################################################################

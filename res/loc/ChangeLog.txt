@@ -7,8 +7,8 @@ Or simply download https://rufus-web.akeo.ie/locale/pollock.exe and follow its d
 
 o v3.?? (????.??.??)
   - *UPDATED*  MSG_305 Reworked the message to mention the new Windows 11 Extended option
-  - *NEW*      MSG_322 "Standard Windows 11 Installation (TPM 2.0, Secure Boot, 8GB+ RAM)"
-  - *NEW*      MSG_323 "Extended Windows 11 Installation (no TPM/no Secure Boot/8GB- RAM)"
+  - *NEW*      MSG_322 "Standard Windows 11 Installation (TPM 2.0 + Secure Boot)"
+  - *NEW*      MSG_323 "Extended Windows 11 Installation (no TPM / no Secure Boot)"
   - *NEW*      MSG_324 "Removing Windows 11 installation restrictions: %s"
 
 o v3.14 (2021.03.31)

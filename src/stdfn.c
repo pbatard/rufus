@@ -242,6 +242,8 @@ int GetCpuArch(void)
 
 static const char* GetEdition(DWORD ProductType)
 {
+	static char unknown_edition_str[64];
+
 	// From: https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getproductinfo
 	// These values can be found in the winnt.h header.
 	switch (ProductType) {
@@ -307,7 +309,9 @@ static const char* GetEdition(DWORD ProductType)
 	case 0x000000B8: return "Cloud E N";
 	case 0x000000BD: return "Lite";
 	case 0xABCDABCD: return "(Unlicensed)";
-	default: return "(Unknown Edition)";
+	default:
+		static_sprintf(unknown_edition_str, "(Unknown Edition 0x%02X)", ProductType);
+		return unknown_edition_str;
 	}
 }
 
