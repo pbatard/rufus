@@ -739,6 +739,9 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
 		goto out;
 	}
+	liFilePointer.QuadPart = 0ULL;
+	if (!SetFilePointerEx(hPhysicalDrive, liFilePointer, &liFilePointer, FILE_BEGIN) || (liFilePointer.QuadPart != 0ULL))
+		uprintf("Warning: Could not reset disk position");
 	if (!WriteFileWithRetry(hPhysicalDrive, pZeroBuf, (DWORD)(SectorSize * num_sectors_to_clear), NULL, WRITE_RETRIES))
 		goto out;
 	CHECK_FOR_USER_CANCEL;
@@ -1852,8 +1855,8 @@ DWORD WINAPI FormatThread(void* param)
 {
 	int r;
 	BOOL ret, use_large_fat32, windows_to_go, actual_lock_drive = lock_drive;
-	// Windows 11 and VDS (which I suspect is what fmifs.dll's FormatEx() is now calling behind the
-	// scenes) require us to unlock the physical drive to format the drive, else access denied is re
+	// Windows 11 and VDS (which I suspect is what fmifs.dll's FormatEx() is now calling behind the scenes)
+	// require us to unlock the physical drive to format the drive, else access denied is returned.
 	BOOL need_logical = FALSE, must_unlock_physical = (use_vds || nWindowsVersion >= WINDOWS_11);
 	DWORD cr, DriveIndex = (DWORD)(uintptr_t)param, ClusterSize, Flags;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;

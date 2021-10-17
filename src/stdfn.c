@@ -310,7 +310,7 @@ static const char* GetEdition(DWORD ProductType)
 	case 0x000000BD: return "Lite";
 	case 0xABCDABCD: return "(Unlicensed)";
 	default:
-		static_sprintf(unknown_edition_str, "(Unknown Edition 0x%02X)", ProductType);
+		static_sprintf(unknown_edition_str, "(Unknown Edition 0x%02X)", (uint32_t)ProductType);
 		return unknown_edition_str;
 	}
 }
