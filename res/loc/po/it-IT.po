@@ -913,7 +913,7 @@ msgid ""
 "\n"
 "Are you sure you want to continue?"
 msgstr ""
-"Poiché è stato selezionato 'MBR' per lo schema partizione, Rufus può creare su questo supporto solo una partizione fino ad un amx di 2 TB, che lascerà %s di spazio su disco non disponibile.\n"
+"Poiché è stato selezionato 'MBR' per lo schema partizione, Rufus può creare su questo supporto solo una partizione fino ad un massimo di 2 TB, che lascerà %s di spazio su disco non disponibile.\n"
 "\n"
 "Sei sicuro di voler continuare?"
 
@@ -1269,7 +1269,7 @@ msgstr "Annullata"
 
 #. • MSG_212
 msgid "Failed"
-msgstr "OPERAZIONE FALLITA"
+msgstr "Operazione fallita"
 
 #. • MSG_213
 #.
