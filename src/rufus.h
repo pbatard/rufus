@@ -676,22 +676,41 @@ extern void StrArrayDestroy(StrArray* arr);
  *   pfFormatEx = (FormatEx_t) GetProcAddress(GetDLLHandle("fmifs"), "FormatEx");
  * to make it accessible.
  */
-#define         MAX_LIBRARY_HANDLES 32
+#define         MAX_LIBRARY_HANDLES 64
 extern HMODULE  OpenedLibrariesHandle[MAX_LIBRARY_HANDLES];
 extern uint16_t OpenedLibrariesHandleSize;
 #define         OPENED_LIBRARIES_VARS HMODULE OpenedLibrariesHandle[MAX_LIBRARY_HANDLES]; uint16_t OpenedLibrariesHandleSize = 0
 #define         CLOSE_OPENED_LIBRARIES while(OpenedLibrariesHandleSize > 0) FreeLibrary(OpenedLibrariesHandle[--OpenedLibrariesHandleSize])
 static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 	HMODULE h = NULL;
-	if ((h = GetModuleHandleA(szLibraryName)) == NULL) {
+	wchar_t* wszLibraryName = NULL;
+	int size;
+	if (szLibraryName == NULL || szLibraryName[0] == 0)
+		goto out;
+	size = MultiByteToWideChar(CP_UTF8, 0, szLibraryName, -1, NULL, 0);
+	if (size <= 1)	// An empty string would be size 1
+		goto out;
+	if ((wszLibraryName = (wchar_t*)calloc(size, sizeof(wchar_t))) == NULL)
+		goto out;
+	if (MultiByteToWideChar(CP_UTF8, 0, szLibraryName, -1, wszLibraryName, size) != size)
+		goto out;
+	// If the library is already opened, just return a handle (that doesn't need to be freed)
+	if ((h = GetModuleHandleW(wszLibraryName)) == NULL) {
 		if (OpenedLibrariesHandleSize >= MAX_LIBRARY_HANDLES) {
 			uprintf("Error: MAX_LIBRARY_HANDLES is too small\n");
 		} else {
-			h = LoadLibraryExA(szLibraryName, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+			h = LoadLibraryExW(wszLibraryName, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+			// Some Windows 7 platforms (most likely the ones missing KB2533623 per
+			// the official LoadLibraryEx doc) return "[0x####007F] The specified
+			// procedure could not be found" when using the Ex version.
+			if ((h == NULL) && (SCODE_CODE(GetLastError()) == ERROR_PROC_NOT_FOUND))
+				h = LoadLibraryW(wszLibraryName);
 			if (h != NULL)
 				OpenedLibrariesHandle[OpenedLibrariesHandleSize++] = h;
 		}
 	}
+out:
+	free(wszLibraryName);
 	return h;
 }
 #define PF_TYPE(api, ret, proc, args)		typedef ret (api *proc##_t)args

@@ -2037,26 +2037,27 @@ static void CALLBACK AlertPromptHook(HWINEVENTHOOK hWinEventHook, DWORD Event, H
 
 void SetAlertPromptMessages(void)
 {
-	HMODULE mui_lib;
+	HMODULE hMui;
 	char mui_path[MAX_PATH];
 
 	// Fetch the localized strings in the relevant MUI
 	// Must use sysnative_dir rather than system_dir as we may not find the MUI's otherwise
+	// Also don't bother with LibLibraryEx() since we have a full path here.
 	static_sprintf(mui_path, "%s\\%s\\shell32.dll.mui", sysnative_dir, GetCurrentMUI());
-	mui_lib = LoadLibraryExU(mui_path, NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
-	if (mui_lib != NULL) {
+	hMui = LoadLibraryU(mui_path);
+	if (hMui != NULL) {
 		// 4097 = "You need to format the disk in drive %c: before you can use it." (dialog text)
 		// 4125 = "Microsoft Windows" (dialog title)
 		// 4126 = "Format disk" (button)
-		if (LoadStringU(mui_lib, 4125, title_str[0], sizeof(title_str[0])) <= 0) {
+		if (LoadStringU(hMui, 4125, title_str[0], sizeof(title_str[0])) <= 0) {
 			static_strcpy(title_str[0], "Microsoft Windows");
 			uprintf("Warning: Could not locate localized format prompt title string in '%s': %s", mui_path, WindowsErrorString());
 		}
-		if (LoadStringU(mui_lib, 4126, button_str, sizeof(button_str)) <= 0) {
+		if (LoadStringU(hMui, 4126, button_str, sizeof(button_str)) <= 0) {
 			static_strcpy(button_str, "Format disk");
 			uprintf("Warning: Could not locate localized format prompt button string in '%s': %s", mui_path, WindowsErrorString());
 		}
-		FreeLibrary(mui_lib);
+		FreeLibrary(hMui);
 	}
 	static_strcpy(title_str[1], lmprintf(MSG_149));
 }
