@@ -1517,6 +1517,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			fd = fopen(tmp, "rb");
 			if (fd != NULL) {
 				// If a file already exists in the current directory, use that one
+				to_windows_path(tmp);
 				uprintf("Will reuse '%s' from '%s\\%s\\%s-%s\\' for Grub 2.x installation",
 					core_img, app_data_dir, FILES_DIR, grub, img_report.grub2_version);
 				fseek(fd, 0, SEEK_END);
@@ -1620,7 +1621,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				IGNORE_RETVAL(_chdir(FILES_DIR));
 				for (i=0; i<2; i++) {
 					// Check if we already have the relevant ldlinux_v#.##.sys & ldlinux_v#.##.bss files
-					static_sprintf(tmp, "%s-%s%s/%s.%s", syslinux, img_report.sl_version_str,
+					static_sprintf(tmp, "%s-%s%s\\%s.%s", syslinux, img_report.sl_version_str,
 						img_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
 					fd = fopen(tmp, "rb");
 					if (fd != NULL) {
@@ -1630,6 +1631,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					}
 				}
 				if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
+					to_windows_path(img_report.sl_version_ext);
 					uprintf("Will reuse '%s.%s' and '%s.%s' from '%s\\%s\\%s-%s%s\\' for Syslinux installation",
 						ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], app_data_dir, FILES_DIR, syslinux,
 						img_report.sl_version_str, img_report.sl_version_ext);
@@ -1687,6 +1689,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		static_sprintf(tmp, "%s-%s/%s.%s", syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
 		fd = fopenU(tmp, "rb");
 		if (fd != NULL) {
+			to_windows_path(tmp);
 			uprintf("Will reuse '%s\\%s\\%s' for Syslinux installation", app_data_dir, FILES_DIR, tmp);
 			fclose(fd);
 		} else {
@@ -1720,6 +1723,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		static_sprintf(tmp, "grub4dos-%s/grldr", GRUB4DOS_VERSION);
 		fd = fopenU(tmp, "rb");
 		if (fd != NULL) {
+			to_windows_path(tmp);
 			uprintf("Will reuse '%s\\%s\\%s' for Grub4DOS installation", app_data_dir, FILES_DIR, tmp);
 			fclose(fd);
 		} else {
