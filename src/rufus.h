@@ -499,7 +499,7 @@ extern uint64_t persistence_size;
 extern size_t ubuffer_pos;
 extern const int nb_steps[FS_MAX];
 extern float fScale;
-extern int nWindowsVersion, nWindowsBuildNumber, dialog_showing, force_update;
+extern int nWindowsVersion, nWindowsBuildNumber, nWindowsEdition, dialog_showing, force_update;
 extern int fs_type, boot_type, partition_type, target_type;
 extern unsigned long syslinux_ldlinux_len[2];
 extern char WindowsVersionStr[128], ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];

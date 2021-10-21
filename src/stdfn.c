@@ -34,8 +34,9 @@
 
 #include "settings.h"
 
-int  nWindowsVersion = WINDOWS_UNDEFINED;
-int  nWindowsBuildNumber = -1;
+int nWindowsVersion = WINDOWS_UNDEFINED;
+int nWindowsBuildNumber = -1;
+int nWindowsEdition = 0;
 char WindowsVersionStr[128] = "Windows ";
 
 /*
@@ -279,6 +280,10 @@ static const char* GetEdition(DWORD ProductType)
 	case 0x00000048: return "Enterprise Eval";
 	case 0x00000054: return "Enterprise N Eval";
 	case 0x00000057: return "Thin PC";
+	case 0x00000058: case 0x00000059: case 0x0000005A: case 0x0000005B: case 0x0000005C: return "Embedded";
+	case 0x00000065: return "Core";
+	case 0x00000067: return "Professional WMC";
+	case 0x00000069: case 0x0000006A: case 0x0000006B: case 0x0000006C: return "Embedded";
 	case 0x0000006F: return "Core Connected";
 	case 0x00000070: return "Pro Student";
 	case 0x00000071: return "Core Connected N";
@@ -321,7 +326,7 @@ static const char* GetEdition(DWORD ProductType)
 void GetWindowsVersion(void)
 {
 	OSVERSIONINFOEXA vi, vi2;
-	DWORD dwProductType;
+	DWORD dwProductType = 0;
 	const char* w = 0;
 	const char* w64 = "32 bit";
 	char *vptr;
@@ -419,7 +424,7 @@ void GetWindowsVersion(void)
 	vptr = &WindowsVersionStr[sizeof("Windows ") - 1];
 	vlen = sizeof(WindowsVersionStr) - sizeof("Windows ") - 1;
 	if (!w)
-		safe_sprintf(vptr, vlen, "%s %u.%u %s", (vi.dwPlatformId==VER_PLATFORM_WIN32_NT?"NT":"??"),
+		safe_sprintf(vptr, vlen, "%s %u.%u %s", (vi.dwPlatformId == VER_PLATFORM_WIN32_NT ? "NT" : "??"),
 			(unsigned)vi.dwMajorVersion, (unsigned)vi.dwMinorVersion, w64);
 	else if (vi.wServicePackMinor)
 		safe_sprintf(vptr, vlen, "%s SP%u.%u %s", w, vi.wServicePackMajor, vi.wServicePackMinor, w64);
@@ -427,7 +432,9 @@ void GetWindowsVersion(void)
 		safe_sprintf(vptr, vlen, "%s SP%u %s", w, vi.wServicePackMajor, w64);
 	else
 		safe_sprintf(vptr, vlen, "%s%s%s, %s",
-			w, (dwProductType != PRODUCT_UNDEFINED) ? " " : "", GetEdition(dwProductType), w64);
+			w, (dwProductType != 0) ? " " : "", GetEdition(dwProductType), w64);
+
+	nWindowsEdition = (int)dwProductType;
 
 	// Add the build number (including UBR if available) for Windows 8.0 and later
 	nWindowsBuildNumber = vi.dwBuildNumber;
