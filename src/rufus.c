@@ -4025,6 +4025,7 @@ out:
 	if ((!automount) && (!SetAutoMount(FALSE)))
 		uprintf("Failed to restore AutoMount to disabled");
 	ubflush();
+	_chdirU(app_dir);
 	// Unconditional delete with retry, just in case...
 	for (i = 0; (!DeleteFileA(cmdline_hogger)) && (i <= 10); i++)
 		Sleep(200);
