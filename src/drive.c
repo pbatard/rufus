@@ -72,7 +72,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_
  * Globals
  */
 RUFUS_DRIVE_INFO SelectedDrive;
-extern BOOL installed_uefi_ntfs, write_as_esp;
+extern BOOL write_as_esp;
 extern int nWindowsVersion, nWindowsBuildNumber;
 uint64_t partition_offset[PI_MAX];
 uint64_t persistence_size = 0;
@@ -2271,7 +2271,6 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 				uprintf("Write error: %s", WindowsErrorString());
 				return FALSE;
 			}
-			installed_uefi_ntfs = TRUE;
 		}
 		pn++;
 	}

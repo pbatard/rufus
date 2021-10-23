@@ -5,14 +5,31 @@ See https://github.com/pbatard/uefi-ntfs for more details.
 
 This image, which you can mount as FAT filesystem or open in 7-zip, contains
 the following data:
-o The NTFS and exFAT UEFI drivers from EfiFs (https://github.com/pbatard/efifs).
-  These are the \EFI\Rufus\[exfat|ntfs]_[ia32|x64|arm|aa64].efi files, which are
-  identical to the v1.7 EfiFs binaries published at https://efi.akeo.ie.
-o The UEFI:NTFS binaries (https://github.com/pbatard/uefi-ntfs), which were
-  compiled using Visual Studio 2019 Community Edition.
-  These are the \EFI\Boot\boot[ia32|x64|arm|aa64].efi files.
+
+o Secure Boot signed NTFS UEFI drivers, derived from ntfs-3g [1].
+  These drivers are the exact same as the read-only binaries from release 1.2,
+  except for the addition of Microsoft's Secure Boot signature.
+  Note that, per Microsoft's current Secure Boot signing policies, the 32-bit
+  ARM driver (ntfs_arm.efi) is not Secure Boot signed.
+
+o Non Secure Boot signed exFAT UEFI drivers from EfiFs [2].
+  These drivers are the exact same as the binaries from EfiFs release 1.8 and
+  because they are licensed under GPLv3, they cannot be Secure Boot signed.
+
+o Secure Boot signed UEFI:NTFS bootloader binaries [3].
+  These drivers are the exact same as the binaries from release 2.2, except for
+  the addition of Microsoft's Secure Boot signature.
+  Note that, per Microsoft's current Secure Boot signing policies, the 32-bit
+  ARM bootloader (bootarm.efi) is not Secure Boot signed.
+
+The above means that, if booting an NTFS partition on an x86_32, x86_64 or ARM64
+system, Secure Boot does not need to be disabled.
 
 The FAT partition was created on Debian GNU/Linux using the following commands
-  dd if=/dev/zero of=uefi-ntfs.img bs=512 count=1024
+  dd if=/dev/zero of=uefi-ntfs.img bs=512 count=2048
   mkfs.vfat -n UEFI_NTFS uefi-ntfs.img
 and then mounting the uefi-ntfs.img image and copying the relevant files.
+
+[1] https://github.com/pbatard/ntfs-3g
+[2] https://github.com/pbatard/efifs
+[3] https://github.com/pbatard/uefi-ntfs

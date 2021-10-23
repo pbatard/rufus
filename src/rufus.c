@@ -120,7 +120,7 @@ BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, n
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
-BOOL write_as_image = FALSE, write_as_esp = FALSE, installed_uefi_ntfs = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
+BOOL write_as_image = FALSE, write_as_esp = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
 BOOL appstore_version = FALSE, is_vds_available = TRUE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1, imop_win_sel = 0;
@@ -2606,7 +2606,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			fs_type = (int)ComboBox_GetCurItemData(hFileSystem);
 			write_as_image = FALSE;
 			write_as_esp = FALSE;
-			installed_uefi_ntfs = FALSE;
 			// Disable all controls except Cancel
 			EnableControls(FALSE, FALSE);
 			FormatStatus = 0;
@@ -3067,12 +3066,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PrintInfo(0, MSG_210);
 			MessageBeep(MB_OK);
 			FlashTaskbar(dialog_handle);
-			if (installed_uefi_ntfs && (!ReadSettingBool(SETTING_DISABLE_SECURE_BOOT_NOTICE))) {
-				notification_info more_info;
-				more_info.id = MORE_INFO_URL;
-				more_info.url = SECURE_BOOT_MORE_INFO_URL;
-				Notification(MSG_INFO, SETTING_DISABLE_SECURE_BOOT_NOTICE, &more_info, lmprintf(MSG_128, "Secure Boot"), lmprintf(MSG_129));
-			}
 		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
