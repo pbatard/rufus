@@ -1,9 +1,16 @@
+o Version 3.17 (2021.10.23) [BUGFIX RELEASE]
+    Fix MBR not being properly cleared
+    Fix commandline hogger not being deleted on exit
+    Improve ReFS handling for platforms that support it
+    Update UEFI:NTFS to latest and remove Secure Boot notice since this version is Secure Boot signed
+    Update Grub4DOS to latest
+
 o Version 3.16 (2021.10.13)
     Fix ISO mode support for Red Hat 8.2+ and derivatives
     Fix BIOS boot support for Arch derivatives
     Fix removal of some boot entries for Ubuntu derivatives
     Fix log not being saved on exit
-    Add Windows 11 "Extended" installation support (Disables TPM/Secure Boot/RAM requirements)
+    Add Windows 11 "Extended" installation support (Disables TPM/Secure Boot requirements)
     Add UEFI Shell ISO downloads
     Add support for Intel NUC card readers
     Improve Windows 11 support

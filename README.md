@@ -21,17 +21,17 @@ Features
 * Create BIOS or UEFI bootable drives, including [UEFI bootable NTFS](https://github.com/pbatard/uefi-ntfs)
 * Create bootable drives from bootable ISOs (Windows, Linux, etc.)
 * Create bootable drives from bootable disk images, including compressed ones
-* Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
 * Create Windows 11 installation drives for PCs that don't have TPM
+* Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
 * Create persistent Linux partitions
-* Download official Microsoft Windows 7, Windows 8 or Windows 10 retail ISOs
-* Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs
+* Create VHD/DD images of a drive
 * Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image
-* Twice as fast as Microsoft's USB/DVD tool or UNetbootin, on ISO → USB creation <sup>(1)</sup>
 * Perform bad blocks checks, including detection of "fake" flash drives
+* Download official Microsoft Windows 7, Windows 8, Windows 10 or Windows 11 retail ISOs
+* Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs
 * Modern and familiar UI, with [38 languages natively supported](https://github.com/pbatard/rufus/wiki/FAQ#What_languages_are_natively_supported_by_Rufus)
 * Small footprint. No installation required.
-* Portable
+* Portable. Secure Boot compatible.
 * 100% [Free Software](https://www.gnu.org/philosophy/free-sw) ([GPL v3](https://www.gnu.org/licenses/gpl-3.0))
 
 Compilation
@@ -60,13 +60,3 @@ Enhancements/Bugs
 
 Please use the [GitHub issue tracker](https://github.com/pbatard/rufus/issues)
 for reporting problems or suggesting new features.
-
-
-<sup>(1)</sup> Tests carried out with a 16 GB USB 3.0 ADATA pen drive on a Core 2 duo/4 GB RAM platform running Windows 7 x64.
-ISO: `en_windows_7_ultimate_with_sp1_x64_dvd_618240.iso`
-
-| Name of tool | Version | Time |
-| ------------ | ------- | ---- |
-| [Windows USB/DVD Download Tool](https://www.microsoft.com/en-us/download/windows-usb-dvd-download-tool) | v1.0.30 | 8 mins 10s |
-| [UNetbootin](https://unetbootin.github.io) | v1.1.1.1 | 6 mins 20s |
-| **Rufus** | v1.1.0 | **3 mins 25s** |
