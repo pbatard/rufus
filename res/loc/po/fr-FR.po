@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2021-10-15 12:59+0100\n"
-"PO-Revision-Date: 2021-10-15 13:07+0100\n"
+"POT-Creation-Date: 2021-10-23 12:51+0100\n"
+"PO-Revision-Date: 2021-10-23 13:00+0100\n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1711,8 +1711,10 @@ msgstr "Crée une image disque à partir du périphérique sélectionné"
 #. • MSG_305
 msgid ""
 "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go).\r\n"
-"In 'Extended Windows 11 Installation' mode, Rufus will patch the media so that Windows 11 can be installed on platforms that don't meet the TPM 2.0, Secure Boot or minimum RAM requirements."
-msgstr "Utilisez cette option pour indiquer si vous voulez utiliser ce périphérique pour installer Windows sur un autre disque, ou bien exécuter Windows directement depuis votre périphérique (Windows To Go)."
+"In 'Extended Windows 11 Installation' mode, Rufus will patch the media so that Windows 11 can be installed on platforms that don't meet the TPM 2.0 or Secure Boot requirements."
+msgstr ""
+"Utilisez cette option pour indiquer si vous voulez installer Windows sur un autre disque, ou bien exécuter Windows directement depuis ce périphérique (Windows To Go).\r\n"
+"En mode 'Installation Windows 11 étendue', Rufus modifiera le périphérique de manière à ce que Windows 11 puisse être installé sur les plateformes qui ne sont pas compatibles avec les exigences matérielles TPM 2.0 ou Secure Boot."
 
 #. • MSG_306
 #.

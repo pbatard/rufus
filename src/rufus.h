@@ -689,27 +689,27 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 	if (szLibraryName == NULL || szLibraryName[0] == 0)
 		goto out;
 	size = MultiByteToWideChar(CP_UTF8, 0, szLibraryName, -1, NULL, 0);
-	if (size <= 1)	// An empty string would be size 1
-		goto out;
-	if ((wszLibraryName = (wchar_t*)calloc(size, sizeof(wchar_t))) == NULL)
-		goto out;
-	if (MultiByteToWideChar(CP_UTF8, 0, szLibraryName, -1, wszLibraryName, size) != size)
+	if ((size <= 1) || ((wszLibraryName = (wchar_t*)calloc(size, sizeof(wchar_t))) == NULL) ||
+		(MultiByteToWideChar(CP_UTF8, 0, szLibraryName, -1, wszLibraryName, size) != size))
 		goto out;
 	// If the library is already opened, just return a handle (that doesn't need to be freed)
-	if ((h = GetModuleHandleW(wszLibraryName)) == NULL) {
-		if (OpenedLibrariesHandleSize >= MAX_LIBRARY_HANDLES) {
-			uprintf("Error: MAX_LIBRARY_HANDLES is too small\n");
-		} else {
-			h = LoadLibraryExW(wszLibraryName, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
-			// Some Windows 7 platforms (most likely the ones missing KB2533623 per
-			// the official LoadLibraryEx doc) return "[0x####007F] The specified
-			// procedure could not be found" when using the Ex version.
-			if ((h == NULL) && (SCODE_CODE(GetLastError()) == ERROR_PROC_NOT_FOUND))
-				h = LoadLibraryW(wszLibraryName);
-			if (h != NULL)
-				OpenedLibrariesHandle[OpenedLibrariesHandleSize++] = h;
-		}
+	if ((h = GetModuleHandleW(wszLibraryName)) != NULL)
+		goto out;
+	// Sanity check
+	if (OpenedLibrariesHandleSize >= MAX_LIBRARY_HANDLES) {
+		uprintf("Error: MAX_LIBRARY_HANDLES is too small\n");
+		goto out;
 	}
+	h = LoadLibraryExW(wszLibraryName, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+	// Some Windows 7 platforms (most likely the ones missing KB2533623 per the
+	// official LoadLibraryEx doc) can return ERROR_INVALID_PARAMETER when using
+	// the Ex() version. If that's the case, fallback to using LoadLibraryW().
+	if ((h == NULL) && (SCODE_CODE(GetLastError()) == ERROR_INVALID_PARAMETER))
+		h = LoadLibraryW(wszLibraryName);
+	if (h != NULL)
+		OpenedLibrariesHandle[OpenedLibrariesHandleSize++] = h;
+	else
+		uprintf("Unable to load '%S.dll': %s", wszLibraryName, WindowsErrorString());
 out:
 	free(wszLibraryName);
 	return h;
@@ -720,7 +720,7 @@ out:
 #define PF_INIT(proc, name)					if (pf##proc == NULL) pf##proc = \
 	(proc##_t) GetProcAddress(GetLibraryHandle(#name), #proc)
 #define PF_INIT_OR_OUT(proc, name)			do {PF_INIT(proc, name);         \
-	if (pf##proc == NULL) {uprintf("Unable to locate %s() in %s.dll: %s\n",  \
+	if (pf##proc == NULL) {uprintf("Unable to locate %s() in '%s.dll': %s",  \
 	#proc, #name, WindowsErrorString()); goto out;} } while(0)
 #define PF_INIT_OR_SET_STATUS(proc, name)	do {PF_INIT(proc, name);         \
 	if ((pf##proc == NULL) && (NT_SUCCESS(status))) status = STATUS_NOT_IMPLEMENTED; } while(0)
