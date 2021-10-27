@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Package
+ IgnorableNamespaces="uap uap7 uap8 rescap build"
+ xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+ xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+ xmlns:uap7="http://schemas.microsoft.com/appx/manifest/uap/windows10/7"
+ xmlns:uap8="http://schemas.microsoft.com/appx/manifest/uap/windows10/8"
+ xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+ xmlns:build="http://schemas.microsoft.com/developer/appx/2015/build">
+  <Identity
+   Name="19453.net.Rufus"
+   Publisher="CN=7AC86D13-3E5A-491A-ADD5-80095C212740"
+   Version="@VERSION@"
+   ProcessorArchitecture="@ARCH@"/>
+  <Properties>
+    <DisplayName>Rufus</DisplayName>
+    <PublisherDisplayName>Akeo Consulting</PublisherDisplayName>
+    <Logo>Images\StoreLogo.png</Logo>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily 
+     Name="Windows.Desktop"
+     MinVersion="10.0.14316.0"
+     MaxVersionTested="10.0.22000.194"/>
+    <PackageDependency
+     Name="Microsoft.VCLibs.140.00.UWPDesktop"
+     MinVersion="14.0.30035.0"
+     Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"/>
+  </Dependencies>
+  <Resources>
+    <Resource Language="en-US"/>
+    <Resource uap:Scale="200"/>
+  </Resources>
+  <Applications>
+    <Application
+     Id="Rufus"
+     Executable="rufus\rufus.exe"
+     EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+       DisplayName="Rufus"
+       Description="Rufus"
+       BackgroundColor="transparent"
+       Square150x150Logo="Images\Square150x150Logo.png"
+       Square44x44Logo="Images\Square44x44Logo.png">
+        <uap:DefaultTile
+         Wide310x150Logo="Images\Wide310x150Logo.png"
+         Square71x71Logo="Images\SmallTile.png"
+         Square310x310Logo="Images\LargeTile.png">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo"/>
+            <uap:ShowOn Tile="wide310x150Logo"/>
+            <uap:ShowOn Tile="square310x310Logo"/>
+          </uap:ShowNameOnTiles>
+        </uap:DefaultTile>
+      </uap:VisualElements>
+      <uap7:Properties>
+        <uap8:ActiveCodePage>UTF-8</uap8:ActiveCodePage>
+      </uap7:Properties>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust"/>
+    <rescap:Capability Name="allowElevation"/>
+  </Capabilities>
+</Package>

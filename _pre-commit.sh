@@ -38,9 +38,7 @@ _EOF
 sed -i -e "s/@@BUILD@@/$BUILD/g" cmd.sed
 # Run sed to update the nano version
 sed -b -i -f cmd.sed src/rufus.rc
-sed -b -i -f cmd.sed res/appstore/Package.appxmanifest
 # NB: we need to run git add else the modified files may be ignored
 git add src/rufus.rc
-git add res/appstore/Package.appxmanifest
 
 rm cmd.sed

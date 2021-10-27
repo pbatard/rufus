@@ -33,7 +33,5 @@ _EOF
 # First run sed to substitute our variable in the sed command file
 sed -i -e "s/@@MAJOR@@/$MAJOR/g" -e "s/@@MINOR@@/$MINOR/g" cmd.sed
 sed -b -i -f cmd.sed src/rufus.rc
-sed -b -i -f cmd.sed res/appstore/Package.appxmanifest
-sed -b -i -f cmd.sed res/appstore/packme.cmd
 rm cmd.sed
 source ./bootstrap.sh
