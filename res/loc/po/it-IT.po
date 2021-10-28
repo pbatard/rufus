@@ -698,7 +698,7 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"%s o successivo richiedono l'installazione di un file '%s'.\n"
+"%s o successivo richiedono l'installazione del file '%s'.\n"
 "Poiché questo file è più grande di 100 KB, ed è sempre presente nell'immagine ISO di %s, il file non è incluso in Rufus.\n"
 "\n"
 "Rufus può scaricare per te il file mancante:\n"
@@ -836,7 +836,7 @@ msgstr "Nascondi %s"
 #. To test this feature, please download and select 'casper_test.iso' from:
 #. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
 msgid "Persistent partition size"
-msgstr "Dim. partizione persistente"
+msgstr "Dimensione partizione persistente"
 
 #. • MSG_124
 #.
@@ -957,7 +957,7 @@ msgstr "Download via browser"
 msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
 msgstr ""
 "Temporaneamente vietato da Microsoft per la richiesta di troppi download\n"
-"Riprova più tardi ..."
+"Riprova più tardi..."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -977,7 +977,7 @@ msgstr "Download immagine ISO"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
-msgstr "Tipo di computer con cui pensi di effettuare il boot. È una tua responsabilità, prima di creare l'unità, identificare se il tipo di sistema destinazione è di tipo BIOS o UEFI. Altrimenti il boot potrebbe fallire ."
+msgstr "Tipo di computer con cui pensi di effettuare il boot. È una tua responsabilità, prima di creare l'unità, identificare se il tipo di sistema destinazione è di tipo BIOS o UEFI. Altrimenti il boot potrebbe fallire."
 
 #. • MSG_151
 #.
@@ -1094,7 +1094,7 @@ msgstr "Fai clic per selezionare..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr "Rufus - Utility affidabile formattazione unità USB"
+msgstr "Rufus - Utility affidabile per la formattazione di unità USB"
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
@@ -1168,13 +1168,13 @@ msgstr "Rilevata unità incompatibile"
 #.
 #. Used in MSG_235
 msgid "Write pass"
-msgstr "Fase scrittura"
+msgstr "Fase di scrittura"
 
 #. • MSG_192
 #.
 #. Used in MSG_235
 msgid "Read pass"
-msgstr "Fase lettura"
+msgstr "Fase di lettura"
 
 #. • MSG_193
 msgid "Downloaded %s"
@@ -1389,7 +1389,7 @@ msgstr "Blocchi danneggiati: test con pattern casuali"
 
 #. • MSG_237
 msgid "Bad Blocks: Testing with pattern 0x%02X"
-msgstr "Blocchi danneggiati: testing con pattern 0x%02X"
+msgstr "Blocchi danneggiati: test con pattern 0x%02X"
 
 #. • MSG_238
 #.
