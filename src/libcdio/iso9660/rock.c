@@ -471,7 +471,7 @@ iso9660_get_rock_attr_str(posix_mode_t st_mode)
   result[ 8] = (st_mode & ISO_ROCK_IWOTH) ? 'w' : '-';
   result[ 9] = (st_mode & ISO_ROCK_IXOTH) ? 'x' : '-';
 
-  result[11] = '\0';
+  result[10] = '\0';
 
   return result;
 }
