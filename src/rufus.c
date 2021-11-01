@@ -1006,7 +1006,7 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			ShowWindow(hDlg, SW_HIDE);
 			log_displayed = FALSE;
 			// Set focus to the Cancel button on the main dialog
-			// This avoids intempestive tooltip display from the log toolbar buttom
+			// This avoids intempestive tooltip display from the log toolbar button
 			SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 			return TRUE;
 		case IDC_LOG_CLEAR:
@@ -1036,7 +1036,7 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		reset_localization(IDD_LOG);
 		log_displayed = FALSE;
 		// Set focus to the Cancel button on the main dialog
-		// This avoids intempestive tooltip display from the log toolbar buttom
+		// This avoids intempestive tooltip display from the log toolbar button
 		SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 		return TRUE;
 	case UM_RESIZE_BUTTONS:
@@ -3972,7 +3972,7 @@ relaunch:
 		}
 
 		// Standalone 'Alt' key toggles progress report between percent, rate (if available)
-		// and remaining time (if availabe)
+		// and remaining time (if available)
 		if (alt_pressed && !(GetKeyState(VK_MENU) & 0x8000)) {
 			alt_pressed = FALSE;
 			if (!alt_command)

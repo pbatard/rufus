@@ -650,7 +650,7 @@ out:
  * \param bIgnoreSelf Whether the current process should be listed.
  * \param bQuiet Prints minimal output.
  *
- * \return a byte containing the cummulated access rights (f----xwr) from all the handles found
+ * \return a byte containing the cumulated access rights (f----xwr) from all the handles found
  *         with bit 7 ('f') also set if at least one process was found.
  */
 BYTE SearchProcess(char* HandleName, DWORD dwTimeOut, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet)

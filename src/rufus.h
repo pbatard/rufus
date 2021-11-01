@@ -106,7 +106,7 @@
 #define UDF_FORMAT_SPEED            3.1f		// Speed estimate at which we expect UDF drives to be formatted (GB/s)
 #define UDF_FORMAT_WARN             20			// Duration (in seconds) above which we warn about long UDF formatting times
 #define MAX_FAT32_SIZE              2.0f		// Threshold above which we disable FAT32 formatting (in TB)
-#define FAT32_CLUSTER_THRESHOLD     1.011f		// For FAT32, cluster size changes don't occur at power of 2 boundaries but sligthly above
+#define FAT32_CLUSTER_THRESHOLD     1.011f		// For FAT32, cluster size changes don't occur at power of 2 boundaries but slightly above
 #define DD_BUFFER_SIZE              (32 * 1024 * 1024)	// Minimum size of buffer to use for DD operations
 #define UBUFFER_SIZE                4096
 #define RSA_SIGNATURE_SIZE          256

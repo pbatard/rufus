@@ -1217,7 +1217,7 @@ char* replace_in_token_data(const char* filename, const char* token, const char*
 			// coverity[invalid_type]
 			fwprintf_s(fd_out, L"%s%s", &buf[p[j]], wrep);
 
-		// Ouput the last fragment
+		// Output the last fragment
 		// coverity[invalid_type]
 		fwprintf_s(fd_out, L"%s", &buf[p[j]]);
 

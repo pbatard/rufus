@@ -1246,7 +1246,7 @@ int SetWinToGoIndex(void)
 			wininst_index = 0;
 	}
 
-	// If we're not using a straigth install.wim, we need to mount the ISO to access it
+	// If we're not using a straight install.wim, we need to mount the ISO to access it
 	if (!img_report.is_windows_img) {
 		mounted_iso = MountISO(image_path);
 		if (mounted_iso == NULL) {

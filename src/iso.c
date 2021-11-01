@@ -1437,7 +1437,7 @@ BOOL HasEfiImgBootLoaders(void)
 	p_private->p_iso = p_iso;
 	p_private->lsn = p_statbuf->lsn;
 	p_private->sec_start = 0;
-	// Populate our intial buffer
+	// Populate our initial buffer
 	if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf, p_private->lsn, ISO_NB_BLOCKS) != ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
 		uprintf("Error reading ISO-9660 file %s at LSN %lu\n", img_report.efi_img_path, (long unsigned int)p_private->lsn);
 		goto out;
@@ -1528,7 +1528,7 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 		p_private->p_iso = p_iso;
 		p_private->lsn = p_statbuf->lsn;
 		p_private->sec_start = 0;
-		// Populate our intial buffer
+		// Populate our initial buffer
 		if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf, p_private->lsn, ISO_NB_BLOCKS) != ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
 			uprintf("Error reading ISO-9660 file %s at LSN %lu\n", img_report.efi_img_path, (long unsigned int)p_private->lsn);
 			goto out;

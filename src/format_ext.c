@@ -313,7 +313,7 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 	features.s_log_cluster_size = features.s_log_block_size;
 	size /= BlockSize;
 
-	// ext2 and ext3 have a can only accomodate up to Blocksize * 2^32 sized volumes
+	// ext2 and ext3 have a can only accommodate up to Blocksize * 2^32 sized volumes
 	if (((strcmp(FSName, FileSystemLabel[FS_EXT2]) == 0) || (strcmp(FSName, FileSystemLabel[FS_EXT3]) == 0)) &&
 		(size >= 0x100000000ULL)) {
 		SET_EXT2_FORMAT_ERROR(ERROR_INVALID_VOLUME_SIZE);

@@ -360,7 +360,7 @@ char* GetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrail
 	if (i < found_name.Index) {
 		ret = safe_strdup(found_name.String[i]);
 	} else {
-		// NB: We need to re-add DRIVE_INDEX_MIN for this call since CheckDriveIndex() substracted it
+		// NB: We need to re-add DRIVE_INDEX_MIN for this call since CheckDriveIndex() subtracted it
 		ret = AltGetLogicalName(DriveIndex + DRIVE_INDEX_MIN, PartitionOffset, bKeepTrailingBackslash, bSilent);
 		if ((ret != NULL) && (strchr(ret, ' ') != NULL))
 			uprintf("Warning: Using physical device to access partition data");
@@ -829,7 +829,7 @@ BOOL DeletePartition(DWORD DriveIndex, ULONGLONG PartitionOffset, BOOL bSilent)
 }
 
 /*
- * Count on Microsoft for *COMPLETELY CRIPPLING* an API when alledgedly upgrading it...
+ * Count on Microsoft for *COMPLETELY CRIPPLING* an API when allegedly upgrading it...
  * As illustrated when you do so with diskpart (which uses VDS behind the scenes), VDS
  * simply *DOES NOT* list all the volumes that the system can see, especially compared
  * to what mountvol (which uses FindFirstVolume()/FindNextVolume()) and other APIs do.
@@ -1609,7 +1609,7 @@ BOOL ToggleEsp(DWORD DriveIndex, uint64_t PartitionOffset)
 			// We successfully reverted ESP from Basic Data -> Delete stored ESP info
 			ClearEspInfo((uint8_t)j);
 		} else if (!IsDriveLetterInUse(*mount_point)) {
-			// We succesfully switched ESP to Basic Data -> Try to mount it
+			// We successfully switched ESP to Basic Data -> Try to mount it
 			volume_name = GetLogicalName(DriveIndex, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart, TRUE, FALSE);
 			IGNORE_RETVAL(MountVolume(mount_point, volume_name));
 			free(volume_name);

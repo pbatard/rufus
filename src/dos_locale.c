@@ -42,7 +42,7 @@
  */
 
 /* WinME DOS keyboard 2 letter codes & supported keyboard ID(s), as retrieved
- * from the Millenium disk image in diskcopy.dll on a Windows 7 system
+ * from the Millennium disk image in diskcopy.dll on a Windows 7 system
  *
  *	KEYBOARD.SYS
  *		GR 129*

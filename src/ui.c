@@ -784,7 +784,7 @@ void ToggleImageOptions(void)
 
 	assert(popcnt8(image_options) <= 1);
 
-	// Keep a copy of the "Image Option" text (so that we don't have to duplicate its transation in the .loc)
+	// Keep a copy of the "Image Option" text (so that we don't have to duplicate its translation in the .loc)
 	if (image_option_txt[0] == 0)
 		GetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), image_option_txt, sizeof(image_option_txt));
 
