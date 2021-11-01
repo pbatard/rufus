@@ -87,7 +87,6 @@ def load_languages():
                     languages[i].groups[shlex.split(line)[1]] = {}
                     # print("current group: "+languages[i].get_current_group())
                 elif line[0] == "t":
-                    pass
                     try:
                         temp_translation = shlex.split(line) #errors
                     except ValueError as err:
