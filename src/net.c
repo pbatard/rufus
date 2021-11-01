@@ -319,7 +319,7 @@ out:
  * to the dialog in question, with WPARAM being set to nonzero for EXIT on success
  * and also attempt to indicate progress using an IDC_PROGRESS control
  * Note that when a buffer is used, the actual size of the buffer is one more than its reported
- * size (with the extra byte set to 0) to accomodate for calls that need a NUL-terminated buffer.
+ * size (with the extra byte set to 0) to accommodate for calls that need a NUL-terminated buffer.
  */
 uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress)
 {

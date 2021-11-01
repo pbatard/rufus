@@ -1343,7 +1343,7 @@ const char* test_hash[CHECKSUM_MAX][4] = {
 	},
 };
 
-/* Tests the message digest aglorithms */
+/* Tests the message digest algorithms */
 int TestChecksum(void)
 {
 	const uint32_t blocksize[CHECKSUM_MAX] = { MD5_BLOCKSIZE, SHA1_BLOCKSIZE, SHA256_BLOCKSIZE, SHA512_BLOCKSIZE };

@@ -234,7 +234,7 @@ namespace pollock
                             lang.lcid += " " + parts[i];
                         break;
                     case 'a':
-                        // This attribue will be restored manually
+                        // This attribute will be restored manually
                         break;
                     case 'g':
                         comment = null;
@@ -300,7 +300,7 @@ namespace pollock
         /// <summary>
         /// Create .po/.pot files from a list of Language elements.
         /// </summary>
-        /// <param name="langs">A lits of Language objects to process.</param>
+        /// <param name="langs">A list of Language objects to process.</param>
         /// <param name="old_en_US">(Optional) A previous version of en-US to use for comparison.</param>
         /// <param name="path">(Optional) The path where the .po/.pot files should be created.</param>
         /// <returns>The number of PO files created.</returns>
@@ -457,7 +457,7 @@ namespace pollock
             bool is_pot = file.EndsWith(".pot");
             bool file_locked = true;
             string[] lines = null;
-            // May get an I/O expection if Poedit is not done
+            // May get an I/O exception if Poedit is not done
             do
             {
                 try
@@ -924,7 +924,7 @@ namespace pollock
             // Fix needed for Windows 7 to download from github SSL
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-            // Also set the Console width to something that can accomodate us
+            // Also set the Console width to something that can accommodate us
             if (Console.WindowWidth < 100)
                 Console.SetWindowSize(100, Console.WindowHeight);
 

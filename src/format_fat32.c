@@ -356,7 +356,7 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	// Sector 6 Backup boot sector
 	// Sector 7 Backup FSInfo sector
 	// Sector 8 Backup 'more boot code'
-	// zeroed sectors upto ReservedSectCount
+	// zeroed sectors up to ReservedSectCount
 	// FAT1  ReservedSectCount to ReservedSectCount + FatSize
 	// ...
 	// FATn  ReservedSectCount to ReservedSectCount + FatSize
