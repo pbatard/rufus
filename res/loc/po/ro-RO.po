@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.5\n"
+"Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-04-17 12:18+0100\n"
-"PO-Revision-Date: 2020-04-17 12:24+0100\n"
+"POT-Creation-Date: 2021-10-24 23:38+0300\n"
+"PO-Revision-Date: 2021-11-13 11:35+0000\n"
 "Language: ro_RO\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,11 +13,11 @@ msgstr ""
 "X-Rufus-LCID: 0x0418, 0x0818\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 3.0\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
-msgstr "Proprietați Dispozitiv"
+msgstr "Proprietăți unitate"
 
 #. • IDD_DIALOG → IDS_DEVICE_TXT
 msgid "Device"
@@ -25,7 +25,7 @@ msgstr "Dispozitiv"
 
 #. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
 msgid "Boot selection"
-msgstr "Selectare Boot"
+msgstr "Selectare boot"
 
 #. • IDD_DIALOG → IDC_SELECT
 msgid "Select"
@@ -33,26 +33,26 @@ msgstr "Selectare"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
 msgid "Image Option"
-msgstr "Opțiuni Imagine"
+msgstr "Opțiune imagine"
 
 #. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
 msgid "Partition scheme"
-msgstr "Schema de Partiționare"
+msgstr "Schemă de partiționare"
 
 #. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
 msgid "Target system"
-msgstr "Sistemul Țintă"
+msgstr "Sistemul vizat"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
-msgstr "Lista Hard-uri USB"
+msgstr "Afișare unități conectate prin USB"
 
 #. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
 #.
 #. It is acceptable to drop the parenthesis () if you are running out of space
 #. as there is a tooltip (MSG_169) providing these details.
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
-msgstr "Adaugă remedieri pentru BIOS-ul vechi"
+msgstr "Adăugare remedieri pentru BIOS-uri vechi (partiție extra, aliniere, etc.)"
 
 #. • IDD_DIALOG → IDC_RUFUS_MBR
 #.
@@ -64,35 +64,35 @@ msgstr "Utilizare MBR Rufus cu ID BIOS"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
-msgstr "Opțiuni Formatare"
+msgstr "Opțiuni formatare"
 
 #. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
 msgid "File system"
-msgstr "Sistem de Fișiere"
+msgstr "Sistem de fișiere"
 
 #. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
 msgid "Cluster size"
-msgstr "Mărime Cluster"
+msgstr "Mărime cluster"
 
 #. • IDD_DIALOG → IDS_LABEL_TXT
 msgid "Volume label"
-msgstr "Eticheta Volumului"
+msgstr "Etichetă volum"
 
 #. • IDD_DIALOG → IDC_QUICK_FORMAT
 msgid "Quick format"
-msgstr "Formatare Rapidă"
+msgstr "Formatare rapidă"
 
 #. • IDD_DIALOG → IDC_BAD_BLOCKS
 msgid "Check device for bad blocks"
-msgstr "Testare Blocuri Defecte"
+msgstr "Căutare blocuri defecte"
 
 #. • IDD_DIALOG → IDC_EXTENDED_LABEL
 msgid "Create extended label and icon files"
-msgstr "Creare Etichete extinse și Pictograme"
+msgstr "Creare fișiere extinse pentru etichete și iconițe"
 
 #. • IDD_DIALOG → IDS_STATUS_TXT
 msgid "Status"
-msgstr "Starea"
+msgstr "Stare"
 
 #. • IDD_DIALOG → IDCANCEL
 #. • IDD_LICENSE → IDCANCEL
@@ -101,7 +101,7 @@ msgstr "Starea"
 #. • IDD_NEW_VERSION → IDCANCEL
 #. • MSG_006
 msgid "Close"
-msgstr "Închide"
+msgstr "Închidere"
 
 #. • IDD_DIALOG → IDC_START
 msgid "Start"
@@ -113,15 +113,15 @@ msgstr "Despre Rufus"
 
 #. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
 msgid "License"
-msgstr "Licența"
+msgstr "Licență"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
-msgstr "Ok"
+msgstr ""
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
-msgstr "Licența Rufus"
+msgstr "Licență Rufus"
 
 #. • IDD_NOTIFICATION → IDC_MORE_INFO
 msgid "More information"
@@ -139,19 +139,19 @@ msgstr "Nu"
 
 #. • IDD_LOG → IDD_LOG
 msgid "Log"
-msgstr "Registru"
+msgstr "Jurnal"
 
 #. • IDD_LOG → IDC_LOG_CLEAR
 msgid "Clear"
-msgstr "Șterge"
+msgstr "Ștergere"
 
 #. • IDD_LOG → IDC_LOG_SAVE
 msgid "Save"
-msgstr "Salvează"
+msgstr "Salvare"
 
 #. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
 msgid "Update policy and settings"
-msgstr "Setări politică de actualizare"
+msgstr "Politică de actualizare și setări"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
 msgid "Settings"
@@ -159,31 +159,31 @@ msgstr "Setări"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
 msgid "Check for updates"
-msgstr "Verificare actualizări"
+msgstr "Căutare actualizări"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
 msgid "Include beta versions"
-msgstr "Include versiuni beta"
+msgstr "Includere versiuni beta"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
-msgstr "Verifică acum"
+msgstr "Căutare acum"
 
 #. • IDD_NEW_VERSION → IDD_NEW_VERSION
 msgid "Check For Updates - Rufus"
-msgstr "Rufus - Verificare actualizări"
+msgstr "Căutare actualizări - Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
 msgid "A newer version is available. Please download the latest version!"
-msgstr "Este o nouă versiune. Descarcați cea mai recentă versiune!"
+msgstr "Este disponibilă o nouă versiune. Vă rugăm să descărcați cea mai recentă versiune!"
 
 #. • IDD_NEW_VERSION → IDC_WEBSITE
 msgid "Click here to go to the website"
-msgstr "Click aici pentru a vizita site-ul web"
+msgstr "Apăsați aici pentru a accesa pagina web"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
 msgid "Release Notes"
-msgstr "Informații versiune"
+msgstr "Informații despre lansări"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
 #. • IDD_NEW_VERSION → IDC_DOWNLOAD
@@ -193,23 +193,23 @@ msgstr "Descărcare"
 
 #. • MSG_001
 msgid "Other instance detected"
-msgstr "Altă instanță detectată"
+msgstr "S-a detectat altă instanță"
 
 #. • MSG_002
 msgid ""
 "Another Rufus application is running.\n"
 "Please close the first application before running another one."
 msgstr ""
-"Rulează o altă aplicație Rufus.\n"
-"Închideți prima aplicație înainte de a efectua a doua."
+"O altă aplicație Rufus rulează.\n"
+"Vă rugăm să închideți prima aplicație înainte de a deschide alta."
 
 #. • MSG_003
 msgid ""
 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
 "To continue with this operation, click OK. To quit click CANCEL."
 msgstr ""
-"AVERTISMENT: TOATE DATELE DE PE DISPOZITIVUL '%s' VOR FI ŞTERSE.\n"
-"Pentru a continua cu această operație, faceți click pe OK. Pentru a renunța faceți click pe Cancel."
+"ATENȚIE: TOATE DATELE DE PE DISPOZITIVUL '%s' VOR FI DISTRUSE.\n"
+"Pentru a continua, alegeți OK. Pentru a renunța, alegeți ANULARE."
 
 #. • MSG_004
 msgid "Rufus update policy"
@@ -217,15 +217,15 @@ msgstr "Politica de actualizare Rufus"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
-msgstr "Permiteți ca Rufus să verifice actualizările online?"
+msgstr "Permiteți aplicației Rufus să caute actualizări pe internet?"
 
 #. • MSG_007
 msgid "Cancel"
-msgstr "Anulează"
+msgstr "Anulare"
 
 #. • MSG_010
 msgid "Bad blocks found"
-msgstr "Bloc defect Detectat"
+msgstr "S-au găsit blocuri defecte"
 
 #. • MSG_011
 msgid ""
@@ -234,10 +234,10 @@ msgid ""
 "  %d write error(s)\n"
 "  %d corruption error(s)"
 msgstr ""
-"Verificare completă: s-au găsit %d blocuri defecte\n"
+"Verificare finalizată: s-au găsit %d blocuri defecte\n"
 "  %d erori de citire\n"
 "  %d erori de scriere\n"
-"  %d erori de corupere"
+"  %d erori de integritate"
 
 #. • MSG_012
 #.
@@ -248,12 +248,12 @@ msgid ""
 "%s"
 msgstr ""
 "%s\n"
-"Un raport mai detaliat este disponibil în:\n"
+"Un raport mai detaliat se află în:\n"
 "%s"
 
 #. • MSG_013
 msgid "Disabled"
-msgstr "Dezactivat"
+msgstr "Dezactivată"
 
 #. • MSG_014
 msgid "Daily"
@@ -273,64 +273,64 @@ msgstr "Personalizat"
 
 #. • MSG_018
 msgid "Your version: %d.%d (Build %d)"
-msgstr "Versiunea instalată: %d.%d (Build %d)"
+msgstr "Versiune instalată: %d.%d (Generare %d)"
 
 #. • MSG_019
 msgid "Latest version: %d.%d (Build %d)"
-msgstr "Ultima versiune: %d.%d (Build %d)"
+msgstr "Cea mai recentă versiune: %d.%d (Generare %d)"
 
 #. • MSG_020
 #. • MSG_026
 msgid "bytes"
-msgstr "octeți"
+msgstr "baiți"
 
 #. • MSG_021
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr "KO"
+msgstr ""
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr "MO"
+msgstr ""
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr "GO"
+msgstr ""
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr "TO"
+msgstr ""
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr "PO"
+msgstr ""
 
 #. • MSG_027
 msgid "kilobytes"
-msgstr "kilo-octeți"
+msgstr "kilobaiți"
 
 #. • MSG_028
 msgid "megabytes"
-msgstr "megaocteți"
+msgstr "megabaiți"
 
 #. • MSG_029
 msgid "Default"
-msgstr "Standard"
+msgstr "Implicit"
 
 #. • MSG_030
 #.
 #. This gets appended to the file system, cluster size, etc.
 msgid "%s (Default)"
-msgstr "%s (Standard)"
+msgstr "%s (Implicit)"
 
 #. • MSG_031
 msgid "BIOS (or UEFI-CSM)"
@@ -363,19 +363,19 @@ msgstr "Imagine ISO"
 
 #. • MSG_037
 msgid "Application"
-msgstr "Cerere"
+msgstr "Aplicație"
 
 #. • MSG_038
 msgid "Abort"
-msgstr "Anulează"
+msgstr "Anulare"
 
 #. • MSG_039
 msgid "Launch"
-msgstr "Execută"
+msgstr "Lansare"
 
 #. • MSG_041
 msgid "Operation cancelled by the user"
-msgstr "Operațiunea anulată de către utilizator"
+msgstr "Operațiune anulată de către utilizator"
 
 #. • MSG_042
 msgid "Error"
@@ -391,21 +391,21 @@ msgstr "Descărcare fișier"
 
 #. • MSG_045
 msgid "USB Storage Device (Generic)"
-msgstr "Unitate de stocare USB (generic)"
+msgstr "Dispozitiv de stocare USB (Generic)"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
-msgstr "%s (disc %d) [%s]"
+msgstr "%s (Disc %d) [%s]"
 
 #. • MSG_047
 #.
 #. Used when a drive is detected that contains more than one partition
 msgid "Multiple Partitions"
-msgstr "Volume multiple"
+msgstr "Partiții multiple"
 
 #. • MSG_048
 msgid "Rufus - Flushing buffers"
-msgstr "Rufus - Ștergere buffer"
+msgstr "Rufus - Curățare buffer"
 
 #. • MSG_049
 msgid "Rufus - Cancellation"
@@ -413,27 +413,27 @@ msgstr "Rufus - Anulare"
 
 #. • MSG_050
 msgid "Success."
-msgstr "Finisat."
+msgstr "Finalizat cu succes."
 
 #. • MSG_051
 msgid "Undetermined error while formatting."
-msgstr "A apărut o eroare necunoscută în timpul formatării."
+msgstr "Eroare necunoscută în timpul formatării."
 
 #. • MSG_052
 msgid "Cannot use the selected file system for this media."
-msgstr "Imposibilitatea de a utiliza sistemul de fișiere selectat."
+msgstr "Nu se poate utiliza sistemul de fișiere selectat pe acest dispozitiv media."
 
 #. • MSG_053
 msgid "Access to the device is denied."
-msgstr "Acces respins unitate."
+msgstr "Accesul la dispozitiv a fost respins."
 
 #. • MSG_054
 msgid "Media is write protected."
-msgstr "Dispozitivul este apărat de la înscriere."
+msgstr "Dispozitivul media are scrierea protejată."
 
 #. • MSG_055
 msgid "The device is in use by another process. Please close any other process that may be accessing the device."
-msgstr "Dispozitivul este folosit în alt proces. Închideți orice alt proces care ar putea avea acces la dispozitiv."
+msgstr "Dispozitivul este utilizat de către un alt proces. Vă rugăm să închideți orice alt proces care ar putea să acceseze dispozitivul."
 
 #. • MSG_056
 msgid "Quick format is not available for this device."
@@ -441,11 +441,11 @@ msgstr "Formatarea rapidă nu este disponibilă pentru acest dispozitiv."
 
 #. • MSG_057
 msgid "The volume label is invalid."
-msgstr "Eticheta de volum nu este valabilă."
+msgstr "Eticheta volumului nu este validă."
 
 #. • MSG_058
 msgid "The device handle is invalid."
-msgstr "Dispozitivul este invalid."
+msgstr "Procesul de gestionare al dispozitivului nu este valid."
 
 #. • MSG_059
 msgid "The selected cluster size is not valid for this device."
@@ -453,15 +453,15 @@ msgstr "Dimensiunea selectată pentru cluster nu este validă pentru acest dispo
 
 #. • MSG_060
 msgid "The volume size is invalid."
-msgstr "Dimensiune de volum invalidă."
+msgstr "Dimensiunea volumului nu este validă."
 
 #. • MSG_061
 msgid "Please insert a removable media in drive."
-msgstr "Introduceți un dispozitiv de sprijin."
+msgstr "Vă rugăm să introduceți un dispozitiv media detașabil."
 
 #. • MSG_062
 msgid "An unsupported command was received."
-msgstr "Comanda primită nu este suportată."
+msgstr "A fost primită o comandă neacceptată."
 
 #. • MSG_063
 msgid "Memory allocation error."
@@ -477,19 +477,19 @@ msgstr "Eroare de scriere."
 
 #. • MSG_066
 msgid "Installation failure"
-msgstr "Instalarea nu a reușit"
+msgstr "Instalarea a eșuat"
 
 #. • MSG_067
 msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
-msgstr "Imposibilitatea de a deschide dispozitivul. Posibil e utilizat de un alt proces.Reintroduceți dispozitivul și încercați din nou."
+msgstr "Nu s-a putut deschide dispozitivul media. Este posibil ca acesta să fie utilizat de către un alt proces. Vă rugăm să reintroduceți dispozitivul și să încercați din nou."
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "Eroare în partiționare a dispozitivului."
+msgstr "Nu s-a putut partiționa unitatea."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
-msgstr "Imposibil de a copia fișierele pe dispozitiv."
+msgstr "Nu s-au putut copia fișierele pe dispozitivul țintă."
 
 #. • MSG_070
 msgid "Cancelled by user."
@@ -499,11 +499,11 @@ msgstr "Anulat de către utilizator."
 #.
 #. See http://en.wikipedia.org/wiki/Thread_%28computing%29
 msgid "Unable to start thread."
-msgstr "Imposibil de formatat."
+msgstr "Nu se poate porni firul de execuție."
 
 #. • MSG_072
 msgid "Bad blocks check didn't complete."
-msgstr "Blocurile de control incorect completate."
+msgstr "Căutarea blocurilor defecte nu s-a finalizat."
 
 #. • MSG_073
 msgid "ISO image scan failure."
@@ -515,23 +515,23 @@ msgstr "Extragerea imaginii ISO a eșuat."
 
 #. • MSG_075
 msgid "Unable to remount volume."
-msgstr "Imposibilitatea de a monta dispozitivul."
+msgstr "Nu se poate remonta volumul."
 
 #. • MSG_076
 msgid "Unable to patch/setup files for boot."
-msgstr "Imposibil de a seta fișierul să boot-eze."
+msgstr "Nu se pot configura fișierele pentru boot."
 
 #. • MSG_077
 msgid "Unable to assign a drive letter."
-msgstr "Nu se poate atribui o literă de dispozitiv."
+msgstr "Nu se poate atribui litera unității."
 
 #. • MSG_078
 msgid "Can't mount GUID volume."
-msgstr "Imposibilitatea de a monta un volum GUID."
+msgstr "Nu se poate monta volumul GUID."
 
 #. • MSG_079
 msgid "The device is not ready."
-msgstr "Dispozitivul nu este gata."
+msgstr "Dispozitivul nu este pregătit."
 
 #. • MSG_080
 msgid ""
@@ -541,23 +541,23 @@ msgid ""
 "\n"
 "We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
 msgstr ""
-"Rufus a detectat că Windows-ul nu a terminat de scris datele din buffer pe dispozitivul USB.\n"
+"Rufus a observat că Windows încă mai scrie date din buffer pe dispozitivul USB.\n"
 "\n"
-"În funcție de viteza dispozitivului USB, această operație poate dura o perioadă lungă de timp pentru a finaliza, în special pentru fișiere mari.\n"
+"În funcție de viteza dispozitivului USB, poate dura mult timp pentru ca această operațiune să se finalizeze, mai ales dacă există fișiere mari.\n"
 "\n"
-"Pentru a evita coruperea datelor vă recomandăm să lăsați Windows-ul să finalizeze. Dar, dacă ați obosit să așteptați, aveți posibilitatea să deconectați doar dispozitivul..."
+"Pentru a evita deteriorarea datelor, vă recomandăm să așteptați câteva momente pentru ca Windows să finalizeze scrierea. Dacă nu doriți să așteptați, puteți scoate dispozitivul USB, însă integritatea datelor nu va fi garantată."
 
 #. • MSG_081
 msgid "Unsupported image"
-msgstr "Imaginea nu este acceptată"
+msgstr "Imagine neacceptată"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "Această imagine nu este boot-abilă sau folosește o metodă de boot sau de compresie nesuportată de Rufus..."
+msgstr "Această imagine nu este de tip boot, sau folosește o metodă de boot sau compresie care nu este acceptată de Rufus..."
 
 #. • MSG_083
 msgid "Replace %s?"
-msgstr "Înlocuire %s?"
+msgstr "Înlocuiți %s?"
 
 #. • MSG_084
 msgid ""
@@ -571,23 +571,23 @@ msgid ""
 "\n"
 "Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"Acest lucru arată ca utilizați o versiune învechită a '%s'.\n"
-"Din acest motiv, meniul de boot nu este vizualizat corect.\n"
+"Această imagine ISO pare să folosească o versiune învechită de '%s'.\n"
+"Drept urmare, este posibil ca meniul de boot să nu funcționeze corect.\n"
 "\n"
-"O versiune nouă poate fi descărcată de la Rufus, pentru a corecta această problemă:\n"
-"- Selectați 'Da' pentru a vă conecta la Internet și a descărca fișierul\n"
-"- Selectați 'Nu' pentru a lăsa neschimbat fișierul din imaginea ISO\n"
-"Dacă nu știi ce să faci, este recomandat să alegi 'Da'.\n"
+"Rufus poate descărca o versiune mai nouă pentru rezolva această problemă:\n"
+"- Alegeți 'Da' pentru a vă conecta la internet și a descărca fișierul\n"
+"- Alegeți 'Nu' pentru a lăsa fișierul ISO neschimbat.\n"
+"Dacă nu știți care este alegerea potrivită, este recomandat să alegeți 'Da'.\n"
 "\n"
-"Notă: Noul fișier va fi descărcat în folderul curent și odată descărcat '%s', va fi reutilizat automat."
+"Observație: Un nou fișier va fi descărcat în folderul curent. Odată descărcat, noua versiune de '%s' va fi refolosită automat."
 
 #. • MSG_085
 msgid "Downloading %s"
-msgstr "Descărcare %s"
+msgstr "Se descarcă %s"
 
 #. • MSG_086
 msgid "No image selected"
-msgstr "Nici o imagine selectată"
+msgstr "Nicio imagine selectată"
 
 #. • MSG_087
 #.
@@ -598,23 +598,23 @@ msgstr "Nici o imagine selectată"
 #. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
 #. See also MSG_035.
 msgid "for %s NAND"
-msgstr "pentru %s NAND"
+msgstr "pentru tip %s"
 
 #. • MSG_088
 msgid "Image is too big"
-msgstr "Imagine prea mare"
+msgstr "Imaginea este prea mare"
 
 #. • MSG_089
 msgid "The image is too big for the selected target."
-msgstr "Această imagine este prea mare pentru acest dispozitiv."
+msgstr "Imaginea este prea mare pentru dispozitivul selectat."
 
 #. • MSG_090
 msgid "Unsupported ISO"
-msgstr "Formatul ISO nu este acceptat"
+msgstr "Imagine ISO neacceptată"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "Când se folosește un tip de destinație UEFI imagini ISO boot-abile sunt acceptate doar EFI. Alegeți un UEFI boot sau stabilește o destinație de tip BIOS."
+msgstr "Atunci când este selectat UEFI drept țintă, doar imaginile ISO de tip EFI boot sunt acceptate. Vă rugăm să alegeți un fișier ISO de tip EFI, sau să selectați BIOS drept țintă."
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -625,11 +625,14 @@ msgid ""
 "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n"
 "\n"
 "This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
-msgstr "IMPORTANT: Această unitate conține mai multe partiții sau volume!!! Aceasta poate include paravane/volume care nu sunt listate sau chiar vizibile de la Windows. Dacă doriți să continuați, sunteți responsabil pentru orice pierdere de date de pe aceste partiții."
+msgstr ""
+"IMPORTANT: ACEASTĂ UNITATE CONȚINE MAI MULTE PARTIȚII!!\n"
+"\n"
+"Aceste partiții pot fi ascunse sau invizibile în Windows. Continuând, dumneavoastră veți fi responsabil(ă) pentru orice pierderi de date apărute în urma ștergerii acestor partiții."
 
 #. • MSG_094
 msgid "Multiple partitions detected"
-msgstr "Mai multe partiții detectate"
+msgstr "Au fost detectate mai multe partiții"
 
 #. • MSG_095
 msgid "DD Image"
@@ -637,11 +640,11 @@ msgstr "Imagine DD"
 
 #. • MSG_096
 msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
-msgstr "Sistemul de fișier selectat în prezent, nu poate fi folosit cu acest tip de ISO."
+msgstr "Sistemul de fișiere selectat nu poate fi utilizat cu acest tip de ISO. Vă rugăm să selectați alt sistem de fișiere sau să folosiți alt fișier ISO."
 
 #. • MSG_097
 msgid "'%s' can only be applied if the file system is NTFS."
-msgstr "'%s' poate fi aplicată numai în cazul în care sistemul de fișiere este NTFS.Vă rugăm să selectați un sistem de fișiere ISO diferit."
+msgstr "'%s' poate fi aplicat doar dacă sistemul de fișiere este NTFS."
 
 #. • MSG_098
 msgid ""
@@ -651,35 +654,35 @@ msgid ""
 "\n"
 "Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"IMPORTANT: Încercați să instalați 'Windows To Go', dar unitatea aleasă nu are atributul 'FIXAT'. Din aceasta cauza Windows-ul cel mai probabil nu va funcționa în timpul de boot, Microsoft nu a proiectat să funcționeze cu drive-urile care au atributul nefixat.\n"
+"IMPORTANT: Ați ales să instalați 'Windows To Go', dar unitatea aleasă nu are atributul 'FIXED'. Drept urmare, Windows nu va porni corect, întrucât Microsoft nu a proiectat acest sistem de operare să funcționeze cu unitățile care au atributul 'REMOVABLE'.\n"
 "\n"
 "Doriți totuși să continuați?\n"
 "\n"
-"Notă: Atributul 'FIX/DETAȘABIL' este o proprietate de hardware care poate fi schimbat doarfolosind instrumentele personalizate de la producător, dar aceste instrumente nu suntoferite publicului..."
+"Observație: Atributul 'FIXED/REMOVABLE' este o proprietate hardware. Atributul poate fi schimbat doar folosind instrumente speciale personalizate de către producătorul unității, însă aceste instrumente nu sunt APROAPE NICIODATĂ oferite publicului..."
 
 #. • MSG_099
 msgid "Filesystem limitation"
-msgstr "Limitarea sistemului de fișiere"
+msgstr "Limitare a sistemului de fișiere"
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Această imagine ISO conține un fișier mai mare de 4 GB, care este mai mare decât dimensiunea maximă permisă pentru sistemul de fișiere FAT sau FAT32."
+msgstr "Această imagine ISO conține un fișier mai mare de 4 GO, care depășește dimensiunea maximă permisă pentru un sistem de fișiere FAT sau FAT32."
 
 #. • MSG_101
 msgid "Missing WIM support"
-msgstr "Suport WIN lipsă"
+msgstr "Lipsește suportul WIM"
 
 #. • MSG_102
 msgid ""
 "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
 "Do you want to visit the 7-zip download page?"
 msgstr ""
-"Sistemul de operare nu poate extrage fișierele de WIM. Extragerea WIM este necesar pentru a crea un dispozitiv USB boot-abil UEFI Windows 7 și Windows Vista. Puteți corecta aceasta instalați o versiune recentă a 7-Zip.\n"
-" Doriți să vizitați pagina de Descărcare a 7-Zip?"
+"Platforma dvs. nu poate extrage fișiere din archive WIM. Extragerea din WIM este necesară pentru a crea unități de boot EFI pentru Windows 7 și Windows Vista. Puteți rezolva această problemă descărcând 7-Zip.\n"
+"Doriți să accesați pagina de descărcare 7-Zip?"
 
 #. • MSG_103
 msgid "Download %s?"
-msgstr "Descărcare %s?"
+msgstr "Descărcați %s?"
 
 #. • MSG_104
 #.
@@ -695,26 +698,26 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"%s sau mai mare, necesită instalarea unui fișier'%s'.\n"
-"Deoarece acest fișier este mai mare de 100 KB, și este prezentă în imaginea ISO %s, fișierul nu este inclus în Rufus.\n"
+"Începând cu %s, este necesară instalarea unui fișier '%s'.\n"
+"Având o mărime de peste 100 KB și fiind mereu prezent în imaginile ISO %s, acest fișier nu este integrat în Rufus.\n"
 "\n"
-" Rufus poate descărca fișierul lipsă pentru tine:\n"
-"- Selectați 'Da' pentru a vă conecta la Internet și a descărca fișierul\n"
-"- Selectați 'Nu' dacă doriți să copiați manual acest fișier mai târziu\n"
+"Rufus poate descărca fișierul pentru dumneavoastră:\n"
+"- Alegeți 'Da' pentru a vă conecta la internet și a descărca fișierul\n"
+"- Alegeți 'Nu' dacă doriți să copiați manual acest fișier mai târziu\n"
 "\n"
-"Notă: fișierul va fi descărcat în folderul curent și o dată ce'%s' a fost descărcat, acesta va fi reutilizat automat."
+"Observație: Fișierul va fi descărcat în folderul curent și odată ce '%s' a fost descărcat, acesta va fi reutilizat automat."
 
 #. • MSG_105
 msgid ""
 "Cancelling may leave the device in an UNUSABLE state.\n"
 "If you are sure you want to cancel, click YES. Otherwise, click NO."
 msgstr ""
-"Eliminarea ar lăsa dispozitivul într-o stare inutilizabilă.\n"
-"Sunteți sigur că doriți să ștergeți, selectați Da. În caz contrar, selectați Nu."
+"Anularea poate lăsa dispozitivul într-o stare INUTILIZABILĂ.\n"
+"Dacă într-adevăr doriți să anulați, alegeți DA. În caz contrar, alegeți NU."
 
 #. • MSG_106
 msgid "Please select folder"
-msgstr "Selectați folderul"
+msgstr "Vă rugăm să selectați folderul"
 
 #. • MSG_107
 msgid "All files"
@@ -722,7 +725,7 @@ msgstr "Toate fișierele"
 
 #. • MSG_108
 msgid "Rufus log"
-msgstr "Registrul înregistrărilor Rufus"
+msgstr "Jurnal Rufus"
 
 #. • MSG_109
 msgid "0x%02X (Disk %d)"
@@ -736,8 +739,8 @@ msgid ""
 "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
 "Please change the Cluster size or use FreeDOS."
 msgstr ""
-"MS-DOS nu poate fi pornit de pe o unitate care are dimensiunea clusterului de 64 de kiloocteți.\n"
-"Te rugăm să modifici dimensiunea clusterului sau utilizează FreeDOS."
+"MS-DOS nu poate porni de pe o unitate ce are dimensiunea clusterului de 64 kilobaiți.\n"
+"Vă rugăm să modificați dimensiunea clusterului sau să utilizați FreeDOS."
 
 #. • MSG_111
 msgid "Incompatible Cluster size"
@@ -747,11 +750,11 @@ msgstr "Dimensiune cluster incompatibilă"
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "Formatarea volumului mare UDF, poate dura ceva timp. Viteza formatării USB 2.0, estimează durata este %d:%02d, în care va apărea pe bara de progres. Vă rugăm să aveți răbdare!"
+msgstr "Formatarea volumelor UDF largi poate dura mult timp. Cu viteza USB 2.0, timpul estimat de așteptare este %d:%02d, timp în care bara de progres se va bloca. Vă rugăm să așteptați!"
 
 #. • MSG_113
 msgid "Large UDF volume"
-msgstr "Volumul UDF mare"
+msgstr "Volum UDF mare"
 
 #. • MSG_114
 msgid ""
@@ -763,13 +766,13 @@ msgid ""
 "\n"
 "Note: The files will be downloaded in the current application directory and will be reused automatically if present."
 msgstr ""
-"Această imagine folosește Syslinux %s%s, dar această aplicație include doar fișierele de instalare pentru Syslinux %s%s.\n"
+"Această imagine folosește Syslinux %s%s, însă această aplicație include doar fișierele de instalare pentru Syslinux %s%s.\n"
 "\n"
-"Noile versiuni ale syslinux, nu sunt compatibile cu altele, și nu ar fi este posibil ca Rufus să le includă, două fișiere suplimentare, ele trebuie să fi descărcate de pe Internet ('ldlinux.sys' şi 'ldlinux.bss'):\n"
-"- Selectați 'Da' pentru a vă conecta la Internet și de a descărca aceste fișiere\n"
-"- Selectați 'Nu' pentru a anula operațiunea\n"
+"Întrucât versiunile noi de Syslinux nu sunt compatibile cu cele vechi, iar Rufus nu le poate include pe toate, este necesar ca două fișiere suplimentare să fie descărcate de pe internet ('ldlinux.sys' și 'ldlinux.bss'):\n"
+"- Alegeți 'Da' pentru a vă conecta la internet și a descărca fișierele respective\n"
+"- Alegeți 'Nu' pentru a anula operațiunea.\n"
 "\n"
-"Notă: Fișierele vor fi descărcate în aplicația curentă director și vor fi reutilizate în mod automat în cazul în prezent."
+"Observație: Noile fișiere vor fi descărcate în folderul curent al aplicației. Odată prezente în folder, acestea vor fi refolosite automat."
 
 #. • MSG_115
 msgid "Download required"
@@ -789,18 +792,18 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
 msgstr ""
-"Această imagine folosește Grub %s dar cererea include doar fișierele de instalare pentru Grub %s.\n"
+"Această imagine folosește Grub %s, însă aplicația include doar fișierele de instalare pentru Grub %s.\n"
 "\n"
-" Versiuni diferite ale Grub pot să nu fie compatibile cu altele, deci Nu este posibil să le includă, Rufus va încerca să localizeze o versiune a Grub fișierul de instalare ('core.img'), care se potrivește cu cel din imagine:\n"
-"- Selectați 'Da' pentru a vă conecta la Internet și să încercați să-l descărcați\n"
-"- Selectați 'Nu' pentru a utiliza versiunea implicită de la Rufus\n"
-"- Selectați 'Anulare' pentru a abandona operațiunea\n"
+"Întrucât versiunile noi de Grub pot fi incompatibile cu cele vechi, iar Rufus nu le poate include pe toate, Rufus va căuta un fișier de instalare Grub ('core.img') potrivit pentru versiunea din imaginea dvs:\n"
+"- Alegeți 'Da' pentru a vă conecta la internet și a încerca descărcarea\n"
+"- Alegeți 'Nu' pentru a utiliza versiunea implicită din Rufus\n"
+"- Alegeți 'Anulare' pentru a anula operațiunea\n"
 "\n"
-"Notă: Fișierul va fi descărcat în directorul aplicației curente și va fi reutilizat în mod automat dacă este prezent. În cazul în care nu se potrivesc pot fi găsite online, atunci versiunea implicită va fi folosită."
+"Observație: Noul fișier va fi descărcat în folderul curent al aplicației. Odată prezent în folder, acesta va fi refolosit automat. Daca nu este găsită nicio potrivire online, atunci va fi utilizată versiunea implicită."
 
 #. • MSG_117
 msgid "Standard Windows installation"
-msgstr "Instalare Standard Windows"
+msgstr "Instalare Windows standard"
 
 #. • MSG_118
 #.
@@ -816,7 +819,7 @@ msgstr "proprietăți unitate avansate"
 
 #. • MSG_120
 msgid "advanced format options"
-msgstr "opțiuni de formatare avansate"
+msgstr "opțiuni formatare avansate"
 
 #. • MSG_121
 msgid "Show %s"
@@ -824,7 +827,7 @@ msgstr "Afișare %s"
 
 #. • MSG_122
 msgid "Hide %s"
-msgstr "Ascunde %s"
+msgstr "Ascundere %s"
 
 #. • MSG_123
 #.
@@ -833,7 +836,7 @@ msgstr "Ascunde %s"
 #. To test this feature, please download and select 'casper_test.iso' from:
 #. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
 msgid "Persistent partition size"
-msgstr "Dimensiunea partiției persistente"
+msgstr "Dimensiune partiție persistentă"
 
 #. • MSG_124
 #.
@@ -847,27 +850,27 @@ msgstr "Fără persistență"
 #.
 #. Tooltips used for the peristence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "Setați dimensiunea partiției persistente pentru mediul USB live. Setarea mărimii la 0 dezactivează partiția persistentă."
+msgstr "Setați dimensiunea partiției persistente pentru dispozitivul USB live. Setarea mărimii la 0 va dezactiva partiția persistentă."
 
 #. • MSG_126
 msgid "Set the partition size units."
-msgstr "Setați unitățile de dimensiune a partițiilor."
+msgstr "Alegeți unitatea de măsură pentru dimensiunea partiției."
 
 #. • MSG_127
 msgid "Do not show this message again"
-msgstr "Nu afișați mesajul din nou"
+msgstr "Nu mai afișa acest mesaj"
 
 #. • MSG_128
 msgid "Important notice about %s"
-msgstr "Notă importantă despre %s"
+msgstr "Aviz important în legătură cu %s"
 
 #. • MSG_129
 msgid ""
 "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
-"Tocmai ați creat media care include UEFI:NTFS bootloader. Retineti pentru a boot-a acest mediu, trebuie să dezactivați TEMPORAR 'SECURE BOOT'.\n"
-"Pentru detalii de ce este asta necesar, utilizati 'Mai multe informatii'."
+"Tocmai ați creat un media care utilizează bootloader-ul UEFI:NTFS. Pentru a porni acest media, ESTE NECESAR SĂ DEZACTIVAȚI SECURE BOOT.\n"
+"Pentru a afla de ce este necesar acest lucru, alegeți 'Mai multe informații'."
 
 #. • MSG_130
 msgid "Windows image selection"
@@ -878,12 +881,12 @@ msgid ""
 "This ISO contains multiple Windows images.\n"
 "Please select the image you wish to use for this installation:"
 msgstr ""
-"Acest ISO contine multiple imagini Windows.\n"
-"Selectati imaginea pentru instalare:"
+"Acest ISO conține mai multe imagini Windows.\n"
+"Vă rugăm să selectați imaginea pe care doriți să o utilizați pentru această instalare:"
 
 #. • MSG_132
 msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
-msgstr "Alt program sau proces utilizeaza dispozitivul. Doriti sa il formatati?"
+msgstr "Un alt program sau proces utilizează această unitate. Doriți să o formatați oricum?"
 
 #. • MSG_133
 msgid ""
@@ -893,9 +896,9 @@ msgid ""
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"Rufus a detectat că încercați să creați media Windows To Go bazat pe ISO 1809.\n"
+"Rufus a observat că încercați să creați un media Windows To Go bazat pe un ISO cu versiunea 1809.\n"
 "\n"
-"Din cauza unei erori *MICROSOFT BUG*, acest mediu se va prăbuși în timpul pornirii Windows (Blue Screen Of Death), cu excepția cazului în care înlocuiți manual fișierul 'WppRecorder.sys' cu o versiune 1803.\n"
+"Din cauza unui *BUG MICROSOFT*, acest media va eșua în timpul pornirii Windows (Blue Screen Of Death), cu excepția cazului în care înlocuiți manual fișierul 'WppRecorder.sys' cu o versiune 1803.\n"
 "\n"
 "De asemenea, rețineți că motivul pentru care Rufus nu poate remedia automat acest lucru pentru dvs. este că 'WppRecorder.sys' este un fișier Microsoft protejat prin drepturi de autor, deci nu putem încorpora în mod legal o copie a fișierului în aplicație..."
 
@@ -905,9 +908,9 @@ msgid ""
 "\n"
 "Are you sure you want to continue?"
 msgstr ""
-"Deoarece MBR a fost selectat pentru schema de partiționare, Rufus poate crea doar o partiție de pină la 2 TB pe acest suport media, ceea ce va lăsa %s spațiu de disc indisponibil.\n"
+"Deoarece MBR a fost selectat pentru schema de partiționare, Rufus poate crea doar o partiție de până la 2 TB pe acest suport media, ceea ce va lăsa %s spațiu de disc indisponibil.\n"
 "\n"
-"Esti sigur ca vrei sa continui?"
+"Sigur doriți să continuați?"
 
 #. • MSG_135
 msgid "Version"
@@ -919,15 +922,15 @@ msgstr "Lansare"
 
 #. • MSG_137
 msgid "Edition"
-msgstr "Editie"
+msgstr "Ediție"
 
 #. • MSG_138
 msgid "Language"
-msgstr "Limba"
+msgstr "Limbă"
 
 #. • MSG_139
 msgid "Architecture"
-msgstr "Arhitectura"
+msgstr "Arhitectură"
 
 #. • MSG_140
 msgid "Continue"
@@ -935,19 +938,19 @@ msgstr "Continuare"
 
 #. • MSG_141
 msgid "Back"
-msgstr "Inapoi"
+msgstr "Înapoi"
 
 #. • MSG_142
 msgid "Please wait..."
-msgstr "Va rog asteptati..."
+msgstr "Vă rugăm să așteptați..."
 
 #. • MSG_143
 msgid "Download using a browser"
-msgstr "Descarcare folosind un browser"
+msgstr "Descărcați folosind un browser"
 
 #. • MSG_144
 msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Interzis temporar de Microsoft pentru solicitarea de descărcări prea multe - încercați din nou mai tîrziu..."
+msgstr "Blocat temporar de către Microsoft din cauza prea multor solicitări de descărcare - vă rugăm să încercați din nou mai târziu..."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -955,29 +958,29 @@ msgstr "PowerShell 3.0 sau mai nou este necesar pentru a rula acest script."
 
 #. • MSG_146
 msgid "Do you want to go online and download it?"
-msgstr "Dorești să te duci online și să descarci?"
+msgstr "Doriți să intrați pe internet și să îl descărcați?"
 
 #. • MSG_148
 msgid "Running download script..."
-msgstr "Rularea scriptului de descărcare..."
+msgstr "Se rulează scriptul pentru descărcare..."
 
 #. • MSG_149
 msgid "Download ISO Image"
-msgstr "Descarcare imagine ISO"
+msgstr "Descărcare imagine ISO"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
-msgstr "Tipul computerului, pe care doriţi să-l utilizați cu unitatea bootabilă, ține de responsabilitatea dvs. să determinați dacăeste de tip BIOS sau UEFI înainte de a crea unitatea, deoarece ar putea să nu booteze altfel."
+msgstr "Tipul computerului pe care doriți să utilizați unitatea bootabilă. Este responsabilitatea dvs. să determinați dacă acesta este de tip BIOS sau UEFI înainte de a crea unitatea. Dacă alegeți tipul greșit, unitatea nu va funcționa și sistemul nu va porni."
 
 #. • MSG_151
 #.
 #. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
 msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
-msgstr "'UEFI-CSM' înseamnă că dispozitivul va porni doar în modul de emulare BIOS (cunoscut și ca 'Legacy Mode') sub UEFI, și nu în modul nativ UEFI."
+msgstr "'UEFI-CSM' înseamnă că dispozitivul NU va porni în modul UEFI nativ, ci doar în modul de BIOS emulat (cunoscut și ca 'Legacy Mode') sub UEFI."
 
 #. • MSG_152
 msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-msgstr "'non-CSM' înseamnă că dispozitivul va porni numai în modul UEFI nativ, și nu în modul de emulare BIOS (cunoscut și ca 'Legacy Mode')."
+msgstr "'non-CSM' înseamnă că dispozitivul va porni DOAR în modul UEFI nativ. Acesta NU va porni în modul de BIOS emulat (cunoscut și ca 'Legacy Mode')."
 
 #. • MSG_153
 msgid "Test pattern: 0x%02X"
@@ -997,11 +1000,11 @@ msgstr "Model de test: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
 
 #. • MSG_157
 msgid "Sets the target filesystem"
-msgstr "Setarea destinației sistemului de fișiere"
+msgstr "Setează sistemul de fișiere pentru dispozitiv"
 
 #. • MSG_158
 msgid "Minimum size that a block of data will occupy in the filesystem"
-msgstr "Dimensiunea minimă a blocului de date a sistemului de fișiere"
+msgstr "Dimensiunea minimă pe care un bloc de date o va ocupa în sistemul de fișiere"
 
 #. • MSG_159
 msgid ""
@@ -1009,176 +1012,176 @@ msgid ""
 "International characters are accepted."
 msgstr ""
 "Utilizați acest câmp pentru a seta eticheta unității.\n"
-"caractere internaționale sunt permise."
+"Sunt acceptate caractere internaționale."
 
 #. • MSG_160
 msgid "Toggle advanced options"
-msgstr "Activează / dezactivează opțiuni avansate"
+msgstr "Afișare sau ascundere opțiuni avansate"
 
 #. • MSG_161
 msgid "Check the device for bad blocks using a test pattern"
-msgstr "Activați această opțiune pentru a efectua o verificare pentru blocuri defecte pe dispozitiv utilizând un model de test"
+msgstr "Căutați blocuri defecte pe dispozitiv utilizând un model de test"
 
 #. • MSG_162
 msgid "Uncheck this box to use the \"slow\" format method"
-msgstr "Debifați această opțiune pentru a utiliza metoda de formatare complet"
+msgstr "Debifați această casetă pentru a utiliza metoda de formatare \"înceată\""
 
 #. • MSG_163
 msgid "Method that will be used to create partitions"
-msgstr "Metoda care va fi utilizată pentru a crea partiții"
+msgstr "Metoda care va fi folosită pentru a crea partiții"
 
 #. • MSG_164
 msgid "Method that will be used to make the drive bootable"
-msgstr "Definește metoda care va fi folosită pentru a face unitatea USB boot-abilă"
+msgstr "Metoda care va fi folosită pentru a face unitatea USB să fie bootabilă"
 
 #. • MSG_165
 msgid "Click to select or download an image..."
-msgstr "Selectați sau descarcati imaginea..."
+msgstr "Dați click pentru a selecta sau descărca o imagine..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
-msgstr "Activați această opțiune pentru a permite afișarea etichetelor internaționale și a stabili o pictogramă dispozitiv (se va crea un fișier autorun.inf)"
+msgstr "Bifați această casetă pentru a permite afișarea etichetelor internaționale și pentru a seta o pictogramă pentru dispozitiv (se va crea un fișier autorun.inf)"
 
 #. • MSG_167
 msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Instalați un MBR care permite pornirea și selecția dispozitivului USB din BIOS"
+msgstr "Instalează un MBR care permite pornirea și selecția dispozitivului USB din BIOS"
 
 #. • MSG_168
 msgid ""
 "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
 "This should only be necessary if you install Windows XP and have more than one disk."
 msgstr ""
-"În primul rând încearcă să mascheze unitatea de boot USB (de obicei 0x80), ca un alt disc.\n"
-"Acest lucru ar putea fi necesar numai dacă ați instalat Windows XP și aveți mai mult de un singur disc."
+"Se va încerca mascarea primei unități USB (de obicei 0x80) ca fiind un alt disc.\n"
+"Acest lucru este necesar numai dacă instalați Windows XP și aveți mai mult decât un singur disc."
 
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
 "This can improve boot detection for older BIOSes."
 msgstr ""
-"Creați o partiție suplimentară și să încerce să alinieze diferite partiții.\n"
-"Acest lucru poate îmbunătăți detectarea cu un vechi BIOS."
+"Creează o partiție ascunsă suplimentară și încearcă să alinieze delimitările pentru partiții.\n"
+"Poate îmbunătăți detectarea pe BIOS-uri mai vechi."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
-msgstr "Activați lista de USB Hard Drive anexate. O FOLOSESTI PE PROPRIUL RISC!!!"
+msgstr "Activează afișarea unităților de tip hard conectate prin USB. UTILIZAȚI PE PROPRIA RĂSPUNDERE!!!"
 
 #. • MSG_171
 msgid ""
 "Start the formatting operation.\n"
 "This will DESTROY any data on the target!"
 msgstr ""
-"Începe operația de formatare.\n"
-" Aceasta va distruge orice date de pe dispozitiv!"
+"Începe operațiunea de formatare.\n"
+"Aceasta va DISTRUGE toate datele de pe dispozitivul țintă!"
 
 #. • MSG_172
 #.
 #. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
 #. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
 msgid "Invalid download signature"
-msgstr "Semnătura de descărcare nevalidă"
+msgstr "Semnătura descărcării nu este validă"
 
 #. • MSG_173
 msgid "Click to select..."
-msgstr "Faceți clic pentru a selecta..."
+msgstr "Dați click pentru a selecta..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr "Rufus - Dispozitive USB de formatare"
+msgstr "Rufus - Instrumentul de încredere pentru formatări USB"
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
-msgstr "Versiune %d.%d (build %d)"
+msgstr "Versiunea %d.%d (generare %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Traducere în română de Gîrlea Alexandru <girlea_alex@yahoo.com>"
+msgstr "Traducerea în limba română: Alexandru Gîrlea și Mihai Străuț"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
-msgstr "Raportați probleme sau solicitați noi caracteristici:"
+msgstr "Raportați probleme sau solicitați îmbunătățiri la:"
 
 #. • MSG_178
 msgid "Additional Copyrights:"
-msgstr "Drepturi suplimentare:"
+msgstr "Drepturi de autor suplimentare:"
 
 #. • MSG_179
 msgid "Update Policy:"
-msgstr "Politica de actualizare:"
+msgstr "Politică de actualizare:"
 
 #. • MSG_180
 msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
-msgstr "Dacă alegeți să permiteți acestui program să verifice automat actualizările, sunteți de acord ca următoarele informații să fie stocate pe serverul nostru:"
+msgstr "Dacă alegeți să permiteți acestui program să caute actualizări, sunteți de acord ca următoarele informații să fie colectate și stocate pe serverele noastre:"
 
 #. • MSG_181
 msgid "Your operating system's architecture and version"
-msgstr "Arhitectura și versiunea sistemului de operare"
+msgstr "Arhitectura și versiunea sistemului dvs. de operare"
 
 #. • MSG_182
 msgid "The version of the application you use"
-msgstr "Versiunea aplicației"
+msgstr "Versiunea de aplicație pe care o utilizați"
 
 #. • MSG_183
 msgid "Your IP address"
-msgstr "Adresa dvs de IP"
+msgstr "Adresa dvs. IP"
 
 #. • MSG_184
 msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
-msgstr "Putem păstra informații numai în scopul de a crea o statistică privată de utilizare, \\b timp de un an\\b0 . Cu toate acestea, vă garantăm că nu vom trimite date către terțe părți."
+msgstr "Vom păstra aceste informații, în scopul de a crea statistici de utilizare private, \\b timp de cel mult un an\\b0 . Totuși, vă garantăm că nu vom trimite aceste date către terțe părți."
 
 #. • MSG_185
 msgid "Update Process:"
-msgstr "Actualizare proces:"
+msgstr "Proces de actualizare:"
 
 #. • MSG_186
 msgid ""
 "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
 "Internet access is of course required when checking for updates."
 msgstr ""
-"Rufus nu instalează sau rulează servicii de background. Verificarea actualizări va fi făcută doar atunci când aplicația rulează.\\line\n"
-"Accesul la internet este, evident, necesar atunci când verificați actualizările."
+"Rufus nu instalează și nu rulează servicii de fundal. Așadar, căutarea actualizărilor va avea loc doar în timp ce aplicația principală rulează.\\line\n"
+"Accesul la internet este, desigur, necesar atunci când se caută actualizări."
 
 #. • MSG_187
 msgid "Invalid image for selected boot option"
-msgstr "Imagine nevalidă pentru opțiunea de boot selectat"
+msgstr "Imaginea nu este validă pentru opțiunea de boot selectată"
 
 #. • MSG_188
 msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
-msgstr "Actuala imagine nu se potrivește cu opțiunea de boot selectată. Vă rugăm să folosiți o altă imagine sau alegeți o opțiune de boot diferită."
+msgstr "Imaginea curentă nu se potrivește cu opțiunea de boot selectată. Vă rugăm să folosiți altă imagine sau să alegeți altă opțiune de boot."
 
 #. • MSG_189
 msgid "This ISO image is not compatible with the selected filesystem"
-msgstr "Această imagine ISO nu este compatibila cu sistemul de fișiere selectat"
+msgstr "Această imagine ISO nu este compatibilă cu sistemul de fișiere selectat"
 
 #. • MSG_190
 msgid "Incompatible drive detected"
-msgstr "Unitatea detectată necompatibilă"
+msgstr "Unitate incompatibilă detectată"
 
 #. • MSG_191
 #.
 #. Used in MSG_235
 msgid "Write pass"
-msgstr "Trecere scriere"
+msgstr "Pas scriere"
 
 #. • MSG_192
 #.
 #. Used in MSG_235
 msgid "Read pass"
-msgstr "Trecere citire"
+msgstr "Pas citire"
 
 #. • MSG_193
 msgid "Downloaded %s"
-msgstr "Descărcat %s"
+msgstr "S-a descărcat %s"
 
 #. • MSG_194
 msgid "Could not download %s"
-msgstr "Nu a putut fi descarcat %s"
+msgstr "Nu s-a putut descărca %s"
 
 #. • MSG_195
 #.
 #. Example: "Using embedded version of Grub2 file(s)"
 msgid "Using embedded version of %s file(s)"
-msgstr "Folosiți versiunea integrată de %s fișiere"
+msgstr "Se folosește versiunea inclusă a fișierului/fișierelor %s"
 
 #. • MSG_196
 msgid ""
@@ -1187,71 +1190,71 @@ msgid ""
 "Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
 "Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
 msgstr ""
-"IMPORTANT: Această unitate utilizează dimensiune de sector non-standard!\n"
+"IMPORTANT: ACEASTĂ UNITATE UTILIZEAZĂ O MĂRIME DE SECTOR NON-STANDARD!\n"
 "\n"
-"Unitățile convenționale folosesc dimensiunea sectorului de 512 octeți, dar această unitate folosește %d octeți. În multe cazuri, acest lucru înseamnă că nu va fi capabil să boot-eze de pe această unitate.\n"
-"Rufus poate încerca să creeze o unitate de boot, dar nu există nicio garanție că va funcționa corect."
+"Unitățile convenționale folosesc o mărime de sector de 512 baiți, însă această unitate folosește una de %d baiți. În multe cazuri, unitatea NU va porni.\n"
+"Rufus poate încerca să creeze o unitate bootabilă, însă nu există NICIO GARANȚIE că aceasta va funcționa corect."
 
 #. • MSG_197
 msgid "Nonstandard sector size detected"
-msgstr "Mărimea sectorului detectat este non-standard"
+msgstr "Mărime sector non-standard detectată"
 
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
-msgstr "'Windows To Go' poate fi instalat doar pe unitatea cu partiția GPT, și dacă are atributul FIX setat. Unitatea curentă nu are atributul FIXAT..."
+msgstr "'Windows To Go' poate fi instalat pe o unitate partiționată cu GPT doar dacă aceasta are atributul FIXED setat. Unitatea curentă nu a fost detectată ca fiind FIXED..."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
-msgstr "Anulare..."
+msgstr "Se anulează - Vă rugăm să așteptați..."
 
 #. • MSG_202
 msgid "Scanning image..."
-msgstr "Analiza imaginii..."
+msgstr "Se scanează imaginea..."
 
 #. • MSG_203
 msgid "Failed to scan image"
-msgstr "Analiza eșuată a imaginii"
+msgstr "Nu s-a putut scana imaginea"
 
 #. • MSG_204
 #.
 #. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
 msgid "Obsolete %s detected"
-msgstr "Detectat %s învechit"
+msgstr "%s învechit detectat"
 
 #. • MSG_205
 #.
 #. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
 msgid "Using image: %s"
-msgstr "Utilizare imagine: %s"
+msgstr "Se folosește imaginea: %s"
 
 #. • MSG_206
 #.
 #. Example: "Missing ldlinux.c32 file"
 msgid "Missing %s file"
-msgstr "Fișier %s dispărut"
+msgstr "Lipsește fișierul %s"
 
 #. • MSG_207
 #.
 #. The name proposed by Windows' Computer Management → Disk Management when you try to format
 #. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
 msgid "New Volume"
-msgstr "Volumul nou"
+msgstr "Volum nou"
 
 #. • MSG_208
 #.
 #. Singular. Example: "1 device found"
 msgid "%d device found"
-msgstr "%d dispozitiv detectat"
+msgstr "S-a găsit %d dispozitiv"
 
 #. • MSG_209
 #.
 #. Plural. Example: "3 devices found"
 msgid "%d devices found"
-msgstr "%d dispozitive detectate"
+msgstr "S-au găsit %d dispozitive"
 
 #. • MSG_210
 msgid "READY"
-msgstr "FINALIZAT"
+msgstr "GATA"
 
 #. • MSG_211
 msgid "Cancelled"
@@ -1259,43 +1262,43 @@ msgstr "Anulat"
 
 #. • MSG_212
 msgid "Failed"
-msgstr "Operația a eșuat"
+msgstr "Eșuat"
 
 #. • MSG_213
 #.
 #. Used when a new update has been downloaded and launched
 msgid "Launching new application..."
-msgstr "Executarea unei noi aplicații..."
+msgstr "Se lansează noua aplicație..."
 
 #. • MSG_214
 msgid "Failed to launch new application"
-msgstr "Executarea unei noi aplicații a eșuat"
+msgstr "Lansarea noii aplicații a eșuat"
 
 #. • MSG_215
 #.
 #. Example: "Opened some_file.txt"
 msgid "Opened %s"
-msgstr "Deschide %s"
+msgstr "Deschis %s"
 
 #. • MSG_216
 #.
 #. Example: "Saved rufus.log"
 msgid "Saved %s"
-msgstr "Salvate %s"
+msgstr "Salvat %s"
 
 #. • MSG_217
 #.
 #. Formatting status
 msgid "Formatting: %s"
-msgstr "Formatarea: %s"
+msgstr "Se formatează: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
-msgstr "Crearea sistemului de fișiere: activitate %d/%d terminată"
+msgstr "Se creează sistemul de fișiere: Pasul %d din %d"
 
 #. • MSG_219
 msgid "NTFS Fixup: %d%% completed"
-msgstr "Fixare NTFS: %d%% terminată"
+msgstr "Fixup NTFS: %d%% finalizat"
 
 #. • MSG_220
 #.
@@ -1303,33 +1306,33 @@ msgstr "Fixare NTFS: %d%% terminată"
 #. Example: "Formatting (UDF) - Estimated duration 3:21..."
 #. If "estimated duration" is too long, just use "estimated" or an abbreviation
 msgid "Formatting (%s) - estimated duration %d:%02d..."
-msgstr "Formatarea (%s) - durata estimată %d:%02d..."
+msgstr "Se formatează (%s) - durată estimată %d:%02d..."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "Setarea etichetei (poate dura ceva timp)..."
+msgid "Setting label (%s)..."
+msgstr "Se setează eticheta (%s)..."
 
 #. • MSG_222
 #.
 #. Example: "Formatting (FAT32)..."
 msgid "Formatting (%s)..."
-msgstr "Formatare (%s)..."
+msgstr "Se formatează (%s)..."
 
 #. • MSG_223
 msgid "NTFS Fixup (Checkdisk)..."
-msgstr "Fixare NTFS (verificare disc)..."
+msgstr "Fixup NTFS (Checkdisk)..."
 
 #. • MSG_224
 msgid "Clearing MBR/PBR/GPT structures..."
-msgstr "Resetarea structurii MBR/PBR/GPT..."
+msgstr "Se șterg structurile MBR/PBR/GPT..."
 
 #. • MSG_225
 msgid "Requesting disk access..."
-msgstr "Solicită accesul la disc..."
+msgstr "Se solicită accesul la disc..."
 
 #. • MSG_226
 msgid "Analyzing existing boot records..."
-msgstr "Pornire analiza datelor..."
+msgstr "Se analizează înregistrările de boot existente..."
 
 #. • MSG_227
 msgid "Closing existing volume..."
@@ -1341,23 +1344,23 @@ msgstr "Se scrie Master Boot Record..."
 
 #. • MSG_229
 msgid "Writing Partition Boot Record..."
-msgstr "Se scrie partiția de boot..."
+msgstr "Se scrie Partition Boot Record..."
 
 #. • MSG_230
 msgid "Copying DOS files..."
-msgstr "Se copiază fișierul DOS..."
+msgstr "Se copiază fișierele DOS..."
 
 #. • MSG_231
 msgid "Copying ISO files: %s"
-msgstr "Se copiază imaginea ISO: %s"
+msgstr "Se copiază fișierele imaginii ISO: %s"
 
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "Setarea UEFI de boot Windows 7 (poate dura ceva timp)..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "Configurare boot EFI Win7 (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
-msgstr "Se finalizează..."
+msgstr "Se finalizează, vă rugăm să așteptați..."
 
 #. • MSG_234
 #.
@@ -1375,21 +1378,21 @@ msgstr "Blocuri defecte: %s %d/%d - %0.2f%% (erori %d/%d/%d)"
 
 #. • MSG_236
 msgid "Bad Blocks: Testing with random pattern"
-msgstr "Blocuri defecte: testarea cu modele aleatoare"
+msgstr "Blocuri defecte: se testează cu modelul aleator"
 
 #. • MSG_237
 msgid "Bad Blocks: Testing with pattern 0x%02X"
-msgstr "Blocuri defecte: testarea cu model 0x%02X"
+msgstr "Blocuri defecte: se testează cu modelul 0x%02X"
 
 #. • MSG_238
 #.
 #. Example: "Partitioning (MBR)..."
 msgid "Partitioning (%s)..."
-msgstr "Partiționare (%s)..."
+msgstr "Se partiționează (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "Eliminare partiții..."
+msgid "Deleting partitions (%s)..."
+msgstr "Se șterg partițiile (%s)..."
 
 #. • MSG_240
 #.
@@ -1398,73 +1401,76 @@ msgid ""
 "The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n"
 "\n"
 "The download will be deleted. Please check the log for more details."
-msgstr "Descărcare de %s: conexiune..."
+msgstr ""
+"Semnătura pentru actualizarea descărcată nu poate fi validată. Ori că sistemul dvs. nu este configurat pentru validarea semnăturilor, ori este vorba de o descărcare malițioasă.\n"
+"\n"
+"Descărcarea va fi ștearsă. Vă rugăm să verificați jurnalul pentru mai multe detalii."
 
 #. • MSG_241
 msgid "Downloading: %s"
-msgstr "Descărcare: %s"
+msgstr "Se descarcă: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
-msgstr "Imposibilitatea de a descărca fișierul."
+msgstr "Nu s-a putut descărca fișierul."
 
 #. • MSG_243
 msgid "Checking for Rufus updates..."
-msgstr "Verificare actualizări Rufus..."
+msgstr "Se caută actualizări Rufus..."
 
 #. • MSG_244
 msgid "Updates: Unable to connect to the internet"
-msgstr "Actualizare: Nu se poate conecta la internet"
+msgstr "Actualizări: Nu s-a putut realiza conexiunea la internet"
 
 #. • MSG_245
 msgid "Updates: Unable to access version data"
-msgstr "Actualizare: Imposibil pentru a accesa informații versiune"
+msgstr "Actualizări: Nu s-au putut accesa datele despre versiune"
 
 #. • MSG_246
 msgid "A new version of Rufus is available!"
-msgstr "Este o nouă versiune Rufus!"
+msgstr "Este disponibilă o nouă versiune Rufus!"
 
 #. • MSG_247
 msgid "No new version of Rufus was found"
-msgstr "Versiunea instalată este actualizată"
+msgstr "Nu a fost găsită o versiune nouă de Rufus"
 
 #. • MSG_248
 msgid "Application registry keys successfully deleted"
-msgstr "Registrul de aplicații șters cu succes"
+msgstr "Registrul de chei al aplicației a fost șters cu succes"
 
 #. • MSG_249
 msgid "Failed to delete application registry keys"
-msgstr "Imposibilitatea de a șterge registrul de aplicații"
+msgstr "Nu s-a putut șterge registrul aplicației"
 
 #. • MSG_250
 #.
 #. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
 msgid "%s enabled"
-msgstr "Activare %s"
+msgstr "%s activat"
 
 #. • MSG_251
 msgid "%s disabled"
-msgstr "Dezactivare %s"
+msgstr "%s dezactivat"
 
 #. • MSG_252
 msgid "Size checks"
-msgstr "Dimensiunea de control"
+msgstr "Verificări mărime"
 
 #. • MSG_253
 msgid "Hard disk detection"
-msgstr "Detectare Hard Disk-uri"
+msgstr "Detectare hard disk"
 
 #. • MSG_254
 msgid "Force large FAT32 formatting"
-msgstr "Formatare extinsă FAT32"
+msgstr "Formatare Large FAT32 forțată"
 
 #. • MSG_255
 msgid "NoDriveTypeAutorun will be deleted on exit"
-msgstr "Vor fi eliminate NoDriveTypeAutoRun ieșire"
+msgstr "NoDriveTypeAutoRun va fi șters la ieșire"
 
 #. • MSG_256
 msgid "Fake drive detection"
-msgstr "Unități fictive de detectare"
+msgstr "Detectare unitate falsă"
 
 #. • MSG_257
 msgid "Joliet support"
@@ -1484,23 +1490,23 @@ msgstr "Compresie NTFS"
 
 #. • MSG_261
 msgid "Writing image: %s"
-msgstr "Se scriere imaginea: %s"
+msgstr "Se scrie imaginea: %s"
 
 #. • MSG_262
 #.
 #. Cheat mode message to disable ISO Support, so that only DD images can be opened
 msgid "ISO Support"
-msgstr "Suport ISO (Dacă vrei să știi despre ce e vorba, vezi comentariu în engleză)"
+msgstr "Suport ISO"
 
 #. • MSG_263
 #.
 #. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
 msgid "Use PROPER size units"
-msgstr "Utilizarea dimensiunii corecte pentru unități"
+msgstr "Utilizare unități de măsură corecte"
 
 #. • MSG_264
 msgid "Deleting directory '%s'"
-msgstr "Ștergerea directorului '%s'"
+msgstr "Se șterge directorul '%s'"
 
 #. • MSG_265
 msgid "VMWare disk detection"
@@ -1508,19 +1514,19 @@ msgstr "Detectare disc VMWare"
 
 #. • MSG_266
 msgid "Dual UEFI/BIOS mode"
-msgstr "Mod dual UEFI/BIOS"
+msgstr "Mod UEFI/BIOS dual"
 
 #. • MSG_267
 msgid "Applying Windows image: %s"
-msgstr "Aplicarea imaginii Windows: %s"
+msgstr "Se aplică imaginea Windows: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
-msgstr "Aplicarea imaginii Windows..."
+msgstr "Se aplică imaginea Windows..."
 
 #. • MSG_269
 msgid "Preserve timestamps"
-msgstr "Păstrare mărci temporale"
+msgstr "Păstrare marcaje de timp"
 
 #. • MSG_270
 msgid "USB debug"
@@ -1528,19 +1534,19 @@ msgstr "Depanare USB"
 
 #. • MSG_271
 msgid "Computing image checksums: %s"
-msgstr "Calcularea sumelor de control: %s"
+msgstr "Se calculează sumele de control ale imaginii: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
-msgstr "Calcularea sumelor de control MD5, SHA1 și SHA256 pentru imaginea selectată"
+msgstr "Calculează sumele de control MD5, SHA1 și SHA256 pentru imaginea selectată"
 
 #. • MSG_273
 msgid "Change the application language"
-msgstr "Schimbă limba aplicației"
+msgstr "Schimbați limba aplicației"
 
 #. • MSG_274
-msgid "ISOHybrid image detected"
-msgstr "Imagine detectată ISOHybrid"
+msgid "%s image detected"
+msgstr "Imagine %s detectată"
 
 #. • MSG_275
 #.
@@ -1552,31 +1558,31 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"Imaginea selectată este 'ISOHybrid'. Înseamnă că poate fi scris fie în modul (copiere dosar) %s sau in modul (imagine de disc) %s.\n"
+"Imaginea selectată este de tip 'ISOHybrid'. Aceasta poate fi scrisă fie în modul %s (copiere fișiere) sau în modul %s (imagine disc).\n"
 "Rufus recomandă modul %s, astfel încât să aveți acces deplin la unitatea utilizată.\n"
-"Dacă vă confruntați cu probleme în timpul de boot-are, puteți încerca să scrieți imaginea din nou în modul %s.\n"
+"Dacă vă confruntați cu probleme în timpul pornirii, puteți încerca să scrieți imaginea din nou în modul %s.\n"
 "\n"
-"Selectați modul care doriți să-l utilizați pentru a scrie această imagine:"
+"Vă rugăm să alegeți modul în care doriți să se scrie această imagine:"
 
 #. • MSG_276
 #.
 #. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
 msgid "Write in %s mode (Recommended)"
-msgstr "Scriere in modul %s (Recomandat)"
+msgstr "Scriere în modul %s (Recomandat)"
 
 #. • MSG_277
 #.
 #. '%s' will be replaced with your translation for MSG_095 ("DD Image")
 msgid "Write in %s mode"
-msgstr "Scriere in modul %s"
+msgstr "Scriere în modul %s"
 
 #. • MSG_278
 msgid "Checking for conflicting processes..."
-msgstr "Verificarea proceselor conflictuale..."
+msgstr "Se caută procese conflictuale..."
 
 #. • MSG_279
 msgid "Non bootable"
-msgstr "Imagine nebootabilă"
+msgstr "Nebootabil"
 
 #. • MSG_280
 msgid "Disk or ISO image"
@@ -1584,19 +1590,19 @@ msgstr "Disc sau imagine ISO"
 
 #. • MSG_281
 msgid "%s (Please select)"
-msgstr "%s (Vă rugăm, selectați)"
+msgstr "%s (Vă rugăm să selectați)"
 
 #. • MSG_282
 msgid "Exclusive USB drive locking"
-msgstr "Exclusiv blocare USB"
+msgstr "Blocare unitate USB exclusivă"
 
 #. • MSG_283
 msgid "Invalid signature"
-msgstr "Semnătură invalidă"
+msgstr "Semnătura nu este validă"
 
 #. • MSG_284
 msgid "The downloaded executable is missing a digital signature."
-msgstr "Executabilul descărcat nu este semnat."
+msgstr "Fișierului executabil descărcat îi lipsește o semnătură digitală."
 
 #. • MSG_285
 msgid ""
@@ -1606,27 +1612,27 @@ msgid ""
 msgstr ""
 "Executabilul descărcat este semnat de către '%s'.\n"
 "Aceasta nu este o semnătură recunoscută și ar putea indica o anumită formă de activitate dăunătoare...\n"
-"Sunteți sigur că doriți să executați acest fișier?"
+"Sigur doriți să executați acest fișier?"
 
 #. • MSG_286
 msgid "Zeroing drive: %s"
-msgstr "Unitatea zero: %s"
+msgstr "Se scriu zerouri pe unitate: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
-msgstr "Detectarea unităților mobile de bază non-USB"
+msgstr "Detectarea unităților amovibile non-USB"
 
 #. • MSG_288
 msgid "Missing elevated privileges"
-msgstr "Lipsă privilegii ridicate"
+msgstr "Lipsă permisiuni administrator"
 
 #. • MSG_289
 msgid "This application can only run with elevated privileges"
-msgstr "Această aplicație rulează numai cu privilegii ridicate"
+msgstr "Această aplicație va funcționa doar dacă o executați ca administrator"
 
 #. • MSG_290
 msgid "File Indexing"
-msgstr "Indexare fișier"
+msgstr "Indexare fișiere"
 
 #. • MSG_291
 msgid "Version selection"
@@ -1634,7 +1640,7 @@ msgstr "Selectare versiune"
 
 #. • MSG_292
 msgid "Please select the version of Windows you want to install:"
-msgstr "Selectați versiunea de Windows pentru instalare:"
+msgstr "Vă rugăm să selectați versiunea de Windows pe care doriți să o instalați:"
 
 #. • MSG_293
 msgid "Unsupported Windows version"
@@ -1642,11 +1648,11 @@ msgstr "Versiune Windows neacceptată"
 
 #. • MSG_294
 msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Această versiune Windows nu mai este suportată de Rufus."
+msgstr "Această versiune de Windows nu mai este acceptată de Rufus."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
-msgstr "Atenție: versiune neoficială"
+msgstr "Avertisment: versiune neoficială"
 
 #. • MSG_296
 msgid ""
@@ -1656,7 +1662,7 @@ msgid ""
 msgstr ""
 "Această versiune de Rufus nu a fost produsă de dezvoltatorul oficial.\n"
 "\n"
-"Sigur doriți să îl rulați?"
+"Sigur doriți să o rulați?"
 
 #. • MSG_297
 msgid "Truncated ISO detected"
@@ -1670,15 +1676,15 @@ msgid ""
 "\n"
 "Note that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
 msgstr ""
-"Fișierul ISO pe care l-ați selectat nu se potrivește dimensiunii sale declarate: %s de date lipsesc!\n"
+"Fișierul ISO pe care l-ați selectat nu se potrivește cu dimensiunea sa declarată: %s de date lipsesc!\n"
 "\n"
-"Dacă ați obținut acest fișier de pe Internet, ar trebui să încercați să descărcați o copie nouă și să verificați dacă sumele de control MD5 sau SHA se potrivesccu cele oficiale.\n"
+"Dacă ați obținut acest fișier de pe internet, ar trebui să încercați să descărcați o copie nouă și să verificați dacă sumele de control MD5 sau SHA se potrivesc cu cele oficiale.\n"
 "\n"
-"Rețineți că puteți calcula MD5 sau SHA în Rufus făcând clic pe butonul (✓)."
+"Rețineți că puteți calcula MD5 sau SHA în Rufus dând click pe butonul (✓)."
 
 #. • MSG_299
 msgid "Timestamp validation error"
-msgstr "Eroare validare și de timp"
+msgstr "Eroare validare marcaj de timp"
 
 #. • MSG_300
 msgid ""
@@ -1686,33 +1692,119 @@ msgid ""
 "\n"
 "In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
 msgstr ""
-"Rufus nu a putut valida că marcajul temporal al actualizării descărcate este mai recent decît executabilul curent.\n"
+"Rufus nu a putut valida că marcajul de timp al actualizării descărcate este mai recent decât executabilul curent.\n"
 "\n"
-"Pentru a preveni posibilele scenarii de atac, procesul de actualizare a fost anulat şi descărcarea va fi ştearsă. Vă rugăm să verificaţi jurnalul pentru mai multe detalii."
+"Pentru a preveni posibilele scenarii de atac, procesul de actualizare a fost anulat și descărcarea va fi ștearsă. Vă rugăm să verificați jurnalul pentru mai multe detalii."
 
 #. • MSG_301
 msgid "Show application settings"
-msgstr "Afișare setările aplicației"
+msgstr "Afișați setările aplicației"
 
 #. • MSG_302
 msgid "Show information about this application"
-msgstr "Afișare informații despre această aplicație"
+msgstr "Afișați informații despre această aplicație"
 
 #. • MSG_303
 msgid "Show the log"
-msgstr "Afișare jurnal"
+msgstr "Afișați jurnalul"
 
 #. • MSG_304
 msgid "Create a disk image of the selected device"
-msgstr "Creare imagine disc a dispozitivului selectat"
+msgstr "Generați o imagine de disc după dispozitivul selectat"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "Utilizaţi această opţiune dacă doriţi să utilizaţi acest dispozitiv pentru a instala Windows pe un alt disc, sau dacă doriţi să executaţi Windows direct de pe această unitate (Windows to Go)"
+msgid ""
+"Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go).\r\n"
+"In 'Extended Windows 11 Installation' mode, Rufus will patch the media so that Windows 11 can be installed on platforms that don't meet the TPM 2.0 or Secure Boot requirements."
+msgstr ""
+"Utilizați această opțiune pentru a indica dacă planificați să instalați Windows pe un alt disc, sau dacă doriți să rulați Windows direct de pe această unitate (Windows To Go).\n"
+"În modul 'Instalare Windows 11 extinsă', Rufus va aplica un patch astfel încât Windows 11 să poată fi instalat pe platforme care nu îndeplinesc cerințele TPM 2.0 sau Secure Boot."
 
 #. • MSG_306
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
-msgstr "Unitatea de redare la zero: %s"
+msgstr "Se scriu rapid zerouri pe unitate: %s"
+
+#. • MSG_307
+msgid "this may take a while"
+msgstr "poate dura mai mult timp"
+
+#. • MSG_308
+msgid "VHD detection"
+msgstr "Detectare VHD"
+
+#. • MSG_309
+msgid "Compressed archive"
+msgstr "Arhivă comprimată"
+
+#. • MSG_310
+msgid ""
+"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"Fișierul ISO selectat utilizează UEFI și este destul de mic pentru a fi scris ca EFI System Partition (ESP). Scrierea ca ESP, în locul scrierii unei partiții generice ce ocupă întregul disc, este de preferat pentru anumite tipuri de instalare.\n"
+"\n"
+"Vă rugăm să selectați modul în care doriți să scrieți această imagine:"
+
+#. • MSG_311
+msgid "Use %s (in the main application window) to enable."
+msgstr "Folosiți %s (în fereastra principală a aplicației) pentru a activa."
+
+#. • MSG_312
+msgid "Extra hashes (SHA512)"
+msgstr "Hash-uri extra (SHA512)"
+
+#. • MSG_313
+msgid "Save to VHD"
+msgstr "Salvare pe VHD"
+
+#. • MSG_314
+msgid "Compute image checksums"
+msgstr "Calculare sume de control pentru imagine"
+
+#. • MSG_315
+msgid "Multiple buttons"
+msgstr "Butoane multiple"
+
+#. • MSG_316
+msgid "Number of passes"
+msgstr "Număr de pași"
+
+#. • MSG_317
+msgid "Disk ID"
+msgstr "ID disc"
+
+#. • MSG_318
+msgid "Default thread priority: %d"
+msgstr "Prioritate implicită pentru firul de execuție: %d"
+
+#. • MSG_319
+msgid "Ignore Boot Marker"
+msgstr "Ignorare Boot Marker"
+
+#. • MSG_320
+msgid "Refreshing partition layout (%s)..."
+msgstr "Se reîmprospătează așezarea partițiilor (%s)..."
+
+#. • MSG_321
+msgid ""
+"The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
+"As a result, DD image writing mode will be enforced."
+msgstr ""
+"Imaginea selectată este de tip ISOHybrid, însă creatorii acesteia nu au făcut-o să fie compatibilă cu modul ISO/Copiere fișiere.\n"
+"Drept urmare, modul imagine DD va fi aplicat."
+
+#. • MSG_322
+msgid "Standard Windows 11 Installation (TPM 2.0 + Secure Boot)"
+msgstr "Instalare Windows 11 standard (TPM 2.0 + Secure Boot)"
+
+#. • MSG_323
+msgid "Extended Windows 11 Installation (no TPM / no Secure Boot)"
+msgstr "Instalare Windows 11 extinsă (fără TPM / fără Secure Boot)"
+
+#. • MSG_324
+msgid "Removing Windows 11 installation restrictions: %s"
+msgstr "Se elimină restricțiile pentru instalarea Windows 11: %s"
