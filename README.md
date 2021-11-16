@@ -1,13 +1,13 @@
 Rufus: The Reliable USB Formatting Utility
 ==========================================
 
-[![Build status](https://img.shields.io/github/workflow/status/pbatard/rufus/VS2022.svg?style=flat-square&label=VS2022)](https://github.com/pbatard/rufus/actions/workflows/vs2022.yml)
-[![Build status](https://img.shields.io/github/workflow/status/pbatard/rufus/MinGW.svg?style=flat-square&label=MinGW)](https://github.com/pbatard/rufus/actions/workflows/mingw.yml)
-[![Coverity Scan Build Status](https://img.shields.io/coverity/scan/2172.svg?style=flat-square)](https://scan.coverity.com/projects/pbatard-rufus)
-[![Build contributors](https://img.shields.io/github/contributors/pbatard/rufus.svg?style=flat-square)](https://github.com/pbatard/rufus/graphs/contributors)
-[![Github stats](https://img.shields.io/github/downloads/pbatard/rufus/total.svg?label=downloads%20%28since%202019%29&style=flat-square)](https://github.com/pbatard/rufus/releases)
-[![Release](https://img.shields.io/github/release-pre/pbatard/rufus.svg?style=flat-square)](https://github.com/pbatard/rufus/releases)
-[![Licence](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![VS2022 Build Status](https://img.shields.io/github/workflow/status/pbatard/rufus/VS2022.svg?style=flat-square&label=VS2022%20Build)](https://github.com/pbatard/rufus/actions/workflows/vs2022.yml)
+[![MinGW Build Status](https://img.shields.io/github/workflow/status/pbatard/rufus/MinGW.svg?style=flat-square&label=MinGW%20Build)](https://github.com/pbatard/rufus/actions/workflows/mingw.yml)
+[![Coverity Scan Status](https://img.shields.io/coverity/scan/2172.svg?style=flat-square&label=Coverity%20Analysis)](https://scan.coverity.com/projects/pbatard-rufus)  
+[![Latest Release](https://img.shields.io/github/release-pre/pbatard/rufus.svg?style=flat-square&label=Latest%20Release)](https://github.com/pbatard/rufus/releases)
+[![Licence](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&label=License)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![Download Stats](https://img.shields.io/github/downloads/pbatard/rufus/total.svg?label=Downloads%20%28since%202019%29&style=flat-square)](https://github.com/pbatard/rufus/releases)
+[![Contributors](https://img.shields.io/github/contributors/pbatard/rufus.svg?style=flat-square&label=Contributors)](https://github.com/pbatard/rufus/graphs/contributors)
 
 ![Rufus logo](https://raw.githubusercontent.com/pbatard/rufus/master/res/icons/rufus-128.png)
 
