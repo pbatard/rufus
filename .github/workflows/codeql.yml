@@ -33,7 +33,7 @@ env:
 
 jobs:
   CodeQL-Build:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     permissions:
       security-events: write
@@ -48,7 +48,9 @@ jobs:
         languages: cpp
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        msbuild-architecture: x64
 
     - name: Build 
       run: msbuild ${{env.SOLUTION_FILE_PATH}} /m /p:Configuration=${{ env.BUILD_CONFIGURATION}},Platform=${{ env.TARGET_PLATFORM }}

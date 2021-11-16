@@ -1,4 +1,4 @@
-name: VS2019
+name: VS2022
 
 on: 
   push:
@@ -30,8 +30,8 @@ env:
   BUILD_CONFIGURATION: Release
 
 jobs:
-  VS2019-Build:
-    runs-on: windows-latest
+  VS2022-Build:
+    runs-on: windows-2022
 
     strategy:
       matrix:
@@ -45,7 +45,9 @@ jobs:
         submodules: recursive
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        msbuild-architecture: x64
 
     - name: Set ALPHA
       id: set_alpha

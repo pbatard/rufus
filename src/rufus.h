@@ -146,7 +146,7 @@
 #define safe_mm_free(p) do {_mm_free((void*)p); p = NULL;} while(0)
 #define safe_min(a, b) min((size_t)(a), (size_t)(b))
 #define safe_strcp(dst, dst_max, src, count) do {memcpy(dst, src, safe_min(count, dst_max)); \
-	((char*)dst)[safe_min(count, dst_max)-1] = 0;} while(0)
+	((char*)(dst))[safe_min(count, dst_max)-1] = 0;} while(0)
 #define safe_strcpy(dst, dst_max, src) safe_strcp(dst, dst_max, src, safe_strlen(src)+1)
 #define static_strcpy(dst, src) safe_strcpy(dst, sizeof(dst), src)
 #define safe_strncat(dst, dst_max, src, count) strncat(dst, src, safe_min(count, dst_max - safe_strlen(dst) - 1))
@@ -161,7 +161,7 @@
 #define safe_release_dc(hDlg, hDC) do {if ((hDC != INVALID_HANDLE_VALUE) && (hDC != NULL)) {ReleaseDC(hDlg, hDC); hDC = NULL;}} while(0)
 #define safe_sprintf(dst, count, ...) do {_snprintf(dst, count, __VA_ARGS__); (dst)[(count)-1] = 0; } while(0)
 #define static_sprintf(dst, ...) safe_sprintf(dst, sizeof(dst), __VA_ARGS__)
-#define safe_strlen(str) ((((char*)str)==NULL)?0:strlen(str))
+#define safe_strlen(str) ((((char*)(str))==NULL)?0:strlen(str))
 #define safe_strdup _strdup
 #define to_windows_path(str) do { size_t __i; for (__i = 0; __i < safe_strlen(str); __i++) if (str[__i] == '/') str[__i] = '\\'; } while(0)
 #if defined(_MSC_VER)
