@@ -22,7 +22,7 @@ del /q *.appx >NUL 2>&1
 del /q *.appxbundle >NUL 2>&1
 del /q *.map >NUL 2>&1
 
-set WDK_PATH=C:\Program Files (x86)\Windows Kits\10\bin\10.0.20348.0\x64
+set WDK_PATH=C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0\x64
 set ZIP_PATH=C:\Program Files\7-Zip
 set SIGNATURE_SHA1=9ce9a71ccab3b38a74781b975f1c228222cf7d3b
 set MSBUILD_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin
@@ -73,7 +73,7 @@ del version.txt
 echo Will create %VERSION% AppStore Bundle
 pause
 
-"%WDK_PATH%\signtool" sign /v /sha1 %SIGNATURE_SHA1% /fd SHA256 /td SHA256 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp *.exe
+"%WDK_PATH%\signtool" sign /v /sha1 %SIGNATURE_SHA1% /fd SHA256 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td SHA256 *.exe
 if ERRORLEVEL 1 goto out
 
 echo [Files]> bundle.map

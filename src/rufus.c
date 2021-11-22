@@ -1263,7 +1263,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 	const char* redhat8_derivative[] = {
 		"^AlmaLinux-8.*",		// AlmaLinux 8.x
 		"^Fedora.*-3[3-9].*",	// Fedora 33-39
-		"^CentOS-8.*",			// CentOS 8.x
+		"^CentOS.*-8.*",		// CentOS and CentOS Stream 8.x
 		"^OL-8.*",				// Oracle Linux 8.x
 		"^RHEL-8.*",			// Red Hat 8.x
 		"^Rocky-8.*",			// Rocky Linux 8.x
