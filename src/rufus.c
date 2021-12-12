@@ -36,6 +36,7 @@
 #include <io.h>
 #include <getopt.h>
 #include <assert.h>
+#include <delayimp.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -3191,6 +3192,23 @@ static HANDLE SetHogger(void)
 	return hogmutex;
 }
 
+// For delay-loaded DLLs, use LOAD_LIBRARY_SEARCH_SYSTEM32 to avoid DLL search order hijacking.
+FARPROC WINAPI dllDelayLoadHook(unsigned dliNotify, PDelayLoadInfo pdli)
+{
+	if (dliNotify == dliNotePreLoadLibrary) {
+		// Windows 7 without KB2533623 does not support the LOAD_LIBRARY_SEARCH_SYSTEM32 flag.
+		// That is is OK, because the delay load handler will interrupt the NULL return value
+		// to mean that it should perform a normal LoadLibrary.
+		return (FARPROC)LoadLibraryExA(pdli->szDll, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+	}
+	return NULL;
+}
+
+#if defined(_MSC_VER)
+// By default the Windows SDK headers have a `const` while MinGW does not.
+const
+#endif
+PfnDliHook __pfnDliNotifyHook2 = dllDelayLoadHook;
 
 /*
  * Application Entrypoint
@@ -3202,7 +3220,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
 {
 	const char* rufus_loc = "rufus.loc";
-	wchar_t kernel32_path[MAX_PATH];
 	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
 	int wait_for_mutex = 0;
 	FILE* fd;
@@ -3238,22 +3255,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Still, we invoke it, for platforms where the following call might actually work...
 	SetDllDirectoryA("");
 
-	// Also, even if you use SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32), you're
-	// still going to be brought down if you link to wininet.lib or dwmapi.lib, as these two
-	// perform their DLL invocations before you've had a chance to execute anything.
-	// Of course, this is not something that security "researchers" will bother looking into
-	// to try to help fellow developers, when they can get an ego fix by simply throwing
-	// generic URLs around and deliberately refusing to practice *responsible disclosure*...
+	// For libraries on the KnownDLLs list, the system will always load them from System32.
+	// For other DLLs we link directly to, we can delay load the DLL and use a delay load
+	// hook to load them from System32. Note that, for this to work, something like:
+	// 'somelib.dll;%(DelayLoadDLLs)' must be added to the 'Delay Loaded Dlls' option of
+	// the linker properties in Visual Studio (which means this won't work with MinGW).
+	// For all other DLLs, use SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32).
 	// Finally, we need to perform the whole gymkhana below, where we can't call on
 	// SetDefaultDllDirectories() directly, because Windows 7 doesn't have the API exposed.
-	GetSystemDirectoryW(kernel32_path, ARRAYSIZE(kernel32_path));
-	wcsncat(kernel32_path, L"\\kernel32.dll", ARRAYSIZE(kernel32_path) - wcslen(kernel32_path) - 1);
-	// NB: Because kernel32 should already be loaded, what we do above to ensure that we
-	// (re)pick the system one is mostly unnecessary. But since for a hammer everything is a
-	// nail... Also, no, Coverity, we never need to care about freeing kernel32 as a library.
+	// Also, no, Coverity, we never need to care about freeing kernel32 as a library.
 	// coverity[leaked_storage]
 	pfSetDefaultDllDirectories = (SetDefaultDllDirectories_t)
-		GetProcAddress(LoadLibraryW(kernel32_path), "SetDefaultDllDirectories");
+		GetProcAddress(LoadLibraryW(L"kernel32.dll"), "SetDefaultDllDirectories");
 	if (pfSetDefaultDllDirectories != NULL)
 		pfSetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 
