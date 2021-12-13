@@ -3208,7 +3208,12 @@ FARPROC WINAPI dllDelayLoadHook(unsigned dliNotify, PDelayLoadInfo pdli)
 
 	return NULL;
 }
-const PfnDliHook __pfnDliNotifyHook2 = dllDelayLoadHook;
+
+#ifdef _MSC_VER
+// For some reason the Windows SDK headers have a `const` while MinGW does not.
+const
+#endif
+PfnDliHook __pfnDliNotifyHook2 = dllDelayLoadHook;
 
 /*
  * Application Entrypoint
