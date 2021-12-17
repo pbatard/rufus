@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2021-04-02 12:38+0100\n"
-"PO-Revision-Date: 2021-10-23 13:09+0100\n"
+"PO-Revision-Date: 2022-01-05 18:36+0000\n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1275,11 +1275,11 @@ msgstr "Operazione fallita"
 #.
 #. Used when a new update has been downloaded and launched
 msgid "Launching new application..."
-msgstr "Esecuzione nuova applicazione..."
+msgstr "Avvio nuova applicazione..."
 
 #. • MSG_214
 msgid "Failed to launch new application"
-msgstr "Esecuzione nuova applicazione fallita"
+msgstr "Avvio nuova applicazione fallito"
 
 #. • MSG_215
 #.
@@ -1395,7 +1395,7 @@ msgstr "Blocchi danneggiati: test con pattern 0x%02X"
 #.
 #. Example: "Partitioning (MBR)..."
 msgid "Partitioning (%s)..."
-msgstr "Partitionamento (%s)..."
+msgstr "Partizionamento (%s)..."
 
 #. • MSG_239
 msgid "Deleting partitions (%s)..."
@@ -1687,7 +1687,7 @@ msgstr ""
 "\n"
 "Se hai scaricato questo file da internet, prova a scaricarne una nuova copia e verifica che la checksum MD5 o SHA corrisponda alla checksum ufficiale.\n"
 "\n"
-"Nota che puoi calcolare in Rufus la checksum facendo clic sul pulsante (✓)."
+"Nota che puoi calcolare in Rufus la checksum cliccando sul pulsante (✓)."
 
 #. • MSG_299
 msgid "Timestamp validation error"
