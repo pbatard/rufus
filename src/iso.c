@@ -92,10 +92,13 @@ static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* md5sum_name[] = { "MD5SUMS", "md5sum.txt" };
 static const char* casper_dirname = "/casper";
-static const char* efi_dirname = "/efi/boot";
+/* https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf
+ * 3.5.1.1 Removable Media Boot Behavior */
+static const char* efi_dirname = "/EFI/BOOT";
 static const char* efi_bootname[MAX_ARCHS] = {
-	"bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi",
-	"bootebc.efi", "bootriscv32.efi", "bootriscv64.efi", "bootriscv128.efi" };
+	"BOOTIA32.EFI", "BOOTIA64.EFI", "BOOTx64.EFI", "BOOTARM.EFI",
+	"BOOTAA64.EFI", "BOOTRISCV32.EFI", "BOOTRISCV64.EFI", "BOOTRISCV128.EFI",
+	"BOOTEBC.EFI" };
 static const char* sources_str = "/sources";
 static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm" };
 // We only support GRUB/BIOS (x86) that uses a standard config dir (/boot/grub/i386-pc/)
