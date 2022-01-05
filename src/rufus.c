@@ -751,9 +751,6 @@ static void EnableMBRBootOptions(BOOL enable, BOOL remove_checkboxes)
 			actual_enable_mbr = FALSE;
 			mbr_selected_by_user = FALSE;
 		}
-		if (boot_type == BT_NON_BOOTABLE) {
-			actual_enable_fix = FALSE;
-		}
 	}
 
 	if (remove_checkboxes) {
@@ -1135,6 +1132,7 @@ static void DisplayISOProps(void)
 	PRINT_ISO_PROP(HAS_WINPE(img_report), "  Uses: WinPE %s", (img_report.uses_minint) ? "(with /minint)" : "");
 	if (HAS_WININST(img_report)) {
 		inst_str[4] = '0' + img_report.wininst_index;
+		assert(strlen(img_report.wininst_path[0]) >= 3);
 		uprintf("  Uses: Install.%s%s (version %d.%d.%d%s)", &img_report.wininst_path[0][strlen(img_report.wininst_path[0]) - 3],
 			(img_report.wininst_index > 1) ? inst_str : "", (img_report.wininst_version >> 24) & 0xff,
 			(img_report.wininst_version >> 16) & 0xff, (img_report.wininst_version >> 8) & 0xff,
@@ -2218,6 +2216,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	static SHChangeNotifyEntry NotifyEntry;
 	static DWORD_PTR thread_affinity[CHECKSUM_MAX + 1];
 	static HFONT hyperlink_font = NULL;
+	static wchar_t wtooltip[128];
 	LONG lPos;
 	BOOL set_selected_fs;
 	DRAWITEMSTRUCT* pDI;
@@ -2234,7 +2233,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	char tmp[MAX_PATH], *log_buffer = NULL;
 	wchar_t* wbuffer = NULL;
 	loc_cmd* lcmd = NULL;
-	wchar_t wtooltip[128];
 
 	switch (message) {
 

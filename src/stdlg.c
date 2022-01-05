@@ -155,9 +155,12 @@ void BrowseForFolder(void) {
 	dialog_showing++;
 	hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_INPROC,
 		&IID_IFileOpenDialog, (LPVOID)&pfod);
-	if (FAILED(hr)) {
+	if (FAILED(hr) || pfod == NULL) {
 		uprintf("CoCreateInstance for FileOpenDialog failed: error %X\n", hr);
-		pfod = NULL;	// Just in case
+		if (pfod != NULL) {
+			IFileOpenDialog_Release(pfod);
+			pfod = NULL;	// Just in case
+		}
 		goto fallback;
 	}
 	hr = IFileOpenDialog_SetOptions(pfod, FOS_PICKFOLDERS);
@@ -180,7 +183,7 @@ void BrowseForFolder(void) {
 	}
 
 	hr = SHCreateItemFromParsingName(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
-	if (SUCCEEDED(hr)) {
+	if (SUCCEEDED(hr) && pfod != NULL) {
 		if (wpath != NULL) {
 			IFileOpenDialog_SetFolder(pfod, si_path);
 		}
@@ -191,7 +194,7 @@ void BrowseForFolder(void) {
 	safe_free(wpath);
 
 	hr = IFileOpenDialog_Show(pfod, hMainDialog);
-	if (SUCCEEDED(hr)) {
+	if (SUCCEEDED(hr) && pfod != NULL) {
 		hr = IFileOpenDialog_GetResult(pfod, &psi);
 		if (SUCCEEDED(hr)) {
 			IShellItem_GetDisplayName(psi, SIGDN_FILESYSPATH, &wpath);
@@ -277,7 +280,10 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 		if (FAILED(hr)) {
 			SetLastError(hr);
 			uprintf("CoCreateInstance for FileOpenDialog failed: %s\n", WindowsErrorString());
-			pfd = NULL;	// Just in case
+			if (pfd != NULL) {
+				IFileDialog_Release(pfd);
+				pfd = NULL;	// Just in case
+			}
 			goto fallback;
 		}
 
@@ -789,8 +795,8 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDC_MORE_INFO:
-			assert(notification_more_info->callback != NULL);
 			if (notification_more_info != NULL) {
+				assert(notification_more_info->callback != NULL);
 				if (notification_more_info->id == MORE_INFO_URL) {
 					ShellExecuteA(hDlg, "open", notification_more_info->url, NULL, NULL, SW_SHOWNORMAL);
 				} else {
@@ -1613,7 +1619,7 @@ BOOL SetUpdateCheck(void)
 		}
 		// If the user hasn't set the interval in the dialog, set to default
 		if ( (ReadSetting32(SETTING_UPDATE_INTERVAL) == 0) ||
-			 ((ReadSetting32(SETTING_UPDATE_INTERVAL) == -1) && enable_updates) )
+			 (ReadSetting32(SETTING_UPDATE_INTERVAL) == -1) )
 			WriteSetting32(SETTING_UPDATE_INTERVAL, 86400);
 	}
 	SetFidoCheck();
@@ -2005,7 +2011,7 @@ static BOOL CALLBACK AlertPromptCallback(HWND hWnd, LPARAM lParam)
 
 	if (GetWindowTextU(hWnd, str, sizeof(str)) == 0)
 		return TRUE;
-	if (safe_strcmp(str, button_str) == 0)
+	if (strcmp(str, button_str) == 0)
 		*found = TRUE;
 	return TRUE;
 }

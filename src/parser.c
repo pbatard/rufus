@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Elementary Unicode compliant find/replace parser
- * Copyright © 2012-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -796,13 +796,20 @@ char* set_token_data_file(const char* token, const char* data, const char* filen
 	}
 
 out:
-	if (fd_in != NULL) fclose(fd_in);
-	if (fd_out != NULL) fclose(fd_out);
+	if (fd_in != NULL) {
+		fclose(fd_in);
+		fd_in = NULL;
+	}
+	if (fd_out != NULL) {
+		fclose(fd_out);
+		fd_out = NULL;
+	}
 
 	// If an insertion occurred, delete existing file and use the new one
 	if (ret != NULL) {
 		// We're in Windows text mode => Remove CRs if requested
-		fd_in = _wfopen(wtmpname, L"rb");
+		if (wtmpname != NULL)
+			fd_in = _wfopen(wtmpname, L"rb");
 		fd_out = _wfopen(wfilename, L"wb");
 		// Don't check fds
 		if ((fd_in != NULL) && (fd_out != NULL)) {
@@ -1052,7 +1059,7 @@ out:
 	if (fd_out != NULL) fclose(fd_out);
 
 	// If an insertion occurred, delete existing file and use the new one
-	if (ret != NULL) {
+	if (ret != NULL && wtmpname != NULL && wfilename != NULL) {
 		// We're in Windows text mode => Remove CRs if requested
 		fd_in = _wfopen(wtmpname, L"rb");
 		fd_out = _wfopen(wfilename, L"wb");
@@ -1229,7 +1236,7 @@ out:
 	if (fd_out != NULL) fclose(fd_out);
 
 	// If a replacement occurred, delete existing file and use the new one
-	if (ret != NULL) {
+	if (ret != NULL && wtmpname != NULL && wfilename != NULL) {
 		// We're in Windows text mode => Remove CRs if requested
 		fd_in = _wfopen(wtmpname, L"rb");
 		fd_out = _wfopen(wfilename, L"wb");

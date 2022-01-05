@@ -89,12 +89,12 @@ static __inline uint8_t popcnt8(uint8_t val)
 
 static __inline uint8_t popcnt64(register uint64_t u)
 {
-	u = (u & 0x5555555555555555) + ((u >> 1) & 0x5555555555555555);
-	u = (u & 0x3333333333333333) + ((u >> 2) & 0x3333333333333333);
-	u = (u & 0x0f0f0f0f0f0f0f0f) + ((u >> 4) & 0x0f0f0f0f0f0f0f0f);
-	u = (u & 0x00ff00ff00ff00ff) + ((u >> 8) & 0x00ff00ff00ff00ff);
-	u = (u & 0x0000ffff0000ffff) + ((u >> 16) & 0x0000ffff0000ffff);
-	u = (u & 0x00000000ffffffff) + ((u >> 32) & 0x00000000ffffffff);
+	u = (u & 0x5555555555555555ULL) + ((u >> 1) & 0x5555555555555555ULL);
+	u = (u & 0x3333333333333333ULL) + ((u >> 2) & 0x3333333333333333ULL);
+	u = (u & 0x0f0f0f0f0f0f0f0fULL) + ((u >> 4) & 0x0f0f0f0f0f0f0f0fULL);
+	u = (u & 0x00ff00ff00ff00ffULL) + ((u >> 8) & 0x00ff00ff00ff00ffULL);
+	u = (u & 0x0000ffff0000ffffULL) + ((u >> 16) & 0x0000ffff0000ffffULL);
+	u = (u & 0x00000000ffffffffULL) + ((u >> 32) & 0x00000000ffffffffULL);
 	return (uint8_t)u;
 }
 

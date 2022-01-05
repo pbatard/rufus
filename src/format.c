@@ -1175,6 +1175,7 @@ static BOOL SetupWinPE(char drive_letter)
 	for (i=1; i<size-32; i++) {
 		for (j=0; j<ARRAYSIZE(patch_str_org); j++) {
 			if (safe_strnicmp(&buffer[i], patch_str_org[j], strlen(patch_str_org[j])-1) == 0) {
+				assert(index < 2);
 				uprintf("  0x%08X: '%s' -> '%s'\n", i, &buffer[i], patch_str_rep[index][j]);
 				strcpy(&buffer[i], patch_str_rep[index][j]);
 				i += (DWORD)max(strlen(patch_str_org[j]), strlen(patch_str_rep[index][j]));	// in case org is a substring of rep
@@ -2093,6 +2094,7 @@ DWORD WINAPI FormatThread(void* param)
 	if ((hLogicalVolume != NULL) && (hLogicalVolume != INVALID_HANDLE_VALUE)) {
 		PrintInfoDebug(0, MSG_227);
 		if (!CloseHandle(hLogicalVolume)) {
+			hLogicalVolume = INVALID_HANDLE_VALUE;
 			uprintf("Could not close volume: %s", WindowsErrorString());
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_ACCESS_DENIED;
 			goto out;

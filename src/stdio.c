@@ -662,7 +662,7 @@ const char *WindowsErrorString(void)
 
 	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
 		HRESULT_CODE(error_code), MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
-		&err_string[presize], sizeof(err_string)-(DWORD)strlen(err_string), NULL);
+		&err_string[presize], (DWORD)(sizeof(err_string)-strlen(err_string)), NULL);
 	if (size == 0) {
 		format_error = GetLastError();
 		if ((format_error) && (format_error != ERROR_MR_MID_NOT_FOUND) && (format_error != ERROR_MUI_FILE_NOT_LOADED))

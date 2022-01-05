@@ -1064,9 +1064,10 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 
 		safe_release_dc(GetDlgItem(hDlg, IDC_MD5), hDC);
 
-		for (i=(int)safe_strlen(image_path); (i>0)&&(image_path[i]!='\\'); i--);
-		if (image_path != NULL)	// VS code analysis has a false positive on this one
-			SetWindowTextU(hDlg, &image_path[i+1]);
+		if (image_path != NULL) {
+			for (i = (int)strlen(image_path); (i > 0) && (image_path[i] != '\\'); i--);
+			SetWindowTextU(hDlg, &image_path[i + 1]);
+		}
 		// Set focus on the OK button
 		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDOK), TRUE);
 		CenterDialog(hDlg, NULL);

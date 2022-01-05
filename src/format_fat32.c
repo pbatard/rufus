@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Large FAT32 formatting
  * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -414,7 +414,7 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	}
 
 	for (i = 0; i < (SystemAreaSize + BurstSize - 1); i += BurstSize) {
-		UpdateProgressWithInfo(OP_FORMAT, MSG_217, (uint64_t)i, (uint64_t)(SystemAreaSize + BurstSize));
+		UpdateProgressWithInfo(OP_FORMAT, MSG_217, (uint64_t)i, (uint64_t)SystemAreaSize + BurstSize);
 		CHECK_FOR_USER_CANCEL;
 		if (write_sectors(hLogicalVolume, BytesPerSect, i, BurstSize, pZeroSect) != (BytesPerSect * BurstSize)) {
 			die("Error clearing reserved sectors", ERROR_WRITE_FAULT);

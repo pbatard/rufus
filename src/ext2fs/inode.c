@@ -87,10 +87,11 @@ void ext2fs_free_inode_cache(struct ext2_inode_cache *icache)
 		return;
 	if (icache->buffer)
 		ext2fs_free_mem(&icache->buffer);
-	for (i = 0; i < icache->cache_size; i++)
-		ext2fs_free_mem(&icache->cache[i].inode);
-	if (icache->cache)
+	if (icache->cache) {
+		for (i = 0; i < icache->cache_size; i++)
+			ext2fs_free_mem(&icache->cache[i].inode);
 		ext2fs_free_mem(&icache->cache);
+	}
 	icache->buffer_blk = 0;
 	ext2fs_free_mem(&icache);
 }

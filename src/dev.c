@@ -655,6 +655,7 @@ BOOL GetDevices(DWORD devnum)
 				}
 				// Also test for "_SD&" instead of "_SD_" and so on to allow for devices like
 				// "SCSI\DiskRicoh_Storage_SD&REV_3.0" to be detected.
+				assert(strlen(scsi_card_name_copy) > 1);
 				scsi_card_name_copy[strlen(scsi_card_name_copy) - 1] = '&';
 				if (safe_strstr(buffer, scsi_card_name_copy) != NULL) {
 					props.is_CARD = TRUE;
@@ -668,7 +669,7 @@ BOOL GetDevices(DWORD devnum)
 		if (!SetupDiGetDeviceInstanceIdA(dev_info, &dev_info_data, device_instance_id,
 			sizeof(device_instance_id), &size)) {
 			uprintf("SetupDiGetDeviceInstanceId failed: %s", WindowsErrorString());
-			static_strcpy(device_instance_id, "<N/A>");
+			strcpy(device_instance_id, "<N/A>");
 		}
 
 		memset(buffer, 0, sizeof(buffer));

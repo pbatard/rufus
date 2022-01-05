@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Extract icon from executable and set autorun.inf
- * Copyright © 2012-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -185,7 +186,8 @@ BOOL SetAutorun(const char* path)
 	uprintf("Created: %s", filename);
 
 	// .inf -> .ico
-	filename[strlen(filename)-1] = 'o';
-	filename[strlen(filename)-2] = 'c';
+	assert(strlen(filename) >= 2);
+	filename[strlen(filename) - 1] = 'o';
+	filename[strlen(filename) - 2] = 'c';
 	return ExtractAppIcon(filename, FALSE);
 }

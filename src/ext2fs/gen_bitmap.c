@@ -117,7 +117,7 @@ errcode_t ext2fs_make_generic_bitmap(errcode_t magic, ext2_filsys fs,
 	} else
 		bitmap->description = 0;
 
-	size = (size_t) (((bitmap->real_end - bitmap->start) / 8) + 1);
+	size = (((size_t)bitmap->real_end - bitmap->start) / 8) + 1;
 	/* Round up to allow for the BT x86 instruction */
 	size = (size + 7) & ~3;
 	retval = ext2fs_get_mem(size, &bitmap->bitmap);
@@ -303,7 +303,7 @@ void ext2fs_clear_generic_bitmap(ext2fs_generic_bitmap bitmap)
 	}
 
 	memset(bitmap32->bitmap, 0,
-	       (size_t) (((bitmap32->real_end - bitmap32->start) / 8) + 1));
+	       (((size_t)bitmap32->real_end - bitmap32->start) / 8) + 1);
 }
 
 errcode_t ext2fs_fudge_generic_bitmap_end(ext2fs_inode_bitmap gen_bitmap,

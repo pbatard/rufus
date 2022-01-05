@@ -4,7 +4,7 @@
  *
  * Modified from Process Hacker:
  *   https://github.com/processhacker2/processhacker2/
- * Copyright © 2017-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2017-2021 Pete Batard <pete@akeo.ie>
  * Copyright © 2017 dmex
  * Copyright © 2009-2016 wj32
  *
@@ -506,6 +506,9 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 		if (i >= handles->NumberOfHandles)
 			break;
 
+		if (handleInfo == NULL)
+			continue;
+
 		// Don't bother with processes we can't access
 		if (handleInfo->UniqueProcessId == last_access_denied_pid)
 			continue;
@@ -609,7 +612,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 		// The above may not work on Windows 7, so try QueryFullProcessImageName (Vista or later)
 		if (!bGotCmdLine) {
-			bGotCmdLine = QueryFullProcessImageNameW(processHandle, 0, wexe_path, &size);
+			bGotCmdLine = (QueryFullProcessImageNameW(processHandle, 0, wexe_path, &size) != FALSE);
 			if (bGotCmdLine)
 				wchar_to_utf8_no_alloc(wexe_path, cmdline, sizeof(cmdline));
 		}

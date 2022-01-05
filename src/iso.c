@@ -180,7 +180,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 
 	// Check for archiso loader/entries/*.conf files
 	if (safe_stricmp(psz_dirname, "/loader/entries") == 0) {
-		len = strlen(psz_basename);
+		len = safe_strlen(psz_basename);
 		props->is_conf = ((len > 4) && (stricmp(&psz_basename[len - 5], ".conf") == 0));
 	}
 
@@ -863,7 +863,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	size_t i, j, size, sl_index = 0;
 	uint16_t sl_version;
 	FILE* fd;
-	int r = 1;
+	int k, r = 1;
 	iso9660_t* p_iso = NULL;
 	iso9660_pvd_t pvd;
 	udf_t* p_udf = NULL;
@@ -969,8 +969,8 @@ out:
 		if ((iso9660_ifs_read_pvd(p_iso, &pvd)) && (_stat64U(src_iso, &stat) == 0))
 			img_report.mismatch_size = (int64_t)(iso9660_get_pvd_space_size(&pvd)) * ISO_BLOCKSIZE - stat.st_size;
 		// Remove trailing spaces from the label
-		for (j=safe_strlen(img_report.label)-1; ((j>0)&&(isspaceU(img_report.label[j]))); j--)
-			img_report.label[j] = 0;
+		for (k=(int)safe_strlen(img_report.label)-1; ((k>0)&&(isspaceU(img_report.label[k]))); k--)
+			img_report.label[k] = 0;
 		// We use the fact that UDF_BLOCKSIZE and ISO_BLOCKSIZE are the same here
 		img_report.projected_size = total_blocks * ISO_BLOCKSIZE;
 		// We will link the existing isolinux.cfg from a syslinux.cfg we create

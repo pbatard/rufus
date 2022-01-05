@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * DOS keyboard locale setup
- * Copyright © 2011-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -982,6 +982,7 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 		kb = "us";
 		kbdrv = bFreeDOS?fd_get_kbdrv(kb):ms_get_kbdrv(kb);	// Always succeeds
 	}
+	assert(kbdrv >= 0);
 	uprintf("Will use DOS keyboard '%s' [%s]\n", kb, kb_to_hr(kb));
 
 	// Now get a codepage

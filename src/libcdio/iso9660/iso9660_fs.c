@@ -937,7 +937,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
     if (su_length % 2)
       su_length--;
 
-    if (su_length < 0 || su_length < sizeof (iso9660_xa_t))
+    if (su_length < sizeof (iso9660_xa_t))
       return p_stat;
 
     if (nope == b_xa) {

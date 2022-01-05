@@ -301,8 +301,8 @@ errcode_t ext2fs_get_free_blocks2(ext2_filsys fs, blk64_t start, blk64_t finish,
 	if (!num)
 		num = 1;
 	c_ratio = 1 << ext2fs_get_bitmap_granularity(map);
-	b &= ~(c_ratio - 1);
-	finish &= ~(c_ratio -1);
+	b &= ~((blk64_t)c_ratio - 1);
+	finish &= ~((blk64_t)c_ratio - 1);
 	do {
 		if (b + num - 1 >= ext2fs_blocks_count(fs->super)) {
 			if (finish > start)

@@ -132,7 +132,7 @@
 #ifndef STRINGIFY
 #define STRINGIFY(x)                #x
 #endif
-#define PERCENTAGE(percent, value)  ((1ULL * percent * value) / 100ULL)
+#define PERCENTAGE(percent, value)  ((1ULL * (percent) * (value)) / 100ULL)
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
 #define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING|MB_RIGHT:0)
 #define CHECK_FOR_USER_CANCEL       if (IS_ERROR(FormatStatus) && (SCODE_CODE(FormatStatus) == ERROR_CANCELLED)) goto out
@@ -149,7 +149,7 @@
 	((char*)(dst))[safe_min(count, dst_max)-1] = 0;} while(0)
 #define safe_strcpy(dst, dst_max, src) safe_strcp(dst, dst_max, src, safe_strlen(src)+1)
 #define static_strcpy(dst, src) safe_strcpy(dst, sizeof(dst), src)
-#define safe_strncat(dst, dst_max, src, count) strncat(dst, src, safe_min(count, dst_max - safe_strlen(dst) - 1))
+#define safe_strncat(dst, dst_max, src, count) strncat(dst, src, safe_min(count, (dst_max) - safe_strlen(dst) - 1))
 #define safe_strcat(dst, dst_max, src) safe_strncat(dst, dst_max, src, safe_strlen(src)+1)
 #define static_strcat(dst, src) safe_strcat(dst, sizeof(dst), src)
 #define safe_strcmp(str1, str2) strcmp(((str1==NULL)?"<NULL>":str1), ((str2==NULL)?"<NULL>":str2))
@@ -178,7 +178,7 @@ extern void _uprintfs(const char *str);
 #define vvuprintf(...) do { if (verbose > 1) _uprintf(__VA_ARGS__); } while(0)
 #define suprintf(...) do { if (!bSilent) _uprintf(__VA_ARGS__); } while(0)
 #define uuprintf(...) do { if (usb_debug) _uprintf(__VA_ARGS__); } while(0)
-#define ubprintf(...) do { safe_sprintf(&ubuffer[ubuffer_pos], UBUFFER_SIZE - ubuffer_pos - 2, __VA_ARGS__); \
+#define ubprintf(...) do { safe_sprintf(&ubuffer[ubuffer_pos], UBUFFER_SIZE - ubuffer_pos - 4, __VA_ARGS__); \
 	ubuffer_pos = strlen(ubuffer); ubuffer[ubuffer_pos++] = '\r'; ubuffer[ubuffer_pos++] = '\n'; \
 	ubuffer[ubuffer_pos] = 0; } while(0)
 #define ubflush() do { if (ubuffer_pos) uprintf("%s", ubuffer); ubuffer_pos = 0; } while(0)
@@ -389,7 +389,7 @@ typedef struct {
 	BOOLEAN has_kolibrios;
 	BOOLEAN uses_casper;
 	BOOLEAN uses_minint;
-	BOOLEAN compression_type;
+	uint8_t compression_type;
 	winver_t win_version;	// Windows ISO version
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];

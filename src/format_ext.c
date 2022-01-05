@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * extfs formatting
- * Copyright © 2019-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2019-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -212,6 +212,7 @@ const char* GetExtFsLabel(DWORD DriveIndex, uint64_t PartitionOffset)
 	r = ext2fs_open(volume_name, EXT2_FLAG_SKIP_MMP, 0, 0, manager, &ext2fs);
 	free(volume_name);
 	if (r == 0) {
+		assert(ext2fs != NULL);
 		strncpy(label, ext2fs->super->s_volume_name, EXT2_LABEL_LEN);
 		label[EXT2_LABEL_LEN] = 0;
 	}

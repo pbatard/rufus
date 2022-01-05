@@ -1438,7 +1438,7 @@ static errcode_t xattr_array_update(struct ext2_xattr_handle *h,
 		return 0;
 	}
 
-	if (h->ibody_count <= old_idx) {
+	if (old_idx >= 0 && h->ibody_count <= old_idx) {
 		block_free += EXT2_EXT_ATTR_LEN(name_len);
 		if (!h->attrs[old_idx].ea_ino)
 			block_free +=
