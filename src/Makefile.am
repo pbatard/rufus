@@ -15,5 +15,6 @@ rufus_SOURCES = badblocks.c checksum.c dev.c dos.c dos_locale.c drive.c format.c
 rufus_CFLAGS = -I$(srcdir)/ms-sys/inc -I$(srcdir)/syslinux/libfat -I$(srcdir)/syslinux/libinstaller -I$(srcdir)/syslinux/win -I$(srcdir)/libcdio $(AM_CFLAGS) \
 	-DEXT2_FLAT_INCLUDES=0 -DSOLUTION=rufus
 rufus_LDFLAGS = $(AM_LDFLAGS) -mwindows
+# Note: Do not link with -lversion as this will results in DLL sideloading issue. See https://github.com/pbatard/rufus/pull/1838
 rufus_LDADD = rufus_rc.o bled/libbled.a ext2fs/libext2fs.a ms-sys/libmssys.a syslinux/libfat/libfat.a syslinux/libinstaller/libinstaller.a syslinux/win/libwin.a \
-	libcdio/iso9660/libiso9660.a libcdio/udf/libudf.a libcdio/driver/libdriver.a -lsetupapi -lole32 -lgdi32 -lshlwapi -lcrypt32 -lwintrust -lcomdlg32 -lcomctl32 -luuid -lpsapi -lversion
+	libcdio/iso9660/libiso9660.a libcdio/udf/libudf.a libcdio/driver/libdriver.a -lsetupapi -lole32 -lgdi32 -lshlwapi -lcrypt32 -lwintrust -lcomdlg32 -lcomctl32 -luuid -lpsapi

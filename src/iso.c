@@ -858,6 +858,12 @@ void GetGrubVersion(char* buf, size_t buf_size)
 		img_report.grub2_version[0] = 0;
 }
 
+// Linking to version.lib would result in DLL sideloading issues, so we don't
+// See https://github.com/pbatard/rufus/pull/1838
+PF_TYPE_DECL(WINAPI, DWORD, GetFileVersionInfoSizeW, (LPCWSTR, LPDWORD));
+PF_TYPE_DECL(WINAPI, BOOL, GetFileVersionInfoW, (LPCWSTR, DWORD, DWORD, LPVOID));
+PF_TYPE_DECL(WINAPI, BOOL, VerQueryValueA, (LPCVOID, LPCSTR, LPVOID, PUINT));
+
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 {
 	size_t i, j, size, sl_index = 0;
@@ -877,6 +883,10 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 
 	if ((!enable_iso) || (src_iso == NULL) || (dest_dir == NULL))
 		return FALSE;
+
+	PF_INIT_OR_OUT(GetFileVersionInfoSizeW, Version);
+	PF_INIT_OR_OUT(GetFileVersionInfoW, Version);
+	PF_INIT_OR_OUT(VerQueryValueA, Version);
 
 	scan_only = scan;
 	if (!scan_only)
@@ -1113,14 +1123,19 @@ out:
 			VS_FIXEDFILEINFO* ver_info = NULL;
 			DWORD ver_handle = 0, ver_size;
 			UINT value_len = 0;
+			assert(pfGetFileVersionInfoSizeW != NULL);
+			assert(pfGetFileVersionInfoW != NULL);
+			assert(pfVerQueryValueA != NULL);
 			// coverity[swapped_arguments]
 			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, path) != 0) {
+				wconvert(path);
+				assert(wpath != NULL);
 				size = (size_t)ExtractISOFile(src_iso, "sources/compatresources.dll", path, FILE_ATTRIBUTE_NORMAL);
-				ver_size = GetFileVersionInfoSizeU(path, &ver_handle);
+				ver_size = pfGetFileVersionInfoSizeW(wpath, &ver_handle);
 				if (ver_size != 0) {
 					buf = malloc(ver_size);
-					if ((buf != NULL) && GetFileVersionInfoU(path, ver_handle, ver_size, buf) &&
-						VerQueryValueA(buf, "\\", (LPVOID)&ver_info, &value_len) && (value_len != 0)) {
+					if ((buf != NULL) && pfGetFileVersionInfoW(wpath, ver_handle, ver_size, buf) &&
+						pfVerQueryValueA(buf, "\\", (LPVOID)&ver_info, &value_len) && (value_len != 0)) {
 						if (ver_info->dwSignature == VS_FFI_SIGNATURE) {
 							img_report.win_version.major = HIWORD(ver_info->dwFileVersionMS);
 							img_report.win_version.minor = LOWORD(ver_info->dwFileVersionMS);
@@ -1132,7 +1147,8 @@ out:
 					}
 					free(buf);
 				}
-				DeleteFileU(path);
+				DeleteFileW(wpath);
+				free(wpath);
 			}
 		}
 		StrArrayDestroy(&config_path);
