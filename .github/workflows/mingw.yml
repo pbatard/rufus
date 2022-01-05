@@ -48,6 +48,7 @@ jobs:
         install: >-
           mingw-w64-${{ matrix.env }}-toolchain
           base-devel
+          autotools
           git
           upx
 
