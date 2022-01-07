@@ -335,7 +335,7 @@ static void SetPartitionSchemeAndTargetSystem(BOOL only_target)
 			if (HAS_WINDOWS(img_report) && img_report.has_efi)
 				preferred_pt = allow_dual_uefi_bios? PARTITION_STYLE_MBR :
 					((selected_pt >= 0) ? selected_pt : PARTITION_STYLE_GPT);
-			if (img_report.is_bootable_img)
+			if (IS_DD_BOOTABLE(img_report))
 				preferred_pt = (selected_pt >= 0) ? selected_pt : PARTITION_STYLE_MBR;
 		}
 		SetComboEntry(hPartitionScheme, preferred_pt);
@@ -841,7 +841,7 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 		actual_enable = FALSE;
 	actual_enable_bb = actual_enable;
 	// If we are dealing with a pure DD image, remove all options except Bad Blocks check
-	if ((boot_type == BT_IMAGE) && (img_report.is_bootable_img) && (!img_report.is_iso))
+	if ((boot_type == BT_IMAGE) && IS_DD_BOOTABLE(img_report) && (!img_report.is_iso))
 		actual_enable = FALSE;
 
 	EnableWindow(hImageOption, actual_enable);
@@ -1284,17 +1284,20 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 
 	if ((FormatStatus == (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)) ||
 		(img_report.image_size == 0) ||
-		(!img_report.is_iso && !img_report.is_bootable_img && !img_report.is_windows_img)) {
+		(!img_report.is_iso && (img_report.is_bootable_img <= 0) && !img_report.is_windows_img)) {
 		// Failed to scan image
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
-		safe_free(image_path);
 		UpdateImage(FALSE);
 		SetMBRProps();
 		PopulateProperties();
 		PrintInfoDebug(0, MSG_203);
 		PrintStatus(0, MSG_203);
 		EnableControls(TRUE, FALSE);
-		MessageBoxExU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
+		if (img_report.is_bootable_img < 0)
+			MessageBoxExU(hMainDialog, lmprintf(MSG_325, image_path), lmprintf(MSG_042), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+		else
+			MessageBoxExU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
+		safe_free(image_path);
 		goto out;
 	}
 
@@ -1317,7 +1320,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 			DeleteFileU(tmp_path);
 		}
 		uprintf("  Image is %sa UEFI bootable Windows installation image", img_report.has_efi ? "" : "NOT ");
-	} else if (img_report.is_bootable_img) {
+	} else if (IS_DD_BOOTABLE(img_report)) {
 		if (img_report.is_bootable_img == 2)
 			uprintf("  Image is a FORCED non-bootable image");
 		else

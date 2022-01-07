@@ -50,8 +50,15 @@ jobs:
 
     - name: Build with Coverity
       run: cov-build.exe --dir cov-int msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ env.TARGET_PLATFORM }}
+
+    - name: Publish Coverity artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: cov-int
+        path: cov-int/
       
     - name: Upload Coverity build for analysis
       run: |
         7z a -r cov-int.zip cov-int
         curl --form email=${{ env.EMAIL }} --form token=${{ secrets.COVERITY_SCAN_TOKEN }} --form file=@cov-int.zip --form version="${{ env.GITHUB_SHA }}" --form description="Automated build" https://scan.coverity.com/builds?project=${{ env.COVERITY_PROJECT_NAME }}
+

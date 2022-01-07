@@ -586,6 +586,7 @@ t MSG_321 "The image you have selected is an ISOHybrid, but its creators have no
 t MSG_322 "Standard Windows 11 Installation (TPM 2.0 + Secure Boot)"
 t MSG_323 "Extended Windows 11 Installation (no TPM / no Secure Boot)"
 t MSG_324 "Removing Windows 11 installation restrictions: %s"
+t MSG_325 "Unable to open or read '%s'"
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001

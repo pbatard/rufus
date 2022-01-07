@@ -10,6 +10,7 @@ o v3.?? (????.??.??)
   - *NEW*      MSG_322 "Standard Windows 11 Installation (TPM 2.0 + Secure Boot)"
   - *NEW*      MSG_323 "Extended Windows 11 Installation (no TPM / no Secure Boot)"
   - *NEW*      MSG_324 "Removing Windows 11 installation restrictions: %s"
+  - *NEW*      MSG_325 "Unable to open or read '%s'"
 
 o v3.14 (2021.03.31)
   - *UPDATED*  MSG_068 "Error while partitioning drive." -> "Could not partition drive."

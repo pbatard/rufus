@@ -326,7 +326,7 @@ BOOL IsCompressedBootableImage(const char* path)
 }
 
 // 0: non-bootable, 1: bootable, 2: forced bootable
-uint8_t IsBootableImage(const char* path)
+int8_t IsBootableImage(const char* path)
 {
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	LARGE_INTEGER liImageSize;
@@ -336,13 +336,13 @@ uint8_t IsBootableImage(const char* path)
 	uint32_t checksum, old_checksum;
 	uint64_t wim_magic = 0;
 	LARGE_INTEGER ptr = { 0 };
-	uint8_t is_bootable_img = 0;
+	int8_t is_bootable_img;
 
 	uprintf("Disk image analysis:");
-	handle = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL,
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	handle = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle == INVALID_HANDLE_VALUE) {
 		uprintf("  Could not open image '%s'", path);
+		is_bootable_img = -1;
 		goto out;
 	}
 
@@ -352,6 +352,7 @@ uint8_t IsBootableImage(const char* path)
 
 	if (!GetFileSizeEx(handle, &liImageSize)) {
 		uprintf("  Could not get image size: %s", WindowsErrorString());
+		is_bootable_img = -2;
 		goto out;
 	}
 	img_report.image_size = (uint64_t)liImageSize.QuadPart;
@@ -368,6 +369,7 @@ uint8_t IsBootableImage(const char* path)
 		if ( (footer == NULL) || (!SetFilePointerEx(handle, ptr, NULL, FILE_BEGIN)) ||
 			 (!ReadFile(handle, footer, size, &size, NULL)) || (size != sizeof(vhd_footer)) ) {
 			uprintf("  Could not read VHD footer");
+			is_bootable_img = -3;
 			goto out;
 		}
 		if (memcmp(footer->cookie, conectix_str, sizeof(footer->cookie)) == 0) {
@@ -381,7 +383,7 @@ uint8_t IsBootableImage(const char* path)
 			// Might as well validate the checksum while we're at it
 			old_checksum = bswap_uint32(footer->checksum);
 			footer->checksum = 0;
-			for (checksum=0, i=0; i<sizeof(vhd_footer); i++)
+			for (checksum = 0, i = 0; i < sizeof(vhd_footer); i++)
 				checksum += ((uint8_t*)footer)[i];
 			checksum = ~checksum;
 			if (checksum != old_checksum)

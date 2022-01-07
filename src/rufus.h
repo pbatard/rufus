@@ -333,8 +333,8 @@ enum checksum_type {
 #define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))
 #define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_WININST(r))
 #define HAS_EFI_IMG(r)      (r.efi_img_path[0] != 0)
-#define IS_DD_BOOTABLE(r)   (r.is_bootable_img)
-#define IS_DD_ONLY(r)       (r.is_bootable_img && (!r.is_iso || r.disable_iso))
+#define IS_DD_BOOTABLE(r)   (r.is_bootable_img > 0)
+#define IS_DD_ONLY(r)       ((r.is_bootable_img > 0) && (!r.is_iso || r.disable_iso))
 #define IS_EFI_BOOTABLE(r)  (r.has_efi != 0)
 #define IS_BIOS_BOOTABLE(r) (HAS_BOOTMGR(r) || HAS_SYSLINUX(r) || HAS_WINPE(r) || HAS_GRUB(r) || HAS_REACTOS(r) || HAS_KOLIBRIOS(r))
 #define HAS_WINTOGO(r)      (HAS_BOOTMGR(r) && IS_EFI_BOOTABLE(r) && HAS_WININST(r))
@@ -363,7 +363,7 @@ typedef struct {
 	int64_t mismatch_size;
 	uint32_t wininst_version;
 	BOOLEAN is_iso;
-	uint8_t is_bootable_img;
+	int8_t is_bootable_img;
 	BOOLEAN is_vhd;
 	BOOLEAN is_windows_img;
 	BOOLEAN disable_iso;
@@ -598,7 +598,7 @@ extern BOOL WimExtractFile_7z(const char* image, int index, const char* src, con
 extern BOOL WimApplyImage(const char* image, int index, const char* dst);
 extern char* WimMountImage(const char* image, int index);
 extern BOOL WimUnmountImage(const char* image, int index);
-extern uint8_t IsBootableImage(const char* path);
+extern int8_t IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int SetWinToGoIndex(void);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
