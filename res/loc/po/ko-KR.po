@@ -3,7 +3,9 @@ msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2021-04-02 10:49+0900\n"
-"PO-Revision-Date: 2021-04-02 11:50+0100\n"
+"PO-Revision-Date: 2022-01-07 10:58+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Korean (한국어)\n"
 "X-Rufus-LCID: 0x0412\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -25,7 +25,7 @@ msgstr "장치"
 
 #. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
 msgid "Boot selection"
-msgstr "부트 선택"
+msgstr "부트 유형"
 
 #. • IDD_DIALOG → IDC_SELECT
 msgid "Select"
@@ -37,7 +37,7 @@ msgstr "이미지 옵션"
 
 #. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
 msgid "Partition scheme"
-msgstr "파티션 방식"
+msgstr "파티션 구성"
 
 #. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
 msgid "Target system"
@@ -52,7 +52,7 @@ msgstr "USB 하드 드라이브 목록"
 #. It is acceptable to drop the parenthesis () if you are running out of space
 #. as there is a tooltip (MSG_169) providing these details.
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
-msgstr "이전 BIOS 수정을 추가(추가 파티션, 정렬 등)"
+msgstr "이전 BIOS에 대한 호환성 옵션 추가 (추가 파티션, 정렬 등)"
 
 #. • IDD_DIALOG → IDC_RUFUS_MBR
 #.
@@ -60,7 +60,7 @@ msgstr "이전 BIOS 수정을 추가(추가 파티션, 정렬 등)"
 #. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
 #. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
 msgid "Use Rufus MBR with BIOS ID"
-msgstr "Rufus MBR을 BIOS ID로 사용"
+msgstr "BIOS ID로 Rufus MBR을 사용"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -84,7 +84,7 @@ msgstr "빠른 포맷"
 
 #. • IDD_DIALOG → IDC_BAD_BLOCKS
 msgid "Check device for bad blocks"
-msgstr "장치에 불량 블록이 있는지 확인"
+msgstr "장치에서 불량 블록 확인"
 
 #. • IDD_DIALOG → IDC_EXTENDED_LABEL
 msgid "Create extended label and icon files"
@@ -151,7 +151,7 @@ msgstr "저장"
 
 #. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
 msgid "Update policy and settings"
-msgstr "업데이트 정책과 설정"
+msgstr "업데이트 정책 및 설정"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
 msgid "Settings"
@@ -175,7 +175,7 @@ msgstr "업데이트 확인 - Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
 msgid "A newer version is available. Please download the latest version!"
-msgstr "최신 버전을 사용할 수 있습니다. 최신 버전을 다운로드하십시오!"
+msgstr "새 버전을 사용할 수 있습니다. 새 버전을 다운로드 하십시오!"
 
 #. • IDD_NEW_VERSION → IDC_WEBSITE
 msgid "Click here to go to the website"
@@ -183,7 +183,7 @@ msgstr "웹 사이트로 이동하려면 여기를 클릭하십시오"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
 msgid "Release Notes"
-msgstr "업데이트 목록"
+msgstr "릴리즈 노트"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
 #. • IDD_NEW_VERSION → IDC_DOWNLOAD
@@ -213,7 +213,7 @@ msgstr ""
 
 #. • MSG_004
 msgid "Rufus update policy"
-msgstr "업데이트 정책"
+msgstr "Rufus 업데이트 정책"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
@@ -234,10 +234,10 @@ msgid ""
 "  %d write error(s)\n"
 "  %d corruption error(s)"
 msgstr ""
-"검사 완료: %d개의 불량 불럭이 발견되었습니다.\n"
-"읽기 오류 %d\n"
-"  쓰기 오류 %d\n"
-"  손상 오류 %d"
+"검사 완료: %d개의 불량 블록이 발견되었습니다.\n"
+"  읽기 오류: %d\n"
+"  쓰기 오류: %d\n"
+"  손상 오류: %d"
 
 #. • MSG_012
 #.
@@ -248,7 +248,7 @@ msgid ""
 "%s"
 msgstr ""
 "%s\n"
-"자세한 보고서는 다음 위치에 있습니다 :\n"
+"상세 리포트는 다음 위치에 있습니다 :\n"
 "%s"
 
 #. • MSG_013
@@ -273,11 +273,11 @@ msgstr "사용자 정의"
 
 #. • MSG_018
 msgid "Your version: %d.%d (Build %d)"
-msgstr "버전: %d.%d (Build %d)"
+msgstr "현재 버전: %d.%d (Build %d)"
 
 #. • MSG_019
 msgid "Latest version: %d.%d (Build %d)"
-msgstr "죄신 버전: %d.%d (Build %d)"
+msgstr "최신 버전: %d.%d (Build %d)"
 
 #. • MSG_020
 #. • MSG_026
@@ -348,7 +348,7 @@ msgstr "BIOS 또는 UEFI"
 #.
 #. Number of bad block check passes (singular for 1 pass)
 msgid "%d pass"
-msgstr "한 번만 검사"
+msgstr "%d회만 검사"
 
 #. • MSG_035
 #.
@@ -367,7 +367,7 @@ msgstr "프로그램"
 
 #. • MSG_038
 msgid "Abort"
-msgstr "취소"
+msgstr "중지"
 
 #. • MSG_039
 msgid "Launch"
@@ -375,7 +375,7 @@ msgstr "실행"
 
 #. • MSG_041
 msgid "Operation cancelled by the user"
-msgstr "사용자에 의해 작업이 취소 됨"
+msgstr "사용자에 의해 작업이 취소됨"
 
 #. • MSG_042
 msgid "Error"
@@ -387,7 +387,7 @@ msgstr "오류: %s"
 
 #. • MSG_044
 msgid "File download"
-msgstr "다운로드 파일"
+msgstr "파일 다운로드"
 
 #. • MSG_045
 msgid "USB Storage Device (Generic)"
@@ -405,11 +405,11 @@ msgstr "다중 파티션"
 
 #. • MSG_048
 msgid "Rufus - Flushing buffers"
-msgstr "Rufus - 버퍼 비움"
+msgstr "Rufus - 버퍼를 지우는 중"
 
 #. • MSG_049
 msgid "Rufus - Cancellation"
-msgstr "Rufus - 취소"
+msgstr "Rufus - 취소 중"
 
 #. • MSG_050
 msgid "Success."
@@ -417,11 +417,11 @@ msgstr "성공."
 
 #. • MSG_051
 msgid "Undetermined error while formatting."
-msgstr "포맷 중 알 수 없는 오류 발생."
+msgstr "포맷 중 알 수 없는 오류가 발생하였습니다."
 
 #. • MSG_052
 msgid "Cannot use the selected file system for this media."
-msgstr "이 미디어는 선택한 파일 시스템을 사용할 수 없습니다."
+msgstr "선택한 파일 시스템은 이 미디어에 사용할 수 없습니다."
 
 #. • MSG_053
 msgid "Access to the device is denied."
@@ -429,7 +429,7 @@ msgstr "장치에 대한 액세스가 거부되었습니다."
 
 #. • MSG_054
 msgid "Media is write protected."
-msgstr "미디어에 쓰기가 금지되어 있습니다."
+msgstr "미디어에 쓰기 금지가 설정되어 있습니다."
 
 #. • MSG_055
 msgid "The device is in use by another process. Please close any other process that may be accessing the device."
@@ -441,7 +441,7 @@ msgstr "이 장치는 빠른 포맷을 사용할 수 없습니다."
 
 #. • MSG_057
 msgid "The volume label is invalid."
-msgstr "볼륨 레이블이 잘못되었습니다."
+msgstr "볼륨 레이블이 유효하지 않습니다."
 
 #. • MSG_058
 msgid "The device handle is invalid."
@@ -457,7 +457,7 @@ msgstr "볼륨 크기가 유효하지 않습니다."
 
 #. • MSG_061
 msgid "Please insert a removable media in drive."
-msgstr "드라이브에 이동식 미디어를 넣으십시오."
+msgstr "드라이브에 이동식 미디어를 삽입하십시오."
 
 #. • MSG_062
 msgid "An unsupported command was received."
@@ -519,11 +519,11 @@ msgstr "볼륨을 다시 탑재할 수 없습니다."
 
 #. • MSG_076
 msgid "Unable to patch/setup files for boot."
-msgstr "부팅하기 위한 패치 또는 설치 파일이 없습니다."
+msgstr "부팅을 위한 패치/설치를 할 수 없습니다."
 
 #. • MSG_077
 msgid "Unable to assign a drive letter."
-msgstr "드라이브 문자를 할당 할 수 없습니다."
+msgstr "드라이브 문자를 할당할 수 없습니다."
 
 #. • MSG_078
 msgid "Can't mount GUID volume."
@@ -543,9 +543,9 @@ msgid ""
 msgstr ""
 "Rufus에서 Windows가 내부 버퍼를 USB 장치에 쓰고 있음을 감지했습니다.\n"
 "\n"
-"USB 장치의 속도에 따라 이 작업은 완료하는데 시간이 오래 걸릴 수 있습니다. 특히 큰 파일의 경우 손상을 방지하기 위해 \n"
+"특히 대용량의 파일의 경우 USB 장치의 속도에 따라 이 작업에 많은 시간이 소요될 수 있습니다. \n"
 "\n"
-"윈도우를 종료할 것을 권장합니다. 그렇지만 기다릴 수 없다면 강제로 장치를 분리할 수도 있습니다."
+"파일 손상을 방지하려면 작업이 완료될 때까지 기다리는 것이 권장됩니다. 다만 기다릴 수 없다면 강제로 장치를 분리할 수도 있습니다."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -553,11 +553,11 @@ msgstr "지원되지 않는 이미지"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "이 이미지는 부팅할 수 없거나, Rufus가 지원하지 않는 부팅 또는 압축 방법을 사용하고 있습니다."
+msgstr "해당 이미지는 부팅 가능한 이미지가 아니거나 Rufus가 지원하지 않는 부팅 혹은 압축 방식을 사용하고 있습니다."
 
 #. • MSG_083
 msgid "Replace %s?"
-msgstr "%s 교체?"
+msgstr "%s를 교체하시겠습니까?"
 
 #. • MSG_084
 msgid ""
@@ -572,19 +572,19 @@ msgid ""
 "Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
 "이 ISO 이미지는 '%s'의 이전 버전을 사용하고 있는 것 같습니다.\n"
-"이것 때문에 부팅 메뉴가 제대로 표시되지 않을 수 있습니다.\n"
+"이로 인하여 부팅 메뉴가 정상적으로 표시되지 않을 수 있습니다.\n"
 "\n"
 "\n"
 "Rufus가 최신 버전을 다운로드하여 이 문제를 해결할 수 있습니다.:\n"
-"- 인터넷에 연결해 파일을 내려받으려면 '예'를 선택하십시오.\n"
-"- 기존 ISO 파일을 수정하지 않고 그대로 두려면 '아니오'를 선택하십시오.\n"
+"- 인터넷에 연결하여 파일을 다운로드하려면 '예'를 선택하십시오.\n"
+"- 기존 ISO파일을 변경하지 않으려면 '아니오'를 선택하십시오.\n"
 "만약 무엇을 선택해야 할지 모른다면 '예'를 선택하십시오.\n"
 "\n"
-"알림: 새 파일은 현재 디렉토리에 내려받게 되며 이미 '%s'가 있다면 자동으로 재사용됩니다."
+"참고: 새 파일은 현재 디렉토리에 다운로드되며 이미 '%s' 파일이 존재하는 경우 자동으로 재사용합니다."
 
 #. • MSG_085
 msgid "Downloading %s"
-msgstr "%s 다운로드 중..."
+msgstr "%s 다운로드 중"
 
 #. • MSG_086
 msgid "No image selected"
@@ -615,7 +615,7 @@ msgstr "지원되지 않는 ISO"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "UEFI 대상 유형을 사용하는 경우 EFI 부팅이 가능한 ISO 이미지만 지원됩니다. EFI 부팅이 가능한 ISO를 선택하거나 대상 유형을 BIOS로 설정하십시오."
+msgstr "UEFI 대상 유형을 사용하는 경우 EFI 부팅이 가능한 ISO 이미지만 지원됩니다. EFI 부팅이 가능한 ISO를 선택하거나 대상 시스템을 BIOS로 설정하십시오."
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -627,13 +627,13 @@ msgid ""
 "\n"
 "This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
 msgstr ""
-"중요: 이 드라이브에는 여러 개의 파티션이 포함되어 있습니다!!\n"
+"중요: 이 드라이브에는 다중 파티션이 포함되어 있습니다!!\n"
 "\n"
 "여기에는 목록에 없거나 Windows에서 볼 수 없는 파티션/볼륨이 포함될 수 있습니다. 계속 진행하는 경우 이 파티션의 데이터가 손실될 수 있습니다."
 
 #. • MSG_094
 msgid "Multiple partitions detected"
-msgstr "여러 개의 파티션이 감지되었습니다"
+msgstr "다중 파티션이 감지되었습니다"
 
 #. • MSG_095
 msgid "DD Image"
@@ -655,12 +655,11 @@ msgid ""
 "\n"
 "Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"중요: 'Windows To Go'를 설치하려고 하지만 대상 드라이브가 고정 드라이브가 아닙니다. Microsoft에서는 고정 드라이브 대신 제거 가능한 드라이브도 사용하도록 설계하지 않았으므로 \n"
-"부팅하는 도중에 시스템이 거의 멈추게 됩니다.\n"
+"중요: 'Windows To Go'를 설치하려고 하지만 대상 드라이브에는 '고정' 속성이 없습니다. 해당 기능은 '이동식' 속성이 있는 드라이브에서 동작하도록 Microsoft에서 설계되지 않았기 때문에 Windows가 부팅하는 도중 멈출 가능성이 높습니다.\n"
 "\n"
 "그래도 계속하시겠습니까?\n"
 "\n"
-"알림: '고정/이동식'특성은 드라이브 제조업체의 사용자 지정 도구를 통해서만 변경할 수 있는 하드웨어 속성입니다. 그러나 이런 도구는 대중에게 절대 제공되지 않습니다."
+"참고: '고정/이동식' 속성은 드라이브 제조업체의 툴을 통해서만 변경할 수 있는 하드웨어 속성이며, 해당 툴은 일반적으로 거의 공개되어 있지 않습니다..."
 
 #. • MSG_099
 msgid "Filesystem limitation"
@@ -668,7 +667,7 @@ msgstr "파일 시스템 제한"
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "이 ISO 이미지는 FAT 또는 FAT32 파일 시스템에 허용되는 최대 크기 4 GB보다 더 큰 파일이 포함되어 있습니다."
+msgstr "이 ISO 이미지는 FAT 또는 FAT32 파일 시스템에서 허용되는 최대 크기인 4GB 보다 더 큰 파일이 포함되어 있습니다."
 
 #. • MSG_101
 msgid "Missing WIM support"
@@ -679,12 +678,12 @@ msgid ""
 "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
 "Do you want to visit the 7-zip download page?"
 msgstr ""
-"이 플랫폼은 WIM 아카이브에서 파일을 추출 할 수 없습니다. WIM에서 추출하려면 EFI 부팅 가능한 Windows 7 및 Windows Vista의 USB 드라이브를 생성해야합니다. 최신 버전의 7-Zip으로 이 문제를 해결할 수 있습니다.\n"
-"지금 7-ZIP을 다운로드 하시겠습니까?"
+"사용 중인 환경에서는 WIM 아카이브에서 파일을 추출할 수 없습니다. EFI 부팅 가능 Windows 7 및 Windows Vista USB 드라이브를 생성하려면 WIM 추출이 필요합니다. 최신 버전의 7-Zip을 설치함으로써 해당 문제를 해결할 수 있습니다.\n"
+"지금 7-zip 다운로드 페이지로 이동 하시겠습니까?"
 
 #. • MSG_103
 msgid "Download %s?"
-msgstr "%s 다운로드?"
+msgstr "%s(을)를 다운로드하시겠습니까?"
 
 #. • MSG_104
 #.
@@ -704,8 +703,8 @@ msgstr ""
 "그러나 파일의 크기가 100KB 이상이고 항상 %s ISO 이미지에 들어있기 때문에, Rufus에는 포함돼 있지 않습니다.\n"
 "\n"
 "필요하다면 지금 이 파일을 다운로드할 수 있습니다:\n"
-"- 인터넷에 연결하고 이 파일을 다운로드하려면 '예'를 선택하십시오.\n"
-"- 이 파일을 나중에 드라이브에 수동으로 복사하려면 '아니오'를 선택하십시오.\n"
+"- 인터넷에 연결하여 해당 파일을 다운로드하려면 '예'를 선택하십시오.\n"
+"- 해당 파일을 나중에 드라이브에 수동으로 복사하려면 '아니오'를 선택하십시오.\n"
 "\n"
 "참고: 이 파일은 현재 디렉토리에 내려받게 되고 '%s' 파일이 존재하면 자동으로 다시 사용됩니다."
 
@@ -752,11 +751,11 @@ msgstr "호환되지 않는 클러스터 크기"
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "큰 UDF 볼륨을 포맷하려면 시간이 많이 걸릴 수 있습니다. USB 2.0의 속도로 추정했을 때 예상 시간은 %d:%02d 입니다. 포맷 중 진행바가 멈춤상태로 있을 수도 있습니다. 기다려주십시오!"
+msgstr "대용량 UDF 볼륨을 포맷하려면 많은 시간이 소요될 수 있습니다. USB 2.0 속도에서 예상 시간은 %d:%02d 이며, 이 동안 진행 상태바가 정지된 상태로 나타날 수도 있습니다. 기다려주십시오!"
 
 #. • MSG_113
 msgid "Large UDF volume"
-msgstr "큰 UDF 볼륨"
+msgstr "대용량 UDF 볼륨"
 
 #. • MSG_114
 msgid ""
@@ -768,11 +767,11 @@ msgid ""
 "\n"
 "Note: The files will be downloaded in the current application directory and will be reused automatically if present."
 msgstr ""
-"이 이미지는 Syslinux %s%s을(를) 사용하지만 응용 프로그램에는 Syslinux %s%s 설치 파일만 포함됩니다. Syslinux의 새 버전은 서로 호환되지 않고 Rufus가 모두 포함할 수 없으므로 두 개의 추가 파일('ldlinux.sys', 'ldlinux.bss')을 인터넷에서 다운로드해야 합니다 :\n"
-"- 인터넷에 연결해 이 파일을 내려받으려면 '예'를 선택하십시오.\n"
+"이 이미지는 Syslinux %s%s을(를) 사용하지만 해당 응용 프로그램에는 Syslinux %s%s 설치 파일만 포함됩니다. Syslinux의 새 버전은 서로 호환되지 않고 Rufus에 모두 포함할 수 없으므로 두 개의 추가 파일('ldlinux.sys', 'ldlinux.bss')을 인터넷에서 다운로드해야 합니다 :\n"
+"- 인터넷에 연결해 이 파일을 다운로드 받으려면 '예'를 선택하십시오.\n"
 "- 작업을 취소하려면 '아니오'를 선택하십시오.\n"
 "\n"
-"참고: 파일은 현재 응용 프로그램 디렉토리에 내려받게 되며 파일이 존재하면 자동으로 재사용됩니다."
+"참고: 파일은 현재 응용 프로그램 디렉토리에 다운로드되며 존재하는 경우 자동으로 재사용됩니다."
 
 #. • MSG_115
 msgid "Download required"
@@ -792,14 +791,14 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
 msgstr ""
-"이 이미지는 Grub %s(을)를 사용하지만 응용 프로그램에는 Grub %s의 설치 파일만 포함됩니다.\n"
+"이 이미지는 Grub %s(을)를 사용하지만 응용 프로그램에는 Grub %s에 대한 설치 파일만 포함되어 있습니다.\n"
 "\n"
-"Grub의 다른 버전은 서로 호환되지 않을 수 있으며 Rufus에서 모두 포함할 수 없기 때문에 Rufus는 이지미의 것과 일치하는 Grub 설치 파일('core.img')버전을 찾습니다.\n"
+"다른 버전의 Grub은 서로 호환되지 않을 수 있고 모두 포함할 수 없으므로, Rufus는 이미지의 버전과 일치하는 Grub 설치 파일('core.img') 버전을 찾으려고 시도합니다.\n"
 "- 인터넷에 연결하여 내려받기를 시도하려면 '예'를 선택하십시오.\n"
 "- Rufus의 기본 버전을 사용려면 '아니오'를 선택하십시오.\n"
 "- 작업을 중단하려면 '취소'를 선택하십시오.\n"
 "\n"
-"참고: 파일은 현재 응용 프로그램의 디렉토리에 내려 받아지며 자동으로 재사용 됩니다. 만약 일치하는 항목이 온라인에 없는 경우에는 기본 버전이 사용됩니다."
+"참고: 파일은 현재 응용 프로그램의 디렉토리에 다운로드되며 존재하는 경우 자동으로 재사용 됩니다. 만약 온라인에서 일치하는 항목을 찾을 수 없으면 기본 버전이 사용됩니다."
 
 #. • MSG_117
 msgid "Standard Windows installation"
@@ -844,13 +843,13 @@ msgstr "영구적인 파티션 크기"
 #. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
 #. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
 msgid "No persistence"
-msgstr "지속성 없음"
+msgstr "비활성화"
 
 #. • MSG_125
 #.
 #. Tooltips used for the peristence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "라이브 USB 미디어의 영구 파티션 크기를 설정합니다. 크기를 0으로 설정하면 영구 파티션을 사용할 수 없게됩니다."
+msgstr "라이브 USB 미디어의 영구 파티션 크기를 설정합니다. 크기를 0으로 설정하면 영구 파티션이 비활성화됩니다."
 
 #. • MSG_126
 msgid "Set the partition size units."
@@ -862,14 +861,14 @@ msgstr "이 메시지를 다시 표시하지 않음"
 
 #. • MSG_128
 msgid "Important notice about %s"
-msgstr "%s에 대한 중요한 알림"
+msgstr "%s에 대한 중요한 안내"
 
 #. • MSG_129
 msgid ""
 "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
-"방금 UEFI:NTFS 부트로더를 사용하는 미디어를 만들었습니다. 이 미디어를 부팅하려면, 반드시 보안 부팅 (Secure Boot)을 비활성화 해야합니다.\n"
+"UEFI:NTFS 부트로더를 사용하는 미디어를 생성하였습니다. 해당 미디어를 부팅하려면, 반드시 보안 부팅 (Secure Boot)을 비활성화 해야합니다.\n"
 "이것이 필요한 이유에 대한 자세한 설명은 아래의 '추가 정보' 버튼을 참조하십시오."
 
 #. • MSG_130
@@ -898,9 +897,9 @@ msgid ""
 msgstr ""
 "Rufus가 1809 버전 ISO를 기반으로 한 Windows To Go 미디어를 제작을 시도하는 것을 감지했습니다.\n"
 "\n"
-"*Microsoft 버그*로 인하여, 'WppRecorder.sys' 파일을 수동으로 1803 버전으로 교체하지 않는 한 이 미디어는 Windows 부팅 도중 블루스크린이 발생 할 겁니다.\n"
+"*Microsoft 버그*로 인하여, 'WppRecorder.sys' 파일을 1803 버전으로 수동으로 교체하지 않는 한 이 미디어에서 Windows 부팅 도중 블루스크린이 발생 할 겁니다.\n"
 "\n"
-"또한 Rufus가 당신을 위해 자동으로 이 문제를 해결하지 못하는 이유는 'WppRecorder.sys' 파일이 Microsoft가 저작권을 보류한 파일이기 때문에, 파일 복사본을 합법적으로 본 프로그램에 포함시킬 수 없기 때문입니다."
+"또한 Rufus가 이 문제를 자동으로 해결하지 못하는 이유는 'WppRecorder.sys' 파일이 Microsoft의 저작권이 있는 파일이므로 복사본을 합법적으로 본 프로그램에 포함시킬 수 없기 때문입니다..."
 
 #. • MSG_134
 msgid ""
@@ -908,7 +907,7 @@ msgid ""
 "\n"
 "Are you sure you want to continue?"
 msgstr ""
-"파티션 구성방식이 MBR로 선택되었으므로, Rufus는 이 미디어에 최대 2TB의 파티션만 생성할 수 있습니다. 따라서 %s 의 디스크 공간을 사용할 수 없습니다.\n"
+"파티션 구성방식이 MBR로 선택되었으므로 Rufus는 이 미디어에 최대 2TB의 파티션만 생성할 수 있으며,이로 인해 %s 의 디스크 공간을 사용할 수 없게 됩니다.\n"
 "\n"
 "계속 진행 하시겠습니까?"
 
@@ -950,7 +949,7 @@ msgstr "브라우저를 사용하여 다운로드"
 
 #. • MSG_144
 msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Mircosoft에서 너무 많은 다운로드 요청을 일시적으로 금지했습니다 - 잠시 후 다시 시도하십시오..."
+msgstr "너무 많은 요청으로 인해 Microsoft에서 일시적으로 다운로드를 금지했습니다 - 잠시 후 다시 시도하십시오..."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -970,17 +969,17 @@ msgstr "ISO 이미지 다운로드"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
-msgstr "이 부팅 가능한 드라이브를 사용할 컴퓨터 유형입니다. 드라이브 작성을 시작하기 전에 대상이 BIOS 또는 UEFI 유형인지 여부를 판단하는 것은 사용자의 책임입니다."
+msgstr "이 부팅 가능한 드라이브를 사용할 컴퓨터 유형입니다. 드라이브 생성을 시작하기 전에 대상이 BIOS 또는 UEFI 유형인지 확인하는 것은 사용자의 책임입니다."
 
 #. • MSG_151
 #.
 #. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
 msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
-msgstr "'UEFI-CSM'은 장치가 UEFI에서 BIOS 에뮬레이션 모드(Legacy Mode)에서만 부팅되고 기본 UEFI 모드에서는 부팅되지 않습니다."
+msgstr "'UEFI-CSM'은 장치가 기본 UEFI 모드가 아닌 UEFI에서 BIOS 에뮬레이션 모드(혹은 'Legacy Mode')로만 부팅됨을 의미합니다."
 
 #. • MSG_152
 msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-msgstr "'CSM 지원 안 됨'은 장치가 BIOS 에뮬레이션 모드(Legacy Mode)가 아닌 기본 UEFI 모드에서만 부팅됩니다."
+msgstr "'CSM 지원 안 됨'은 장치가 BIOS 에뮬레이션 모드(혹은 'Legacy Mode')가 아닌 기본 UEFI 모드에서만 부팅됨을 의미합니다."
 
 #. • MSG_153
 msgid "Test pattern: 0x%02X"
@@ -1004,7 +1003,7 @@ msgstr "대상 파일 시스템 설정"
 
 #. • MSG_158
 msgid "Minimum size that a block of data will occupy in the filesystem"
-msgstr "파일 시스템에서 차지하는 데이터 블록의 최소 크기"
+msgstr "파일 시스템에서 데이터 블록이 차지하는 최소 크기"
 
 #. • MSG_159
 msgid ""
@@ -1016,7 +1015,7 @@ msgstr ""
 
 #. • MSG_160
 msgid "Toggle advanced options"
-msgstr "고급 옵션으로 전환"
+msgstr "고급 옵션 전환"
 
 #. • MSG_161
 msgid "Check the device for bad blocks using a test pattern"
@@ -1024,15 +1023,15 @@ msgstr "테스트 패턴을 사용하여 장치의 불량 불록을 확인"
 
 #. • MSG_162
 msgid "Uncheck this box to use the \"slow\" format method"
-msgstr "빠른 포맷을 사용하지 않고 포맷하려면 이 선택을 취소하십시오"
+msgstr "빠른 포맷을 사용하지 않으려면 이 확인란의 선택을 취소합니다"
 
 #. • MSG_163
 msgid "Method that will be used to create partitions"
-msgstr "파티션을 만드는 데 사용되는 방법입니다"
+msgstr "파티션을 만드는 데 사용할 방식"
 
 #. • MSG_164
 msgid "Method that will be used to make the drive bootable"
-msgstr "드라이브를 부팅할 수 있도록 만듭니다"
+msgstr "부팅 가능한 드라이브를 만드는 데 사용할 방식"
 
 #. • MSG_165
 msgid "Click to select or download an image..."
@@ -1040,29 +1039,31 @@ msgstr "이미지를 선택하거나 다운로드하려면 선택..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
-msgstr "사용 중인 언어로 이름을 표시하고 장치 아이콘을 설정하려면 선택하십시오. (autorun.inf 파일을 만듭니다.)"
+msgstr "모든 문자 사용을 허용하고 장치 아이콘을 설정하려면 이 확인란을 선택하십시오. (autorun.inf 파일 생성)"
 
 #. • MSG_167
 msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "부팅 선택이 가능한 MBR을 설치하고 BIOS USB drive ID로 가장할 수 있습니다"
+msgstr "부팅 선택을 허용하고 BIOS의 USB 드라이브 ID를 가장할 수 있는 MBR 설치"
 
 #. • MSG_168
 msgid ""
 "Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
 "This should only be necessary if you install Windows XP and have more than one disk."
 msgstr ""
-"먼저 부팅 가능한 USB 드라이브(일반적으로 0x80)를 다른 디스크로 가장하십시오.\n"
-"Windows XP를 설치하려고 하며 또 디스크가 두 개 이상인 경우에만 필요합니다."
+"최우선으로 부팅할 USB 드라이브(일반적으로 0x80)를 다른 디스크로 가장합니다.\n"
+"Windows XP를 설치하고 여러 디스크를 사용하는 경우에만 필요합니다."
 
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
 "This can improve boot detection for older BIOSes."
-msgstr "여분의 숨겨진 파티션을 만들고 파티션의 경계를 정렬하십시오. 이렇게 하면 이전 BIOS에서 부팅 감지 기능을 향상시킬 수 있습니다."
+msgstr ""
+"추가적으로 숨겨진 파티션을 만들고 파티션의 경계를 재정렬합니다.\n"
+"오래된 BIOS들에서 사용 시 부팅 감지를 개선시킬 수 있습니다."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
-msgstr "USB 하드 드라이브 인클로저의 목록을 활성화합니다. 주의!!! 사용상의 위험에 대한 책임은 모두 사용자에게 있습니다."
+msgstr "USB 하드 드라이브 인클로저 목록을 활성화합니다. 사용자 본인의 책임 하에 사용하십시오!!!"
 
 #. • MSG_171
 msgid ""
@@ -1077,7 +1078,7 @@ msgstr ""
 #. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
 #. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
 msgid "Invalid download signature"
-msgstr "잘못된 다운로드 서명"
+msgstr "유효하지 않은 다운로드 디지털 서명"
 
 #. • MSG_173
 msgid "Click to select..."
@@ -1093,11 +1094,11 @@ msgstr "버전 %d.%d (빌드 %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "한국어 번역:\\line• 세상사는이야기-나두 <mailto:ho82.kr@gmail.com>\\line• Uk-Jin Jang <mailto:doublestat@gmail.com>"
+msgstr "한국어 번역:\\line• Uk-Jin Jang <mailto:doublestat@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
-msgstr "버그에 대한 보고나 프로그램의 개선을 요청:"
+msgstr "다음에서 버그 보고나 개선사항을 요청하십시오:"
 
 #. • MSG_178
 msgid "Additional Copyrights:"
@@ -1109,11 +1110,11 @@ msgstr "업데이트 정책:"
 
 #. • MSG_180
 msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
-msgstr "해당 프로그램을 업데이트를 확인하도록 선택하는 경우, 다음의 정보들이 서버에 수집 될 수 있다는 데 동의합니다:"
+msgstr "해당 프로그램이 업데이트를 확인하도록 선택하면 다음 정보들이 서버에서 수집될 수 있다는 것에 동의합니다:"
 
 #. • MSG_181
 msgid "Your operating system's architecture and version"
-msgstr "사용 중인 운영 체제의 아키텍처와 버전"
+msgstr "사용 중인 운영 체제의 아키텍처 및 버전"
 
 #. • MSG_182
 msgid "The version of the application you use"
@@ -1125,18 +1126,18 @@ msgstr "사용자의 IP 주소"
 
 #. • MSG_184
 msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
-msgstr "개인 사용 통계를 생성하기 위해 수집 된 정보를 \\b 최대 1년간 \\b0 보관할 수 있으며, 이러한 이유로 수집된 개인 정보를 제 3자에게 공개하지 않습니다."
+msgstr "개인 사용 통계를 생성하기 위해 수집된 정보를 \\b 최대 1년간 \\b0 보관할 수 있으며, 이러한 이유로 수집된 개인 정보를 제 3자에게 공개하지 않습니다."
 
 #. • MSG_185
 msgid "Update Process:"
-msgstr "업데이트 프로세스:"
+msgstr "업데이트 방법:"
 
 #. • MSG_186
 msgid ""
 "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
 "Internet access is of course required when checking for updates."
 msgstr ""
-"이 프로그램은 백그라운드 서비스를 설치하거나 실행하지 않으므로 주 프로그램이 실행 중일 때에만 업데이트가 수행됩니다.\\line\n"
+"Rufus는 백그라운드 서비스를 설치하거나 실행하지 않으므로 주 프로그램이 실행 중일 때만 업데이트가 수행됩니다.\\line\n"
 "업데이트에는 인터넷 연결이 필요합니다."
 
 #. • MSG_187
@@ -1145,15 +1146,15 @@ msgstr "선택한 부팅 옵션에 대한 잘못된 이미지"
 
 #. • MSG_188
 msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
-msgstr "이 이미지는 선택된 부팅 옵션과 일치하지 않습니다. 다른 이미지를 사용하거나 다른 부트 옵션을 선택하세요."
+msgstr "현재 이미지는 선택된 부팅 옵션과 일치하지 않습니다. 다른 이미지를 사용하거나 다른 부팅 옵션을 선택하십시오."
 
 #. • MSG_189
 msgid "This ISO image is not compatible with the selected filesystem"
-msgstr "이 ISO 이미지는 선택한 파일 시스템과는 호환되지 않습니다"
+msgstr "해당 ISO 이미지는 선택한 파일 시스템과 호환되지 않습니다"
 
 #. • MSG_190
 msgid "Incompatible drive detected"
-msgstr "호환되지 않는 드라이브가 감지 됨"
+msgstr "호환되지 않는 드라이브가 감지되었습니다"
 
 #. • MSG_191
 #.
@@ -1173,13 +1174,13 @@ msgstr "%s가 다운로드 됨"
 
 #. • MSG_194
 msgid "Could not download %s"
-msgstr "%s를 다운로드할 수 없음"
+msgstr "%s(을)를 다운로드할 수 없음"
 
 #. • MSG_195
 #.
 #. Example: "Using embedded version of Grub2 file(s)"
 msgid "Using embedded version of %s file(s)"
-msgstr "내장된 %s버전 파일을 사용함"
+msgstr "내장된 %s 파일(들)을 사용합니다"
 
 #. • MSG_196
 msgid ""
@@ -1188,10 +1189,10 @@ msgid ""
 "Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
 "Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
 msgstr ""
-"중요: 이 드라이브는 비표준 섹터 크기를 사용합니다!\n"
+"중요: 해당 드라이브는 비표준 섹터 크기를 사용합니다!\n"
 "\n"
-"이전의 드라이브는 512바이트 섹터를 사용하지만 이 드라이브는 %d바이트를 사용합니다 .대부분의 경우 이 드라이브로 부팅 할 수 없습니다.\n"
-"지금 Rufus로 부팅 가능한 드라이브로 만들 수는 있지만, 정상적으로 동작한다는 보장은 없습니다."
+"기존의 드라이브는 512바이트 섹터 크기를 사용하지만 이 드라이브는 %d바이트를 사용합니다. 대부분의 경우 이것은 이 드라이브에서 부팅할 수 없음을 의미합니다.\n"
+"Rufus는부팅 가능한 드라이브 생성을 시도할 수 있지만 작동할 것이라는 보장은 없습니다."
 
 #. • MSG_197
 msgid "Nonstandard sector size detected"
@@ -1199,15 +1200,15 @@ msgstr "비표준 섹터 크기 검출"
 
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
-msgstr "'Windows To Go'는 드라이브가 'FIXED' 속성인 경우 GPT파티션에만 설치됩니다. 현재 드라이브는 고정 드라이브가 아닙니다."
+msgstr "'Windows To Go'는 고정 속성인 경우에만 GPT 파티션이 설정된 드라이브에 설치할 수 있습니다. 현재 드라이브는 고정 드라이브로 감지되지 않았습니다."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
-msgstr "쥐소 중 - 잠시만..."
+msgstr "취소 중 - 잠시만 기다려주세요..."
 
 #. • MSG_202
 msgid "Scanning image..."
-msgstr "이미지 스캔..."
+msgstr "이미지 스캔 중..."
 
 #. • MSG_203
 msgid "Failed to scan image"
@@ -1217,13 +1218,13 @@ msgstr "ISO 이미지를 스캔 할 수 없습니다"
 #.
 #. %s is the name of an obsolete Syslinux .c32 module. Example: "Obsolete vesamenu.c32 detected"
 msgid "Obsolete %s detected"
-msgstr "오래된 %s가 감지 됨"
+msgstr "더 이상 사용되지 않는 %s이(가) 감지되었습니다"
 
 #. • MSG_205
 #.
 #. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
 msgid "Using image: %s"
-msgstr "사용 ISO: %s"
+msgstr "사용중인 이미지: %s"
 
 #. • MSG_206
 #.
@@ -1248,11 +1249,11 @@ msgstr "%d개의 장치를 찾음"
 #.
 #. Plural. Example: "3 devices found"
 msgid "%d devices found"
-msgstr "%d개의 장치를 찾음"
+msgstr "%d개의 장치들을 찾음"
 
 #. • MSG_210
 msgid "READY"
-msgstr "완료"
+msgstr "준비 됨"
 
 #. • MSG_211
 msgid "Cancelled"
@@ -1266,11 +1267,11 @@ msgstr "실패"
 #.
 #. Used when a new update has been downloaded and launched
 msgid "Launching new application..."
-msgstr "새 버전의 프로그램을 시작 중..."
+msgstr "업데이트 된 버전의 프로그램을 시작 중..."
 
 #. • MSG_214
 msgid "Failed to launch new application"
-msgstr "새 버전의 프로그램을 시작하지 못했습니다"
+msgstr "업데이트 된 버전의 프로그램을 시작하지 못했습니다"
 
 #. • MSG_215
 #.
@@ -1292,7 +1293,7 @@ msgstr "포맷 중: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
-msgstr "파일 시스템 만들기: 작업 %d/%d 완료 됨"
+msgstr "파일 시스템 생성 중: 작업 %d/%d 완료 됨"
 
 #. • MSG_219
 msgid "NTFS Fixup: %d%% completed"
@@ -1308,7 +1309,7 @@ msgstr "(%s) 포맷 중... - 예상 소요 시간 %d:%02d..."
 
 #. • MSG_221
 msgid "Setting label (%s)..."
-msgstr "라벨 설정 중 (%s)..."
+msgstr "레이블 설정 중 (%s)..."
 
 #. • MSG_222
 #.
@@ -1322,39 +1323,39 @@ msgstr "NTFS 오류 복구 (Checkdisk)..."
 
 #. • MSG_224
 msgid "Clearing MBR/PBR/GPT structures..."
-msgstr "MBR/PBR/GPT 구조를 초기화..."
+msgstr "MBR/PBR/GPT 구조를 초기화 중..."
 
 #. • MSG_225
 msgid "Requesting disk access..."
-msgstr "디스크 액세스를 요청..."
+msgstr "디스크 액세스 요청 중..."
 
 #. • MSG_226
 msgid "Analyzing existing boot records..."
-msgstr "기존 부트 레코드를 분석..."
+msgstr "기존 부트 레코드 분석 중..."
 
 #. • MSG_227
 msgid "Closing existing volume..."
-msgstr "기존 볼륨 닫기..."
+msgstr "기존 볼륨 닫는 중..."
 
 #. • MSG_228
 msgid "Writing Master Boot Record..."
-msgstr "마스터 부트 레코드를 작성 중..."
+msgstr "마스터 부트 레코드 작성 중..."
 
 #. • MSG_229
 msgid "Writing Partition Boot Record..."
-msgstr "파티션 부트 레코드를 작성 중..."
+msgstr "파티션 부트 레코드 작성 중..."
 
 #. • MSG_230
 msgid "Copying DOS files..."
-msgstr "DOS 파일을 복사 중..."
+msgstr "DOS 파일 복사 중..."
 
 #. • MSG_231
 msgid "Copying ISO files: %s"
-msgstr "ISO 파일을 복사 중: %s"
+msgstr "ISO 파일 복사 중: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (%s)..."
-msgstr "Win7 EFI 부팅 설정 (%s)..."
+msgstr "Win7 EFI 부팅 설정 중 (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1365,18 +1366,18 @@ msgstr "마무리 하는 중, 기다려 주십시오..."
 #. Takes a Syslinux version as parameter.
 #. Example: "Installing Syslinux v5.10..."
 msgid "Installing Syslinux %s..."
-msgstr "Syslinux %s를 설치..."
+msgstr "Syslinux %s 설치 중..."
 
 #. • MSG_235
 #.
 #. Bad blocks status. Example: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
 #. See MSG_191 & MSG_192 for "Write pass"/"Read pass" translation.
 msgid "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
-msgstr "불량 불록: PASS %d/%d - %0.2f%% (%d/%d/%d errors)"
+msgstr "불량 불록: PASS %d/%d - %0.2f%% (%d/%d/%d 애러)"
 
 #. • MSG_236
 msgid "Bad Blocks: Testing with random pattern"
-msgstr "불량 불록: 랜덤 패턴 테스트"
+msgstr "불량 불록: 랜덤 패턴으로 테스트"
 
 #. • MSG_237
 msgid "Bad Blocks: Testing with pattern 0x%02X"
@@ -1400,7 +1401,8 @@ msgid ""
 "\n"
 "The download will be deleted. Please check the log for more details."
 msgstr ""
-"다운로드한 업데이트의 서명을 확인 할 수 없습니다. 이는 시스템이 서명의 유효성 검증을 위해 부적절하게 구성되었거나 악의적인 다운로드를 나타낼 수 있음을 의미합니다.n\n"
+"다운로드한 업데이트의 디지털 서명을 확인 할 수 없습니다. 이는 시스템이 서명의 유효성 검증을 위해 부적절하게 구성되었거나 악의적인 다운로드를 나타낼 수 있음을 의미합니다.\n"
+"\n"
 "다운로드가 삭제됩니다. 자세한 내용은 로그를 확인하십시오."
 
 #. • MSG_241
@@ -1409,11 +1411,11 @@ msgstr "다운로드 중: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
-msgstr "파일을 내려받지 못했습니다."
+msgstr "파일을 다운로드하지 못했습니다."
 
 #. • MSG_243
 msgid "Checking for Rufus updates..."
-msgstr "업데이트를 확인하고 있습니다..."
+msgstr "Rufus 업데이트 확인 중..."
 
 #. • MSG_244
 msgid "Updates: Unable to connect to the internet"
@@ -1421,29 +1423,29 @@ msgstr "업데이트: 인터넷에 연결할 수 없습니다"
 
 #. • MSG_245
 msgid "Updates: Unable to access version data"
-msgstr "업데이트: 버전 테이터에 액세스할 수 없습니다"
+msgstr "업데이트: 버전 데이터에 액세스할 수 없습니다"
 
 #. • MSG_246
 msgid "A new version of Rufus is available!"
-msgstr "새 버전을 사용할 수 있습니다!"
+msgstr "새로운 버전의 Rufus를 사용할 수 있습니다!"
 
 #. • MSG_247
 msgid "No new version of Rufus was found"
-msgstr "새 버전이 없습니다"
+msgstr "이미 최신 버전의 Rufus를 사용 중입니다"
 
 #. • MSG_248
 msgid "Application registry keys successfully deleted"
-msgstr "프로그램의 레지스트리 키를 성공적으로 삭제"
+msgstr "애플리케이션 레지스트리 키가 성공적으로 삭제되었습니다"
 
 #. • MSG_249
 msgid "Failed to delete application registry keys"
-msgstr "프로그램의 레지스트리 키를 삭제하는 데 실패"
+msgstr "애플리케이션 레지스트리 키를 삭제하지 못했습니다"
 
 #. • MSG_250
 #.
 #. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
 msgid "%s enabled"
-msgstr "%s 가능"
+msgstr "%s 활성화"
 
 #. • MSG_251
 msgid "%s disabled"
@@ -1455,19 +1457,19 @@ msgstr "크기 확인"
 
 #. • MSG_253
 msgid "Hard disk detection"
-msgstr "고정 디스크 감지"
+msgstr "하드디스크 감지"
 
 #. • MSG_254
 msgid "Force large FAT32 formatting"
-msgstr "Large FAT32를 강제로 포맷"
+msgstr "대용량 FAT32 포맷 강제 실행"
 
 #. • MSG_255
 msgid "NoDriveTypeAutorun will be deleted on exit"
-msgstr "종료시 레지스트리에서 'NoDriveTypeAutoRun'키가 삭제됩니다"
+msgstr "Rufus 종료 시 NoDriveTypeAutoRun가 삭제됩니다"
 
 #. • MSG_256
 msgid "Fake drive detection"
-msgstr "가짜 드라이브 감지"
+msgstr "위조된 드라이브 감지"
 
 #. • MSG_257
 msgid "Joliet support"
@@ -1499,7 +1501,7 @@ msgstr "ISO 지원"
 #.
 #. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
 msgid "Use PROPER size units"
-msgstr "적당한 크기의 단위를 사용"
+msgstr "적절한 크기의 단위를 사용"
 
 #. • MSG_264
 msgid "Deleting directory '%s'"
@@ -1523,7 +1525,7 @@ msgstr "Windows 이미지 적용 중..."
 
 #. • MSG_269
 msgid "Preserve timestamps"
-msgstr "타임 스탬프를 보존"
+msgstr "타임 스탬프 유지"
 
 #. • MSG_270
 msgid "USB debug"
@@ -1531,11 +1533,11 @@ msgstr "USB 디버그"
 
 #. • MSG_271
 msgid "Computing image checksums: %s"
-msgstr "이미지 체크섬을 계산 중: %s"
+msgstr "이미지 체크섬 계산 중: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
-msgstr "선택한 이미지의 MD5, SHA1 및 SHA256 체크섬을 계산"
+msgstr "선택한 이미지에 대한 MD5, SHA1 및 SHA256 체크섬 계산"
 
 #. • MSG_273
 msgid "Change the application language"
@@ -1555,11 +1557,11 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"선택한 이미지는 'ISOHybrid' 이미지입니다. 이 이미지는 %s(파일 복사)모드나 %s(디스크 이미지)모드로 쓸 수 있습니다..\n"
-"Rufus는 %s 모드 사용을 권장하므로 쓰기 후에 드라이브에 항상 액세스 할 수 있습니다.\n"
+"선택하신 이미지는 'ISOHybrid' 이미지입니다. 즉 %s (파일 복사)모드나 %s (디스크 이미지)모드에서 쓸 수 있습니다..\n"
+"Rufus는 드라이브를 작성한 후 항상 전체 액세스 권한을 가질 수 있도록 %s 모드를 사용할 것을 권장합니다.\n"
 "그러나 부팅하는 동안 문제가 발생하면 이 이미지를 %s 모드로 다시 작성해 보십시오.\n"
 "\n"
-"이 이미지를 만드는 데 사용할 모드를 선택하세요:"
+"해당 이미지를 만드는 데 사용할 모드를 선택하십시오:"
 
 #. • MSG_276
 #.
@@ -1575,11 +1577,11 @@ msgstr "%s 모드로 쓰기"
 
 #. • MSG_278
 msgid "Checking for conflicting processes..."
-msgstr "충돌하는 프로세스 확인..."
+msgstr "충돌하는 프로세스 확인 중..."
 
 #. • MSG_279
 msgid "Non bootable"
-msgstr "부팅 할 수 없음"
+msgstr "부팅 불가능"
 
 #. • MSG_280
 msgid "Disk or ISO image"
@@ -1587,11 +1589,11 @@ msgstr "디스크 또는 ISO 이미지"
 
 #. • MSG_281
 msgid "%s (Please select)"
-msgstr "%s (선택)"
+msgstr "%s (선택하십시오)"
 
 #. • MSG_282
 msgid "Exclusive USB drive locking"
-msgstr "전용 USB 드라이브 잠김"
+msgstr "USB 드라이브 전용으로 잠금"
 
 #. • MSG_283
 msgid "Invalid signature"
@@ -1607,8 +1609,8 @@ msgid ""
 "This is not a signature we recognize and could indicate some form of malicious activity...\n"
 "Are you sure you want to run this file?"
 msgstr ""
-"내려받은 실행 파일은 '%s'에 의해 서명됩니다.\n"
-"이 파일은 정상적인 서명이 아니며 악성코드가 포함되어 있을 수 있습니다...\n"
+"내려받은 실행 파일은 '%s'에 의해 디지털 서명되었습니다.\n"
+"해당 파일은 Rufus에서 인식하는 서명이 아니며 악성코드가 포함되어 있을 수 있습니다...\n"
 "그래도 이 파일을 실행하시겠습니까?"
 
 #. • MSG_286
@@ -1617,15 +1619,15 @@ msgstr "드라이브 제로필 중: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
-msgstr "비 이동식 USB 드라이브 검출"
+msgstr "USB 연결이 아닌 이동식 디스크를 감지했습니다"
 
 #. • MSG_288
 msgid "Missing elevated privileges"
-msgstr "권한 상승 실패"
+msgstr "관리자 권한이 없습니다"
 
 #. • MSG_289
 msgid "This application can only run with elevated privileges"
-msgstr "이 응용 프로그램은 상승된 권한으로만 실행할 수 있습니다"
+msgstr "이 응용 프로그램은 관리자 권한으로만 실행할 수 있습니다"
 
 #. • MSG_290
 msgid "File Indexing"
@@ -1637,7 +1639,7 @@ msgstr "버전 선택"
 
 #. • MSG_292
 msgid "Please select the version of Windows you want to install:"
-msgstr "설치할 Windows 버전을 선택하십시오.:"
+msgstr "설치할 Windows 버전을 선택하십시오:"
 
 #. • MSG_293
 msgid "Unsupported Windows version"
@@ -1663,7 +1665,7 @@ msgstr ""
 
 #. • MSG_297
 msgid "Truncated ISO detected"
-msgstr "깨진 ISO가 감지 됨"
+msgstr "불완전한 ISO 감지"
 
 #. • MSG_298
 msgid ""
@@ -1673,9 +1675,9 @@ msgid ""
 "\n"
 "Note that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
 msgstr ""
-"선택한 ISO파일이 선언된 크기와 일치하지 않습니다. %s이(가) 누락되었습니다!\n"
+"선택한 ISO파일이 정의된 크기와 일치하지 않습니다. 데이터의 %s이(가) 누락되었습니다!\n"
 "\n"
-"만약 이 파일을 인터넷에서 내려받았다면 새로운 사본을 내려받고 MD5 또는 SHA Checksum이 공식 버전과 일치하는지 확인하십시오.\n"
+"인터넷에서 이 파일을 다운로드 한 경우 다시 다운로드하여 MD5 혹은 SHA 체크섬이 공식 체크섬과 일치하는지 확인하십시오.\n"
 "\n"
 "Rufus에서 MD5 또는 SHA를 계산하려면 (✓) 버튼을 클릭하십시오."
 
@@ -1689,7 +1691,7 @@ msgid ""
 "\n"
 "In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
 msgstr ""
-"Rufus는 다운로드 한 업데이트의 타임 스탬프가 현재 실행 파일의 타임 스탬프보다 최근임을 확인하지 못했습니다.\n"
+"Rufus는 다운로드 한 업데이트의 타임 스탬프가 현재 실행 파일의 타임 스탬프보다 최신임을 확인하지 못했습니다.\n"
 "\n"
 "잠재적인 공격 시나리오를 방지하기 위해 업데이트 프로세스가 중단되고 다운로드가 삭제됩니다. 자세한 내용은 로그를 확인하십시오."
 
@@ -1711,7 +1713,7 @@ msgstr "선택한 장치의 디스크 이미지 만들기"
 
 #. • MSG_305
 msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "이 장치를 사용하여 다른 디스크에 Windows를 설치하거나, 이 드라이브(Windows To Go)에서 Windows를 직접 실행하려면 이 옵션을 사용하십시오."
+msgstr "이 옵션을 사용하여 이 장치를 사용하여 다른 디스크에 Windows를 설치할지 또는 이 드라이브에서 직접 Windows를 실행할지(Windows To Go) 선택하십시오."
 
 #. • MSG_306
 #.
@@ -1722,7 +1724,7 @@ msgstr "빠른 드라이브 제로필 중: %s"
 
 #. • MSG_307
 msgid "This may take a while"
-msgstr "시간이 좀 걸릴 수 있습니다"
+msgstr "시간이 걸릴 수 있습니다"
 
 #. • MSG_308
 msgid "VHD detection"
@@ -1738,13 +1740,13 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"선택한 ISO는 UEFI를 사용하며 EFI 시스템 파티션 (ESP)으로 쓸 수있을만큼 작습니다. 일부 유형의 설치에서는 전체 디스크를 차지하는 일반 데이터 파티션에 쓰는 대신 ESP에 쓰는 것이 좋습니다.\n"
+"선택한 ISO는 UEFI를 사용하며 EFI 시스템 파티션(ESP)으로 작성하기에 충분히 작습니다. 일부 유형의 설치에서는 전체 디스크를 차지하는 일반 데이터 파티션에 쓰는 대신 ESP에 쓰는 것이 더 나을 수 있습니다.\n"
 "\n"
-"이 이미지를 작성하는 데 사용할 모드를 선택하십시오."
+"이 이미지를 작성하는 데 사용할 모드를 선택하십시오:"
 
 #. • MSG_311
 msgid "Use %s (in the main application window) to enable."
-msgstr "활성화하려면 %s (기본 응용 프로그램 창에서)를 사용하십시오."
+msgstr "활성화하려면 주 응용 프로그램 창에서 %s을(를) 실행합니다."
 
 #. • MSG_312
 msgid "Extra hashes (SHA512)"
@@ -1764,7 +1766,7 @@ msgstr "여러개의 버튼"
 
 #. • MSG_316
 msgid "Number of passes"
-msgstr "검사 수"
+msgstr "검사 통과 수"
 
 #. • MSG_317
 msgid "Disk ID"
