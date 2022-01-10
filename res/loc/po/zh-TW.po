@@ -2,8 +2,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2021-04-03 17:18+0800\n"
-"PO-Revision-Date: 2021-04-03 18:47+0800\n"
+"POT-Creation-Date: 2022-01-10 19:23+0800\n"
+"PO-Revision-Date: 2022-01-10 20:13+0800\n"
+"Last-Translator: SiderealArt <admin@siderealart.me>\n"
+"Language-Team: \n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Chinese Traditional (正體中文)\n"
 "X-Rufus-LCID: 0x0404, 0x0c04, 0x1404, 0x7c04\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -282,7 +282,7 @@ msgstr "最新版本: %d.%d (Build %d)"
 #. • MSG_020
 #. • MSG_026
 msgid "bytes"
-msgstr ""
+msgstr "位元組"
 
 #. • MSG_021
 #.
@@ -316,11 +316,11 @@ msgstr ""
 
 #. • MSG_027
 msgid "kilobytes"
-msgstr ""
+msgstr "KB"
 
 #. • MSG_028
 msgid "megabytes"
-msgstr ""
+msgstr "MB"
 
 #. • MSG_029
 msgid "Default"
@@ -507,7 +507,7 @@ msgstr "損毀磁區檢查工作未完成。"
 
 #. • MSG_073
 msgid "ISO image scan failure."
-msgstr "檔掃 ISO 映像描失敗。"
+msgstr "掃描 ISO 映像檔失敗。"
 
 #. • MSG_074
 msgid "ISO image extraction failure."
@@ -543,13 +543,13 @@ msgid ""
 msgstr ""
 "Rufus 偵測到 Windows 正在排清緩衝區至 USB 裝置。\n"
 "\n"
-"此作業可能需要一段時間才完成、視裝置速度及檔案大小而定。\n"
+"此作業可能需要一段時間才完成，視裝置速度及檔案大小而定。\n"
 "\n"
-"我們建議耐心等候操作完成、以免發生資料損毀。但如果不願意等待、可以直接移除裝置..."
+"我們建議耐心等候操作完成，以免發生資料損毀。但如果不願意等待，可以直接移除裝置..."
 
 #. • MSG_081
 msgid "Unsupported image"
-msgstr "不支援的 ISO 映像檔"
+msgstr "不支援的映像檔"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
@@ -866,7 +866,7 @@ msgid ""
 "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
-"你已建立使用 UEFI:NTFS bootloader 的裝置。如要使用此裝置開機，請記得關閉 SECURE BOOT。\n"
+"你已建立使用 UEFI:NTFS bootloader 的裝置。如要使用此裝置開機，請記得關閉安全開機。\n"
 "更多資訊請點選底下 '進階說明' 按鈕。"
 
 #. • MSG_130
@@ -1068,7 +1068,7 @@ msgid ""
 "Start the formatting operation.\n"
 "This will DESTROY any data on the target!"
 msgstr ""
-"立即開始格式化作業\n"
+"立即開始格式化作業。\n"
 "注意: 裝置上所有的資料將被清除!"
 
 #. • MSG_172
@@ -1092,7 +1092,7 @@ msgstr "版本 %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "正體中文譯者: 佚 <mailto:mmmeow@gmail.com>\\line Chocobo1 <https://github.com/Chocobo1>"
+msgstr "正體中文譯者: 佚 <mailto:mmmeow@gmail.com>\\line Chocobo1 <https://github.com/Chocobo1>\\line SiderealArt <https://github.com/SiderealArt>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1533,7 +1533,7 @@ msgstr "計算映像檔總和檢查碼: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
-msgstr "計算已選擇映像檔的 MD5, SHA1 和 SHA256 總和檢查碼"
+msgstr "計算已選擇映像檔的 MD5、SHA1 和 SHA256 總和檢查碼"
 
 #. • MSG_273
 msgid "Change the application language"
@@ -1605,7 +1605,7 @@ msgid ""
 "This is not a signature we recognize and could indicate some form of malicious activity...\n"
 "Are you sure you want to run this file?"
 msgstr ""
-"下載的檔案簽章者為: '%s'.\n"
+"下載的檔案簽章者為: '%s'。\n"
 "本軟體未使用此簽章，代表檔案可能已遭受病毒感染...\n"
 "是否要執行檔案?"
 
@@ -1615,7 +1615,7 @@ msgstr "正在寫入零: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
-msgstr "偵測非USB可移除磁碟"
+msgstr "偵測非 USB 可移除磁碟"
 
 #. • MSG_288
 msgid "Missing elevated privileges"
@@ -1708,8 +1708,12 @@ msgid "Create a disk image of the selected device"
 msgstr "建立選擇的裝置的磁碟映像"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "是否要使用此裝置來安裝 Windows 在另一個磁碟上，或是要直接在此磁碟上執行 Windows (Windows To Go)。"
+msgid ""
+"Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go).\r\n"
+"In 'Extended Windows 11 Installation' mode, Rufus will patch the media so that Windows 11 can be installed on platforms that don't meet the TPM 2.0 or Secure Boot requirements."
+msgstr ""
+"是否要使用此裝置來安裝 Windows 在另一個磁碟上，或是要直接在此磁碟上執行 Windows (Windows To Go)。\r\n"
+"在「擴充 Windows 11 安裝」模式中，Rufus 將修補裝置，以使 Windows 11 能夠安裝在不符合 TPM 2.0 或安全開機要求的系統上。"
 
 #. • MSG_306
 #.
@@ -1719,7 +1723,7 @@ msgid "Fast-zeroing drive: %s"
 msgstr "正在快速寫入零: %s"
 
 #. • MSG_307
-msgid "This may take a while"
+msgid "this may take a while"
 msgstr "可能需要一段時間"
 
 #. • MSG_308
@@ -1738,7 +1742,7 @@ msgid ""
 msgstr ""
 "你選擇的 ISO 使用 UEFI 可以直接當作 EFI System Partition (ESP)。比起占用整個通用磁區，使用 ESP 有時是更好的選擇。\n"
 "\n"
-"請選擇此映象檔的寫入模式:"
+"請選擇此映像檔的寫入模式:"
 
 #. • MSG_311
 msgid "Use %s (in the main application window) to enable."
@@ -1785,5 +1789,21 @@ msgid ""
 "The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
 "As a result, DD image writing mode will be enforced."
 msgstr ""
-"你選擇的映象檔是 ISOHybrid，但是檔案作者沒有使之與 ISO/檔案複製 模式相容。\n"
-"因此強制使用 DD 映象寫入模式。"
+"你選擇的映像檔是 ISOHybrid，但是檔案作者沒有使之與 ISO/檔案複製模式相容。\n"
+"因此強制使用 DD 映像寫入模式。"
+
+#. • MSG_322
+msgid "Standard Windows 11 Installation (TPM 2.0 + Secure Boot)"
+msgstr "標準 Windows 11 安裝 (TPM 2.0 + 安全開機)"
+
+#. • MSG_323
+msgid "Extended Windows 11 Installation (no TPM / no Secure Boot)"
+msgstr "擴充 Windows 11 安裝 (無 TPM 和安全開機)"
+
+#. • MSG_324
+msgid "Removing Windows 11 installation restrictions: %s"
+msgstr "正在移除 Windows 11 安裝限制: %s"
+
+#. • MSG_325
+msgid "Unable to open or read '%s'"
+msgstr "無法開啟或讀取 '%s'"
