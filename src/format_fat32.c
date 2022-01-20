@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Large FAT32 formatting
  * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2022 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,8 @@
 #define die(msg, err) do { uprintf(msg); \
 	FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|err; \
 	goto out; } while(0)
+
+extern BOOL write_as_esp;
 
 /* Large FAT32 */
 #pragma pack(push, 1)
@@ -196,7 +198,9 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	VolumeId = GetVolumeID();
 
 	// Open the drive and lock it
-	hLogicalVolume = GetLogicalHandle(DriveIndex, PartitionOffset, TRUE, TRUE, FALSE);
+	hLogicalVolume = write_as_esp ?
+		AltGetLogicalHandle(DriveIndex, PartitionOffset, TRUE, TRUE, FALSE) :
+		GetLogicalHandle(DriveIndex, PartitionOffset, TRUE, TRUE, FALSE);
 	if (IS_ERROR(FormatStatus))
 		goto out;
 	if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL))
@@ -450,7 +454,9 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	uprintf("Setting label...");
 	// Handle must be closed for SetVolumeLabel to work
 	safe_closehandle(hLogicalVolume);
-	VolumeName = GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);
+	VolumeName = write_as_esp ?
+		AltGetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE) :
+		GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);
 	if ((VolumeName == NULL) || (!SetVolumeLabelA(VolumeName, Label))) {
 		uprintf("Could not set label: %s", WindowsErrorString());
 		// Non fatal error

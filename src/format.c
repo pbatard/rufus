@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
- * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2022 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2125,11 +2125,20 @@ DWORD WINAPI FormatThread(void* param)
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...");
 	Sleep(200);
-	if (!WaitForLogical(DriveIndex, partition_offset[PI_MAIN])) {
-		uprintf("Logical drive was not found - aborting");
-		if (!IS_ERROR(FormatStatus))
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_TIMEOUT;
-		goto out;
+	if (write_as_esp) {
+		// Can't format the ESP unless we mount it ourself
+		volume_name = AltMountVolume(DriveIndex, partition_offset[PI_MAIN], FALSE);
+		if (volume_name == NULL) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_ASSIGN_LETTER);
+			goto out;
+		}
+	} else {
+		if (!WaitForLogical(DriveIndex, partition_offset[PI_MAIN])) {
+			uprintf("Logical drive was not found - aborting");
+			if (!IS_ERROR(FormatStatus))
+				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_TIMEOUT;
+			goto out;
+		}
 	}
 	CHECK_FOR_USER_CANCEL;
 
@@ -2190,33 +2199,37 @@ DWORD WINAPI FormatThread(void* param)
 		UpdateProgress(OP_FIX_MBR, -1.0f);
 	}
 	Sleep(200);
-	WaitForLogical(DriveIndex, 0);
-	// Try to continue
-	CHECK_FOR_USER_CANCEL;
 
-	volume_name = GetLogicalName(DriveIndex, partition_offset[PI_MAIN], TRUE, TRUE);
-	if (volume_name == NULL) {
-		uprintf("Could not get volume name");
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NO_VOLUME_ID;
-		goto out;
-	}
-	uprintf("Found volume %s", volume_name);
+	if (!write_as_esp) {
+		WaitForLogical(DriveIndex, 0);
+		// Try to continue
+		CHECK_FOR_USER_CANCEL;
 
-	// Windows is really finicky with regards to reassigning drive letters even after
-	// we forcibly removed them, so add yet another explicit call to RemoveDriveLetters()
-	RemoveDriveLetters(DriveIndex, FALSE, TRUE);
-	if (!MountVolume(drive_name, volume_name)) {
-		uprintf("Could not remount %s as %C: %s\n", volume_name, drive_name[0], WindowsErrorString());
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_MOUNT_VOLUME);
-		goto out;
-	}
-	CHECK_FOR_USER_CANCEL;
+		volume_name = GetLogicalName(DriveIndex, partition_offset[PI_MAIN], TRUE, TRUE);
+		if (volume_name == NULL) {
+			uprintf("Could not get volume name");
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NO_VOLUME_ID;
+			goto out;
+		}
+		uprintf("Found volume %s", volume_name);
 
-	// Disable file indexing, unless it was force-enabled by the user
-	if ((!enable_file_indexing) && ((fs_type == FS_NTFS) || (fs_type == FS_UDF) || (fs_type == FS_REFS))) {
-		uprintf("Disabling file indexing...");
-		if (!SetFileAttributesA(volume_name, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED))
-			uprintf("Could not disable file indexing: %s", WindowsErrorString());
+
+		// Windows is really finicky with regards to reassigning drive letters even after
+		// we forcibly removed them, so add yet another explicit call to RemoveDriveLetters()
+		RemoveDriveLetters(DriveIndex, FALSE, TRUE);
+		if (!MountVolume(drive_name, volume_name)) {
+			uprintf("Could not remount %s as %C: %s\n", volume_name, drive_name[0], WindowsErrorString());
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_MOUNT_VOLUME);
+			goto out;
+		}
+		CHECK_FOR_USER_CANCEL;
+
+		// Disable file indexing, unless it was force-enabled by the user
+		if ((!enable_file_indexing) && ((fs_type == FS_NTFS) || (fs_type == FS_UDF) || (fs_type == FS_REFS))) {
+			uprintf("Disabling file indexing...");
+			if (!SetFileAttributesA(volume_name, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED))
+				uprintf("Could not disable file indexing: %s", WindowsErrorString());
+		}
 	}
 
 	// Refresh the drive label - This is needed as Windows may have altered it from
@@ -2370,11 +2383,14 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 out:
+	if (write_as_esp && volume_name != NULL)
+		AltUnmountVolume(volume_name, TRUE);
+	else
+		safe_free(volume_name);
 	if ((boot_type == BT_IMAGE) && write_as_image) {
 		PrintInfo(0, MSG_320, lmprintf(MSG_307));
 		VdsRescan(VDS_RESCAN_REFRESH, 0, TRUE);
 	}
-	safe_free(volume_name);
 	safe_free(buffer);
 	safe_unlockclose(hLogicalVolume);
 	safe_unlockclose(hPhysicalDrive);	// This can take a while
