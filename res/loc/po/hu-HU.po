@@ -1,9 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.5\n"
+"Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-04-17 12:17+0100\n"
-"PO-Revision-Date: 2020-04-17 12:20+0100\n"
+"POT-Creation-Date: 2022-01-22 02:14+0100\n"
+"PO-Revision-Date: 2022-01-25 09:37+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: hu_HU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,13 +13,11 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Hungarian (Magyar)\n"
 "X-Rufus-LCID: 0x040e\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
-msgstr "Eszköz tulajdonságai"
+msgstr "Meghajtó tulajdonságai"
 
 #. • IDD_DIALOG → IDS_DEVICE_TXT
 msgid "Device"
@@ -25,7 +25,7 @@ msgstr "Eszköz"
 
 #. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
 msgid "Boot selection"
-msgstr "Boot kiválasztása"
+msgstr "Rendszerindító (boot) kiválasztása"
 
 #. • IDD_DIALOG → IDC_SELECT
 msgid "Select"
@@ -33,7 +33,7 @@ msgstr "Kiválasztás"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
 msgid "Image Option"
-msgstr "Kép tulajdonságai"
+msgstr "Kép opció"
 
 #. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
 msgid "Partition scheme"
@@ -41,11 +41,11 @@ msgstr "Partíciós séma"
 
 #. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
 msgid "Target system"
-msgstr "Cél"
+msgstr "Célrendszer"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
-msgstr "USB eszközök kilistázása"
+msgstr "USB merevlemezek listázása"
 
 #. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
 #.
@@ -84,11 +84,11 @@ msgstr "Gyorsformázás"
 
 #. • IDD_DIALOG → IDC_BAD_BLOCKS
 msgid "Check device for bad blocks"
-msgstr "Rossz blokkok keresése"
+msgstr "Hibás blokkok keresése az eszközön"
 
 #. • IDD_DIALOG → IDC_EXTENDED_LABEL
 msgid "Create extended label and icon files"
-msgstr "Kiterejsztett kötet és ikonfájlok használata"
+msgstr "Kiterjesztett kötetcímke és ikonfájlok használata"
 
 #. • IDD_DIALOG → IDS_STATUS_TXT
 msgid "Status"
@@ -109,7 +109,7 @@ msgstr "Indítás"
 
 #. • IDD_ABOUTBOX → IDD_ABOUTBOX
 msgid "About Rufus"
-msgstr "A Rufusról"
+msgstr "A Rufus névjegye"
 
 #. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
 msgid "License"
@@ -151,7 +151,7 @@ msgstr "Mentés"
 
 #. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
 msgid "Update policy and settings"
-msgstr "Frissítési irányelvek beállítások"
+msgstr "Frissítési irányelvek és beállítások"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
 msgid "Settings"
@@ -175,7 +175,7 @@ msgstr "Frissítések keresése - Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
 msgid "A newer version is available. Please download the latest version!"
-msgstr "Új verzió elérhető, kérlek töltsd le!"
+msgstr "Egy újabb verzió érhető el. Kérlek, töltsd le a legújabb verziót!"
 
 #. • IDD_NEW_VERSION → IDC_WEBSITE
 msgid "Click here to go to the website"
@@ -193,14 +193,14 @@ msgstr "Letöltés"
 
 #. • MSG_001
 msgid "Other instance detected"
-msgstr "Másik folyamat észlelve"
+msgstr "Másik példány észlelve"
 
 #. • MSG_002
 msgid ""
 "Another Rufus application is running.\n"
 "Please close the first application before running another one."
 msgstr ""
-"Még egy Rufus fut.\n"
+"Egy másik Rufus példány már fut.\n"
 "Kérlek, zárd be, mielőtt ezt futtatnád."
 
 #. • MSG_003
@@ -209,7 +209,8 @@ msgid ""
 "To continue with this operation, click OK. To quit click CANCEL."
 msgstr ""
 "FIGYELMEZTETÉS: A(Z) '%s' ESZKÖZÖN AZ ÖSSZES ADAT LE LESZ TÖRÖLVE!\n"
-"Folytatáshoz kattints az OK gombra, a megszakításhoz a Mégse gombra."
+"A művelet folytatásához kattints az OK gombra.\n"
+"A művelet megszakításához kattints a Mégse gombra."
 
 #. • MSG_004
 msgid "Rufus update policy"
@@ -217,7 +218,7 @@ msgstr "Rufus frissítési irányelvek"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
-msgstr "Engedélyezed a Rufusnak hogy frissítéseket keressen?"
+msgstr "Engedélyezed, hogy a Rufus frissítéseket keressen?"
 
 #. • MSG_007
 msgid "Cancel"
@@ -225,7 +226,7 @@ msgstr "Mégse"
 
 #. • MSG_010
 msgid "Bad blocks found"
-msgstr "Rossz blokkok találva"
+msgstr "Hibás blokkok találhatóak"
 
 #. • MSG_011
 msgid ""
@@ -234,7 +235,7 @@ msgid ""
 "  %d write error(s)\n"
 "  %d corruption error(s)"
 msgstr ""
-"Ellenőrzés befejezve: %d rossz blokk találva\n"
+"Ellenőrzés befejezve: %d hibás blokk található\n"
 "  %d olvasási hiba\n"
 "  %d írási hiba\n"
 "  %d megsérülve"
@@ -248,12 +249,12 @@ msgid ""
 "%s"
 msgstr ""
 "%s\n"
-"Részletesebb jelentés megtalálható:\n"
+"Egy részletesebb jelentés megtalálható itt:\n"
 "%s"
 
 #. • MSG_013
 msgid "Disabled"
-msgstr "Kikapcsolva"
+msgstr "Letiltva"
 
 #. • MSG_014
 msgid "Daily"
@@ -348,14 +349,14 @@ msgstr "BIOS vagy UEFI"
 #.
 #. Number of bad block check passes (singular for 1 pass)
 msgid "%d pass"
-msgstr "%d vizsgálva"
+msgstr "%d menet"
 
 #. • MSG_035
 #.
 #. Number of bad block check passes (plural for 2 or more passes).
 #. See MSG_087 for the message that %s gets replaced with.
 msgid "%d passes %s"
-msgstr "%d vizsgálva %s"
+msgstr "%d menet %s"
 
 #. • MSG_036
 msgid "ISO Image"
@@ -391,7 +392,7 @@ msgstr "Fájl letöltése"
 
 #. • MSG_045
 msgid "USB Storage Device (Generic)"
-msgstr "USB Tároló"
+msgstr "USB tárolóeszköz (általános)"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
@@ -421,7 +422,7 @@ msgstr "Ismeretlen hiba formázás közben."
 
 #. • MSG_052
 msgid "Cannot use the selected file system for this media."
-msgstr "Nem használható a kiválasztott fájlrendszer az eszközhöz."
+msgstr "A kiválasztott fájlrendszer nem használható ehhez az eszközhöz."
 
 #. • MSG_053
 msgid "Access to the device is denied."
@@ -433,7 +434,7 @@ msgstr "Az eszköz írásvédett."
 
 #. • MSG_055
 msgid "The device is in use by another process. Please close any other process that may be accessing the device."
-msgstr "Az eszközt más folyamat használja. Kérlek, zárj be minden más alkalmazást ami használhatja ezt az eszközt."
+msgstr "Az eszközt más folyamat használja. Kérlek, zárj be minden más alkalmazást, ami használhatja ezt az eszközt."
 
 #. • MSG_056
 msgid "Quick format is not available for this device."
@@ -445,7 +446,7 @@ msgstr "A kötetcímke érvénytelen."
 
 #. • MSG_058
 msgid "The device handle is invalid."
-msgstr "Az eszköz kezelése érvénytelen."
+msgstr "Az eszközkezelő érvénytelen."
 
 #. • MSG_059
 msgid "The selected cluster size is not valid for this device."
@@ -457,15 +458,15 @@ msgstr "A kötetméret érvénytelen."
 
 #. • MSG_061
 msgid "Please insert a removable media in drive."
-msgstr "Kérlek, helyezz be egy eltávolítható eszközt."
+msgstr "Kérlek, helyezz be egy eltávolítható eszközt a meghajtóba."
 
 #. • MSG_062
 msgid "An unsupported command was received."
-msgstr "Nem támgoatott parancs."
+msgstr "Nem támogatott parancs."
 
 #. • MSG_063
 msgid "Memory allocation error."
-msgstr "Memória hiba."
+msgstr "Memóriafoglalási hiba."
 
 #. • MSG_064
 msgid "Read error."
@@ -481,15 +482,15 @@ msgstr "Telepítési hiba"
 
 #. • MSG_067
 msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
-msgstr "Nem lehet megnyitni az eszközt, lehet más folyamat használja. Kérlek, helyezd be újra és próbáld újra."
+msgstr "Nem sikerült megnyitni az adathordozót. Lehet, hogy másik folyamat használja. Kérlek, helyezd be újra és próbáld újra."
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "Hiba az eszköz particionálása közben."
+msgstr "Nem sikerült a meghajtót particionálni."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
-msgstr "Nem lehet fájlokat másolni a céleszközre."
+msgstr "Nem sikerült fájlokat másolni a célmeghajtóra."
 
 #. • MSG_070
 msgid "Cancelled by user."
@@ -503,19 +504,19 @@ msgstr "Nem sikerült elindítani a folyamatot."
 
 #. • MSG_072
 msgid "Bad blocks check didn't complete."
-msgstr "Nem lehet befejezni a rossz blokkok keresését."
+msgstr "A hibás blokkok ellenőrzése nem fejeződött be."
 
 #. • MSG_073
 msgid "ISO image scan failure."
-msgstr "ISO képfájl vizsgálat sikertelen."
+msgstr "ISO képfájl beolvasási hiba."
 
 #. • MSG_074
 msgid "ISO image extraction failure."
-msgstr "ISO képfájl kibontása sikertelen."
+msgstr "ISO képfájl kibontási hiba."
 
 #. • MSG_075
 msgid "Unable to remount volume."
-msgstr "A kötetet nem sikerült újracsatlakoztatni."
+msgstr "Nem lehet a kötetet újracsatlakoztatni."
 
 #. • MSG_076
 msgid "Unable to patch/setup files for boot."
@@ -523,7 +524,7 @@ msgstr "Nem lehet a fájlokat frissíteni/telepíteni bootoláshoz."
 
 #. • MSG_077
 msgid "Unable to assign a drive letter."
-msgstr "Nem sikerült betűt hozzárendelni."
+msgstr "Nem lehet meghajtóbetűjelet hozzárendelni."
 
 #. • MSG_078
 msgid "Can't mount GUID volume."
@@ -543,7 +544,7 @@ msgid ""
 msgstr ""
 "A Rufus észlelte, hogy a Windows még mindig ír az USB eszközre.\n"
 "\n"
-"Az USB eszközöd sebességétől függően ez a művelet hosszú ideig is eltarthat, különösen nagy fájlok esetén.\n"
+"Az USB eszközöd sebességétől függően e művelet befejezése hosszú ideig is eltarthat, különösen nagy fájlok esetén.\n"
 "\n"
 "A hibák elkerülése érdekében hagyd, hogy a Windows befejezze az írást. De ha belefáradtál a várakozásba, akkor egyszerűen távolítsd el az USB eszközt..."
 
@@ -553,11 +554,11 @@ msgstr "Nem támogatott képfájl"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "Ez a képfájl vagy nem támogatott, vagy olyat bootolási- vagy tömörítési módszert használ, amelyet a Rufus nem támogat..."
+msgstr "Ez a képfájl vagy nem bootolható, vagy olyan bootolási vagy tömörítési módszert használ, amelyet a Rufus nem támogat..."
 
 #. • MSG_083
 msgid "Replace %s?"
-msgstr "Felülírod a(z) %s-t?"
+msgstr "Felülírod ezt: %s?"
 
 #. • MSG_084
 msgid ""
@@ -571,13 +572,13 @@ msgid ""
 "\n"
 "Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"Ez az ISO fájl valószínűleg a(z) '%s' elavult verzióját használja.\n"
-"A boot menü valószínűleg nem fog megfelelően megjelenni.\n"
+"Úgy tűnik, hogy ez az ISO képfájl a(z) '%s' elavult verzióját használja.\n"
+"Emiatt a boot menü valószínűleg nem fog megfelelően megjelenni.\n"
 "\n"
 "A Rufus le tud tölteni egy újabb verziót a probléma megoldásához:\n"
-"- Nyomj 'Igen' gombot az új verzió letöltéséhez\n"
-"- Nyomj 'Nem' gombot a létező ISO fájl módosítatlanul hagyásához\n"
-"Ha nem tudod, mit kell tenned, nyomj 'Igen' gombot.\n"
+"- Válaszd az 'Igen' gombot az új verzió letöltéséhez\n"
+"- Válaszd a 'Nem' gombot a létező ISO képfájl változatlanul hagyásához\n"
+"Ha nem tudod, hogy mit kell tenned, akkor válaszd az 'Igen' gombot.\n"
 "\n"
 "Megjegyzés: Az új fájl a jelenlegi mappába lesz letöltve, és ha egy '%s' létezik, akkor az automatikusan újra lesz használva."
 
@@ -598,7 +599,7 @@ msgstr "Nincs képfájl kiválasztva"
 #. If you prefer, it's okay to use "type" or "device" instead of "NAND" (e.g. "for TLC type").
 #. See also MSG_035.
 msgid "for %s NAND"
-msgstr "%s NAND-hoz"
+msgstr "%s NAND típushoz"
 
 #. • MSG_088
 msgid "Image is too big"
@@ -614,7 +615,7 @@ msgstr "Nem támogatott ISO"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "UEFI típusú cél rendszer esetén csak EFI alól bootolható ISO képfájlok támogatottak. Kérlek, válassz egy EFI alól bootolható ISO-t, vagy állítsd a célrendszer típusát BIOS-ra."
+msgstr "UEFI típusú célrendszer esetén csak EFI alól bootolható ISO képfájlok támogatottak. Kérlek, válassz egy EFI alól bootolható ISO-t, vagy állítsd a célrendszer típusát BIOS-ra."
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -626,9 +627,9 @@ msgid ""
 "\n"
 "This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
 msgstr ""
-"FONTOS: EZ AZ ESZKÖZ TÖBB PARTÍCIÓT TARTALMAZ!!\n"
+"FONTOS: EZ A MEGHAJTÓ TÖBB PARTÍCIÓT TARTALMAZ!!\n"
 "\n"
-"Ez olyan köteteket/partíciókat is tartalmazhat, amely nincs listázva, vagy nem is látható Windows alól. Ha folytatod, akkor Te leszel a felelős minden elvesztett adatért ezeken a partíciókon."
+"Ez olyan partíciókat/köteteket is jelenthet, amelyek nincsenek listázva, vagy nem is láthatóak Windows alól. Ha folytatni szeretnéd, akkor Te vagy a felelős az ezeken a partíciókon bekövetkező adatvesztésekért."
 
 #. • MSG_094
 msgid "Multiple partitions detected"
@@ -636,11 +637,11 @@ msgstr "Több partíció észlelve"
 
 #. • MSG_095
 msgid "DD Image"
-msgstr "DD Képfájl"
+msgstr "DD képfájl"
 
 #. • MSG_096
 msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
-msgstr "A jelenleg kiválasztott fájlrendszer nem használható ezzel a típusú ISO fájllal. Kérlek, válassz ki egy másik fájlrendszert vagy másik ISO-t."
+msgstr "A jelenleg kiválasztott fájlrendszer nem használható ezzel a típusú ISO képfájllal. Kérlek, válassz ki egy másik fájlrendszert vagy egy másik ISO képfájlt."
 
 #. • MSG_097
 msgid "'%s' can only be applied if the file system is NTFS."
@@ -654,11 +655,11 @@ msgid ""
 "\n"
 "Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"FONTOS: 'Windows To Go'-t próbálsz telepíteni, de céleszköz nem 'BEÉPÍTETT' megjelölésű. Emiatt a Windows bootolás közben lefagyhat, mivel a Microsoft nem úgy tervezte, hogy 'ELTÁVOLÍTHATÓ' megjelölésű eszközzel is működjön.\n"
+"FONTOS: 'Windows To Go'-t próbálsz telepíteni, de a célmeghajtó nem 'BEÉPÍTETT' megjelölésű. Emiatt a Windows bootolás közben lefagyhat, mivel a Microsoft nem úgy tervezte, hogy 'ELTÁVOLÍTHATÓ' megjelölésű eszközzel is működjön.\n"
 "\n"
 "Szeretnéd folytatni?\n"
 "\n"
-"Megjegyzés: A 'BEÉPÍTETT/ELTÁVOLÍTHATÓ' megjelölés egy hardveres tulajdonság, amely csak az eszköz gyártójától származó egyedi eszközökkel változtatható meg. Azonban ezek az eszközök szinte SOHA sem publikusak..."
+"Megjegyzés: A 'BEÉPÍTETT/ELTÁVOLÍTHATÓ' megjelölés egy hardveres tulajdonság, amely csak az eszköz gyártójától származó egyedi eszközökkel változtatható meg. Azonban ezek az eszközök SZINTE SOHA SEM publikusak..."
 
 #. • MSG_099
 msgid "Filesystem limitation"
@@ -677,12 +678,12 @@ msgid ""
 "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
 "Do you want to visit the 7-zip download page?"
 msgstr ""
-"A rendszered nem képes WIM archívumokat kicsomagolni. A WIM kicsomagolása szükséges az EFI alól bootolható Windows 7 és Windows Vista USB eszközök készítéséhez. Ezt megoldhatod a 7-Zip aktuális verziójának telepítésével.\n"
+"A rendszered nem képes WIM archívumokat kicsomagolni. A WIM kicsomagolása szükséges az EFI alól bootolható Windows 7 és Windows Vista USB meghajtók készítéséhez. Ezt megoldhatod a 7-Zip aktuális verziójának telepítésével.\n"
 "Meg szeretnéd látogatni a 7-Zip letöltési oldalát?"
 
 #. • MSG_103
 msgid "Download %s?"
-msgstr "Letöltöd a(z) %s?-t?"
+msgstr "Letöltöd ezt: %s?"
 
 #. • MSG_104
 #.
@@ -698,12 +699,12 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"%s vagy újabb verzió szükséges a(z) '%s' fájl telepítéséhez.\n"
+"A(z) %s vagy újabb verziójához telepíteni kell egy '%s' fájlt.\n"
 "Mivel ez a fájl nagyobb, mint 100 KB, és mindig szerepel a(z) %s ISO képfájlokban, ezért nincs a Rufusba beépítve.\n"
 "\n"
 "A Rufus letöltheti a hiányzó fájlt:\n"
-"- Nyomj 'Igen' gombot az internetre csatlakozáshoz és a fájl letöltéséhez\n"
-"- Nyomj 'Nem' gombot, ha magad szeretnéd felmásolni a fájlt az eszközre később\n"
+"- Válaszd az 'Igen' gombot az internethez történő csatlakozáshoz és a fájl letöltéséhez\n"
+"- Válaszd a 'Nem' gombot, ha magad szeretnéd felmásolni a fájlt a meghajtóra később\n"
 "\n"
 "Megjegyzés: A fájl a jelenlegi mappába lesz letöltve, és ha a(z) '%s' nevű fájl létezik, akkor az automatikusan újra lesz használva."
 
@@ -713,7 +714,7 @@ msgid ""
 "If you are sure you want to cancel, click YES. Otherwise, click NO."
 msgstr ""
 "A megszakítás az eszközt HASZNÁLHATATLAN állapotba hozhatja.\n"
-"Ha meg szeretnéd szakítani, kattints az IGEN gombra, más esetben a NEM gombra."
+"Ha biztosan meg szeretnéd szakítani, kattints az IGEN gombra. Egyébként kattints a NEM gombra."
 
 #. • MSG_106
 msgid "Please select folder"
@@ -766,11 +767,11 @@ msgid ""
 "\n"
 "Note: The files will be downloaded in the current application directory and will be reused automatically if present."
 msgstr ""
-"Ez a képfájl Syslinux %s%s-t használ, de ez az alkalmazás csak a Syslinux %s%s telepítő fájljait tartalmazza.\n"
+"Ez a képfájl ezt használja: Syslinux %s%s, de ez az alkalmazás csak a Syslinux %s%s telepítő fájljait tartalmazza.\n"
 "\n"
-"Mivel a Syslinux új verziói nem kompatibilisek a többivel, és a Rufus sem tartalmazhatja az összes verziót, ezért két további fájlt le kell tölteni az internetről ('ldlinux.sys' és 'ldlinux.bss'):\n"
-"- Nyomj 'Igen' gombot az internethez kapcsolódáshoz, és a fájlok letöltéséhez\n"
-"- Nyomj 'Nem' gombot a művelet megszakításához\n"
+"Mivel a Syslinux új verziói nem kompatibilisek egymással, és a Rufus sem tartalmazhatja az összes verziót, ezért két további fájlt le kell tölteni az internetről ('ldlinux.sys' és 'ldlinux.bss'):\n"
+"- Válaszd az 'Igen' gombot az internethez történő kapcsolódáshoz, és ezen fájlok letöltéséhez\n"
+"- Válaszd a 'Nem' gombot a művelet megszakításához\n"
 "\n"
 "Megjegyzés: A fájlok a program mappájába lesznek letöltve és automatikusan újra lesznek használva."
 
@@ -792,12 +793,12 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
 msgstr ""
-"Ez a képfájl Grub %s-t használ, de ez az alkalmazás csak a Grub %s telepítő fájljait tartalmazza.\n"
+"Ez a képfájl ezt használja: Grub %s, de ez az alkalmazás csak a Grub %s telepítő fájljait tartalmazza.\n"
 "\n"
-"Mivel a Grub új verziói nem kompatibilisek a többivel, és a Rufus sem tartalmazhatja az összes verziót, ezért a Rufus megkísérel találni egy olyan verziót a Grub telepítő fájlból ('core.img'), ami egyezik a képfájlban lévővel:\n"
-"- Nyomj 'Igen' gombot az internetre csatlakozáshoz és a letöltés megkísérléséhez\n"
-"- Nyomj 'Nem' gombot a Rufus által biztosított, alapértelmezett verzió használatához\n"
-"- Nyomj 'Mégse' gombot a művelet megszakításához\n"
+"Mivel a Grub különböző verziói nem feltétlenül kompatibilisek egymással, és a Rufus sem tartalmazhatja az összes verziót, ezért a Rufus megkísérel találni egy olyan verziót a Grub telepítő fájlból ('core.img'), ami egyezik a képfájlban lévővel:\n"
+"- Válaszd az 'Igen' gombot az internethez történő csatlakozáshoz és a letöltés megkísérléséhez\n"
+"- Válaszd a 'Nem' gombot a Rufus által biztosított, alapértelmezett verzió használatához\n"
+"- Válaszd a 'Mégse' gombot a művelet megszakításához\n"
 "\n"
 "Megjegyzés: A fájl a program mappájába lesz letöltve és automatikusan újra lesz használva, ha létezik. Ha az interneten nincs megegyező verzió, akkor az alapértelmezett verzió lesz használva."
 
@@ -836,7 +837,7 @@ msgstr "%s elrejtése"
 #. To test this feature, please download and select 'casper_test.iso' from:
 #. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
 msgid "Persistent partition size"
-msgstr "Állandó partíció mérete"
+msgstr "Tartós partíció mérete"
 
 #. • MSG_124
 #.
@@ -844,17 +845,17 @@ msgstr "Állandó partíció mérete"
 #. It is okay to use "No partition" or "None" or "Deactivated" to indicate that a persistent partition will not be
 #. created if the width of the control is too small (since the 'Size' edit control is *not* adjusted for width).
 msgid "No persistence"
-msgstr "Nincs állandóság"
+msgstr "Kikapcsolva"
 
 #. • MSG_125
 #.
 #. Tooltips used for the peristence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "Az állandó partíció méretének beállítása az USB eszközön. A méret 0-ra állítása kikapcsolja az állandó partíciót."
+msgstr "Állítsd be a tartós partíció méretét a Live USB adathordozóhoz. A méret 0-ra állításával letiltod a tartós partíciót."
 
 #. • MSG_126
 msgid "Set the partition size units."
-msgstr "A partíció egységek megadása."
+msgstr "Állítsd be a partíció méretegységét."
 
 #. • MSG_127
 msgid "Do not show this message again"
@@ -862,15 +863,15 @@ msgstr "Többet ne mutassa ezt az üzenetet"
 
 #. • MSG_128
 msgid "Important notice about %s"
-msgstr "Fontos figyelmeztetés a(z) %s-ról/ről"
+msgstr "Fontos figyelmeztetés erről: %s"
 
 #. • MSG_129
 msgid ""
 "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
-"Egy UEFI:NTFS bootloaderrel rendelkező eszközt készítettél. Kérlek ne felejtsd el, hogy a sikeres bootoláshoz, KI KELL KAPCSOLNI A SECURE BOOTOT!\n"
-"Hogy ez miért is szükséges, a 'További információk' gombbal elolvashatod."
+"Egy UEFI:NTFS bootloaderrel rendelkező adathordozót készítettél. Kérlek, ne felejtsd el, hogy a sikeres bootoláshoz, KI KELL KAPCSOLNI A SECURE BOOTOT!\n"
+"Hogy ez miért is szükséges, a 'További információk' gombra kattintva elolvashatod."
 
 #. • MSG_130
 msgid "Windows image selection"
@@ -881,12 +882,12 @@ msgid ""
 "This ISO contains multiple Windows images.\n"
 "Please select the image you wish to use for this installation:"
 msgstr ""
-"Az ISO több Windowst is tartalmaz.\n"
-"Kérlek, válaszd ki a képet amelyet használni szeretnél a telepítéshez:"
+"Ez az ISO több Windows képet is tartalmaz.\n"
+"Kérlek, válaszd ki azt a képet, amelyet használni szeretnél a telepítéshez:"
 
 #. • MSG_132
 msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
-msgstr "Egy másik alkalmazás vagy folyamat használja az eszközt. Így is formázni szeretnéd?"
+msgstr "Egy másik alkalmazás vagy folyamat használja ezt az eszközt. Így is formázni szeretnéd?"
 
 #. • MSG_133
 msgid ""
@@ -896,11 +897,11 @@ msgid ""
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"A Rufus észlelte, hogy egy 1809 alapú ISO-val szeretnél készíteni Windows To Go alapú eszközt készíteni.\n"
+"A Rufus észlelte, hogy egy 1809-es verziójú ISO alapján kíséreltél meg egy Windows To Go meghajtót készíteni\n"
 "\n"
-"Egy Microsoftos hiba miatt az eszköz a Windows bootolása alatt Kékhalált fog dobni amíg nincs helyettesítve a 'WppRecorder.sys' nevű fájl a 1803 verzióból.\n"
+"Egy *MICROSOFT HIBA* miatt ez a meghajtó a Windows indulása során össze fog omlani (kék halál), hacsak nem cseréled ki manuálisan a 'WppRecorder.sys' fájlt egy 1803-as verzióra.\n"
 "\n"
-"Fontos megjegyezni, hogy a Rufusba jogi okok miatt nem tehetjük bele a fájlt."
+"Vedd figyelembe azt is, hogy a Rufus azért nem tudja automatikusan kijavítani ezt, mert a 'WppRecorder.sys' a Microsoft jogvédett fájlja, ezért nem tudjuk törvényesen beágyazni a fájl másolatát az alkalmazásba..."
 
 #. • MSG_134
 msgid ""
@@ -908,7 +909,7 @@ msgid ""
 "\n"
 "Are you sure you want to continue?"
 msgstr ""
-"Mivel MBR lett kiválasztva partíciós sémaként, a Rufus legfeljebb 2 TB-os partíciót tud létrehozni az eszközön, amellyel így %s lemezterület használhatatlanná válik.\n"
+"Mivel MBR lett kiválasztva partíciós sémaként, a Rufus legfeljebb 2 TB-os partíciót tud létrehozni ezen az adathordozón, amellyel így %s lemezterület elérhetetlenné válik.\n"
 "\n"
 "Biztosan folytatni szeretnéd?"
 
@@ -950,7 +951,7 @@ msgstr "Letöltés böngészővel"
 
 #. • MSG_144
 msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Ideiglenesen letiltva a Microsoft által túl sok letöltési kérelem miatt. Kérlek, próbáld újra később..."
+msgstr "A túl sok letöltési kérelem miatt a Microsoft ideiglenesen kitiltotta - Kérlek, próbáld meg később..."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -966,11 +967,11 @@ msgstr "Letöltőkód futtatása..."
 
 #. • MSG_149
 msgid "Download ISO Image"
-msgstr "ISO kép letöltése"
+msgstr "ISO képfájl letöltése"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
-msgstr "A számítógép típusa, amivel használni szeretnéd a bootolható eszközt. A te felelősséged, hogy eldöntsd, BIOS-t vagy UEFI-t használ-e a géped, mielőtt elkezded készíteni az eszközt, mert különben nem bootolhat be."
+msgstr "A számítógép típusa, amellyel használni szeretnéd ezt a rendszerindító meghajtót. A meghajtó létrehozásának megkezdése előtt a te felelősséged annak eldöntése, hogy a célrendszer BIOS vagy UEFI típusú-e, mivel ellenkező esetben előfordulhat, hogy nem indul el."
 
 #. • MSG_151
 #.
@@ -980,23 +981,23 @@ msgstr "'UEFI-CSM' azt jelenti, hogy az eszköz csak BIOS emulációs módban ('
 
 #. • MSG_152
 msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-msgstr "'nem CSM' azt jelenti, hogy az eszköz csak UEFI módban bootol, nem BIOS emulációs ('Legacy Mode') módban."
+msgstr "'nem CSM' azt jelenti, hogy az eszköz csak natív UEFI módban bootol, BIOS emulációs ('Legacy Mode') módban pedig nem."
 
 #. • MSG_153
 msgid "Test pattern: 0x%02X"
-msgstr "Teszt paraméter: 0x%02X"
+msgstr "Teszt minta: 0x%02X"
 
 #. • MSG_154
 msgid "Test pattern: 0x%02X, 0x%02X"
-msgstr "Teszt paraméter: 0x%02X, 0x%02X"
+msgstr "Teszt minta: 0x%02X, 0x%02X"
 
 #. • MSG_155
 msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X"
-msgstr "Teszt paraméter: 0x%02X, 0x%02X, 0x%02X"
+msgstr "Teszt minta: 0x%02X, 0x%02X, 0x%02X"
 
 #. • MSG_156
 msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
-msgstr "Teszt paraméter: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+msgstr "Teszt minta: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
 
 #. • MSG_157
 msgid "Sets the target filesystem"
@@ -1004,14 +1005,14 @@ msgstr "A fájlrendszert állítja be"
 
 #. • MSG_158
 msgid "Minimum size that a block of data will occupy in the filesystem"
-msgstr "A legkisebb méret, amelyben megjelennek a blokkok a fájlrendszerben"
+msgstr "A legkisebb méret, amelyet egy adatblokk elfoglal a fájlrendszerben"
 
 #. • MSG_159
 msgid ""
 "Use this field to set the drive label.\n"
 "International characters are accepted."
 msgstr ""
-"Használd ezt a mezőt a kötet címke megadásához.\n"
+"Használd ezt a mezőt a kötetcímke megadásához.\n"
 "A nemzetközi karakterek is elfogadottak."
 
 #. • MSG_160
@@ -1028,15 +1029,15 @@ msgstr "Vedd ki innen a pipát a \"lassú\" formázáshoz"
 
 #. • MSG_163
 msgid "Method that will be used to create partitions"
-msgstr "Módszer partíciók készítéséhez"
+msgstr "A partíciók létrehozásához használt metódus"
 
 #. • MSG_164
 msgid "Method that will be used to make the drive bootable"
-msgstr "Ezt fogjuk használni az USB eszköz bootolhatóvá tételéhez"
+msgstr "Az USB meghajtó bootolhatóvá tételéhez használt metódus"
 
 #. • MSG_165
 msgid "Click to select or download an image..."
-msgstr "Kattints ide egy képfájl letöltéséhez vagy kiválasztásához."
+msgstr "Kattints ide egy képfájl kiválasztásához vagy letöltéséhez..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
@@ -1087,7 +1088,7 @@ msgstr "Kattints a kiválasztáshoz..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr "Rufus - A megbízható USB formázó"
+msgstr "Rufus - A megbízható USB-formázó segédprogram"
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
@@ -1095,11 +1096,11 @@ msgstr "Verzió: %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Magyar fordítás:\\line• Viszokai György <mailto:familyguyfan79@gmail.com>\\line• Csizmadia Gábor <mailto:gabor.csizmadia@hotmail.hu>"
+msgstr "Magyar fordítás:\\line• Csizmadia Gábor <mailto:gabor.csizmadia@hotmail.hu>\\line• Viszokai György <mailto:familyguyfan79@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
-msgstr "Hibák és javaslatok bejelentése:"
+msgstr "Hibák bejelentése és fejlesztések kérése:"
 
 #. • MSG_178
 msgid "Additional Copyrights:"
@@ -1138,7 +1139,7 @@ msgid ""
 "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
 "Internet access is of course required when checking for updates."
 msgstr ""
-"A Rufus nem telepít vagy futtat háttérben futó szolgáltatásokat, a frissítések ellenörzése akkor történik, amikor az alkalmazás fut.\\line\n"
+"A Rufus nem telepít vagy futtat háttérben futó szolgáltatásokat, a frissítések ellenőrzése csak akkor történik, amikor az alkalmazás fut.\\line\n"
 "Természetesen a frissítések ellenőrzéséhez internet kapcsolat szükséges."
 
 #. • MSG_187
@@ -1193,7 +1194,7 @@ msgstr ""
 "FONTOS: EZ AZ ESZKÖZ 'NEM SZABVÁNYOS' SZEKTOR MÉRETET HASZNÁL!\n"
 "\n"
 "A hagyományos eszközök szektor mérete 512 bájt, de ennek az eszköznek a szektor mérete %d bájt. Sok esetben ez azt jelenti, hogy NEM lehet bootolni erről az eszközről.\n"
-"A Rufus megpróbálhat egy bootolható eszközt készíteni, de NINCS RÁ GARANCIA hogy működni fog."
+"A Rufus megpróbálhat egy bootolható meghajtót készíteni, de NINCS RÁ GARANCIA hogy működni fog."
 
 #. • MSG_197
 msgid "Nonstandard sector size detected"
@@ -1201,7 +1202,7 @@ msgstr "'Nem szabványos' szektor méret észlelve"
 
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
-msgstr "'Windows To Go' csak akkor telepíthető GPT típusúra particionált eszközre, ha az BEÉPÍTETT megjelölésű. A jelenlegi eszközt nem BEÉPÍTETT megjelölésűnek észleltük."
+msgstr "'Windows To Go' csak akkor telepíthető GPT típusúra particionált meghajtóra, ha az BEÉPÍTETT megjelölésű. A jelenlegi eszközt nem BEÉPÍTETT megjelölésűnek észleltük."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1209,11 +1210,11 @@ msgstr "Megszakítás - Kérlek, várj..."
 
 #. • MSG_202
 msgid "Scanning image..."
-msgstr "Képfájl vizsgálata..."
+msgstr "Képfájl beolvasása..."
 
 #. • MSG_203
 msgid "Failed to scan image"
-msgstr "Nem sikerült a képfájlt megvizsgálni"
+msgstr "Nem sikerült a képfájlt beolvasni"
 
 #. • MSG_204
 #.
@@ -1309,8 +1310,8 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "Formázás (%s) - becsült idő: %d:%02d..."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "Címke beállítása (Ez eltarthat egy kis ideig)..."
+msgid "Setting label (%s)..."
+msgstr "Kötetcímke beállítása (%s)..."
 
 #. • MSG_222
 #.
@@ -1320,7 +1321,7 @@ msgstr "Formázás (%s)..."
 
 #. • MSG_223
 msgid "NTFS Fixup (Checkdisk)..."
-msgstr "NTFS javítás (Checkdisk)..."
+msgstr "NTFS Fixup (lemezellenőrzés)..."
 
 #. • MSG_224
 msgid "Clearing MBR/PBR/GPT structures..."
@@ -1355,8 +1356,8 @@ msgid "Copying ISO files: %s"
 msgstr "ISO fájlok másolása: %s"
 
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "Win7 EFI boot telepítés (ez eltarthat egy kis ideig)..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "Win7 EFI boot telepítés (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1391,8 +1392,8 @@ msgid "Partitioning (%s)..."
 msgstr "Particionálás (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "Partíciók törlése..."
+msgid "Deleting partitions (%s)..."
+msgstr "Partíciók törlése (%s)..."
 
 #. • MSG_240
 #.
@@ -1404,7 +1405,7 @@ msgid ""
 msgstr ""
 "A letöltött frissítés aláírása nem érvényesíthető. Ez azt jelentheti, hogy a rendszer helytelenül van konfigurálva aláírás érvényesítéshez, vagy fertőzött letöltést jelezhet.\n"
 " \n"
-"A letöltés törölve lesz, kérlek, ellenőrizd a naplót további részletekért."
+"A letöltés törölve lesz. Kérlek, ellenőrizd a naplót további részletekért."
 
 #. • MSG_241
 msgid "Downloading: %s"
@@ -1436,11 +1437,11 @@ msgstr "Nem található új Rufus verzió"
 
 #. • MSG_248
 msgid "Application registry keys successfully deleted"
-msgstr "A program regisztációs kulcsai sikeresen eltávolítva"
+msgstr "Az alkalmazás Windows beállításjegyzékben tárolt kulcsai sikeresen eltávolítva"
 
 #. • MSG_249
 msgid "Failed to delete application registry keys"
-msgstr "Nem sikerült a regisztációs kulcsokat eltávolítani"
+msgstr "Az alkalmazás Windows beállításjegyzékben tárolt kulcsait nem sikerült eltávolítani"
 
 #. • MSG_250
 #.
@@ -1534,7 +1535,7 @@ msgstr "USB hibakeresés"
 
 #. • MSG_271
 msgid "Computing image checksums: %s"
-msgstr "Képfájl ellenörző összegének számítása: %s"
+msgstr "Képfájl ellenőrző összegének számítása: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1545,8 +1546,8 @@ msgid "Change the application language"
 msgstr "Alkalmazás nyelvének megváltoztatása"
 
 #. • MSG_274
-msgid "ISOHybrid image detected"
-msgstr "ISOHybrid képfájl észlelve"
+msgid "%s image detected"
+msgstr "%s képfájl észlelve"
 
 #. • MSG_275
 #.
@@ -1558,8 +1559,8 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"A kiválasztott képfájl egy 'ISOHybrid' képfájl. Ez azt jelenti, hogy írható: %s (fájlmásolás) módban vagy %s (lemezképfájl) módban.\n"
-"A Rufus a(z) %s mód használatát javasolja, mivel így mindig teljes hozzáférésed lesz az eszközhöz az írás után.\n"
+"A kiválasztott képfájl egy 'ISOHybrid' képfájl. Ez azt jelenti, hogy írható %s (fájlmásolás) módban vagy %s (lemezképfájl) módban.\n"
+"A Rufus a(z) %s mód használatát javasolja, mivel így mindig teljes hozzáférésed lesz a meghajtóhoz az írás után.\n"
 "Azonban, ha bootolás közben hibát észlelsz, akkor megpróbálhatod ezt a képfájlt újraírni %s módban.\n"
 "\n"
 "Kérlek, válaszd ki, hogy mely írási módot szeretnéd használni:"
@@ -1578,7 +1579,7 @@ msgstr "Írás %s módban"
 
 #. • MSG_278
 msgid "Checking for conflicting processes..."
-msgstr "Összeütköző folyamatos ellenőrzése..."
+msgstr "Összeütköző folyamatok ellenőrzése..."
 
 #. • MSG_279
 msgid "Non bootable"
@@ -1586,11 +1587,11 @@ msgstr "Nem bootolható"
 
 #. • MSG_280
 msgid "Disk or ISO image"
-msgstr "Lemez vagy képfájl kiválasztása"
+msgstr "Lemez vagy ISO képfájl"
 
 #. • MSG_281
 msgid "%s (Please select)"
-msgstr "%s (Kérlek, válassz)"
+msgstr "%s (Kérlek, válassz!)"
 
 #. • MSG_282
 msgid "Exclusive USB drive locking"
@@ -1611,7 +1612,7 @@ msgid ""
 "Are you sure you want to run this file?"
 msgstr ""
 "A letöltött futtatható fájlt '%s' írta alá.\n"
-"Ez egy általunk nem felismert aláírás, és rosszindulatú tevékenységre utalhat\n"
+"Ez egy általunk nem felismert aláírás, és rosszindulatú tevékenységre utalhat...\n"
 "Biztosan futtatni szeretnéd ezt a fájlt?"
 
 #. • MSG_286
@@ -1620,19 +1621,19 @@ msgstr "Meghajtó nullázása: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
-msgstr "Nem-USB eltávolítható eszközök észlelése"
+msgstr "Nem-USB eltávolítható meghajtók észlelése"
 
 #. • MSG_288
 msgid "Missing elevated privileges"
-msgstr "Hiányzó magasabb felhasználói jogok"
+msgstr "Hiányzó emelt szintű felhasználói jogok"
 
 #. • MSG_289
 msgid "This application can only run with elevated privileges"
-msgstr "Az alkalmazás csak magasabb felhasználói jogokkal tud futni"
+msgstr "Az alkalmazás csak emelt szintű felhasználói jogokkal tud futni"
 
 #. • MSG_290
 msgid "File Indexing"
-msgstr "File indexelése"
+msgstr "Fájl indexelése"
 
 #. • MSG_291
 msgid "Version selection"
@@ -1640,7 +1641,7 @@ msgstr "Verzió kiválasztása"
 
 #. • MSG_292
 msgid "Please select the version of Windows you want to install:"
-msgstr "Kérlek, válaszd ki a Windows verzió amelyet telepíteni szeretnél:"
+msgstr "Kérlek, válaszd ki a telepíteni kívánt Windows verziót:"
 
 #. • MSG_293
 msgid "Unsupported Windows version"
@@ -1648,7 +1649,7 @@ msgstr "Nem támogatott Windows verzió"
 
 #. • MSG_294
 msgid "This version of Windows is no longer supported by Rufus."
-msgstr "A Windows ezen verziója már nem támogatott többé a Rufus által."
+msgstr "A Rufus már nem támogatja a Windows ezen verzióját."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1660,7 +1661,7 @@ msgid ""
 "\n"
 "Are you sure you want to run it?"
 msgstr ""
-"A Rufus ezen verzióját nem a hivatalos fejlesztő adta ki.\n"
+"A Rufus ezen verzióját nem a hivatalos fejlesztője adta ki.\n"
 "\n"
 "Biztosan futtatni szeretnéd?"
 
@@ -1676,11 +1677,11 @@ msgid ""
 "\n"
 "Note that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
 msgstr ""
-"A kiválasztott ISO fájl nem rendelkezik a meghatározott mérettel: %s mennyiségű adat hiányzik!\n"
+"A kiválasztott ISO képfájl nem egyezik az általa meghatározott mérettel: %s mennyiségű adat hiányzik!\n"
 "\n"
-"Ha ezt a fájlt az internetről töltötted le, próbálj meg egy újat letölteni, és ellenőrizd, hogy az MD5 vagy SHA egyezik-e a hivataloséval.\n"
+"Ha ezt a fájlt az internetről szerezted be, próbálj meg egy új példányt letölteni, és ellenőrizd, hogy az MD5 vagy SHA ellenőrző összegek megegyeznek-e a hivatalosakkal.\n"
 "\n"
-"Az MD5-öt vagy SHA-t a Rufusban a (✓) gombbal számíthatod ki."
+"Vedd figyelembe, hogy a (✓) gombra kattintva kiszámíthatod az MD5 vagy SHA értékeket a Rufusban."
 
 # ' gombbal számíthatod ki"
 #. • MSG_299
@@ -1693,17 +1694,17 @@ msgid ""
 "\n"
 "In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
 msgstr ""
-"A Rufus nem tudta érvényesíteni, hogy a letöltött frissítés időbélyege újabb-e mint a jelenlegié.\n"
+"A Rufus nem tudta érvényesíteni, hogy a letöltött frissítés időbélyege újabb-e, mint a jelenlegié.\n"
 "\n"
-"Egy esetleges támadást megelőzve a frissítési folyamat meg lett szakítva és a letöltött fájlok törölve lettek. Kérlek, ellenőrizd a naplót több részletért."
+"Egy esetleges támadást megelőzve a frissítési folyamat meg lett szakítva, és a letöltött fájlok törölve lettek. Kérlek, ellenőrizd a naplót több részletért."
 
 #. • MSG_301
 msgid "Show application settings"
-msgstr "Alkalmazás beállításainak megjelenítése"
+msgstr "Az alkalmazás beállításainak megjelenítése"
 
 #. • MSG_302
 msgid "Show information about this application"
-msgstr "Ezen alkalmazás információinak megjelenítése"
+msgstr "Az alkalmazás névjegyének megjelenítése"
 
 #. • MSG_303
 msgid "Show the log"
@@ -1714,12 +1715,102 @@ msgid "Create a disk image of the selected device"
 msgstr "Lemezkép készítése a kiválasztott eszközről"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "Ezt a lehetőséget arra használd, hogy jelezd, ezt az eszközt szeretnéd-e használni Windows telepítésre, vagy közvetlenül erről szeretnéd-e futtatni a Windowst."
+msgid ""
+"Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go).\r\n"
+"In 'Extended Windows 11 Installation' mode, Rufus will patch the media so that Windows 11 can be installed on platforms that don't meet the TPM 2.0 or Secure Boot requirements."
+msgstr ""
+"Ezzel a beállítással jelezheted, ha a Windows rendszert egy másik lemezre szeretnéd telepíteni, vagy közvetlenül erről a meghajtóról szeretnéd futtatni a Windows rendszert (Windows To Go).\n"
+"„Kiterjesztett Windows 11 telepítés” módban a Rufus úgy módosítja az adathordozót, hogy a Windows 11 olyan platformokon is telepíthető legyen, amelyek nem felelnek meg a TPM 2.0 vagy a Secure Boot követelményeinek."
 
 #. • MSG_306
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
-msgstr "Eszköz gyors-nullázása: %s"
+msgstr "Meghajtó gyors-nullázása: %s"
+
+#. • MSG_307
+msgid "this may take a while"
+msgstr "ez eltarthat egy kis ideig"
+
+#. • MSG_308
+msgid "VHD detection"
+msgstr "VHD észlelés"
+
+#. • MSG_309
+msgid "Compressed archive"
+msgstr "Tömörített archívum"
+
+#. • MSG_310
+msgid ""
+"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"A kiválasztott ISO képfájl UEFI-t használ, és elég kicsi ahhoz, hogy EFI rendszerpartícióként (ESP) legyen írva. Bizonyos típusú telepítéseknél előnyösebb lehet az ESP-re írás, ahelyett, hogy egy általános adatpartícióra írna, amely a teljes lemezt elfoglalja.\n"
+"\n"
+"Kérlek, válaszd ki a módot, amellyel ezt a képet írni szeretnéd:"
+
+#. • MSG_311
+msgid "Use %s (in the main application window) to enable."
+msgstr "Az engedélyezéshez használd ezt: %s (az alkalmazás főablakában)"
+
+#. • MSG_312
+msgid "Extra hashes (SHA512)"
+msgstr "Extra kivonatok (SHA512)"
+
+#. • MSG_313
+msgid "Save to VHD"
+msgstr "Mentés VHD-re"
+
+#. • MSG_314
+msgid "Compute image checksums"
+msgstr "Képfájl ellenőrzőösszegeinek számítása"
+
+#. • MSG_315
+msgid "Multiple buttons"
+msgstr "Több gomb"
+
+#. • MSG_316
+msgid "Number of passes"
+msgstr "Menetek száma"
+
+#. • MSG_317
+msgid "Disk ID"
+msgstr "Lemezazonosító"
+
+#. • MSG_318
+msgid "Default thread priority: %d"
+msgstr "Alapértelmezett szál prioritás: %d"
+
+#. • MSG_319
+msgid "Ignore Boot Marker"
+msgstr "Boot Marker figyelmen kívül hagyása"
+
+#. • MSG_320
+msgid "Refreshing partition layout (%s)..."
+msgstr "Partíció elrendezés frissítése (%s)..."
+
+#. • MSG_321
+msgid ""
+"The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
+"As a result, DD image writing mode will be enforced."
+msgstr ""
+"A kiválasztott képfájl egy ISOHybrid képfájl, de a készítői nem tették kompatibilissé az ISO (fájlmásolás) móddal.\n"
+"Emiatt a DD képfájl írási mód lesz kényszerítve."
+
+#. • MSG_322
+msgid "Standard Windows 11 Installation (TPM 2.0 + Secure Boot)"
+msgstr "Alapértelmezett Windows 11 telepítés  (TPM 2.0 + Secure Boot)"
+
+#. • MSG_323
+msgid "Extended Windows 11 Installation (no TPM / no Secure Boot)"
+msgstr "Kiterjesztett Windows 11 telepítés (nincs TPM / nincs Secure Boot)"
+
+#. • MSG_324
+msgid "Removing Windows 11 installation restrictions: %s"
+msgstr "Windows 11 telepítési korlátozások eltávolítása: %s"
+
+#. • MSG_325
+msgid "Unable to open or read '%s'"
+msgstr "Nem lehet megnyitni vagy olvasni ezt: '%s'"
