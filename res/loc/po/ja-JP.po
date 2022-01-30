@@ -1166,13 +1166,13 @@ msgstr "互換性のないドライブが検出されました。"
 #.
 #. Used in MSG_235
 msgid "Write pass"
-msgstr "書き込みをパスしました。"
+msgstr "書き込み中"
 
 #. • MSG_192
 #.
 #. Used in MSG_235
 msgid "Read pass"
-msgstr "読み出しをパスしました。"
+msgstr "読み出し中"
 
 #. • MSG_193
 msgid "Downloaded %s"
@@ -1385,7 +1385,7 @@ msgstr "Syslinux %s をインストール中..."
 #. Bad blocks status. Example: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
 #. See MSG_191 & MSG_192 for "Write pass"/"Read pass" translation.
 msgid "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
-msgstr "不良ブロック: %s %d/%d - %0.2f%% (エラー: %d/%d/%d)"
+msgstr "不良ブロック: %s %d/%d パス - %0.2f%% (エラー: %d/%d/%d)"
 
 #. • MSG_236
 msgid "Bad Blocks: Testing with random pattern"
