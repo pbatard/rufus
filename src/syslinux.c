@@ -194,7 +194,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	}
 
 	/* Create ldlinux.sys file */
-	static_sprintf(path, "%c:\\%s.%s", drive_letter, ldlinux, ldlinux_ext[0]);
+	static_sprintf(path, "%c:\\%s.%s", toupper(drive_letter), ldlinux, ldlinux_ext[0]);
 	f_handle = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
 			  FILE_SHARE_READ | FILE_SHARE_WRITE,
 			  NULL, CREATE_ALWAYS,
@@ -236,7 +236,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 
 	switch (file_system) {
 	case FS_NTFS:
-		static_sprintf(tmp, "%c:\\", drive_letter);
+		static_sprintf(tmp, "%c:\\", toupper(drive_letter));
 		vol_info.Handle = d_handle;
 		err = NtfsSectGetVolumeInfo(tmp, &vol_info);
 		if (err != ERROR_SUCCESS) {
@@ -333,7 +333,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 		IGNORE_RETVAL(_chdirU(app_data_dir));
 		static_sprintf(path, "%s\\%s-%s", FILES_DIR, syslinux, embedded_sl_version_str[1]);
 		IGNORE_RETVAL(_chdir(path));
-		static_sprintf(path, "%c:\\%s.%s", drive_letter, ldlinux, ldlinux_ext[2]);
+		static_sprintf(path, "%c:\\%s.%s", toupper(drive_letter), ldlinux, ldlinux_ext[2]);
 		fd = fopen(&path[3], "rb");
 		if (fd == NULL) {
 			uprintf("Caution: No '%s' was provided. The target will be missing a required Syslinux file!", &path[3]);
@@ -354,7 +354,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 			goto out;
 		}
 		/* Create mboot.c32 file */
-		static_sprintf(path, "%c:\\%s", drive_letter, mboot_c32);
+		static_sprintf(path, "%c:\\%s", toupper(drive_letter), mboot_c32);
 		f_handle = CreateFileA(path, GENERIC_READ | GENERIC_WRITE,
 				  FILE_SHARE_READ | FILE_SHARE_WRITE,
 				  NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -368,7 +368,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 			goto out;
 		}
 		safe_closehandle(f_handle);
-		static_sprintf(path, "%c:\\syslinux.cfg", drive_letter);
+		static_sprintf(path, "%c:\\syslinux.cfg", toupper(drive_letter));
 		fd = fopen(path, "w");
 		if (fd == NULL) {
 			uprintf("Could not create ReactOS 'syslinux.cfg'");

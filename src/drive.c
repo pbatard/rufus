@@ -1142,11 +1142,11 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 		if ((_drive_type != DRIVE_REMOVABLE) && (_drive_type != DRIVE_FIXED))
 			continue;
 
-		static_sprintf(logical_drive, "\\\\.\\%c:", drive[0]);
+		static_sprintf(logical_drive, "\\\\.\\%c:", toupper(drive[0]));
 		hDrive = CreateFileA(logical_drive, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE,
 			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hDrive == INVALID_HANDLE_VALUE) {
-//			uprintf("Warning: could not open drive %c: %s", drive[0], WindowsErrorString());
+//			uprintf("Warning: could not open drive %c: %s", toupper(drive[0]), WindowsErrorString());
 			continue;
 		}
 
@@ -1341,11 +1341,11 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 	if (DeviceIoControl(hPhysical, IOCTL_STORAGE_CHECK_VERIFY, NULL, 0, NULL, 0, &size, NULL))
 		AutorunLabel = get_token_data_file("label", AutorunPath);
 	else if (GetLastError() == ERROR_NOT_READY)
-		uprintf("Ignoring autorun.inf label for drive %c: %s", letters[0],
+		uprintf("Ignoring 'autorun.inf' label for drive %c: %s", toupper(letters[0]),
 		(HRESULT_CODE(GetLastError()) == ERROR_NOT_READY)?"No media":WindowsErrorString());
 	safe_closehandle(hPhysical);
 	if (AutorunLabel != NULL) {
-		uprintf("Using autorun.inf label for drive %c: '%s'", letters[0], AutorunLabel);
+		uprintf("Using 'autorun.inf' label for drive %c: '%s'", toupper(letters[0]), AutorunLabel);
 		static_strcpy(VolumeLabel, AutorunLabel);
 		safe_free(AutorunLabel);
 		*label = VolumeLabel;
@@ -1832,12 +1832,12 @@ static BOOL FlushDrive(char drive_letter)
 	hDrive = CreateFileA(logical_drive, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
 		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDrive == INVALID_HANDLE_VALUE) {
-		uprintf("Failed to open %c: for flushing: %s", drive_letter, WindowsErrorString());
+		uprintf("Failed to open %c: for flushing: %s", toupper(drive_letter), WindowsErrorString());
 		goto out;
 	}
 	r = FlushFileBuffers(hDrive);
 	if (r == FALSE)
-		uprintf("Failed to flush %c: %s", drive_letter, WindowsErrorString());
+		uprintf("Failed to flush %c: %s", toupper(drive_letter), WindowsErrorString());
 
 out:
 	safe_closehandle(hDrive);
@@ -1886,10 +1886,10 @@ BOOL MountVolume(char* drive_name, char *volume_name)
 		// about the level of thought and foresight that actually goes into the Windows APIs...
 		// [1] https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-definedosdevicew
 		if (!DefineDosDeviceA(DDD_RAW_TARGET_PATH | DDD_NO_BROADCAST_SYSTEM, dos_name, &volume_name[14])) {
-			uprintf("Could not mount %s as %C:", volume_name, drive_name[0]);
+			uprintf("Could not mount %s as %c:", volume_name, toupper(drive_name[0]));
 			return FALSE;
 		}
-		uprintf("%s was successfully mounted as %C:", volume_name, drive_name[0]);
+		uprintf("%s was successfully mounted as %c:", volume_name, toupper(drive_name[0]));
 		return TRUE;
 	}
 
@@ -1902,8 +1902,8 @@ BOOL MountVolume(char* drive_name, char *volume_name)
 	// If that is the case, update drive_name to that letter.
 	if ( (GetVolumePathNamesForVolumeNameA(volume_name, mounted_letter, sizeof(mounted_letter), &size))
 	  && (size > 1) && (mounted_letter[0] != drive_name[0]) ) {
-		uprintf("%s is already mounted as %C: instead of %C: - Will now use this target instead...",
-			volume_name, mounted_letter[0], drive_name[0]);
+		uprintf("%s is already mounted as %c: instead of %c: - Will now use this target instead...",
+			volume_name, toupper(mounted_letter[0]), toupper(drive_name[0]));
 		drive_name[0] = mounted_letter[0];
 		return TRUE;
 	}
@@ -1918,7 +1918,7 @@ BOOL MountVolume(char* drive_name, char *volume_name)
 				uprintf("%s is mounted, but volume GUID doesn't match:\r\n  expected %s, got %s",
 					drive_name, volume_name, mounted_guid);
 			} else {
-				duprintf("%s is already mounted as %C:", volume_name, drive_name[0]);
+				duprintf("%s is already mounted as %c:", volume_name, toupper(drive_name[0]));
 				return TRUE;
 			}
 			uprintf("Retrying after dismount...");
@@ -1929,7 +1929,7 @@ BOOL MountVolume(char* drive_name, char *volume_name)
 			if ((GetLastError() == ERROR_DIR_NOT_EMPTY) &&
 				GetVolumeNameForVolumeMountPointA(drive_name, mounted_guid, sizeof(mounted_guid)) &&
 				(safe_strcmp(volume_name, mounted_guid) == 0)) {
-				uprintf("%s was remounted as %C: (second time lucky!)", volume_name, drive_name[0]);
+				uprintf("%s was remounted as %c: (second time lucky!)", volume_name, toupper(drive_name[0]));
 				return TRUE;
 			}
 		}
@@ -2002,9 +2002,9 @@ BOOL RemountVolume(char* drive_name, BOOL bSilent)
 	FlushDrive(drive_name[0]);
 	if (GetVolumeNameForVolumeMountPointA(drive_name, volume_name, sizeof(volume_name))) {
 		if (MountVolume(drive_name, volume_name)) {
-			suprintf("Successfully remounted %s as %C:", volume_name, drive_name[0]);
+			suprintf("Successfully remounted %s as %c:", volume_name, toupper(drive_name[0]));
 		} else {
-			suprintf("Could not remount %s as %C: %s", volume_name, drive_name[0], WindowsErrorString());
+			suprintf("Could not remount %s as %c: %s", volume_name, toupper(drive_name[0]), WindowsErrorString());
 			// This will leave the drive inaccessible and must be flagged as an error
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
 			return FALSE;

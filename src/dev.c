@@ -939,7 +939,7 @@ BOOL GetDevices(DWORD devnum)
 					}
 					// Make sure that we don't list any drive that should not be listed
 					if (remove_drive) {
-						uprintf("Removing %C: from the list: This is the %s!", drive_letters[--k],
+						uprintf("Removing %c: from the list: This is the %s!", toupper(drive_letters[--k]),
 							(remove_drive==1)?"disk from which " APPLICATION_NAME " is running":"system disk");
 						safe_free(devint_detail_data);
 						break;

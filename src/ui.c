@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * UI-related function calls
- * Copyright © 2018-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2018-2022 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -789,7 +789,8 @@ void ToggleImageOptions(void)
 	if (image_option_txt[0] == 0)
 		GetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), image_option_txt, sizeof(image_option_txt));
 
-	if ((has_wintogo) != (image_options & IMOP_WINTOGO)) {
+	if (((has_wintogo) && !(image_options & IMOP_WINTOGO)) ||
+		((!has_wintogo) && (image_options & IMOP_WINTOGO))) {
 		image_options ^= IMOP_WINTOGO;
 		if (image_options & IMOP_WINTOGO) {
 			// Set the Windows To Go selection in the dropdown
@@ -797,7 +798,8 @@ void ToggleImageOptions(void)
 		}
 	}
 
-	if ((has_persistence) != (image_options & IMOP_PERSISTENCE)) {
+	if (((has_persistence) && !(image_options & IMOP_PERSISTENCE)) ||
+		((!has_persistence) && (image_options & IMOP_PERSISTENCE))) {
 		image_options ^= IMOP_PERSISTENCE;
 		if (image_options & IMOP_PERSISTENCE) {
 			SetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), lmprintf(MSG_123));

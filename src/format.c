@@ -1105,13 +1105,13 @@ static BOOL SetupWinPE(char drive_letter)
 	static_sprintf(setupsrcdev, "SetupSourceDevice = \"\\device\\harddisk%d\\partition1\"",
 		ComboBox_GetCurSel(hDiskID));
 	// Copy of ntdetect.com in root
-	static_sprintf(src, "%c:\\%s\\ntdetect.com", drive_letter, basedir[2*(index/2)]);
-	static_sprintf(dst, "%c:\\ntdetect.com", drive_letter);
+	static_sprintf(src, "%c:\\%s\\ntdetect.com", toupper(drive_letter), basedir[2*(index/2)]);
+	static_sprintf(dst, "%c:\\ntdetect.com", toupper(drive_letter));
 	CopyFileA(src, dst, TRUE);
 	if (!img_report.uses_minint) {
 		// Create a copy of txtsetup.sif, as we want to keep the i386/amd64 files unmodified
-		static_sprintf(src, "%c:\\%s\\txtsetup.sif", drive_letter, basedir[index]);
-		static_sprintf(dst, "%c:\\txtsetup.sif", drive_letter);
+		static_sprintf(src, "%c:\\%s\\txtsetup.sif", toupper(drive_letter), basedir[index]);
+		static_sprintf(dst, "%c:\\txtsetup.sif", toupper(drive_letter));
 		if (!CopyFileA(src, dst, TRUE)) {
 			uprintf("Did not copy %s as %s: %s\n", src, dst, WindowsErrorString());
 		}
@@ -1122,8 +1122,8 @@ static BOOL SetupWinPE(char drive_letter)
 		uprintf("Successfully added '%s' to %s\n", setupsrcdev, dst);
 	}
 
-	static_sprintf(src, "%c:\\%s\\setupldr.bin", drive_letter,  basedir[2*(index/2)]);
-	static_sprintf(dst, "%c:\\BOOTMGR", drive_letter);
+	static_sprintf(src, "%c:\\%s\\setupldr.bin", toupper(drive_letter),  basedir[2*(index/2)]);
+	static_sprintf(dst, "%c:\\BOOTMGR", toupper(drive_letter));
 	if (!CopyFileA(src, dst, TRUE)) {
 		uprintf("Did not copy %s as %s: %s\n", src, dst, WindowsErrorString());
 	}
@@ -1922,7 +1922,7 @@ DWORD WINAPI FormatThread(void* param)
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_ASSIGN_LETTER);
 		goto out;
 	}
-	uprintf("Will use '%C:' as volume mountpoint", drive_name[0]);
+	uprintf("Will use '%c:' as volume mountpoint", toupper(drive_name[0]));
 
 	// It kind of blows, but we have to relinquish access to the physical drive
 	// for VDS to be able to delete the partitions that reside on it...
@@ -2074,7 +2074,7 @@ DWORD WINAPI FormatThread(void* param)
 			if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE)) {
 				volume_name = GetLogicalName(DriveIndex, 0, TRUE, TRUE);
 				if ((volume_name != NULL) && (MountVolume(drive_name, volume_name)))
-					uprintf("Remounted %s as %C:", volume_name, drive_name[0]);
+					uprintf("Remounted %s as %c:", volume_name, toupper(drive_name[0]));
 			}
 		}
 		goto out;
@@ -2218,7 +2218,7 @@ DWORD WINAPI FormatThread(void* param)
 		// we forcibly removed them, so add yet another explicit call to RemoveDriveLetters()
 		RemoveDriveLetters(DriveIndex, FALSE, TRUE);
 		if (!MountVolume(drive_name, volume_name)) {
-			uprintf("Could not remount %s as %C: %s\n", volume_name, drive_name[0], WindowsErrorString());
+			uprintf("Could not remount %s as %c: %s\n", volume_name, toupper(drive_name[0]), WindowsErrorString());
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_MOUNT_VOLUME);
 			goto out;
 		}
@@ -2398,7 +2398,7 @@ out:
 		volume_name = GetLogicalName(DriveIndex, partition_offset[PI_MAIN], TRUE, TRUE);
 		if (volume_name != NULL) {
 			if (MountVolume(drive_name, volume_name))
-				uprintf("Re-mounted volume as %C: after error", drive_name[0]);
+				uprintf("Re-mounted volume as %c: after error", toupper(drive_name[0]));
 			free(volume_name);
 		}
 	}
