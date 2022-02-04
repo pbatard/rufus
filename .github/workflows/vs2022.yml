@@ -70,6 +70,7 @@ jobs:
       run: sha256sum ./rufus_${{ matrix.TARGET_PLATFORM }}.exe
 
     - name: Upload to VirusTotal
+      continue-on-error: true
       if: ${{ github.event_name == 'push' }}
       run: |
         curl --request POST --url https://www.virustotal.com/vtapi/v2/file/scan --form apikey=${{ secrets.VIRUSTOTAL_API_KEY }} --form file=@./rufus_${{ matrix.TARGET_PLATFORM }}.exe

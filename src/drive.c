@@ -1638,6 +1638,132 @@ out:
 	return ret;
 }
 
+// This is a crude attempt at detecting file systems through their superblock magic.
+// Note that we only attempt to detect the file systems that Rufus can actually format.
+const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
+{
+	typedef struct {
+		const char* name;
+		const uint8_t magic[8];
+	} win_fs_type;
+	const win_fs_type win_fs_types[] = {
+		{ "exFAT", { 'E', 'X', 'F', 'A', 'T', ' ', ' ', ' ' } },
+		{ "NTFS", { 'N', 'T', 'F', 'S', ' ', ' ', ' ', ' ' } },
+		{ "ReFS", { 'R', 'e', 'F', 'S', 0, 0, 0, 0 } }
+	};
+	const  win_fs_type fat_fs_types[] = {
+		{ "FAT", {  'F', 'A', 'T', ' ', ' ', ' ', ' ', ' ' } },
+		{ "FAT12", {  'F', 'A', 'T', '1', '2', ' ', ' ', ' ' } },
+		{ "FAT16", {  'F', 'A', 'T', '1', '6', ' ', ' ', ' ' } },
+		{ "FAT32", {  'F', 'A', 'T', '3', '2', ' ', ' ', ' ' } },
+	};
+	const uint32_t ext_feature[3][3] = {
+		// feature_compat
+		{ 0x0000017B, 0x00000004, 0x00000E00 },
+		// feature_ro_compat
+		{ 0x00000003, 0x00000000, 0x00008FF8 },
+		// feature_incompat
+		{ 0x00000013, 0x0000004C, 0x0003F780 }
+	};
+	const char* ext_names[] = { "ext", "ext2", "ext3", "ext4" };
+	const char* ret = "(Unrecognized)";
+	DWORD i, j, offset, size, sector_size = 512;
+	uint8_t* buf = calloc(sector_size, 1);
+	if (buf == NULL)
+		goto out;
+
+	// 1. Try to detect FAT/exFAT/NTFS/ReFS through the 512 bytes superblock at offset 0
+	if (!SetFilePointerEx(hPhysical, StartingOffset, NULL, FILE_BEGIN))
+		goto out;
+	if (!ReadFile(hPhysical, buf, sector_size, &size, NULL) || size != sector_size)
+		goto out;
+
+
+	// The beginning of a superblock for FAT/exFAT/NTFS/ReFS is pretty much always the same:
+	// There are 3 bytes potentially used for a jump instruction, and then are 8 bytes of
+	// OEM Name which, even if *not* technically correct, we are going to assume hold an
+	// immutable file system magic for exFAT/NTFS/ReFS (but not for FAT, see below).
+	for (i = 0; i < ARRAYSIZE(win_fs_types); i++)
+		if (memcmp(&buf[0x03], win_fs_types[i].magic, 8) == 0)
+			break;
+	if (i < ARRAYSIZE(win_fs_types)) {
+		ret = win_fs_types[i].name;
+		goto out;
+	}
+
+	// For FAT, because the OEM Name may actually be set to something else than what we
+	// expect, we poke the FAT12/16 Extended BIOS Parameter Block:
+	// https://en.wikipedia.org/wiki/Design_of_the_FAT_file_system#Extended_BIOS_Parameter_Block
+	// or FAT32 Extended BIOS Parameter Block:
+	// https://en.wikipedia.org/wiki/Design_of_the_FAT_file_system#FAT32_Extended_BIOS_Parameter_Block
+	for (offset = 0x36; offset <= 0x52; offset += 0x1C) {
+		for (i = 0; i < ARRAYSIZE(fat_fs_types); i++)
+			if (memcmp(&buf[offset], fat_fs_types[i].magic, 8) == 0)
+				break;
+		if (i < ARRAYSIZE(fat_fs_types)) {
+			ret = fat_fs_types[i].name;
+			goto out;
+		}
+	}
+
+	// 2. Try to detect Apple AFS/HFS/HFS+ through the 512 bytes superblock at either offset 0 or 1024
+	// "NXSB" at offset 0x20 => APFS
+	if (strncmp("NXSB", &buf[0x20], 4) == 0) {
+		ret = "APFS";
+		goto out;
+	}
+	// Switch to offset 1024
+	memset(buf, sector_size, 0);
+	StartingOffset.QuadPart += 0x0400ULL;
+	if (!SetFilePointerEx(hPhysical, StartingOffset, NULL, FILE_BEGIN))
+		goto out;
+	if (!ReadFile(hPhysical, buf, sector_size, &size, NULL) || size != sector_size)
+		goto out;
+	// "HX" or "H+" at offset 0x00 => HFS/HFS+
+	if (buf[0] == 'H' && (buf[1] == 'X' || buf[1] == '+')) {
+		ret = "HFS/HFS+";
+		goto out;
+	}
+
+	// 3. Try to detect ext2/ext3/ext4 through the 512 bytes superblock at offset 1024
+	// We're already at the right offset
+	if (!SetFilePointerEx(hPhysical, StartingOffset, NULL, FILE_BEGIN))
+		goto out;
+	if (!ReadFile(hPhysical, buf, sector_size, &size, NULL) || size != sector_size)
+		goto out;
+	if (buf[0x38] == 0x53 && buf[0x39] == 0xEF) {
+		uint32_t rev = 0;
+		for (i = 0; i < 3; i++) {
+			uint32_t feature = *((uint32_t*)&buf[0x5C + 4 * i]);
+			for (j = 0; j < 3; j++) {
+				if (feature & ext_feature[i][j] && rev <= j)
+					rev = j + 1;
+			}
+		}
+		assert(rev < ARRAYSIZE(ext_names));
+		ret = ext_names[rev];
+		goto out;
+	}
+
+	// 4. Try to detect UDF through by looking for a "BEA01\0" string at offset 0xC001
+	// NB: This is not thorough UDF detection but good enough for our purpose.
+	// For the full specs see: http://www.osta.org/specs/pdf/udf260.pdf
+	memset(buf, sector_size, 0);
+	StartingOffset.QuadPart += 0x8000ULL - 0x0400ULL;
+	if (!SetFilePointerEx(hPhysical, StartingOffset, NULL, FILE_BEGIN))
+		goto out;
+	if (!ReadFile(hPhysical, buf, sector_size, &size, NULL) || size != sector_size)
+		goto out;
+	if (strncmp("BEA01", &buf[1], 5) == 0) {
+		ret = "UDF";
+		goto out;
+	}
+
+out:
+	free(buf);
+	return ret;
+}
+
 /*
  * Fill the drive properties (size, FS, etc)
  * Returns TRUE if the drive has a partition that can be mounted in Windows, FALSE otherwise
@@ -1754,9 +1880,11 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 					SelectedDrive.PartitionOffset[i] = DriveLayout->PartitionEntry[i].StartingOffset.QuadPart;
 					SelectedDrive.PartitionSize[i] = DriveLayout->PartitionEntry[i].PartitionLength.QuadPart;
 				}
-				suprintf("  Type: %s (0x%02x)\r\n  Size: %s (%lld bytes)\r\n  Start Sector: %lld, Boot: %s",
+				suprintf("  Type: %s (0x%02x)\r\n  Detected File System: %s\r\n"
+					"  Size: %s (%lld bytes)\r\n  Start Sector: %lld, Boot: %s",
 					((part_type == 0x07 || super_floppy_disk) && (FileSystemName[0] != 0)) ?
 					FileSystemName : GetMBRPartitionType(part_type), super_floppy_disk ? 0: part_type,
+					GetFsName(hPhysical, DriveLayout->PartitionEntry[i].StartingOffset),
 					SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
 					DriveLayout->PartitionEntry[i].PartitionLength.QuadPart,
 					DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize,
@@ -1789,6 +1917,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 				GetGPTPartitionType(&DriveLayout->PartitionEntry[i].Gpt.PartitionType));
 			if (DriveLayout->PartitionEntry[i].Gpt.Name[0] != 0)
 				suprintf("  Name: '%S'", DriveLayout->PartitionEntry[i].Gpt.Name);
+			suprintf("  Detected File System: %s", GetFsName(hPhysical, DriveLayout->PartitionEntry[i].StartingOffset));
 			suprintf("  ID: %s\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Attributes: 0x%016" PRIX64,
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId),
 				SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),

@@ -406,7 +406,8 @@ static BOOL IsRefsAvailable(MEDIA_TYPE MediaType)
 		return FALSE;
 	if (nWindowsVersion < WINDOWS_8_1 || nWindowsBuildNumber <= 0)
 		return FALSE;
-	if (nWindowsBuildNumber < 16000)
+	// Per https://gist.github.com/0xbadfca11/da0598e47dd643d933dc
+	if (nWindowsBuildNumber < 16226)
 		return TRUE;
 	switch (nWindowsEdition) {
 	case 0x0000000A: // Enterprise Server

@@ -1,3 +1,4 @@
+# Disabled on account of https://github.com/github/codeql-action/issues/850
 name: "CodeQL"
 
 on:
