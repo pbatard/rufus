@@ -1267,6 +1267,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		"^OL-8.*",				// Oracle Linux 8.x
 		"^RHEL-8.*",			// Red Hat 8.x
 		"^Rocky-8.*",			// Rocky Linux 8.x
+		"^MIRACLE-LINUX-8-.*",	// MIRACLE LINUX 8.x
 	};
 	int i, len;
 	uint8_t arch;
