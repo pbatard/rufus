@@ -80,5 +80,5 @@ jobs:
       uses: actions/upload-artifact@v2
       if: ${{ github.event_name == 'push' }}
       with:
-        name: VS2019
+        name: VS2022
         path: ./*.exe

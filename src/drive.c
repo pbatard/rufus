@@ -1639,7 +1639,8 @@ out:
 }
 
 // This is a crude attempt at detecting file systems through their superblock magic.
-// Note that we only attempt to detect the file systems that Rufus can actually format.
+// Note that we only attempt to detect the file systems that Rufus can format as
+// well as a couple other maintsream ones.
 const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 {
 	typedef struct {
@@ -1713,7 +1714,7 @@ const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 		goto out;
 	}
 	// Switch to offset 1024
-	memset(buf, sector_size, 0);
+	memset(buf, 0, sector_size);
 	StartingOffset.QuadPart += 0x0400ULL;
 	if (!SetFilePointerEx(hPhysical, StartingOffset, NULL, FILE_BEGIN))
 		goto out;
@@ -1748,7 +1749,7 @@ const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 	// 4. Try to detect UDF through by looking for a "BEA01\0" string at offset 0xC001
 	// NB: This is not thorough UDF detection but good enough for our purpose.
 	// For the full specs see: http://www.osta.org/specs/pdf/udf260.pdf
-	memset(buf, sector_size, 0);
+	memset(buf, 0, sector_size);
 	StartingOffset.QuadPart += 0x8000ULL - 0x0400ULL;
 	if (!SetFilePointerEx(hPhysical, StartingOffset, NULL, FILE_BEGIN))
 		goto out;
