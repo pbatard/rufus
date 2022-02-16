@@ -1870,6 +1870,8 @@ DWORD WINAPI FormatThread(void* param)
 	char drive_letters[27], fs_name[32], label[64];
 	char logfile[MAX_PATH], *userdir;
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
+	char appraiserres_dll_src[] = "?:\\sources\\appraiserres.dll";
+	char appraiserres_dll_dst[] = "?:\\sources\\appraiserres.bak";
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
 
@@ -2358,6 +2360,18 @@ DWORD WINAPI FormatThread(void* param)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 				}
 				if (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_EXTENDED) {
+					// Create a backup of sources\appraiserres.dll and then create an empty file to
+					// allow in-place upgrades without TPM/SB. Note that we need to create an empty,
+					// appraiserres.dll otherwise setup.exe extracts its own.
+					appraiserres_dll_src[0] = drive_name[0];
+					appraiserres_dll_dst[0] = drive_name[0];
+					uprintf("Renaming: '%s' → '%s'", appraiserres_dll_src, appraiserres_dll_dst);
+					if (!MoveFileExU(appraiserres_dll_src, appraiserres_dll_dst, MOVEFILE_REPLACE_EXISTING))
+						uprintf("  Rename failed: %s", WindowsErrorString());
+					else
+						CloseHandle(CreateFileU(appraiserres_dll_src, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
+							NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL));
+					// Now patch for boot-time TPM/SB checks.
 					if (!RemoveWindows11Restrictions(drive_name[0]))
 						FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_PATCH);
 				}
