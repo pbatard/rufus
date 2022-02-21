@@ -1,21 +1,11 @@
-o KERNEL.SYS was taken from KERNL386.SYS in FreeDOS Kernel 2042:
-  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/kernel.zip
+All of the executables found in this repository where extracted from:
+https://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.3/official/FD13-FullUSB.zip
+
+o COMMAND.COM was extracted from packages\base\freecom.zip
+o DISPLAY.EXE was extracted from packages\base\display.zip
+o The EGA[#].CPX files were extracted from packages\base\cpidos.zip
+o KERNEL.SYS was taken from packages\base\kernel.zip (KERNL386.SYS)
   It was modified to have FORCELBA enabled (byte offset 0x0D set to 0x01)
-
-o COMMAND.COM was extracted from FreeCom 0.84 pre 2:
-  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/command.zip
-
-o The EGA files were extracted from CPI (Code Page Information) Package 3.0:
-  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/cpidos.zip
-
-o DISPLAY.EXE was extracted from Display 0.13b:
-  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/display.zip
-
-o KEYB.EXE was extracted from Keyb 2.01:
-  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/keyb.zip
-  
-o The keyboard layouts (KEYB___.SYS) were extracted from Keyb Layouts 3.1:
-  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/keyb_lay.zip
-
-o MODE.COM was extracted from Mode 2015-11-25:
-  http://ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.2/repos/base/mode.zip
+o KEYB.EXE was extracted from packages\base\keyb.zip
+o The KEYB###.SYS keyboard layouts were extracted from packages\base\keyb_lay.zip
+o MODE.COM was extracted from packages\base\mode.zip

@@ -65,7 +65,6 @@ typedef struct _TIME_FIELDS {
 	short Minute;
 	short Second;
 	short Milliseconds;
-	short Weekday;
 } TIME_FIELDS, *PTIME_FIELDS;
 
 #define ARGUMENT_PRESENT(ArgumentPointer) \

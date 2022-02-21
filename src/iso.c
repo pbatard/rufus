@@ -1557,6 +1557,7 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 	}
 
 	do {
+		// coverity[-taint_source]
 		dirpos.cluster = libfat_dumpdir(lf_fs, &dirpos, &diritem);
 		if (dirpos.cluster >= 0) {
 			name = wchar_to_utf8(diritem.name);
