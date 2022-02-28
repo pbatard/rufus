@@ -31,7 +31,9 @@
 #include <ctype.h>
 #include <locale.h>
 #include <assert.h>
+#if !defined(__MINGW32__)
 #include <vds.h>
+#endif
 
 #include "rufus.h"
 #include "missing.h"

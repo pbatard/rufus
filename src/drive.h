@@ -94,7 +94,12 @@ typedef struct _FILE_FS_DEVICE_INFORMATION {
 	ULONG Characteristics;
 } FILE_FS_DEVICE_INFORMATION, *PFILE_FS_DEVICE_INFORMATION;
 #else
-/* MinGW is currently missing all the VDS COM stuff */
+/*
+ * MinGW is currently missing most of the VDS COM stuff.
+ * Oh, and MinGW's vds.h is screwed up unless you define the following:
+ */
+#define VDS_LUN_INFORMATION void
+#define __vdslun_h__
 #include <vds.h>
 typedef interface IVdsServiceLoader IVdsServiceLoader;
 typedef interface IVdsService IVdsService;

@@ -29,8 +29,8 @@
 #include <assert.h>
 #if !defined(__MINGW32__)
 #include <initguid.h>
-#endif
 #include <vds.h>
+#endif
 
 #include "rufus.h"
 #include "missing.h"
