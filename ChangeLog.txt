@@ -1,3 +1,12 @@
+o Version 3.18 (2022.03.??)
+    Fix DLL sideloading vulnerabilities
+    Fix ISO → ESP creation when running on Windows 11
+    Fix an issue when detecting network connectivity when the DHCP service is disabled
+    Update FreeDOS to version 1.3
+    Add bypass of Windows 11 restrictions for in-place upgrades
+    Add Miracle Linux 8 to the list of Red Hat exceptions
+    Other internal fixes and improvements
+
 o Version 3.17 (2021.10.23) [BUGFIX RELEASE]
     Fix MBR not being properly cleared
     Fix commandline hogger not being deleted on exit

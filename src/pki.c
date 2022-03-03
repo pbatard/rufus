@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * PKI functions (code signing, etc.)
- * Copyright © 2015-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2022 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -572,9 +572,11 @@ out:
 // From https://msdn.microsoft.com/en-us/library/windows/desktop/aa382384.aspx
 LONG ValidateSignature(HWND hDlg, const char* path)
 {
-	LONG r;
+	LONG r = TRUST_E_SYSTEM_ERROR;
 	WINTRUST_DATA trust_data = { 0 };
 	WINTRUST_FILE_INFO trust_file = { 0 };
+	PF_TYPE_DECL(WINAPI, long, WinVerifyTrustEx, (HWND, GUID*, WINTRUST_DATA*));
+	PF_INIT(WinVerifyTrustEx, WinTrust);
 	GUID guid_generic_verify =	// WINTRUST_ACTION_GENERIC_VERIFY_V2
 		{ 0xaac56b, 0xcd44, 0x11d0,{ 0x8c, 0xc2, 0x0, 0xc0, 0x4f, 0xc2, 0x95, 0xee } };
 	char *signature_name;
@@ -625,7 +627,8 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	trust_data.dwUnionChoice = WTD_CHOICE_FILE;
 	trust_data.pFile = &trust_file;
 
-	r = WinVerifyTrustEx(INVALID_HANDLE_VALUE, &guid_generic_verify, &trust_data);
+	if (pfWinVerifyTrustEx != NULL)
+		r = pfWinVerifyTrustEx(INVALID_HANDLE_VALUE, &guid_generic_verify, &trust_data);
 	safe_free(trust_file.pcwszFilePath);
 	switch (r) {
 	case ERROR_SUCCESS:
