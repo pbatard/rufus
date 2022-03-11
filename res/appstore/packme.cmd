@@ -25,7 +25,6 @@ del /q *.map >NUL 2>&1
 set WDK_PATH=C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0\x64
 set ZIP_PATH=C:\Program Files\7-Zip
 set SIGNATURE_SHA1=3dbc3a2a0e9ce8803b422cfdbc60acd33164965d
-set MSBUILD_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin
 set MANIFEST=AppxManifest.xml
 set ARCHS=x86 x64 arm arm64
 set DEFAULT_SCALE=200

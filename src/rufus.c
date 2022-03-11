@@ -1168,7 +1168,8 @@ static void UpdateImage(BOOL update_image_option_only)
 	ComboBox_ResetContent(hImageOption);
 
 	if (!img_report.is_windows_img) {	// Straight install.wim/install.esd only have Windows To Go option
-		if (img_report.win_version.major == 11) {
+		// Can't remove restrictions if running on Windows 7 or when running the appstore version
+		if (nWindowsVersion >= WINDOWS_8 && !appstore_version && img_report.win_version.major == 11) {
 			IGNORE_RETVAL(ComboBox_SetItemData(hImageOption, ComboBox_AddStringU(hImageOption, lmprintf(MSG_322)), IMOP_WIN_STANDARD));
 			IGNORE_RETVAL(ComboBox_SetItemData(hImageOption, ComboBox_AddStringU(hImageOption, lmprintf(MSG_323)), IMOP_WIN_EXTENDED));
 		} else {

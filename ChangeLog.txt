@@ -1,4 +1,4 @@
-o Version 3.18 (2022.03.??)
+o Version 3.18 (2022.03.11)
     Fix DLL sideloading vulnerabilities
     Fix ISO → ESP creation when running on Windows 11
     Fix an issue when detecting network connectivity when the DHCP service is disabled
