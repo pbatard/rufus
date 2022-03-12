@@ -10221,7 +10221,7 @@ t MSG_303 "Mostrar registo de eventos"
 t MSG_304 "Criar imagem do disco do dispositivo selecionado"
 t MSG_305 "Use esta opção se pretende utilizar este dispositivo para instalar o Windows noutro disco, ou se pretende executar o Windows diretamente desta unidade (Windows To Go)."
 t MSG_306 "Limpeza rápida da unidade: %s"
-t MSG_307 "pode demorar"
+t MSG_307 "Pode demorar"
 t MSG_308 "Deteção VHD"
 t MSG_309 "Arquivo comprimido"
 t MSG_310 "O ISO selecionado utiliza UEFI e é pequeno para ser escrito como uma partição do sistema EFI (ESP). Escrever para uma ESP em vez de escrever para uma partição genérica de dados que ocupa o disco todo, pode ser preferível para alguns tipos de instalações.\n\nPor favor, selecione o modo que pretende utilizar para escrever esta imagem:"
@@ -10236,6 +10236,9 @@ t MSG_318 "Prioridade padrão do thread: %d"
 t MSG_319 "Ignorar marcador de arranque"
 t MSG_320 "A atualizar a estrutura da partição (%s)..."
 t MSG_321 "A imagem que selecionou é ISOHybrid mas os criadores não a tornaram compatível com o modo de cópia ISO/Ficheiro.\nComo resultado, será aplicado o modo de gravação da imagem DD."
+t MSG_322 "Instalação padrão do Windows 11 (TPM 2.0 + Secure Boot)"
+t MSG_323 "Instalação alterada do Windows 11 (sem TPM / sem Secure Boot)"
+t MSG_324 "A remover as restrições de instalação do Windows 11: %s"
 
 #########################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
