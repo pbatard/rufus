@@ -1814,7 +1814,7 @@ msgstr "Instalação padrão do Windows 11 (TPM 2.0 + Secure Boot) "
 
 #. • MSG_323
 msgid "Extended Windows 11 Installation (no TPM / no Secure Boot)"
-msgstr "Instalação alterada do Windows 11  (sem TPM / sem Secure Boot)"
+msgstr "Instalação alterada do Windows 11 (sem TPM / sem Secure Boot)"
 
 #. • MSG_324
 msgid "Removing Windows 11 installation restrictions: %s"
