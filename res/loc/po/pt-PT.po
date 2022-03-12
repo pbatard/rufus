@@ -1807,3 +1807,15 @@ msgid ""
 msgstr ""
 "A imagem que selecionou é ISOHybrid mas os criadores não a tornaram compatível com o modo de cópia ISO/Ficheiro.\n"
 "Como resultado, será aplicado o modo de gravação da imagem DD."
+
+#. • MSG_322
+msgid "Standard Windows 11 Installation (TPM 2.0 + Secure Boot)"
+msgstr "Instalação padrão do Windows 11 (TPM 2.0 + Secure Boot) "
+
+#. • MSG_323
+msgid "Extended Windows 11 Installation (no TPM / no Secure Boot)"
+msgstr "Instalação alterada do Windows 11  (sem TPM / sem Secure Boot)"
+
+#. • MSG_324
+msgid "Removing Windows 11 installation restrictions: %s"
+msgstr "A remover as restrições de instalação do Windows 11: %s"
