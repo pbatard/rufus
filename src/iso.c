@@ -502,7 +502,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	while ((p_udf_dirent = udf_readdir(p_udf_dirent)) != NULL) {
 		if (FormatStatus) goto out;
 		psz_basename = udf_get_filename(p_udf_dirent);
-		if (strlen(psz_basename) == 0)
+		if (psz_basename[0] != '\0')
 			continue;
 		length = (int)(3 + strlen(psz_path) + strlen(psz_basename) + strlen(psz_extract_dir) + 24);
 		psz_fullpath = (char*)calloc(sizeof(char), length);

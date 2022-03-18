@@ -368,7 +368,7 @@ get_member_id(iso9660_t *p_iso, cdio_utf8_t **p_psz_member_id,
     strip = false;
     (*p_psz_member_id)[j] = pvd_member[j];
   }
-  if (strlen(*p_psz_member_id) == 0) {
+  if (*p_psz_member_id[0] != '\0') {
     free(*p_psz_member_id);
     *p_psz_member_id = NULL;
     return false;
@@ -638,7 +638,7 @@ iso9660_fs_read_pvd(const CdIo_t *p_cdio, /*out*/ iso9660_pvd_t *p_pvd)
      the part we need to save.
    */
   cdio_assert (sizeof(buf) >= sizeof (iso9660_pvd_t));
-  memcpy(p_pvd, buf, sizeof(iso9660_pvd_t));
+  memcpy(p_pvd, buf, sizeof(ptr_iso9660_pvd_t));
 
   return check_pvd(p_pvd, CDIO_LOG_WARN);
 }
@@ -677,7 +677,7 @@ iso9660_fs_read_superblock (CdIo_t *p_cdio,
 	 the part we need to save.
       */
       cdio_assert (sizeof(buf) >= sizeof (iso9660_svd_t));
-      memcpy(p_svd, buf, sizeof(iso9660_svd_t));
+      memcpy(p_svd, buf, sizeof(ptr_iso9660_svd_t));
 
       if ( ISO_VD_SUPPLEMENTARY == from_711(p_svd->type) ) {
 	if (p_svd->escape_sequences[0] == 0x25
@@ -1936,7 +1936,7 @@ iso_have_rr_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
 					p_iso->b_xa, p_iso->u_joliet_level);
       have_rr = p_stat->rr.b3_rock;
       if ( have_rr != yep) {
-	if (strlen(splitpath[0]) == 0)
+	if (splitpath[0][0] != '\0')
 	  have_rr = false;
 	else
 	  have_rr = iso_have_rr_traverse (p_iso, p_stat, &splitpath[i_last_component],

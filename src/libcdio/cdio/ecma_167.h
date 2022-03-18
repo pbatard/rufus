@@ -334,6 +334,7 @@ struct anchor_vol_desc_ptr_s
 } GNUC_PACKED;
 
 typedef struct anchor_vol_desc_ptr_s anchor_vol_desc_ptr_t;
+typedef struct anchor_vol_desc_ptr_s *ptr_anchor_vol_desc_ptr_t;
 
 /** Volume Descriptor Pointer (ECMA 167r3 3/10.3) */
 struct vol_desc_ptr_s

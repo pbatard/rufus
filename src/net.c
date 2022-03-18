@@ -54,7 +54,7 @@ extern loc_cmd* selected_locale;
 extern HANDLE dialog_handle;
 extern BOOL is_x86_32;
 static DWORD error_code, fido_len = 0;
-static BOOL force_update_check = FALSE;
+volatile static BOOL force_update_check = FALSE;
 static const char* request_headers = "Accept-Encoding: gzip, deflate";
 
 #if defined(__MINGW32__)

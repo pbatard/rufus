@@ -394,7 +394,7 @@ udf_open (const char *psz_path)
   if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, &data, 256, 1) )
     goto error;
 
-  memcpy(&(p_udf->anchor_vol_desc_ptr), &data, sizeof(anchor_vol_desc_ptr_t));
+  memcpy(&(p_udf->anchor_vol_desc_ptr), &data, sizeof(ptr_anchor_vol_desc_ptr_t));
 
   if (udf_checktag((udf_tag_t *)&(p_udf->anchor_vol_desc_ptr), TAGID_ANCHOR))
     goto error;

@@ -391,6 +391,7 @@ struct iso9660_pvd_s {
 } GNUC_PACKED;
 
 typedef struct iso9660_pvd_s  iso9660_pvd_t;
+typedef struct iso9660_pvd_s  *ptr_iso9660_pvd_t;
 
 /*!
   \brief ISO-9660 Supplementary Volume Descriptor.
@@ -505,6 +506,7 @@ struct iso9660_svd_s {
 } GNUC_PACKED;
 
 typedef struct iso9660_svd_s  iso9660_svd_t;
+typedef struct iso9660_svd_s  *ptr_iso9660_svd_t;
 
 PRAGMA_END_PACKED
 
