@@ -567,7 +567,11 @@ static DWORD WINAPI WimMountImageThread(LPVOID param)
 out:
 	wfree(temp_dir);
 	safe_free(wimage);
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex((DWORD)r);
+#else
 	ExitThread((DWORD)r);
+#endif
 }
 
 // Returns the temporary mount path on success, NULL on error.
@@ -578,7 +582,11 @@ char* WimMountImage(const char* image, int index)
 	_image = image;
 	_index = index;
 
+#if _MSC_VER && !__INTEL_COMPILER
+	wim_thread = (HANDLE)_beginthreadex(NULL, 0, &WimMountImageThread, NULL, 0, NULL);
+#else
 	wim_thread = CreateThread(NULL, 0, WimMountImageThread, NULL, 0, NULL);
+#endif
 	if (wim_thread == NULL) {
 		uprintf("Unable to start mount-image thread");
 		return NULL;
@@ -630,7 +638,11 @@ static DWORD WINAPI WimUnmountImageThread(LPVOID param)
 	wmount_path[0] = 0;
 out:
 	safe_free(wimage);
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex((DWORD)r);
+#else
 	ExitThread((DWORD)r);
+#endif
 }
 
 BOOL WimUnmountImage(const char* image, int index)
@@ -639,7 +651,11 @@ BOOL WimUnmountImage(const char* image, int index)
 	_image = image;
 	_index = index;
 
+#if _MSC_VER && !__INTEL_COMPILER
+	wim_thread = (HANDLE)_beginthreadex(NULL, 0, &WimUnmountImageThread, NULL, 0, NULL);
+#else
 	wim_thread = CreateThread(NULL, 0, WimUnmountImageThread, NULL, 0, NULL);
+#endif
 	if (wim_thread == NULL) {
 		uprintf("Unable to start unmount-image thread");
 		return FALSE;
@@ -905,7 +921,11 @@ out:
 		pfWIMUnregisterMessageCallback(NULL, (FARPROC)WimProgressCallback);
 	safe_free(wimage);
 	safe_free(wdst);
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex((DWORD)r);
+#else
 	ExitThread((DWORD)r);
+#endif
 }
 
 BOOL WimApplyImage(const char* image, int index, const char* dst)
@@ -915,7 +935,11 @@ BOOL WimApplyImage(const char* image, int index, const char* dst)
 	_index = index;
 	_dst = dst;
 
+#if _MSC_VER && !__INTEL_COMPILER
+	wim_thread = (HANDLE)_beginthreadex(NULL, 0, &WimApplyImageThread, NULL, 0, NULL);
+#else
 	wim_thread = CreateThread(NULL, 0, WimApplyImageThread, NULL, 0, NULL);
+#endif
 	if (wim_thread == NULL) {
 		uprintf("Unable to start apply-image thread");
 		return FALSE;

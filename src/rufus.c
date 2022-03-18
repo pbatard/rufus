@@ -1399,7 +1399,11 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 out:
 	dont_display_image_name = FALSE;
 	PrintInfo(0, MSG_210);
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex(0);
+#else
 	ExitThread(0);
+#endif
 }
 
 // Likewise, boot check will block message processing => use a thread
@@ -1799,7 +1803,11 @@ uefi_target:
 
 out:
 	PostMessage(hMainDialog, UM_FORMAT_START, ret, 0);
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex((DWORD)ret);
+#else
 	ExitThread((DWORD)ret);
+#endif
 }
 
 static __inline const char* IsAlphaOrBeta(void)
@@ -2047,7 +2055,11 @@ static void SaveVHD(void)
 			EnableControls(FALSE, FALSE);
 			FormatStatus = 0;
 			InitProgress(TRUE);
+#if _MSC_VER && !__INTEL_COMPILER
+			format_thread = (HANDLE)_beginthreadex(NULL, 0, &SaveImageThread, &img_save, 0, NULL);
+#else
 			format_thread = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
+#endif
 			if (format_thread != NULL) {
 				uprintf("\r\nSave to VHD operation started");
 				PrintInfo(0, -1);
@@ -2102,7 +2114,11 @@ static void SaveISO(void)
 	// Disable all controls except cancel
 	EnableControls(FALSE, FALSE);
 	InitProgress(TRUE);
+#if _MSC_VER && !__INTEL_COMPILER
+	format_thread = (HANDLE)_beginthreadex(NULL, 0, &SaveImageThread, &img_save, 0, NULL);
+#else
 	format_thread = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
+#endif
 	if (format_thread != NULL) {
 		uprintf("\r\nSave to ISO operation started");
 		PrintInfo(0, -1);
@@ -2584,7 +2600,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					}
 				}
 				FormatStatus = 0;
-				if (CreateThread(NULL, 0, ImageScanThread, NULL, 0, NULL) == NULL) {
+				HANDLE hImgScanThread;
+#if _MSC_VER && !__INTEL_COMPILER
+				hImgScanThread = (HANDLE)_beginthreadex(NULL, 0, &ImageScanThread, NULL, 0, NULL);
+#else
+				hImgScanThread = CreateThread(NULL, 0, ImageScanThread, NULL, 0, NULL);
+#endif
+				if (hImgScanThread == NULL) {
 					uprintf("Unable to start ISO scanning thread");
 					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
 				}
@@ -2621,7 +2643,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			selection_default = (int)ComboBox_GetCurItemData(hBootType);
 			// Create a thread to validate options and download files as needed (so that we can update the UI).
 			// On exit, this thread sends message UM_FORMAT_START back to this dialog.
-			if (CreateThread(NULL, 0, BootCheckThread, NULL, 0, NULL) == NULL) {
+			HANDLE hBootCheck;
+#if _MSC_VER && !__INTEL_COMPILER
+			hBootCheck = (HANDLE)_beginthreadex(NULL, 0, &BootCheckThread, NULL, 0, NULL);
+#else
+			hBootCheck = CreateThread(NULL, 0, BootCheckThread, NULL, 0, NULL);
+#endif
+			if (hBootCheck == NULL) {
 				uprintf("Unable to start boot check thread");
 				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
 				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
@@ -2646,7 +2674,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				EnableControls(FALSE, FALSE);
 				InitProgress(FALSE);
 				SetThreadAffinity(thread_affinity, CHECKSUM_MAX + 1);
+#if _MSC_VER && !__INTEL_COMPILER
+				format_thread = (HANDLE)_beginthreadex(NULL, 0, &SumThread, (LPVOID)thread_affinity, 0, NULL);
+#else
 				format_thread = CreateThread(NULL, 0, SumThread, (LPVOID)thread_affinity, 0, NULL);
+#endif
 				if (format_thread != NULL) {
 					SetThreadPriority(format_thread, default_thread_priority);
 					PrintInfo(0, -1);
@@ -3025,7 +3057,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 		DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 		InitProgress(zero_drive || write_as_image);
+#if _MSC_VER && !__INTEL_COMPILER
+		format_thread = (HANDLE)_beginthreadex(NULL, 0, &FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
+#else
 		format_thread = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
+#endif
 		if (format_thread == NULL) {
 			uprintf("Unable to start formatting thread");
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);

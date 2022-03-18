@@ -2419,7 +2419,11 @@ out:
 		}
 	}
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex(0);
+#else
 	ExitThread(0);
+#endif
 }
 
 DWORD WINAPI SaveImageThread(void* param)
@@ -2542,5 +2546,9 @@ out:
 	safe_closehandle(hDestImage);
 	safe_unlockclose(hPhysicalDrive);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex(0);
+#else
 	ExitThread(0);
+#endif
 }

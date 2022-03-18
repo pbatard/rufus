@@ -1574,7 +1574,11 @@ void SetFidoCheck(void)
 		return;
 	}
 
+#if _MSC_VER && !__INTEL_COMPILER
+	_beginthreadex(NULL, 0, &CheckForFidoThread, NULL, 0, NULL);
+#else
 	CreateThread(NULL, 0, CheckForFidoThread, NULL, 0, NULL);
+#endif
 }
 
 /*

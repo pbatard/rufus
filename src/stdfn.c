@@ -927,7 +927,11 @@ BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* s
 		return FALSE;
 	}
 
+#if _MSC_VER && !__INTEL_COMPILER
+	thread_id = (HANDLE)_beginthreadex(NULL, 0, &SetLGPThread, (LPVOID)&params, 0, NULL);
+#else
 	thread_id = CreateThread(NULL, 0, SetLGPThread, (LPVOID)&params, 0, NULL);
+#endif
 	if (thread_id == NULL) {
 		ubprintf("SetLGP: Unable to start thread");
 		return FALSE;

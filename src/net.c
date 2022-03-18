@@ -594,7 +594,11 @@ typedef struct {
 static DWORD WINAPI DownloadSignedFileThread(LPVOID param)
 {
 	DownloadSignedFileThreadArgs* args = (DownloadSignedFileThreadArgs*)param;
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex(DownloadSignedFile(args->url, args->file, args->hProgressDialog, args->bPromptOnError));
+#else
 	ExitThread(DownloadSignedFile(args->url, args->file, args->hProgressDialog, args->bPromptOnError));
+#endif
 }
 
 HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError)
@@ -604,7 +608,11 @@ HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgr
 	args.file = file;
 	args.hProgressDialog = hProgressDialog;
 	args.bPromptOnError = bPromptOnError;
+#if _MSC_VER && !__INTEL_COMPILER
+	return (HANDLE)_beginthreadex(NULL, 0, &DownloadSignedFileThread, &args, 0, NULL);
+#else
 	return CreateThread(NULL, 0, DownloadSignedFileThread, &args, 0, NULL);
+#endif
 }
 
 static __inline uint64_t to_uint64_t(uint16_t x[4]) {
@@ -865,7 +873,11 @@ out:
 	force_update_check = FALSE;
 	update_check_thread = NULL;
 	CoUninitialize();
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex(0);
+#else
 	ExitThread(0);
+#endif
 }
 
 /*
@@ -877,7 +889,11 @@ BOOL CheckForUpdates(BOOL force)
 	if (update_check_thread != NULL)
 		return FALSE;
 
+#if _MSC_VER && !__INTEL_COMPILER
+	update_check_thread = (HANDLE)_beginthreadex(NULL, 0, &CheckForUpdatesThread, NULL, 0, NULL);
+#else
 	update_check_thread = CreateThread(NULL, 0, CheckForUpdatesThread, NULL, 0, NULL);
+#endif
 	if (update_check_thread == NULL) {
 		uprintf("Unable to start update check thread");
 		return FALSE;
@@ -1071,12 +1087,22 @@ out:
 	SendMessage(hMainDialog, UM_ENABLE_CONTROLS, 0, 0);
 	dialog_showing--;
 	CoUninitialize();
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex(dwExitCode);
+#else
 	ExitThread(dwExitCode);
+#endif
 }
 
 BOOL DownloadISO()
 {
-	if (CreateThread(NULL, 0, DownloadISOThread, NULL, 0, NULL) == NULL) {
+	HANDLE hDownloadIso;
+#if _MSC_VER && !__INTEL_COMPILER
+	hDownloadIso = (HANDLE)_beginthreadex(NULL, 0, &DownloadISOThread, NULL, 0, NULL);
+#else
+	hDownloadIso = CreateThread(NULL, 0, DownloadISOThread, NULL, 0, NULL);
+#endif
+	if (hDownloadIso == NULL) {
 		uprintf("Unable to start Windows ISO download thread");
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
 		SendMessage(hMainDialog, UM_ENABLE_CONTROLS, 0, 0);

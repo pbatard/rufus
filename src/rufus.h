@@ -20,6 +20,7 @@
 #include <inttypes.h>
 
 #if defined(_MSC_VER)
+#include <process.h>
 // Disable some VS Code Analysis warnings
 #pragma warning(disable: 4996)		// Ignore deprecated
 #pragma warning(disable: 6258)		// I know what I'm using TerminateThread for

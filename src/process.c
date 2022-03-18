@@ -641,7 +641,11 @@ out:
 	PhFree(buffer);
 	PhFree(handles);
 	PhDestroyHeap();
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex(0);
+#else
 	ExitThread(0);
+#endif
 }
 
 /**
@@ -669,7 +673,11 @@ BYTE SearchProcess(char* HandleName, DWORD dwTimeOut, BOOL bPartialMatch, BOOL b
 
 	assert(_wHandleName != NULL);
 
+#if _MSC_VER && !__INTEL_COMPILER
+	handle = (HANDLE)_beginthreadex(NULL, 0, &SearchProcessThread, NULL, 0, NULL);
+#else
 	handle = CreateThread(NULL, 0, SearchProcessThread, NULL, 0, NULL);
+#endif
 	if (handle == NULL) {
 		uprintf("Warning: Unable to create conflicting process search thread");
 		goto out;

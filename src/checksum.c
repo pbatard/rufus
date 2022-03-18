@@ -1134,7 +1134,11 @@ DWORD WINAPI SumThread(void* param)
 	int num_checksums = CHECKSUM_MAX - (enable_extra_hashes ? 0 : 1);
 
 	if ((image_path == NULL) || (thread_affinity == NULL))
+#if _MSC_VER && !__INTEL_COMPILER
+		_endthreadex(r);
+#else
 		ExitThread(r);
+#endif
 
 	uprintf("\r\nComputing checksum for '%s'...", image_path);
 
@@ -1155,7 +1159,11 @@ DWORD WINAPI SumThread(void* param)
 			uprintf("Unable to create checksum thread event: %s", WindowsErrorString());
 			goto out;
 		}
+#if _MSC_VER && !__INTEL_COMPILER
+		sum_thread[i] = (HANDLE)_beginthreadex(NULL, 0, &IndividualSumThread, (LPVOID)(uintptr_t)i, 0, NULL);
+#else
 		sum_thread[i] = CreateThread(NULL, 0, IndividualSumThread, (LPVOID)(uintptr_t)i, 0, NULL);
+#endif
 		if (sum_thread[i] == NULL) {
 			uprintf("Unable to start checksum thread #%d", i);
 			goto out;
@@ -1250,7 +1258,11 @@ out:
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 	if (r == 0)
 		MyDialogBox(hMainInstance, IDD_CHECKSUM, hMainDialog, ChecksumCallback);
+#if _MSC_VER && !__INTEL_COMPILER
+	_endthreadex(r);
+#else
 	ExitThread(r);
+#endif
 }
 
 /*
