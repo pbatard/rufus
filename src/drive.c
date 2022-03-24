@@ -1487,6 +1487,43 @@ BOOL AnalyzePBR(HANDLE hLogicalVolume)
 	return TRUE;
 }
 
+/*
+ * This call returns the offset of the first ESP partition found
+ * on the relevant drive, or 0ULL if no ESP was found.
+ */
+uint64_t GetEspOffset(DWORD DriveIndex)
+{
+	uint64_t ret = 0ULL;
+	BOOL r;
+	HANDLE hPhysical;
+	DWORD size, i;
+	BYTE layout[4096] = { 0 };
+	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
+
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, TRUE, TRUE);
+	if (hPhysical == INVALID_HANDLE_VALUE)
+		return FALSE;
+
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX,
+		NULL, 0, layout, sizeof(layout), &size, NULL);
+	if (!r || size <= 0) {
+		uprintf("Could not get layout for drive 0x%02x: %s", DriveIndex, WindowsErrorString());
+		goto out;
+	}
+
+	for (i = 0; i < DriveLayout->PartitionCount; i++) {
+		if (((DriveLayout->PartitionStyle == PARTITION_STYLE_MBR) && (DriveLayout->PartitionEntry[i].Mbr.PartitionType == 0xef)) ||
+			((DriveLayout->PartitionStyle == PARTITION_STYLE_GPT) && CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP))) {
+			ret = DriveLayout->PartitionEntry[i].StartingOffset.QuadPart;
+			break;
+		}
+	}
+
+out:
+	safe_closehandle(hPhysical);
+	return ret;
+}
+
 static BOOL StoreEspInfo(GUID* guid)
 {
 	uint8_t j;
@@ -1531,12 +1568,23 @@ static BOOL ClearEspInfo(uint8_t index)
 BOOL ToggleEsp(DWORD DriveIndex, uint64_t PartitionOffset)
 {
 	char *volume_name, mount_point[] = DEFAULT_ESP_MOUNT_POINT;
-	BOOL r, ret = FALSE, found = FALSE;
+	int i, j, esp_index = -1;
+	BOOL r, ret = FALSE, delete_data = FALSE;
 	HANDLE hPhysical;
-	DWORD size, i, j, esp_index = 0;
-	BYTE layout[4096] = { 0 };
-	GUID* guid;
+	DWORD dl_size, size, offset;
+	BYTE layout[4096] = { 0 }, buf[512];
+	GUID *guid = NULL, *stored_guid = NULL, mbr_guid;
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
+	typedef struct {
+		const uint8_t mbr_type;
+		const uint8_t magic[8];
+	} fat_mbr_type;
+	const fat_mbr_type fat_mbr_types[] = {
+		{ 0x0b, { 'F', 'A', 'T', ' ', ' ', ' ', ' ', ' ' } },
+		{ 0x01, { 'F', 'A', 'T', '1', '2', ' ', ' ', ' ' } },
+		{ 0x0e, { 'F', 'A', 'T', '1', '6', ' ', ' ', ' ' } },
+		{ 0x0c, { 'F', 'A', 'T', '3', '2', ' ', ' ', ' ' } },
+	};
 
 	if ((PartitionOffset == 0) && (nWindowsVersion < WINDOWS_10)) {
 		uprintf("ESP toggling is only available for Windows 10 or later");
@@ -1547,86 +1595,113 @@ BOOL ToggleEsp(DWORD DriveIndex, uint64_t PartitionOffset)
 	if (hPhysical == INVALID_HANDLE_VALUE)
 		return FALSE;
 
-	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX,
-		NULL, 0, layout, sizeof(layout), &size, NULL);
-	if (!r || size <= 0) {
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &dl_size, NULL);
+	if (!r || dl_size <= 0) {
 		uprintf("Could not get layout for drive 0x%02x: %s", DriveIndex, WindowsErrorString());
-		goto out;
-	}
-	// TODO: Handle MBR
-	if (DriveLayout->PartitionStyle != PARTITION_STYLE_GPT) {
-		uprintf("ESP toggling is only available for GPT drives");
 		goto out;
 	}
 
 	if (PartitionOffset == 0) {
 		// See if the current drive contains an ESP
-		for (i = 0, j = 0; i < DriveLayout->PartitionCount; i++) {
-			if (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP)) {
+		for (i = 0; i < (int)DriveLayout->PartitionCount; i++) {
+			if (((DriveLayout->PartitionStyle == PARTITION_STYLE_MBR) && (DriveLayout->PartitionEntry[i].Mbr.PartitionType == 0xef)) ||
+				((DriveLayout->PartitionStyle == PARTITION_STYLE_GPT) && CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP))) {
 				esp_index = i;
-				j++;
+				break;
 			}
 		}
 
-		if (j > 1) {
-			uprintf("ESP toggling is not available for drives with more than one ESP");
-			goto out;
-		}
-		if (j == 1) {
+		if (esp_index >= 0) {
 			// ESP -> Basic Data
-			i = esp_index;
-			uprintf("ESP name: '%S'", DriveLayout->PartitionEntry[i].Gpt.Name);
-			if (!StoreEspInfo(&DriveLayout->PartitionEntry[i].Gpt.PartitionId)) {
+			if (DriveLayout->PartitionStyle == PARTITION_STYLE_GPT) {
+				uprintf("ESP name: '%S'", DriveLayout->PartitionEntry[esp_index].Gpt.Name);
+				guid = &DriveLayout->PartitionEntry[esp_index].Gpt.PartitionId;
+			} else {
+				// For MBR we create a GUID from the disk signature and the offset
+				mbr_guid.Data1 = DriveLayout->Mbr.Signature;
+				mbr_guid.Data2 = 0; mbr_guid.Data3 = 0;
+				*((uint64_t*)&mbr_guid.Data4) = DriveLayout->PartitionEntry[i].StartingOffset.QuadPart;
+				guid = &mbr_guid;
+			}
+			if (!StoreEspInfo(guid)) {
 				uprintf("ESP toggling data could not be stored");
 				goto out;
 			}
-			DriveLayout->PartitionEntry[i].Gpt.PartitionType = PARTITION_MICROSOFT_DATA;
-		} else {
-			// Basic Data -> ESP
-			for (j = 1; j <= MAX_ESP_TOGGLE; j++) {
-				guid = GetEspGuid((uint8_t)j);
-				if (guid != NULL) {
-					for (i = 0; i < DriveLayout->PartitionCount; i++) {
-						if (CompareGUID(guid, &DriveLayout->PartitionEntry[i].Gpt.PartitionId)) {
-							found = TRUE;
-							break;
+			if (DriveLayout->PartitionStyle == PARTITION_STYLE_GPT) {
+				DriveLayout->PartitionEntry[esp_index].Gpt.PartitionType = PARTITION_MICROSOFT_DATA;
+			} else if (DriveLayout->PartitionStyle == PARTITION_STYLE_MBR) {
+				// Default to FAT32 (non LBA) if we can't determine anything better
+				DriveLayout->PartitionEntry[esp_index].Mbr.PartitionType = 0x0b;
+				// Now detect if we're dealing with FAT12/16/32
+				if (SetFilePointerEx(hPhysical, DriveLayout->PartitionEntry[esp_index].StartingOffset, NULL, FILE_BEGIN) &&
+					ReadFile(hPhysical, buf, 512, &size, NULL) && size == 512) {
+					for (offset = 0x36; offset <= 0x52; offset += 0x1c) {
+						for (i = 0; i < ARRAYSIZE(fat_mbr_types); i++) {
+							if (memcmp(&buf[offset], fat_mbr_types[i].magic, 8) == 0) {
+								DriveLayout->PartitionEntry[esp_index].Mbr.PartitionType = fat_mbr_types[i].mbr_type;
+								break;
+							}
 						}
 					}
-					if (found)
-						break;
 				}
 			}
-			if (j > MAX_ESP_TOGGLE)
-				goto out;
-			DriveLayout->PartitionEntry[i].Gpt.PartitionType = PARTITION_GENERIC_ESP;
+		} else {
+			// Basic Data -> ESP
+			for (i = 1; i <= MAX_ESP_TOGGLE && esp_index < 0; i++) {
+				stored_guid = GetEspGuid((uint8_t)i);
+				if (stored_guid != NULL) {
+					for (j = 0; j < (int)DriveLayout->PartitionCount && esp_index < 0; j++) {
+						if (DriveLayout->PartitionStyle == PARTITION_STYLE_GPT) {
+							guid = &DriveLayout->PartitionEntry[j].Gpt.PartitionId;
+						} else if (DriveLayout->PartitionStyle == PARTITION_STYLE_MBR) {
+							mbr_guid.Data1 = DriveLayout->Mbr.Signature;
+							mbr_guid.Data2 = 0; mbr_guid.Data3 = 0;
+							*((uint64_t*)&mbr_guid.Data4) = DriveLayout->PartitionEntry[j].StartingOffset.QuadPart;
+							guid = &mbr_guid;
+						}
+						if (CompareGUID(stored_guid, guid)) {
+							esp_index = j;
+							delete_data = TRUE;
+							if (DriveLayout->PartitionStyle == PARTITION_STYLE_GPT)
+								DriveLayout->PartitionEntry[esp_index].Gpt.PartitionType = PARTITION_GENERIC_ESP;
+							else if (DriveLayout->PartitionStyle == PARTITION_STYLE_MBR)
+								DriveLayout->PartitionEntry[esp_index].Mbr.PartitionType = 0xef;
+						}
+					}
+				}
+			}
 		}
 	} else {
-		for (i = 0, j = 0; i < DriveLayout->PartitionCount; i++) {
+		for (i = 0; i < (int)DriveLayout->PartitionCount; i++) {
 			if (DriveLayout->PartitionEntry[i].StartingOffset.QuadPart == PartitionOffset) {
-				DriveLayout->PartitionEntry[i].Gpt.PartitionType = PARTITION_GENERIC_ESP;
+				esp_index = i;
+				if (DriveLayout->PartitionStyle == PARTITION_STYLE_GPT)
+					DriveLayout->PartitionEntry[esp_index].Gpt.PartitionType = PARTITION_GENERIC_ESP;
+				else if (DriveLayout->PartitionStyle == PARTITION_STYLE_MBR)
+					DriveLayout->PartitionEntry[esp_index].Mbr.PartitionType = 0xef;
 				break;
 			}
 		}
 	}
-	if (i >= DriveLayout->PartitionCount) {
+	if (esp_index < 0) {
 		uprintf("No partition to toggle");
 		goto out;
 	}
 
-	DriveLayout->PartitionEntry[i].RewritePartition = TRUE;	// Just in case
-	r = DeviceIoControl(hPhysical, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, (BYTE*)DriveLayout, size, NULL, 0, &size, NULL);
+	DriveLayout->PartitionEntry[esp_index].RewritePartition = TRUE;	// Just in case
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_SET_DRIVE_LAYOUT_EX, (BYTE*)DriveLayout, dl_size, NULL, 0, &dl_size, NULL);
 	if (!r) {
 		uprintf("Could not set drive layout: %s", WindowsErrorString());
 		goto out;
 	}
 	RefreshDriveLayout(hPhysical);
 	if (PartitionOffset == 0) {
-		if (CompareGUID(&DriveLayout->PartitionEntry[i].Gpt.PartitionType, &PARTITION_GENERIC_ESP)) {
+		if (delete_data) {
 			// We successfully reverted ESP from Basic Data -> Delete stored ESP info
 			ClearEspInfo((uint8_t)j);
 		} else if (!IsDriveLetterInUse(*mount_point)) {
 			// We successfully switched ESP to Basic Data -> Try to mount it
-			volume_name = GetLogicalName(DriveIndex, DriveLayout->PartitionEntry[i].StartingOffset.QuadPart, TRUE, FALSE);
+			volume_name = GetLogicalName(DriveIndex, DriveLayout->PartitionEntry[esp_index].StartingOffset.QuadPart, TRUE, FALSE);
 			IGNORE_RETVAL(MountVolume(mount_point, volume_name));
 			free(volume_name);
 		}
@@ -1652,11 +1727,11 @@ const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 		{ "NTFS", { 'N', 'T', 'F', 'S', ' ', ' ', ' ', ' ' } },
 		{ "ReFS", { 'R', 'e', 'F', 'S', 0, 0, 0, 0 } }
 	};
-	const  win_fs_type fat_fs_types[] = {
-		{ "FAT", {  'F', 'A', 'T', ' ', ' ', ' ', ' ', ' ' } },
-		{ "FAT12", {  'F', 'A', 'T', '1', '2', ' ', ' ', ' ' } },
-		{ "FAT16", {  'F', 'A', 'T', '1', '6', ' ', ' ', ' ' } },
-		{ "FAT32", {  'F', 'A', 'T', '3', '2', ' ', ' ', ' ' } },
+	const win_fs_type fat_fs_types[] = {
+		{ "FAT", { 'F', 'A', 'T', ' ', ' ', ' ', ' ', ' ' } },
+		{ "FAT12", { 'F', 'A', 'T', '1', '2', ' ', ' ', ' ' } },
+		{ "FAT16", { 'F', 'A', 'T', '1', '6', ' ', ' ', ' ' } },
+		{ "FAT32", { 'F', 'A', 'T', '3', '2', ' ', ' ', ' ' } },
 	};
 	const uint32_t ext_feature[3][3] = {
 		// feature_compat

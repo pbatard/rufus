@@ -2064,23 +2064,6 @@ DWORD WINAPI FormatThread(void* param)
 	// Write an image file
 	if ((boot_type == BT_IMAGE) && write_as_image) {
 		WriteDrive(hPhysicalDrive, FALSE);
-
-		// Trying to mount accessible partitions after writing an image leads to the
-		// creation of the infamous 'System Volume Information' folder on ESPs, which
-		// in turn leads to checksum errors for Ubuntu's boot/grub/efi.img (that maps
-		// to the Ubuntu ESP). So we only call the code below for Ventoy's vtsi images.
-		if (img_report.compression_type == BLED_COMPRESSION_VTSI) {
-			// If the image contains a partition we might be able to access, try to re-mount it
-			safe_unlockclose(hPhysicalDrive);
-			safe_unlockclose(hLogicalVolume);
-			Sleep(200);
-			WaitForLogical(DriveIndex, 0);
-			if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE)) {
-				volume_name = GetLogicalName(DriveIndex, 0, TRUE, TRUE);
-				if ((volume_name != NULL) && (MountVolume(drive_name, volume_name)))
-					uprintf("Remounted %s as %c:", volume_name, toupper(drive_name[0]));
-			}
-		}
 		goto out;
 	}
 
@@ -2403,13 +2386,27 @@ out:
 		AltUnmountVolume(volume_name, TRUE);
 	else
 		safe_free(volume_name);
-	if ((boot_type == BT_IMAGE) && write_as_image) {
-		PrintInfo(0, MSG_320, lmprintf(MSG_307));
-		VdsRescan(VDS_RESCAN_REFRESH, 0, TRUE);
-	}
 	safe_free(buffer);
 	safe_unlockclose(hLogicalVolume);
 	safe_unlockclose(hPhysicalDrive);	// This can take a while
+	if ((boot_type == BT_IMAGE) && write_as_image) {
+		PrintInfo(0, MSG_320, lmprintf(MSG_307));
+		Sleep(200);
+		VdsRescan(VDS_RESCAN_REFRESH, 0, TRUE);
+		// Trying to mount accessible partitions after writing an image leads to the
+		// creation of the infamous 'System Volume Information' folder on ESPs, which
+		// in turn leads to checksum errors for Ubuntu's boot/grub/efi.img (that maps
+		// to the Ubuntu ESP). So we only call the code below if there are no ESPs or
+		// if we're running a Ventoy image.
+		if ((GetEspOffset(DriveIndex) == 0) || (img_report.compression_type == BLED_COMPRESSION_VTSI)) {
+			WaitForLogical(DriveIndex, 0);
+			if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE)) {
+				volume_name = GetLogicalName(DriveIndex, 0, TRUE, TRUE);
+				if ((volume_name != NULL) && (MountVolume(drive_name, volume_name)))
+					uprintf("Remounted %s as %c:", volume_name, toupper(drive_name[0]));
+			}
+		}
+	}
 	if (IS_ERROR(FormatStatus)) {
 		volume_name = GetLogicalName(DriveIndex, partition_offset[PI_MAIN], TRUE, TRUE);
 		if (volume_name != NULL) {

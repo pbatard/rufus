@@ -165,7 +165,7 @@ mbr_type_t mbr_type[] = {
 	{ 0xec, "SkyFS" },
 	{ 0xed, "GPT Hybrid MBR" },
 	{ 0xee, "GPT Protective MBR" },
-	{ 0xef, "EFI FAT" },
+	{ 0xef, "EFI System Partition" },
 	{ 0xf0, "PA-RISC Boot" },
 	{ 0xf1, "SpeedStor" },
 	{ 0xf2, "DOS secondary" },
