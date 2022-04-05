@@ -1748,12 +1748,15 @@ const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 	if (buf == NULL)
 		goto out;
 
-	// 1. Try to detect FAT/exFAT/NTFS/ReFS through the 512 bytes superblock at offset 0
+	// 1. Try to detect ISO9660/FAT/exFAT/NTFS/ReFS through the 512 bytes superblock at offset 0
 	if (!SetFilePointerEx(hPhysical, StartingOffset, NULL, FILE_BEGIN))
 		goto out;
 	if (!ReadFile(hPhysical, buf, sector_size, &size, NULL) || size != sector_size)
 		goto out;
-
+	if (strncmp("CD001", &buf[0x01], 5) == 0) {
+		ret = "ISO9660";
+		goto out;
+	}
 
 	// The beginning of a superblock for FAT/exFAT/NTFS/ReFS is pretty much always the same:
 	// There are 3 bytes potentially used for a jump instruction, and then are 8 bytes of

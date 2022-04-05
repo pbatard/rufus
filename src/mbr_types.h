@@ -150,6 +150,7 @@ mbr_type_t mbr_type[] = {
 	{ 0xc4, "DR DOS Extended" },
 	{ 0xc6, "DR DOS FAT16" },
 	{ 0xc7, "Syrinx" },
+	{ 0xcd, "ISOHybrid" },
 	{ 0xda, "Non-FS Data" },
 	{ 0xdb, "CP/M" },
 	{ 0xde, "Dell Utility" },
