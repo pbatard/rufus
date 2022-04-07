@@ -375,6 +375,8 @@
     <ClCompile Include="..\src\vhd.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\res\grub2\grub2_version.h" />
+    <ClInclude Include="..\res\grub\grub_version.h" />
     <ClInclude Include="..\src\badblocks.h" />
     <ClInclude Include="..\src\bled\bled.h" />
     <ClInclude Include="..\src\drive.h" />

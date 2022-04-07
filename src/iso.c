@@ -82,6 +82,7 @@ RUFUS_IMG_REPORT img_report;
 int64_t iso_blocking_status = -1;
 extern BOOL preserve_timestamps, enable_ntfs_compression;
 extern char* archive_path;
+extern const grub_patch_t grub_patch[2];
 BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
@@ -100,7 +101,7 @@ static const char* sources_str = "/sources";
 static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm" };
 // We only support GRUB/BIOS (x86) that uses a standard config dir (/boot/grub/i386-pc/)
 // If the disc was mastered properly, GRUB/EFI will take care of itself
-static const char* grub_dirname = "/boot/grub/i386-pc";
+static const char* grub_dirname[] = { "/boot/grub/i386-pc", "/boot/grub2/i386-pc" };
 static const char* grub_cfg[] = { "grub.cfg", "loopback.cfg" };
 static const char* compatresources_dll = "compatresources.dll";
 static const char* menu_cfg = "menu.cfg";
@@ -211,8 +212,10 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		}
 	} else {	// Scan-time checks
 		// Check for GRUB artifacts
-		if (safe_stricmp(psz_dirname, grub_dirname) == 0)
-			img_report.has_grub2 = TRUE;
+		for (i = 0; i < ARRAYSIZE(grub_dirname); i++) {
+			if (safe_stricmp(psz_dirname, grub_dirname[i]) == 0)
+				img_report.has_grub2 = (uint8_t)i + 1;
+		}
 
 		// Check for a syslinux v5.0+ file anywhere
 		if (safe_stricmp(psz_basename, ldlinux_c32) == 0) {
@@ -1092,15 +1095,17 @@ out:
 			img_report.wininst_version = GetInstallWimVersion(src_iso);
 		}
 		if (img_report.has_grub2) {
+			char grub_path[128];
+			static_sprintf(grub_path, "%s/normal.mod", &grub_dirname[img_report.has_grub2 - 1][1]);
 			// In case we have a GRUB2 based iso, we extract boot/grub/i386-pc/normal.mod to parse its version
 			img_report.grub2_version[0] = 0;
 			// coverity[swapped_arguments]
 			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, path) != 0) {
-				size = (size_t)ExtractISOFile(src_iso, "boot/grub/i386-pc/normal.mod", path, FILE_ATTRIBUTE_NORMAL);
+				size = (size_t)ExtractISOFile(src_iso, grub_path, path, FILE_ATTRIBUTE_NORMAL);
 				buf = (char*)calloc(size, 1);
 				fd = fopen(path, "rb");
 				if ((size == 0) || (buf == NULL) || (fd == NULL)) {
-					uprintf("  Could not read Grub version from 'boot/grub/i386-pc/normal.mod'");
+					uprintf("  Could not read Grub version from '%s'", grub_path);
 				} else {
 					fread(buf, 1, size, fd);
 					fclose(fd);
@@ -1109,11 +1114,43 @@ out:
 				free(buf);
 				DeleteFileU(path);
 			}
-			if (img_report.grub2_version[0] != 0)
-				uprintf("  Detected Grub version: %s", img_report.grub2_version);
-			else {
+			if (img_report.grub2_version[0] != 0) {
+				// (Insert "Why is it always you three" meme, with Fedora, Manjaro and openSUSE)
+				// For some obscure reason, openSUSE have decided that their Live images should
+				// use /boot/grub2/ as their prefix directory instead of the standard /boot/grub/
+				// This creates a MAJOR issue because the prefix directory is hardcoded in
+				// 'core.img', and Rufus must install a 'core.img', that is not provided by the
+				// ISO, for the USB to boot (since even trying to pick the one from ISOHybrid
+				// does usually not guarantees the presence of the FAT driver which is mandatory
+				// for ISO boot).
+				// Therefore, when *someone* uses a nonstandard GRUB prefix directory, our base
+				// 'core.img' can't work with their image, since it isn't able to load modules
+				// like 'normal.mod', that are required to access the configuration files. Oh and
+				// you can forget about direct editing the prefix string inside 'core.img' since
+				// GRUB are forcing LZMA compression for BIOS payloads. And it gets even better,
+				// because even if you're trying to be smart and use GRUB's earlyconfig features
+				// to do something like:
+				//   if [ -e /boot/grub2/i386-pc/normal.mod ]; then set prefix = ...
+				// you still must embed 'configfile.mod' and 'normal.mod' in 'core.img' in order
+				// to do that, which ends up tripling the file size...
+				// Soooo, since the universe is conspiring against us and in order to cut a long
+				// story short about developers making annoying decisions, we'll take advantage
+				// of the fact that the LZMA replacement section for the 2.04 and 2.06 'core.img'
+				// when using '/boot/grub2' as a prefix is very small and always located at the
+				// very end the file to patch the damn thing and get on with our life!
+				uprintf("  Detected Grub version: %s%s", img_report.grub2_version,
+					img_report.has_grub2 >= 1 ? " with NONSTANDARD prefix" : "");
+				for (k = 0; k < ARRAYSIZE(grub_patch); k++) {
+					if (strcmp(img_report.grub2_version, grub_patch[k].version) == 0)
+						break;
+				}
+				if (k >= ARRAYSIZE(grub_patch)) {
+					uprintf("  • Don't have a prefix patch for this version => DROPPED!");
+					img_report.has_grub2 = 0;
+				}
+			} else {
 				uprintf("  Could not detect Grub version");
-				img_report.has_grub2 = FALSE;
+				img_report.has_grub2 = 0;
 			}
 		}
 		if (img_report.has_compatresources_dll) {

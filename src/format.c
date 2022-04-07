@@ -73,6 +73,7 @@ extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 static int actual_fs_type, wintogo_index = -1, wininst_index = 0;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing, write_as_image;
 extern BOOL use_vds, write_as_esp, is_vds_available;
+extern const grub_patch_t grub_patch[2];
 uint8_t *grub2_buf = NULL, *sec_buf = NULL;
 long grub2_len;
 
@@ -909,8 +910,8 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 {
 	// TODO: Do we need anything special for 4K sectors?
 	DWORD size, max_size, br_size = 0x200;
-	int r, sub_type = boot_type;
-	unsigned char* buf = NULL;
+	int i, j, r, sub_type = boot_type;
+	uint8_t *buf = NULL, *patched = NULL;
 	FAKE_FD fake_fd = { 0 };
 	FILE* fp = (FILE*)&fake_fd;
 
@@ -951,6 +952,31 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 			if (buf == NULL) {
 				uprintf("Could not access core.img");
 				return FALSE;
+			}
+		}
+		// TODO: Compute the projected increase in size instead of harcoding it
+		if (img_report.has_grub2 == 2 && ((patched = malloc(size + 16)) != NULL)) {
+			memcpy(patched, buf, size);
+			// Patch GRUB for nonstandard prefix directory
+			for (i = 0; i < ARRAYSIZE(grub_patch); i++) {
+				if (strcmp(img_report.grub2_version, grub_patch[i].version) == 0) {
+					for (j = 0; j < ARRAYSIZE(grub_patch[i].patch); j++) {
+						if (memcmp(&patched[grub_patch[i].patch[j].src->offset], grub_patch[i].patch[j].src->data,
+							grub_patch[i].patch[j].src->size) != 0) {
+							uprintf("ERROR: Did not find expected source data for GRUB patch");
+							return FALSE;
+						}
+						memcpy(&patched[grub_patch[i].patch[j].rep->offset], grub_patch[i].patch[j].rep->data,
+							grub_patch[i].patch[j].rep->size);
+						if (grub_patch[i].patch[j].rep->size > grub_patch[i].patch[j].src->size)
+							size += grub_patch[i].patch[j].rep->size - grub_patch[i].patch[j].src->size;
+					}
+					safe_free(grub2_buf);
+					grub2_buf = patched;
+					buf = grub2_buf;
+					uprintf("Patched Grub 2.0 SBR for NONSTANDARD prefix");
+					break;
+				}
 			}
 		}
 		break;

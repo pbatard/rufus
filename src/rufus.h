@@ -384,7 +384,7 @@ typedef struct {
 	BOOLEAN has_efi_syslinux;
 	BOOLEAN needs_syslinux_overwrite;
 	BOOLEAN has_grub4dos;
-	BOOLEAN has_grub2;
+	uint8_t has_grub2;
 	BOOLEAN has_compatresources_dll;
 	BOOLEAN has_kolibrios;
 	BOOLEAN uses_casper;
@@ -665,6 +665,23 @@ extern int32_t StrArrayFind(StrArray* arr, const char* str);
 extern void StrArrayClear(StrArray* arr);
 extern void StrArrayDestroy(StrArray* arr);
 #define IsStrArrayEmpty(arr) (arr.Index == 0)
+
+/* Patch structs for GRUB */
+typedef struct {
+	const uint32_t offset;
+	const uint32_t size;
+	const uint8_t data[];
+} chunk_t;
+
+typedef struct {
+	const chunk_t* src;
+	const chunk_t* rep;
+} patch_t;
+
+typedef struct {
+	const char* version;
+	const patch_t patch[2];
+} grub_patch_t;
 
 /*
  * typedefs for the function prototypes. Use the something like:

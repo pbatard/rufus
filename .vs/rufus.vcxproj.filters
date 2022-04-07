@@ -176,6 +176,12 @@
     <ClInclude Include="..\src\re.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\res\grub\grub_version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\res\grub2\grub2_version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\rufus.ico">
