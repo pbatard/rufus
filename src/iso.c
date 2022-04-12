@@ -1580,7 +1580,6 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 	}
 
 	do {
-		// coverity[tainted_data_return]
 		dirpos.cluster = libfat_dumpdir(lf_fs, &dirpos, &diritem);
 		if (dirpos.cluster >= 0) {
 			name = wchar_to_utf8(diritem.name);
@@ -1640,6 +1639,7 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 			safe_free(target);
 			safe_free(name);
 		}
+	// coverity[tainted_data]
 	} while (dirpos.cluster >= 0);
 	ret = TRUE;
 

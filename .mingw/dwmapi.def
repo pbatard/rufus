@@ -1,0 +1,2 @@
+EXPORTS
+  DwmGetWindowAttribute@16
