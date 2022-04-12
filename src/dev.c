@@ -61,12 +61,9 @@ static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 	DEVINST device_inst;
 	USB_NODE_CONNECTION_INFORMATION_EX conn_info;
 	USB_NODE_CONNECTION_INFORMATION_EX_V2 conn_info_v2;
-	PF_INIT(CM_Get_DevNode_Registry_PropertyA, Cfgmgr32);
 
-	if ((parent_path == NULL) || (device_id == NULL) || (props == NULL) ||
-		(pfCM_Get_DevNode_Registry_PropertyA == NULL)) {
+	if ((parent_path == NULL) || (device_id == NULL) || (props == NULL))
 		goto out;
-	}
 
 	cr = CM_Locate_DevNodeA(&device_inst, device_id, 0);
 	if (cr != CR_SUCCESS) {
@@ -76,7 +73,7 @@ static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 
 	props->port = 0;
 	size = sizeof(props->port);
-	cr = pfCM_Get_DevNode_Registry_PropertyA(device_inst, CM_DRP_ADDRESS, NULL, (PVOID)&props->port, &size, 0);
+	cr = CM_Get_DevNode_Registry_PropertyA(device_inst, CM_DRP_ADDRESS, NULL, (PVOID)&props->port, &size, 0);
 	if (cr != CR_SUCCESS) {
 		uprintf("Could not get port for '%s': CR error %d", device_id, cr);
 		goto out;

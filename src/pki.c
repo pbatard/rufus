@@ -575,8 +575,6 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	LONG r = TRUST_E_SYSTEM_ERROR;
 	WINTRUST_DATA trust_data = { 0 };
 	WINTRUST_FILE_INFO trust_file = { 0 };
-	PF_TYPE_DECL(WINAPI, long, WinVerifyTrustEx, (HWND, GUID*, WINTRUST_DATA*));
-	PF_INIT(WinVerifyTrustEx, WinTrust);
 	GUID guid_generic_verify =	// WINTRUST_ACTION_GENERIC_VERIFY_V2
 		{ 0xaac56b, 0xcd44, 0x11d0,{ 0x8c, 0xc2, 0x0, 0xc0, 0x4f, 0xc2, 0x95, 0xee } };
 	char *signature_name;
@@ -627,8 +625,9 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	trust_data.dwUnionChoice = WTD_CHOICE_FILE;
 	trust_data.pFile = &trust_file;
 
-	if (pfWinVerifyTrustEx != NULL)
-		r = pfWinVerifyTrustEx(INVALID_HANDLE_VALUE, &guid_generic_verify, &trust_data);
+	// NB: Calling this API will create DLL sideloading issues through 'msasn1.dll'.
+	// So make sure you delay-load 'wintrust.dll' in your application.
+	r = WinVerifyTrustEx(INVALID_HANDLE_VALUE, &guid_generic_verify, &trust_data);
 	safe_free(trust_file.pcwszFilePath);
 	switch (r) {
 	case ERROR_SUCCESS:

@@ -607,11 +607,11 @@ HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgr
 	return CreateThread(NULL, 0, DownloadSignedFileThread, &args, 0, NULL);
 }
 
-static __inline uint64_t to_uint64_t(uint16_t x[4]) {
+static __inline uint64_t to_uint64_t(uint16_t x[3]) {
 	int i;
 	uint64_t ret = 0;
-	for (i=0; i<3; i++)
-		ret = (ret<<16) + x[i];
+	for (i = 0; i < 3; i++)
+		ret = (ret << 16) + x[i];
 	return ret;
 }
 

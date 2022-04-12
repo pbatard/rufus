@@ -86,8 +86,6 @@ DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Child(PDEVINST pdnDevInst, DEVINST dnDev
 DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Parent(PDEVINST pdnDevInst, DEVINST dnDevInst, ULONG ulFlags);
 DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Sibling(PDEVINST pdnDevInst, DEVINST dnDevInst, ULONG ulFlags);
 DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_DevNode_Status(PULONG pulStatus, PULONG pulProblemNumber, DEVINST dnDevInst, ULONG ulFlags);
-// This last one is unknown from MinGW32 and needs to be fetched from the DLL
-PF_TYPE_DECL(WINAPI, CONFIGRET, CM_Get_DevNode_Registry_PropertyA, (DEVINST, ULONG, PULONG, PVOID, PULONG, ULONG));
 
 #define USB_HUB_CYCLE_PORT                        273
 #define USB_GET_NODE_CONNECTION_INFORMATION_EX    274

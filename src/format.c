@@ -964,6 +964,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 						if (memcmp(&patched[grub_patch[i].patch[j].src->offset], grub_patch[i].patch[j].src->data,
 							grub_patch[i].patch[j].src->size) != 0) {
 							uprintf("ERROR: Did not find expected source data for GRUB patch");
+							free(patched);
 							return FALSE;
 						}
 						memcpy(&patched[grub_patch[i].patch[j].rep->offset], grub_patch[i].patch[j].rep->data,

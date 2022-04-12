@@ -12,8 +12,9 @@ AC_PROG_AR
 AC_PROG_RANLIB
 AC_PROG_SED
 AC_PATH_PROG(RM, rm, rm)
-AC_CHECK_TOOL(STRIP, strip, strip)
-AC_CHECK_TOOL(WINDRES, windres, windres)
+AC_CHECK_TOOL(DLLTOOL, dlltool, :)
+AC_CHECK_TOOL(STRIP, strip, :)
+AC_CHECK_TOOL(WINDRES, windres, :)
 AC_C_INLINE
 AC_DEFINE([_GNU_SOURCE], [], [Use GNU extensions])
 
@@ -71,6 +72,7 @@ AC_SUBST([AM_LDFLAGS])
 AC_SUBST([SUFFIX])
 
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([.mingw/Makefile])
 AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([src/bled/Makefile])
 AC_CONFIG_FILES([src/ext2fs/Makefile])

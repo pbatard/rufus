@@ -1,0 +1,4 @@
+EXPORTS
+  GetFileVersionInfoW@16
+  GetFileVersionInfoSizeW@8
+  VerQueryValueA@16
