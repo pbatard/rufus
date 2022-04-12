@@ -367,7 +367,7 @@ uninstall-am:
 
 
 .PHONY: all
-all: wintrust-delaylib.lib version-delaylib.lib
+all: wintrust-delaylib.lib version-delaylib.lib wininet-delaylib.lib
 
 %.def64: %.def
 	$(AM_V_SED) "s/@.*//" $< >$@
