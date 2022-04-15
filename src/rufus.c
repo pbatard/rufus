@@ -1289,6 +1289,13 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		(img_report.image_size == 0) ||
 		(!img_report.is_iso && (img_report.is_bootable_img <= 0) && !img_report.is_windows_img)) {
 		// Failed to scan image
+		if (img_report.is_bootable_img < 0)
+			MessageBoxExU(hMainDialog, lmprintf(MSG_325, image_path), lmprintf(MSG_042), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+		else
+			MessageBoxExU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
+		// Make sure to relinquish image_path before we call UpdateImage
+		// otherwise the boot selection dropdown won't be properly reset.
+		safe_free(image_path);
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		UpdateImage(FALSE);
 		SetMBRProps();
@@ -1296,11 +1303,6 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		PrintInfoDebug(0, MSG_203);
 		PrintStatus(0, MSG_203);
 		EnableControls(TRUE, FALSE);
-		if (img_report.is_bootable_img < 0)
-			MessageBoxExU(hMainDialog, lmprintf(MSG_325, image_path), lmprintf(MSG_042), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
-		else
-			MessageBoxExU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
-		safe_free(image_path);
 		goto out;
 	}
 
