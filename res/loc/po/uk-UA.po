@@ -288,31 +288,31 @@ msgstr "байт"
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr "Кб"
+msgstr "КБ"
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr "Мб"
+msgstr "МБ"
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr "Гб"
+msgstr "ГБ"
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr "Тб"
+msgstr "ТБ"
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr "Пб"
+msgstr "ПБ"
 
 #. • MSG_027
 msgid "kilobytes"
