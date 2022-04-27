@@ -69,6 +69,8 @@ const char* WinInetErrorString(void)
 {
 	static char error_string[256];
 	DWORD size = sizeof(error_string);
+	PF_TYPE_DECL(WINAPI, BOOL, InternetGetLastResponseInfoA, (LPDWORD, LPSTR, LPDWORD));
+	PF_INIT(InternetGetLastResponseInfoA, WinInet);
 
 	error_code = HRESULT_CODE(GetLastError());
 
@@ -219,8 +221,10 @@ const char* WinInetErrorString(void)
 	case ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY:
 		return "Please ask Microsoft about that one!";
 	case ERROR_INTERNET_EXTENDED_ERROR:
-		InternetGetLastResponseInfoA(&error_code, error_string, &size);
-		return error_string;
+		if (pfInternetGetLastResponseInfoA != NULL) {
+			pfInternetGetLastResponseInfoA(&error_code, error_string, &size);
+			return error_string;
+		}
 		// fall through
 	default:
 		static_sprintf(error_string, "Unknown internet error 0x%08lX", error_code);
@@ -273,6 +277,13 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 	HRESULT hr = S_FALSE;
 	INetworkListManager* pNetworkListManager;
 
+	PF_TYPE_DECL(WINAPI, HINTERNET, InternetOpenA, (LPCSTR, DWORD, LPCSTR, LPCSTR, DWORD));
+	PF_TYPE_DECL(WINAPI, BOOL, InternetSetOptionA, (HINTERNET, DWORD, LPVOID, DWORD));
+	PF_TYPE_DECL(WINAPI, BOOL, InternetGetConnectedState, (LPDWORD, DWORD));
+	PF_INIT_OR_OUT(InternetOpenA, WinInet);
+	PF_INIT_OR_OUT(InternetSetOptionA, WinInet);
+	PF_INIT(InternetGetConnectedState, WinInet);
+
 	// Create a NetworkListManager Instance to check the network connection
 	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
 	hr = CoCreateInstance(&CLSID_NetworkListManager, NULL, CLSCTX_ALL,
@@ -283,8 +294,8 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 			// INetworkListManager may fail with ERROR_SERVICE_DEPENDENCY_FAIL if the DHCP service
 			// is not running, in which case we must fall back to using InternetGetConnectedState().
 			// See https://github.com/pbatard/rufus/issues/1801.
-			if (hr == HRESULT_FROM_WIN32(ERROR_SERVICE_DEPENDENCY_FAIL)) {
-				InternetConnection = InternetGetConnectedState(&dwFlags, 0) ? VARIANT_TRUE : VARIANT_FALSE;
+			if ((hr == HRESULT_FROM_WIN32(ERROR_SERVICE_DEPENDENCY_FAIL)) && (pfInternetGetConnectedState != NULL)) {
+				InternetConnection = pfInternetGetConnectedState(&dwFlags, 0) ? VARIANT_TRUE : VARIANT_FALSE;
 				break;
 			}
 			if (hr == S_OK || !bRetry)
@@ -299,15 +310,15 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
 		rufus_version[0], rufus_version[1], rufus_version[2],
 		nWindowsVersion >> 4, nWindowsVersion & 0x0F, is_x64() ? "; WOW64" : "");
-	hSession = InternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	hSession = pfInternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	// Set the timeouts
-	InternetSetOptionA(hSession, INTERNET_OPTION_CONNECT_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
-	InternetSetOptionA(hSession, INTERNET_OPTION_SEND_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
-	InternetSetOptionA(hSession, INTERNET_OPTION_RECEIVE_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
+	pfInternetSetOptionA(hSession, INTERNET_OPTION_CONNECT_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
+	pfInternetSetOptionA(hSession, INTERNET_OPTION_SEND_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
+	pfInternetSetOptionA(hSession, INTERNET_OPTION_RECEIVE_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
 	// Enable gzip and deflate decoding schemes
-	InternetSetOptionA(hSession, INTERNET_OPTION_HTTP_DECODING, (LPVOID)&decodingSupport, sizeof(decodingSupport));
+	pfInternetSetOptionA(hSession, INTERNET_OPTION_HTTP_DECODING, (LPVOID)&decodingSupport, sizeof(decodingSupport));
 	// Enable HTTP/2 protocol support
-	InternetSetOptionA(hSession, INTERNET_OPTION_ENABLE_HTTP_PROTOCOL, (LPVOID)&dwProtocolSupport, sizeof(dwProtocolSupport));
+	pfInternetSetOptionA(hSession, INTERNET_OPTION_ENABLE_HTTP_PROTOCOL, (LPVOID)&dwProtocolSupport, sizeof(dwProtocolSupport));
 
 out:
 	return hSession;
@@ -337,6 +348,23 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1};
 	uint64_t size = 0, total_size = 0;
 
+	// Can't link with wininet.lib because of sideloading issues
+	// And we can't delay-load wininet.dll with MinGW either because the application simply exits on startup...
+	PF_TYPE_DECL(WINAPI, BOOL, InternetCrackUrlA, (LPCSTR, DWORD, DWORD, LPURL_COMPONENTSA));
+	PF_TYPE_DECL(WINAPI, HINTERNET, InternetConnectA, (HINTERNET, LPCSTR, INTERNET_PORT, LPCSTR, LPCSTR, DWORD, DWORD, DWORD_PTR));
+	PF_TYPE_DECL(WINAPI, BOOL, InternetReadFile, (HINTERNET, LPVOID, DWORD, LPDWORD));
+	PF_TYPE_DECL(WINAPI, BOOL, InternetCloseHandle, (HINTERNET));
+	PF_TYPE_DECL(WINAPI, HINTERNET, HttpOpenRequestA, (HINTERNET, LPCSTR, LPCSTR, LPCSTR, LPCSTR, LPCSTR*, DWORD, DWORD_PTR));
+	PF_TYPE_DECL(WINAPI, BOOL, HttpSendRequestA, (HINTERNET, LPCSTR, DWORD, LPVOID, DWORD));
+	PF_TYPE_DECL(WINAPI, BOOL, HttpQueryInfoA, (HINTERNET, DWORD, LPVOID, LPDWORD, LPDWORD));
+	PF_INIT_OR_OUT(InternetCrackUrlA, WinInet);
+	PF_INIT_OR_OUT(InternetConnectA, WinInet);
+	PF_INIT_OR_OUT(InternetReadFile, WinInet);
+	PF_INIT_OR_OUT(InternetCloseHandle, WinInet);
+	PF_INIT_OR_OUT(HttpOpenRequestA, WinInet);
+	PF_INIT_OR_OUT(HttpSendRequestA, WinInet);
+	PF_INIT_OR_OUT(HttpQueryInfoA, WinInet);
+
 	FormatStatus = 0;
 	DownloadStatus = 404;
 	if (hProgressDialog != NULL)
@@ -353,7 +381,7 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 		uprintf("Downloading %s", url);
 	}
 
-	if ( (!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))
+	if ( (!pfInternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))
 	  || (UrlParts.lpszHostName == NULL) || (UrlParts.lpszUrlPath == NULL)) {
 		uprintf("Unable to decode URL: %s", WinInetErrorString());
 		goto out;
@@ -366,13 +394,13 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 		goto out;
 	}
 
-	hConnection = InternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
+	hConnection = pfInternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
 	if (hConnection == NULL) {
 		uprintf("Could not connect to server %s:%d: %s", UrlParts.lpszHostName, UrlParts.nPort, WinInetErrorString());
 		goto out;
 	}
 
-	hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
+	hRequest = pfHttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
 		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|
 		INTERNET_FLAG_NO_COOKIES|INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE|INTERNET_FLAG_HYPERLINK|
 		((UrlParts.nScheme==INTERNET_SCHEME_HTTPS)?INTERNET_FLAG_SECURE:0), (DWORD_PTR)NULL);
@@ -381,14 +409,14 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 		goto out;
 	}
 
-	if (!HttpSendRequestA(hRequest, request_headers, -1L, NULL, 0)) {
+	if (!pfHttpSendRequestA(hRequest, request_headers, -1L, NULL, 0)) {
 		uprintf("Unable to send request: %s", WinInetErrorString());
 		goto out;
 	}
 
 	// Get the file size
 	dwSize = sizeof(DownloadStatus);
-	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
+	pfHttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
 	if (DownloadStatus != 200) {
 		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
 		SetLastError(ERROR_SEVERITY_ERROR | FAC(FACILITY_HTTP) | error_code);
@@ -396,7 +424,7 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 		goto out;
 	}
 	dwSize = sizeof(strsize);
-	if (!HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH, (LPVOID)strsize, &dwSize, NULL)) {
+	if (!pfHttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH, (LPVOID)strsize, &dwSize, NULL)) {
 		uprintf("Unable to retrieve file length: %s", WinInetErrorString());
 		goto out;
 	}
@@ -435,7 +463,7 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 		// User may have cancelled the download
 		if (IS_ERROR(FormatStatus))
 			goto out;
-		if (!InternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded) || (dwDownloaded == 0))
+		if (!pfInternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded) || (dwDownloaded == 0))
 			break;
 		if (hProgressDialog != NULL)
 			UpdateProgressWithInfo(OP_NOOP, MSG_241, size, total_size);
@@ -480,11 +508,11 @@ out:
 			safe_free(*buffer);
 	}
 	if (hRequest)
-		InternetCloseHandle(hRequest);
+		pfInternetCloseHandle(hRequest);
 	if (hConnection)
-		InternetCloseHandle(hConnection);
+		pfInternetCloseHandle(hConnection);
 	if (hSession)
-		InternetCloseHandle(hSession);
+		pfInternetCloseHandle(hSession);
 
 	SetLastError(error_code);
 	return r ? size : 0;
@@ -612,6 +640,22 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	FILETIME FileTime;
 	int64_t local_time = 0, reg_time, server_time, update_interval;
 
+	// Can't link with wininet.lib because of sideloading issues
+	PF_TYPE_DECL(WINAPI, BOOL, InternetCrackUrlA, (LPCSTR, DWORD, DWORD, LPURL_COMPONENTSA));
+	PF_TYPE_DECL(WINAPI, HINTERNET, InternetConnectA, (HINTERNET, LPCSTR, INTERNET_PORT, LPCSTR, LPCSTR, DWORD, DWORD, DWORD_PTR));
+	PF_TYPE_DECL(WINAPI, BOOL, InternetReadFile, (HINTERNET, LPVOID, DWORD, LPDWORD));
+	PF_TYPE_DECL(WINAPI, BOOL, InternetCloseHandle, (HINTERNET));
+	PF_TYPE_DECL(WINAPI, HINTERNET, HttpOpenRequestA, (HINTERNET, LPCSTR, LPCSTR, LPCSTR, LPCSTR, LPCSTR*, DWORD, DWORD_PTR));
+	PF_TYPE_DECL(WINAPI, BOOL, HttpSendRequestA, (HINTERNET, LPCSTR, DWORD, LPVOID, DWORD));
+	PF_TYPE_DECL(WINAPI, BOOL, HttpQueryInfoA, (HINTERNET, DWORD, LPVOID, LPDWORD, LPDWORD));
+	PF_INIT_OR_OUT(InternetCrackUrlA, WinInet);
+	PF_INIT_OR_OUT(InternetConnectA, WinInet);
+	PF_INIT_OR_OUT(InternetReadFile, WinInet);
+	PF_INIT_OR_OUT(InternetCloseHandle, WinInet);
+	PF_INIT_OR_OUT(HttpOpenRequestA, WinInet);
+	PF_INIT_OR_OUT(HttpSendRequestA, WinInet);
+	PF_INIT_OR_OUT(HttpQueryInfoA, WinInet);
+
 	verbose = ReadSetting32(SETTING_VERBOSE_UPDATES);
 	// Without this the FileDialog will produce error 0x8001010E when compiled for Vista or later
 	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
@@ -654,7 +698,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		goto out;
 	}
 
-	if (!InternetCrackUrlA(server_url, (DWORD)safe_strlen(server_url), 0, &UrlParts))
+	if (!pfInternetCrackUrlA(server_url, (DWORD)safe_strlen(server_url), 0, &UrlParts))
 		goto out;
 	hostname[sizeof(hostname)-1] = 0;
 
@@ -664,7 +708,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	hSession = GetInternetSession(FALSE);
 	if (hSession == NULL)
 		goto out;
-	hConnection = InternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
+	hConnection = pfInternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
 	if (hConnection == NULL)
 		goto out;
 
@@ -704,11 +748,11 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		UrlParts.dwUrlPathLength = sizeof(urlpath);
 		for (i=0; i<ARRAYSIZE(verpos); i++) {
 			vvuprintf("Trying %s", UrlParts.lpszUrlPath);
-			hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
+			hRequest = pfHttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
 				INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|
 				INTERNET_FLAG_NO_COOKIES|INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE|INTERNET_FLAG_HYPERLINK|
 				((UrlParts.nScheme == INTERNET_SCHEME_HTTPS)?INTERNET_FLAG_SECURE:0), (DWORD_PTR)NULL);
-			if ((hRequest == NULL) || (!HttpSendRequestA(hRequest, request_headers, -1L, NULL, 0))) {
+			if ((hRequest == NULL) || (!pfHttpSendRequestA(hRequest, request_headers, -1L, NULL, 0))) {
 				uprintf("Unable to send request: %s", WinInetErrorString());
 				goto out;
 			}
@@ -716,10 +760,10 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 			// Ensure that we get a text file
 			dwSize = sizeof(dwStatus);
 			dwStatus = 404;
-			HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
+			pfHttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwStatus, &dwSize, NULL);
 			if (dwStatus == 200)
 				break;
-			InternetCloseHandle(hRequest);
+			pfInternetCloseHandle(hRequest);
 			hRequest = NULL;
 			safe_strcpy(&urlpath[verpos[i]], 5, ".ver");
 		}
@@ -736,7 +780,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// On the other hand, if local clock is set way back in the past, we will never check.
 		dwSize = sizeof(ServerTime);
 		// If we can't get a date we can trust, don't bother...
-		if ( (!HttpQueryInfoA(hRequest, HTTP_QUERY_DATE|HTTP_QUERY_FLAG_SYSTEMTIME, (LPVOID)&ServerTime, &dwSize, NULL))
+		if ( (!pfHttpQueryInfoA(hRequest, HTTP_QUERY_DATE|HTTP_QUERY_FLAG_SYSTEMTIME, (LPVOID)&ServerTime, &dwSize, NULL))
 			|| (!SystemTimeToFileTime(&ServerTime, &FileTime)) )
 			goto out;
 		server_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
@@ -752,7 +796,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		}
 
 		dwSize = sizeof(dwTotalSize);
-		if (!HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL))
+		if (!pfHttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL))
 			goto out;
 
 		// Make sure the file is NUL terminated
@@ -760,7 +804,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		if (buf == NULL)
 			goto out;
 		// This is a version file - we should be able to gulp it down in one go
-		if (!InternetReadFile(hRequest, buf, dwTotalSize, &dwDownloaded) || (dwDownloaded != dwTotalSize))
+		if (!pfInternetReadFile(hRequest, buf, dwTotalSize, &dwDownloaded) || (dwDownloaded != dwTotalSize))
 			goto out;
 		vuprintf("Successfully downloaded version file (%d bytes)", dwTotalSize);
 
@@ -791,11 +835,11 @@ out:
 	safe_free(buf);
 	safe_free(sig);
 	if (hRequest)
-		InternetCloseHandle(hRequest);
+		pfInternetCloseHandle(hRequest);
 	if (hConnection)
-		InternetCloseHandle(hConnection);
+		pfInternetCloseHandle(hConnection);
 	if (hSession)
-		InternetCloseHandle(hSession);
+		pfInternetCloseHandle(hSession);
 	switch (status) {
 	case 1:
 		PrintInfoDebug(3000, MSG_244);
@@ -1051,13 +1095,26 @@ BOOL IsDownloadable(const char* url)
 	URL_COMPONENTSA UrlParts = { sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
 		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1 };
 
+	PF_TYPE_DECL(WINAPI, BOOL, InternetCrackUrlA, (LPCSTR, DWORD, DWORD, LPURL_COMPONENTSA));
+	PF_TYPE_DECL(WINAPI, HINTERNET, InternetConnectA, (HINTERNET, LPCSTR, INTERNET_PORT, LPCSTR, LPCSTR, DWORD, DWORD, DWORD_PTR));
+	PF_TYPE_DECL(WINAPI, BOOL, InternetCloseHandle, (HINTERNET));
+	PF_TYPE_DECL(WINAPI, HINTERNET, HttpOpenRequestA, (HINTERNET, LPCSTR, LPCSTR, LPCSTR, LPCSTR, LPCSTR*, DWORD, DWORD_PTR));
+	PF_TYPE_DECL(WINAPI, BOOL, HttpSendRequestA, (HINTERNET, LPCSTR, DWORD, LPVOID, DWORD));
+	PF_TYPE_DECL(WINAPI, BOOL, HttpQueryInfoA, (HINTERNET, DWORD, LPVOID, LPDWORD, LPDWORD));
+	PF_INIT_OR_OUT(InternetCrackUrlA, WinInet);
+	PF_INIT_OR_OUT(InternetConnectA, WinInet);
+	PF_INIT_OR_OUT(InternetCloseHandle, WinInet);
+	PF_INIT_OR_OUT(HttpOpenRequestA, WinInet);
+	PF_INIT_OR_OUT(HttpSendRequestA, WinInet);
+	PF_INIT_OR_OUT(HttpQueryInfoA, WinInet);
+
 	if (url == NULL)
 		return FALSE;
 
 	FormatStatus = 0;
 	DownloadStatus = 404;
 
-	if ((!InternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))
+	if ((!pfInternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))
 		|| (UrlParts.lpszHostName == NULL) || (UrlParts.lpszUrlPath == NULL))
 		goto out;
 	hostname[sizeof(hostname) - 1] = 0;
@@ -1067,35 +1124,35 @@ BOOL IsDownloadable(const char* url)
 	if (hSession == NULL)
 		goto out;
 
-	hConnection = InternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
+	hConnection = pfInternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
 	if (hConnection == NULL)
 		goto out;
 
-	hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
+	hRequest = pfHttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
 		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
 		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_HYPERLINK |
 		((UrlParts.nScheme == INTERNET_SCHEME_HTTPS) ? INTERNET_FLAG_SECURE : 0), (DWORD_PTR)NULL);
 	if (hRequest == NULL)
 		goto out;
 
-	if (!HttpSendRequestA(hRequest, request_headers, -1L, NULL, 0))
+	if (!pfHttpSendRequestA(hRequest, request_headers, -1L, NULL, 0))
 		goto out;
 
 	// Get the file size
 	dwSize = sizeof(DownloadStatus);
-	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
+	pfHttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
 	if (DownloadStatus != 200)
 		goto out;
 	dwSize = sizeof(dwTotalSize);
-	HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL);
+	pfHttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL);
 
 out:
 	if (hRequest)
-		InternetCloseHandle(hRequest);
+		pfInternetCloseHandle(hRequest);
 	if (hConnection)
-		InternetCloseHandle(hConnection);
+		pfInternetCloseHandle(hConnection);
 	if (hSession)
-		InternetCloseHandle(hSession);
+		pfInternetCloseHandle(hSession);
 
 	return (dwTotalSize > 0);
 }
