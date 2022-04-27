@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * SMART HDD vs Flash detection - isHDD() tables
- * Copyright © 2013-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2022 Pete Batard <pete@akeo.ie>
  *
  * Based in part on drivedb.h from Smartmontools:
  * http://svn.code.sf.net/p/smartmontools/code/trunk/smartmontools/drivedb.h
@@ -256,6 +256,7 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x059f, 0x1027, -20 },	// 16 GB UFD
 	{ 0x059f, 0x103B, -20 },	// 16 GB UFD
 	{ 0x059f, 0x1064, -20 },	// 16 GB UFD
+	{ 0x059f, 0x1079, -20 },	// LaCie XtremKey UFD
 	// Apple exceptions
 	{ 0x05ac, 0x8400, -20},
 	{ 0x05ac, 0x8401, -20},
