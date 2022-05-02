@@ -3,7 +3,9 @@ msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2021-04-11 16:36+0200\n"
-"PO-Revision-Date: 2021-04-11 17:32+0200\n"
+"PO-Revision-Date: 2022-05-02 11:18+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: pl_PL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Polish (Polski)\n"
 "X-Rufus-LCID: 0x0415\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1586,7 +1586,7 @@ msgstr "Niebootowalne"
 
 #. • MSG_280
 msgid "Disk or ISO image"
-msgstr "Dysk lub obraz ISO"
+msgstr "Obraz dysku lub ISO płyty"
 
 #. • MSG_281
 msgid "%s (Please select)"
