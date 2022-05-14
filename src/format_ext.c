@@ -406,14 +406,14 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 	// Create root and lost+found dirs
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, EXT2_ROOT_INO, 0);
 	if (r != 0) {
-		SET_EXT2_FORMAT_ERROR(ERROR_DIR_NOT_ROOT);
+		SET_EXT2_FORMAT_ERROR(ERROR_FILE_CORRUPT);
 		uprintf("Failed to create %s root dir: %s", FSName, error_message(r));
 		goto out;
 	}
 	ext2fs->umask = 077;
 	r = ext2fs_mkdir(ext2fs, EXT2_ROOT_INO, 0, "lost+found");
 	if (r != 0) {
-		SET_EXT2_FORMAT_ERROR(ERROR_DIR_NOT_ROOT);
+		SET_EXT2_FORMAT_ERROR(ERROR_FILE_CORRUPT);
 		uprintf("Failed to create %s 'lost+found' dir: %s", FSName, error_message(r));
 		goto out;
 	}
@@ -491,7 +491,6 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 		goto out;
 	}
 	UpdateProgressWithInfo(OP_FORMAT, MSG_217, 100, 100);
-	uprintf("Done");
 	ret = TRUE;
 
 out:
