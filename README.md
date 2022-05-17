@@ -1,7 +1,7 @@
 Rufus: The Reliable USB Formatting Utility
 ==========================================
 
-![Badge](https://visitor-counter-badge.vercel.app/api/pbatard/rufus)
+![Visitor count](https://shields-io-visitor-counter.herokuapp.com/badge?page=pbatard.rufus&labelColor=000000&logo=GitHub&logoColor=FFFFFF&color=1D70B8&style=for-the-badge)
 
 [![VS2022 Build Status](https://img.shields.io/github/workflow/status/pbatard/rufus/VS2022.svg?style=flat-square&label=VS2022%20Build)](https://github.com/pbatard/rufus/actions/workflows/vs2022.yml)
 [![MinGW Build Status](https://img.shields.io/github/workflow/status/pbatard/rufus/MinGW.svg?style=flat-square&label=MinGW%20Build)](https://github.com/pbatard/rufus/actions/workflows/mingw.yml)
