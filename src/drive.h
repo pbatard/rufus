@@ -413,6 +413,7 @@ BOOL RefreshDriveLayout(HANDLE hDrive);
 const char* GetMBRPartitionType(const uint8_t type);
 const char* GetGPTPartitionType(const GUID* guid);
 const char* GetExtFsLabel(DWORD DriveIndex, uint64_t PartitionOffset);
+void ClearDrives(void);
 BOOL GetDevices(DWORD devnum);
 BOOL CyclePort(int index);
 int CycleDevice(int index);

@@ -108,7 +108,7 @@ HWND hMainDialog, hMultiToolbar, hSaveToolbar, hHashToolbar, hAdvancedDeviceTool
 HFONT hInfoFont;
 uint8_t image_options = IMOP_WINTOGO;
 uint16_t rufus_version[3], embedded_sl_version[2];
-uint32_t dur_mins, dur_secs, DrivePort[MAX_DRIVES];;
+uint32_t dur_mins, dur_secs;
 loc_cmd* selected_locale = NULL;
 WORD selected_langid = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 DWORD MainThreadId;
@@ -134,10 +134,11 @@ char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
 char *archive_path = NULL, image_option_txt[128], *fido_url = NULL;
-StrArray DriveId, DriveName, DriveLabel, DriveHub, BlockingProcess, ImageList;
+StrArray BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
+RUFUS_DRIVE rufus_drive[MAX_DRIVES] = { 0 };
 
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
 // localization_data.sh and the .rc when the year changes!
@@ -727,11 +728,11 @@ static void SetProposedLabel(int ComboIndex)
 	}
 
 	// Else if no existing label is available, propose one according to the size (eg: "256MB", "8GB")
-	if ((_stricmp(no_label, DriveLabel.String[ComboIndex]) == 0) || (_stricmp(no_label, empty) == 0)
-		|| (safe_stricmp(lmprintf(MSG_207), DriveLabel.String[ComboIndex]) == 0)) {
+	if ((_stricmp(no_label, rufus_drive[ComboIndex].label) == 0) || (_stricmp(no_label, empty) == 0)
+		|| (safe_stricmp(lmprintf(MSG_207), rufus_drive[ComboIndex].label) == 0)) {
 		SetWindowTextU(hLabel, SelectedDrive.proposed_label);
 	} else {
-		SetWindowTextU(hLabel, DriveLabel.String[ComboIndex]);
+		SetWindowTextU(hLabel, rufus_drive[ComboIndex].label);
 	}
 }
 
@@ -944,14 +945,14 @@ static BOOL PopulateProperties(void)
 		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, TRUE));
 
 	// Add a tooltip (with the size of the device in parenthesis)
-	device_tooltip = (char*) malloc(safe_strlen(DriveName.String[device_index]) + 32);
+	device_tooltip = (char*) malloc(safe_strlen(rufus_drive[device_index].name) + 32);
 	if (device_tooltip != NULL) {
 		if (right_to_left_mode)
-			safe_sprintf(device_tooltip, safe_strlen(DriveName.String[device_index]) + 32, "(%s) %s",
-				SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE), DriveName.String[device_index]);
+			safe_sprintf(device_tooltip, safe_strlen(rufus_drive[device_index].name) + 32, "(%s) %s",
+				SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE), rufus_drive[device_index].name);
 		else
-			safe_sprintf(device_tooltip, safe_strlen(DriveName.String[device_index]) + 32, "%s (%s)",
-				DriveName.String[device_index], SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE));
+			safe_sprintf(device_tooltip, safe_strlen(rufus_drive[device_index].name) + 32, "%s (%s)",
+				rufus_drive[device_index].name, SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE));
 		CreateTooltip(hDeviceList, device_tooltip, -1);
 		free(device_tooltip);
 	}
@@ -1951,10 +1952,6 @@ static void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 
 	// Create the string arrays
-	StrArrayCreate(&DriveId, MAX_DRIVES);
-	StrArrayCreate(&DriveName, MAX_DRIVES);
-	StrArrayCreate(&DriveLabel, MAX_DRIVES);
-	StrArrayCreate(&DriveHub, MAX_DRIVES);
 	StrArrayCreate(&BlockingProcess, 16);
 	StrArrayCreate(&ImageList, 16);
 	// Set various checkboxes
@@ -2031,7 +2028,7 @@ static void SaveVHD(void)
 	if ((DriveIndex < 0) || (format_thread != NULL))
 		return;
 
-	static_sprintf(filename, "%s.vhd", DriveLabel.String[DriveIndex]);
+	static_sprintf(filename, "%s.vhd", rufus_drive[DriveIndex].label);
 	img_save.Type = IMG_SAVE_TYPE_VHD;
 	img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
 	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
@@ -2317,10 +2314,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (ulRegister != 0)
 				SHChangeNotifyDeregister(ulRegister);
 			PostQuitMessage(0);
-			StrArrayDestroy(&DriveId);
-			StrArrayDestroy(&DriveName);
-			StrArrayDestroy(&DriveLabel);
-			StrArrayDestroy(&DriveHub);
+			ClearDrives();
 			StrArrayDestroy(&BlockingProcess);
 			StrArrayDestroy(&ImageList);
 			DestroyAllTooltips();

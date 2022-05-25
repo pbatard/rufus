@@ -44,8 +44,7 @@
 #include "drive.h"
 #include "dev.h"
 
-extern StrArray DriveId, DriveName, DriveLabel, DriveHub;
-extern uint32_t DrivePort[MAX_DRIVES];
+extern RUFUS_DRIVE rufus_drive[MAX_DRIVES];
 extern BOOL enable_HDDs, enable_VHDs, use_fake_units, enable_vmdk, usb_debug;
 extern BOOL list_non_usb_removable_drives, its_a_me_mario;
 
@@ -139,29 +138,30 @@ BOOL CyclePort(int index)
 	DWORD size;
 	USB_CYCLE_PORT_PARAMS cycle_port;
 
+	assert(index < MAX_DRIVES);
 	// Wait at least 10 secs between resets
 	if (GetTickCount64() < LastReset + 10000ULL) {
 		uprintf("You must wait at least 10 seconds before trying to reset a device");
 		return FALSE;
 	}
 
-	if (DriveHub.String[index] == NULL) {
+	if (rufus_drive[index].hub == NULL) {
 		uprintf("The device you are trying to reset does not appear to be a USB device...");
 		return FALSE;
 	}
 
 	LastReset = GetTickCount64();
 
-	handle = CreateFileA(DriveHub.String[index], GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+	handle = CreateFileA(rufus_drive[index].hub, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
 	if (handle == INVALID_HANDLE_VALUE) {
-		uprintf("Could not open %s: %s", DriveHub.String[index], WindowsErrorString());
+		uprintf("Could not open %s: %s", rufus_drive[index].hub, WindowsErrorString());
 		goto out;
 	}
 
 	size = sizeof(cycle_port);
 	memset(&cycle_port, 0, size);
-	cycle_port.ConnectionIndex = DrivePort[index];
-	uprintf("Cycling port %d (reset) on %s", DrivePort[index], DriveHub.String[index]);
+	cycle_port.ConnectionIndex = rufus_drive[index].port;
+	uprintf("Cycling port %d (reset) on %s", rufus_drive[index].port, rufus_drive[index].hub);
 	// As per https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/usbioctl/ni-usbioctl-ioctl_usb_hub_cycle_port
 	// IOCTL_USB_HUB_CYCLE_PORT is not supported on Windows 7, Windows Vista, and Windows Server 2008
 	if (!DeviceIoControl(handle, IOCTL_USB_HUB_CYCLE_PORT, &cycle_port, size, &cycle_port, size, &size, NULL)) {
@@ -191,7 +191,8 @@ int CycleDevice(int index)
 	SP_DEVINFO_DATA dev_info_data;
 	SP_PROPCHANGE_PARAMS propchange_params;
 
-	if ((index < 0) || (safe_strlen(DriveId.String[index]) < 8))
+	assert(index < MAX_DRIVES);
+	if ((index < 0) || (safe_strlen(rufus_drive[index].id) < 8))
 		return ERROR_INVALID_PARAMETER;
 
 	// Need DIGCF_ALLCLASSES else disabled devices won't be listed.
@@ -210,7 +211,7 @@ int CycleDevice(int index)
 			continue;
 		}
 
-		if (safe_strcmp(DriveId.String[index], device_instance_id) != 0)
+		if (safe_strcmp(rufus_drive[index].id, device_instance_id) != 0)
 			continue;
 
 		found = TRUE;
@@ -421,6 +422,19 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 #define FORCED_NAME "VendorCo Disk USB Device"
 #endif
 
+void ClearDrives(void)
+{
+	int i;
+	for (i = 0; i < MAX_DRIVES && rufus_drive[i].size != 0; i++) {
+		free(rufus_drive[i].id);
+		free(rufus_drive[i].name);
+		free(rufus_drive[i].display_name);
+		free(rufus_drive[i].label);
+		free(rufus_drive[i].hub);
+	}
+	memset(rufus_drive, 0, sizeof(rufus_drive));
+}
+
 /*
  * Refresh the list of USB devices
  */
@@ -474,16 +488,13 @@ BOOL GetDevices(DWORD devnum)
 	ULONG list_size[ARRAYSIZE(usbstor_name)] = { 0 }, list_start[ARRAYSIZE(usbstor_name)] = { 0 }, full_list_size, ulFlags;
 	HANDLE hDrive;
 	LONG maxwidth = 0;
-	int s, score, drive_number, remove_drive;
-	char drive_letters[27], *device_id, *devid_list = NULL, entry_msg[128];
-	char *p, *label, *entry, buffer[MAX_PATH], str[MAX_PATH], device_instance_id[MAX_PATH], *method_str, *hub_path;
+	int s, u, v, score, drive_number, remove_drive, num_drives = 0;
+	char drive_letters[27], *device_id, *devid_list = NULL, display_msg[128];
+	char *p, *label, *display_name, buffer[MAX_PATH], str[MAX_PATH], device_instance_id[MAX_PATH], *method_str, *hub_path;
 	usb_device_props props;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
-	StrArrayClear(&DriveId);
-	StrArrayClear(&DriveName);
-	StrArrayClear(&DriveLabel);
-	StrArrayClear(&DriveHub);
+	ClearDrives();
 	StrArrayCreate(&dev_if_path, 128);
 	// Add a dummy for string index zero, as this is what non matching hashes will point to
 	StrArrayAdd(&dev_if_path, "", TRUE);
@@ -601,7 +612,7 @@ BOOL GetDevices(DWORD devnum)
 		goto out;
 	}
 	dev_info_data.cbSize = sizeof(dev_info_data);
-	for (i=0; SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
+	for (i = 0; num_drives < MAX_DRIVES && SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
 		memset(buffer, 0, sizeof(buffer));
 		memset(&props, 0, sizeof(props));
 		method_str = "";
@@ -907,7 +918,7 @@ BOOL GetDevices(DWORD devnum)
 
 				// The empty string is returned for drives that don't have any volumes assigned
 				if (drive_letters[0] == 0) {
-					entry = lmprintf(MSG_046, label, drive_number,
+					display_name = lmprintf(MSG_046, label, drive_number,
 						SizeToHumanReadable(GetDriveSize(drive_index), FALSE, use_fake_units));
 				} else {
 					// Find the UEFI:TOGO partition(s) (and eliminate them form our listing)
@@ -921,14 +932,14 @@ BOOL GetDevices(DWORD devnum)
 					}
 					// We have multiple volumes assigned to the same device (multiple partitions)
 					// If that is the case, use "Multiple Volumes" instead of the label
-					static_strcpy(entry_msg, (((drive_letters[0] != 0) && (drive_letters[1] != 0))?
+					static_strcpy(display_msg, (((drive_letters[0] != 0) && (drive_letters[1] != 0))?
 						lmprintf(MSG_047):label));
 					for (k=0, remove_drive=0; drive_letters[k] && (!remove_drive); k++) {
 						// Append all the drive letters we detected
 						letter_name[2] = drive_letters[k];
 						if (right_to_left_mode)
-							static_strcat(entry_msg, RIGHT_TO_LEFT_MARK);
-						static_strcat(entry_msg, letter_name);
+							static_strcat(display_msg, RIGHT_TO_LEFT_MARK);
+						static_strcat(display_msg, letter_name);
 						if (drive_letters[k] == (PathGetDriveNumberU(app_dir) + 'A'))
 							remove_drive = 1;
 						if (drive_letters[k] == (PathGetDriveNumberU(system_dir) + 'A'))
@@ -941,20 +952,25 @@ BOOL GetDevices(DWORD devnum)
 						safe_free(devint_detail_data);
 						break;
 					}
-					safe_sprintf(&entry_msg[strlen(entry_msg)], sizeof(entry_msg) - strlen(entry_msg),
+					safe_sprintf(&display_msg[strlen(display_msg)], sizeof(display_msg) - strlen(display_msg),
 						"%s [%s]", (right_to_left_mode)?RIGHT_TO_LEFT_MARK:"", SizeToHumanReadable(GetDriveSize(drive_index), FALSE, use_fake_units));
-					entry = entry_msg;
+					display_name = display_msg;
 				}
 
-				// Must ensure that the combo box is UNSORTED for indexes to be the same
-				StrArrayAdd(&DriveId, device_instance_id, TRUE);
-				StrArrayAdd(&DriveName, buffer, TRUE);
-				StrArrayAdd(&DriveLabel, label, TRUE);
-				if ((hub_path != NULL) && (StrArrayAdd(&DriveHub, hub_path, TRUE) >= 0))
-					DrivePort[DriveHub.Index - 1] = props.port;
-
-				IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, entry), drive_index));
-				maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, entry));
+				rufus_drive[num_drives].index = drive_index;
+				rufus_drive[num_drives].id = safe_strdup(device_instance_id);
+				rufus_drive[num_drives].name = safe_strdup(buffer);
+				rufus_drive[num_drives].display_name = safe_strdup(display_name);
+				rufus_drive[num_drives].label = safe_strdup(label);
+				rufus_drive[num_drives].size = GetDriveSize(drive_index);
+				assert(rufus_drive[num_drives].size != 0);
+				if (hub_path != NULL) {
+					rufus_drive[num_drives].hub = safe_strdup(hub_path);
+					rufus_drive[num_drives].port = props.port;
+				}
+				num_drives++;
+				if (num_drives >= MAX_DRIVES)
+					uprintf("Warning: Found more than %d drives - ignoring remaining ones...", MAX_DRIVES);
 				safe_free(devint_detail_data);
 				break;
 			}
@@ -962,6 +978,30 @@ BOOL GetDevices(DWORD devnum)
 	}
 	SetupDiDestroyDeviceInfoList(dev_info);
 
+	// Reorder the drives by increasing size, using the "selection sort" algorithm
+	for (u = 0; u < num_drives - 1; u++) {
+		uint64_t min_drive_size = rufus_drive[u].size;
+		int min_index = u;
+		for (v = u + 1; v < num_drives; v++) {
+			if (rufus_drive[v].size < min_drive_size) {
+				min_drive_size = rufus_drive[v].size;
+				min_index = v;
+			}
+		}
+		if (min_index != u) {
+			RUFUS_DRIVE tmp;
+			memcpy(&tmp, &rufus_drive[u], sizeof(RUFUS_DRIVE));
+			memcpy(&rufus_drive[u], &rufus_drive[min_index], sizeof(RUFUS_DRIVE));
+			memcpy(&rufus_drive[min_index], &tmp, sizeof(RUFUS_DRIVE));
+		}
+	}
+
+	// Now populate the drive combo box
+	// NB: The combo box must have the UNSORTED attribute for indexes to remain the ones we assign
+	for (u = 0; u < num_drives; u++) {
+		IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, rufus_drive[u].display_name), rufus_drive[u].index));
+		maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, rufus_drive[u].display_name));
+	}
 	// Adjust the Dropdown width to the maximum text size
 	SendMessage(hDeviceList, CB_SETDROPPEDWIDTH, (WPARAM)maxwidth, 0);
 

@@ -402,6 +402,17 @@ typedef struct {
 #define SL_MINOR(x) ((uint8_t)(x))
 
 typedef struct {
+	char* id;
+	char* name;
+	char* display_name;
+	char* label;
+	char* hub;
+	DWORD index;
+	uint32_t port;
+	uint64_t size;
+} RUFUS_DRIVE;
+
+typedef struct {
 	uint16_t version[3];
 	uint32_t platform_min[2];		// minimum platform version required
 	char* download_url;
