@@ -28,7 +28,7 @@
 # • v3.14 "nb-NO" "Norwegian (Norsk)"
 # • v3.5  "fa-IR" "Persian (پارسی)"
 # • v3.14 "pl-PL" "Polish (Polski)"
-# • v3.5  "pt-BR" "Portuguese Brazilian (Português do Brasil)"
+# • v3.14 "pt-BR" "Portuguese Brazilian (Português do Brasil)"
 # • v3.14 "pt-PT" "Portuguese Standard (Português)"
 # • v3.14 "ro-RO" "Romanian (Română)"
 # • v3.5  "ru-RU" "Russian (Русский)"
@@ -9509,7 +9509,7 @@ t MSG_321 "Obraz, który został wybrany jest Hybrydą ISO i nie jest zgodny z t
 
 #########################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
-v 3.5
+v 3.14
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -9863,7 +9863,24 @@ t MSG_303 "Exibir o registro"
 t MSG_304 "Criar uma imagem do dispositivo selecionado"
 t MSG_305 "Use esta opção caso queira instalar o Windows neste dispositivo ou em outro, ou se deseja rodar o Windows direto deste dispositivo (Windows To Go)."
 t MSG_306 "Modo expresso de zerar o disco: %s"
-t MSG_307 "pode demorar um pouco"
+t MSG_307 "Isso pode demorar um pouco"
+t MSG_308 "Detecção de VHD"
+t MSG_309 "Arquivo comprimido"
+t MSG_310 "O ISO que você selecionou usa UEFI e é pequeno o suficiente para ser escrito como uma partição do sistema EFI (ESP). Escrever para uma ESP, em vez de escrever para uma partição genérica de dados que ocupa o disco todo, pode ser preferível para alguns tipos de instalações.\n\nPor favor, selecione o modo que pretende utilizar para escrever esta imagem:"
+t MSG_311 "Usar %s para habilitar (na janela principal da aplicação)."
+t MSG_312 "Hashes extra (SHA512)"
+t MSG_313 "Salvar em VHD"
+t MSG_314 "Calcular cheksums da imagem"
+t MSG_315 "Múltiplos botões"
+t MSG_316 "Número de passes"
+t MSG_317 "ID do Disco"
+t MSG_318 "Prioridade padrão da thread: %d"
+t MSG_319 "Ignorar marcador de inicialização"
+t MSG_320 "Atualizando o layout da partição (%s)..."
+t MSG_321 "A imagem que você selecionou é uma ISOHybrid, mas os criadores não a tornaram compatível com o modo de cópia ISO/Arquivo.\nComo resultado, o modo de gravação de imagem DD será aplicado."
+t MSG_322 "Instalação padrão do Windows 11 (TPM 2.0 + Secure Boot)"
+t MSG_323 "Instalação estendida do Windows 11 (sem TPM / sem Secure Boot)"
+t MSG_324 "Removendo as restrições de instalação do Windows 11: %s"
 
 #########################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
