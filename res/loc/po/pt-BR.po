@@ -1742,7 +1742,7 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"O ISO que você selecionou usa UEFI e é pequeno o suficiente para ser escrito como uma partição do sistema EFI (ESP). Escrever para uma ESP em vez de escrever para uma partição genérica de dados que ocupa o disco todo, pode ser preferível para alguns tipos de instalações.\n"
+"O ISO que você selecionou usa UEFI e é pequeno o suficiente para ser escrito como uma partição do sistema EFI (ESP). Escrever para uma ESP, em vez de escrever para uma partição genérica de dados que ocupa o disco todo, pode ser preferível para alguns tipos de instalações.\n"
 "\n"
 "Por favor, selecione o modo que pretende utilizar para escrever esta imagem:"
 
@@ -1776,7 +1776,7 @@ msgstr "ID do Disco"
 
 #. • MSG_318
 msgid "Default thread priority: %d"
-msgstr "Prioridade padrão do thread: %d"
+msgstr "Prioridade padrão da thread: %d"
 
 #. • MSG_319
 msgid "Ignore Boot Marker"
@@ -1791,7 +1791,7 @@ msgid ""
 "The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
 "As a result, DD image writing mode will be enforced."
 msgstr ""
-"A imagem que você selecionou é uma ISOHybrid mas os criadores não a tornaram compatível com o modo de cópia ISO/Arquivo.\n"
+"A imagem que você selecionou é uma ISOHybrid, mas os criadores não a tornaram compatível com o modo de cópia ISO/Arquivo.\n"
 "Como resultado, o modo de gravação de imagem DD será aplicado."
 
 #. • MSG_322
