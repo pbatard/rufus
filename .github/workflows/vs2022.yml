@@ -31,7 +31,7 @@ env:
 
 jobs:
   VS2022-Build:
-    runs-on: windows-2022
+    runs-on: windows-latest
 
     strategy:
       matrix:

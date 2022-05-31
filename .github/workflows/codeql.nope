@@ -14,7 +14,7 @@ env:
 
 jobs:
   CodeQL-Build:
-    runs-on: windows-2022
+    runs-on: windows-latest
 
     permissions:
       security-events: write

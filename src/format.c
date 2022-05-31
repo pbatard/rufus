@@ -1884,7 +1884,7 @@ out:
 DWORD WINAPI FormatThread(void* param)
 {
 	int r;
-	BOOL ret, use_large_fat32, windows_to_go, actual_lock_drive = lock_drive;
+	BOOL ret, use_large_fat32, windows_to_go, actual_lock_drive = lock_drive, write_as_ext = FALSE;
 	// Windows 11 and VDS (which I suspect is what fmifs.dll's FormatEx() is now calling behind the scenes)
 	// require us to unlock the physical drive to format the drive, else access denied is returned.
 	BOOL need_logical = FALSE, must_unlock_physical = (use_vds || nWindowsVersion >= WINDOWS_11);
@@ -1931,6 +1931,9 @@ DWORD WINAPI FormatThread(void* param)
 	// were, meaning that we also can't lock the drive without incurring errors...
 	if ((nWindowsVersion >= WINDOWS_11) && extra_partitions)
 		actual_lock_drive = FALSE;
+	// Fixed drives + ext2/ext3 don't play nice and require the same handling as ESPs
+	write_as_ext = (fs_type >= FS_EXT2 && fs_type <= FS_EXT4) &&
+		(GetDriveTypeFromIndex(DriveIndex) == DRIVE_FIXED);
 
 	PrintInfoDebug(0, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, actual_lock_drive, FALSE, !actual_lock_drive);
@@ -1993,7 +1996,7 @@ DWORD WINAPI FormatThread(void* param)
 			goto out;
 		// If the call succeeds (and we don't get a NULL logical handle as returned for
 		// unpartitioned drives), try to unmount the volume.
-		} else if ((hLogicalVolume == NULL) && (!UnmountVolume(hLogicalVolume))) {
+		} else if ((hLogicalVolume != NULL) && (!UnmountVolume(hLogicalVolume))) {
 			uprintf("Trying to continue regardless...");
 		}
 	}
@@ -2139,8 +2142,8 @@ DWORD WINAPI FormatThread(void* param)
 	// Wait for the logical drive we just created to appear
 	uprintf("Waiting for logical drive to reappear...");
 	Sleep(200);
-	if (write_as_esp) {
-		// Can't format the ESP unless we mount it ourself
+	if (write_as_esp || write_as_ext) {
+		// Can't format ESPs or ext2/ext3 partitions unless we mount them ourselves
 		volume_name = AltMountVolume(DriveIndex, partition_offset[PI_MAIN], FALSE);
 		if (volume_name == NULL) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_ASSIGN_LETTER);
@@ -2214,7 +2217,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 	Sleep(200);
 
-	if (!write_as_esp) {
+	if (!write_as_esp && !write_as_ext) {
 		WaitForLogical(DriveIndex, 0);
 		// Try to continue
 		CHECK_FOR_USER_CANCEL;
@@ -2409,7 +2412,7 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 out:
-	if (write_as_esp && volume_name != NULL)
+	if ((write_as_esp || write_as_ext) && volume_name != NULL)
 		AltUnmountVolume(volume_name, TRUE);
 	else
 		safe_free(volume_name);
