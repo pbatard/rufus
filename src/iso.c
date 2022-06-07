@@ -93,6 +93,7 @@ static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* md5sum_name[] = { "MD5SUMS", "md5sum.txt" };
 static const char* casper_dirname = "/casper";
+static const char* proxmox_dirname = "/proxmox";
 static const char* efi_dirname = "/efi/boot";
 static const char* efi_bootname[MAX_ARCHS] = {
 	"bootia32.efi", "bootia64.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi",
@@ -229,7 +230,12 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 				img_report.disable_iso = TRUE;
 		}
 
-		// Check for various files in root (psz_dirname = "")
+		// Check for a '/proxmox' directory
+		if (safe_stricmp(psz_dirname, proxmox_dirname) == 0) {
+			img_report.disable_iso = TRUE;
+		}
+
+		// Check for various files and directories in root (psz_dirname = "")
 		if ((psz_dirname != NULL) && (psz_dirname[0] == 0)) {
 			if (safe_stricmp(psz_basename, bootmgr_name) == 0) {
 				img_report.has_bootmgr = TRUE;
