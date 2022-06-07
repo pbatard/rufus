@@ -1263,13 +1263,13 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 	// where we should apply an inst.stage2 ➔ inst.repo workaround for ISO
 	// mode (per: https://github.com/rhinstaller/anaconda/pull/3529).
 	const char* redhat8_derivative[] = {
-		"^AlmaLinux-8.*",		// AlmaLinux 8.x
-		"^Fedora.*-3[3-9].*",	// Fedora 33-39
-		"^CentOS.*-8.*",		// CentOS and CentOS Stream 8.x
-		"^OL-8.*",				// Oracle Linux 8.x
-		"^RHEL-8.*",			// Red Hat 8.x
-		"^Rocky-8.*",			// Rocky Linux 8.x
-		"^MIRACLE-LINUX-8-.*",	// MIRACLE LINUX 8.x
+		"^AlmaLinux-[8-9].*",		// AlmaLinux 8.x and 9.x
+		"^Fedora.*-3[3-9].*",		// Fedora 33-39
+		"^CentOS.*-[8-9].*",		// CentOS and CentOS Stream 8.and 9.x
+		"^OL-[8-9].*",				// Oracle Linux 8.x and 9.x
+		"^RHEL-[8-9].*",			// Red Hat 8.x and 9.x
+		"^Rocky-[8-9].*",			// Rocky Linux 8.x and 9.x
+		"^MIRACLE-LINUX-[8-9].*",	// MIRACLE LINUX 8.x and 9.x
 	};
 	int i, len;
 	uint8_t arch;
