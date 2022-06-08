@@ -782,7 +782,7 @@ static void EnableExtendedLabel(BOOL enable, BOOL remove_checkboxes)
 	static UINT checked, state = 0;
 	HWND hCtrl = GetDlgItem(hMainDialog, IDC_EXTENDED_LABEL);
 
-	if ((fs_type >= FS_EXT2) || ((boot_type == BT_IMAGE) && IS_DD_ONLY(img_report)))
+	if (IS_EXT(fs_type) || ((boot_type == BT_IMAGE) && IS_DD_ONLY(img_report)))
 		enable = FALSE;
 
 	if (remove_checkboxes) {

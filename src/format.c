@@ -671,7 +671,7 @@ static BOOL FormatPartition(DWORD DriveIndex, uint64_t PartitionOffset, DWORD Un
 	actual_fs_type = FSType;
 	if ((FSType == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32) || (Flags & FP_LARGE_FAT32)))
 		return FormatLargeFAT32(DriveIndex, PartitionOffset, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
-	else if (FSType >= FS_EXT2)
+	else if (IS_EXT(FSType))
 		return FormatExtFs(DriveIndex, PartitionOffset, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
 	else if (use_vds)
 		return FormatNativeVds(DriveIndex, PartitionOffset, UnitAllocationSize, FileSystemLabel[FSType], Label, Flags);
@@ -1925,15 +1925,14 @@ DWORD WINAPI FormatThread(void* param)
 		extra_partitions = XP_COMPAT;
 	// On pre 1703 platforms (and even on later ones), anything with ext2/ext3 doesn't sit
 	// too well with Windows. Same with ESPs. Relaxing our locking rules seems to help...
-	if ((extra_partitions & (XP_ESP | XP_CASPER)) || (fs_type >= FS_EXT2))
+	if ((extra_partitions & (XP_ESP | XP_CASPER)) || IS_EXT(fs_type))
 		actual_lock_drive = FALSE;
 	// Windows 11 is a lot more proactive in locking ESPs and MSRs than previous versions
 	// were, meaning that we also can't lock the drive without incurring errors...
 	if ((nWindowsVersion >= WINDOWS_11) && extra_partitions)
 		actual_lock_drive = FALSE;
 	// Fixed drives + ext2/ext3 don't play nice and require the same handling as ESPs
-	write_as_ext = (fs_type >= FS_EXT2 && fs_type <= FS_EXT4) &&
-		(GetDriveTypeFromIndex(DriveIndex) == DRIVE_FIXED);
+	write_as_ext = IS_EXT(fs_type) && (GetDriveTypeFromIndex(DriveIndex) == DRIVE_FIXED);
 
 	PrintInfoDebug(0, MSG_225);
 	hPhysicalDrive = GetPhysicalHandle(DriveIndex, actual_lock_drive, FALSE, !actual_lock_drive);
@@ -2254,7 +2253,7 @@ DWORD WINAPI FormatThread(void* param)
 	if ((fs_type < FS_EXT2) && !GetVolumeInformationU(drive_name, img_report.usb_label,
 		ARRAYSIZE(img_report.usb_label), NULL, NULL, NULL, NULL, 0)) {
 		uprintf("Warning: Failed to refresh label: %s", WindowsErrorString());
-	} else if ((fs_type >= FS_EXT2) && (fs_type <= FS_EXT4)) {
+	} else if (IS_EXT(fs_type)) {
 		const char* ext_label = GetExtFsLabel(DriveIndex, 0);
 		if (ext_label != NULL)
 			static_strcpy(img_report.usb_label, label);

@@ -1201,7 +1201,7 @@ void InitProgress(BOOL bOnlyFormat)
 			// So, yeah, if you're doing slow format, or using Large FAT32, and have persistence, you'll see
 			// the progress bar revert during format on account that we reuse the same operation for both
 			// partitions. Maybe one day I'll be bothered to handle two separate OP_FORMAT ops...
-			if ((!IsChecked(IDC_QUICK_FORMAT)) || (persistence_size != 0) || (fs_type >= FS_EXT2) ||
+			if ((!IsChecked(IDC_QUICK_FORMAT)) || (persistence_size != 0) || IS_EXT(fs_type) ||
 				((fs_type == FS_FAT32) && ((SelectedDrive.DiskSize >= LARGE_FAT32_SIZE) || (force_large_fat32)))) {
 				nb_slots[OP_FORMAT] = -1;
 				nb_slots[OP_CREATE_FS] = 0;
