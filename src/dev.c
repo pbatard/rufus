@@ -38,6 +38,7 @@
 #include "rufus.h"
 #include "missing.h"
 #include "resource.h"
+#include "settings.h"
 #include "msapi_utf8.h"
 #include "localization.h"
 
@@ -475,6 +476,7 @@ BOOL GetDevices(DWORD devnum)
 	StrArray dev_if_path;
 	char letter_name[] = " (?:)";
 	char drive_name[] = "?:\\";
+	char setting_name[32];
 	char uefi_togo_check[] = "?:\\EFI\\Rufus\\ntfs_x64.efi";
 	char scsi_card_name_copy[16];
 	BOOL r = FALSE, found = FALSE, post_backslash;
@@ -491,6 +493,7 @@ BOOL GetDevices(DWORD devnum)
 	int s, u, v, score, drive_number, remove_drive, num_drives = 0;
 	char drive_letters[27], *device_id, *devid_list = NULL, display_msg[128];
 	char *p, *label, *display_name, buffer[MAX_PATH], str[MAX_PATH], device_instance_id[MAX_PATH], *method_str, *hub_path;
+	uint32_t ignore_vid_pid[MAX_IGNORE_USB];
 	usb_device_props props;
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
@@ -568,9 +571,15 @@ BOOL GetDevices(DWORD devnum)
 			full_list_size += list_size[s]-1;	// remove extra NUL terminator
 	}
 	// Compute the card_start index
-	for (s=0; s<ARRAYSIZE(genstor_name); s++) {
+	for (s = 0; s < ARRAYSIZE(genstor_name); s++) {
 		if (strcmp(genstor_name[s], "SD") == 0)
 			card_start = s;
+	}
+
+	// Build the list of USB devices we may want to ignore
+	for (s = 0; s < ARRAYSIZE(ignore_vid_pid); s++) {
+		static_sprintf(setting_name, "IgnoreUsb%02d", s + 1);
+		ignore_vid_pid[s] = ReadSetting32(setting_name);
 	}
 
 	// Better safe than sorry. And yeah, we could have used arrays of
@@ -791,6 +800,7 @@ BOOL GetDevices(DWORD devnum)
 				}
 				static_strcpy(str, "????:????");	// Couldn't figure VID:PID
 			} else {
+				static_sprintf(str, "%04X:%04X", props.vid, props.pid);
 				// I *REALLY* don't want to erase the devices below by accident.
 				if (its_a_me_mario) {
 					if ((props.vid == 0x0525) && (props.pid == 0x622b))
@@ -798,7 +808,15 @@ BOOL GetDevices(DWORD devnum)
 					if ((props.vid == 0x0781) && (props.pid == 0x75a0))
 						continue;
 				}
-				static_sprintf(str, "%04X:%04X", props.vid, props.pid);
+				// Also ignore USB devices that have been specifically flaggged by the user
+				for (s = 0; s < ARRAYSIZE(ignore_vid_pid); s++) {
+					if ((props.vid == (ignore_vid_pid[s] >> 16)) && (props.pid == (ignore_vid_pid[s] & 0xffff))) {
+						uprintf("Ignoring '%s' (%s), per user settings", buffer, str);
+						break;
+					}
+				}
+				if (s < ARRAYSIZE(ignore_vid_pid))
+					continue;
 			}
 			if (props.speed >= USB_SPEED_MAX)
 				props.speed = 0;

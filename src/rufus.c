@@ -3866,7 +3866,7 @@ relaunch:
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'Q')) {
 				enable_file_indexing = !enable_file_indexing;
 				WriteSettingBool(SETTING_ENABLE_FILE_INDEXING, enable_file_indexing);
-				PrintStatusTimeout(lmprintf(MSG_290), !enable_file_indexing);
+				PrintStatusTimeout(lmprintf(MSG_290), enable_file_indexing);
 				continue;
 			}
 			// Alt-R => Remove all the registry keys that may have been created by Rufus
