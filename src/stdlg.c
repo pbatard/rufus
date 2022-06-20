@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Dialog Routines (Browse for folder, About, etc)
- * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2022 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -859,13 +859,16 @@ BOOL Notification(int type, const char* dont_display_setting, const notification
 	return ret;
 }
 
+// We only ever display one selection dialog, so set some params as globals
+static int selection_dialog_style, selection_dialog_mask;
+
 /*
  * Custom dialog for radio button selection dialog
  */
 INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	LRESULT loc;
-	int i, dh, r  = -1;
+	int i, m, dh, r  = -1;
 	// Prevent resizing
 	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
 		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
@@ -885,6 +888,9 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 				nDialogItems, IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1);
 			nDialogItems = IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1;
 		}
+		// Switch to checkboxes or some other style if requested
+		for (i = 0; i < nDialogItems; i++)
+			Button_SetStyle(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), selection_dialog_style, TRUE);
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
 		ncm.cbSize = sizeof(ncm);
 		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
@@ -936,9 +942,9 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		ResizeButtonHeight(hDlg, IDOK);
 		ResizeButtonHeight(hDlg, IDCANCEL);
 
-		// Set the radio selection
-		Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), BST_CHECKED);
-		Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), BST_UNCHECKED);
+		// Set the default selection
+		for (i = 0, m = 1; i < nDialogItems; i++, m <<= 1)
+			Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), (m & selection_dialog_mask) ? BST_CHECKED : BST_UNCHECKED);
 		return (INT_PTR)TRUE;
 	case WM_CTLCOLORSTATIC:
 		// Change the background colour for static text and icon
@@ -959,10 +965,9 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
-			for (i = 0; (i < nDialogItems) &&
-				(Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)) != BST_CHECKED); i++);
-			if (i < nDialogItems)
-				r = i + 1;
+			for (r = 0, i = 0, m = 1; i < nDialogItems; i++, m <<= 1)
+				if (Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)) == BST_CHECKED)
+					r += m;
 			// Fall through
 		case IDNO:
 		case IDCANCEL:
@@ -977,7 +982,7 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 /*
  * Display an item selection dialog
  */
-int SelectionDialog(char* title, char* message, char** choices, int size)
+int SelectionDialog(int style, char* title, char* message, char** choices, int size, int mask)
 {
 	int ret;
 
@@ -986,6 +991,9 @@ int SelectionDialog(char* title, char* message, char** choices, int size)
 	szMessageText = message;
 	szDialogItem = choices;
 	nDialogItems = size;
+	selection_dialog_style = style;
+	selection_dialog_mask = mask;
+	assert(selection_dialog_style == BS_AUTORADIOBUTTON || selection_dialog_style == BS_AUTOCHECKBOX);
 	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, SelectionCallback);
 	dialog_showing--;
 
@@ -1971,6 +1979,7 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc)
 {
 	LPCDLGTEMPLATE rcTemplate = GetDialogTemplate(Dialog_ID);
+	assert(rcTemplate != NULL);
 	HWND hDlg = CreateDialogIndirect(hInstance, rcTemplate, hWndParent, lpDialogFunc);
 	safe_free(rcTemplate);
 	return hDlg;
@@ -1987,6 +1996,7 @@ INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC
 	// main dialog was reduced => Ensure the main dialog is visible before we display anything.
 	ShowWindow(hMainDialog, SW_NORMAL);
 
+	assert(rcTemplate != NULL);
 	ret = DialogBoxIndirect(hMainInstance, rcTemplate, hWndParent, lpDialogFunc);
 	safe_free(rcTemplate);
 	return ret;

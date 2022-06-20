@@ -1268,11 +1268,11 @@ int SetWinToGoIndex(void)
 	if (img_report.wininst_index > 1) {
 		for (i = 0; i < img_report.wininst_index; i++)
 			install_names[i] = &img_report.wininst_path[i][2];
-		wininst_index = SelectionDialog(lmprintf(MSG_130), lmprintf(MSG_131), install_names, img_report.wininst_index);
+		wininst_index = _log2(SelectionDialog(BS_AUTORADIOBUTTON, lmprintf(MSG_130),
+			lmprintf(MSG_131), install_names, img_report.wininst_index, 1));
 		if (wininst_index < 0)
 			return -2;
-		wininst_index--;
-		if ((wininst_index < 0) || (wininst_index >= MAX_WININST))
+		if (wininst_index >= MAX_WININST)
 			wininst_index = 0;
 	}
 
@@ -1323,14 +1323,15 @@ int SetWinToGoIndex(void)
 		uprintf("Warning: Nonstandard Windows image (missing <DISPLAYNAME> entries)");
 
 	if (i > 1)
-		i = SelectionDialog(lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i);
-	if (i < 0) {
+		// NB: _log2 returns -2 if SelectionDialog() returns negative (user cancelled)
+		i = _log2(SelectionDialog(BS_AUTORADIOBUTTON,
+			lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i, 1)) + 1;
+	if (i < 0)
 		wintogo_index = -2;	// Cancelled by the user
-	} else if (i == 0) {
+	else if (i == 0)
 		wintogo_index = 1;
-	} else {
+	else
 		wintogo_index = atoi(version_index.String[i - 1]);
-	}
 	if (i > 0) {
 		// Get the build version
 		build = get_token_data_file_indexed("BUILD", xml_file, i);

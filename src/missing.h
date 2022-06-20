@@ -1,7 +1,7 @@
 /*
 * Rufus: The Reliable USB Formatting Utility
 * Constants and defines missing from various toolchains
-* Copyright © 2016-2017 Pete Batard <pete@akeo.ie>
+* Copyright © 2016-2022 Pete Batard <pete@akeo.ie>
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -102,6 +102,16 @@ static __inline void *_reallocf(void *ptr, size_t size) {
 	void *ret = realloc(ptr, size);
 	if (!ret)
 		free(ptr);
+	return ret;
+}
+
+static __inline int _log2(register int val)
+{
+	int ret = 0;
+	if (val < 0)
+		return -2;
+	while (val >>= 1)
+		ret++;
 	return ret;
 }
 

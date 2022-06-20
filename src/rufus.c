@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2022 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1454,23 +1454,20 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
 					(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
 					char* choices[3] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP"), lmprintf(MSG_277, dd_image) };
-					i = SelectionDialog(lmprintf(MSG_274, "ISOHybrid"), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
-						choices, 3);
+					i = SelectionDialog(BS_AUTORADIOBUTTON, lmprintf(MSG_274, "ISOHybrid"),
+						lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image), choices, 3, 1);
 					if (i < 0)	// Cancel
 						goto out;
-					else if (i == 2)
-						write_as_esp = TRUE;
-					else if (i == 3)
-						write_as_image = TRUE;
+					write_as_esp = (i & 2);
+					write_as_image = (i & 4);
 					esp_already_asked = TRUE;
 				} else {
 					char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
-					i = SelectionDialog(lmprintf(MSG_274, "ISOHybrid"), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image),
-						choices, 2);
+					i = SelectionDialog(BS_AUTORADIOBUTTON, lmprintf(MSG_274, "ISOHybrid"),
+						lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image), choices, 2, 1);
 					if (i < 0)	// Cancel
 						goto out;
-					else if (i == 2)
-						write_as_image = TRUE;
+					write_as_image = (i & 2);
 				}
 			}
 		}
@@ -1541,11 +1538,10 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			// so ask the users if they want to write it as an ESP.
 			char* iso_image = lmprintf(MSG_036);
 			char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP") };
-			i = SelectionDialog(lmprintf(MSG_274, "ESP"), lmprintf(MSG_310), choices, 2);
+			i = SelectionDialog(BS_AUTORADIOBUTTON, lmprintf(MSG_274, "ESP"), lmprintf(MSG_310), choices, 2, 1);
 			if (i < 0)	// Cancel
 				goto out;
-			else if (i == 2)
-				write_as_esp = TRUE;
+			write_as_esp = (i & 2);
 		}
 
 		// If the selected target doesn't include BIOS, skip file downloads for GRUB/Syslinux
