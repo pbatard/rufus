@@ -5,12 +5,16 @@ To edit a translation, please make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translation
 Or simply download https://rufus-web.akeo.ie/locale/pollock.exe and follow its directions.
 
-o v3.?? (????.??.??)
-  - *UPDATED*  MSG_305 Reworked the message to mention the new Windows 11 Extended option
-  - *NEW*      MSG_322 "Standard Windows 11 Installation (TPM 2.0 + Secure Boot)"
-  - *NEW*      MSG_323 "Extended Windows 11 Installation (no TPM / no Secure Boot)"
-  - *NEW*      MSG_324 "Removing Windows 11 installation restrictions: %s"
-  - *NEW*      MSG_325 "Unable to open or read '%s'"
+o v3.20 (2022.??.??)
+  - *NEW*      MSG_323 "Unable to open or read '%s'"
+  - *NEW*      MSG_325 "Applying Windows customization: %s"
+  - *NEW*      MSG_326 "Windows User Experience"
+  - *NEW*      MSG_327 "Customize Windows installation?"
+  - *NEW*      MSG_328 "Remove requirement for Secure Boot and TPM 2.0"
+  - *NEW*      MSG_329 "Remove requirement for 4GB+ RAM and 64GB+ disk"
+  - *NEW*      MSG_330 "Remove requirement for an online Microsoft account"
+  - *NEW*      MSG_331 "Remove \"unsupported hardware\" desktop watermark"
+  - *NEW*      MSG_332 "Disable data collection (Skip privacy questions)"
 
 o v3.14 (2021.03.31)
   - *UPDATED*  MSG_068 "Error while partitioning drive." -> "Could not partition drive."

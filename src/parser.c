@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Elementary Unicode compliant find/replace parser
- * Copyright © 2012-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2022 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -914,7 +914,7 @@ void parse_update(char* buf, size_t len)
 	char allowed_rtf_chars[] = "abcdefghijklmnopqrstuvwxyz|~-_:*'";
 	char allowed_std_chars[] = "\r\n ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"$%^&+=<>(){}[].,;#@/?";
 	char download_url_name[24];
-	char *arch_names[CPU_ARCH_MAX] = { "x86", "x64", "arm", "arm64", "none" };
+	char *arch_names[5] = { "unknown", "x86", "x64", "arm", "arm64" };
 
 	// strchr includes the NUL terminator in the search, so take care of backslash before NUL
 	if ((buf == NULL) || (len < 2) || (len > 64 * KB) || (buf[len-1] != 0) || (buf[len-2] == '\\'))

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Virtual Disk Handling functions
- * Copyright © 2013-2016 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2022 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -548,7 +548,7 @@ static DWORD WINAPI WimMountImageThread(LPVOID param)
 
 	progress_report_mask = WIM_REPORT_PROGRESS;
 	progress_op = OP_PATCH;
-	progress_msg = MSG_324;
+	progress_msg = MSG_325;
 	progress_offset = 1;
 	progress_total = PATCH_PROGRESS_TOTAL;
 	if (pfWIMRegisterMessageCallback(NULL, (FARPROC)WimProgressCallback, NULL) == INVALID_CALLBACK_VALUE) {
@@ -607,7 +607,7 @@ static DWORD WINAPI WimUnmountImageThread(LPVOID param)
 
 	progress_report_mask = WIM_REPORT_PROGRESS;
 	progress_op = OP_PATCH;
-	progress_msg = MSG_324;
+	progress_msg = MSG_325;
 	progress_offset = 105;
 	progress_total = PATCH_PROGRESS_TOTAL;
 	if (pfWIMRegisterMessageCallback(NULL, (FARPROC)WimProgressCallback, NULL) == INVALID_CALLBACK_VALUE) {

@@ -63,7 +63,6 @@
 #define MIN_DRIVE_SIZE              8			// Minimum size a drive must have, to be formattable (in MB)
 #define MIN_EXTRA_PART_SIZE         (1024*1024)	// Minimum size of the extra partition, in bytes
 #define MIN_EXT_SIZE                (256*1024*1024)	// Minimum size we allow for ext formatting
-#define MAX_ARCHS                   9			// Number of arhitectures we recognize
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
 #define MAX_TOOLTIPS                128
 #define MAX_SIZE_SUFFIXES           6			// bytes, KB, MB, GB, TB, PB
@@ -333,6 +332,7 @@ enum checksum_type {
 #define HAS_WINPE(r)        (((r.winpe & WINPE_I386) == WINPE_I386)||((r.winpe & WINPE_AMD64) == WINPE_AMD64)||((r.winpe & WINPE_MININT) == WINPE_MININT))
 #define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))
 #define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_WININST(r))
+#define IS_WINDOWS_11(r)    (r.has_bootmgr_efi && (r.win_version.major >= 11))
 #define HAS_EFI_IMG(r)      (r.efi_img_path[0] != 0)
 #define IS_DD_BOOTABLE(r)   (r.is_bootable_img > 0)
 #define IS_DD_ONLY(r)       ((r.is_bootable_img > 0) && (!r.is_iso || r.disable_iso))
@@ -483,13 +483,18 @@ enum WindowsVersion {
 	WINDOWS_MAX
 };
 
-enum CpuArch {
-	CPU_ARCH_X86_32 = 0,
-	CPU_ARCH_X86_64,
-	CPU_ARCH_ARM_32,
-	CPU_ARCH_ARM_64,
-	CPU_ARCH_UNDEFINED,
-	CPU_ARCH_MAX
+enum ArchType {
+	ARCH_UNKNOWN = 0,
+	ARCH_X86_32,
+	ARCH_X86_64,
+	ARCH_ARM_32,
+	ARCH_ARM_64,
+	ARCH_IA_64,
+	ARCH_RISCV_32,
+	ARCH_RISCV_64,
+	ARCH_RISCV_128,
+	ARCH_EBC,
+	ARCH_MAX
 };
 
 /*
@@ -524,7 +529,7 @@ extern char app_data_dir[MAX_PATH], *image_path, *fido_url;
  */
 extern void GetWindowsVersion(void);
 extern BOOL is_x64(void);
-extern BOOL GetCpuArch(void);
+extern int GetCpuArch(void);
 extern const char *WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, ...);
