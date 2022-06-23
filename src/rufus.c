@@ -1272,6 +1272,7 @@ static char* CreateUnattendXml(int arch, int mask)
 	if (arch < ARCH_X86_32 || arch >= ARCH_ARM_64 || mask == 0)
 		return NULL;
 	arch--;
+	// coverity[swapped_arguments]
 	if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, path) == 0)
 		return NULL;
 	fd = fopen(path, "w");

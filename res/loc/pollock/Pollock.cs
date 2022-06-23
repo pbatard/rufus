@@ -1,7 +1,7 @@
 ﻿/*
  * Rufus: The Reliable USB Formatting Utility
  * Poedit <-> rufus.loc conversion utility
- * Copyright © 2018-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2018-2022 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,9 +41,9 @@ using System.Windows.Forms;
 [assembly: AssemblyDescription("Poedit ↔ Rufus loc conversion utility")]
 [assembly: AssemblyCompany("Akeo Consulting")]
 [assembly: AssemblyProduct("Pollock")]
-[assembly: AssemblyCopyright("Copyright © 2018 Pete Batard <pete@akeo.ie>")]
+[assembly: AssemblyCopyright("Copyright © 2018-2022 Pete Batard <pete@akeo.ie>")]
 [assembly: AssemblyTrademark("GNU GPLv3")]
-[assembly: AssemblyVersion("1.3.*")]
+[assembly: AssemblyVersion("1.4.*")]
 
 namespace pollock
 {
@@ -266,8 +266,16 @@ namespace pollock
                         }
                         lang.sections[section_name].Add(new Message(parts[1], parts[2]));
                         // We also maintain global list of Id -> str for convenience
-                        lang.id_to_str.Add(new Id(section_name, (parts[1])), parts[2]);
-                        last_key = parts[1];
+                        try
+                        {
+                            lang.id_to_str.Add(new Id(section_name, (parts[1])), parts[2]);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"Error for {parts[1]}: " + e.Message);
+                            continue;
+                        }
+                            last_key = parts[1];
                         if (comment != null)
                         {
                             id = new Id(section_name, last_key);

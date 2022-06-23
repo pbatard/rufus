@@ -1,4 +1,3 @@
-# Disabled on account of https://github.com/github/codeql-action/issues/850
 name: "CodeQL"
 
 on:
@@ -21,10 +20,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
         languages: cpp
 
@@ -37,4 +36,4 @@ jobs:
       run: msbuild ${{env.SOLUTION_FILE_PATH}} /m /p:Configuration=${{ env.BUILD_CONFIGURATION}},Platform=${{ env.TARGET_PLATFORM }}
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2
