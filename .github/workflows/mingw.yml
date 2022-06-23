@@ -88,7 +88,7 @@ jobs:
 
     - name: Upload artifacts
       if: ${{ matrix.env == 'i686' && github.event_name == 'push' }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: MinGW
         path: ./*.exe
