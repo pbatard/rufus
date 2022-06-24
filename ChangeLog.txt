@@ -1,3 +1,19 @@
+o Version 3.19 (2022.07.??)
+    Add a new selection dialog for Windows 11 setup customization:
+      - Secure Boot and TPM bypass have now been moved to this dialog
+      - Also allows to bypass the mandatory requirement for a Microsoft account on Windows 11 22H2
+        (NB: Network *MUST* be temporarily disabled for the local account creation to be proposed)
+      - Also add an option to skip all collection questions (Sets all answers to "Don't allow")
+      - Also add an option for setting internal drives offline with Windows To Go
+      Note: These customization options are only be proposed when using a Windows 11 image.
+    Add support for distros using a nonstandard GRUB 2.0 prefix directory (openSUSE Live, GeckoLinux)
+    Add the ability to ignore USBs (See https://github.com/pbatard/rufus/blob/master/res/rufus.ini)
+    Change drive listing to always list in increasing order of size
+    Update exceptions needed by Red Hat and derivatives for latest versions
+    Update UEFI:NTFS drivers to latest
+    Reassign a letter for drives written in DD mode that don't have an ESP (CoreELEC)
+    Fix Windows refusing to mount Linux MBR partitions on FIXED drives
+
 o Version 3.18 (2022.03.11)
     Fix DLL sideloading vulnerabilities
     Fix ISO → ESP creation when running on Windows 11
