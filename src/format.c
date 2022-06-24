@@ -72,7 +72,7 @@ extern uint32_t dur_mins, dur_secs;
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 static int actual_fs_type, wintogo_index = -1, wininst_index = 0;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing;
-extern BOOL write_as_image, use_vds, write_as_esp, is_vds_available, enable_inplace;
+extern BOOL write_as_image, use_vds, write_as_esp, is_vds_available, enable_inplace, set_drives_offline;
 extern const grub_patch_t grub_patch[2];
 extern char* unattend_xml_path;
 uint8_t *grub2_buf = NULL, *sec_buf = NULL;
@@ -1464,6 +1464,19 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	}
 
 	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, wim_proc_files + 2 * wim_extra_files, wim_nb_files);
+
+	// Setting internal drives offline for Windows To Go is crucial if, for instance, you are using ReFS
+	// on Windows 10 (therefore ReFS v3.4) and don't want a Windows 11 To Go boot to automatically
+	// "upgrade" the ReFS version on all drives to v3.7, thereby preventing you from being able to mount
+	// those volumes back on Windows 10 ever again. Yes, I have been stung by this Microsoft bullshit!
+	// See: https://gist.github.com/0xbadfca11/da0598e47dd643d933dc#Mountability
+	if (set_drives_offline) {
+		uprintf("Setting the target's internal drives offline using command:");
+		// This applies the "offlineServicing" section of the unattend.xml (while ignoring the other sections)
+		static_sprintf(cmd, "dism /Image:%s\\ /Apply-Unattend:%s", drive_name, unattend_xml_path);
+		uprintf(cmd);
+		RunCommand(cmd, NULL, usb_debug);
+	}
 
 	uprintf("Disabling use of the Windows Recovery Environment using command:");
 	static_sprintf(cmd, "%s\\bcdedit.exe /store %s\\EFI\\Microsoft\\Boot\\BCD /set {default} recoveryenabled no",

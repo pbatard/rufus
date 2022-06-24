@@ -64,10 +64,12 @@ enum bootcheck_return {
 #define UNATTEND_MINRAM_MINDISK_MASK        0x02
 #define UNATTEND_NO_ONLINE_ACCOUNT_MASK     0x04
 #define UNATTEND_NO_DATA_COLLECTION_MASK    0x08
+#define UNATTEND_OFFLINE_INTERNAL_DRIVES    0x10
 
 #define UNATTEND_WINPE_SETUP_MASK           (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_MINRAM_MINDISK_MASK)
 #define UNATTEND_SPECIALIZE_DEPLOYMENT_MASK (UNATTEND_NO_ONLINE_ACCOUNT_MASK)
 #define UNATTEND_OOBE_SHELL_SETUP           (UNATTEND_NO_DATA_COLLECTION_MASK)
+#define UNATTEND_OFFLINE_SERVICING          (UNATTEND_OFFLINE_INTERNAL_DRIVES)
 
 static const char* cmdline_hogger = "rufus.com";
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
@@ -88,7 +90,8 @@ static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
 static int selected_pt = -1, selected_fs = FS_UNKNOWN, preselected_fs = FS_UNKNOWN;
 static int image_index = 0, select_index = 0;
-static int unattend_xml_mask = (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_NO_ONLINE_ACCOUNT_MASK);
+static int unattend_xml_mask = (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_NO_ONLINE_ACCOUNT_MASK |
+	UNATTEND_OFFLINE_INTERNAL_DRIVES);
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uMBRChecked = BST_UNCHECKED;
 static HANDLE format_thread = NULL;
@@ -126,13 +129,13 @@ HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hL
 HWND hImageOption, hLogDialog = NULL, hProgress = NULL, hDiskID;
 HANDLE dialog_handle = NULL;
 BOOL is_x86_32, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
-BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, its_a_me_mario = FALSE, enable_inplace;
+BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, its_a_me_mario = FALSE, enable_inplace = FALSE;
 BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
 BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
 BOOL write_as_image = FALSE, write_as_esp = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
-BOOL appstore_version = FALSE, is_vds_available = TRUE;
+BOOL appstore_version = FALSE, is_vds_available = TRUE, set_drives_offline = FALSE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1, imop_win_sel = 0;
 int default_fs, fs_type, boot_type, partition_type, target_type;
@@ -1275,7 +1278,6 @@ static char* CreateUnattendXml(int arch, int mask)
 	fd = fopen(path, "w");
 	if (fd == NULL)
 		return NULL;
-	enable_inplace = mask & UNATTEND_WINPE_SETUP_MASK;
 
 	fprintf(fd, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 	fprintf(fd, "<unattend xmlns=\"urn:schemas-microsoft-com:unattend\">\n");
@@ -1283,6 +1285,7 @@ static char* CreateUnattendXml(int arch, int mask)
 	// This part produces the unbecoming display of a command prompt window during initial setup, which
 	// may scare users... But the Windows Store version doesn't allow us to edit an offline registry...
 	if (mask & UNATTEND_WINPE_SETUP_MASK) {
+		enable_inplace = TRUE;
 		order = 1;
 		fprintf(fd, "  <settings pass=\"windowsPE\">\n");
 		fprintf(fd, "    <component name=\"Microsoft-Windows-Setup\" processorArchitecture=\"%s\" language=\"neutral\" "
@@ -1342,6 +1345,19 @@ static char* CreateUnattendXml(int arch, int mask)
 			fprintf(fd, "      </OOBE>\n");
 		}
 		fprintf(fd, "    </component>\n");
+		fprintf(fd, "  </settings>\n");
+	}
+
+	if (mask & UNATTEND_OFFLINE_SERVICING) {
+		fprintf(fd, "  <settings pass=\"offlineServicing\">\n");
+		if (mask & UNATTEND_OFFLINE_INTERNAL_DRIVES) {
+			set_drives_offline = TRUE;
+			fprintf(fd, "    <component name=\"Microsoft-Windows-PartitionManager\" processorArchitecture=\"%s\" language=\"neutral\" "
+				"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
+			fprintf(fd, "      <SanPolicy>4</SanPolicy>\n");
+			fprintf(fd, "    </component>\n");
+		}
 		fprintf(fd, "  </settings>\n");
 	}
 
@@ -1609,6 +1625,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				}
 				StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
 				MAP_BIT(UNATTEND_NO_DATA_COLLECTION_MASK);
+				StrArrayAdd(&options, lmprintf(MSG_332), TRUE);
+				MAP_BIT(UNATTEND_OFFLINE_INTERNAL_DRIVES);
 				i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_326), lmprintf(MSG_327),
 					options.String, options.Index, remap8(unattend_xml_mask, map, FALSE));
 				StrArrayDestroy(&options);
@@ -2747,6 +2765,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			fs_type = (int)ComboBox_GetCurItemData(hFileSystem);
 			write_as_image = FALSE;
 			write_as_esp = FALSE;
+			enable_inplace = FALSE;
+			set_drives_offline = FALSE;
 			// Disable all controls except Cancel
 			EnableControls(FALSE, FALSE);
 			FormatStatus = 0;
