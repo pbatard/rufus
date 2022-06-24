@@ -588,8 +588,7 @@ t MSG_327 "Customize Windows installation?"
 t MSG_328 "Remove requirement for Secure Boot and TPM 2.0"
 t MSG_329 "Remove requirement for 4GB+ RAM and 64GB+ disk"
 t MSG_330 "Remove requirement for an online Microsoft account"
-t MSG_331 "Remove \"unsupported hardware\" desktop watermark"
-t MSG_332 "Disable data collection (Skip privacy questions)"
+t MSG_331 "Disable data collection (Skip privacy questions)"
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001

@@ -85,11 +85,7 @@
 #define STATUS_MSG_TIMEOUT          3500		// How long should cheat mode messages appear for on the status bar
 #define WRITE_RETRIES               4
 #define WRITE_TIMEOUT               5000		// How long we should wait between write retries (in ms)
-#if defined(_DEBUG)
-#define SEARCH_PROCESS_TIMEOUT      60000
-#else
 #define SEARCH_PROCESS_TIMEOUT      10000		// How long we should search for conflicting processes before giving up (in ms)
-#endif
 #define NET_SESSION_TIMEOUT         3500		// How long we should wait to connect, send or receive internet data
 #define MARQUEE_TIMER_REFRESH       10			// Time between progress bar marquee refreshes, in ms
 #define FS_DEFAULT                  FS_FAT32
@@ -161,6 +157,7 @@
 #define safe_release_dc(hDlg, hDC) do {if ((hDC != INVALID_HANDLE_VALUE) && (hDC != NULL)) {ReleaseDC(hDlg, hDC); hDC = NULL;}} while(0)
 #define safe_sprintf(dst, count, ...) do {_snprintf(dst, count, __VA_ARGS__); (dst)[(count)-1] = 0; } while(0)
 #define static_sprintf(dst, ...) safe_sprintf(dst, sizeof(dst), __VA_ARGS__)
+#define safe_atoi(str) ((((char*)(str))==NULL)?0:atoi(str))
 #define safe_strlen(str) ((((char*)(str))==NULL)?0:strlen(str))
 #define safe_strdup _strdup
 #define to_windows_path(str) do { size_t __i; for (__i = 0; __i < safe_strlen(str); __i++) if (str[__i] == '/') str[__i] = '\\'; } while(0)

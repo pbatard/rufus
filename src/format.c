@@ -1250,11 +1250,11 @@ out:
 // Returns -2 on user cancel, -1 on other error, >=0 on success.
 int SetWinToGoIndex(void)
 {
-	char *mounted_iso, *build, mounted_image_path[128];
+	char *mounted_iso, *val, mounted_image_path[128];
 	char xml_file[MAX_PATH] = "";
 	char *install_names[MAX_WININST];
 	StrArray version_name, version_index;
-	int i, build_nr = 0;
+	int i;
 	BOOL bNonStandard = FALSE;
 
 	// Sanity checks
@@ -1334,21 +1334,34 @@ int SetWinToGoIndex(void)
 	else
 		wintogo_index = atoi(version_index.String[i - 1]);
 	if (i > 0) {
-		// Get the build version
-		build = get_token_data_file_indexed("BUILD", xml_file, i);
-		if (build != NULL)
-			build_nr = atoi(build);
-		free(build);
+		// Get the version data from the XML index
+		val = get_token_data_file_indexed("MAJOR", xml_file, i);
+		img_report.win_version.major = (uint16_t)safe_atoi(val);
+		free(val);
+		val = get_token_data_file_indexed("MINOR", xml_file, i);
+		img_report.win_version.minor = (uint16_t)safe_atoi(val);
+		free(val);
+		val = get_token_data_file_indexed("BUILD", xml_file, i);
+		img_report.win_version.build = (uint16_t)safe_atoi(val);
+		free(val);
+		val = get_token_data_file_indexed("SPBUILD", xml_file, i);
+		img_report.win_version.revision = (uint16_t)safe_atoi(val);
+		free(val);
+		if ((img_report.win_version.major == 10) && (img_report.win_version.build > 20000))
+			img_report.win_version.major = 11;
+		// If we couldn't obtain the major and build, we have a problem
+		if (img_report.win_version.major == 0 || img_report.win_version.build == 0)
+			uprintf("Warning: Could not obtain version information from XML index (Nonstandard Windows image?)");
 		uprintf("Will use '%s' (Build: %d, Index %s) for Windows To Go",
-			version_name.String[i - 1], build_nr, version_index.String[i - 1]);
+			version_name.String[i - 1], img_report.win_version.build, version_index.String[i - 1]);
 		// Need Windows 10 Creator Update or later for boot on REMOVABLE to work
-		if ((build_nr < 15000) && (SelectedDrive.MediaType != FixedMedia)) {
+		if ((img_report.win_version.build < 15000) && (SelectedDrive.MediaType != FixedMedia)) {
 			if (MessageBoxExU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_190),
 				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
 				wintogo_index = -2;
 		}
 		// Display a notice about WppRecorder.sys for 1809 ISOs
-		if (build_nr == 17763) {
+		if (img_report.win_version.build == 17763) {
 			notification_info more_info;
 			more_info.id = MORE_INFO_URL;
 			more_info.url = WPPRECORDER_MORE_INFO_URL;

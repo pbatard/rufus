@@ -115,6 +115,22 @@ static __inline int _log2(register int val)
 	return ret;
 }
 
+// Remap bits from a byte according to an 8x8 bit matrix
+static __inline uint8_t remap8(uint8_t src, uint8_t* map, const BOOL reverse)
+{
+	uint8_t i, m = 1, r = 0;
+	for (i = 0, m = 1; i < 8; i++, m <<= 1) {
+		if (reverse) {
+			if (src & map[i])
+				r |= m;
+		} else {
+			if (src & m)
+				r |= map[i];
+		}
+	}
+	return r;
+}
+
 /* Why oh why does Microsoft have to make everybody suffer with their braindead use of Unicode? */
 #define _RT_ICON			MAKEINTRESOURCEA(3)
 #define _RT_DIALOG			MAKEINTRESOURCEA(5)

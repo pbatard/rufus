@@ -63,12 +63,11 @@ enum bootcheck_return {
 #define UNATTEND_SECUREBOOT_TPM_MASK        0x01
 #define UNATTEND_MINRAM_MINDISK_MASK        0x02
 #define UNATTEND_NO_ONLINE_ACCOUNT_MASK     0x04
-#define UNATTEND_REMOVE_WATERMARK_MASK      0x08
-#define UNATTEND_NO_DATA_COLLECTION_MASK    0x10
+#define UNATTEND_NO_DATA_COLLECTION_MASK    0x08
 
 #define UNATTEND_WINPE_SETUP_MASK           (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_MINRAM_MINDISK_MASK)
-#define UNATTEND_SPECIALIZE_DEPLOYMENT_MASK (UNATTEND_NO_ONLINE_ACCOUNT_MASK | UNATTEND_REMOVE_WATERMARK_MASK)
-#define UNATTEND_OOBE_SHELL_SETUP           (UNATTEND_REMOVE_WATERMARK_MASK | UNATTEND_NO_DATA_COLLECTION_MASK)
+#define UNATTEND_SPECIALIZE_DEPLOYMENT_MASK (UNATTEND_NO_ONLINE_ACCOUNT_MASK)
+#define UNATTEND_OOBE_SHELL_SETUP           (UNATTEND_NO_DATA_COLLECTION_MASK)
 
 static const char* cmdline_hogger = "rufus.com";
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
@@ -89,8 +88,7 @@ static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
 static int selected_pt = -1, selected_fs = FS_UNKNOWN, preselected_fs = FS_UNKNOWN;
 static int image_index = 0, select_index = 0;
-static int unattend_xml_mask = (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_NO_ONLINE_ACCOUNT_MASK |
-	UNATTEND_REMOVE_WATERMARK_MASK);
+static int unattend_xml_mask = (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_NO_ONLINE_ACCOUNT_MASK);
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uMBRChecked = BST_UNCHECKED;
 static HANDLE format_thread = NULL;
@@ -1266,7 +1264,6 @@ static char* CreateUnattendXml(int arch, int mask)
 	static char path[MAX_PATH];
 	FILE* fd;
 	int i, order;
-	// I don't believe there's a version of Windows 11 for ARM32 but whatever...
 	const char* xml_arch_names[5] = { "x86", "amd64", "arm", "arm64" };
 	const char* bypass_name[4] = { "BypassTPMCheck", "BypassSecureBootCheck", "BypassRAMCheck", "BypassStorageCheck" };
 	if (arch < ARCH_X86_32 || arch >= ARCH_ARM_64 || mask == 0)
@@ -1311,7 +1308,6 @@ static char* CreateUnattendXml(int arch, int mask)
 		fprintf(fd, "  </settings>\n");
 	}
 
-	// This part and some of OOBE was picked from https://github.com/AveYo/MediaCreationTool.bat/blob/main/bypass11/AutoUnattend.xml
 	if (mask & UNATTEND_SPECIALIZE_DEPLOYMENT_MASK) {
 		order = 1;
 		fprintf(fd, "  <settings pass=\"specialize\">\n");
@@ -1319,20 +1315,11 @@ static char* CreateUnattendXml(int arch, int mask)
 			"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 			"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
 		fprintf(fd, "      <RunSynchronous>\n");
+		// This part was picked from https://github.com/AveYo/MediaCreationTool.bat/blob/main/bypass11/AutoUnattend.xml
 		if (mask & UNATTEND_NO_ONLINE_ACCOUNT_MASK) {
 			fprintf(fd, "        <RunSynchronousCommand wcm:action=\"add\">\n");
 			fprintf(fd, "          <Order>%d</Order>\n", order++);
 			fprintf(fd, "          <Path>reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OOBE /v BypassNRO /t REG_DWORD /d 1 /f</Path>\n");
-			fprintf(fd, "        </RunSynchronousCommand>\n");
-		}
-		if (mask & UNATTEND_SPECIALIZE_DEPLOYMENT_MASK) {
-			fprintf(fd, "        <RunSynchronousCommand wcm:action=\"add\">\n");
-			fprintf(fd, "          <Order>%d</Order>\n", order++);
-			fprintf(fd, "          <Path>reg add HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate /v TargetReleaseVersion /t REG_DWORD /d 1 /f</Path>\n");
-			fprintf(fd, "        </RunSynchronousCommand>\n");
-			fprintf(fd, "        <RunSynchronousCommand wcm:action=\"add\">\n");
-			fprintf(fd, "          <Order>%d</Order>\n", order++);
-			fprintf(fd, "          <Path>reg add HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate /v TargetReleaseVersionInfo /t REG_SZ /d 25H1 /f</Path>\n");
 			fprintf(fd, "        </RunSynchronousCommand>\n");
 		}
 		fprintf(fd, "      </RunSynchronous>\n");
@@ -1346,18 +1333,6 @@ static char* CreateUnattendXml(int arch, int mask)
 		fprintf(fd, "    <component name=\"Microsoft-Windows-Shell-Setup\" processorArchitecture=\"%s\" language=\"neutral\" "
 			"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 			"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
-		if (mask & UNATTEND_REMOVE_WATERMARK_MASK) {
-			fprintf(fd, "      <FirstLogonCommands>\n");
-			fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
-			fprintf(fd, "          <Order>%d</Order>\n", order++);
-			fprintf(fd, "          <CommandLine>reg add \"HKCU\\Control Panel\\UnsupportedHardwareNotificationCache\" /v SV1 /t REG_DWORD /d 0 /f</CommandLine>\n");
-			fprintf(fd, "        </SynchronousCommand>\n");
-			fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
-			fprintf(fd, "          <Order>%d</Order>\n", order++);
-			fprintf(fd, "          <CommandLine>reg add \"HKCU\\Control Panel\\UnsupportedHardwareNotificationCache\" /v SV2 /t REG_DWORD /d 0 /f</CommandLine>\n");
-			fprintf(fd, "        </SynchronousCommand>\n");
-			fprintf(fd, "      </FirstLogonCommands>\n");
-		}
 		// https://docs.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-shell-setup-oobe-protectyourpc
 		// It is really super insidous of Microsoft to call this option "ProtectYourPC", when it's really only about
 		// data collection. But of course, if it was called "AllowDataCollection", everyone would turn it off...
@@ -1525,6 +1500,8 @@ out:
 	ExitThread(0);
 }
 
+#define MAP_BIT(bit) do { map[_log2(bit)] = b; b <<= 1; } while(0)
+
 // Likewise, boot check will block message processing => use a thread
 static DWORD WINAPI BootCheckThread(LPVOID param)
 {
@@ -1621,20 +1598,29 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			default:
 				break;
 			}
-			if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_11(img_report) && (img_report.win_version.build >= 22500)) {
+			if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_11(img_report)) {
 				StrArray options;
 				int arch = _log2(img_report.has_efi >> 1);
-				StrArrayCreate(&options, 4);
-				StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
+				uint8_t map[8] = { 0 }, b = 1;
+				StrArrayCreate(&options, 2);
+				if (img_report.win_version.build >= 22500) {
+					StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
+					MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT_MASK);
+				}
 				StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
-				StrArrayAdd(&options, lmprintf(MSG_332), TRUE);
-				i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_326), lmprintf(MSG_327), options.String, options.Index, unattend_xml_mask >> 2);
+				MAP_BIT(UNATTEND_NO_DATA_COLLECTION_MASK);
+				i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_326), lmprintf(MSG_327),
+					options.String, options.Index, remap8(unattend_xml_mask, map, FALSE));
 				StrArrayDestroy(&options);
 				if (i < 0)
 					goto out;
-				i <<= 2;
+				// Remap i to the correct bit positions before calling CreateUnattendXml()
+				i = remap8(i, map, TRUE);
 				unattend_xml_path = CreateUnattendXml(arch, i);
-				unattend_xml_mask = (unattend_xml_mask & 0x03) | (i & (~0x03));
+				// Keep the bits we didn't process
+				unattend_xml_mask &= ~(remap8(0xff, map, TRUE));
+				// And add back the bits we did process
+				unattend_xml_mask |= i;
 			}
 		} else if (target_type == TT_UEFI) {
 			if (!IS_EFI_BOOTABLE(img_report)) {
@@ -1651,24 +1637,29 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_11(img_report)) {
 				StrArray options;
 				int arch = _log2(img_report.has_efi >> 1);
-				StrArrayCreate(&options, 5);
+				uint8_t map[8] = { 0 }, b = 1;
+				StrArrayCreate(&options, 4);
 				StrArrayAdd(&options, lmprintf(MSG_328), TRUE);
+				MAP_BIT(UNATTEND_SECUREBOOT_TPM_MASK);
 				StrArrayAdd(&options, lmprintf(MSG_329), TRUE);
+				MAP_BIT(UNATTEND_MINRAM_MINDISK_MASK);
 				if (img_report.win_version.build >= 22500) {
 					StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
-					StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
+					MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT_MASK);
 				}
-				StrArrayAdd(&options, lmprintf(MSG_332), TRUE);
-				i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_326), lmprintf(MSG_327), options.String, options.Index, unattend_xml_mask);
+				StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
+				MAP_BIT(UNATTEND_NO_DATA_COLLECTION_MASK);
+				i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_326), lmprintf(MSG_327),
+					options.String, options.Index, remap8(unattend_xml_mask, map, FALSE));
 				StrArrayDestroy(&options);
 				if (i < 0)
 					goto out;
+				i = remap8(i, map, TRUE);
 				unattend_xml_path = CreateUnattendXml(arch, i);
 				// Remember the user preferences for the current session.
 				// TODO: Do we want to save the current mask as a permanent setting?
-				unattend_xml_mask = (unattend_xml_mask & (~0x3)) | (i & 0x03);
-				if (img_report.win_version.build >= 22500)
-					unattend_xml_mask = (unattend_xml_mask & 0x03) | (i & (~0x3));
+				unattend_xml_mask &= ~(remap8(0xff, map, TRUE));
+				unattend_xml_mask |= i;
 			}
 		} else if ( ((fs_type == FS_NTFS) && !HAS_WINDOWS(img_report) && !HAS_GRUB(img_report) && 
 					 (!HAS_SYSLINUX(img_report) || (SL_MAJOR(img_report.sl_version) <= 5)))

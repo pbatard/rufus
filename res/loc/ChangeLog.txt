@@ -13,8 +13,7 @@ o v3.20 (2022.??.??)
   - *NEW*      MSG_328 "Remove requirement for Secure Boot and TPM 2.0"
   - *NEW*      MSG_329 "Remove requirement for 4GB+ RAM and 64GB+ disk"
   - *NEW*      MSG_330 "Remove requirement for an online Microsoft account"
-  - *NEW*      MSG_331 "Remove \"unsupported hardware\" desktop watermark"
-  - *NEW*      MSG_332 "Disable data collection (Skip privacy questions)"
+  - *NEW*      MSG_331 "Disable data collection (Skip privacy questions)"
 
 o v3.14 (2021.03.31)
   - *UPDATED*  MSG_068 "Error while partitioning drive." -> "Could not partition drive."
