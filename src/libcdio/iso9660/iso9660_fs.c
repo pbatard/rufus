@@ -795,6 +795,49 @@ _iso9660_is_rock_ridge_enabled(void* p_image)
   return true;
 }
 
+/*!
+  Convert a directory record name to a 0-terminated string.
+  One of parameters alloc_result and cpy_result should be non-NULL to take
+  the result. 
+*/
+static bool
+_iso9660_recname_to_cstring(const char *src, size_t src_len,
+			    cdio_utf8_t **alloc_result,
+			    cdio_utf8_t *cpy_result, uint8_t u_joliet_level)
+{
+#ifdef HAVE_JOLIET
+  if (u_joliet_level) {
+    int i_inlen = src_len;
+    cdio_utf8_t *p_psz_out = NULL;
+
+    if (cdio_charset_to_utf8(src, i_inlen, &p_psz_out, "UCS-2BE")) {
+      if (cpy_result != NULL)
+        strcpy(cpy_result, p_psz_out);
+      if (alloc_result != NULL)
+        *alloc_result = p_psz_out;
+      else
+        free(p_psz_out);
+    } else {
+      return false;
+    }
+  } else
+#endif /*HAVE_JOLIET*/
+  {
+    if (alloc_result != NULL) {
+      *alloc_result = calloc(1, src_len + 1);
+      if (*alloc_result == NULL)
+	return false;
+      strncpy(*alloc_result, src, src_len);
+      (*alloc_result)[src_len] = 0;
+    }
+    if (cpy_result != NULL) {
+      strncpy(cpy_result, src, src_len);
+      cpy_result[src_len] = 0;
+    }
+  }
+  return true;
+}
+
 static iso9660_stat_t *
 _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
 			 iso9660_stat_t *last_p_stat,
@@ -868,8 +911,17 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
   if ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0) {
     /* Check if this is the last part of a multiextent file */
     if (!first_extent) {
-      if (strlen(p_stat->filename) != i_fname ||
-          strncmp(p_stat->filename, &p_iso9660_dir->filename.str[1], i_fname) != 0) {
+      cdio_utf8_t *p_psz_out = NULL;
+      int bad_multi;
+      int i_inlen = i_fname;
+
+      if (!_iso9660_recname_to_cstring(&p_iso9660_dir->filename.str[1],
+				       i_inlen, &p_psz_out, NULL,
+				       u_joliet_level))
+	goto fail;
+      bad_multi = (strcmp(p_stat->filename, p_psz_out) != 0);
+      free(p_psz_out);
+      if (bad_multi) {
 	cdio_warn("Non consecutive multiextent file parts for '%s'",
 		  p_stat->filename);
 	goto fail;
@@ -895,30 +947,26 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
       }
       strncpy(p_stat->filename, rr_fname, i_rr_fname+1);
     } else {
-      if ('\0' == p_iso9660_dir->filename.str[1] && 1 == i_fname)
+      if ('\0' == p_iso9660_dir->filename.str[1] && 1 == i_fname) {
 	strncpy (p_stat->filename, ".", strlen(".")+1);
-      else if ('\1' == p_iso9660_dir->filename.str[1] && 1 == i_fname)
+      } else if ('\1' == p_iso9660_dir->filename.str[1] && 1 == i_fname) {
 	strncpy (p_stat->filename, "..", strlen("..")+1);
-#ifdef HAVE_JOLIET
-      else if (u_joliet_level) {
+      } else {
 	int i_inlen = i_fname;
-	cdio_utf8_t *p_psz_out = NULL;
-	if (cdio_charset_to_utf8(&p_iso9660_dir->filename.str[1], i_inlen,
-                             &p_psz_out, "UCS-2BE")) {
-          strncpy(p_stat->filename, p_psz_out, i_fname);
-          free(p_psz_out);
-        } else {
-          goto fail;
-        }
-      }
-#endif /*HAVE_JOLIET*/
-      else {
-	strncpy (p_stat->filename, &p_iso9660_dir->filename.str[1], i_fname);
+
+	if (!_iso9660_recname_to_cstring(&p_iso9660_dir->filename.str[1],
+					 i_inlen, NULL, p_stat->filename,
+					 u_joliet_level))
+	  goto fail;
       }
     }
   } else {
-      /* Use the plain ISO-9660 name when dealing with a multiextent file part */
-      strncpy(p_stat->filename, &p_iso9660_dir->filename.str[1], i_fname);
+    int i_inlen = i_fname;
+
+    if (!_iso9660_recname_to_cstring(&p_iso9660_dir->filename.str[1],
+				     i_inlen, NULL, p_stat->filename,
+				     u_joliet_level))
+      goto fail;
   }
 
   iso9660_get_dtime(&(p_iso9660_dir->recording_time), true, &(p_stat->tm));
