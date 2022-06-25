@@ -1652,33 +1652,6 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				goto out;
 			}
-			if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_11(img_report)) {
-				StrArray options;
-				int arch = _log2(img_report.has_efi >> 1);
-				uint8_t map[8] = { 0 }, b = 1;
-				StrArrayCreate(&options, 4);
-				StrArrayAdd(&options, lmprintf(MSG_328), TRUE);
-				MAP_BIT(UNATTEND_SECUREBOOT_TPM_MASK);
-				StrArrayAdd(&options, lmprintf(MSG_329), TRUE);
-				MAP_BIT(UNATTEND_MINRAM_MINDISK_MASK);
-				if (img_report.win_version.build >= 22500) {
-					StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
-					MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT_MASK);
-				}
-				StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
-				MAP_BIT(UNATTEND_NO_DATA_COLLECTION_MASK);
-				i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_326), lmprintf(MSG_327),
-					options.String, options.Index, remap8(unattend_xml_mask, map, FALSE));
-				StrArrayDestroy(&options);
-				if (i < 0)
-					goto out;
-				i = remap8(i, map, TRUE);
-				unattend_xml_path = CreateUnattendXml(arch, i);
-				// Remember the user preferences for the current session.
-				// TODO: Do we want to save the current mask as a permanent setting?
-				unattend_xml_mask &= ~(remap8(0xff, map, TRUE));
-				unattend_xml_mask |= i;
-			}
 		} else if ( ((fs_type == FS_NTFS) && !HAS_WINDOWS(img_report) && !HAS_GRUB(img_report) && 
 					 (!HAS_SYSLINUX(img_report) || (SL_MAJOR(img_report.sl_version) <= 5)))
 				 || ((IS_FAT(fs_type)) && (!HAS_SYSLINUX(img_report)) && (!allow_dual_uefi_bios) && !IS_EFI_BOOTABLE(img_report) &&
@@ -1696,6 +1669,33 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			// This ISO image contains a file larger than 4GB file (FAT32)
 			MessageBoxExU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
+		}
+		if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_11(img_report)) {
+			StrArray options;
+			int arch = _log2(img_report.has_efi >> 1);
+			uint8_t map[8] = { 0 }, b = 1;
+			StrArrayCreate(&options, 4);
+			StrArrayAdd(&options, lmprintf(MSG_328), TRUE);
+			MAP_BIT(UNATTEND_SECUREBOOT_TPM_MASK);
+			StrArrayAdd(&options, lmprintf(MSG_329), TRUE);
+			MAP_BIT(UNATTEND_MINRAM_MINDISK_MASK);
+			if (img_report.win_version.build >= 22500) {
+				StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
+				MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT_MASK);
+			}
+			StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
+			MAP_BIT(UNATTEND_NO_DATA_COLLECTION_MASK);
+			i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_326), lmprintf(MSG_327),
+				options.String, options.Index, remap8(unattend_xml_mask, map, FALSE));
+			StrArrayDestroy(&options);
+			if (i < 0)
+				goto out;
+			i = remap8(i, map, TRUE);
+			unattend_xml_path = CreateUnattendXml(arch, i);
+			// Remember the user preferences for the current session.
+			// TODO: Do we want to save the current mask as a permanent setting?
+			unattend_xml_mask &= ~(remap8(0xff, map, TRUE));
+			unattend_xml_mask |= i;
 		}
 
 		if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
