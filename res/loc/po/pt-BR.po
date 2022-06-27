@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2022-06-07 16:25+0100\n"
-"PO-Revision-Date: 2022-06-07 16:28+0100\n"
+"PO-Revision-Date: 2022-06-27 23:47+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Portuguese Brazilian (Português do Brasil)\n"
 "X-Rufus-LCID: 0x0416\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -348,14 +348,14 @@ msgstr "BIOS ou UEFI"
 #.
 #. Number of bad block check passes (singular for 1 pass)
 msgid "%d pass"
-msgstr "%d passo"
+msgstr "%d passada"
 
 #. • MSG_035
 #.
 #. Number of bad block check passes (plural for 2 or more passes).
 #. See MSG_087 for the message that %s gets replaced with.
 msgid "%d passes %s"
-msgstr "%d passa %s"
+msgstr "%d passadas %s"
 
 #. • MSG_036
 msgid "ISO Image"
@@ -603,11 +603,11 @@ msgstr "para %s NAND"
 
 #. • MSG_088
 msgid "Image is too big"
-msgstr "Imagem ISO muito grande"
+msgstr "Imagem é muito grande"
 
 #. • MSG_089
 msgid "The image is too big for the selected target."
-msgstr "A imagem ISO é muito grande para o destino selecionado."
+msgstr "A imagem é muito grande para o destino selecionado."
 
 #. • MSG_090
 msgid "Unsupported ISO"
@@ -1162,13 +1162,13 @@ msgstr "Drive incompatível detectado"
 #.
 #. Used in MSG_235
 msgid "Write pass"
-msgstr "Passo de gravação"
+msgstr "Verificação de escrita"
 
 #. • MSG_192
 #.
 #. Used in MSG_235
 msgid "Read pass"
-msgstr "Passo de leitura"
+msgstr "Verificação de leitura"
 
 #. • MSG_193
 msgid "Downloaded %s"
@@ -1770,7 +1770,7 @@ msgstr "Múltiplos botões"
 
 #. • MSG_316
 msgid "Number of passes"
-msgstr "Número de passes"
+msgstr "Número de passadas"
 
 #. • MSG_317
 msgid "Disk ID"
