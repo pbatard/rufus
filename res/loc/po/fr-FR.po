@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2022-06-24 17:34+0100\n"
-"PO-Revision-Date: 2022-06-24 17:36+0100\n"
+"PO-Revision-Date: 2022-06-30 11:26+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -1794,11 +1794,11 @@ msgstr "Impossible d'ouvrir ou de lire '%s'"
 
 #. • MSG_325
 msgid "Applying Windows customization: %s"
-msgstr "Application des options de personalisation de Windows: %s"
+msgstr "Application des options de personnalisation de Windows: %s"
 
 #. • MSG_326
 msgid "Windows User Experience"
-msgstr "Experience de l'utilisateur Windows"
+msgstr "Expérience de l'utilisateur Windows"
 
 #. • MSG_327
 msgid "Customize Windows installation?"
@@ -1814,7 +1814,7 @@ msgstr "Supprimer la nécessité d'avoir 4Go+ de RAM et 64Go+ de disque"
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
-msgstr "Désactiver la collecte de données (Élimine les questions sur la vie-privée)"
+msgstr "Désactiver la collecte de données (Élimine les questions sur la vie privée)"
 
 #. • MSG_331
 msgid "Disable data collection (Skip privacy questions)"
