@@ -1794,11 +1794,11 @@ msgstr "Impossible d'ouvrir ou de lire '%s'"
 
 #. • MSG_325
 msgid "Applying Windows customization: %s"
-msgstr "Application des options de personalisation de Windows: %s"
+msgstr "Application des options de personnalisation de Windows: %s"
 
 #. • MSG_326
 msgid "Windows User Experience"
-msgstr "Experience de l'utilisateur Windows"
+msgstr "Expérience de l'utilisateur Windows"
 
 #. • MSG_327
 msgid "Customize Windows installation?"
@@ -1814,7 +1814,7 @@ msgstr "Supprimer la nécessité d'avoir 4Go+ de RAM et 64Go+ de disque"
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
-msgstr "Désactiver la collecte de données (Élimine les questions sur la vie-privée)"
+msgstr "Désactiver la collecte de données (élimine les questions sur la vie privée)"
 
 #. • MSG_331
 msgid "Disable data collection (Skip privacy questions)"
