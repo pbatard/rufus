@@ -1,4 +1,4 @@
-o Version 3.19 (2022.07.??)
+o Version 3.19 (2022.07.01)
     Add a new selection dialog for Windows 11 setup customization:
       - Secure Boot and TPM bypass have now been moved to this dialog
       - Also allows to bypass the mandatory requirement for a Microsoft account on Windows 11 22H2
@@ -13,6 +13,7 @@ o Version 3.19 (2022.07.??)
     Update UEFI:NTFS drivers to latest
     Reassign a letter for drives written in DD mode that don't have an ESP (e.g. CoreELEC)
     Fix Windows refusing to mount Linux MBR partitions on FIXED drives
+    Fix support for multiextent files when Joliet is in use
 
 o Version 3.18 (2022.03.11)
     Fix DLL sideloading vulnerabilities
