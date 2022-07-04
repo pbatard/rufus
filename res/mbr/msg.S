@@ -2,7 +2,7 @@
 /* MSG - A protective MBR that displays an ASCII message located in the         */
 /*       subsequent sectors.                                                     */
 /*                                                                              */
-/* Copyright (c) 2019-2020 Pete Batard <pete@akeo.ie>                           */
+/* Copyright (c) 2019-2022 Pete Batard <pete@akeo.ie>                           */
 /*                                                                              */
 /* This program is free software; you can redistribute it and/or modify it      */
 /* under the terms of the GNU General Public License as published by the Free   */
@@ -31,7 +31,7 @@
 /********************************************************************************/
 MBR_ADDR      = 0x7c00
 MBR_RESERVED  = 0x1b8	# Start of the reserved section (partition table, etc.)
-MSG_SECTOR    = 0x22  # First sector of the message (must be after the GPT)
+MSG_SECTOR    = 0x22	# First sector of the message (must be after the GPT)
 NB_SECTORS    = 0x08	# Number of sectors to read
 PT_MAX        = 0x04	# Number of partition entries in the partition table
 PT_ENTRY_SIZE = 0x10	# Size of a partition entry in the partition table
@@ -85,21 +85,16 @@ mbr:
 	mov  es, ax		# Keep allocated RAM segment in ES
 
 clear_display:
-	mov  bh, 0x07
-	mov  ax, 0x007f
-	int  0x10		# Set Video Mode to 640x480 16 color graphics (VGA)
-	xor  bx, bx
-	xor  cx, cx
-	mov  dx, 0x184f
-	mov  ax, 0x0600
-	int  0x10		# Clear screen
-	xor  dx, dx
+	mov  ax, 0x0003
+	int  0x10		# Set Text Mode to 80x25, 16 color (setting mode also clears the screen)
 	mov  ah, 0x02
 	int  0x10		# Set cursor pos to top left
 
 read_sectors:			# Copy the next sectors into RAM
 	mov  ah, 0x41
 	mov  bx, 0x55aa
+	xor  cx, cx
+	xor  dx, dx
 	int  0x13
 	jb   no_ext		# failure to get ext
 	cmp  bx, 0xaa55

@@ -1,7 +1,7 @@
 #
 # This file is part of the Rufus project.
 #
-# Copyright (c) 2012 Pete Batard <pete@akeo.ie>
+# Copyright (c) 2012-2022 Pete Batard <pete@akeo.ie>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -24,8 +24,7 @@ CC          = gcc
 LD          = ld
 OBJDUMP     = objdump
 OBJCOPY     = objcopy
-CFLAGS      = -m32
-LDFLAGS     = -nostartfile
+CFLAGS      = -m32 -nostartfiles -nodefaultlibs
 BOCHS       = "C:/Program Files/Bochs/bochsdbg.exe"
 
 .PHONY: all clean
