@@ -1526,6 +1526,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	DWORD len;
 	WPARAM ret = BOOTCHECK_CANCEL;
 	BOOL in_files_dir = FALSE, esp_already_asked = FALSE;
+	BOOL is_windows_to_go = ((image_options & IMOP_WINTOGO) && (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO));
 	const char* grub = "grub";
 	const char* core_img = "core.img";
 	const char* ldlinux = "ldlinux";
@@ -1590,7 +1591,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				goto out;
 		}
 
-		if ((image_options & IMOP_WINTOGO) && (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO)) {
+		if (is_windows_to_go) {
 			if (fs_type != FS_NTFS) {
 				// Windows To Go only works for NTFS
 				MessageBoxExU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
@@ -1670,7 +1671,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			MessageBoxExU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
 		}
-		if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_11(img_report)) {
+		if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_11(img_report) && (!is_windows_to_go)) {
 			StrArray options;
 			int arch = _log2(img_report.has_efi >> 1);
 			uint8_t map[8] = { 0 }, b = 1;
