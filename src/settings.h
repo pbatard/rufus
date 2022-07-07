@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Settings access, through either registry or INI file
- * Copyright © 2015-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2022 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,7 @@ extern char* ini_file;
 #define SETTING_USE_VDS                     "UseVds"
 #define SETTING_PRESERVE_TIMESTAMPS         "PreserveTimestamps"
 #define SETTING_VERBOSE_UPDATES             "VerboseUpdateCheck"
+#define SETTING_WUE_OPTIONS                 "WindowsUserExperienceOptions"
 
 
 static __inline BOOL CheckIniKey(const char* key) {

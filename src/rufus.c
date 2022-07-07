@@ -65,11 +65,13 @@ enum bootcheck_return {
 #define UNATTEND_NO_ONLINE_ACCOUNT_MASK     0x04
 #define UNATTEND_NO_DATA_COLLECTION_MASK    0x08
 #define UNATTEND_OFFLINE_INTERNAL_DRIVES    0x10
+#define UNATTEND_DEFAULT_MASK               0x1F
 
 #define UNATTEND_WINPE_SETUP_MASK           (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_MINRAM_MINDISK_MASK)
 #define UNATTEND_SPECIALIZE_DEPLOYMENT_MASK (UNATTEND_NO_ONLINE_ACCOUNT_MASK)
 #define UNATTEND_OOBE_SHELL_SETUP           (UNATTEND_NO_DATA_COLLECTION_MASK)
 #define UNATTEND_OFFLINE_SERVICING          (UNATTEND_OFFLINE_INTERNAL_DRIVES)
+#define UNATTEND_DEFAULT_SELECTION          (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_NO_ONLINE_ACCOUNT_MASK | UNATTEND_OFFLINE_INTERNAL_DRIVES)
 
 static const char* cmdline_hogger = "rufus.com";
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
@@ -89,9 +91,7 @@ static BOOL app_changed_label = FALSE;
 static BOOL allowed_filesystem[FS_MAX] = { 0 };
 static int64_t last_iso_blocking_status;
 static int selected_pt = -1, selected_fs = FS_UNKNOWN, preselected_fs = FS_UNKNOWN;
-static int image_index = 0, select_index = 0;
-static int unattend_xml_mask = (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_NO_ONLINE_ACCOUNT_MASK |
-	UNATTEND_OFFLINE_INTERNAL_DRIVES);
+static int image_index = 0, select_index = 0, unattend_xml_mask = UNATTEND_DEFAULT_SELECTION;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uMBRChecked = BST_UNCHECKED;
 static HANDLE format_thread = NULL;
@@ -1640,6 +1640,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				unattend_xml_mask &= ~(remap8(0xff, map, TRUE));
 				// And add back the bits we did process
 				unattend_xml_mask |= i;
+				WriteSetting32(SETTING_WUE_OPTIONS, (UNATTEND_DEFAULT_MASK << 16) | unattend_xml_mask);
 			}
 		} else if (target_type == TT_UEFI) {
 			if (!IS_EFI_BOOTABLE(img_report)) {
@@ -1697,6 +1698,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			// TODO: Do we want to save the current mask as a permanent setting?
 			unattend_xml_mask &= ~(remap8(0xff, map, TRUE));
 			unattend_xml_mask |= i;
+			WriteSetting32(SETTING_WUE_OPTIONS, (UNATTEND_DEFAULT_MASK << 16) | unattend_xml_mask);
 		}
 
 		if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
@@ -3393,6 +3395,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	const char* rufus_loc = "rufus.loc";
 	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
 	int wait_for_mutex = 0;
+	uint32_t wue_options;
 	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount = TRUE;
 	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE, vc = IsRegistryNode(REGKEY_HKCU, vs_reg);
@@ -3656,6 +3659,14 @@ skip_args_processing:
 	enable_VHDs = !ReadSettingBool(SETTING_DISABLE_VHDS);
 	enable_extra_hashes = ReadSettingBool(SETTING_ENABLE_EXTRA_HASHES);
 	ignore_boot_marker = ReadSettingBool(SETTING_IGNORE_BOOT_MARKER);
+	// This restores the Windows User Experience/unattend.xml mask from the saved user
+	// settings, and is designed to work even if we add new options later.
+	wue_options = ReadSetting32(SETTING_WUE_OPTIONS);
+	if ((wue_options >> 16) != 0) {
+		uint32_t mask = wue_options >> 16;
+		unattend_xml_mask &= ~mask;
+		unattend_xml_mask |= (wue_options & mask);
+	}
 	// We want above normal priority by default, so we offset the value.
 	default_thread_priority = ReadSetting32(SETTING_DEFAULT_THREAD_PRIORITY) + THREAD_PRIORITY_ABOVE_NORMAL;
 
