@@ -521,11 +521,15 @@ static DWORD WINAPI WimMountImageThread(LPVOID param)
 
 	PF_INIT_OR_OUT(WIMRegisterMessageCallback, Wimgapi);
 	PF_INIT_OR_OUT(WIMMountImage, Wimgapi);
+	PF_INIT_OR_OUT(WIMUnmountImage, Wimgapi);
 	PF_INIT_OR_OUT(WIMUnregisterMessageCallback, Wimgapi);
 
 	if (wmount_path[0] != 0) {
-		uprintf("WimMountImage: An image is already mounted");
-		goto out;
+		uprintf("WimMountImage: An image is already mounted. Trying to unmount it...");
+		if (pfWIMUnmountImage(wmount_path, wimage, _index, FALSE))
+			uprintf("WimMountImage: Successfully unmounted existing image..");
+		else
+			goto out;
 	}
 	if (GetTempFileNameW(wtemp_dir, L"Ruf", 0, wmount_path) == 0) {
 		uprintf("WimMountImage: Can not generate mount directory: %s", WindowsErrorString());
@@ -565,6 +569,16 @@ static DWORD WINAPI WimMountImageThread(LPVOID param)
 	uprintf("mounted '%S [%d]' on '%S'", wimage, _index, wmount_path);
 
 out:
+	if (!r) {
+		if (wmount_track[0] != 0) {
+			RemoveDirectoryW(wmount_track);
+			wmount_track[0] = 0;
+		}
+		if (wmount_path[0] != 0) {
+			RemoveDirectoryW(wmount_path);
+			wmount_path[0] = 0;
+		}
+	}
 	wfree(temp_dir);
 	safe_free(wimage);
 	ExitThread((DWORD)r);
