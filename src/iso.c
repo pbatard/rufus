@@ -125,6 +125,7 @@ static uint8_t joliet_level = 0;
 static uint64_t total_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
 static StrArray config_path, isolinux_path, modified_path;
+static char symlinked_syslinux[MAX_PATH];
 
 // Ensure filenames do not contain invalid FAT32 or NTFS characters
 static __inline char* sanitize_filename(char* filename, BOOL* is_identical)
@@ -789,8 +790,15 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (!is_identical)
 				uprintf("  File name sanitized to '%s'", psz_sanpath);
 			if (is_symlink) {
-				if (file_length == 0)
-					uprintf("  Ignoring Rock Ridge symbolic link to '%s'", p_statbuf->rr.psz_symlink);
+				if (file_length == 0) {
+					// Special handling for ISOs that have a syslinux → isolinux symbolic link (e.g. Knoppix)
+					if ((safe_stricmp(p_statbuf->filename, "syslinux") == 0) &&
+						(safe_stricmp(p_statbuf->rr.psz_symlink, "isolinux") == 0)) {
+						static_strcpy(symlinked_syslinux, psz_fullpath);
+						uprintf("  Found Rock Ridge symbolic link to '%s'", p_statbuf->rr.psz_symlink);
+					} else
+						uprintf("  Ignoring Rock Ridge symbolic link to '%s'", p_statbuf->rr.psz_symlink);
+				}
 				safe_free(p_statbuf->rr.psz_symlink);
 			}
 			file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
@@ -912,6 +920,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		}
 		nb_blocks = 0;
 		iso_blocking_status = 0;
+		symlinked_syslinux[0] = 0;
 		StrArrayCreate(&modified_path, 8);
 	}
 
@@ -1216,6 +1225,46 @@ out:
 			}
 			if (fd != NULL)
 				fclose(fd);
+			// Workaround needed for Knoppix that has a /boot/syslinux that links to /boot/isolinux/
+			// with EFI Syslinux trying to read /boot/syslinux/syslnx[32|64].cfg as the config file.
+			if (symlinked_syslinux[0] != 0) {
+				static const char* efi_cfg_name[] = { "syslnx32.cfg", "syslnx64.cfg" };
+				size_t len = strlen(symlinked_syslinux);
+				char isolinux_dir[MAX_PATH];
+				static_strcpy(isolinux_dir, symlinked_syslinux);
+				assert(len > 8);
+				// ".../syslinux" -> ".../isolinux"
+				isolinux_dir[len - 8] = 'i';
+				isolinux_dir[len - 7] = 's';
+				isolinux_dir[len - 6] = 'o';
+				// Delete the empty syslinux symbolic link remnant and replace it with a syslinux/ dir
+				DeleteFileA(symlinked_syslinux);
+				CreateDirectoryA(symlinked_syslinux, NULL);
+				// Now add the relevant config files that link back to the ones in isolinux/
+				for (i = 0; i < ARRAYSIZE(efi_cfg_name); i++) {
+					static_sprintf(path, "%s/%s", isolinux_dir, efi_cfg_name[i]);
+					if (!PathFileExistsA(path))
+						continue;
+					static_sprintf(path, "%s/%s", symlinked_syslinux, efi_cfg_name[i]);
+					fd = fopen(path, "w");
+					if (fd == NULL) {
+						uprintf("Unable to create %s - booting from USB may not work", path);
+						r = 1;
+						continue;
+					}
+					static_sprintf(path, "%s/%s", isolinux_dir, efi_cfg_name[i]);
+					fprintf(fd, "DEFAULT loadconfig\n\nLABEL loadconfig\n  CONFIG %s\n  APPEND %s\n", &path[2], &isolinux_dir[2]);
+					fclose(fd);
+					for (j = 0; j < len; j++)
+						if (symlinked_syslinux[j] == '/')
+							symlinked_syslinux[j] = '\\';
+					uprintf("Created: %s\\%s → %s", symlinked_syslinux, efi_cfg_name[i], &path[2]);
+					for (j = 0; j < len; j++)
+						if (symlinked_syslinux[j] == '\\')
+							symlinked_syslinux[j] = '/';
+					fd = NULL;
+				}
+			}
 		} else if (HAS_BOOTMGR(img_report) && enable_ntfs_compression) {
 			// bootmgr might need to be uncompressed: https://github.com/pbatard/rufus/issues/1381
 			RunCommand("compact /u bootmgr* efi/boot/*.efi", dest_dir, TRUE);
