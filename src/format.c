@@ -71,10 +71,12 @@ extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 static int actual_fs_type, wintogo_index = -1, wininst_index = 0;
+extern int unattend_xml_selection;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing;
-extern BOOL write_as_image, use_vds, write_as_esp, is_vds_available, enable_inplace, set_drives_offline;
+extern BOOL write_as_image, use_vds, write_as_esp, is_vds_available;
 extern const grub_patch_t grub_patch[2];
 extern char* unattend_xml_path;
+extern const char* bypass_name[4];
 uint8_t *grub2_buf = NULL, *sec_buf = NULL;
 long grub2_len;
 
@@ -1470,7 +1472,7 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	// "upgrade" the ReFS version on all drives to v3.7, thereby preventing you from being able to mount
 	// those volumes back on Windows 10 ever again. Yes, I have been stung by this Microsoft bullshit!
 	// See: https://gist.github.com/0xbadfca11/da0598e47dd643d933dc#Mountability
-	if (set_drives_offline) {
+	if (unattend_xml_selection & UNATTEND_OFFLINE_INTERNAL_DRIVES) {
 		uprintf("Setting the target's internal drives offline using command:");
 		// This applies the "offlineServicing" section of the unattend.xml (while ignoring the other sections)
 		static_sprintf(cmd, "dism /Image:%s\\ /Apply-Unattend:%s", drive_name, unattend_xml_path);
@@ -1499,12 +1501,17 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
  */
 BOOL ApplyWindowsCustomization(char drive_letter, BOOL windows_to_go)
 {
-	BOOL r = FALSE;
+	BOOL r = FALSE, is_hive_mounted = FALSE;
+	int i;
 	const int wim_index = 2;
-	char boot_wim_path[] = "?:\\sources\\boot.wim";
+	const char* offline_hive_name = "RUFUS_OFFLINE_HIVE";
+	char boot_wim_path[] = "?:\\sources\\boot.wim", key_path[64];
 	char appraiserres_dll_src[] = "?:\\sources\\appraiserres.dll";
 	char appraiserres_dll_dst[] = "?:\\sources\\appraiserres.bak";
 	char *mount_path = NULL, path[MAX_PATH];
+	HKEY hKey = NULL, hSubKey = NULL;
+	LSTATUS status;
+	DWORD dwDisp, dwVal = 1;
 
 	assert(unattend_xml_path != NULL);
 	uprintf("Applying Windows customization:");
@@ -1522,7 +1529,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, BOOL windows_to_go)
 		uprintf("Added '%s'", path);
 	} else {
 		boot_wim_path[0] = drive_letter;
-		if (enable_inplace) {
+		if (unattend_xml_selection & UNATTEND_WINPE_SETUP_MASK) {
 			// Create a backup of sources\appraiserres.dll and then create an empty file to
 			// allow in-place upgrades without TPM/SB. Note that we need to create an empty,
 			// appraiserres.dll otherwise setup.exe extracts its own.
@@ -1542,6 +1549,53 @@ BOOL ApplyWindowsCustomization(char drive_letter, BOOL windows_to_go)
 		if (mount_path == NULL)
 			goto out;
 
+		if (unattend_xml_selection & UNATTEND_WINPE_SETUP_MASK) {
+			// Try to create the registry keys directly, and fallback to using unattend
+			// if that fails (which the Windows Store version is expected to do).
+			static_sprintf(path, "%s\\Windows\\System32\\config\\SYSTEM", mount_path);
+			if (!MountRegistryHive(HKEY_LOCAL_MACHINE, offline_hive_name, path)) {
+				uprintf("Falling back to creating the registry keys through unattend.xml");
+				goto copy_unattend;
+			}
+			UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 101, PATCH_PROGRESS_TOTAL);
+			is_hive_mounted = TRUE;
+
+			static_sprintf(key_path, "%s\\Setup", offline_hive_name);
+			status = RegOpenKeyExA(HKEY_LOCAL_MACHINE, key_path, 0, KEY_READ | KEY_CREATE_SUB_KEY, &hKey);
+			if (status != ERROR_SUCCESS) {
+				SetLastError(status);
+				uprintf("Could not open 'HKLM\\SYSTEM\\Setup' registry key: %s", WindowsErrorString());
+				goto copy_unattend;
+			}
+
+			status = RegCreateKeyExA(hKey, "LabConfig", 0, NULL, 0,
+				KEY_SET_VALUE | KEY_QUERY_VALUE | KEY_CREATE_SUB_KEY, NULL, &hSubKey, &dwDisp);
+			if (status != ERROR_SUCCESS) {
+				SetLastError(status);
+				uprintf("Could not create 'HKLM\\SYSTEM\\Setup\\LabConfig' registry key: %s", WindowsErrorString());
+				goto copy_unattend;
+			}
+
+			for (i = 0; i < ARRAYSIZE(bypass_name); i++) {
+				if (!(unattend_xml_selection & (1 << (i / 2))))
+					continue;
+				status = RegSetValueExA(hSubKey, bypass_name[i], 0, REG_DWORD, (LPBYTE)&dwVal, sizeof(DWORD));
+				if (status != ERROR_SUCCESS) {
+					SetLastError(status);
+					uprintf("Could not set 'HKLM\\SYSTEM\\Setup\\LabConfig\\%s' registry key: %s",
+						bypass_name[i], WindowsErrorString());
+					goto copy_unattend;
+				}
+				uprintf("Created 'HKLM\\SYSTEM\\Setup\\LabConfig\\%s' registry key", bypass_name[i]);
+			}
+			// We were successfull in creating the keys so disable the windowsPE section from unattend.xml
+			// We do this by replacing '<settings pass="windowsPE">' with '<settings pass="disabled">'
+			if (replace_in_token_data(unattend_xml_path, "<settings", "windowsPE", "disabled", FALSE) == NULL)
+				uprintf("Warning: Could not disable 'windowsPE' pass from unattend.xml");
+			UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 102, PATCH_PROGRESS_TOTAL);
+		}
+
+copy_unattend:
 		static_sprintf(path, "%s\\Autounattend.xml", mount_path);
 		if (!CopyFileU(unattend_xml_path, path, TRUE)) {
 			uprintf("Could not create boot.wim 'Autounattend.xml': %s", WindowsErrorString());
@@ -1553,6 +1607,14 @@ BOOL ApplyWindowsCustomization(char drive_letter, BOOL windows_to_go)
 	r = TRUE;
 
 out:
+	if (hSubKey != NULL)
+		RegCloseKey(hSubKey);
+	if (hKey != NULL)
+		RegCloseKey(hKey);
+	if (is_hive_mounted) {
+		UnmountRegistryHive(HKEY_LOCAL_MACHINE, offline_hive_name);
+		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 104, PATCH_PROGRESS_TOTAL);
+	}
 	if (mount_path) {
 		uprintf("Unmounting '%s'...", boot_wim_path, wim_index);
 		WimUnmountImage(boot_wim_path, wim_index);

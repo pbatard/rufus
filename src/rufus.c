@@ -60,19 +60,6 @@ enum bootcheck_return {
 	BOOTCHECK_GENERAL_ERROR = -3,
 };
 
-#define UNATTEND_SECUREBOOT_TPM_MASK        0x01
-#define UNATTEND_MINRAM_MINDISK_MASK        0x02
-#define UNATTEND_NO_ONLINE_ACCOUNT_MASK     0x04
-#define UNATTEND_NO_DATA_COLLECTION_MASK    0x08
-#define UNATTEND_OFFLINE_INTERNAL_DRIVES    0x10
-#define UNATTEND_DEFAULT_MASK               0x1F
-
-#define UNATTEND_WINPE_SETUP_MASK           (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_MINRAM_MINDISK_MASK)
-#define UNATTEND_SPECIALIZE_DEPLOYMENT_MASK (UNATTEND_NO_ONLINE_ACCOUNT_MASK)
-#define UNATTEND_OOBE_SHELL_SETUP           (UNATTEND_NO_DATA_COLLECTION_MASK)
-#define UNATTEND_OFFLINE_SERVICING          (UNATTEND_OFFLINE_INTERNAL_DRIVES)
-#define UNATTEND_DEFAULT_SELECTION          (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_NO_ONLINE_ACCOUNT_MASK | UNATTEND_OFFLINE_INTERNAL_DRIVES)
-
 static const char* cmdline_hogger = "rufus.com";
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
 static const char* vs_reg = "Software\\Microsoft\\VisualStudio";
@@ -128,17 +115,17 @@ DWORD MainThreadId;
 HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hImageOption, hLogDialog = NULL, hProgress = NULL, hDiskID;
 HANDLE dialog_handle = NULL;
-BOOL is_x86_32, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE;
-BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, its_a_me_mario = FALSE, enable_inplace = FALSE;
-BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE, lock_drive = TRUE;
-BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32, usb_debug;
-BOOL use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
+BOOL is_x86_32, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE, lock_drive = TRUE;
+BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, its_a_me_mario = FALSE;
+BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE;
+BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32;
+BOOL usb_debug, use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
 BOOL write_as_image = FALSE, write_as_esp = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
-BOOL appstore_version = FALSE, is_vds_available = TRUE, set_drives_offline = FALSE;
+BOOL appstore_version = FALSE, is_vds_available = TRUE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1, imop_win_sel = 0;
-int default_fs, fs_type, boot_type, partition_type, target_type;
+int default_fs, fs_type, boot_type, partition_type, target_type, unattend_xml_selection = 0;
 int force_update = 0, default_thread_priority = THREAD_PRIORITY_ABOVE_NORMAL;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 char app_data_dir[MAX_PATH], user_dir[MAX_PATH];
@@ -151,6 +138,7 @@ StrArray BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
+const char* bypass_name[4] = { "BypassTPMCheck", "BypassSecureBootCheck", "BypassRAMCheck", "BypassStorageCheck" };
 RUFUS_DRIVE rufus_drive[MAX_DRIVES] = { 0 };
 
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
@@ -1268,7 +1256,7 @@ static char* CreateUnattendXml(int arch, int mask)
 	FILE* fd;
 	int i, order;
 	const char* xml_arch_names[5] = { "x86", "amd64", "arm", "arm64" };
-	const char* bypass_name[4] = { "BypassTPMCheck", "BypassSecureBootCheck", "BypassRAMCheck", "BypassStorageCheck" };
+	unattend_xml_selection = mask;
 	if (arch < ARCH_X86_32 || arch >= ARCH_ARM_64 || mask == 0)
 		return NULL;
 	arch--;
@@ -1282,10 +1270,11 @@ static char* CreateUnattendXml(int arch, int mask)
 	fprintf(fd, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 	fprintf(fd, "<unattend xmlns=\"urn:schemas-microsoft-com:unattend\">\n");
 
-	// This part produces the unbecoming display of a command prompt window during initial setup, which
-	// may scare users... But the Windows Store version doesn't allow us to edit an offline registry...
+	// This part produces the unbecoming display of a command prompt window during initial setup as well
+	// as alters the layout and options of the initial Windows installer screens, which may scare users.
+	// So, in format.c, we'll try to insert the registry keys directly and drop this section. However,
+	// because Microsoft prevents Store apps from editing an offline registry, we do need this fallback.
 	if (mask & UNATTEND_WINPE_SETUP_MASK) {
-		enable_inplace = TRUE;
 		order = 1;
 		fprintf(fd, "  <settings pass=\"windowsPE\">\n");
 		fprintf(fd, "    <component name=\"Microsoft-Windows-Setup\" processorArchitecture=\"%s\" language=\"neutral\" "
@@ -1351,7 +1340,6 @@ static char* CreateUnattendXml(int arch, int mask)
 	if (mask & UNATTEND_OFFLINE_SERVICING) {
 		fprintf(fd, "  <settings pass=\"offlineServicing\">\n");
 		if (mask & UNATTEND_OFFLINE_INTERNAL_DRIVES) {
-			set_drives_offline = TRUE;
 			fprintf(fd, "    <component name=\"Microsoft-Windows-PartitionManager\" processorArchitecture=\"%s\" language=\"neutral\" "
 				"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
@@ -2768,8 +2756,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			fs_type = (int)ComboBox_GetCurItemData(hFileSystem);
 			write_as_image = FALSE;
 			write_as_esp = FALSE;
-			enable_inplace = FALSE;
-			set_drives_offline = FALSE;
+			unattend_xml_selection = 0;
 			// Disable all controls except Cancel
 			EnableControls(FALSE, FALSE);
 			FormatStatus = 0;
