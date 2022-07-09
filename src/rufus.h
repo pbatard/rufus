@@ -160,12 +160,16 @@
 #define safe_atoi(str) ((((char*)(str))==NULL)?0:atoi(str))
 #define safe_strlen(str) ((((char*)(str))==NULL)?0:strlen(str))
 #define safe_strdup _strdup
-#define to_windows_path(str) do { size_t __i; for (__i = 0; __i < safe_strlen(str); __i++) if (str[__i] == '/') str[__i] = '\\'; } while(0)
 #if defined(_MSC_VER)
 #define safe_vsnprintf(buf, size, format, arg) _vsnprintf_s(buf, size, _TRUNCATE, format, arg)
 #else
 #define safe_vsnprintf vsnprintf
 #endif
+static __inline void static_repchr(char* p, char s, char r) {
+	if (p != NULL) while (*p != 0) { if (*p == s) *p = r; p++; }
+}
+#define to_unix_path(str) static_repchr(str, '\\', '/')
+#define to_windows_path(str) static_repchr(str, '/', '\\')
 
 extern void _uprintf(const char *format, ...);
 extern void _uprintfs(const char *str);

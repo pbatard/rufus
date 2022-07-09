@@ -328,15 +328,14 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 static void fix_config(const char* psz_fullpath, const char* psz_path, const char* psz_basename, EXTRACT_PROPS* props)
 {
 	BOOL modified = FALSE;
-	size_t i, nul_pos;
+	size_t nul_pos;
 	char *iso_label = NULL, *usb_label = NULL, *src, *dst;
 
-	nul_pos = safe_strlen(psz_fullpath);
 	src = safe_strdup(psz_fullpath);
 	if (src == NULL)
 		return;
-	for (i=0; i<nul_pos; i++)
-		if (src[i] == '/') src[i] = '\\';
+	nul_pos = strlen(src);
+	to_windows_path(src);
 
 	// Add persistence to the kernel options
 	if ((boot_type == BT_IMAGE) && HAS_PERSISTENCE(img_report) && persistence_size) {
@@ -437,25 +436,21 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 
 static void print_extracted_file(char* psz_fullpath, uint64_t file_length)
 {
-	size_t i, nul_pos;
+	size_t nul_pos;
 
 	if (psz_fullpath == NULL)
 		return;
 	// Replace slashes with backslashes and append the size to the path for UI display
+	to_windows_path(psz_fullpath);
 	nul_pos = strlen(psz_fullpath);
-	for (i = 0; i < nul_pos; i++)
-		if (psz_fullpath[i] == '/')
-			psz_fullpath[i] = '\\';
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, TRUE, FALSE));
 	uprintf("Extracting: %s\n", psz_fullpath);
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, FALSE, FALSE));
 	PrintStatus(0, MSG_000, psz_fullpath);	// MSG_000 is "%s"
-	// ISO9660 cannot handle backslashes
-	for (i = 0; i < nul_pos; i++)
-		if (psz_fullpath[i] == '\\')
-			psz_fullpath[i] = '/';
 	// Remove the appended size for extraction
 	psz_fullpath[nul_pos] = 0;
+	// ISO9660 cannot handle backslashes
+	to_unix_path(psz_fullpath);
 }
 
 static void alt_print_extracted_file(const char* psz_fullpath, uint64_t file_length)
@@ -1255,13 +1250,9 @@ out:
 					static_sprintf(path, "%s/%s", isolinux_dir, efi_cfg_name[i]);
 					fprintf(fd, "DEFAULT loadconfig\n\nLABEL loadconfig\n  CONFIG %s\n  APPEND %s\n", &path[2], &isolinux_dir[2]);
 					fclose(fd);
-					for (j = 0; j < len; j++)
-						if (symlinked_syslinux[j] == '/')
-							symlinked_syslinux[j] = '\\';
+					to_windows_path(symlinked_syslinux);
 					uprintf("Created: %s\\%s → %s", symlinked_syslinux, efi_cfg_name[i], &path[2]);
-					for (j = 0; j < len; j++)
-						if (symlinked_syslinux[j] == '\\')
-							symlinked_syslinux[j] = '/';
+					to_unix_path(symlinked_syslinux);
 					fd = NULL;
 				}
 			}
@@ -1390,7 +1381,7 @@ out:
 
 uint32_t GetInstallWimVersion(const char* iso)
 {
-	char *wim_path = NULL, *p, buf[UDF_BLOCKSIZE] = { 0 };
+	char *wim_path = NULL, buf[UDF_BLOCKSIZE] = { 0 };
 	uint32_t* wim_header = (uint32_t*)buf, r = 0xffffffff;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL;
@@ -1402,8 +1393,7 @@ uint32_t GetInstallWimVersion(const char* iso)
 		goto out;
 	// UDF indiscriminately accepts slash or backslash delimiters,
 	// but ISO-9660 requires slash
-	for (p = wim_path; *p != 0; p++)
-		if (*p == '\\') *p = '/';
+	to_unix_path(wim_path);
 
 	// First try to open as UDF - fallback to ISO if it failed
 	p_udf = udf_open(iso);
