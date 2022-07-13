@@ -1498,8 +1498,9 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 
 /*
  * Add unattend.xml to 'sources\boot.wim' (install) or 'Windows\Panther\' (Windows To Go)
+ * NB: Work with a copy of unattend_xml_selection as a paremeter since we will modify it.
  */
-BOOL ApplyWindowsCustomization(char drive_letter, BOOL windows_to_go)
+BOOL ApplyWindowsCustomization(char drive_letter, int unattend_selection)
 {
 	BOOL r = FALSE, is_hive_mounted = FALSE;
 	int i;
@@ -1515,7 +1516,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, BOOL windows_to_go)
 
 	assert(unattend_xml_path != NULL);
 	uprintf("Applying Windows customization:");
-	if (windows_to_go) {
+	if (unattend_selection & UNATTEND_WINDOWS_TO_GO) {
 		static_sprintf(path, "%c:\\Windows\\Panther", drive_letter);
 		if (!CreateDirectoryA(path, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) {
 			uprintf("Could not create '%s' : %s", path, WindowsErrorString());
@@ -1529,7 +1530,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, BOOL windows_to_go)
 		uprintf("Added '%s'", path);
 	} else {
 		boot_wim_path[0] = drive_letter;
-		if (unattend_xml_selection & UNATTEND_WINPE_SETUP_MASK) {
+		if (unattend_selection & UNATTEND_WINPE_SETUP_MASK) {
 			// Create a backup of sources\appraiserres.dll and then create an empty file to
 			// allow in-place upgrades without TPM/SB. Note that we need to create an empty,
 			// appraiserres.dll otherwise setup.exe extracts its own.
@@ -1544,12 +1545,16 @@ BOOL ApplyWindowsCustomization(char drive_letter, BOOL windows_to_go)
 		}
 
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 0, PATCH_PROGRESS_TOTAL);
-		uprintf("Mounting '%s'...", boot_wim_path);
-		mount_path = WimMountImage(boot_wim_path, wim_index);
-		if (mount_path == NULL)
-			goto out;
+		// We only need to mount boot.wim if we have windowsPE data to deal with. If
+		// not, we can just copy our unattend.xml in \sources\$OEM$\$$\Panther\.
+		if (unattend_selection & UNATTEND_WINPE_SETUP_MASK) {
+			uprintf("Mounting '%s'...", boot_wim_path);
+			mount_path = WimMountImage(boot_wim_path, wim_index);
+			if (mount_path == NULL)
+				goto out;
+		}
 
-		if (unattend_xml_selection & UNATTEND_WINPE_SETUP_MASK) {
+		if (unattend_selection & (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_MINRAM_MINDISK_MASK)) {
 			// Try to create the registry keys directly, and fallback to using unattend
 			// if that fails (which the Windows Store version is expected to do).
 			static_sprintf(path, "%s\\Windows\\System32\\config\\SYSTEM", mount_path);
@@ -1577,7 +1582,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, BOOL windows_to_go)
 			}
 
 			for (i = 0; i < ARRAYSIZE(bypass_name); i++) {
-				if (!(unattend_xml_selection & (1 << (i / 2))))
+				if (!(unattend_selection & (1 << (i / 2))))
 					continue;
 				status = RegSetValueExA(hSubKey, bypass_name[i], 0, REG_DWORD, (LPBYTE)&dwVal, sizeof(DWORD));
 				if (status != ERROR_SUCCESS) {
@@ -1590,18 +1595,52 @@ BOOL ApplyWindowsCustomization(char drive_letter, BOOL windows_to_go)
 			}
 			// We were successfull in creating the keys so disable the windowsPE section from unattend.xml
 			// We do this by replacing '<settings pass="windowsPE">' with '<settings pass="disabled">'
-			if (replace_in_token_data(unattend_xml_path, "<settings", "windowsPE", "disabled", FALSE) == NULL)
-				uprintf("Warning: Could not disable 'windowsPE' pass from unattend.xml");
+			// (provided that the registry key creation was the only item for this pass)
+			if ((unattend_selection & UNATTEND_WINPE_SETUP_MASK) == (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_MINRAM_MINDISK_MASK)) {
+				if (replace_in_token_data(unattend_xml_path, "<settings", "windowsPE", "disabled", FALSE) == NULL)
+					uprintf("Warning: Could not disable 'windowsPE' pass from unattend.xml");
+				// Remove the flags, since we accomplished the registry creation outside of unattend.
+				unattend_selection &= ~(UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_MINRAM_MINDISK_MASK);
+			} else {
+				// TODO: If we add other tasks besides LabConfig reg keys, we'll need to figure out how
+				// to comment out the <RunSynchronous> entries from windowsPE (and only windowsPE).
+				assert(FALSE);
+			}
 			UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 102, PATCH_PROGRESS_TOTAL);
 		}
 
 copy_unattend:
-		static_sprintf(path, "%s\\Autounattend.xml", mount_path);
-		if (!CopyFileU(unattend_xml_path, path, TRUE)) {
-			uprintf("Could not create boot.wim 'Autounattend.xml': %s", WindowsErrorString());
-			goto out;
+		if (unattend_selection & UNATTEND_WINPE_SETUP_MASK) {
+			// If we have a windowsPE section, copy the answer files to the root of boot.wim as
+			// Autounattend.xml. This also results in that file being automatically copied over
+			// to %WINDIR%\Panther\unattend.xml for later passes processing.
+			assert(mount_path != NULL);
+			static_sprintf(path, "%s\\Autounattend.xml", mount_path);
+			if (!CopyFileU(unattend_xml_path, path, TRUE)) {
+				uprintf("Could not create boot.wim 'Autounattend.xml': %s", WindowsErrorString());
+				goto out;
+			}
+			uprintf("Added 'Autounattend.xml' to '%s'", boot_wim_path);
+		} else {
+			// If there is no windowsPE section in our unattend, then copying it as Autounattend.xml on
+			// the root of boot.wim will not work as Windows Setup does *NOT* carry Autounattend.xml into
+			// %WINDIR%\Panther\unattend.xml then (See: https://github.com/pbatard/rufus/issues/1981).
+			// So instead, copy it to \sources\$OEM$\$$\Panther\unattend.xml on the media, as the content
+			// of \sources\$OEM$\$$\* will get copied into %WINDIR%\ during the file copy phase.
+			static_sprintf(path, "%c:\\sources\\$OEM$\\$$\\Panther", drive_letter);
+			i = SHCreateDirectoryExA(NULL, path, NULL);
+			if (i != ERROR_SUCCESS) {
+				SetLastError(i);
+				uprintf("Error: Could not create directory '%s': %s", path, WindowsErrorString());
+				goto out;
+			}
+			static_sprintf(path, "%c:\\sources\\$OEM$\\$$\\Panther\\unattend.xml", drive_letter);
+			if (!CopyFileU(unattend_xml_path, path, TRUE)) {
+				uprintf("Could not create '%s': %s", path, WindowsErrorString());
+				goto out;
+			}
+			uprintf("Created '%s'", path);
 		}
-		uprintf("Added 'Autounattend.xml' to '%s'", boot_wim_path);
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 103, PATCH_PROGRESS_TOTAL);
 	}
 	r = TRUE;
@@ -2413,7 +2452,7 @@ DWORD WINAPI FormatThread(void* param)
 					goto out;
 				}
 				if (unattend_xml_path != NULL) {
-					if (!ApplyWindowsCustomization(drive_name[0], TRUE))
+					if (!ApplyWindowsCustomization(drive_name[0], unattend_xml_selection | UNATTEND_WINDOWS_TO_GO))
 						FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_PATCH);
 				}
 			} else {
@@ -2455,7 +2494,7 @@ DWORD WINAPI FormatThread(void* param)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 				}
 				if (unattend_xml_path != NULL) {
-					if (!ApplyWindowsCustomization(drive_name[0], FALSE))
+					if (!ApplyWindowsCustomization(drive_name[0], unattend_xml_selection))
 						FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_PATCH);
 				}
 			}

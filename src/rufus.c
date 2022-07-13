@@ -1283,7 +1283,7 @@ static char* CreateUnattendXml(int arch, int mask)
 		// WinPE will complain if we don't provide a product key. *Any* product key. This is soooo idiotic...
 		fprintf(fd, "      <UserData>\n");
 		fprintf(fd, "        <ProductKey>\n");
-		fprintf(fd, "          <Key>xxxxx-xxxxx-xxxxx-xxxxx-xxxxx</Key>\n");
+		fprintf(fd, "          <Key />\n");
 		fprintf(fd, "        </ProductKey>\n");
 		fprintf(fd, "      </UserData>\n");
 		fprintf(fd, "      <RunSynchronous>\n");
