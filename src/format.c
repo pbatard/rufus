@@ -71,7 +71,7 @@ extern const int nb_steps[FS_MAX];
 extern uint32_t dur_mins, dur_secs;
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 static int actual_fs_type, wintogo_index = -1, wininst_index = 0;
-extern int unattend_xml_selection;
+extern int unattend_xml_flags;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing;
 extern BOOL write_as_image, use_vds, write_as_esp, is_vds_available;
 extern const grub_patch_t grub_patch[2];
@@ -1472,7 +1472,7 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	// "upgrade" the ReFS version on all drives to v3.7, thereby preventing you from being able to mount
 	// those volumes back on Windows 10 ever again. Yes, I have been stung by this Microsoft bullshit!
 	// See: https://gist.github.com/0xbadfca11/da0598e47dd643d933dc#Mountability
-	if (unattend_xml_selection & UNATTEND_OFFLINE_INTERNAL_DRIVES) {
+	if (unattend_xml_flags & UNATTEND_OFFLINE_INTERNAL_DRIVES) {
 		uprintf("Setting the target's internal drives offline using command:");
 		// This applies the "offlineServicing" section of the unattend.xml (while ignoring the other sections)
 		static_sprintf(cmd, "dism /Image:%s\\ /Apply-Unattend:%s", drive_name, unattend_xml_path);
@@ -1498,9 +1498,9 @@ static BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 
 /*
  * Add unattend.xml to 'sources\boot.wim' (install) or 'Windows\Panther\' (Windows To Go)
- * NB: Work with a copy of unattend_xml_selection as a paremeter since we will modify it.
+ * NB: Work with a copy of unattend_xml_flags as a paremeter since we will modify it.
  */
-BOOL ApplyWindowsCustomization(char drive_letter, int unattend_selection)
+BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 {
 	BOOL r = FALSE, is_hive_mounted = FALSE;
 	int i;
@@ -1516,7 +1516,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int unattend_selection)
 
 	assert(unattend_xml_path != NULL);
 	uprintf("Applying Windows customization:");
-	if (unattend_selection & UNATTEND_WINDOWS_TO_GO) {
+	if (flags & UNATTEND_WINDOWS_TO_GO) {
 		static_sprintf(path, "%c:\\Windows\\Panther", drive_letter);
 		if (!CreateDirectoryA(path, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) {
 			uprintf("Could not create '%s' : %s", path, WindowsErrorString());
@@ -1530,7 +1530,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int unattend_selection)
 		uprintf("Added '%s'", path);
 	} else {
 		boot_wim_path[0] = drive_letter;
-		if (unattend_selection & UNATTEND_WINPE_SETUP_MASK) {
+		if (flags & UNATTEND_WINPE_SETUP_MASK) {
 			// Create a backup of sources\appraiserres.dll and then create an empty file to
 			// allow in-place upgrades without TPM/SB. Note that we need to create an empty,
 			// appraiserres.dll otherwise setup.exe extracts its own.
@@ -1547,14 +1547,14 @@ BOOL ApplyWindowsCustomization(char drive_letter, int unattend_selection)
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 0, PATCH_PROGRESS_TOTAL);
 		// We only need to mount boot.wim if we have windowsPE data to deal with. If
 		// not, we can just copy our unattend.xml in \sources\$OEM$\$$\Panther\.
-		if (unattend_selection & UNATTEND_WINPE_SETUP_MASK) {
+		if (flags & UNATTEND_WINPE_SETUP_MASK) {
 			uprintf("Mounting '%s'...", boot_wim_path);
 			mount_path = WimMountImage(boot_wim_path, wim_index);
 			if (mount_path == NULL)
 				goto out;
 		}
 
-		if (unattend_selection & (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_MINRAM_MINDISK_MASK)) {
+		if (flags & (UNATTEND_SECUREBOOT_TPM | UNATTEND_MINRAM_MINDISK)) {
 			// Try to create the registry keys directly, and fallback to using unattend
 			// if that fails (which the Windows Store version is expected to do).
 			static_sprintf(path, "%s\\Windows\\System32\\config\\SYSTEM", mount_path);
@@ -1582,7 +1582,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int unattend_selection)
 			}
 
 			for (i = 0; i < ARRAYSIZE(bypass_name); i++) {
-				if (!(unattend_selection & (1 << (i / 2))))
+				if (!(flags & (1 << (i / 2))))
 					continue;
 				status = RegSetValueExA(hSubKey, bypass_name[i], 0, REG_DWORD, (LPBYTE)&dwVal, sizeof(DWORD));
 				if (status != ERROR_SUCCESS) {
@@ -1596,11 +1596,11 @@ BOOL ApplyWindowsCustomization(char drive_letter, int unattend_selection)
 			// We were successfull in creating the keys so disable the windowsPE section from unattend.xml
 			// We do this by replacing '<settings pass="windowsPE">' with '<settings pass="disabled">'
 			// (provided that the registry key creation was the only item for this pass)
-			if ((unattend_selection & UNATTEND_WINPE_SETUP_MASK) == (UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_MINRAM_MINDISK_MASK)) {
+			if ((flags & UNATTEND_WINPE_SETUP_MASK) == (UNATTEND_SECUREBOOT_TPM | UNATTEND_MINRAM_MINDISK)) {
 				if (replace_in_token_data(unattend_xml_path, "<settings", "windowsPE", "disabled", FALSE) == NULL)
 					uprintf("Warning: Could not disable 'windowsPE' pass from unattend.xml");
 				// Remove the flags, since we accomplished the registry creation outside of unattend.
-				unattend_selection &= ~(UNATTEND_SECUREBOOT_TPM_MASK | UNATTEND_MINRAM_MINDISK_MASK);
+				flags &= ~(UNATTEND_SECUREBOOT_TPM | UNATTEND_MINRAM_MINDISK);
 			} else {
 				// TODO: If we add other tasks besides LabConfig reg keys, we'll need to figure out how
 				// to comment out the <RunSynchronous> entries from windowsPE (and only windowsPE).
@@ -1610,7 +1610,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int unattend_selection)
 		}
 
 copy_unattend:
-		if (unattend_selection & UNATTEND_WINPE_SETUP_MASK) {
+		if (flags & UNATTEND_WINPE_SETUP_MASK) {
 			// If we have a windowsPE section, copy the answer files to the root of boot.wim as
 			// Autounattend.xml. This also results in that file being automatically copied over
 			// to %WINDIR%\Panther\unattend.xml for later passes processing.
@@ -2452,7 +2452,7 @@ DWORD WINAPI FormatThread(void* param)
 					goto out;
 				}
 				if (unattend_xml_path != NULL) {
-					if (!ApplyWindowsCustomization(drive_name[0], unattend_xml_selection | UNATTEND_WINDOWS_TO_GO))
+					if (!ApplyWindowsCustomization(drive_name[0], unattend_xml_flags | UNATTEND_WINDOWS_TO_GO))
 						FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_PATCH);
 				}
 			} else {
@@ -2494,7 +2494,7 @@ DWORD WINAPI FormatThread(void* param)
 						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 				}
 				if (unattend_xml_path != NULL) {
-					if (!ApplyWindowsCustomization(drive_name[0], unattend_xml_selection))
+					if (!ApplyWindowsCustomization(drive_name[0], unattend_xml_flags))
 						FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_PATCH);
 				}
 			}

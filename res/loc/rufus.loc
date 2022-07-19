@@ -590,6 +590,8 @@ t MSG_329 "Remove requirement for 4GB+ RAM and 64GB+ disk"
 t MSG_330 "Remove requirement for an online Microsoft account"
 t MSG_331 "Disable data collection (Skip privacy questions)"
 t MSG_332 "Prevent Windows To Go from accessing internal disks"
+t MSG_333 "Set a local account using the same name as this user's"
+t MSG_334 "Set regional options to the same values as this user's"
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001

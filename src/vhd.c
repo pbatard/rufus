@@ -167,8 +167,8 @@ static int _index, progress_op = OP_FILE_COPY, progress_msg = MSG_267;
 
 static BOOL Get7ZipPath(void)
 {
-	if ( (GetRegistryKeyStr(REGKEY_HKCU, "7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path)))
-	  || (GetRegistryKeyStr(REGKEY_HKLM, "7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path))) ) {
+	if ( (GetRegistryKeyStr(REGKEY_HKCU, "Software\\7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path)))
+	  || (GetRegistryKeyStr(REGKEY_HKLM, "Software\\7-Zip\\Path", sevenzip_path, sizeof(sevenzip_path))) ) {
 		static_strcat(sevenzip_path, "\\7z.exe");
 		return (_accessU(sevenzip_path, 0) != -1);
 	}

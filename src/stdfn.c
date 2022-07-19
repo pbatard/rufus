@@ -1017,12 +1017,12 @@ out:
 	return r;
 }
 
-char* GetCurrentMUI(void)
+char* ToLocaleName(DWORD lang_id)
 {
 	static char mui_str[LOCALE_NAME_MAX_LENGTH];
 	wchar_t wmui_str[LOCALE_NAME_MAX_LENGTH];
 
-	if (LCIDToLocaleName(GetUserDefaultUILanguage(), wmui_str, LOCALE_NAME_MAX_LENGTH, 0) > 0) {
+	if (LCIDToLocaleName(lang_id, wmui_str, LOCALE_NAME_MAX_LENGTH, 0) > 0) {
 		wchar_to_utf8_no_alloc(wmui_str, mui_str, LOCALE_NAME_MAX_LENGTH);
 	} else {
 		static_strcpy(mui_str, "en-US");
