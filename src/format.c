@@ -1554,7 +1554,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 				goto out;
 		}
 
-		if (flags & (UNATTEND_SECUREBOOT_TPM | UNATTEND_MINRAM_MINDISK)) {
+		if (flags & UNATTEND_SECUREBOOT_TPM_MINRAM) {
 			// Try to create the registry keys directly, and fallback to using unattend
 			// if that fails (which the Windows Store version is expected to do).
 			static_sprintf(path, "%s\\Windows\\System32\\config\\SYSTEM", mount_path);
@@ -1582,8 +1582,6 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			}
 
 			for (i = 0; i < ARRAYSIZE(bypass_name); i++) {
-				if (!(flags & (1 << (i / 2))))
-					continue;
 				status = RegSetValueExA(hSubKey, bypass_name[i], 0, REG_DWORD, (LPBYTE)&dwVal, sizeof(DWORD));
 				if (status != ERROR_SUCCESS) {
 					SetLastError(status);
@@ -1596,11 +1594,11 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			// We were successfull in creating the keys so disable the windowsPE section from unattend.xml
 			// We do this by replacing '<settings pass="windowsPE">' with '<settings pass="disabled">'
 			// (provided that the registry key creation was the only item for this pass)
-			if ((flags & UNATTEND_WINPE_SETUP_MASK) == (UNATTEND_SECUREBOOT_TPM | UNATTEND_MINRAM_MINDISK)) {
+			if ((flags & UNATTEND_WINPE_SETUP_MASK) == UNATTEND_SECUREBOOT_TPM_MINRAM) {
 				if (replace_in_token_data(unattend_xml_path, "<settings", "windowsPE", "disabled", FALSE) == NULL)
 					uprintf("Warning: Could not disable 'windowsPE' pass from unattend.xml");
 				// Remove the flags, since we accomplished the registry creation outside of unattend.
-				flags &= ~(UNATTEND_SECUREBOOT_TPM | UNATTEND_MINRAM_MINDISK);
+				flags &= ~UNATTEND_SECUREBOOT_TPM_MINRAM;
 			} else {
 				// TODO: If we add other tasks besides LabConfig reg keys, we'll need to figure out how
 				// to comment out the <RunSynchronous> entries from windowsPE (and only windowsPE).

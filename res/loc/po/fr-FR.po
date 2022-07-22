@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2022-06-24 17:34+0100\n"
-"PO-Revision-Date: 2022-06-30 11:26+0100\n"
+"POT-Creation-Date: 2022-07-22 11:06+0100\n"
+"PO-Revision-Date: 2022-07-22 11:14+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: French (Français)\n"
 "X-Rufus-LCID: 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c\n"
-"X-Generator: Poedit 3.1\n"
+"X-Generator: Poedit 3.1.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1805,21 +1805,25 @@ msgid "Customize Windows installation?"
 msgstr "Personnaliser l'installation de Windows ?"
 
 #. • MSG_328
-msgid "Remove requirement for Secure Boot and TPM 2.0"
-msgstr "Supprimer la nécessité d'avoir Secure Boot et TPM 2.0"
-
-#. • MSG_329
-msgid "Remove requirement for 4GB+ RAM and 64GB+ disk"
-msgstr "Supprimer la nécessité d'avoir 4Go+ de RAM et 64Go+ de disque"
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "Supprimer la nécessité d'avoir 4Go+ de RAM, Secure Boot et TPM 2.0"
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
-msgstr "Désactiver la collecte de données (Élimine les questions sur la vie privée)"
+msgstr "Supprimer la nécessité d'utiliser un compte Microsoft en ligne"
 
 #. • MSG_331
 msgid "Disable data collection (Skip privacy questions)"
-msgstr "Supprimer la nécessité d'utiliser un compte Microsoft en ligne"
+msgstr "Désactiver la collecte de données (Supprime les questions de confidentialité)"
 
 #. • MSG_332
 msgid "Prevent Windows To Go from accessing internal disks"
 msgstr "Empêcher Windows To Go d'accéder aux disques internes"
+
+#. • MSG_333
+msgid "Set a local account using the same name as this user's"
+msgstr "Définir un compte local utilisant le même nom que celui de cet utilisateur"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "Définir les options régionales avec les mêmes valeurs que celles de cet utilisateur"

@@ -138,7 +138,7 @@ StrArray BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
-const char* bypass_name[4] = { "BypassTPMCheck", "BypassSecureBootCheck", "BypassRAMCheck", "BypassStorageCheck" };
+const char* bypass_name[] = { "BypassTPMCheck", "BypassSecureBootCheck", "BypassRAMCheck" };
 RUFUS_DRIVE rufus_drive[MAX_DRIVES] = { 0 };
 
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
@@ -1293,16 +1293,16 @@ static char* CreateUnattendXml(int arch, int flags)
 		fprintf(fd, "          <Key />\n");
 		fprintf(fd, "        </ProductKey>\n");
 		fprintf(fd, "      </UserData>\n");
-		fprintf(fd, "      <RunSynchronous>\n");
-		for (i = 0; i < ARRAYSIZE(bypass_name); i++) {
-			if (!(flags & (1 << (i/2))))
-				continue;
-			fprintf(fd, "        <RunSynchronousCommand wcm:action=\"add\">\n");
-			fprintf(fd, "          <Order>%d</Order>\n", order++);
-			fprintf(fd, "          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v %s /t REG_DWORD /d 1 /f</Path>\n", bypass_name[i]);
-			fprintf(fd, "        </RunSynchronousCommand>\n");
+		if (flags & UNATTEND_SECUREBOOT_TPM_MINRAM) {
+			fprintf(fd, "      <RunSynchronous>\n");
+			for (i = 0; i < ARRAYSIZE(bypass_name); i++) {
+				fprintf(fd, "        <RunSynchronousCommand wcm:action=\"add\">\n");
+				fprintf(fd, "          <Order>%d</Order>\n", order++);
+				fprintf(fd, "          <Path>reg add HKLM\\SYSTEM\\Setup\\LabConfig /v %s /t REG_DWORD /d 1 /f</Path>\n", bypass_name[i]);
+				fprintf(fd, "        </RunSynchronousCommand>\n");
+			}
+			fprintf(fd, "      </RunSynchronous>\n");
 		}
-		fprintf(fd, "      </RunSynchronous>\n");
 		fprintf(fd, "    </component>\n");
 		fprintf(fd, "  </settings>\n");
 	}
@@ -1732,9 +1732,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			uint8_t map[8] = { 0 }, b = 1;
 			StrArrayCreate(&options, 4);
 			StrArrayAdd(&options, lmprintf(MSG_328), TRUE);
-			MAP_BIT(UNATTEND_SECUREBOOT_TPM);
-			StrArrayAdd(&options, lmprintf(MSG_329), TRUE);
-			MAP_BIT(UNATTEND_MINRAM_MINDISK);
+			MAP_BIT(UNATTEND_SECUREBOOT_TPM_MINRAM);
 			if (img_report.win_version.build >= 22500) {
 				StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
 				MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
