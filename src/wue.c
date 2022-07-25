@@ -60,7 +60,7 @@ char* CreateUnattendXml(int arch, int flags)
 	int i, order;
 	const char* xml_arch_names[5] = { "x86", "amd64", "arm", "arm64" };
 	unattend_xml_flags = flags;
-	if (arch < ARCH_X86_32 || arch >= ARCH_ARM_64 || flags == 0)
+	if (arch < ARCH_X86_32 || arch > ARCH_ARM_64 || flags == 0)
 		return NULL;
 	arch--;
 	// coverity[swapped_arguments]
