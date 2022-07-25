@@ -637,7 +637,6 @@ extern char* WimMountImage(const char* image, int index);
 extern BOOL WimUnmountImage(const char* image, int index);
 extern int8_t IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);
-extern int SetWinToGoIndex(void);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 extern char* GetSignatureName(const char* path, const char* country_code, BOOL bSilent);
 extern uint64_t GetSignatureTimeStamp(const char* path);
@@ -670,7 +669,6 @@ extern HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAcce
 	DWORD dwFlagsAndAttributes, LONGLONG fileSize);
 #define GetTextWidth(hDlg, id) GetTextSize(GetDlgItem(hDlg, id), NULL).cx
 
-DWORD WINAPI FormatThread(void* param);
 DWORD WINAPI SaveImageThread(void* param);
 DWORD WINAPI SumThread(void* param);
 

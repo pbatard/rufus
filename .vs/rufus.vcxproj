@@ -373,6 +373,7 @@
     <ClCompile Include="..\src\dev.c" />
     <ClCompile Include="..\src\ui.c" />
     <ClCompile Include="..\src\vhd.c" />
+    <ClCompile Include="..\src\wue.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\res\grub2\grub2_version.h" />
@@ -405,6 +406,7 @@
     <ClInclude Include="..\src\ui.h" />
     <ClInclude Include="..\src\ui_data.h" />
     <ClInclude Include="..\src\winio.h" />
+    <ClInclude Include="..\src\wue.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\src\rufus.manifest" />

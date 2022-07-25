@@ -98,7 +98,7 @@ am_rufus_OBJECTS = rufus-badblocks.$(OBJEXT) rufus-checksum.$(OBJEXT) \
 	rufus-rufus.$(OBJEXT) rufus-smart.$(OBJEXT) \
 	rufus-stdfn.$(OBJEXT) rufus-stdio.$(OBJEXT) \
 	rufus-stdlg.$(OBJEXT) rufus-syslinux.$(OBJEXT) \
-	rufus-ui.$(OBJEXT) rufus-vhd.$(OBJEXT)
+	rufus-ui.$(OBJEXT) rufus-vhd.$(OBJEXT) rufus-wue.$(OBJEXT)
 rufus_OBJECTS = $(am_rufus_OBJECTS)
 am__DEPENDENCIES_1 =
 rufus_DEPENDENCIES = rufus_rc.o bled/libbled.a ext2fs/libext2fs.a \
@@ -282,7 +282,7 @@ AM_V_WINDRES_1 = $(WINDRES)
 AM_V_WINDRES_ = $(AM_V_WINDRES_$(AM_DEFAULT_VERBOSITY))
 AM_V_WINDRES = $(AM_V_WINDRES_$(V))
 rufus_SOURCES = badblocks.c checksum.c dev.c dos.c dos_locale.c drive.c format.c format_ext.c format_fat32.c icon.c iso.c localization.c \
-	net.c parser.c pki.c process.c re.c rufus.c smart.c stdfn.c stdio.c stdlg.c syslinux.c ui.c vhd.c
+	net.c parser.c pki.c process.c re.c rufus.c smart.c stdfn.c stdio.c stdlg.c syslinux.c ui.c vhd.c wue.c
 
 rufus_CFLAGS = -I$(srcdir)/ms-sys/inc -I$(srcdir)/syslinux/libfat -I$(srcdir)/syslinux/libinstaller -I$(srcdir)/syslinux/win -I$(srcdir)/libcdio $(AM_CFLAGS) \
 	-DEXT2_FLAT_INCLUDES=0 -DSOLUTION=rufus
@@ -494,6 +494,12 @@ rufus-vhd.o: vhd.c
 
 rufus-vhd.obj: vhd.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-vhd.obj `if test -f 'vhd.c'; then $(CYGPATH_W) 'vhd.c'; else $(CYGPATH_W) '$(srcdir)/vhd.c'; fi`
+
+rufus-wue.o: wue.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-wue.o `test -f 'wue.c' || echo '$(srcdir)/'`wue.c
+
+rufus-wue.obj: wue.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-wue.obj `if test -f 'wue.c'; then $(CYGPATH_W) 'wue.c'; else $(CYGPATH_W) '$(srcdir)/wue.c'; fi`
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.

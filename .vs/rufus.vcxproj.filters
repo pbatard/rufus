@@ -90,6 +90,9 @@
     <ClCompile Include="..\src\re.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\wue.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\rufus.h">
@@ -180,6 +183,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\res\grub2\grub2_version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\wue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

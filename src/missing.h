@@ -115,11 +115,39 @@ static __inline int _log2(register int val)
 	return ret;
 }
 
-// Remap bits from a byte according to an 8x8 bit matrix
+/// <summary>
+/// Remaps bits from a byte according to an 8x8 bit matrix.
+/// </summary>
+/// <param name="src">The byte to remap.</param>
+/// <param name="map">An 8-byte array where each byte has a single bit set to the position to remap to.</param>
+/// <param name="reverse">Indicates whether the reverse mapping operation should be applied.</param>
+/// <returns>The remapped byte data.</returns>
 static __inline uint8_t remap8(uint8_t src, uint8_t* map, const BOOL reverse)
 {
 	uint8_t i, m = 1, r = 0;
-	for (i = 0, m = 1; i < 8; i++, m <<= 1) {
+	for (i = 0, m = 1; i < (sizeof(src) * 8); i++, m <<= 1) {
+		if (reverse) {
+			if (src & map[i])
+				r |= m;
+		} else {
+			if (src & m)
+				r |= map[i];
+		}
+	}
+	return r;
+}
+
+/// <summary>
+/// Remaps bits from a 16-bit word according to a 16x16 bit matrix.
+/// </summary>
+/// <param name="src">The word to remap.</param>
+/// <param name="map">A 16-word array where each word has a single bit set to the position to remap to.</param>
+/// <param name="reverse">Indicates whether the reverse mapping operation should be applied.</param>
+/// <returns>The remapped byte data.</returns>
+static __inline uint16_t remap16(uint16_t src, uint16_t* map, const BOOL reverse)
+{
+	uint16_t i, m = 1, r = 0;
+	for (i = 0, m = 1; i < (sizeof(src) * 8); i++, m <<= 1) {
 		if (reverse) {
 			if (src & map[i])
 				r |= m;
