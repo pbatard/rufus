@@ -868,7 +868,7 @@ static int selection_dialog_style, selection_dialog_mask;
 INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	LRESULT loc;
-	int i, m, dh, r  = -1;
+	int i, m, dw, dh, r  = -1, mw;
 	// Prevent resizing
 	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
 		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
@@ -908,6 +908,13 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		separator_brush = CreateSolidBrush(GetSysColor(COLOR_3DLIGHT));
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg, NULL);
+
+		// Get the dialog's default size
+		GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_TEXT), &rc);
+		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
+		mw = rc.right - rc.left - ddw;	// ddw seems to work okay as a fudge
+		dw = mw;
+
 		// Change the default icon and set the text
 		Static_SetIcon(GetDlgItem(hDlg, IDC_SELECTION_ICON), LoadIcon(NULL, IDI_QUESTION));
 		SetWindowTextU(hDlg, szMessageTitle);
@@ -916,9 +923,14 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		for (i = 0; i < nDialogItems; i++) {
 			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), szDialogItem[i]);
 			ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), SW_SHOW);
+			// Compute the maximum line's width
+			mw = max(mw, GetTextSize(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), szDialogItem[i]).cx);
 		}
+		// If our maximum line's width is greater than the default, set a nonzero delta width
+		dw = (mw <= dw) ? 0: mw - dw;
 		// Move/Resize the controls as needed to fit our text
 		hCtrl = GetDlgItem(hDlg, IDC_SELECTION_TEXT);
+		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, dw, 0, 1.0f);
 		hDC = GetDC(hCtrl);
 		SelectFont(hDC, hDlgFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
 		GetWindowRect(hCtrl, &rc);
@@ -928,17 +940,19 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		safe_release_dc(hCtrl, hDC);
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
 		for (i = 0; i < nDialogItems; i++)
-			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, 0, 0, 1.0f);
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, dw, 0, 1.0f);
 		if (nDialogItems > 2) {
 			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), &rc);
 			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + nDialogItems - 1), &rc2);
 			dh += rc2.top - rc.top;
 		}
-		ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
-		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, -1), 0, 0, 0, dh, 1.0f);	// IDC_STATIC = -1
-		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_LINE), 0, dh, 0, 0, 1.0f);
-		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDOK), 0, dh, 0, 0, 1.0f);
-		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, dh, 0, 0, 1.0f);
+		if (dw != 0)
+			dw += ddw;
+		ResizeMoveCtrl(hDlg, hDlg, 0, 0, dw, dh, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, -1), 0, 0, dw, dh, 1.0f);	// IDC_STATIC = -1
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_LINE), 0, dh, dw, 0, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDOK), dw, dh, 0, 0, 1.0f);
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), dw, dh, 0, 0, 1.0f);
 		ResizeButtonHeight(hDlg, IDOK);
 		ResizeButtonHeight(hDlg, IDCANCEL);
 
