@@ -46,13 +46,13 @@ char* unattend_xml_path = NULL;
 
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 
- /// <summary>
- /// Create an installation answer file containing the sections specified by the flags.
- /// </summary>
- /// <param name="arch">The processor architecture of the Windows image being used.</param>
- /// <param name="flags">A bitmask representing the sections to enable.
- /// See "Windows User Experience flags and masks" from rufus.h</param>
- /// <returns>The path of a newly created answer file on success or NULL on error.</returns>
+/// <summary>
+/// Create an installation answer file containing the sections specified by the flags.
+/// </summary>
+/// <param name="arch">The processor architecture of the Windows image being used.</param>
+/// <param name="flags">A bitmask representing the sections to enable.
+/// See "Windows User Experience flags and masks" from rufus.h</param>
+/// <returns>The path of a newly created answer file on success or NULL on error.</returns>
 char* CreateUnattendXml(int arch, int flags)
 {
 	static char path[MAX_PATH];
@@ -499,7 +499,7 @@ out:
 /// <returns>TRUE on success, FALSE on error.</returns>
 BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 {
-	char* mounted_iso, * ms_efi = NULL, mounted_image_path[128], cmd[MAX_PATH];
+	char *mounted_iso, *ms_efi = NULL, mounted_image_path[128], cmd[MAX_PATH];
 	ULONG cluster_size;
 
 	uprintf("Windows To Go mode selected");
@@ -625,13 +625,14 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 	char boot_wim_path[] = "?:\\sources\\boot.wim", key_path[64];
 	char appraiserres_dll_src[] = "?:\\sources\\appraiserres.dll";
 	char appraiserres_dll_dst[] = "?:\\sources\\appraiserres.bak";
-	char* mount_path = NULL, path[MAX_PATH];
+	char *mount_path = NULL, path[MAX_PATH];
 	HKEY hKey = NULL, hSubKey = NULL;
 	LSTATUS status;
 	DWORD dwDisp, dwVal = 1;
 
 	assert(unattend_xml_path != NULL);
 	uprintf("Applying Windows customization:");
+	PrintStatus(0, MSG_326);
 	if (flags & UNATTEND_WINDOWS_TO_GO) {
 		static_sprintf(path, "%c:\\Windows\\Panther", drive_letter);
 		if (!CreateDirectoryA(path, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) {

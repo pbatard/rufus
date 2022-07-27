@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2022-07-22 11:06+0100\n"
-"PO-Revision-Date: 2022-07-22 11:14+0100\n"
+"POT-Creation-Date: 2022-07-27 11:43+0100\n"
+"PO-Revision-Date: 2022-07-27 11:44+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -1797,14 +1797,18 @@ msgid "Applying Windows customization: %s"
 msgstr "Application des options de personnalisation de Windows: %s"
 
 #. • MSG_326
+msgid "Applying user options..."
+msgstr "Application des options utilisateur..."
+
+#. • MSG_327
 msgid "Windows User Experience"
 msgstr "Expérience de l'utilisateur Windows"
 
-#. • MSG_327
+#. • MSG_328
 msgid "Customize Windows installation?"
 msgstr "Personnaliser l'installation de Windows ?"
 
-#. • MSG_328
+#. • MSG_329
 msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
 msgstr "Supprimer la nécessité d'avoir 4Go+ de RAM, Secure Boot et TPM 2.0"
 
@@ -1825,5 +1829,5 @@ msgid "Set a local account using the same name as this user's"
 msgstr "Définir un compte local utilisant le même nom que celui de cet utilisateur"
 
 #. • MSG_334
-msgid "Set regional options to the same values as this user's"
+msgid "Set regional options using the same values as this user's"
 msgstr "Définir les options régionales avec les mêmes valeurs que celles de cet utilisateur"

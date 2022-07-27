@@ -1505,7 +1505,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			default:
 				break;
 			}
-			if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_11(img_report)) {
+			if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_1X(img_report)) {
 				StrArray options;
 				int arch = _log2(img_report.has_efi >> 1);
 				uint8_t map[8] = { 0 }, b = 1;
@@ -1522,7 +1522,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				MAP_BIT(UNATTEND_DUPLICATE_USER);
 				StrArrayAdd(&options, lmprintf(MSG_334), TRUE);
 				MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
-				i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_326), lmprintf(MSG_327),
+				i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
 					options.String, options.Index, remap8(unattend_xml_mask, map, FALSE));
 				StrArrayDestroy(&options);
 				if (i < 0)
@@ -1566,13 +1566,15 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			MessageBoxExU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
 		}
-		if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_11(img_report) && (!is_windows_to_go)) {
+		if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_1X(img_report) && (!is_windows_to_go)) {
 			StrArray options;
 			int arch = _log2(img_report.has_efi >> 1);
 			uint8_t map[8] = { 0 }, b = 1;
 			StrArrayCreate(&options, 4);
-			StrArrayAdd(&options, lmprintf(MSG_328), TRUE);
-			MAP_BIT(UNATTEND_SECUREBOOT_TPM_MINRAM);
+			if (IS_WINDOWS_11(img_report)) {
+				StrArrayAdd(&options, lmprintf(MSG_329), TRUE);
+				MAP_BIT(UNATTEND_SECUREBOOT_TPM_MINRAM);
+			}
 			if (img_report.win_version.build >= 22500) {
 				StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
 				MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
@@ -1583,7 +1585,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			MAP_BIT(UNATTEND_DUPLICATE_USER);
 			StrArrayAdd(&options, lmprintf(MSG_334), TRUE);
 			MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
-			i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_326), lmprintf(MSG_327),
+			i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
 				options.String, options.Index, remap8(unattend_xml_mask, map, FALSE));
 			StrArrayDestroy(&options);
 			if (i < 0)
