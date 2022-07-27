@@ -1,3 +1,17 @@
+o Version 3.20 (2022.08.??)
+    Enable applicable Windows User Experience options for Windows 10
+    Make Windows User Experience options persist between sessions
+    Add automatic local account creation and regional options duplication
+    (NB: This is limited to creating an account with the same name as the current user and
+     with an empty password that the user will be prompted to change after first reboot)
+    Add a workaround for ISOs that have a 'syslinux' symbolic link to '/isolinux/' (Knoppix)
+    Revert to inserting registry keys for the TPM/SB/RAM bypass where possible
+    Remove storage bypass, since this is a bogus bypass that doesn't do anything
+    Improve BIOS compatibility when displaying the "UEFI boot only" alert message
+    Fix Windows User Experience dialog appearing twice for Windows To Go
+    Fix Windows User Experience options not being applied for ARM64
+    Fix Microsoft Account bypass not being applied unless TPM/SB/RAM bypass is selected
+
 o Version 3.19 (2022.07.01)
     Add a new selection dialog for Windows 11 setup customization:
       - Secure Boot and TPM bypass have now been moved to this dialog
