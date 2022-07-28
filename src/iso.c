@@ -847,19 +847,28 @@ out:
 
 void GetGrubVersion(char* buf, size_t buf_size)
 {
+	// In typical "I'll make my own Open Source... with blackjack and hookers!" fashion,
+	// IBM/Red-Hat/Fedora took it upon themselves to "fix" the double space typo from the
+	// GRUB version string. But of course, just like their introduction of GRUB calls like
+	// 'grub_debug_is_enabled', they didn't want to bother upstreaming their changes...
+	// On the other hand, boy do they want to leech of FSF/GNU developed software, while
+	// not having it mention GNU anywhere. See:
+	// https://src.fedoraproject.org/rpms/grub2/blob/rawhide/f/0024-Don-t-say-GNU-Linux-in-generated-menus.patch
+	const char* grub_version_str[] = { "GRUB  version %s", "GRUB version %s" };
 	char *p, unauthorized[] = {'<', '>', ':', '|', '*', '?', '\\', '/'};
-	size_t i;
-	const char grub_version_str[] = "GRUB  version %s";
+	size_t i, j;
 
-	for (i=0; i<buf_size; i++) {
-		if (memcmp(&buf[i], grub_version_str, sizeof(grub_version_str)) == 0) {
-			static_strcpy(img_report.grub2_version, &buf[i + sizeof(grub_version_str)]);
-			break;
+	for (i = 0; i < buf_size; i++) {
+		for (j = 0; j < ARRAYSIZE(grub_version_str); j++) {
+			if (memcmp(&buf[i], grub_version_str[j], strlen(grub_version_str[j]) + 1) == 0) {
+				static_strcpy(img_report.grub2_version, &buf[i + strlen(grub_version_str[j]) + 1]);
+				break;
+			}
 		}
 	}
 	// Sanitize the string
 	for (p = &img_report.grub2_version[0]; *p; p++) {
-		for (i=0; i<sizeof(unauthorized); i++) {
+		for (i = 0; i < sizeof(unauthorized); i++) {
 			if (*p == unauthorized[i])
 				*p = '_';
 		}
@@ -1139,7 +1148,7 @@ out:
 				// when using '/boot/grub2' as a prefix is very small and always located at the
 				// very end the file to patch the damn thing and get on with our life!
 				uprintf("  Detected Grub version: %s%s", img_report.grub2_version,
-					img_report.has_grub2 >= 1 ? " with NONSTANDARD prefix" : "");
+					img_report.has_grub2 > 1 ? " with NONSTANDARD prefix" : "");
 				for (k = 0; k < ARRAYSIZE(grub_patch); k++) {
 					if (strcmp(img_report.grub2_version, grub_patch[k].version) == 0)
 						break;
