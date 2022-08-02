@@ -47,6 +47,7 @@
 
 #include "ui.h"
 #include "re.h"
+#include "vhd.h"
 #include "wue.h"
 #include "drive.h"
 #include "settings.h"
@@ -3770,9 +3771,8 @@ relaunch:
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-			//extern int TestChecksum(void);
-			//TestChecksum();
-			ListVdsVolumes(FALSE);
+			int index = 2;
+			uprintf("Index %d is %s", index, WimIsValidIndex("C:\\tmp\\boot1.wim", index) ? "valid" : "invalid");
 			continue;
 		}
 #endif

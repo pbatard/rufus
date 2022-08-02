@@ -44,6 +44,7 @@
 #include "localization.h"
 
 #include "br.h"
+#include "vhd.h"
 #include "wue.h"
 #include "fat16.h"
 #include "fat32.h"

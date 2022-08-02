@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "rufus.h"
+#include "vhd.h"
 #include "drive.h"
 #include "format.h"
 #include "missing.h"
@@ -359,7 +360,7 @@ out:
 /// <returns>-2 on user cancel, -1 on other error, >=0 on success.</returns>
 int SetWinToGoIndex(void)
 {
-	char* mounted_iso, * val, mounted_image_path[128];
+	char* mounted_iso, *val, mounted_image_path[128];
 	char xml_file[MAX_PATH] = "";
 	char* install_names[MAX_WININST];
 	StrArray version_name, version_index;
@@ -619,8 +620,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 // NB: Work with a copy of unattend_xml_flags as a paremeter since we will modify it.
 {
 	BOOL r = FALSE, is_hive_mounted = FALSE;
-	int i;
-	const int wim_index = 2;
+	int i, wim_index = 2;
 	const char* offline_hive_name = "RUFUS_OFFLINE_HIVE";
 	char boot_wim_path[] = "?:\\sources\\boot.wim", key_path[64];
 	char appraiserres_dll_src[] = "?:\\sources\\appraiserres.dll";
@@ -653,12 +653,16 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			// appraiserres.dll otherwise setup.exe extracts its own.
 			appraiserres_dll_src[0] = drive_letter;
 			appraiserres_dll_dst[0] = drive_letter;
-			if (!MoveFileExU(appraiserres_dll_src, appraiserres_dll_dst, MOVEFILE_REPLACE_EXISTING))
+			if (!MoveFileExU(appraiserres_dll_src, appraiserres_dll_dst, MOVEFILE_REPLACE_EXISTING)
+				&& GetLastError() != ERROR_FILE_NOT_FOUND) {
 				uprintf("Could not rename '%s': %s", appraiserres_dll_src, WindowsErrorString());
-			else
+			} else {
+				if (GetLastError() == ERROR_SUCCESS)
+					uprintf("Renamed '%s' → '%s'", appraiserres_dll_src, appraiserres_dll_dst);
 				CloseHandle(CreateFileU(appraiserres_dll_src, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
 					NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL));
-			uprintf("Renamed '%s' → '%s'", appraiserres_dll_src, appraiserres_dll_dst);
+				uprintf("Created '%s' placeholder", appraiserres_dll_src);
+			}
 		}
 
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 0, PATCH_PROGRESS_TOTAL);
@@ -666,6 +670,13 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 		// not, we can just copy our unattend.xml in \sources\$OEM$\$$\Panther\.
 		if (flags & UNATTEND_WINPE_SETUP_MASK) {
 			uprintf("Mounting '%s'...", boot_wim_path);
+			// Some "unofficial" ISOs have a modified boot.wim that doesn't have Windows Setup at index 2...
+			if (!WimIsValidIndex(boot_wim_path, wim_index)) {
+				uprintf("WARNING: This image appears to be an UNOFFICIAL Windows ISO!");
+				uprintf("Rufus recommends that you only use OFFICIAL retail Microsoft Windows images, such as");
+				uprintf("the ones that can be downloaded through the download facility of this application.");
+				wim_index = 1;
+			}
 			mount_path = WimMountImage(boot_wim_path, wim_index);
 			if (mount_path == NULL)
 				goto out;

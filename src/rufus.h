@@ -629,15 +629,6 @@ extern char* replace_in_token_data(const char* filename, const char* token, cons
 extern char* replace_char(const char* src, const char c, const char* rep);
 extern void parse_update(char* buf, size_t len);
 extern void* get_data_from_asn1(const uint8_t* buf, size_t buf_len, const char* oid_str, uint8_t asn1_type, size_t* data_len);
-extern uint8_t WimExtractCheck(BOOL bSilent);
-extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst, BOOL bSilent);
-extern BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst, BOOL bSilent);
-extern BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst, BOOL bSilent);
-extern BOOL WimApplyImage(const char* image, int index, const char* dst);
-extern char* WimMountImage(const char* image, int index);
-extern BOOL WimUnmountImage(const char* image, int index);
-extern int8_t IsBootableImage(const char* path);
-extern BOOL AppendVHDFooter(const char* vhd_path);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 extern char* GetSignatureName(const char* path, const char* country_code, BOOL bSilent);
 extern uint64_t GetSignatureTimeStamp(const char* path);
