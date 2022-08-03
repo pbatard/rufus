@@ -21,11 +21,12 @@ Features
 * Create BIOS or UEFI bootable drives, including [UEFI bootable NTFS](https://github.com/pbatard/uefi-ntfs)
 * Create bootable drives from bootable ISOs (Windows, Linux, etc.)
 * Create bootable drives from bootable disk images, including compressed ones
-* Create Windows 11 installation drives for PCs that don't have TPM
+* Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
 * Create persistent Linux partitions
 * Create VHD/DD images of a drive
 * Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image
+* Improve Windows installation experience by automatically setting up OOBE parameters (local account, privacy options, etc.)
 * Perform bad blocks checks, including detection of "fake" flash drives
 * Download official Microsoft Windows 7, Windows 8, Windows 10 or Windows 11 retail ISOs
 * Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs

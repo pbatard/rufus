@@ -744,7 +744,7 @@ BOOL WimIsValidIndex(const char* image, int index)
 
 	// Zero indexes are invalid
 	if (index == 0)
-		return FALSE;
+		goto out;
 
 	hWim = pfWIMCreateFile(wimage, WIM_GENERIC_READ, WIM_OPEN_EXISTING,
 		(img_report.wininst_version >= SPECIAL_WIM_VERSION) ? WIM_UNDOCUMENTED_BULLSHIT : 0, 0, NULL);

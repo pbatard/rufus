@@ -1,4 +1,4 @@
-o Version 3.20 (2022.08.??)
+o Version 3.20 (2022.08.03)
     Enable applicable Windows User Experience options for Windows 10
     Remember last Windows User Experience selection between sessions
     Add automatic local account creation and regional options duplication
