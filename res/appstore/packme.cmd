@@ -30,6 +30,9 @@ set ARCHS=x86 x64 arm arm64
 set DEFAULT_SCALE=200
 set OTHER_SCALES=100 125 150 400
 set SCALED_IMAGES=LargeTile SmallTile Square44x44Logo Square150x150Logo StoreLogo Wide310x150Logo
+rem All the languages listed below *MUST* match the ones from the Resources section of AppManifest.xml
+set DEFAULT_LANGUAGE=en-US
+set ADDITIONAL_LANGUAGES=ar-SA bg-BG zh-CN zh-TW hr-HR cs-CZ da-DK nl-NL fi-FI fr-FR de-DE el-GR he-IL hu-HU id-ID it-IT ja-JP ko-KR lv-LV lt-LT ms-MY nb-NO fa-IR pl-PL pt-BR pt-PT ro-RO ru-RU sr-SP sk-SK sl-SI es-ES sv-SE th-TH tr-TR uk-UA vi-VN
 set PACKAGE_IMAGES=^
  Square44x44Logo.altform-lightunplated_targetsize-16.png^
  Square44x44Logo.altform-lightunplated_targetsize-24.png^
@@ -77,6 +80,16 @@ if ERRORLEVEL 1 goto out
 
 echo [Files]> bundle.map
 
+rem Now who the £$%^&* at Microsoft thought it was a good idea to have MakePri require '/dq lang-en-US_lang-fr-FR-...'
+rem so that you actually end up with a <qualifier name="Language" value="en-US;fr-FR;..."/> in priconfig.xml?!?
+rem Oh, and of course, good luck finding this documented ANYWHERE on Microsoft's website!
+setlocal EnableDelayedExpansion
+set STUPID_MAKEPRI_LANGUAGES=lang-%DEFAULT_LANGUAGE%
+for %%l in (%ADDITIONAL_LANGUAGES%) do (
+  set STUPID_MAKEPRI_LANGUAGES=!STUPID_MAKEPRI_LANGUAGES!_lang-%%l
+)
+setlocal DisableDelayedExpansion
+
 for %%a in (%ARCHS%) do (
   echo.
   echo Creating Rufus_%VERSION%_%%a.appx...
@@ -97,7 +110,7 @@ for %%a in (%ARCHS%) do (
   rem When invoking MakePri, it is very important that you don't have files such as AppxManifest.xml or priconfig.xml
   rem in the directory referenced by /pr or you may get ERROR_MRM_DUPLICATE_ENTRY when validating the submission as,
   rem for instance, the 'AppxManifest.xml' from the 100% scale bundle will conflict the one from the x64 bundle.
-  "%WDK_PATH%\MakePri" createconfig /o /pv 10.0.0 /dq lang-en-US_scale-%DEFAULT_SCALE%_theme-light /cf ..\priconfig.xml
+  "%WDK_PATH%\MakePri" createconfig /o /pv 10.0.0 /cf ..\priconfig.xml /dq %STUPID_MAKEPRI_LANGUAGES%_scale-%DEFAULT_SCALE%_theme-light
   "%WDK_PATH%\MakePri" new /o /pr . /cf ..\priconfig.xml
   del /q ..\priconfig.xml
   copy ..\RufusAppxManifest.xml %MANIFEST% >NUL 2>&1
@@ -118,7 +131,7 @@ for %%a in (%OTHER_SCALES%) do (
   for %%i in (%SCALED_IMAGES%) do (
     copy "..\Images\%%i.scale-%%a.png" Images\ >NUL 2>&1
   )
-  "%WDK_PATH%\MakePri" createconfig /o /pv 10.0.0 /dq lang-en-US_scale-%%a_theme-light /cf ..\priconfig.xml
+  "%WDK_PATH%\MakePri" createconfig /o /pv 10.0.0 /cf ..\priconfig.xml /dq %STUPID_MAKEPRI_LANGUAGES%_scale-%%a_theme-light
   "%WDK_PATH%\MakePri" new /o /pr . /cf ..\priconfig.xml
   del /q ..\priconfig.xml
   copy ..\ScaleAppxManifest.xml %MANIFEST% >NUL 2>&1
