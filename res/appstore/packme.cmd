@@ -31,8 +31,10 @@ set DEFAULT_SCALE=200
 set OTHER_SCALES=100 125 150 400
 set SCALED_IMAGES=LargeTile SmallTile Square44x44Logo Square150x150Logo StoreLogo Wide310x150Logo
 rem All the languages listed below *MUST* match the ones from the Resources section of AppManifest.xml
+rem Oh, and these must be *valid* codes that Microsoft accepts, else your users will get an error
+rem (that the Microsoft validation and certification process will *NOT* catch) during install.
 set DEFAULT_LANGUAGE=en-US
-set ADDITIONAL_LANGUAGES=ar-SA bg-BG zh-CN zh-TW hr-HR cs-CZ da-DK nl-NL fi-FI fr-FR de-DE el-GR he-IL hu-HU id-ID it-IT ja-JP ko-KR lv-LV lt-LT ms-MY nb-NO fa-IR pl-PL pt-BR pt-PT ro-RO ru-RU sr-SP sk-SK sl-SI es-ES sv-SE th-TH tr-TR uk-UA vi-VN
+set ADDITIONAL_LANGUAGES=ar-SA bg-BG zh-CN zh-TW hr-HR cs-CZ da-DK nl-NL fi-FI fr-FR de-DE el-GR he-IL hu-HU id-ID it-IT ja-JP ko-KR lv-LV lt-LT ms-MY nb-NO fa-IR pl-PL pt-BR pt-PT ro-RO ru-RU sr-Latn-RS sk-SK sl-SI es-ES sv-SE th-TH tr-TR uk-UA vi-VN
 set PACKAGE_IMAGES=^
  Square44x44Logo.altform-lightunplated_targetsize-16.png^
  Square44x44Logo.altform-lightunplated_targetsize-24.png^

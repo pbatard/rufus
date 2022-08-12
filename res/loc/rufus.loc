@@ -32,7 +32,7 @@
 # • v3.14 "pt-PT" "Portuguese Standard (Português)"
 # • v3.14 "ro-RO" "Romanian (Română)"
 # • v3.5  "ru-RU" "Russian (Русский)"
-# • v3.14 "sr-SP" "Serbian (Srpski)"
+# • v3.14 "sr-RS" "Serbian (Srpski)"
 # • v3.14 "sk-SK" "Slovak (Slovensky)"
 # • v3.14 "sl-SI" "Slovenian (Slovenščina)"
 # • v3.14 "es-ES" "Spanish (Español)"
@@ -11001,7 +11001,7 @@ t MSG_306 "Быстрое обнуление диска: %s"
 t MSG_307 "Это может занять время"
 
 #########################################################################
-l "sr-SP" "Serbian (Srpski)" 0x241a, 0x081a, 0x181a, 0x2c1a, 0x701a, 0x7c1a
+l "sr-RS" "Serbian (Srpski)" 0x241a, 0x081a, 0x181a, 0x2c1a, 0x701a, 0x7c1a
 v 3.14
 b "en-US"
 
