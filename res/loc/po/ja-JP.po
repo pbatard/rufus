@@ -544,7 +544,7 @@ msgid ""
 msgstr ""
 "Windows が内部バッファから USB デバイスに書き込み中であることを検出しました。\n"
 "\n"
-"特に大きなファイルの場合、 USB デバイスのスピードによっては、この操作に時間がかかるかもしれません。\n"
+"特に大きなファイルの場合、 USB デバイスのスピードによっては、この操作に時間が掛かる可能性があります。\n"
 "\n"
 "ファイル破損を避けるためには、作業完了まで待つことを推奨しますが、デバイスを取り外すこともできます。"
 
@@ -752,7 +752,7 @@ msgstr "互換性のないクラスター サイズ"
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "大きな UDF ボリュームをフォーマットするには時間がかかります。USB2.0 接続の場合、フォーマット完了までの推定時間は %d:%02d です。この間、進行バーは進んでいないように見えます。終了までしばらくお待ちください。"
+msgstr "大きな UDF ボリュームをフォーマットするには時間が掛かります。USB2.0 接続の場合、フォーマット完了までの推定時間は %d:%02d です。この間、進行バーは進んでいないように見えます。終了までしばらくお待ちください。"
 
 #. • MSG_113
 msgid "Large UDF volume"
@@ -1100,7 +1100,7 @@ msgstr "バージョン %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "日本語翻訳: チャンテラ・ジャクソン <mailto:chantella-eng@live.com> \\line校正、翻訳: Tiryoh <mailto:tiryoh+rufus@gmail.com>,\\line修正及び補正：シューゴ <https://s1204.me/Twitter>"
+msgstr "日本語翻訳: チャンテラ・ジャクソン <mailto:chantella-eng@live.com> \\line校正、翻訳: Tiryoh <mailto:tiryoh+rufus@gmail.com>\\line修正及び補正：シューゴ <https://s1204.me/Twitter>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
