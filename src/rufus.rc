@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 3.20.1931"
+CAPTION "Rufus 3.20.1932"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
@@ -395,8 +395,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,20,1931,0
- PRODUCTVERSION 3,20,1931,0
+ FILEVERSION 3,20,1932,0
+ PRODUCTVERSION 3,20,1932,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -414,13 +414,13 @@ BEGIN
             VALUE "Comments", "https://rufus.ie"
             VALUE "CompanyName", "Akeo Consulting"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "3.20.1931"
+            VALUE "FileVersion", "3.20.1932"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2022 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "https://www.gnu.org/licenses/gpl-3.0.html"
             VALUE "OriginalFilename", "rufus-3.20.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "3.20.1931"
+            VALUE "ProductVersion", "3.20.1932"
         END
     END
     BLOCK "VarFileInfo"

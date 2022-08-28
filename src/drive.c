@@ -1079,6 +1079,7 @@ int GetDriveNumber(HANDLE hDrive, char* path)
 	}
 	if (r >= MAX_DRIVES) {
 		uprintf("Device Number for device %s is too big (%d) - ignoring device", path, r);
+		uprintf("NOTE: This may be due to an excess of Virtual Drives, such as hidden ones created by the XBox PC app");
 		return -1;
 	}
 	return r;
