@@ -465,7 +465,7 @@ static LPFILETIME __inline to_filetime(time_t t)
 {
 	static int i = 0;
 	static FILETIME ft[3], *r;
-	LONGLONG ll = Int32x32To64(t, 10000000) + 116444736000000000;
+	LONGLONG ll = (t * 10000000LL) + 116444736000000000LL;
 
 	r = &ft[i];
 	r->dwLowDateTime = (DWORD)ll;

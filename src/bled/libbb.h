@@ -2,7 +2,7 @@
  * Library header for busybox/Bled
  *
  * Rewritten for Bled (Base Library for Easy Decompression)
- * Copyright © 2014-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2022 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -126,6 +126,11 @@ typedef struct _llist_t {
 	char *data;
 } llist_t;
 
+struct timeval64 {
+	int64_t tv_sec;
+	int32_t tv_usec;
+};
+
 extern void (*bled_printf) (const char* format, ...);
 extern void (*bled_progress) (const uint64_t processed_bytes);
 extern void (*bled_switch) (const char* filename, const uint64_t filesize);
@@ -160,7 +165,7 @@ static inline int link(const char *oldpath, const char *newpath) {errno = ENOSYS
 static inline int symlink(const char *oldpath, const char *newpath) {errno = ENOSYS; return -1;}
 static inline int chown(const char *path, uid_t owner, gid_t group) {errno = ENOSYS; return -1;}
 static inline int mknod(const char *pathname, mode_t mode, dev_t dev) {errno = ENOSYS; return -1;}
-static inline int utimes(const char *filename, const struct timeval times[2]) {errno = ENOSYS; return -1;}
+static inline int utimes64(const char* filename, const struct timeval64 times64[2]) { errno = ENOSYS; return -1; }
 static inline int fnmatch(const char *pattern, const char *string, int flags) {return PathMatchSpecA(string, pattern)?0:1;}
 static inline pid_t wait(int* status) { *status = 4; return -1; }
 #define wait_any_nohang wait

@@ -461,13 +461,16 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 		int written = 0, fsize = sizeof(data) - 1;
 		ext2_file_t ext2fd;
 		ext2_ino_t inode_id;
-		uint32_t ctime = (uint32_t)time(0);
+		time_t ctime = time(NULL);
 		struct ext2_inode inode = { 0 };
+		// Don't care about the Y2K38 problem of ext2/ext3 for a 'persistence.conf' timestamp
+		if (ctime > UINT32_MAX)
+			ctime = UINT32_MAX;
 		inode.i_mode = 0100644;
 		inode.i_links_count = 1;
-		inode.i_atime = ctime;
-		inode.i_ctime = ctime;
-		inode.i_mtime = ctime;
+		inode.i_atime = (uint32_t)ctime;
+		inode.i_ctime = (uint32_t)ctime;
+		inode.i_mtime = (uint32_t)ctime;
 		inode.i_size = fsize;
 
 		ext2fs_namei(ext2fs, EXT2_ROOT_INO, EXT2_ROOT_INO, name, &inode_id);

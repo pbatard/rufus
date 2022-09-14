@@ -195,11 +195,11 @@ void FAST_FUNC data_extract_all(archive_handle_t *archive_handle)
 			(void)_chmod(file_header->name, file_header->mode);
 		}
 		if (archive_handle->ah_flags & ARCHIVE_RESTORE_DATE) {
-			struct timeval t[2];
+			struct timeval64 t[2];
 
-			t[1].tv_sec = t[0].tv_sec = (long)file_header->mtime;
+			t[1].tv_sec = t[0].tv_sec = file_header->mtime;
 			t[1].tv_usec = t[0].tv_usec = 0;
-			utimes(file_header->name, t);
+			utimes64(file_header->name, t);
 		}
 	}
 
