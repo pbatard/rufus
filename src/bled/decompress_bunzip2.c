@@ -1,14 +1,14 @@
 /* vi: set sw=4 ts=4: */
-/* Small bzip2 deflate implementation, by Rob Landley (rob@landley.net).
-
-   Based on bzip2 decompression code by Julian R Seward (jseward@acm.org),
-   which also acknowledges contributions by Mike Burrows, David Wheeler,
-   Peter Fenwick, Alistair Moffat, Radford Neal, Ian H. Witten,
-   Robert Sedgewick, and Jon L. Bentley.
-
-   Licensed under GPLv2 or later, see file LICENSE in this source tree.
-*/
-
+/*
+ * Small bzip2 deflate implementation, by Rob Landley (rob@landley.net).
+ *
+ * Based on bzip2 decompression code by Julian R Seward (jseward@acm.org),
+ * which also acknowledges contributions by Mike Burrows, David Wheeler,
+ * Peter Fenwick, Alistair Moffat, Radford Neal, Ian H. Witten,
+ * Robert Sedgewick, and Jon L. Bentley.
+ *
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+ */
 /*
 	Size and speed optimizations by Manuel Novoa III  (mjn3@codepoet.org).
 
@@ -38,7 +38,6 @@
 
 	Manuel
  */
-
 #include "libbb.h"
 #include "bb_archive.h"
 
@@ -101,14 +100,14 @@ struct bunzip_data {
 	unsigned dbufSize;
 
 	/* For I/O error handling */
-	jmp_buf jmpbuf;
+	jmp_buf *jmpbuf;
 
 	/* Big things go last (register-relative addressing can be larger for big offsets) */
 	uint32_t crc32Table[256];
 	uint8_t selectors[32768];  /* nSelectors=15 bits */
 	struct group_data groups[MAX_GROUPS];  /* Huffman coding tables */
 };
-/* typedef struct bunzip_data bunzip_data; -- done in .h file */
+typedef struct bunzip_data bunzip_data;
 
 
 /* Return the next nnn bits of input.  All reads from the compressed input
@@ -128,14 +127,15 @@ static unsigned get_bits(bunzip_data *bd, int bits_wanted)
 			/* if "no input fd" case: in_fd == -1, read fails, we jump */
 			bd->inbufCount = safe_read(bd->in_fd, bd->inbuf, IOBUF_SIZE);
 			if (bd->inbufCount <= 0)
-				longjmp(bd->jmpbuf, RETVAL_UNEXPECTED_INPUT_EOF);
+				longjmp(*bd->jmpbuf, RETVAL_UNEXPECTED_INPUT_EOF);
 			bd->inbufPos = 0;
 		}
 
 		/* Avoid 32-bit overflow (dump bit buffer to top of output) */
 		if (bit_count >= 24) {
-			bits = bd->inbufBits & ((1 << bit_count) - 1);
+			bits = bd->inbufBits & ((1U << bit_count) - 1);
 			bits_wanted -= bit_count;
+			// coverity[negative_shift]
 			bits <<= bits_wanted;
 			bit_count = 0;
 		}
@@ -152,20 +152,20 @@ static unsigned get_bits(bunzip_data *bd, int bits_wanted)
 
 	return bits;
 }
+//#define get_bits(bd, n) (dbg("%d:get_bits()", __LINE__), get_bits(bd, n))
 
 /* Unpacks the next block and sets up for the inverse Burrows-Wheeler step. */
 static int get_next_block(bunzip_data *bd)
 {
-	struct group_data *hufGroup;
-	int dbufCount, dbufSize, groupCount, *base, *limit, selector,
-		i, j, t, runPos, symCount, symTotal, nSelectors, byteCount[256];
-	int runCnt;
+	int groupCount, selector,
+		i, j, symCount, symTotal, nSelectors, byteCount[256];
 	uint8_t uc, symToByte[256], mtfSymbol[256], *selectors;
 	uint32_t *dbuf;
-	unsigned origPtr;
+	unsigned origPtr, t;
+	unsigned dbufCount, runPos;
+	unsigned runCnt = 0; // runCnt; /* for compiler */
 
 	dbuf = bd->dbuf;
-	dbufSize = bd->dbufSize;
 	selectors = bd->selectors;
 
 /* In bbox, we are ok with aborting through setjmp which is set up in start_bunzip */
@@ -180,15 +180,19 @@ static int get_next_block(bunzip_data *bd)
 	i = get_bits(bd, 24);
 	j = get_bits(bd, 24);
 	bd->headerCRC = get_bits(bd, 32);
-	if ((i == 0x177245) && (j == 0x385090)) return RETVAL_LAST_BLOCK;
-	if ((i != 0x314159) || (j != 0x265359)) return RETVAL_NOT_BZIP_DATA;
+	if ((i == 0x177245) && (j == 0x385090))
+		return RETVAL_LAST_BLOCK;
+	if ((i != 0x314159) || (j != 0x265359))
+		return RETVAL_NOT_BZIP_DATA;
 
 	/* We can add support for blockRandomised if anybody complains.  There was
 	   some code for this in busybox 1.0.0-pre3, but nobody ever noticed that
 	   it didn't actually work. */
-	if (get_bits(bd, 1)) return RETVAL_OBSOLETE_INPUT;
+	if (get_bits(bd, 1))
+		return RETVAL_OBSOLETE_INPUT;
 	origPtr = get_bits(bd, 24);
-	if ((int)origPtr > dbufSize) return RETVAL_DATA_ERROR;
+	if (origPtr > bd->dbufSize)
+		return RETVAL_DATA_ERROR;
 
 	/* mapping table: if some byte values are never used (encoding things
 	   like ascii text), the compression code removes the gaps to have fewer
@@ -232,8 +236,9 @@ static int get_next_block(bunzip_data *bd)
 		/* Get next value */
 		int n = 0;
 		while (get_bits(bd, 1)) {
-			if (n >= groupCount) return RETVAL_DATA_ERROR;
 			n++;
+			if (n >= groupCount)
+				return RETVAL_DATA_ERROR;
 		}
 		/* Decode MTF to get the next selector */
 		tmp_byte = mtfSymbol[n];
@@ -249,6 +254,8 @@ static int get_next_block(bunzip_data *bd)
 		uint8_t length[MAX_SYMBOLS];
 		/* 8 bits is ALMOST enough for temp[], see below */
 		unsigned temp[MAX_HUFCODE_BITS+1];
+		struct group_data *hufGroup;
+		int *base, *limit;
 		int minLen, maxLen, pp, len_m1;
 
 		/* Read Huffman code lengths for each symbol.  They're stored in
@@ -284,8 +291,10 @@ static int get_next_block(bunzip_data *bd)
 		/* Find largest and smallest lengths in this group */
 		minLen = maxLen = length[0];
 		for (i = 1; i < symCount; i++) {
-			if (length[i] > maxLen) maxLen = length[i];
-			else if (length[i] < minLen) minLen = length[i];
+			if (length[i] > maxLen)
+				maxLen = length[i];
+			else if (length[i] < minLen)
+				minLen = length[i];
 		}
 
 		/* Calculate permute[], base[], and limit[] tables from length[].
@@ -308,7 +317,7 @@ static int get_next_block(bunzip_data *bd)
 		base = hufGroup->base - 1;
 		limit = hufGroup->limit - 1;
 
-		/* Calculate permute[].  Concurently, initialize temp[] and limit[]. */
+		/* Calculate permute[].  Concurrently, initialize temp[] and limit[]. */
 		pp = 0;
 		for (i = minLen; i <= maxLen; i++) {
 			int k;
@@ -321,7 +330,8 @@ static int get_next_block(bunzip_data *bd)
 		/* Count symbols coded for at each bit length */
 		/* NB: in pathological cases, temp[8] can end ip being 256.
 		 * That's why uint8_t is too small for temp[]. */
-		for (i = 0; i < symCount; i++) temp[length[i]]++;
+		for (i = 0; i < symCount; i++)
+			temp[length[i]]++;
 
 		/* Calculate limit[] (the largest symbol-coding value at each bit
 		 * length, which is (previous limit<<1)+symbols at this level), and
@@ -364,12 +374,22 @@ static int get_next_block(bunzip_data *bd)
 
 	runPos = dbufCount = selector = 0;
 	for (;;) {
+		struct group_data *hufGroup;
+		int *base, *limit;
 		int nextSym;
+		uint8_t ngrp;
 
 		/* Fetch next Huffman coding group from list. */
 		symCount = GROUP_SIZE - 1;
-		if (selector >= nSelectors) return RETVAL_DATA_ERROR;
-		hufGroup = bd->groups + selectors[selector++];
+		if (selector >= nSelectors)
+			return RETVAL_DATA_ERROR;
+		ngrp = selectors[selector++];
+		if (ngrp >= groupCount) {
+			dbg("%d selectors[%d]:%d groupCount:%d",
+				__LINE__, selector-1, ngrp, groupCount);
+			return RETVAL_DATA_ERROR;
+		}
+		hufGroup = bd->groups + ngrp;
 		base = hufGroup->base - 1;
 		limit = hufGroup->limit - 1;
 
@@ -404,7 +424,8 @@ static int get_next_block(bunzip_data *bd)
 		}
 		/* Figure how many bits are in next symbol and unget extras */
 		i = hufGroup->minLen;
-		while (nextSym > limit[i]) ++i;
+		while (nextSym > limit[i])
+			++i;
 		j = hufGroup->maxLen - i;
 		if (j < 0)
 			return RETVAL_DATA_ERROR;
@@ -436,7 +457,7 @@ static int get_next_block(bunzip_data *bd)
 			   symbols, but a run of length 0 doesn't mean anything in this
 			   context).  Thus space is saved. */
 			runCnt += (runPos << nextSym); /* +runPos if RUNA; +2*runPos if RUNB */
-			if (runPos < dbufSize) runPos <<= 1;
+			if (runPos < bd->dbufSize) runPos <<= 1;
 			goto end_of_huffman_loop;
 		}
 
@@ -446,14 +467,15 @@ static int get_next_block(bunzip_data *bd)
 		   literal used is the one at the head of the mtfSymbol array.) */
 		if (runPos != 0) {
 			uint8_t tmp_byte;
-			if (dbufCount + runCnt > dbufSize) {
-				dbg("dbufCount:%d+runCnt:%d %d > dbufSize:%d RETVAL_DATA_ERROR",
-						dbufCount, runCnt, dbufCount + runCnt, dbufSize);
+			if (dbufCount + runCnt > bd->dbufSize) {
+				dbg("dbufCount:%u+runCnt:%u %u > dbufSize:%u RETVAL_DATA_ERROR",
+						dbufCount, runCnt, dbufCount + runCnt, bd->dbufSize);
 				return RETVAL_DATA_ERROR;
 			}
 			tmp_byte = symToByte[mtfSymbol[0]];
 			byteCount[tmp_byte] += runCnt;
-			while (--runCnt >= 0) dbuf[dbufCount++] = (uint32_t)tmp_byte;
+			while ((int)--runCnt >= 0)
+				dbuf[dbufCount++] = (uint32_t)tmp_byte;
 			runPos = 0;
 		}
 
@@ -467,7 +489,7 @@ static int get_next_block(bunzip_data *bd)
 		   first symbol in the mtf array, position 0, would have been handled
 		   as part of a run above.  Therefore 1 unused mtf position minus
 		   2 non-literal nextSym values equals -1.) */
-		if (dbufCount >= dbufSize) return RETVAL_DATA_ERROR;
+		if (dbufCount >= bd->dbufSize) return RETVAL_DATA_ERROR;
 		i = nextSym - 1;
 		uc = mtfSymbol[i];
 
@@ -507,7 +529,7 @@ static int get_next_block(bunzip_data *bd)
 	}
 
 	/* Figure out what order dbuf would be in if we sorted it. */
-	for (i = 0; i < dbufCount; i++) {
+	for (i = 0; i < (int)dbufCount; i++) {
 		uint8_t tmp_byte = (uint8_t)dbuf[i];
 		int tmp_count = byteCount[tmp_byte];
 		dbuf[tmp_count] |= (i << 8);
@@ -540,7 +562,7 @@ static int get_next_block(bunzip_data *bd)
    in outbuf. IOW: on EOF returns len ("all bytes are not filled"), not 0.
    (Why? This allows to get rid of one local variable)
 */
-int FAST_FUNC read_bunzip(bunzip_data *bd, char *outbuf, int len)
+static int read_bunzip(bunzip_data *bd, char *outbuf, int len)
 {
 	const uint32_t *dbuf;
 	int pos, current, previous;
@@ -619,7 +641,7 @@ int FAST_FUNC read_bunzip(bunzip_data *bd, char *outbuf, int len)
 				/* Subtract the 1 copy we'd output anyway to get extras */
 				--bd->writeCopies;
 			}
-		} /* for(;;) */
+		} /* for (;;) */
 
 		/* Decompression of this input block completed successfully */
 		bd->writeCRC = CRC = ~CRC;
@@ -664,7 +686,10 @@ int FAST_FUNC read_bunzip(bunzip_data *bd, char *outbuf, int len)
 /* Because bunzip2 is used for help text unpacking, and because bb_show_usage()
    should work for NOFORK applets too, we must be extremely careful to not leak
    any allocations! */
-int FAST_FUNC start_bunzip(bunzip_data **bdp, int in_fd,
+static int FAST_FUNC start_bunzip(
+		void *jmpbuf,
+		bunzip_data **bdp,
+		int in_fd,
 		const void *inbuf, int len)
 {
 	bunzip_data *bd;
@@ -676,12 +701,15 @@ int FAST_FUNC start_bunzip(bunzip_data **bdp, int in_fd,
 
 	/* Figure out how much data to allocate */
 	i = sizeof(bunzip_data);
-	if (in_fd != -1) i += IOBUF_SIZE;
+	if (in_fd != -1)
+		i += IOBUF_SIZE;
 
 	/* Allocate bunzip_data.  Most fields initialize to zero. */
 	bd = *bdp = xzalloc(i);
 	if (bd == NULL)
 		return -1;
+
+	bd->jmpbuf = jmpbuf;
 
 	/* Setup input buffer */
 	bd->in_fd = in_fd;
@@ -696,10 +724,6 @@ int FAST_FUNC start_bunzip(bunzip_data **bdp, int in_fd,
 
 	/* Init the CRC32 table (big endian) */
 	crc32_filltable(bd->crc32Table, 1);
-
-	/* Setup for I/O error handling via longjmp */
-	i = setjmp(bd->jmpbuf);
-	if (i) return i;
 
 	/* Ensure that file starts with "BZh['1'-'9']." */
 	/* Update: now caller verifies 1st two bytes, makes .gz/.bz2
@@ -724,7 +748,7 @@ int FAST_FUNC start_bunzip(bunzip_data **bdp, int in_fd,
 	return RETVAL_OK;
 }
 
-void FAST_FUNC dealloc_bunzip(bunzip_data *bd)
+static void FAST_FUNC dealloc_bunzip(bunzip_data *bd)
 {
 	free(bd->dbuf);
 	free(bd);
@@ -749,8 +773,12 @@ unpack_bz2_stream(transformer_state_t *xstate)
 		return -1;
 	len = 0;
 	while (1) { /* "Process one BZ... stream" loop */
+		jmp_buf jmpbuf;
 
-		i = start_bunzip(&bd, xstate->src_fd, outbuf + 2, len);
+		/* Setup for I/O error handling via longjmp */
+		i = setjmp(jmpbuf);
+		if (i == 0)
+			i = start_bunzip(&jmpbuf, &bd, xstate->src_fd, outbuf + 2, len);
 
 		if (i == 0) {
 			while (1) { /* "Produce some output bytes" loop */
@@ -773,7 +801,7 @@ unpack_bz2_stream(transformer_state_t *xstate)
 		/* Observed case when i == RETVAL_OK:
 		 * "bzcat z.bz2", where "z.bz2" is a bzipped zero-length file
 		 * (to be exact, z.bz2 is exactly these 14 bytes:
-		 * 42 5a 68 39 17 72 45 38  50 90 00 00 00 00).
+		 * 42 5a 68 39 17 72 45 38 50 90 00 00 00 00).
 		 */
 		 && i != RETVAL_OK
 		) {
@@ -781,7 +809,7 @@ unpack_bz2_stream(transformer_state_t *xstate)
 			break;
 		}
 		if (bd->headerCRC != bd->totalCRC) {
-			bb_error_msg("CRC error");
+			bb_simple_error_msg("CRC error");
 			break;
 		}
 
@@ -809,6 +837,36 @@ unpack_bz2_stream(transformer_state_t *xstate)
 	free(outbuf);
 
 	return i ? i : IF_DESKTOP(total_written) + 0;
+}
+
+char* FAST_FUNC
+unpack_bz2_data(const char *packed, int packed_len, int unpacked_len)
+{
+	char *outbuf = NULL;
+	bunzip_data *bd;
+	int i;
+	jmp_buf jmpbuf;
+
+	/* Setup for I/O error handling via longjmp */
+	i = setjmp(jmpbuf);
+	if (i == 0) {
+		i = start_bunzip(&jmpbuf,
+			&bd,
+			/* src_fd: */ -1,
+			/* inbuf:  */ packed,
+			/* len:    */ packed_len
+		);
+	}
+	/* read_bunzip can longjmp and end up here with i != 0
+	 * on read data errors! Not trivial */
+	if (i == 0) {
+		/* Cannot use xmalloc: will leak bd in NOFORK case! */
+		outbuf = malloc_or_warn(unpacked_len);
+		if (outbuf)
+			read_bunzip(bd, outbuf, unpacked_len);
+	}
+	dealloc_bunzip(bd);
+	return outbuf;
 }
 
 #ifdef TESTING

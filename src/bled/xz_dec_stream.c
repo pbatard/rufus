@@ -353,7 +353,6 @@ static enum xz_ret XZ_FUNC crc32_validate(struct xz_dec *s, struct xz_buf *b)
 			return XZ_DATA_ERROR;
 
 		s->pos += 8;
-
 	} while (s->pos < 32);
 
 	s->crc32 = 0;
@@ -546,7 +545,7 @@ static enum xz_ret XZ_FUNC dec_block_header(struct xz_dec *s)
 	return XZ_OK;
 }
 
-static enum xz_ret XZ_FUNC dec_main(struct xz_dec *s, struct xz_buf *b)
+static NOINLINE enum xz_ret XZ_FUNC dec_main(struct xz_dec *s, struct xz_buf *b)
 {
 	enum xz_ret ret;
 
@@ -753,7 +752,6 @@ XZ_EXTERN enum xz_ret XZ_FUNC xz_dec_run(struct xz_dec *s, struct xz_buf *b)
 			b->in_pos = in_start;
 			b->out_pos = out_start;
 		}
-
 	} else if (ret == XZ_OK && in_start == b->in_pos
 			&& out_start == b->out_pos) {
 		if (s->allow_buf_error)

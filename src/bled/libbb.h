@@ -52,7 +52,7 @@
 #define IF_NOT_FEATURE_LZMA_FAST(x) x
 
 #define uoff_t unsigned off_t
-#define OFF_FMT "I64"
+#define OFF_FMT PRIi64
 
 #ifndef _MODE_T_
 #define _MODE_T_
@@ -85,6 +85,8 @@ typedef unsigned int uid_t;
 #ifndef PATH_MAX
 #define PATH_MAX MAX_PATH
 #endif
+
+#define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
 
 #ifndef get_le64
 #define get_le64(ptr) (*(const uint64_t *)(ptr))
@@ -146,6 +148,9 @@ extern unsigned long* bled_cancel_request;
 #define bb_error_msg_and_err(...) do {bb_error_msg(__VA_ARGS__); goto err;} while(0)
 #define bb_perror_msg bb_error_msg
 #define bb_perror_msg_and_die bb_error_msg_and_die
+#define bb_simple_error_msg bb_error_msg
+#define bb_simple_perror_msg_and_die bb_error_msg_and_die
+#define bb_simple_error_msg_and_die bb_error_msg_and_die
 #define bb_putchar putchar
 
 static inline void *xrealloc(void *ptr, size_t size) {
@@ -157,7 +162,7 @@ static inline void *xrealloc(void *ptr, size_t size) {
 
 #define bb_msg_read_error "read error"
 #define bb_msg_write_error "write error"
-#define bb_mode_string(mode) "[not implemented]"
+#define bb_mode_string(str, mode) "[not implemented]"
 #define bb_copyfd_exact_size(fd1, fd2, size) bb_error_msg("Not implemented")
 #define bb_make_directory(path, mode, flags) SHCreateDirectoryExU(NULL, path, NULL)
 

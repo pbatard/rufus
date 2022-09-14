@@ -1,10 +1,10 @@
 /* vi: set sw=4 ts=4: */
-/* uncompress for busybox -- (c) 2002 Robert Griebl
+/*
+ * uncompress for busybox -- (c) 2002 Robert Griebl
  *
  * based on the original compress42.c source
  * (see disclaimer below)
  */
-
 /* (N)compress42.c - File compression ala IEEE Computer, Mar 1992.
  *
  * Authors:
@@ -21,9 +21,7 @@
  * marc@suse.de : a small security fix for a buffer overflow
  *
  * [... History snipped ...]
- *
  */
-
 #include "libbb.h"
 #include "bb_archive.h"
 
@@ -115,7 +113,7 @@ unpack_Z_stream(transformer_state_t *xstate)
 	/* xread isn't good here, we have to return - caller may want
 	 * to do some cleanup (e.g. delete incomplete unpacked file etc) */
 	if (full_read(xstate->src_fd, inbuf, 1) != 1) {
-		bb_error_msg("short read");
+		bb_simple_error_msg("short read");
 		goto err;
 	}
 
@@ -168,7 +166,7 @@ unpack_Z_stream(transformer_state_t *xstate)
 		if (insize < (int) (IBUFSIZ + 64) - IBUFSIZ) {
 			rsize = safe_read(xstate->src_fd, inbuf + insize, IBUFSIZ);
 			if (rsize < 0)
-				bb_error_msg_and_err(bb_msg_read_error);
+				bb_simple_error_msg_and_die(bb_msg_read_error);
 			insize += rsize;
 		}
 
@@ -202,7 +200,7 @@ unpack_Z_stream(transformer_state_t *xstate)
 
 			if (oldcode == -1) {
 				if (code >= 256)
-					bb_error_msg_and_err("corrupted data"); /* %ld", code); */
+					bb_simple_error_msg_and_die("corrupted data"); /* %ld", code); */
 				oldcode = code;
 				finchar = (int) oldcode;
 				outbuf[outpos++] = (unsigned char) finchar;
@@ -238,7 +236,7 @@ unpack_Z_stream(transformer_state_t *xstate)
 						insize, posbits, p[-1], p[0], p[1], p[2], p[3],
 						(posbits & 07));
 */
-					bb_error_msg("corrupted data");
+					bb_simple_error_msg("corrupted data");
 					goto err;
 				}
 
@@ -249,7 +247,7 @@ unpack_Z_stream(transformer_state_t *xstate)
 			/* Generate output characters in reverse order */
 			while (code >= 256) {
 				if (stackp <= &htabof(0))
-					bb_error_msg_and_err("corrupted data");
+					bb_simple_error_msg_and_die("corrupted data");
 				*--stackp = tab_suffixof(code);
 				code = tab_prefixof(code);
 			}
@@ -301,7 +299,6 @@ unpack_Z_stream(transformer_state_t *xstate)
 			/* Remember previous code.  */
 			oldcode = incode;
 		}
-
 	} while (rsize > 0);
 
 	if (outpos > 0) {

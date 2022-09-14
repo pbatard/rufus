@@ -64,6 +64,9 @@ typedef struct archive_handle_t {
 	/* Currently processed file's header */
 	file_header_t *file_header;
 
+	/* List of link placeholders */
+	llist_t *link_placeholders;
+
 	/* Process the header component, e.g. tar -t */
 	void FAST_FUNC (*action_header)(const file_header_t *);
 
@@ -77,6 +80,9 @@ typedef struct archive_handle_t {
 	off_t offset;
 
 	/* Archiver specific. Can make it a union if it ever gets big */
+#if ENABLE_FEATURE_TAR_LONG_OPTIONS
+	unsigned tar__strip_components;
+#endif
 #define PAX_NEXT_FILE 0
 #define PAX_GLOBAL    1
 #if ENABLE_TAR || ENABLE_DPKG || ENABLE_DPKG_DEB
@@ -95,6 +101,7 @@ typedef struct archive_handle_t {
 #endif
 #if ENABLE_CPIO || ENABLE_RPM2CPIO || ENABLE_RPM
 	uoff_t cpio__blocks;
+	struct bb_uidgid_t cpio__owner;
 	struct hardlinks_t *cpio__hardlinks_to_create;
 	struct hardlinks_t *cpio__created_hardlinks;
 #endif
@@ -110,20 +117,23 @@ typedef struct archive_handle_t {
 	const char *ar__name;
 	struct archive_handle_t *ar__out;
 #endif
+#if ENABLE_FEATURE_AR_LONG_FILENAMES
+	char *ar__long_names;
+	unsigned ar__long_name_size;
+#endif
 } archive_handle_t;
 /* bits in ah_flags */
 #define ARCHIVE_RESTORE_DATE        (1 << 0)
 #define ARCHIVE_CREATE_LEADING_DIRS (1 << 1)
 #define ARCHIVE_UNLINK_OLD          (1 << 2)
-#define ARCHIVE_EXTRACT_QUIET       (1 << 3)
-#define ARCHIVE_EXTRACT_NEWER       (1 << 4)
-#define ARCHIVE_DONT_RESTORE_OWNER  (1 << 5)
-#define ARCHIVE_DONT_RESTORE_PERM   (1 << 6)
-#define ARCHIVE_NUMERIC_OWNER       (1 << 7)
-#define ARCHIVE_O_TRUNC             (1 << 8)
-#define ARCHIVE_REMEMBER_NAMES      (1 << 9)
+#define ARCHIVE_EXTRACT_NEWER       (1 << 3)
+#define ARCHIVE_DONT_RESTORE_OWNER  (1 << 4)
+#define ARCHIVE_DONT_RESTORE_PERM   (1 << 5)
+#define ARCHIVE_NUMERIC_OWNER       (1 << 6)
+#define ARCHIVE_O_TRUNC             (1 << 7)
+#define ARCHIVE_REMEMBER_NAMES      (1 << 8)
 #if ENABLE_RPM
-#define ARCHIVE_REPLACE_VIA_RENAME  (1 << 10)
+#define ARCHIVE_REPLACE_VIA_RENAME  (1 << 9)
 #endif
 
 
@@ -157,6 +167,11 @@ typedef struct tar_header_t {     /* byte offset */
 struct BUG_tar_header {
 	char c[sizeof(tar_header_t) == TAR_BLOCK_SIZE ? 1 : -1];
 };
+void chksum_and_xwrite_tar_header(int fd, struct tar_header_t *hp) FAST_FUNC;
+
+
+extern const char cpio_TRAILER[];
+
 
 archive_handle_t *init_handle(void) FAST_FUNC;
 
@@ -188,41 +203,47 @@ void seek_by_jump(int fd, off_t amount) FAST_FUNC;
 void seek_by_read(int fd, off_t amount) FAST_FUNC;
 
 const char *strip_unsafe_prefix(const char *str) FAST_FUNC;
+void create_or_remember_link(llist_t **link_placeholders,
+		const char *target,
+		const char *linkname,
+		int hard_link) FAST_FUNC;
+void create_links_from_list(llist_t *list) FAST_FUNC;
 
 void data_align(archive_handle_t *archive_handle, unsigned boundary) FAST_FUNC;
 const llist_t *find_list_entry(const llist_t *list, const char *filename) FAST_FUNC;
 const llist_t *find_list_entry2(const llist_t *list, const char *filename) FAST_FUNC;
 
 /* A bit of bunzip2 internals are exposed for compressed help support: */
-typedef struct bunzip_data bunzip_data;
-int start_bunzip(bunzip_data **bdp, int in_fd, const void *inbuf, int len) FAST_FUNC;
-/* NB: read_bunzip returns < 0 on error, or the number of *unfilled* bytes
- * in outbuf. IOW: on EOF returns len ("all bytes are not filled"), not 0: */
-int read_bunzip(bunzip_data *bd, char *outbuf, int len) FAST_FUNC;
-void dealloc_bunzip(bunzip_data *bd) FAST_FUNC;
+char *unpack_bz2_data(const char *packed, int packed_len, int unpacked_len) FAST_FUNC;
 
 /* Meaning and direction (input/output) of the fields are transformer-specific */
 typedef struct transformer_state_t {
-	int8_t      check_signature;        /* most often referenced member */
+	int8_t   signature_skipped; /* most often referenced member */
 
 	IF_DESKTOP(long long) int FAST_FUNC (*xformer)(struct transformer_state_t *xstate);
 	USE_FOR_NOMMU(const char *xformer_prog;)
 
 	/* Source */
-	int         src_fd;
+	int      src_fd;
 	/* Output */
-	int         dst_fd;
-	const char  *dst_dir;               /* if non-NULL, extract to dir */
-	char        *dst_name;
-	uint64_t    dst_size;
-	size_t      mem_output_size_max;    /* if non-zero, decompress to RAM instead of fd */
-	size_t      mem_output_size;
-	char        *mem_output_buf;
+	int      dst_fd;
+	const char *dst_dir;            /* if non-NULL, extract to dir */
+	char     *dst_name;
+	uint64_t dst_size;
+	size_t   mem_output_size_max;   /* if non-zero, decompress to RAM instead of fd */
+	size_t   mem_output_size;
+	char     *mem_output_buf;
 
-	uint64_t    bytes_out;
-	uint64_t    bytes_in;   /* used in unzip code only: needs to know packed size */
-	uint32_t    crc32;
-	time_t      mtime;      /* gunzip code may set this on exit */
+	uint64_t bytes_out;
+	uint64_t bytes_in;  /* used in unzip code only: needs to know packed size */
+	uint32_t crc32;
+	time_t   mtime;     /* gunzip code may set this on exit */
+
+	union {             /* if we read magic, it's saved here */
+		uint8_t b[8];
+		uint16_t b16[4];
+		uint32_t b32[2];
+	} magic;
 } transformer_state_t;
 
 void init_transformer_state(transformer_state_t *xstate) FAST_FUNC;
@@ -278,11 +299,11 @@ int bbunpack(char **argv,
 void check_errors_in_children(int signo);
 #if BB_MMU
 void fork_transformer(int fd,
-	int check_signature,
+	int signature_skipped,
 	IF_DESKTOP(long long) int FAST_FUNC (*transformer)(transformer_state_t *xstate)
 ) FAST_FUNC;
-#define fork_transformer_with_sig(fd, transformer, transform_prog) fork_transformer((fd), 1, (transformer))
-#define fork_transformer_with_no_sig(fd, transformer)              fork_transformer((fd), 0, (transformer))
+#define fork_transformer_with_sig(fd, transformer, transform_prog) fork_transformer((fd), 0, (transformer))
+#define fork_transformer_with_no_sig(fd, transformer)              fork_transformer((fd), 1, (transformer))
 #else
 void fork_transformer(int fd, const char *transform_prog) FAST_FUNC;
 #define fork_transformer_with_sig(fd, transformer, transform_prog) fork_transformer((fd), (transform_prog))

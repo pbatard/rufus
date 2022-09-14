@@ -13,7 +13,7 @@ void FAST_FUNC init_transformer_state(transformer_state_t *xstate)
 
 int FAST_FUNC check_signature16(transformer_state_t *xstate, unsigned magic16)
 {
-	if (xstate->check_signature) {
+	if (!xstate->signature_skipped) {
 		uint16_t magic2;
 		if (full_read(xstate->src_fd, &magic2, 2) != 2 || magic2 != magic16) {
 			bb_error_msg("invalid magic");

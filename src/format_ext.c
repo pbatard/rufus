@@ -468,8 +468,11 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 			ctime = UINT32_MAX;
 		inode.i_mode = 0100644;
 		inode.i_links_count = 1;
+		// coverity[store_truncates_time_t]
 		inode.i_atime = (uint32_t)ctime;
+		// coverity[store_truncates_time_t]
 		inode.i_ctime = (uint32_t)ctime;
+		// coverity[store_truncates_time_t]
 		inode.i_mtime = (uint32_t)ctime;
 		inode.i_size = fsize;
 

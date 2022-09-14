@@ -312,6 +312,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_zip_stream(transformer_state_t *xstat
 			xstate->dst_size = zip_header.formatted.ucmpsize;
 			xstate->dst_name = xzalloc(zip_header.formatted.filename_len + 1);
 			safe_read(xstate->src_fd, xstate->dst_name, zip_header.formatted.filename_len);
+			xstate->dst_name[zip_header.formatted.filename_len] = 0;
 			n = transformer_switch_file(xstate);
 			free(xstate->dst_name);
 			if (n < 0)
