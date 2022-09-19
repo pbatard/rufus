@@ -3581,15 +3581,20 @@ skip_args_processing:
 
 		loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, "embedded.loc", &loc_size, FALSE);
 		if ( (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, loc_file) == 0) || (loc_file[0] == 0) ) {
-			// Last ditch effort to get a loc file - just extract it to the current directory
-			static_strcpy(loc_file, rufus_loc);
+			// If we don't have a working temp API, forget it
+			uprintf("FATAL: Unable to create temp loc file: %s", WindowsErrorString());
+			MessageBoxA(NULL, "Unable to create temporary localization file. This application will now exit.",
+				"Fatal error", MB_ICONSTOP | MB_SYSTEMMODAL);
+			goto out;
 		}
 
 		hFile = CreateFileU(loc_file, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ,
 			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if ((hFile == INVALID_HANDLE_VALUE) || (!WriteFileWithRetry(hFile, loc_data, loc_size, &size, WRITE_RETRIES))) {
-			uprintf("localization: unable to extract '%s': %s", loc_file, WindowsErrorString());
+			uprintf("FATAL: Unable to extract loc file '%s': %s", loc_file, WindowsErrorString());
 			safe_closehandle(hFile);
+			MessageBoxA(NULL, "Unable to extract localization file. This application will now exit.",
+				"Fatal error", MB_ICONSTOP | MB_SYSTEMMODAL);
 			goto out;
 		}
 		uprintf("localization: extracted data to '%s'", loc_file);
