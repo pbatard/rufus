@@ -104,7 +104,6 @@ static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm
 // If the disc was mastered properly, GRUB/EFI will take care of itself
 static const char* grub_dirname[] = { "/boot/grub/i386-pc", "/boot/grub2/i386-pc" };
 static const char* grub_cfg[] = { "grub.cfg", "loopback.cfg" };
-static const char* compatresources_dll = "compatresources.dll";
 static const char* menu_cfg = "menu.cfg";
 // NB: Do not alter the order of the array below without validating hardcoded indexes in check_iso_props
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf", "txt.cfg" };
@@ -290,9 +289,6 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 						}
 					}
 				}
-				// Check for "compatresources.dll" in "###/sources/"
-				if (safe_stricmp(psz_basename, compatresources_dll) == 0)
-					img_report.has_compatresources_dll = TRUE;
 			}
 		}
 
@@ -1162,37 +1158,6 @@ out:
 			} else {
 				uprintf("  Could not detect Grub version");
 				img_report.has_grub2 = 0;
-			}
-		}
-		if (img_report.has_compatresources_dll) {
-			// So that we don't have to extract the XML index from boot/install.wim
-			// to find if we're dealing with Windows 11, we isolate the version from
-			// sources/compatresources.dll, which is much faster...
-			VS_FIXEDFILEINFO* ver_info = NULL;
-			DWORD ver_handle = 0, ver_size;
-			UINT value_len = 0;
-			// coverity[swapped_arguments]
-			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, path) != 0) {
-				// NB: Calling the GetFileVersion/VerQueryValue APIs create DLL sideloading issues.
-				// So make sure you delay-load 'version.dll' in your application if you use these.
-				size = (size_t)ExtractISOFile(src_iso, "sources/compatresources.dll", path, FILE_ATTRIBUTE_NORMAL);
-				ver_size = GetFileVersionInfoSizeU(path, &ver_handle);
-				if (ver_size != 0) {
-					buf = malloc(ver_size);
-					if ((buf != NULL) && GetFileVersionInfoU(path, ver_handle, ver_size, buf) &&
-						VerQueryValueA(buf, "\\", (LPVOID)&ver_info, &value_len) && (value_len != 0)) {
-						if (ver_info->dwSignature == VS_FFI_SIGNATURE) {
-							img_report.win_version.major = HIWORD(ver_info->dwFileVersionMS);
-							img_report.win_version.minor = LOWORD(ver_info->dwFileVersionMS);
-							img_report.win_version.build = HIWORD(ver_info->dwFileVersionLS);
-							img_report.win_version.revision = LOWORD(ver_info->dwFileVersionLS);
-							if ((img_report.win_version.major == 10) && (img_report.win_version.build > 20000))
-								img_report.win_version.major = 11;
-						}
-					}
-					free(buf);
-				}
-				DeleteFileU(path);
 			}
 		}
 		StrArrayDestroy(&config_path);

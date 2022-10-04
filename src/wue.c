@@ -353,6 +353,110 @@ out:
 }
 
 /// <summary>
+/// Populate the img_report Window version from an install[.wim|.esd] XML index
+/// </summary>
+/// <param name="xml_file">The path of the extracted index XML.</param>
+/// <param name="index">The index of the occurrence to look for.</param>
+static void PopulateWindowsVersionFromXml(const char* xml_file, int index)
+{
+	char* val;
+
+	val = get_token_data_file_indexed("MAJOR", xml_file, index);
+	img_report.win_version.major = (uint16_t)safe_atoi(val);
+	free(val);
+	val = get_token_data_file_indexed("MINOR", xml_file, index);
+	img_report.win_version.minor = (uint16_t)safe_atoi(val);
+	free(val);
+	val = get_token_data_file_indexed("BUILD", xml_file, index);
+	img_report.win_version.build = (uint16_t)safe_atoi(val);
+	free(val);
+	val = get_token_data_file_indexed("SPBUILD", xml_file, index);
+	img_report.win_version.revision = (uint16_t)safe_atoi(val);
+	free(val);
+	// Adjust versions so that we produce a more accurate report in the log
+	// (and yeah, I know we won't properly report Server, but I don't care)
+	if (img_report.win_version.major <= 5) {
+		// Don't want to support XP or earlier
+		img_report.win_version.major = 0;
+		img_report.win_version.minor = 0;
+	} else if (img_report.win_version.major == 6) {
+		// Don't want to support Vista
+		if (img_report.win_version.minor == 0) {
+			img_report.win_version.major = 0;
+		} else if (img_report.win_version.minor == 1) {
+			img_report.win_version.major = 7;
+			img_report.win_version.minor = 0;
+		} else if (img_report.win_version.minor == 2) {
+			img_report.win_version.major = 8;
+			img_report.win_version.minor = 0;
+		} else if (img_report.win_version.minor == 3) {
+			img_report.win_version.major = 8;
+			img_report.win_version.minor = 1;
+		} else if (img_report.win_version.minor == 4) {
+			img_report.win_version.major = 10;
+			img_report.win_version.minor = 0;
+		}
+	} else if (img_report.win_version.major == 10) {
+		if (img_report.win_version.build > 20000)
+			img_report.win_version.major = 11;
+	}
+}
+
+/// <summary>
+/// Populate the img_report Window version from an an install[.wim|.esd], mounting the
+/// ISO if needed. Requires Windows 8 or later.
+/// </summary>
+/// <param name="">(none)</param>
+/// <returns>TRUE on success, FALSE if we couldn't populate the version.</returns>
+BOOL PopulateWindowsVersion(void)
+{
+	char *mounted_iso, mounted_image_path[128];
+	char xml_file[MAX_PATH] = "";
+
+	img_report.win_version.major = 0;
+	img_report.win_version.minor = 0;
+	img_report.win_version.build = 0;
+	img_report.win_version.revision = 0;
+
+	if ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck(TRUE) & 4) == 0))
+		return FALSE;
+
+	// If we're not using a straight install.wim, we need to mount the ISO to access it
+	if (!img_report.is_windows_img) {
+		mounted_iso = MountISO(image_path);
+		if (mounted_iso == NULL) {
+			uprintf("Could not mount Windows ISO for build number detection");
+			return FALSE;
+		}
+		static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[0][2]);
+	}
+
+	// Now take a look at the XML file in install.wim to list our versions
+	if ((GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, xml_file) == 0) || (xml_file[0] == 0)) {
+		// Last ditch effort to get a tmp file - just extract it to the current directory
+		static_strcpy(xml_file, ".\\RufVXml.tmp");
+	}
+	// GetTempFileName() may leave a file behind
+	DeleteFileU(xml_file);
+
+	// Must use the Windows WIM API as 7z messes up the XML
+	if (!WimExtractFile_API(img_report.is_windows_img ? image_path : mounted_image_path,
+		0, "[1].xml", xml_file, TRUE)) {
+		uprintf("Could not acquire WIM index");
+		goto out;
+	}
+
+	PopulateWindowsVersionFromXml(xml_file, 1);
+
+out:
+	DeleteFileU(xml_file);
+	if (!img_report.is_windows_img)
+		UnMountISO();
+
+	return (img_report.win_version.major != 0 && img_report.win_version.build != 0);
+}
+
+/// <summary>
 /// Checks which versions of Windows are available in an install image
 /// to set our extraction index. Asks the user to select one if needed.
 /// </summary>
@@ -360,7 +464,7 @@ out:
 /// <returns>-2 on user cancel, -1 on other error, >=0 on success.</returns>
 int SetWinToGoIndex(void)
 {
-	char* mounted_iso, *val, mounted_image_path[128];
+	char* mounted_iso, mounted_image_path[128];
 	char xml_file[MAX_PATH] = "";
 	char* install_names[MAX_WININST];
 	StrArray version_name, version_index;
@@ -392,7 +496,7 @@ int SetWinToGoIndex(void)
 		mounted_iso = MountISO(image_path);
 		if (mounted_iso == NULL) {
 			uprintf("Could not mount ISO for Windows To Go selection");
-			return FALSE;
+			return -1;
 		}
 		static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[wininst_index][2]);
 	}
@@ -444,21 +548,8 @@ int SetWinToGoIndex(void)
 	else
 		wintogo_index = atoi(version_index.String[i - 1]);
 	if (i > 0) {
-		// Get the version data from the XML index
-		val = get_token_data_file_indexed("MAJOR", xml_file, i);
-		img_report.win_version.major = (uint16_t)safe_atoi(val);
-		free(val);
-		val = get_token_data_file_indexed("MINOR", xml_file, i);
-		img_report.win_version.minor = (uint16_t)safe_atoi(val);
-		free(val);
-		val = get_token_data_file_indexed("BUILD", xml_file, i);
-		img_report.win_version.build = (uint16_t)safe_atoi(val);
-		free(val);
-		val = get_token_data_file_indexed("SPBUILD", xml_file, i);
-		img_report.win_version.revision = (uint16_t)safe_atoi(val);
-		free(val);
-		if ((img_report.win_version.major == 10) && (img_report.win_version.build > 20000))
-			img_report.win_version.major = 11;
+		// re-populate the version data from the selected XML index
+		PopulateWindowsVersionFromXml(xml_file, i);
 		// If we couldn't obtain the major and build, we have a problem
 		if (img_report.win_version.major == 0 || img_report.win_version.build == 0)
 			uprintf("Warning: Could not obtain version information from XML index (Nonstandard Windows image?)");

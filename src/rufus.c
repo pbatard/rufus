@@ -1274,7 +1274,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 	};
 	int i, len;
 	uint8_t arch;
-	char tmp_path[MAX_PATH];
+	char tmp_path[MAX_PATH], tmp_str[64];
 
 	if (image_path == NULL)
 		goto out;
@@ -1284,6 +1284,8 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 	memset(&img_report, 0, sizeof(img_report));
 	img_report.is_iso = (BOOLEAN)ExtractISO(image_path, "", TRUE);
 	img_report.is_bootable_img = IsBootableImage(image_path);
+	if (img_report.wininst_index > 0 || img_report.is_windows_img)
+		PopulateWindowsVersion();
 	ComboBox_ResetContent(hImageOption);
 	imop_win_sel = 0;
 
@@ -1327,7 +1329,16 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 			}
 			DeleteFileU(tmp_path);
 		}
-		uprintf("  Image is %sa UEFI bootable Windows installation image", img_report.has_efi ? "" : "NOT ");
+		tmp_str[0] = 0;
+		if (img_report.win_version.major != 0) {
+			if (img_report.win_version.minor == 0)
+				static_sprintf(tmp_str, " %d (Build %d.%d)", img_report.win_version.major,
+					img_report.win_version.build, img_report.win_version.revision);
+			else
+				static_sprintf(tmp_str, " %d.%d (Build %d.%d)", img_report.win_version.major,
+					img_report.win_version.minor, img_report.win_version.build, img_report.win_version.revision);
+		}
+		uprintf("  Image is a %sUEFI bootable Windows%s installation image", img_report.has_efi ? "" : "NON-", tmp_str);
 	} else if (IS_DD_BOOTABLE(img_report)) {
 		if (img_report.is_bootable_img == 2)
 			uprintf("  Image is a FORCED non-bootable image");
@@ -2254,24 +2265,6 @@ out:
 	return ret;
 }
 
-#ifdef RUFUS_TEST
-extern BOOL ApplyWindowsCustomization(char drive_letter);
-
-static DWORD WINAPI TestThread(LPVOID param)
-{
-	static BOOL processing = FALSE;
-
-	if (processing) {
-		uprintf("Test thread is already in progress!");
-		ExitThread(1);
-	}
-	processing = TRUE;
-	ApplyWindowsCustomization('B');
-	processing = FALSE;
-	ExitThread(0);
-}
-#endif
-
 /*
  * Main dialog callback
  */
@@ -2308,7 +2301,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
-			CreateThread(NULL, 0, TestThread, NULL, 0, NULL);
 			break;
 		}
 #endif
