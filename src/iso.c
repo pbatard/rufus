@@ -82,7 +82,6 @@ RUFUS_IMG_REPORT img_report;
 int64_t iso_blocking_status = -1;
 extern BOOL preserve_timestamps, enable_ntfs_compression;
 extern char* archive_path;
-extern const grub_patch_t grub_patch[2];
 BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
@@ -851,16 +850,18 @@ void GetGrubVersion(char* buf, size_t buf_size)
 	// not having it mention GNU anywhere. See:
 	// https://src.fedoraproject.org/rpms/grub2/blob/rawhide/f/0024-Don-t-say-GNU-Linux-in-generated-menus.patch
 	const char* grub_version_str[] = { "GRUB  version %s", "GRUB version %s" };
+	const char* grub_debug_is_enabled_str = "grub_debug_is_enabled";
 	char *p, unauthorized[] = {'<', '>', ':', '|', '*', '?', '\\', '/'};
 	size_t i, j;
+	BOOL has_grub_debug_is_enabled = FALSE;
 
 	for (i = 0; i < buf_size; i++) {
 		for (j = 0; j < ARRAYSIZE(grub_version_str); j++) {
-			if (memcmp(&buf[i], grub_version_str[j], strlen(grub_version_str[j]) + 1) == 0) {
+			if (memcmp(&buf[i], grub_version_str[j], strlen(grub_version_str[j]) + 1) == 0)
 				static_strcpy(img_report.grub2_version, &buf[i + strlen(grub_version_str[j]) + 1]);
-				break;
-			}
 		}
+		if (memcmp(&buf[i], grub_debug_is_enabled_str, strlen(grub_debug_is_enabled_str)) == 0)
+			has_grub_debug_is_enabled = TRUE;
 	}
 	// Sanitize the string
 	for (p = &img_report.grub2_version[0]; *p; p++) {
@@ -873,6 +874,35 @@ void GetGrubVersion(char* buf, size_t buf_size)
 	// But seriously, these guys should know better than "security" through obscurity...
 	if (img_report.grub2_version[0] == '0')
 		img_report.grub2_version[0] = 0;
+
+	// For some obscure reason, openSUSE have decided that their Live images should
+	// use /boot/grub2/ as their prefix directory instead of the standard /boot/grub/
+	// This creates a MAJOR issue because the prefix directory is hardcoded in
+	// 'core.img', and Rufus must install a 'core.img', that is not provided by the
+	// ISO, for the USB to boot (since even trying to pick the one from ISOHybrid
+	// does usually not guarantees the presence of the FAT driver which is mandatory
+	// for ISO boot).
+	// Therefore, when *someone* uses a nonstandard GRUB prefix directory, our base
+	// 'core.img' can't work with their image, since it isn't able to load modules
+	// like 'normal.mod', that are required to access the configuration files. Oh and
+	// you can forget about direct editing the prefix string inside 'core.img' since
+	// GRUB are forcing LZMA compression for BIOS payloads. And it gets even better,
+	// because even if you're trying to be smart and use GRUB's earlyconfig features
+	// to do something like:
+	//   if [ -e /boot/grub2/i386-pc/normal.mod ]; then set prefix = ...
+	// you still must embed 'configfile.mod' and 'normal.mod' in 'core.img' in order
+	// to do that, which ends up tripling the file size...
+	// Also, as mentioned above, Fedora have started applying *BREAKING* patches
+	// willy-nilly, without bothering to alter the GRUB version string.
+	// Soooo, since the universe is conspiring against us and since we have already
+	// have a facility for it, we'll use it to dowload the relevant 'core.img' by
+	// appending a missing version suffix as needed...
+	if (img_report.grub2_version[0] != 0) {
+		if (has_grub_debug_is_enabled)
+			strcat(img_report.grub2_version, "-fedora");
+		if (img_report.has_grub2 > 1)
+			strcat(img_report.grub2_version, "-nonstandard");
+	}
 }
 
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
@@ -1120,41 +1150,7 @@ out:
 				DeleteFileU(path);
 			}
 			if (img_report.grub2_version[0] != 0) {
-				// (Insert "Why is it always you three" meme, with Fedora, Manjaro and openSUSE)
-				// For some obscure reason, openSUSE have decided that their Live images should
-				// use /boot/grub2/ as their prefix directory instead of the standard /boot/grub/
-				// This creates a MAJOR issue because the prefix directory is hardcoded in
-				// 'core.img', and Rufus must install a 'core.img', that is not provided by the
-				// ISO, for the USB to boot (since even trying to pick the one from ISOHybrid
-				// does usually not guarantees the presence of the FAT driver which is mandatory
-				// for ISO boot).
-				// Therefore, when *someone* uses a nonstandard GRUB prefix directory, our base
-				// 'core.img' can't work with their image, since it isn't able to load modules
-				// like 'normal.mod', that are required to access the configuration files. Oh and
-				// you can forget about direct editing the prefix string inside 'core.img' since
-				// GRUB are forcing LZMA compression for BIOS payloads. And it gets even better,
-				// because even if you're trying to be smart and use GRUB's earlyconfig features
-				// to do something like:
-				//   if [ -e /boot/grub2/i386-pc/normal.mod ]; then set prefix = ...
-				// you still must embed 'configfile.mod' and 'normal.mod' in 'core.img' in order
-				// to do that, which ends up tripling the file size...
-				// Soooo, since the universe is conspiring against us and in order to cut a long
-				// story short about developers making annoying decisions, we'll take advantage
-				// of the fact that the LZMA replacement section for the 2.04 and 2.06 'core.img'
-				// when using '/boot/grub2' as a prefix is very small and always located at the
-				// very end the file to patch the damn thing and get on with our life!
-				uprintf("  Detected Grub version: %s%s", img_report.grub2_version,
-					img_report.has_grub2 > 1 ? " with NONSTANDARD prefix" : "");
-				if (img_report.has_grub2 > 1) {
-					for (k = 0; k < ARRAYSIZE(grub_patch); k++) {
-						if (strcmp(img_report.grub2_version, grub_patch[k].version) == 0)
-							break;
-					}
-					if (k >= ARRAYSIZE(grub_patch)) {
-						uprintf("  • Don't have a prefix patch for this version => DROPPED!");
-						img_report.has_grub2 = 0;
-					}
-				}
+				uprintf("  Detected Grub version: %s", img_report.grub2_version);
 			} else {
 				uprintf("  Could not detect Grub version");
 				img_report.has_grub2 = 0;

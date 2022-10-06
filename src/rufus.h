@@ -398,7 +398,7 @@ typedef struct {
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
 	char sl_version_ext[32];
-	char grub2_version[32];
+	char grub2_version[64];
 } RUFUS_IMG_REPORT;
 
 /* Isolate the Syslinux version numbers */
@@ -692,23 +692,6 @@ extern int32_t StrArrayFind(StrArray* arr, const char* str);
 extern void StrArrayClear(StrArray* arr);
 extern void StrArrayDestroy(StrArray* arr);
 #define IsStrArrayEmpty(arr) (arr.Index == 0)
-
-/* Patch structs for GRUB */
-typedef struct {
-	const uint32_t offset;
-	const uint32_t size;
-	const uint8_t data[];
-} chunk_t;
-
-typedef struct {
-	const chunk_t* src;
-	const chunk_t* rep;
-} patch_t;
-
-typedef struct {
-	const char* version;
-	const patch_t patch[2];
-} grub_patch_t;
 
 /*
  * typedefs for the function prototypes. Use the something like:
