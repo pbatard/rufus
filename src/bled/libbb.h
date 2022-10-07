@@ -143,7 +143,7 @@ extern unsigned long* bled_cancel_request;
 #define xfunc_die() longjmp(bb_error_jmp, 1)
 #define bb_printf(...) do { if (bled_printf != NULL) bled_printf(__VA_ARGS__); \
 	else { printf(__VA_ARGS__); putchar('\n'); } } while(0)
-#define bb_error_msg(...) bb_printf("Error: " __VA_ARGS__)
+#define bb_error_msg(...) bb_printf("\nError: " __VA_ARGS__)
 #define bb_error_msg_and_die(...) do {bb_error_msg(__VA_ARGS__); xfunc_die();} while(0)
 #define bb_error_msg_and_err(...) do {bb_error_msg(__VA_ARGS__); goto err;} while(0)
 #define bb_perror_msg bb_error_msg

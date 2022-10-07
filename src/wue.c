@@ -413,10 +413,7 @@ BOOL PopulateWindowsVersion(void)
 	char *mounted_iso, mounted_image_path[128];
 	char xml_file[MAX_PATH] = "";
 
-	img_report.win_version.major = 0;
-	img_report.win_version.minor = 0;
-	img_report.win_version.build = 0;
-	img_report.win_version.revision = 0;
+	memset(&img_report.win_version, 0, sizeof(img_report.win_version));
 
 	if ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck(TRUE) & 4) == 0))
 		return FALSE;
@@ -453,7 +450,7 @@ out:
 	if (!img_report.is_windows_img)
 		UnMountISO();
 
-	return (img_report.win_version.major != 0 && img_report.win_version.build != 0);
+	return ((img_report.win_version.major != 0) && (img_report.win_version.build != 0));
 }
 
 /// <summary>
