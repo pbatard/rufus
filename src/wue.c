@@ -143,6 +143,9 @@ char* CreateUnattendXml(int arch, int flags)
 				char username[128] = { 0 };
 				DWORD size = sizeof(username);
 				if (GetUserNameU(username, &size) && username[0] != 0) {
+					// Administrator and Guest are default accounts that we shouldn't touch
+					if ((stricmp(username, "Administrator") == 0) || (stricmp(username, "Guest") == 0))
+						static_strcpy(username, "User");
 					// If we create a local account in unattend.xml, then we can get Windows 11
 					// 22H2 to skip MSA even if the network is connected during installation.
 					fprintf(fd, "      <UserAccounts>\n");
@@ -757,7 +760,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 		// We only need to mount boot.wim if we have windowsPE data to deal with. If
 		// not, we can just copy our unattend.xml in \sources\$OEM$\$$\Panther\.
 		if (flags & UNATTEND_WINPE_SETUP_MASK) {
-			uprintf("Mounting '%s'...", boot_wim_path);
+			uprintf("Mounting '%s[%d]'...", boot_wim_path, wim_index);
 			// Some "unofficial" ISOs have a modified boot.wim that doesn't have Windows Setup at index 2...
 			if (!WimIsValidIndex(boot_wim_path, wim_index)) {
 				uprintf("WARNING: This image appears to be an UNOFFICIAL Windows ISO!");
@@ -869,7 +872,7 @@ out:
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 104, PATCH_PROGRESS_TOTAL);
 	}
 	if (mount_path) {
-		uprintf("Unmounting '%s'...", boot_wim_path, wim_index);
+		uprintf("Unmounting '%s[%d]'...", boot_wim_path, wim_index);
 		WimUnmountImage(boot_wim_path, wim_index);
 		UpdateProgressWithInfo(OP_PATCH, MSG_325, PATCH_PROGRESS_TOTAL, PATCH_PROGRESS_TOTAL);
 	}
