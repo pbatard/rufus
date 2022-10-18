@@ -1825,9 +1825,9 @@ msgid "Prevent Windows To Go from accessing internal disks"
 msgstr "Empêcher Windows To Go d'accéder aux disques internes"
 
 #. • MSG_333
-msgid "Set a local account using the same name as this user's"
-msgstr "Définir un compte local utilisant le même nom que celui de cet utilisateur"
+msgid "Create a local account with username:"
+msgstr "Créer un compte local avec le nom :"
 
 #. • MSG_334
-msgid "Set regional options using the same values as this user's"
+msgid "Set regional options to the same values as this user's"
 msgstr "Définir les options régionales avec les mêmes valeurs que celles de cet utilisateur"

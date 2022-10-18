@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 3.21.1940"
+CAPTION "Rufus 3.21.1941"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
@@ -174,6 +174,7 @@ BEGIN
     CONTROL         "Choice 14",IDC_SELECTION_CHOICE14,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE | WS_TABSTOP,35,187,269,10,WS_EX_TRANSPARENT
     CONTROL         "Choice 15",IDC_SELECTION_CHOICE15,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE | WS_TABSTOP,35,200,269,10,WS_EX_TRANSPARENT
     CONTROL         "Choice 16",IDC_SELECTION_CHOICEMAX,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE | WS_TABSTOP,35,213,269,10,WS_EX_TRANSPARENT
+    EDITTEXT        IDC_SELECTION_USERNAME,197,57,0,9,ES_AUTOHSCROLL | NOT WS_VISIBLE | WS_TABSTOP | WS_BORDER
 END
 
 IDD_LIST DIALOGEX 0, 0, 312, 59
@@ -395,8 +396,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,21,1940,0
- PRODUCTVERSION 3,21,1940,0
+ FILEVERSION 3,21,1941,0
+ PRODUCTVERSION 3,21,1941,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -414,13 +415,13 @@ BEGIN
             VALUE "Comments", "https://rufus.ie"
             VALUE "CompanyName", "Akeo Consulting"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "3.21.1940"
+            VALUE "FileVersion", "3.21.1941"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2022 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "https://www.gnu.org/licenses/gpl-3.0.html"
             VALUE "OriginalFilename", "rufus-3.21.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "3.21.1940"
+            VALUE "ProductVersion", "3.21.1941"
         END
     END
     BLOCK "VarFileInfo"

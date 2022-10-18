@@ -1423,7 +1423,7 @@ out:
 // Likewise, boot check will block message processing => use a thread
 static DWORD WINAPI BootCheckThread(LPVOID param)
 {
-	int i, r;
+	int i, r, username_index = -1;
 	FILE *fd;
 	DWORD len;
 	WPARAM ret = BOOTCHECK_CANCEL;
@@ -1470,8 +1470,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
 					(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
 					char* choices[3] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP"), lmprintf(MSG_277, dd_image) };
-					i = SelectionDialog(BS_AUTORADIOBUTTON, lmprintf(MSG_274, "ISOHybrid"),
-						lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image), choices, 3, 1);
+					i = SelectionDialog(lmprintf(MSG_274, "ISOHybrid"), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image), choices, 3);
 					if (i < 0)	// Cancel
 						goto out;
 					write_as_esp = (i & 2);
@@ -1479,8 +1478,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					esp_already_asked = TRUE;
 				} else {
 					char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, dd_image) };
-					i = SelectionDialog(BS_AUTORADIOBUTTON, lmprintf(MSG_274, "ISOHybrid"),
-						lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image), choices, 2, 1);
+					i = SelectionDialog(lmprintf(MSG_274, "ISOHybrid"), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image), choices, 2);
 					if (i < 0)	// Cancel
 						goto out;
 					write_as_image = (i & 2);
@@ -1522,20 +1520,21 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				int arch = _log2(img_report.has_efi >> 1);
 				uint8_t map[8] = { 0 }, b = 1;
 				StrArrayCreate(&options, 2);
+				StrArrayAdd(&options, lmprintf(MSG_332), TRUE);
+				MAP_BIT(UNATTEND_OFFLINE_INTERNAL_DRIVES);
 				if (img_report.win_version.build >= 22500) {
 					StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
 					MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
 				}
-				StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
-				MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
-				StrArrayAdd(&options, lmprintf(MSG_332), TRUE);
-				MAP_BIT(UNATTEND_OFFLINE_INTERNAL_DRIVES);
 				StrArrayAdd(&options, lmprintf(MSG_333), TRUE);
-				MAP_BIT(UNATTEND_DUPLICATE_USER);
+				username_index = _log2(b);
+				MAP_BIT(UNATTEND_SET_USER);
 				StrArrayAdd(&options, lmprintf(MSG_334), TRUE);
 				MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
-				i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
-					options.String, options.Index, remap8(unattend_xml_mask, map, FALSE));
+				StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
+				MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
+				i = CustomSelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
+					options.String, options.Index, remap8(unattend_xml_mask, map, FALSE), username_index);
 				StrArrayDestroy(&options);
 				if (i < 0)
 					goto out;
@@ -1591,14 +1590,15 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
 				MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
 			}
-			StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
-			MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
 			StrArrayAdd(&options, lmprintf(MSG_333), TRUE);
-			MAP_BIT(UNATTEND_DUPLICATE_USER);
+			username_index = _log2(b);
+			MAP_BIT(UNATTEND_SET_USER);
 			StrArrayAdd(&options, lmprintf(MSG_334), TRUE);
 			MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
-			i = SelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
-				options.String, options.Index, remap8(unattend_xml_mask, map, FALSE));
+			StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
+			MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
+			i = CustomSelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
+				options.String, options.Index, remap8(unattend_xml_mask, map, FALSE), username_index);
 			StrArrayDestroy(&options);
 			if (i < 0)
 				goto out;
@@ -1616,7 +1616,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			// so ask the users if they want to write it as an ESP.
 			char* iso_image = lmprintf(MSG_036);
 			char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP") };
-			i = SelectionDialog(BS_AUTORADIOBUTTON, lmprintf(MSG_274, "ESP"), lmprintf(MSG_310), choices, 2, 1);
+			i = SelectionDialog(lmprintf(MSG_274, "ESP"), lmprintf(MSG_310), choices, 2);
 			if (i < 0)	// Cancel
 				goto out;
 			write_as_esp = (i & 2);

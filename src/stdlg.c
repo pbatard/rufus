@@ -46,6 +46,7 @@
 
 /* Globals */
 extern BOOL is_x86_32, appstore_version;
+extern char unattend_username[MAX_USERNAME_LENGTH];
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
@@ -53,7 +54,7 @@ static char **szDialogItem;
 static int nDialogItems;
 static HWND hBrowseEdit, hUpdatesDlg;
 static WNDPROC pOrgBrowseWndproc;
-static const SETTEXTEX friggin_microsoft_unicode_amateurs = {ST_DEFAULT, CP_UTF8};
+static const SETTEXTEX friggin_microsoft_unicode_amateurs = { ST_DEFAULT, CP_UTF8 };
 static BOOL notification_is_question;
 static const notification_info* notification_more_info;
 static const char* notification_dont_display_setting;
@@ -564,9 +565,9 @@ INT_PTR CALLBACK LicenseCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int i, dy;
-	const int edit_id[2] = {IDC_ABOUT_BLURB, IDC_ABOUT_COPYRIGHTS};
+	const int edit_id[2] = { IDC_ABOUT_BLURB, IDC_ABOUT_COPYRIGHTS };
 	char about_blurb[2048];
-	const char* edit_text[2] = {about_blurb, additional_copyrights};
+	const char* edit_text[2] = { about_blurb, additional_copyrights };
 	HWND hEdit[2], hCtrl;
 	TEXTRANGEW tr;
 	ENLINK* enl;
@@ -596,7 +597,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			lmprintf(MSG_175|MSG_RTF, rufus_version[0], rufus_version[1], rufus_version[2]),
 			"Copyright © 2011-2022 Pete Batard",
 			lmprintf(MSG_176|MSG_RTF), lmprintf(MSG_177|MSG_RTF), lmprintf(MSG_178|MSG_RTF));
-		for (i=0; i<ARRAYSIZE(hEdit); i++) {
+		for (i = 0; i < ARRAYSIZE(hEdit); i++) {
 			hEdit[i] = GetDlgItem(hDlg, edit_id[i]);
 			SendMessage(hEdit[i], EM_AUTOURLDETECT, 1, 0);
 			/* Can't use SetDlgItemText, because it only works with RichEdit20A... and VS insists
@@ -605,7 +606,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			 * http://blog.kowalczyk.info/article/eny/Setting-unicode-rtf-text-in-rich-edit-control.html */
 			SendMessageA(hEdit[i], EM_SETTEXTEX, (WPARAM)&friggin_microsoft_unicode_amateurs, (LPARAM)edit_text[i]);
 			SendMessage(hEdit[i], EM_SETSEL, -1, -1);
-			SendMessage(hEdit[i], EM_SETEVENTMASK, 0, ENM_LINK|((i==0)?ENM_REQUESTRESIZE:0));
+			SendMessage(hEdit[i], EM_SETEVENTMASK, 0, ENM_LINK | ((i == 0) ? ENM_REQUESTRESIZE : 0));
 			SendMessage(hEdit[i], EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
 		}
 		// Need to send an explicit SetSel to avoid being positioned at the end of richedit control when tabstop is used
@@ -860,19 +861,25 @@ BOOL Notification(int type, const char* dont_display_setting, const notification
 }
 
 // We only ever display one selection dialog, so set some params as globals
-static int selection_dialog_style, selection_dialog_mask;
+static int selection_dialog_style, selection_dialog_mask, selection_dialog_username_index;
 
 /*
  * Custom dialog for radio button selection dialog
  */
-INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	LRESULT loc;
-	int i, m, dw, dh, r  = -1, mw;
+	// This "Mooo" is designed to give us enough space for a regular username length
+	static const char* base_username = "MOOOOOOOOOOO";	// 🐮
+	// https://learn.microsoft.com/en-us/previous-versions/cc722458(v=technet.10)#user-name-policies
+	static const char* username_invalid_chars = "/\\[]:;|=,+*?<>\"";
 	// Prevent resizing
 	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
 		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
 	static HBRUSH background_brush, separator_brush;
+	char username[128] = { 0 };
+	int i, m, dw, dh, r = -1, mw;
+	DWORD size = sizeof(username);
+	LRESULT loc;
 	// To use the system message font
 	NONCLIENTMETRICS ncm;
 	RECT rc, rc2;
@@ -894,7 +901,7 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
 		ncm.cbSize = sizeof(ncm);
 		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
-		hDlgFont = CreateFontIndirect(&(ncm.lfMessageFont));
+		hDlgFont = CreateFontIndirect(&ncm.lfMessageFont);
 		// Set the dialog to use the system message box font
 		SendMessage(hDlg, WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDC_SELECTION_TEXT), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
@@ -921,10 +928,17 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007));
 		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_TEXT), szMessageText);
 		for (i = 0; i < nDialogItems; i++) {
-			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), szDialogItem[i]);
+			char *str = szDialogItem[i];
+			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), str);
 			ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), SW_SHOW);
-			// Compute the maximum line's width
-			mw = max(mw, GetTextSize(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), szDialogItem[i]).cx);
+			// Compute the maximum line's width (with some extra for the username field if needed)
+			if (i == selection_dialog_username_index) {
+				str = calloc(strlen(szDialogItem[i]) + strlen(base_username) + 8, 1);
+				sprintf(str, "%s __%s__", szDialogItem[i], base_username);
+			}
+			mw = max(mw, GetTextSize(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), str).cx);
+			if (i == selection_dialog_username_index)
+				free(str);
 		}
 		// If our maximum line's width is greater than the default, set a nonzero delta width
 		dw = (mw <= dw) ? 0: mw - dw;
@@ -941,6 +955,26 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
 		for (i = 0; i < nDialogItems; i++)
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, dw, 0, 1.0f);
+
+		// If required, set up the the username edit box
+		if (selection_dialog_username_index != -1) {
+			unattend_username[0] = 0;
+			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_dialog_username_index);
+			GetClientRect(hCtrl, &rc);
+			ResizeMoveCtrl(hDlg, hCtrl, 0, 0,
+				(rc.left - rc.right) + GetTextSize(hCtrl, szDialogItem[selection_dialog_username_index]).cx + ddw, 0, 1.0f);
+			GetWindowRect(hCtrl, &rc);
+			SetWindowPos(GetDlgItem(hDlg, IDC_SELECTION_USERNAME), hCtrl, rc.left, rc.top, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_USERNAME);
+			GetWindowRect(hCtrl, &rc2);
+			ResizeMoveCtrl(hDlg, hCtrl, right_to_left_mode ? rc2.right - rc.left : rc.right - rc2.left, rc.top - rc2.top,
+				GetTextSize(hCtrl, (char*)base_username).cx, 0, 1.0f);
+			if (!GetUserNameU(username, &size) || username[0] == 0)
+				static_strcpy(username, "User");
+			SetWindowTextU(hCtrl, username);
+			ShowWindow(hCtrl, SW_SHOW);
+		}
+
 		if (nDialogItems > 2) {
 			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), &rc);
 			GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + nDialogItems - 1), &rc2);
@@ -982,6 +1016,14 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 			for (r = 0, i = 0, m = 1; i < nDialogItems; i++, m <<= 1)
 				if (Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)) == BST_CHECKED)
 					r += m;
+			if (selection_dialog_username_index != -1) {
+				GetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_USERNAME), unattend_username, MAX_USERNAME_LENGTH);
+				// Perform string sanitization (NB: GetWindowTextU always terminates the string)
+				for (i = 0; unattend_username[i] != 0; i++) {
+					if (strchr(username_invalid_chars, unattend_username[i]) != NULL)
+						unattend_username[i] = '_';
+				}
+			}
 			// Fall through
 		case IDNO:
 		case IDCANCEL:
@@ -996,7 +1038,7 @@ INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARA
 /*
  * Display an item selection dialog
  */
-int SelectionDialog(int style, char* title, char* message, char** choices, int size, int mask)
+int CustomSelectionDialog(int style, char* title, char* message, char** choices, int size, int mask, int username_index)
 {
 	int ret;
 
@@ -1007,8 +1049,9 @@ int SelectionDialog(int style, char* title, char* message, char** choices, int s
 	nDialogItems = size;
 	selection_dialog_style = style;
 	selection_dialog_mask = mask;
+	selection_dialog_username_index = username_index;
 	assert(selection_dialog_style == BS_AUTORADIOBUTTON || selection_dialog_style == BS_AUTOCHECKBOX);
-	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, SelectionCallback);
+	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, CustomSelectionCallback);
 	dialog_showing--;
 
 	return ret;

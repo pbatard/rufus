@@ -43,7 +43,7 @@ const char* bypass_name[] = { "BypassTPMCheck", "BypassSecureBootCheck", "Bypass
 
 int unattend_xml_flags = 0, wintogo_index = -1, wininst_index = 0;
 int unattend_xml_mask = UNATTEND_DEFAULT_SELECTION_MASK;
-char* unattend_xml_path = NULL;
+char *unattend_xml_path = NULL, unattend_username[MAX_USERNAME_LENGTH];
 
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 
@@ -138,21 +138,19 @@ char* CreateUnattendXml(int arch, int flags)
 				fprintf(fd, "        <ProtectYourPC>3</ProtectYourPC>\n");
 				fprintf(fd, "      </OOBE>\n");
 			}
-			if (flags & UNATTEND_DUPLICATE_USER) {
-				order = 1;
-				char username[128] = { 0 };
-				DWORD size = sizeof(username);
-				if (GetUserNameU(username, &size) && username[0] != 0) {
-					// Administrator and Guest are default accounts that we shouldn't touch
-					if ((stricmp(username, "Administrator") == 0) || (stricmp(username, "Guest") == 0))
-						static_strcpy(username, "User");
+			if (flags & UNATTEND_SET_USER) {
+				if ((unattend_username[0] == 0) || (stricmp(unattend_username, "Administrator") == 0) ||
+					(stricmp(unattend_username, "Guest") == 0)) {
+					uprintf("WARNING: '%s' is not allowed as local account name - Option ignored", unattend_username);
+				} else {
+					uprintf("Will use '%s' for local account name", unattend_username);
 					// If we create a local account in unattend.xml, then we can get Windows 11
 					// 22H2 to skip MSA even if the network is connected during installation.
 					fprintf(fd, "      <UserAccounts>\n");
 					fprintf(fd, "        <LocalAccounts>\n");
 					fprintf(fd, "          <LocalAccount wcm:action=\"add\">\n");
-					fprintf(fd, "            <Name>%s</Name>\n", username);
-					fprintf(fd, "            <DisplayName>%s</DisplayName>\n", username);
+					fprintf(fd, "            <Name>%s</Name>\n", unattend_username);
+					fprintf(fd, "            <DisplayName>%s</DisplayName>\n", unattend_username);
 					fprintf(fd, "            <Group>Administrators;Power Users</Group>\n");
 					// Sets an empty password for the account (which, in Microsoft's convoluted ways,
 					// needs to be initialized to the Base64 encoded UTF-16 string "Password").
@@ -170,11 +168,9 @@ char* CreateUnattendXml(int arch, int flags)
 					fprintf(fd, "      <FirstLogonCommands>\n");
 					fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
 					fprintf(fd, "          <Order>%d</Order>\n", order++);
-					fprintf(fd, "          <CommandLine>net user &quot;%s&quot; /logonpasswordchg:yes</CommandLine>\n", username);
+					fprintf(fd, "          <CommandLine>net user &quot;%s&quot; /logonpasswordchg:yes</CommandLine>\n", unattend_username);
 					fprintf(fd, "        </SynchronousCommand>\n");
 					fprintf(fd, "      </FirstLogonCommands>\n");
-				} else {
-					uprintf("Warning: Could not retreive current user name. Local Account was not created");
 				}
 			}
 			fprintf(fd, "    </component>\n");
@@ -483,8 +479,7 @@ int SetWinToGoIndex(void)
 	if (img_report.wininst_index > 1) {
 		for (i = 0; i < img_report.wininst_index; i++)
 			install_names[i] = &img_report.wininst_path[i][2];
-		wininst_index = _log2(SelectionDialog(BS_AUTORADIOBUTTON, lmprintf(MSG_130),
-			lmprintf(MSG_131), install_names, img_report.wininst_index, 1));
+		wininst_index = _log2(SelectionDialog(lmprintf(MSG_130), lmprintf(MSG_131), install_names, img_report.wininst_index));
 		if (wininst_index < 0)
 			return -2;
 		if (wininst_index >= MAX_WININST)
@@ -539,8 +534,7 @@ int SetWinToGoIndex(void)
 
 	if (i > 1)
 		// NB: _log2 returns -2 if SelectionDialog() returns negative (user cancelled)
-		i = _log2(SelectionDialog(BS_AUTORADIOBUTTON,
-			lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i, 1)) + 1;
+		i = _log2(SelectionDialog(lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i)) + 1;
 	if (i < 0)
 		wintogo_index = -2;	// Cancelled by the user
 	else if (i == 0)

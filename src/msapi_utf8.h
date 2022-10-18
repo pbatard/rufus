@@ -345,6 +345,8 @@ static __inline int GetWindowTextU(HWND hWnd, char* lpString, int nMaxCount)
 {
 	int ret = 0;
 	DWORD err = ERROR_INVALID_DATA;
+	if (nMaxCount < 0)
+		return 0;
 	// Handle the empty string as GetWindowTextW() returns 0 then
 	if ((lpString != NULL) && (nMaxCount > 0))
 		lpString[0] = 0;
@@ -357,6 +359,7 @@ static __inline int GetWindowTextU(HWND hWnd, char* lpString, int nMaxCount)
 		err = GetLastError();
 	}
 	wfree(lpString);
+	lpString[nMaxCount - 1] = 0;
 	SetLastError(err);
 	return ret;
 }

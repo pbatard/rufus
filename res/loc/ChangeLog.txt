@@ -17,6 +17,8 @@ o v3.20 (2022.??.??)
   - *NEW*      MSG_330 "Remove requirement for an online Microsoft account"
   - *NEW*      MSG_331 "Disable data collection (Skip privacy questions)"
   - *NEW*      MSG_332 "Prevent Windows To Go from accessing internal disks"
+  - *NEW*      MSG_333 "Create a local account with username:"
+  - *NEW*      MSG_334 "Set regional options to the same values as this user's"
 
 o v3.14 (2021.03.31)
   - *UPDATED*  MSG_068 "Error while partitioning drive." -> "Could not partition drive."
