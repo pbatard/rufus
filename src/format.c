@@ -1451,7 +1451,7 @@ DWORD WINAPI FormatThread(void* param)
 		extra_partitions = XP_ESP | XP_MSR;
 	else if ( ((fs_type == FS_NTFS) || (fs_type == FS_EXFAT)) &&
 			  ((boot_type == BT_UEFI_NTFS) || ((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) &&
-			   ((target_type == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios)))) )
+			   ((target_type == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios) || (img_report.has_4GB_file)))) )
 		extra_partitions = XP_UEFI_NTFS;
 	else if ((boot_type == BT_IMAGE) && !write_as_image && HAS_PERSISTENCE(img_report) && persistence_size)
 		extra_partitions = XP_CASPER;
