@@ -792,6 +792,7 @@ void ToggleImageOptions(void)
 		((!has_wintogo) && (image_options & IMOP_WINTOGO))) {
 		image_options ^= IMOP_WINTOGO;
 		if (image_options & IMOP_WINTOGO) {
+			SetWindowTextU(GetDlgItem(hMainDialog, IDS_IMAGE_OPTION_TXT), image_option_txt);
 			// Set the Windows To Go selection in the dropdown
 			IGNORE_RETVAL(ComboBox_SetCurSel(hImageOption, imop_win_sel));
 		}
