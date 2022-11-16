@@ -3,18 +3,18 @@ Rufus for NTFS and exFAT UEFI boot support.
 
 See https://github.com/pbatard/uefi-ntfs for more details.
 
-This image, which you can mount as FAT filesystem or open in 7-zip, contains
-the following data:
+This image, which can be mounted as a FAT file system or opened in 7-zip,
+contains the following data:
 
 o Secure Boot signed NTFS UEFI drivers, derived from ntfs-3g [1].
-  These drivers are the exact same as the read-only binaries from release 1.3,
+  These drivers are the exact same as the read-only binaries from release 1.4,
   except for the addition of Microsoft's Secure Boot signature.
   Note that, per Microsoft's current Secure Boot signing policies, the 32-bit
   ARM driver (ntfs_arm.efi) is not Secure Boot signed.
 
 o Non Secure Boot signed exFAT UEFI drivers from EfiFs [2].
-  These drivers are the exact same as the binaries from EfiFs release 1.8 and
-  because they are licensed under GPLv3, they cannot be Secure Boot signed.
+  These drivers are the exact same as the binaries from EfiFs release 1.9 but,
+  because they are licensed under GPLv3, cannot be Secure Boot signed.
 
 o Secure Boot signed UEFI:NTFS bootloader binaries [3].
   These drivers are the exact same as the binaries from release 2.2, except for
