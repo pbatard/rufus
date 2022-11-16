@@ -483,7 +483,7 @@ static BOOL SetFileSystemAndClusterSize(char* fs_name)
 	// FAT 16
 	if (SelectedDrive.DiskSize < 4*GB) {
 		SelectedDrive.ClusterSize[FS_FAT16].Allowed = 0x00001E00;
-		for (i=32; i<=4096; i<<=1) {			// 8 MB -> 4 GB
+		for (i = 32; i <= 4096; i <<= 1) {			// 8 MB -> 4 GB
 			if (SelectedDrive.DiskSize < i*MB) {
 				SelectedDrive.ClusterSize[FS_FAT16].Default = 16*(ULONG)i;
 				break;
@@ -613,7 +613,7 @@ static BOOL SetFileSystemAndClusterSize(char* fs_name)
 		SelectedDrive.FSType = selected_fs;
 	}
 
-	for (i = 0; i<ComboBox_GetCount(hFileSystem); i++) {
+	for (i = 0; i < ComboBox_GetCount(hFileSystem); i++) {
 		if (ComboBox_GetItemData(hFileSystem, i) == SelectedDrive.FSType) {
 			IGNORE_RETVAL(ComboBox_SetCurSel(hFileSystem, i));
 			break;
@@ -631,7 +631,7 @@ static BOOL SetFileSystemAndClusterSize(char* fs_name)
 static void SetFSFromISO(void)
 {
 	int i, fs_tmp, preferred_fs = FS_UNKNOWN;
-	uint32_t fs_mask = FS_FAT32 | FS_NTFS;
+	uint32_t fs_mask = FS_NTFS | (img_report.has_4GB_file ? 0 : FS_FAT32);
 	BOOL windows_to_go = (image_options & IMOP_WINTOGO) && (boot_type == BT_IMAGE) &&
 		HAS_WINTOGO(img_report) && (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO);
 
@@ -639,37 +639,28 @@ static void SetFSFromISO(void)
 		return;
 
 	// Create a mask of all the FS's available
-	for (i=0; i<ComboBox_GetCount(hFileSystem); i++) {
+	for (i = 0; i < ComboBox_GetCount(hFileSystem); i++) {
 		fs_tmp = (int)ComboBox_GetItemData(hFileSystem, i);
-		fs_mask |= 1<<fs_tmp;
+		fs_mask |= 1 << fs_tmp;
 	}
 
-	if ((preferred_fs == FS_UNKNOWN) && (preselected_fs != FS_UNKNOWN)) {
-		// If the FS requested from the command line is valid use it
-		if (fs_mask & (1 << preselected_fs)) {
-			preferred_fs = preselected_fs;
-		}
-	}
-
-	if (preferred_fs == FS_UNKNOWN) {
+	// If the FS requested from the command line is valid use it
+	if ((preselected_fs != FS_UNKNOWN) && (fs_mask & (1 << preselected_fs))) {
+		preferred_fs = preselected_fs;
+	} else {
 		// Syslinux and EFI have precedence over bootmgr (unless the user selected BIOS as target type)
 		if ((HAS_SYSLINUX(img_report)) || (HAS_REACTOS(img_report)) || HAS_KOLIBRIOS(img_report) ||
-			(IS_EFI_BOOTABLE(img_report) && (target_type == TT_UEFI) && (!windows_to_go))) {
-			if (fs_mask & (1 << FS_FAT32)) {
+			(IS_EFI_BOOTABLE(img_report) && (target_type == TT_UEFI) && (!windows_to_go) && (!img_report.has_4GB_file))) {
+			if (fs_mask & (1 << FS_FAT32))
 				preferred_fs = FS_FAT32;
-			} else if ((fs_mask & (1 << FS_FAT16)) && !HAS_KOLIBRIOS(img_report)) {
+			else if ((fs_mask & (1 << FS_FAT16)) && !HAS_KOLIBRIOS(img_report))
 				preferred_fs = FS_FAT16;
-			}
 		} else if ((windows_to_go) || HAS_BOOTMGR(img_report) || HAS_WINPE(img_report)) {
-			if (fs_mask & (1 << FS_NTFS)) {
+			if ((fs_mask & (1 << FS_FAT32)) && (!img_report.has_4GB_file) && (allow_dual_uefi_bios))
+				preferred_fs = FS_FAT32;
+			else if (fs_mask & (1 << FS_NTFS))
 				preferred_fs = FS_NTFS;
-			}
 		}
-	}
-
-	// The presence of a 4GB file forces the use of NTFS as default FS if available
-	if (img_report.has_4GB_file && (fs_mask & (1 << FS_NTFS))) {
-		preferred_fs = FS_NTFS;
 	}
 
 	// Try to select the FS
@@ -683,7 +674,7 @@ static void SetFSFromISO(void)
 	if (selected_fs == FS_UNKNOWN)
 		selected_fs = preferred_fs;
 
-	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL<<16) | IDC_FILE_SYSTEM,
+	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL << 16) | IDC_FILE_SYSTEM,
 		ComboBox_GetCurSel(hFileSystem));
 }
 
