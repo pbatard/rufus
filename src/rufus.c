@@ -75,6 +75,7 @@ static BOOL img_provided = FALSE;
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
 static BOOL dont_display_image_name = FALSE;
+static BOOL dont_process_dbt_devnodes = FALSE;
 static BOOL user_changed_label = FALSE;
 static BOOL user_deleted_rufus_dir = FALSE;
 static BOOL app_changed_label = FALSE;
@@ -1276,6 +1277,10 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 	uint8_t arch;
 	char tmp_path[MAX_PATH], tmp_str[64];
 
+	// We may mount an ISO during the lookup of the Windows version, which
+	// produces DBT_DEVNODES_CHANGED messages that lead to unwanted device
+	// refreshes. So make sure to ignore DBT_DEVNODES_CHANGED while scanning.
+	dont_process_dbt_devnodes = TRUE;
 	if (image_path == NULL)
 		goto out;
 	PrintInfoDebug(0, MSG_202);
@@ -1414,6 +1419,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 
 out:
 	dont_display_image_name = FALSE;
+	dont_process_dbt_devnodes = FALSE;
 	PrintInfo(0, MSG_210);
 	ExitThread(0);
 }
@@ -2791,7 +2797,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				return (INT_PTR)TRUE;
 			case DBT_DEVNODES_CHANGED:
 				// If it's been more than a second since last device refresh, arm a refresh timer
-				if (GetTickCount64() > LastRefresh + 1000) {
+				if (dont_process_dbt_devnodes) {
+					// This ensures we don't get unwanted refreshes while scanning an image.
+					LastRefresh = GetTickCount64();
+				} else if (GetTickCount64() > LastRefresh + 1000) {
 					LastRefresh = GetTickCount64();
 					SetTimer(hMainDialog, TID_REFRESH_TIMER, 1000, RefreshTimer);
 				}

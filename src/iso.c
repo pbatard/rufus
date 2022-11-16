@@ -368,8 +368,7 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 		// line to their grub.cfg, which means that their kernel option token is no longer
 		//'linux' but '$linux'... and we have to add a workaround for that.
 		// Finally, newer Arch and derivatives added an extra "search --label ..." command
-		// in GRUB which we need to cater for in supplement to the kernel line.
-
+		// in their GRUB conf, which we need to cater for in supplement of the kernel line.
 		static const char* grub_token[] = { "linux", "linuxefi", "$linux", "search" };
 		iso_label = replace_char(img_report.label, ' ', "\\x20");
 		usb_label = replace_char(img_report.usb_label, ' ', "\\x20");
@@ -385,11 +384,9 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
 				modified = TRUE;
 			}
-			//
 			// Since version 8.2, and https://github.com/rhinstaller/anaconda/commit/a7661019546ec1d8b0935f9cb0f151015f2e1d95,
 			// Red Hat derivatives have changed their CD-ROM detection policy which leads to the installation source
 			// not being found. So we need to use 'inst.repo' instead of 'inst.stage2' in the kernel options.
-			//
 			if (img_report.rh8_derivative && (replace_in_token_data(src, props->is_grub_cfg ?
 				"linuxefi" : "append", "inst.stage2", "inst.repo", TRUE) != NULL)) {
 				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, "inst.stage2", "inst.repo");
