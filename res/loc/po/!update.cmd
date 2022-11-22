@@ -1,5 +1,5 @@
 @echo off
-if not exist pollock.exe curl https://rufus-web.akeo.ie/locale/pollock.exe --output pollock.exe
+if not exist pollock.exe curl https://files.akeo.ie/pollock/pollock-1.4.exe --output pollock.exe
 cls
 :menu
 echo 1 - Import .po into .loc

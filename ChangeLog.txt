@@ -1,12 +1,12 @@
 o Version 3.21 (2022.11.??)
-    Allow the provision of an arbitrary local account username
+    Allow the provision of an arbitrary local account username in the Windows User Experience dialog
     Improve Windows version reporting from ISO/.wim
     Update UEFI:NTFS' NTFS drivers to v1.4 and exFAT drivers to v1.9
     Switch to remote download for nonstandard GRUB (Fedora 37, openSUSE Live, GeckoLinux)
     Fix UEFI:NTFS partition not being set in MBR mode for ISOs with a >4GB file (UwUntu)
     Fix GRUB support for Arch and derivatives, when a non FAT compliant label is used
     Fix incorrect detection of GRUB with nonstandard prefixes
-    Fix tab order not working on the Windows Use Experience dialog
+    Fix tab order not working on the Windows User Experience dialog
 
 o Version 3.20 (2022.08.03)
     Enable applicable Windows User Experience options for Windows 10

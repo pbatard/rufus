@@ -3,11 +3,11 @@ rufus.loc since its original version.
 
 To edit a translation, please make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translation
-Or simply download https://rufus-web.akeo.ie/locale/pollock.exe and follow its directions.
+Or simply download https://files.akeo.ie/pollock/pollock-1.4.exe and follow its directions.
 
-o v3.20 (2022.??.??)
-  IMPORTANT: The translation changes below are *NOT* finalized and may evolve further...
-             Please avoid sending a translation update before I send a request for it, thank you!
+o v3.22 (2023.??.??)
+  // MSG_294 can be tested by launching Rufus from the commandline with option -z61
+  - *UPDATED*  MSG_294 "This version of Windows is no longer supported by Rufus." -> added "\nThe last version of Rufus compatible with this platform is v%d.%d."
   - *NEW*      MSG_323 "Unable to open or read '%s'"
   - *NEW*      MSG_325 "Applying Windows customization: %s"
   - *NEW*      MSG_326 "Windows User Experience"

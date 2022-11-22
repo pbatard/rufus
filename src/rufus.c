@@ -3283,7 +3283,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
 	const char* rufus_loc = "rufus.loc";
 	int i, opt, option_index = 0, argc = 0, si = 0, lcid = GetUserDefaultUILanguage();
-	int wait_for_mutex = 0;
+	int wait_for_mutex = 0, forced_windows_version = 0;
 	uint32_t wue_options;
 	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount = TRUE;
@@ -3441,7 +3441,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				}
 			}
 
-			while ((opt = getopt_long(argc, argv, "xghf:i:w:l:", long_options, &option_index)) != EOF) {
+			while ((opt = getopt_long(argc, argv, "ghxf:i:l:w:z:", long_options, &option_index)) != EOF) {
 				switch (opt) {
 				case 'x':
 					enable_HDDs = TRUE;
@@ -3490,6 +3490,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				case 'h':
 					PrintUsage(argv[0]);
 					goto out;
+				case 'z':
+					forced_windows_version = (int)strtol(optarg, NULL, 16);
+					break;
 				// getopt_long returns '?' for any option it doesn't recognize
 				default:
 					list_params = TRUE;
@@ -3608,14 +3611,21 @@ skip_args_processing:
 
 	// Set the Windows version
 	GetWindowsVersion();
+	// Force a version if specified as parameter, but without allowing folks running
+	// a version of Windows we no longer support to use the option as a bypass!
+	if (nWindowsVersion > WINDOWS_7 && forced_windows_version != 0)
+		nWindowsVersion = forced_windows_version;
 
 	// ...and nothing of value was lost
+	// TODO: Set to <= for 3.22
 	if (nWindowsVersion < WINDOWS_7) {
 		// Load the translation before we print the error
 		get_loc_data_file(loc_file, selected_locale);
 		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
 		// Set MB_SYSTEMMODAL to prevent Far Manager from stealing focus...
-		MessageBoxExU(NULL, lmprintf(MSG_294), lmprintf(MSG_293), MB_ICONSTOP | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
+		MessageBoxExU(NULL,
+			lmprintf(MSG_294, (nWindowsVersion == WINDOWS_7) ? 3 : 2, (nWindowsVersion == WINDOWS_7) ? 21 : 18),
+			lmprintf(MSG_293), MB_ICONSTOP | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
 		goto out;
 	}
 

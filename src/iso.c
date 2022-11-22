@@ -894,8 +894,8 @@ void GetGrubVersion(char* buf, size_t buf_size)
 	// to do that, which ends up tripling the file size...
 	// Also, as mentioned above, Fedora have started applying *BREAKING* patches
 	// willy-nilly, without bothering to alter the GRUB version string.
-	// Soooo, since the universe is conspiring against us and since we have already
-	// have a facility for it, we'll use it to dowload the relevant 'core.img' by
+	// Soooo, since the universe is conspiring against us and since we already have
+	// a facility for it, we'll use it to dowload the relevant 'core.img' by
 	// appending a missing version suffix as needed...
 	if (img_report.grub2_version[0] != 0) {
 		if (has_grub_debug_is_enabled)
