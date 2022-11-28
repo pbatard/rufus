@@ -3778,8 +3778,7 @@ relaunch:
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-			int index = 2;
-			uprintf("Index %d is %s", index, WimIsValidIndex("C:\\tmp\\boot1.wim", index) ? "valid" : "invalid");
+			TestChecksum();
 			continue;
 		}
 #endif
