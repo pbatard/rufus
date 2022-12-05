@@ -2478,7 +2478,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					break;
 				}
 				GetWindowTextA(GetDlgItem(hDlg, IDC_PERSISTENCE_SIZE), tmp, sizeof(tmp));
-				lPos = atol(tmp);
+				lPos = strtol(tmp, NULL, 10);
 				persistence_unit_selection = ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS));
 				persistence_size = lPos * MB;
 				for (i = 0; i < persistence_unit_selection; i++)
@@ -2520,7 +2520,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS)) == persistence_unit_selection)
 				break;
 			GetWindowTextA(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), tmp, sizeof(tmp));
-			persistence_size = atol(tmp) * MB;
+			persistence_size = strtol(tmp, NULL, 10) * MB;
 			for (i = 0; i < persistence_unit_selection; i++)
 				persistence_size *= 1024;
 			persistence_unit_selection = ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_PERSISTENCE_UNITS));
