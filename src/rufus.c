@@ -47,6 +47,7 @@
 
 #include "ui.h"
 #include "re.h"
+#include "cpu.h"
 #include "vhd.h"
 #include "wue.h"
 #include "drive.h"
@@ -3688,6 +3689,10 @@ skip_args_processing:
 			uprintf("Failed to enable AutoMount");
 	}
 
+	// Detect CPU acceleration for SHA-1/SHA-256
+	cpu_has_sha1_accel = DetectSHA1Acceleration();
+	cpu_has_sha256_accel = DetectSHA256Acceleration();
+
 relaunch:
 	ubprintf("Localization set to '%s'", selected_locale->txt[0]);
 	right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
@@ -3774,7 +3779,8 @@ relaunch:
 			SendMessage(hMainDialog, WM_COMMAND, IDC_LOG, 0);
 			continue;
 		}
-#if defined(_DEBUG) || defined(TEST)
+#if defined(_DEBUG) || defined(TEST) || defined(ALPHA)
+extern int TestChecksum(void);
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {

@@ -93,6 +93,9 @@
     <ClCompile Include="..\src\wue.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\cpu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\rufus.h">
@@ -189,6 +192,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\vhd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\cpu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

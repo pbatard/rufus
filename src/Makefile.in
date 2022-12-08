@@ -88,7 +88,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 am_rufus_OBJECTS = rufus-badblocks.$(OBJEXT) rufus-checksum.$(OBJEXT) \
-	rufus-dev.$(OBJEXT) rufus-dos.$(OBJEXT) \
+	rufus-cpu.$(OBJEXT) rufus-dev.$(OBJEXT) rufus-dos.$(OBJEXT) \
 	rufus-dos_locale.$(OBJEXT) rufus-drive.$(OBJEXT) \
 	rufus-format.$(OBJEXT) rufus-format_ext.$(OBJEXT) \
 	rufus-format_fat32.$(OBJEXT) rufus-icon.$(OBJEXT) \
@@ -281,8 +281,8 @@ AM_V_WINDRES_0 = @echo "  RC     $@";$(WINDRES)
 AM_V_WINDRES_1 = $(WINDRES)
 AM_V_WINDRES_ = $(AM_V_WINDRES_$(AM_DEFAULT_VERBOSITY))
 AM_V_WINDRES = $(AM_V_WINDRES_$(V))
-rufus_SOURCES = badblocks.c checksum.c dev.c dos.c dos_locale.c drive.c format.c format_ext.c format_fat32.c icon.c iso.c localization.c \
-	net.c parser.c pki.c process.c re.c rufus.c smart.c stdfn.c stdio.c stdlg.c syslinux.c ui.c vhd.c wue.c
+rufus_SOURCES = badblocks.c checksum.c cpu.c dev.c dos.c dos_locale.c drive.c format.c format_ext.c format_fat32.c icon.c iso.c \
+	localization.c net.c parser.c pki.c process.c re.c rufus.c smart.c stdfn.c stdio.c stdlg.c syslinux.c ui.c vhd.c wue.c
 
 rufus_CFLAGS = -I$(srcdir)/ms-sys/inc -I$(srcdir)/syslinux/libfat -I$(srcdir)/syslinux/libinstaller -I$(srcdir)/syslinux/win -I$(srcdir)/libcdio $(AM_CFLAGS) \
 	-DEXT2_FLAT_INCLUDES=0 -DSOLUTION=rufus
@@ -356,6 +356,12 @@ rufus-checksum.o: checksum.c
 
 rufus-checksum.obj: checksum.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-checksum.obj `if test -f 'checksum.c'; then $(CYGPATH_W) 'checksum.c'; else $(CYGPATH_W) '$(srcdir)/checksum.c'; fi`
+
+rufus-cpu.o: cpu.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-cpu.o `test -f 'cpu.c' || echo '$(srcdir)/'`cpu.c
+
+rufus-cpu.obj: cpu.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-cpu.obj `if test -f 'cpu.c'; then $(CYGPATH_W) 'cpu.c'; else $(CYGPATH_W) '$(srcdir)/cpu.c'; fi`
 
 rufus-dev.o: dev.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-dev.o `test -f 'dev.c' || echo '$(srcdir)/'`dev.c
