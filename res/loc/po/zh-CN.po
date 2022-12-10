@@ -2,8 +2,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2021-04-03 15:04+0800\n"
-"PO-Revision-Date: 2021-04-03 15:36+0800\n"
+"POT-Creation-Date: 2022-12-10 21:43+0800\n"
+"PO-Revision-Date: 2023-02-17 17:29+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Chinese Simplified (简体中文)\n"
 "X-Rufus-LCID: 0x0804, 0x1004\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1101,7 +1101,7 @@ msgstr "版本 %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "简体中文翻译者：佚名和就不告诉你"
+msgstr "简体中文翻译者：佚名、HRxiaohu、就不告诉你"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1653,8 +1653,12 @@ msgid "Unsupported Windows version"
 msgstr "不支持的 Windows 版本"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Rufus 已不再支持此 Windows 版本。"
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"Rufus 已不再支持此 Windows 版本。\n"
+"最后一个与此平台兼容的 Rufus 版本为 v%d.%d。"
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1719,7 +1723,7 @@ msgid "Create a disk image of the selected device"
 msgstr "创建所选设备的镜像"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
 msgstr "请选择您希望将 Windows 安装至其他驱动器，还是直接从此驱动器运行(即 Windows To Go)。"
 
 #. • MSG_306
@@ -1730,7 +1734,7 @@ msgid "Fast-zeroing drive: %s"
 msgstr "正在快速清空磁盘: %s"
 
 #. • MSG_307
-msgid "This may take a while"
+msgid "this may take a while"
 msgstr "这可能需要一段时间"
 
 #. • MSG_308
@@ -1798,3 +1802,47 @@ msgid ""
 msgstr ""
 "您选择了一个 ISOHybrid 镜像文件，但此文件与 ISO/File 复制模式不兼容。\n"
 "因此强制使用DD镜像写入模式。"
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "无法打开或读取 '%s'"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "正在应用 Windows 设置: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "正在应用用户设置..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "Windows 用户体验"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "自定义 Windows 安装"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "移除对 4GB+ 内存、安全引导和 TPM 2.0 的要求"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "移除对登录微软账户的要求"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "禁止数据收集 (跳过隐私设置)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "阻止 Windows To Go 访问内部磁盘"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "创建一个使用此用户名的本地账号:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "使用当前的区域设置"
