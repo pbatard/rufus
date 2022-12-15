@@ -45,19 +45,23 @@ jobs:
         submodules: recursive
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v1
       with:
         msbuild-architecture: x64
 
     - name: Set ALPHA
       id: set_alpha
+      shell: bash
       if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-      run: echo "::set-output name=option::/DALPHA"
+      # This ONLY works if the shell is bash or if using $env:GITHUB_OUTPUT
+      run: echo "option=/DALPHA" >> $GITHUB_OUTPUT
 
     - name: Set BETA
       id: set_beta
+      shell: bash
       if: ${{ startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'BETA') }}
-      run: echo "::set-output name=option::/DBETA"
+      # This ONLY works if the shell is bash or if using $env:GITHUB_OUTPUT
+      run: echo "option=/DBETA" >> $GITHUB_OUTPUT
 
     - name: Build
       shell: cmd

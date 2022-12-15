@@ -1447,7 +1447,7 @@ DWORD WINAPI FormatThread(void* param)
 	// Find out if we need to add any extra partitions
 	if ((windows_to_go) && (target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT))
 		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
-		// http://msdn.microsoft.com/en-us/library/windows/hardware/dn640535.aspx#gpt_faq_what_disk_require_msr
+		// https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-and-gpt-faq#disks-that-require-an-msr
 		extra_partitions = XP_ESP | XP_MSR;
 	else if ( ((fs_type == FS_NTFS) || (fs_type == FS_EXFAT)) &&
 			  ((boot_type == BT_UEFI_NTFS) || ((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) &&
