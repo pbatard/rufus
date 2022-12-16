@@ -1807,3 +1807,43 @@ msgstr "Instalação estendida do Windows 11 (sem TPM / sem Secure Boot)"
 #. • MSG_324
 msgid "Removing Windows 11 installation restrictions: %s"
 msgstr "Removendo as restrições de instalação do Windows 11: %s"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "Aplicando a personalização do Windows: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "Aplicando opções do usuário..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "Experiência do Usuário do Windows"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "Personalizar a instalação do Windows?"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "Remova a exigência de 4 GB ou mais de RAM, inicialização segura e TPM 2.0"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "Remover o requisito para uma conta online da Microsoft"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "Desative a coleta de dados (Pular as perguntas sobre privacidade)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "Impedir que o Windows To Go acesse discos internos"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "Crie uma conta local com nome de usuário:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "Defina as opções local com os mesmos valores deste usuário"
