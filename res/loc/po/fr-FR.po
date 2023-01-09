@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2022-11-22 13:30+0000\n"
-"PO-Revision-Date: 2022-11-22 13:32+0000\n"
+"POT-Creation-Date: 2023-01-09 23:02+0000\n"
+"PO-Revision-Date: 2023-01-09 23:07+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: French (Français)\n"
 "X-Rufus-LCID: 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c\n"
-"X-Generator: Poedit 3.2\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -947,8 +947,8 @@ msgid "Download using a browser"
 msgstr "Télécharger avec un navigateur"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Temporairement banni par Microsoft pour trop de téléchargements - Veuillez réessayer plus tard..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "Le téléchargement des ISOs de Windows n'est pas disponible car Microsoft a modifié son site web pour les empêcher."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -1835,3 +1835,7 @@ msgstr "Créer un compte local avec le nom :"
 #. • MSG_334
 msgid "Set regional options to the same values as this user's"
 msgstr "Définir les options régionales avec les mêmes valeurs que celles de cet utilisateur"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "Désactiver l'encryption automatique BitLocker"

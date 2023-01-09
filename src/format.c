@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
- * Copyright © 2011-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -355,7 +355,7 @@ static BOOL FormatNativeVds(DWORD DriveIndex, uint64_t PartitionOffset, DWORD Cl
 	VolumeName = GetLogicalName(DriveIndex, PartitionOffset, TRUE, TRUE);
 	wVolumeName = utf8_to_wchar(VolumeName);
 	if (wVolumeName == NULL) {
-		uprintf("Could not read volume name (%s)", VolumeName);
+		uprintf("Could not read volume name");
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_GEN_FAILURE;
 		goto out;
 	}
@@ -1721,6 +1721,8 @@ DWORD WINAPI FormatThread(void* param)
 		Flags |= FP_QUICK;
 	if ((fs_type == FS_NTFS) && (enable_ntfs_compression))
 		Flags |= FP_COMPRESSION;
+	if (write_as_esp)
+		Flags |= FP_LARGE_FAT32;
 
 	ret = FormatPartition(DriveIndex, partition_offset[PI_MAIN], ClusterSize, fs_type, label, Flags);
 	if (!ret) {

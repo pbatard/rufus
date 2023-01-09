@@ -345,7 +345,7 @@ t MSG_140 "Continue"
 t MSG_141 "Back"
 t MSG_142 "Please wait..."
 t MSG_143 "Download using a browser"
-t MSG_144 "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+t MSG_144 "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
 t MSG_145 "PowerShell 3.0 or later is required to run this script."
 t MSG_146 "Do you want to go online and download it?"
 t MSG_148 "Running download script..."
@@ -592,6 +592,7 @@ t MSG_331 "Disable data collection (Skip privacy questions)"
 t MSG_332 "Prevent Windows To Go from accessing internal disks"
 t MSG_333 "Create a local account with username:"
 t MSG_334 "Set regional options to the same values as this user's"
+t MSG_335 "Disable BitLocker automatic device encryption"
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001
@@ -4131,7 +4132,7 @@ t MSG_140 "Continuer"
 t MSG_141 "Retour"
 t MSG_142 "Veuillez patienter..."
 t MSG_143 "Télécharger avec un navigateur"
-t MSG_144 "Temporairement banni par Microsoft pour trop de téléchargements - Veuillez réessayer plus tard..."
+t MSG_144 "Le téléchargement des ISOs de Windows n'est pas disponible car Microsoft a modifié son site web pour les empêcher."
 t MSG_145 "PowerShell 3.0 ou ultérieur est nécessaire pour lancer ce script."
 t MSG_146 "Voulez-vous aller en ligne pour le télécharger ?"
 t MSG_148 "Execution du script de téléchargement..."
@@ -4315,6 +4316,7 @@ t MSG_331 "Désactiver la collecte de données (Supprime les questions de confid
 t MSG_332 "Empêcher Windows To Go d'accéder aux disques internes"
 t MSG_333 "Créer un compte local avec le nom :"
 t MSG_334 "Définir les options régionales avec les mêmes valeurs que celles de cet utilisateur"
+t MSG_335 "Désactiver l'encryption automatique BitLocker"
 
 #########################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
