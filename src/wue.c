@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Windows User Experience
- * Copyright © 2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2022-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -190,6 +190,13 @@ char* CreateUnattendXml(int arch, int flags)
 			fprintf(fd, "      <UILanguageFallback>%s</UILanguageFallback>\n",
 				// NB: Officially, this is a REG_MULTI_SZ string
 				ReadRegistryKeyStr(REGKEY_HKLM, "SYSTEM\\CurrentControlSet\\Control\\Nls\\Language\\InstallLanguageFallback"));
+			fprintf(fd, "    </component>\n");
+		}
+		if (flags & UNATTEND_DISABLE_BITLOCKER) {
+			fprintf(fd, "    <component name=\"Microsoft-Windows-SecureStartup-FilterDriver\" processorArchitecture=\"%s\" language=\"neutral\" "
+				"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
+			fprintf(fd, "      <PreventDeviceEncryption>true</PreventDeviceEncryption>\n");
 			fprintf(fd, "    </component>\n");
 		}
 		fprintf(fd, "  </settings>\n");

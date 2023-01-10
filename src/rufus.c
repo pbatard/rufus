@@ -1595,6 +1595,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
 			StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
 			MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
+			StrArrayAdd(&options, lmprintf(MSG_335), TRUE);
+			MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
 			i = CustomSelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
 				options.String, options.Index, remap8(unattend_xml_mask, map, FALSE), username_index);
 			StrArrayDestroy(&options);
