@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include <winioctl.h>
 #include <shlobj.h>
 #include <process.h>
@@ -127,7 +128,7 @@ BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fa
 BOOL usb_debug, use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
 BOOL write_as_image = FALSE, write_as_esp = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
-BOOL appstore_version = FALSE, is_vds_available = TRUE;
+BOOL appstore_version = FALSE, is_vds_available = TRUE, persistent_log = FALSE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1, imop_win_sel = 0;
 int default_fs, fs_type, boot_type, partition_type, target_type;
@@ -1019,7 +1020,7 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 					log_size--;	// remove NUL terminator
 					filepath =  FileDialog(TRUE, user_dir, &log_ext, 0);
 					if (filepath != NULL)
-						FileIO(TRUE, filepath, &log_buffer, &log_size);
+						FileIO(FILE_IO_WRITE, filepath, &log_buffer, &log_size);
 					safe_free(filepath);
 				}
 				safe_free(log_buffer);
@@ -1973,6 +1974,17 @@ static void InitDialog(HWND hDlg)
 	SetWindowTextU(hDlg, tmp);
 	// Now that we have a title, we can find the handle of our Dialog
 	dialog_handle = FindWindowA(NULL, tmp);
+	// Add a timestamp in persistent log mode
+	if (persistent_log) {
+		__time64_t ltime;
+		char timestamp[32] = "[";
+		_time64(&ltime);
+		if (_ctime64_s(&timestamp[1], sizeof(timestamp) - 2, &ltime) == 0) {
+			// Windows' _ctime64_s adds a \n at the end - replace it
+			timestamp[strlen(timestamp) - 1] = ']';
+			uprintf(timestamp);
+		}
+	}
 	uprintf(APPLICATION_NAME " " APPLICATION_ARCH " v%d.%d.%d%s%s", rufus_version[0], rufus_version[1], rufus_version[2],
 		IsAlphaOrBeta(), (ini_file != NULL)?"(Portable)": (appstore_version ? "(AppStore version)" : ""));
 	for (i = 0; i < ARRAYSIZE(resource); i++) {
@@ -2353,15 +2365,20 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				return (INT_PTR)TRUE;
 			}
 
-			// Save the current log to %LocalAppData%\Rufus\rufus.log
+			// Save or append the current log to %LocalAppData%\Rufus\rufus.log
 			log_size = GetWindowTextLengthU(hLog);
-			if ((!user_deleted_rufus_dir) && (log_size > 0) && ((log_buffer = (char*)malloc(log_size)) != NULL)) {
+			if ((!user_deleted_rufus_dir) && (log_size > 0) && ((log_buffer = (char*)malloc(log_size + 2)) != NULL)) {
 				log_size = GetDlgItemTextU(hLogDialog, IDC_LOG_EDIT, log_buffer, log_size);
 				if (log_size-- > 1) {
+					if (persistent_log) {
+						// Add an extra line for persistent logs
+						log_buffer[log_size - 1] = '\r';
+						log_buffer[log_size] = '\n';
+					}
 					IGNORE_RETVAL(_chdirU(app_data_dir));
 					IGNORE_RETVAL(_mkdir(FILES_DIR));
 					IGNORE_RETVAL(_chdir(FILES_DIR));
-					FileIO(TRUE, "rufus.log", &log_buffer, &log_size);
+					FileIO(persistent_log ? FILE_IO_APPEND : FILE_IO_WRITE, "rufus.log", &log_buffer, &log_size);
 				}
 				safe_free(log_buffer);
 			}
@@ -3554,6 +3571,7 @@ skip_args_processing:
 	enable_VHDs = !ReadSettingBool(SETTING_DISABLE_VHDS);
 	enable_extra_hashes = ReadSettingBool(SETTING_ENABLE_EXTRA_HASHES);
 	ignore_boot_marker = ReadSettingBool(SETTING_IGNORE_BOOT_MARKER);
+	persistent_log = ReadSettingBool(SETTING_PERSISTENT_LOG);
 	// This restores the Windows User Experience/unattend.xml mask from the saved user
 	// settings, and is designed to work even if we add new options later.
 	wue_options = ReadSetting32(SETTING_WUE_OPTIONS);
@@ -3790,6 +3808,14 @@ extern int TestChecksum(void);
 			continue;
 		}
 #endif
+		// Ctrl-P => Persistent log
+		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
+			&& (msg.wParam == 'P')) {
+			persistent_log = !persistent_log;
+			WriteSettingBool(SETTING_PERSISTENT_LOG, persistent_log);
+			PrintStatusTimeout(lmprintf(MSG_336), persistent_log);
+			continue;
+		}
 
 		if (no_focus && (msg.wParam != VK_CONTROL))
 			ctrl_without_focus = FALSE;

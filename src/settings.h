@@ -51,6 +51,7 @@ extern char* ini_file;
 #define SETTING_USE_PROPER_SIZE_UNITS       "UseProperSizeUnits"
 #define SETTING_USE_UDF_VERSION             "UseUdfVersion"
 #define SETTING_USE_VDS                     "UseVds"
+#define SETTING_PERSISTENT_LOG              "PersistentLog"
 #define SETTING_PRESERVE_TIMESTAMPS         "PreserveTimestamps"
 #define SETTING_VERBOSE_UPDATES             "VerboseUpdateCheck"
 #define SETTING_WUE_OPTIONS                 "WindowsUserExperienceOptions"

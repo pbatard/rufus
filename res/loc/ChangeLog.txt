@@ -21,6 +21,7 @@ o v3.22 (2023.??.??)
   - *NEW*      MSG_333 "Create a local account with username:"
   - *NEW*      MSG_334 "Set regional options to the same values as this user's"
   - *NEW*      MSG_335 "Disable BitLocker automatic device encryption"
+  - *NEW*      MSG_336 "Persistent log"
 
 o v3.14 (2021.03.31)
   - *UPDATED*  MSG_068 "Error while partitioning drive." -> "Could not partition drive."

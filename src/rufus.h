@@ -312,6 +312,12 @@ enum checksum_type {
 	CHECKSUM_MAX
 };
 
+enum file_io_type {
+	FILE_IO_READ = 0,
+	FILE_IO_WRITE,
+	FILE_IO_APPEND
+};
+
 /* Special handling for old .c32 files we need to replace */
 #define NB_OLD_C32          2
 #define OLD_C32_NAMES       { "menu.c32", "vesamenu.c32" }
@@ -460,7 +466,7 @@ typedef struct ext_t {
 	EXT_D(var, descriptions);                                               \
 	ext_t var = { ARRAYSIZE(_##var##_x), filename, _##var##_x, _##var##_d }
 
-/* Duplication of the TBPFLAG enum for Windows 7 taskbar progress */
+/* Duplication of the TBPFLAG enum for Windows taskbar progress */
 typedef enum TASKBAR_PROGRESS_FLAGS
 {
 	TASKBAR_NOPROGRESS = 0,
@@ -601,7 +607,7 @@ extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs);
 extern uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext);
 extern BOOL SetAutorun(const char* path);
 extern char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options);
-extern BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size);
+extern BOOL FileIO(enum file_io_type io_type, char* path, char** buffer, DWORD* size);
 extern unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate);
 extern DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc);
 extern DWORD RunCommand(const char* cmdline, const char* dir, BOOL log);

@@ -593,6 +593,7 @@ t MSG_332 "Prevent Windows To Go from accessing internal disks"
 t MSG_333 "Create a local account with username:"
 t MSG_334 "Set regional options to the same values as this user's"
 t MSG_335 "Disable BitLocker automatic device encryption"
+t MSG_336 "Persistent log"
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001

@@ -585,17 +585,15 @@ static PSID GetSID(void) {
 	return ret;
 }
 
-/*
- * read or write I/O to a file
- * buffer is allocated by the procedure. path is UTF-8
- */
-BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
+BOOL FileIO(enum file_io_type io_type, char* path, char** buffer, DWORD* size)
 {
 	SECURITY_ATTRIBUTES s_attr, *sa = NULL;
 	SECURITY_DESCRIPTOR s_desc;
+	const LARGE_INTEGER liZero = { .QuadPart = 0ULL };
 	PSID sid = NULL;
 	HANDLE handle;
-	BOOL r;
+	DWORD dwDesiredAccess = 0, dwCreationDisposition = 0;
+	BOOL r = FALSE;
 	BOOL ret = FALSE;
 
 	// Change the owner from admin to regular user
@@ -611,20 +609,34 @@ BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
 		uprintf("Could not set security descriptor: %s\n", WindowsErrorString());
 	}
 
-	if (!save) {
+	switch (io_type) {
+	case FILE_IO_READ:
 		*buffer = NULL;
+		dwDesiredAccess = GENERIC_READ;
+		dwCreationDisposition = OPEN_EXISTING;
+		break;
+	case FILE_IO_WRITE:
+		dwDesiredAccess = GENERIC_WRITE;
+		dwCreationDisposition = CREATE_ALWAYS;
+		break;
+	case FILE_IO_APPEND:
+		dwDesiredAccess = FILE_APPEND_DATA;
+		dwCreationDisposition = OPEN_ALWAYS;
+		break;
+	default:
+		assert(FALSE);
+		break;
 	}
-	handle = CreateFileU(path, save?GENERIC_WRITE:GENERIC_READ, FILE_SHARE_READ,
-		sa, save?CREATE_ALWAYS:OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	handle = CreateFileU(path, dwDesiredAccess, FILE_SHARE_READ, sa,
+		dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	if (handle == INVALID_HANDLE_VALUE) {
-		uprintf("Could not %s file '%s'\n", save?"create":"open", path);
+		uprintf("Could not open '%s': %s", path, WindowsErrorString());
 		goto out;
 	}
 
-	if (save) {
-		r = WriteFile(handle, *buffer, *size, size, NULL);
-	} else {
+	switch (io_type) {
+	case FILE_IO_READ:
 		*size = GetFileSize(handle, NULL);
 		*buffer = (char*)malloc(*size);
 		if (*buffer == NULL) {
@@ -632,24 +644,29 @@ BOOL FileIO(BOOL save, char* path, char** buffer, DWORD* size)
 			goto out;
 		}
 		r = ReadFile(handle, *buffer, *size, size, NULL);
+		break;
+	case FILE_IO_APPEND:
+		SetFilePointerEx(handle, liZero, NULL, FILE_END);
+		// Fall through
+	case FILE_IO_WRITE:
+		r = WriteFile(handle, *buffer, *size, size, NULL);
+		break;
 	}
 
 	if (!r) {
-		uprintf("I/O Error: %s\n", WindowsErrorString());
+		uprintf("I/O Error: %s", WindowsErrorString());
 		goto out;
 	}
 
-	PrintInfoDebug(0, save?MSG_216:MSG_215, path);
+	PrintInfoDebug(0, (io_type == FILE_IO_READ) ? MSG_215 : MSG_216, path);
 	ret = TRUE;
 
 out:
 	CloseHandle(handle);
-	if (!ret) {
-		// Only leave a buffer allocated if successful
+	if (!ret && (io_type == FILE_IO_READ)) {
+		// Only leave the buffer allocated if we were able to read data
+		safe_free(*buffer);
 		*size = 0;
-		if (!save) {
-			safe_free(*buffer);
-		}
 	}
 	return ret;
 }
