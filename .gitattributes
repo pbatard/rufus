@@ -17,5 +17,6 @@ install-sh      eol=lf
 *.cmd           export-ignore
 .gitattributes  export-ignore
 .gitignore      export-ignore
+.github         export-ignore
 *.creole        export-ignore
 
