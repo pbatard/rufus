@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device detection and enumeration
- * Copyright © 2014-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -419,8 +419,8 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
 #define FORCED_VID 0x048D
-#define FORCED_PID 0x1234
-#define FORCED_NAME "VendorCo Disk USB Device"
+#define FORCED_PID 0x4030
+#define FORCED_NAME "HP iLO Internal SD-CARD USB Device"
 #endif
 
 void ClearDrives(void)

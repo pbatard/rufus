@@ -109,7 +109,7 @@
 #define RSA_SIGNATURE_SIZE          256
 #define CBN_SELCHANGE_INTERNAL      (CBN_SELCHANGE + 256)
 #if defined(RUFUS_TEST)
-#define RUFUS_URL                   "http://nano/~rufus"
+#define RUFUS_URL                   "http://nas/~rufus"
 #else
 #define RUFUS_URL                   "https://rufus.ie"
 #endif

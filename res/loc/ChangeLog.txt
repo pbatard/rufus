@@ -8,6 +8,7 @@ Or simply download https://files.akeo.ie/pollock/pollock-1.4.exe and follow its 
 o v3.22 (2023.??.??)
   // MSG_294 can be tested by launching Rufus from the commandline with option -z61
   - *UPDATED*  MSG_144 "Temporarily banned by Microsoft for requesting too many downloads (...)" -> "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+  - *NEW*      MSG_199 "This feature is not available for this version of Windows."
   - *UPDATED*  MSG_294 "This version of Windows is no longer supported by Rufus." -> added "\nThe last version of Rufus compatible with this platform is v%d.%d."
   - *NEW*      MSG_323 "Unable to open or read '%s'"
   - *NEW*      MSG_325 "Applying Windows customization: %s"

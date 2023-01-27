@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * SMART HDD vs Flash detection - isHDD() tables
- * Copyright © 2013-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2023 Pete Batard <pete@akeo.ie>
  *
  * Based in part on drivedb.h from Smartmontools:
  * http://svn.code.sf.net/p/smartmontools/code/trunk/smartmontools/drivedb.h
@@ -90,6 +90,7 @@ static str_score_t str_score[] = {
 static str_score_t str_adjust[] = {
 	{ "Gadget", -10 },
 	{ "Flash", -10 },
+	{ "SD-CARD", -10 },
 	{ "HDD", +20 },
 	{ "SSD", +20 }
 };

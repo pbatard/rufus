@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright © 2012-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -982,11 +982,11 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	safe_closehandle(hFile);
 #endif
 	static_sprintf(powershell_path, "%s\\WindowsPowerShell\\v1.0\\powershell.exe", system_dir);
-	static_sprintf(locale_str, "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s",
+	static_sprintf(locale_str, "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s",
 		selected_locale->txt[0], lmprintf(MSG_135), lmprintf(MSG_136), lmprintf(MSG_137),
 		lmprintf(MSG_138), lmprintf(MSG_139), lmprintf(MSG_040), lmprintf(MSG_140), lmprintf(MSG_141),
 		lmprintf(MSG_006), lmprintf(MSG_007), lmprintf(MSG_042), lmprintf(MSG_142), lmprintf(MSG_143),
-		lmprintf(MSG_144), lmprintf(MSG_145), lmprintf(MSG_146));
+		lmprintf(MSG_144), lmprintf(MSG_145), lmprintf(MSG_146), lmprintf(MSG_199));
 
 	hPipe = CreateNamedPipeA(pipe, PIPE_ACCESS_INBOUND,
 		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES,
@@ -1000,6 +1000,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		"-File \"%s\" -PipeName %s -LocData \"%s\" -Icon \"%s\" -AppTitle \"%s\"",
 		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_149));
 
+#ifndef RUFUS_TEST
 	// For extra security, even after we validated that the LZMA download is properly
 	// signed, we also validate the Authenticode signature of the local script.
 	if (ValidateSignature(INVALID_HANDLE_VALUE, script_path) != NO_ERROR) {
@@ -1010,6 +1011,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		goto out;
 	}
 	uprintf("Script signature is valid ✓");
+#endif
 
 	dwExitCode = RunCommand(cmdline, app_data_dir, TRUE);
 	uprintf("Exited download script with code: %d", dwExitCode);

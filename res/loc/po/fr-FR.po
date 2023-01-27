@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-01-09 23:02+0000\n"
-"PO-Revision-Date: 2023-01-09 23:07+0000\n"
+"POT-Creation-Date: 2023-01-27 12:23+0000\n"
+"PO-Revision-Date: 2023-01-27 12:29+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -1199,6 +1199,10 @@ msgstr "Taille de secteur non standard détectée"
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "'Windows To Go' peut seulement être installé sur un disque partitionné au format GPT si il a l'attribut FIXE.Le disque sélectionné na pas été détecté comme FIXE."
 
+#. • MSG_199
+msgid "This feature is not available for this version of Windows."
+msgstr "Cette fonctionalité n'est pas disponible avec cette version de Windows."
+
 #. • MSG_201
 msgid "Cancelling - Please wait..."
 msgstr "Annulation - Veuillez patienter..."
@@ -1839,3 +1843,7 @@ msgstr "Définir les options régionales avec les mêmes valeurs que celles de c
 #. • MSG_335
 msgid "Disable BitLocker automatic device encryption"
 msgstr "Désactiver l'encryption automatique BitLocker"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr ""

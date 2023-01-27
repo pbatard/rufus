@@ -1626,6 +1626,7 @@ void SetFidoCheck(void)
 	// - Powershell being installed
 	// - Rufus running in AppStore mode or update check being enabled
 	// - URL for the script being reachable
+	// - Windows version being Windows 8.0 or later
 	if ((ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\PowerShell\\1\\Install") <= 0) &&
 		(ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\PowerShell\\3\\Install") <= 0)) {
 		ubprintf("Notice: The ISO download feature has been deactivated because "
@@ -1636,6 +1637,12 @@ void SetFidoCheck(void)
 	if (!appstore_version && (ReadSetting32(SETTING_UPDATE_INTERVAL) <= 0)) {
 		ubprintf("Notice: The ISO download feature has been deactivated because "
 			"'Check for updates' is disabled in your settings.");
+		return;
+	}
+
+	if (nWindowsVersion < WINDOWS_8) {
+		ubprintf("Notice: The ISO download feature has been deactivated because "
+			"your version of Windows is too old.");
 		return;
 	}
 

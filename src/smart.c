@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * SMART HDD vs Flash detection (using ATA over USB, S.M.A.R.T., etc.)
- * Copyright © 2013-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2023 Pete Batard <pete@akeo.ie>
  *
  * Based in part on scsiata.cpp from Smartmontools: http://smartmontools.sourceforge.net
  * Copyright © 2006-2012 Douglas Gilbert <dgilbert@interlog.com>
@@ -459,7 +459,7 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 	// Check the string against well known HDD identifiers
 	if (strid != NULL) {
 		ilen = strlen(strid);
-		for (i=0; i<ARRAYSIZE(str_score); i++) {
+		for (i = 0; i < ARRAYSIZE(str_score); i++) {
 			mlen = strlen(str_score[i].name);
 			if (mlen > ilen)
 				break;
@@ -474,13 +474,13 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 
 	// Adjust for oddball devices
 	if (strid != NULL) {
-		for (i=0; i<ARRAYSIZE(str_adjust); i++)
-			if (strstr(strid, str_adjust[i].name) != NULL)
+		for (i = 0; i < ARRAYSIZE(str_adjust); i++)
+			if (StrStrIA(strid, str_adjust[i].name) != NULL)
 				score += str_adjust[i].score;
 	}
 
 	// Check against known VIDs
-	for (i=0; i<ARRAYSIZE(vid_score); i++) {
+	for (i = 0; i < ARRAYSIZE(vid_score); i++) {
 		if (vid == vid_score[i].vid) {
 			score += vid_score[i].score;
 			break;
@@ -488,7 +488,7 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 	}
 
 	// Check against known VID:PIDs
-	for (i=0; i<ARRAYSIZE(vidpid_score); i++) {
+	for (i = 0; i < ARRAYSIZE(vidpid_score); i++) {
 		if ((vid == vidpid_score[i].vid) && (pid == vidpid_score[i].pid)) {
 			score += vidpid_score[i].score;
 			break;
