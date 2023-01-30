@@ -67,8 +67,9 @@ jobs:
       shell: cmd
       run: |
         set ExternalCompilerOptions=${{ steps.set_alpha.outputs.option }} ${{ steps.set_beta.outputs.option }}
-        msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ matrix.TARGET_PLATFORM }}
+        msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ matrix.TARGET_PLATFORM }},ForceImportBeforeCppTargets=%GITHUB_WORKSPACE%\.vs\Generate.PDB.props
         move .\${{ matrix.TARGET_PLATFORM }}\Release\rufus.exe .\rufus_${{ matrix.TARGET_PLATFORM }}.exe
+        move .\${{ matrix.TARGET_PLATFORM }}\Release\rufus.pdb .\rufus_${{ matrix.TARGET_PLATFORM }}.pdb
 
     - name: Display SHA-256
       run: sha256sum ./rufus_${{ matrix.TARGET_PLATFORM }}.exe
@@ -85,4 +86,6 @@ jobs:
       if: ${{ github.event_name == 'push' }}
       with:
         name: VS2022
-        path: ./*.exe
+        path: |
+          ./*.exe
+          ./*.pdb
