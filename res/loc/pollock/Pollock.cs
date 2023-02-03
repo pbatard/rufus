@@ -1,7 +1,7 @@
 ﻿/*
  * Rufus: The Reliable USB Formatting Utility
  * Poedit <-> rufus.loc conversion utility
- * Copyright © 2018-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2018-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,9 +41,9 @@ using System.Windows.Forms;
 [assembly: AssemblyDescription("Poedit ↔ Rufus loc conversion utility")]
 [assembly: AssemblyCompany("Akeo Consulting")]
 [assembly: AssemblyProduct("Pollock")]
-[assembly: AssemblyCopyright("Copyright © 2018-2022 Pete Batard <pete@akeo.ie>")]
+[assembly: AssemblyCopyright("Copyright © 2018-2023 Pete Batard <pete@akeo.ie>")]
 [assembly: AssemblyTrademark("GNU GPLv3")]
-[assembly: AssemblyVersion("1.4.*")]
+[assembly: AssemblyVersion("1.5.*")]
 
 namespace pollock
 {
@@ -426,6 +426,9 @@ namespace pollock
                         if ((old_en_US != null) && (added_ids.Contains(id) || modified_ids.Contains(id)))
                             writer.WriteLine("#, fuzzy");
                         string msg_str = lang.sections[id.group].Where(x => x.id == id.id).Select(x => x.str).FirstOrDefault();
+                        // Special case for MSG_176, which we need to replace
+                        if (id.group == "MSG" && id.id == "MSG_176")
+                            en_str = "\"English translation: Pete Batard <mailto:pete@akeo.ie>\"";
                         // Special case for MSG_240, which we missed in the last round
                         if (id.group == "MSG" && id.id == "MSG_240" && msg_str == null)
                             writer.WriteLine("#, fuzzy");

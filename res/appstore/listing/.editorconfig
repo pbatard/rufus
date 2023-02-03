@@ -1,0 +1,8 @@
+# indicate this is the root of the project
+root = true
+
+[*]
+charset = utf-8-bom
+insert_final_newline = true
+indent_style = space
+trim_trailing_whitespace = true

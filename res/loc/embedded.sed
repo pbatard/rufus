@@ -14,8 +14,8 @@ s/[ \t]*$//
 # 1,300 means we only do this for the the first 300 lines
 1,300 {/^g IDD_DIALOG/,/^t MSG_001/{/^t MSG_001/!d}}
 
-# also replace the "translated by" line for English
-1,500{s/^t MSG_176.*$/t MSG_176 \"mailto:pete@akeo.ie\"/}
+# remove the Windows AppStore specific messages
+/MSG_9/d
 
 # output file *MUST* be CR/LF
 s/$/\r/

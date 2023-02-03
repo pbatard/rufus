@@ -6,9 +6,9 @@ https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translati
 Or simply download https://files.akeo.ie/pollock/pollock-1.4.exe and follow its directions.
 
 o v3.22 (2023.??.??)
-  // MSG_294 can be tested by launching Rufus from the commandline with option -z61
   - *UPDATED*  MSG_144 "Temporarily banned by Microsoft for requesting too many downloads (...)" -> "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
   - *NEW*      MSG_199 "This feature is not available for this version of Windows."
+  // MSG_294 can be tested by launching Rufus from the commandline with option -z61
   - *UPDATED*  MSG_294 "This version of Windows is no longer supported by Rufus." -> added "\nThe last version of Rufus compatible with this platform is v%d.%d."
   - *NEW*      MSG_323 "Unable to open or read '%s'"
   - *NEW*      MSG_325 "Applying Windows customization: %s"
@@ -22,7 +22,30 @@ o v3.22 (2023.??.??)
   - *NEW*      MSG_333 "Create a local account with username:"
   - *NEW*      MSG_334 "Set regional options to the same values as this user's"
   - *NEW*      MSG_335 "Disable BitLocker automatic device encryption"
+  // MSG_336 can be tested with <Ctrl>-<P>
   - *NEW*      MSG_336 "Persistent log"
+  // The following messages are used for the Windows Store listing at https://apps.microsoft.com/store/detail/rufus/9PC3H3V7Q9CH
+  - *NEW*      MSG_900 "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+  - *NEW*      MSG_901 "Official site: %s"
+  - *NEW*      MSG_902 "Source Code: %s"
+  - *NEW*      MSG_903 "ChangeLog: %s"
+  // The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+  // Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it below.
+  - *NEW*      MSG_904 "This application is licensed under the terms of the GNU Public License (GPL) version 3.\nSee https://www.gnu.org/licenses/gpl-3.0.en.html for details"
+  // This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+  - *NEW*      MSG_910 "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+  - *NEW*      MSG_911 "Create FreeDOS bootable USB drives"
+  - *NEW*      MSG_912 "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+  - *NEW*      MSG_913 "Create bootable drives from bootable disk images, including compressed ones"
+  - *NEW*      MSG_914 "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+  - *NEW*      MSG_915 "Create 'Windows To Go' drives"
+  - *NEW*      MSG_916 "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+  - *NEW*      MSG_917 "Create persistent Linux partitions"
+  - *NEW*      MSG_918 "Create a VHD/DD image of a drive"
+  - *NEW*      MSG_919 "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+  - *NEW*      MSG_920 "Perform bad blocks checks, including detection of \"fake\" flash drives"
+  - *NEW*      MSG_921 "Download official Microsoft Windows retail ISOs"
+  - *NEW*      MSG_922 "Download UEFI Shell ISOs"
 
 o v3.14 (2021.03.31)
   - *UPDATED*  MSG_068 "Error while partitioning drive." -> "Could not partition drive."

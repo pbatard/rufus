@@ -383,7 +383,7 @@ t MSG_172 "Invalid download signature"
 t MSG_173 "Click to select..."
 t MSG_174 "Rufus - The Reliable USB Formatting Utility"
 t MSG_175 "Version %d.%d (Build %d)"
-t MSG_176 "English translation: Pete Batard <mailto:pete@akeo.ie>"
+t MSG_176 "mailto:support@akeo.ie"
 t MSG_177 "Report bugs or request enhancements at:"
 t MSG_178 "Additional Copyrights:"
 t MSG_179 "Update Policy:"
@@ -593,6 +593,28 @@ t MSG_333 "Create a local account with username:"
 t MSG_334 "Set regional options to the same values as this user's"
 t MSG_335 "Disable BitLocker automatic device encryption"
 t MSG_336 "Persistent log"
+# The following messages are for the Windows Store listing only and are not used by the application
+t MSG_900 "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."   
+t MSG_901 "Official site: %s"
+t MSG_902 "Source Code: %s"
+t MSG_903 "ChangeLog: %s"
+# The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+# Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+t MSG_904 "This application is licensed under the terms of the GNU Public License (GPL) version 3.\nSee https://www.gnu.org/licenses/gpl-3.0.en.html for details"
+# This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+t MSG_910 "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+t MSG_911 "Create FreeDOS bootable USB drives"
+t MSG_912 "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+t MSG_913 "Create bootable drives from bootable disk images, including compressed ones"
+t MSG_914 "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+t MSG_915 "Create 'Windows To Go' drives"
+t MSG_916 "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+t MSG_917 "Create persistent Linux partitions"
+t MSG_918 "Create a VHD/DD image of a drive"
+t MSG_919 "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+t MSG_920 "Perform bad blocks checks, including detection of \"fake\" flash drives"
+t MSG_921 "Download official Microsoft Windows retail ISOs"
+t MSG_922 "Download UEFI Shell ISOs"
 
 #########################################################################
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001
@@ -960,6 +982,7 @@ t MSG_304 "قم بإنشاء صورة قرص للجهاز المحدد"
 t MSG_305 "إستخدام هذا الخيار لبيان م إذا كنت تريد إستخدام هذا الجهاز لتنصيب Windows على قرص آخر, أو اذا كنت تريد إقلاع Windows بشكل مباشر من هذا الجهاز (Windows To Go)."
 t MSG_306 "التصفير السريع للقرص: %s"
 t MSG_307 "قد يستغرق بعض الوقت"
+t MSG_900 "برنامج Rufus هو أداة تساعد في تنسيق وإنشاء أقراص الإقلاع عن طريق USB، مثل مفاتيح USB، بطاقات الذاكرة، وغيرها."
 
 ######################################################################
 l "bg-BG" "Bulgarian (Български)" 0x0402
@@ -1330,6 +1353,7 @@ t MSG_304 "Създай дисков образ на избраното устр
 t MSG_305 "Използвайте тази опция, за да покажете дали искате да използвате това устройство, за да инсталирате Windows на друг диск, или за да стартирате Windows директно от това устройство (Windows To Go)."
 t MSG_306 "Бързо нулиране на устройството: %s"
 t MSG_307 "Това може да отнеме време"
+t MSG_900 "Rufus е програма, с чиято помощ лесно можете да форматирате и създавате зареждащи USB Keys/Pendrives дискове, карти с памет и др."
 
 #########################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004
@@ -1707,6 +1731,7 @@ t MSG_318 "默认线程优先级: %d"
 t MSG_319 "忽视启动标记(Boot Marker)"
 t MSG_320 "刷新分区布局 (%s)..."
 t MSG_321 "您选择了一个 ISOHybrid 镜像文件，但此文件与 ISO/File 复制模式不兼容。\n因此强制使用DD镜像写入模式。"
+t MSG_900 "Rufus 是一个帮助格式化和创建可启动USB闪存驱动器的工具，如USB钥匙/软盘、记忆棒等。"
 
 #########################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
@@ -2085,6 +2110,7 @@ t MSG_319 "忽略 Boot Marker"
 t MSG_320 "正在重新整理磁區分割 (%s)..."
 t MSG_321 "你選擇的映像檔是 ISOHybrid，但是檔案作者沒有使之與 ISO/檔案複製模式相容。\n因此強制使用 DD 映像寫入模式。"
 t MSG_322 "無法開啟或讀取 '%s'"
+t MSG_900 "Rufus 是個能格式化並製作可開機 USB 快閃磁碟機（USB 隨身碟、Memory Stick 等等）的工具。"
 
 #########################################################################
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
@@ -2462,6 +2488,7 @@ t MSG_318 "Prioritet glavne niti %d"
 t MSG_319 "Zanemari Boot Marker"
 t MSG_320 "Osvježavam raspored particija (%s)..."
 t MSG_321 "Slika koju ste odabrali je \"ISOHybrid\", ali nije kompatibilna s \"ISO/File\" mod kopiranja.\nZbog toga će DD mod zapisivanja slike biti korišten."
+t MSG_900 "Rufus je aplikacija koja olakšava formatiranje i stvaranje USB pokretačkih jedinica."
 
 #########################################################################
 l "cs-CZ" "Czech (Čeština)" 0x0405
@@ -2821,6 +2848,7 @@ t MSG_304 "Vytvořit obraz disku vybraného zařízení"
 t MSG_305 "Touto volbou označte, zda chcete toto zařízení používat k instalaci Windows na jiný disk, nebo pokud chcete spustit systém Windows přímo z této jednotky (Windows To Go)."
 t MSG_306 "Rychlé-přepsání jednotky: %s"
 t MSG_307 "může chvíli trvat"
+t MSG_900 "Nástroj Rufus nabízí snadnou tvorbu a formátování bootovacích USB disků: USB klíčenek, paměťových karet,..."
 
 #########################################################################
 l "da-DK" "Danish (Dansk)" 0x0406
@@ -3185,6 +3213,7 @@ t MSG_318 "Standard trådpriorietet: %d"
 t MSG_319 "Ignorer boot markering"
 t MSG_320 "Genindlæser partition layout (%s)"
 t MSG_321 "Det valgte billede er et ISOHybrid, men dets skabere har ikke gjort det kompatibelt med ISO / Fil kopi måde.\nDerfor bruges DD-billedskrivningstilstand."
+t MSG_900 "Rufus er et værktøj, der hjælper med at formatere og skabe startbare USB-flashdrev, såsom USB-nøgler/USB-pinde, USB-stik, osv."
 
 #########################################################################
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
@@ -3557,6 +3586,7 @@ t MSG_318 "Standaard thread-prioriteit: %d"
 t MSG_319 "Opstartmarkering negeren"
 t MSG_320 "Partitie-layout verversen (%s)..."
 t MSG_321 "De image die u hebt geselecteerd is een ISOHybrid, maar de makers ervan hebben hem niet compatibel gemaakt met de ISO/bestandskopieermodus.\nAls gevolg daarvan zal de DD-image schrijfmodus worden afgedwongen."
+t MSG_900 "Rufus is een programma dat helpt bij het formatteren en aanmaken van opstartbare USB-flash-drives, zoals USB-sticks, USB-hd's,..."
 
 #########################################################################
 l "fi-FI" "Finnish (Suomi)" 0x040B
@@ -3933,6 +3963,7 @@ t MSG_318 "Säikeiden vakioprioriteetti: %d"
 t MSG_319 "Sivuuta Boot Marker"
 t MSG_320 "Päivitetään osioiden sijoittelua (%s)..."
 t MSG_321 "Valitsemasi levykuva on ISOHybrid-muotoinen, mutta sen tekijät eivät ole tehneet siitä yhteensopivaa ISO/tiedostotyyppisen kopiointitilan kanssa.\nTämän vuoksi käyttöön otetaan DD-kuvan kirjoitustila."
+t MSG_900 "Rufus on ohjelma, joka auttaa alustamaan ja luomaan boottaavia USB-laitteita, kuten esimerkiksi USB-avaimia, muistitikkuja jne."
 
 #########################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
@@ -4161,6 +4192,7 @@ t MSG_170 "Liste les disques durs externes USB. UTILISEZ A VOS PROPRES RISQUES !
 t MSG_171 "Lance le formatage. Cette opération DETRUIT toutes les données sur le périphérique sélectionné !"
 t MSG_172 "Signature de téléchargement invalide"
 t MSG_173 "Cliquez pour sélectionner..."
+t MSG_174 "Rufus - L'utilitaire de formatage USB fiable"
 t MSG_176 "Traduction Française : Pete Batard <mailto:pete@akeo.ie>"
 t MSG_177 "Soumettre un bug ou une demande d'amélioration à :"
 t MSG_178 "Copyrights supplémentaires :"
@@ -4318,6 +4350,8 @@ t MSG_332 "Empêcher Windows To Go d'accéder aux disques internes"
 t MSG_333 "Créer un compte local avec le nom :"
 t MSG_334 "Définir les options régionales avec les mêmes valeurs que celles de cet utilisateur"
 t MSG_335 "Désactiver l'encryption automatique BitLocker"
+t MSG_336 "Log persistent"
+t MSG_900 "Rufus est un utilitaire permettant de formater et de créer des média USB amorçables, tels que clés USB, mémoire flash, etc."
 
 #########################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
@@ -4681,6 +4715,7 @@ t MSG_318 "Standardmäßige Thread-Priorität: %d"
 t MSG_319 "Boot-Markierung ignorieren"
 t MSG_320 "Liste der Partitionen aktualisieren (%s)..."
 t MSG_321 "Das ausgewählte Abbild ist vom Typ ISOHybrid, aber der Ersteller hat es nicht mit dem ISO/Datei Kopier-Modus kompatibel gemacht.\nDeswegen wird der DD-Schreibmodus verwendet."
+t MSG_900 "Rufus ist ein Werkzeug, welches dabei hilft, bootfähige USB-Laufwerke zu erstellen, wie beispielweise USB-Keys, Speichersticks usw."
 
 #########################################################################
 l "el-GR" "Greek (Ελληνικά)" 0x0408
@@ -5039,6 +5074,7 @@ t MSG_304 "Δημιουργία ειδώλου δίσκου από την επι
 t MSG_305 "Επιλέξτε αυτό αν θέλετε να χρησιμοποιήσετε αυτή τη συσκευή για να εγκαταστήσετε τα Windows σε κάποιο δίσκο, ή θέλετε να τα τρέχετε κατευθείαν από την συσκευή (Windows To Go)."
 t MSG_306 "Γρήγορος μηδενισμός μονάδας δίσκου: %s"
 t MSG_307 "η διαδικασία ίσως διαρκέσει αρκετά"
+t MSG_900 "Το Rufus είναι ένα πρόγραμμα που σας βοηθά με τη διαμόρφωση και τη δημιουργία USB με δυνατότητα εκκίνησης, όπως USB keys /pendrives, κάρτες μνήμης, κτλ."
 
 #########################################################################
 l "he-IL" "Hebrew (עברית)" 0x040d
@@ -5427,6 +5463,7 @@ t MSG_318 "עדיפות תהליכון ברירת מחדל: %d"
 t MSG_319 "מצב התעלמות מסמן האתחול (Boot Marker)"
 t MSG_320 "מרענן את מבנה המחיצות (%s)..."
 t MSG_321 "קובץ התמונה שבחרת הוא מסוג ISOHybrid, אבל היוצרים שלו לא תכננו אותו בצורה שיהיה נתמך במצב העתקת קבצים מ־ISO.\nכתוצאה מכך, ייאכף שימוש במצב כתיבה כקובץ תמונה DD."
+t MSG_900 "Rufus הוא כלי המסייע באתחול ויצירת כונני הבזק מסוג USB הניתנים לאתחול, כמו "דיסק און קי, כרטיסי זיכרון וכו׳."
 
 #########################################################################v
 l "hu-HU" "Hungarian (Magyar)" 0x040e
@@ -5805,6 +5842,7 @@ t MSG_319 "Boot Marker figyelmen kívül hagyása"
 t MSG_320 "Partíció elrendezés frissítése (%s)..."
 t MSG_321 "A kiválasztott képfájl egy ISOHybrid képfájl, de a készítői nem tették kompatibilissé az ISO (fájlmásolás) móddal.\nEmiatt a DD képfájl írási mód lesz kényszerítve."
 t MSG_322 "Nem lehet megnyitni vagy olvasni ezt: '%s'"
+t MSG_900 "A Rufus egy segédprogram, amellyel indítható USB flash meghajtókat formázhat és készíthet, például USB kulcsokat/pendrive-okat, memóriakártyákat, stb."
 
 #########################################################################
 l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
@@ -6173,6 +6211,7 @@ t MSG_318 "Prioritas utas default: %d"
 t MSG_319 "Abaikan Penanda Boot"
 t MSG_320 "Menyegarkan tata letak partisi (%s)..."
 t MSG_321 "Gambar yang Anda pilih adalah ISOHybrid, tetapi pembuatnya belum membuatnya kompatibel dengan mode salin ISO/Berkas.\nAkibatnya, mode penulisan DD image akan diberlakukan."
+t MSG_900 "Rufus adalah alat yang membantu untuk memformat dan membuat perangkat USB flash menjadi bootable, seperti flashdisk, kartu memori, dll."
 
 #########################################################################
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
@@ -6541,6 +6580,7 @@ t MSG_318 "Priorità predefinita thread: %s"
 t MSG_319 "Ignora marcatore boot"
 t MSG_320 "Aggiornamento layout partizione (%s)..."
 t MSG_321 "L'immagine selezionata è una ISO ibrida, ma i suoi creatori non l'hanno resa compatibile con la modalità di copia ISO/file.\nDi conseguenza, verrà applicata la modalità di scrittura delle immagini DD."
+t MSG_900 "Rufus è un programma che ti aiuta a formattare e creare una unità flash USB avviabile, come una chiavetta/penna/unità USB, memory stick, ecc."
 
 ######################################################################
 l "ja-JP" "Japanese (日本語)" 0x0411
@@ -6917,6 +6957,7 @@ t MSG_318 "スレッドの優先度: %d"
 t MSG_319 "Boot Maker を無視"
 t MSG_320 "パーティション レイアウトを更新中 (%s)"
 t MSG_321 "選択されたイメージはハイブリッド ISO 形式ですが、 ISO イメージ モード / ファイル コピー モードと互換性がありません。\nそのため、書き込みには DD イメージ モードが適用されます。"
+t MSG_900 "Rufus (ルーファス) とは、起動可能なUSBフラッシュドライブ（USBメモリなど）を作成したり、フォーマットをするためのソフトウェアです。"
 
 #########################################################################
 l "ko-KR" "Korean (한국어)" 0x0412
@@ -7292,6 +7333,7 @@ t MSG_318 "기본 스레드 우선 순위: %d"
 t MSG_319 "부팅 마커 무시"
 t MSG_320 "파티션 레이아웃을 새로 고치는 중 (%s)..."
 t MSG_321 "선택한 이미지는 ISOHybrid이지만, 이미지 작성자가 ISO/파일 복사 모드와 호환되도록 제작하지 않았습니다.\n따라서 DD 이미지 쓰기 모드가 적용됩니다."
+t MSG_900 "Rufus는 USB 메모리 및 플래시 드라이브를 포맷하고 부팅할 수 있도록 만드는 도구입니다."
 
 #########################################################################
 l "lv-LV" "Latvian (Latviešu)" 0x0426
@@ -7669,6 +7711,7 @@ t MSG_318 "Noklusējuma prioritāte: %d"
 t MSG_319 "Ignorēt ielādes marķeri"
 t MSG_320 "Atjauno sadaļas izkārtojumu (%s)..."
 t MSG_321 "Izvēlētais virtuālais attēls ir ISOHybrid, bet tā veidotājs nav izveidojis ISO/Failu kopēšanas .\nTiks izmantots DD virtuālā attēla kopēšanas režīms."
+t MSG_900 "Rufus ir instruments ar kura palīdzību var formatēt un izveidot operētājsistēmas ielādes ierīci uz tādiem nesējiem, kā USB pieslēguma zibatmiņas, atmiņas kartes u.c."
 
 #########################################################################
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
@@ -8045,6 +8088,7 @@ t MSG_318 "Numatytasis gijos pirmumas"
 t MSG_319 "Nepasyti įkrovos žymės"
 t MSG_320 "Atnaujinamas skaidinių išdėstymas (%s)..."
 t MSG_321 "Jūsų pasirinktas atvaizdas yra \"ISOHybrid\" atvaizdas, tačiau jo kūrėjai nepadarė jo suderinamu su ISO/failų kopijavimo režimu.\nDėl to bus įgalintas DD atvaizdo įrašymo režimas."
+t MSG_900 "Rufus programa leidžia suženklinti ir sukurti sistemų paleidimo laikmenas, kaip pvz. USB atmintukus, atminties korteles ir pan."
 
 #########################################################################
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
@@ -8405,6 +8449,7 @@ t MSG_304 "Cipta imej cakera untuk peranti yang dipilih"
 t MSG_305 "Pilih pilihan ini jika anda mahu memasang Windows pada komputer lain atau ingin menggunakan Windows terus daripada cakera/media ini (Windows To Go)"
 t MSG_306 "Mensifarkan pemacu 'Fast': %s"
 t MSG_307 "ini mungkin mengambil sedikit masa"
+t MSG_900 "Rufus adalah utiliti yang membantu memformat dan mencipta pemacu kilat USB boot, seperti pemacu pen/kekunci USB, kayu memori, dan lain-lain."
 
 #########################################################################
 l "nb-NO" "Norwegian (Norsk)" 0x0414
@@ -8772,6 +8817,7 @@ t MSG_318 "Standard trådprioritet: %d"
 t MSG_319 "Ignorer oppstartsmarkør"
 t MSG_320 "Forfriskende partisjonsoppsett (%s)..."
 t MSG_321 "Bildet du har valgt er en ISOHybrid, men skaperne har ikke gjort det kompatibelt med ISO / File copy modus.\nSom et resultat vil DD-skrivemodus bli håndhevet."
+t MSG_900 "Rufus er et verktøy som hjelper til med å formatere og lage oppstartbare USB-stasjoner, for eksempel USB-minnepinner, USB-harddisker, og lignende."
 
 #########################################################################
 l "fa-IR" "Persian (پارسی)" 0x0429
@@ -9142,6 +9188,7 @@ t MSG_304 "ساخت ایمیج از دستگاه انتخاب‌شده"
 t MSG_305 "با استفاده از این گزینه مشخص کنید که آیا می‌خواهید از این درایو برای نصب ویندوز استفاده کنید یا اینکه می‌خواهید مستقیما ویندوز را از روی آن اجرا کنید (Windows To Go)."
 t MSG_306 "درحال بازنویسی سریع درایو با داده صفر؛ درصد پیشرفت: %s"
 t MSG_307 "ممکن است کمی زمان‌بر باشد"
+t MSG_900 "Rufus ابزاری است که به فرمت کردن و ساختن فلش درایوهای USB مانند پن‌درایوهای "یو اس بی و ... کمک می‌کند."
 
 #########################################################################
 l "pl-PL" "Polish (Polski)" 0x0415
@@ -9516,6 +9563,7 @@ t MSG_318 "Domyślny priorytet wątku: %d"
 t MSG_319 "Zignoruj znacznik 'boot'"
 t MSG_320 "Odświeżanie układu partycji (%s)..."
 t MSG_321 "Obraz, który został wybrany jest Hybrydą ISO i nie jest zgodny z trybem kopiowania ISO.\nWynikiem tego będzie przymusowe zapisywanie w trybie DD."
+t MSG_900 "Rufus to narzędzie pomagające formatować i tworzyć nośniki rozruchowe USB, takie jak dyski flash USB/pendrive, karty pamięci itp."
 
 #########################################################################
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
@@ -9888,6 +9936,7 @@ t MSG_318 "Prioridade padrão da thread: %d"
 t MSG_319 "Ignorar marcador de inicialização"
 t MSG_320 "Atualizando o layout da partição (%s)..."
 t MSG_321 "A imagem que você selecionou é uma ISOHybrid, mas os criadores não a tornaram compatível com o modo de cópia ISO/Arquivo.\nComo resultado, o modo de gravação de imagem DD será aplicado."
+t MSG_900 "Rufus é uma ferramenta que ajuda a formatar e criar flash drives USB bootaveis, como pendrives, USBkeys, cartões de memória e etc."
 
 #########################################################################
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
@@ -10260,6 +10309,7 @@ t MSG_318 "Prioridade padrão do thread: %d"
 t MSG_319 "Ignorar marcador de arranque"
 t MSG_320 "A atualizar a estrutura da partição (%s)..."
 t MSG_321 "A imagem que selecionou é ISOHybrid mas os criadores não a tornaram compatível com o modo de cópia ISO/Ficheiro.\nComo resultado, será aplicado o modo de gravação da imagem DD."
+t MSG_900 "Rufus é um utilitário que ajuda a formatar e a criar unidades USB inicializáveis, tais como dispositivos USB/pendrives, cartões de memória, etc."
 
 #########################################################################
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
@@ -10634,6 +10684,7 @@ t MSG_318 "Prioritate implicită pentru firul de execuție: %d"
 t MSG_319 "Ignorare Boot Marker"
 t MSG_320 "Se reîmprospătează așezarea partițiilor (%s)..."
 t MSG_321 "Imaginea selectată este de tip ISOHybrid, însă creatorii acesteia nu au făcut-o să fie compatibilă cu modul ISO/Copiere fișiere.\nDrept urmare, modul imagine DD va fi aplicat."
+t MSG_900 "Rufus este un utilitar care ajută la formatarea și crearea de drive-uri USB bootabile."
 
 #########################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
@@ -11002,6 +11053,7 @@ t MSG_304 "Создание образа диска выбранного уст�
 t MSG_305 "Используйте этот параметр, чтобы указать, хотите ли вы использовать это устройство для установки Windows на другой диск, или если вы хотите запускать Windows непосредственно с этого диска (Windows To Go)."
 t MSG_306 "Быстрое обнуление диска: %s"
 t MSG_307 "Это может занять время"
+t MSG_900 "Rufus - это утилита, которая помогает форматировать и создавать загрузочные Flash/Pen/Key диски, карты памяти и т.д."
 
 #########################################################################
 l "sr-RS" "Serbian (Srpski)" 0x241a, 0x081a, 0x181a, 0x2c1a, 0x701a, 0x7c1a
@@ -11378,6 +11430,7 @@ t MSG_318 "Podrazumevana prioritetna nit: %d"
 t MSG_319 "Ignoriši boot marker"
 t MSG_320 "Osvežavanje participnog rasporeda (%s)..."
 t MSG_321 "Slika koju si odabrao je ISOHibrid, ali njeni kreatori ga nisu napravili kompatibilnim sa ISO/File copy mode-om.\nKao rezultat toga, DD režim pisanje slike će biti primenjen."
+t MSG_900 "Rufus je alat koji pomaže da napravite butabilne USB fleš diskove, kao što su USB ključevi/pendrajvovi, memorijski stikovi, itd."
 
 #########################################################################
 l "sk-SK" "Slovak (Slovensky)" 0x041B
@@ -11753,6 +11806,7 @@ t MSG_318 "Predvolená priorita vlákna: %d"
 t MSG_319 "Ignorovať zavádzaciu značku"
 t MSG_320 "Obnovuje sa rozloženie oblasti (%s)..."
 t MSG_321 "Obráz, ktorý ste vybrali, je ISOHybrid a nie je kompatibilný s ISO/režim kopírovania súboru.\nV dôsledku toho sa vynúti režim zápisu obrazu DD."
+t MSG_900 "Rufus je utilita, ktorá pomôže naformátovať a vytvoriť bootovacie jednotky USB Flash, ako sú napr. USB kľúče, pamäťové karty, atď."
 
 #########################################################################
 l "sl-SI" "Slovenian (Slovenščina)" 0x0424
@@ -12130,6 +12184,7 @@ t MSG_318 "Privzeta prioriteta niti: %d"
 t MSG_319 "Indikator zagonskosti (Boot Marker, \"55 AA\") se ignorira"
 t MSG_320 "Osvežujem razpored particij (%s)..."
 t MSG_321 "Izbrana slika je vrste ISOHybrid, vendar ni združljiva z načinom kopiranja datotek (ISO),\nzato bo za zapisovanje uporabljen način za slike DD."
+t MSG_900 "Rufus je program za formatiranje in ustvarjanje zagonskih naprav USB."
 
 #########################################################################
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
@@ -12498,6 +12553,7 @@ t MSG_318 "Prioridad de hilo (thread) por defecto: %d"
 t MSG_319 "Ignorar marca de arranque (Boot Marker)"
 t MSG_320 "Actualizando disposición de partición (%s)..."
 t MSG_321 "La imagen seleccionada es ISOHybrid, pero sus creadores no la han creado compatible con el modo de copia ISO/FILE.\nPor consiguiente, se forzará el modo de escritura de imágenes DD."
+t MSG_900 "Rufus es una utilidad que le ayuda a formatear y crear soportes USB de arranque, como «pendrives», tarjetas de memoria, etcétera."
 
 #########################################################################
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
@@ -12862,6 +12918,7 @@ t MSG_318 "Standard trådprioritet: %d"
 t MSG_319 "Ignorera startmarkör"
 t MSG_320 "Uppdaterar partitionslayout (%s)..."
 t MSG_321 "Avbilden du har valt är en ISOHybrid, men den som skapade filen har inte gjort den kompatibelt med ISO/Filkopieringsläge.\nDärför kommer skrivläget DD-avbild att användas."
+t MSG_900 "Rufus är ett program som hjälper dig formatera och skapa startbara USB-diskar, så som USB-minnen, minneskort, etc."
 
 #########################################################################
 l "th-TH" "Thai (ไทย)" 0x041e
@@ -13238,6 +13295,7 @@ t MSG_318 "ค่าลำดับความสำคัญเริ่มต
 t MSG_319 "การละเว้นการทำ Boot Marker"
 t MSG_320 "กำลังรีเฟรชเค้าโครงพาร์ทิชั่น (%s)..."
 t MSG_321 "อิมเมจไฟล์ที่คุณใช้เป็นแบบ ISOHybrid แต่ผู้ผลิตไม่ได้ทำให้รองรับกับการคัดลอกไฟล์ ISO\nนั่นทำให้โหมดการเขียนอิมเมจแบบ DD image writing จะถูกเรียกใช้งาน"
+t MSG_900 "Rufusคือโปรแกรมที่ช่วยฟอร์แมทและสร้างUSBแฟลชไดรฟ์ที่สามารถบูทได้ เช่นคีย์ USB / pendrives, Memory Sticks, ฯลฯ"
 
 #########################################################################
 l "tr-TR" "Turkish (Türkçe)" 0x041F
@@ -13613,6 +13671,7 @@ t MSG_318 "Varsayılan iş parçacığı önceliği: %d"
 t MSG_319 "Önyükleme İşaretleyicisini Yoksay"
 t MSG_320 "Bölüm düzeni yenileniyor (%s)..."
 t MSG_321 "Seçtiğiniz yansı bir ISOHybrid, ancak yansı ISO/Dosya kopyalama modu ile uyumlu hale  olrak oluşturulmamış.\nSonuç olarak, DD yansısı yazma modu uygulanacaktır."
+t MSG_900 "Rufus, USB anahtar/bellekler, hafıza kartları vb. gibi USB sürücüleri biçimlendirmeye ve önyüklemeli hale getirmeye yardımcı olan bir araçtır."
 
 #########################################################################
 l "uk-UA" "Ukrainian (Українська)" 0x0422
@@ -13995,6 +14054,7 @@ t MSG_318 "Пріоритет потоку за замовчуванням: %d"
 t MSG_319 "Ігнорувати Boot Marker"
 t MSG_320 "Оновлення макета розділу (%s)..."
 t MSG_321 "Вибраний образ має властивості ISOHybrid, проте його автор не потурбувався про сумісність з режимом копіювання ISO-файлів.\nЯк результат, буде примусово застосовано режим запису образів DD."
+t MSG_900 "Rufus це утиліта, яка допомагає форматувати та створювати завантажувальні Flash/Pen/Key диски, картки пам'яті, тощо."
 
 #########################################################################
 l "vi-VN" "Vietnamese (Tiếng Việt)" 0x042A
@@ -14353,3 +14413,4 @@ t MSG_304 "Tạo file ảnh ổ đĩa từ thiết bị được chọn"
 t MSG_305 "Sử dụng tùy chọn này để chỉ thị rằng bạn muốn sử dung thiết bị này cài Windows lên một ổ đĩa khác, hoặc nếu bạn muốn chạy Windows trực tiếp từ thiết bị này (Windows To Go)."
 t MSG_306 "Đang xóa nhanh ổ đĩa: %s"
 t MSG_307 "có thể mất một thời gian"
+t MSG_900 "Rufus là một tiện ích giúp định dạng và tạo khả năng khởi động cho USB, chẳng hạn như thẻ USB/đĩa di động, thẻ nhớ, vv."
