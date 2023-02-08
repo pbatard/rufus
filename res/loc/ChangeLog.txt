@@ -3,15 +3,19 @@ rufus.loc since its original version.
 
 To edit a translation, please make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translation
-Or simply download https://files.akeo.ie/pollock/pollock-1.4.exe and follow its directions.
+Or simply download https://files.akeo.ie/pollock/pollock-1.5.exe and follow its directions.
 
 o v3.22 (2023.??.??)
+  // MSG_144 is aimed the the ISO download feature
   - *UPDATED*  MSG_144 "Temporarily banned by Microsoft for requesting too many downloads (...)" -> "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
-  - *NEW*      MSG_199 "This feature is not available for this version of Windows."
+  // MSG_199 will appear for the ISO download feature if running on Windows 7 
+  - *NEW*      MSG_199 "This feature is not available on this platform."
   // MSG_294 can be tested by launching Rufus from the commandline with option -z61
   - *UPDATED*  MSG_294 "This version of Windows is no longer supported by Rufus." -> added "\nThe last version of Rufus compatible with this platform is v%d.%d."
   - *NEW*      MSG_323 "Unable to open or read '%s'"
+  // MSG_325 appears on the status bar when creating a customized Windows 10 or Windows 11 media
   - *NEW*      MSG_325 "Applying Windows customization: %s"
+  // The following messages appear after selecting a Windows 11 ISO and pressing START
   - *NEW*      MSG_326 "Windows User Experience"
   - *NEW*      MSG_327 "Customize Windows installation?"
   - *NEW*      MSG_328 "Remove requirement for Secure Boot and TPM 2.0"
@@ -32,6 +36,8 @@ o v3.22 (2023.??.??)
   // The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
   // Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it below.
   - *NEW*      MSG_904 "This application is licensed under the terms of the GNU Public License (GPL) version 3.\nSee https://www.gnu.org/licenses/gpl-3.0.en.html for details"
+  // Keyword for "boot" that can be used for search in the Windows Store
+  - *NEW*      MSG_905 "Boot"
   // This and subsequent messages will be listed in the 'Features' section of the Windows Store page
   - *NEW*      MSG_910 "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
   - *NEW*      MSG_911 "Create FreeDOS bootable USB drives"

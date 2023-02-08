@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-03 13:52+0000\n"
-"PO-Revision-Date: 2023-02-03 13:53+0000\n"
+"POT-Creation-Date: 2023-02-08 17:07+0000\n"
+"PO-Revision-Date: 2023-02-08 17:08+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -1200,8 +1200,8 @@ msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it ha
 msgstr "'Windows To Go' peut seulement être installé sur un disque partitionné au format GPT si il a l'attribut FIXE.Le disque sélectionné na pas été détecté comme FIXE."
 
 #. • MSG_199
-msgid "This feature is not available for this version of Windows."
-msgstr "Cette fonctionalité n'est pas disponible avec cette version de Windows."
+msgid "This feature is not available on this platform."
+msgstr "Cette fonctionalité n'est pas disponible pour cette plateforme."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1834,7 +1834,7 @@ msgstr "Empêcher Windows To Go d'accéder aux disques internes"
 
 #. • MSG_333
 msgid "Create a local account with username:"
-msgstr "Créer un compte local avec le nom :"
+msgstr "Créer un compte local sous le nom de :"
 
 #. • MSG_334
 msgid "Set regional options to the same values as this user's"
@@ -1849,5 +1849,90 @@ msgid "Persistent log"
 msgstr "Log persistent"
 
 #. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
 msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
 msgstr "Rufus est un utilitaire permettant de formater et de créer des média USB amorçables, tels que clés USB, mémoire flash, etc."
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "Site official : %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "Code source: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr ""
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"Cette application est fournie sous les termes de la Licence publique générale GNU (GPL) version 3.\n"
+"Veuillez consulter https://www.gnu.org/licenses/gpl-3.0.fr.html pour plus de details."
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr "Amorçable"
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Formatez des périphériques USB, des cartes flash et des disques virtuels en FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "Créez des disques amorçable FreeDOS"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "Créez des disques amorçables à partir d'images ISOs (Windows, Linux, etc.)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "Créez des disques amorçables à partir d'images disque, y compris à partir d'images compressées"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "Créez des disques amorçables BIOS ou UEFI, y compris des disques UEFI amorçables utilisant NTFS"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "Créez des disques 'Windows To Go'"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "Créez des disques d'installation Windows 11 pour des PCs qui ne disposent pas de TPM ou Secure Boot"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "Créez des partitions persistentes pour Linux"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "Créez des images VHD/DD du périphérique sélectionné"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "Calculez les sommes de contrôle MD5, SHA-1, SHA-256 et SHA-512 de l'image sélectionnée"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "Executez un test de mauvais secteurs avec detection des \"fake drives\""
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "Téléchargez des images ISOs commerciales officielles de Microsoft Windows"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "Téléchargez des images ISOs du Shell UEFI"

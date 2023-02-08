@@ -3,7 +3,7 @@
 #########################################################################
 
 # List of all languages included in this file (with version)
-# • v3.14 "en-US" "English (English)"
+# • v3.22 "en-US" "English (English)"
 # • v3.5  "ar-SA" "Arabic (العربية)"
 # • v3.5  "bg-BG" "Bulgarian (Български)"
 # • v3.14 "zh-CN" "Chinese Simplified (简体中文)"
@@ -13,7 +13,7 @@
 # • v3.14 "da-DK" "Danish (Dansk)"
 # • v3.14 "nl-NL" "Dutch (Nederlands)"
 # • v3.14 "fi-FI" "Finnish (Suomi)"
-# • v3.14 "fr-FR" "French (Français)"
+# • v3.22 "fr-FR" "French (Français)"
 # • v3.14 "de-DE" "German (Deutsch)"
 # • v3.5  "el-GR" "Greek (Ελληνικά)"
 # • v3.14 "he-IL" "Hebrew (עברית)"
@@ -44,7 +44,7 @@
 
 #########################################################################
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 3.14
+v 3.22
 
 g IDD_DIALOG
 t IDS_DRIVE_PROPERTIES_TXT "Drive Properties"
@@ -415,7 +415,7 @@ t MSG_196 "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n\n"
 	"Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
 t MSG_197 "Nonstandard sector size detected"
 t MSG_198 "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
-t MSG_199 "This feature is not available for this version of Windows."
+t MSG_199 "This feature is not available on this platform."
 t MSG_201 "Cancelling - Please wait..."
 t MSG_202 "Scanning image..."
 t MSG_203 "Failed to scan image"
@@ -594,13 +594,15 @@ t MSG_334 "Set regional options to the same values as this user's"
 t MSG_335 "Disable BitLocker automatic device encryption"
 t MSG_336 "Persistent log"
 # The following messages are for the Windows Store listing only and are not used by the application
-t MSG_900 "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."   
+t MSG_900 "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
 t MSG_901 "Official site: %s"
 t MSG_902 "Source Code: %s"
 t MSG_903 "ChangeLog: %s"
 # The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
 # Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
-t MSG_904 "This application is licensed under the terms of the GNU Public License (GPL) version 3.\nSee https://www.gnu.org/licenses/gpl-3.0.en.html for details"
+t MSG_904 "This application is licensed under the terms of the GNU Public License (GPL) version 3.\nSee https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+# Keyword for "boot" will be used for search in the Windows Store
+t MSG_905 "Boot"
 # This and subsequent messages will be listed in the 'Features' section of the Windows Store page
 t MSG_910 "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
 t MSG_911 "Create FreeDOS bootable USB drives"
@@ -610,7 +612,7 @@ t MSG_914 "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
 t MSG_915 "Create 'Windows To Go' drives"
 t MSG_916 "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
 t MSG_917 "Create persistent Linux partitions"
-t MSG_918 "Create a VHD/DD image of a drive"
+t MSG_918 "Create VHD/DD images of the selected drive"
 t MSG_919 "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
 t MSG_920 "Perform bad blocks checks, including detection of \"fake\" flash drives"
 t MSG_921 "Download official Microsoft Windows retail ISOs"
@@ -3967,7 +3969,7 @@ t MSG_900 "Rufus on ohjelma, joka auttaa alustamaan ja luomaan boottaavia USB-la
 
 #########################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 3.14
+v 3.22
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -4216,7 +4218,7 @@ t MSG_195 "La version par défaut du fichier %s sera utilisée"
 t MSG_196 "IMPORTANT : CE PÉRIPHÉRIQUE UTILISE UNE TAILLE DE SECTEUR NON STANDARD !\n\nLa majorité des disques utilisent une taille de secteur de 512 octets, mais celui ci utilise une taille de %d octets. Dans la majorité des cas, cela veut dire que vous ne POUVEZ PAS démarrer un oridinateur depusi ce disque.\nRufus peut toujours essayer de créer un disque démarrable, mais il n'y a AUCUNE guarantie que cela marchera."
 t MSG_197 "Taille de secteur non standard détectée"
 t MSG_198 "'Windows To Go' peut seulement être installé sur un disque partitionné au format GPT si il a l'attribut FIXE.Le disque sélectionné na pas été détecté comme FIXE."
-t MSG_199 "Cette fonctionalité n'est pas disponible avec cette version de Windows."
+t MSG_199 "Cette fonctionalité n'est pas disponible pour cette plateforme."
 t MSG_201 "Annulation - Veuillez patienter..."
 t MSG_202 "Analyse de l'image..."
 t MSG_203 "Echec d'analyse de l'image"
@@ -4347,11 +4349,28 @@ t MSG_329 "Supprimer la nécessité d'avoir 4Go+ de RAM, Secure Boot et TPM 2.0"
 t MSG_330 "Supprimer la nécessité d'utiliser un compte Microsoft en ligne"
 t MSG_331 "Désactiver la collecte de données (Supprime les questions de confidentialité)"
 t MSG_332 "Empêcher Windows To Go d'accéder aux disques internes"
-t MSG_333 "Créer un compte local avec le nom :"
+t MSG_333 "Créer un compte local sous le nom de :"
 t MSG_334 "Définir les options régionales avec les mêmes valeurs que celles de cet utilisateur"
 t MSG_335 "Désactiver l'encryption automatique BitLocker"
 t MSG_336 "Log persistent"
 t MSG_900 "Rufus est un utilitaire permettant de formater et de créer des média USB amorçables, tels que clés USB, mémoire flash, etc."
+t MSG_901 "Site official : %s"
+t MSG_902 "Code source: %s"
+t MSG_904 "Cette application est fournie sous les termes de la Licence publique générale GNU (GPL) version 3.\nVeuillez consulter https://www.gnu.org/licenses/gpl-3.0.fr.html pour plus de details."
+t MSG_905 "Amorçable"
+t MSG_910 "Formatez des périphériques USB, des cartes flash et des disques virtuels en FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+t MSG_911 "Créez des disques amorçable FreeDOS"
+t MSG_912 "Créez des disques amorçables à partir d'images ISOs (Windows, Linux, etc.)"
+t MSG_913 "Créez des disques amorçables à partir d'images disque, y compris à partir d'images compressées"
+t MSG_914 "Créez des disques amorçables BIOS ou UEFI, y compris des disques UEFI amorçables utilisant NTFS"
+t MSG_915 "Créez des disques 'Windows To Go'"
+t MSG_916 "Créez des disques d'installation Windows 11 pour des PCs qui ne disposent pas de TPM ou Secure Boot"
+t MSG_917 "Créez des partitions persistentes pour Linux"
+t MSG_918 "Créez des images VHD/DD du périphérique sélectionné"
+t MSG_919 "Calculez les sommes de contrôle MD5, SHA-1, SHA-256 et SHA-512 de l'image sélectionnée"
+t MSG_920 "Executez un test de mauvais secteurs avec detection des \"fake drives\""
+t MSG_921 "Téléchargez des images ISOs commerciales officielles de Microsoft Windows"
+t MSG_922 "Téléchargez des images ISOs du Shell UEFI"
 
 #########################################################################
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
