@@ -1830,7 +1830,7 @@ msgstr "Remova a exigência de 4 GB ou mais de RAM, inicialização segura e TPM
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
-msgstr "Remover a exigência para uma conta online da Microsoft"
+msgstr "Remova a exigência para uma conta online da Microsoft"
 
 #. • MSG_331
 msgid "Disable data collection (Skip privacy questions)"
