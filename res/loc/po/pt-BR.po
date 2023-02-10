@@ -1830,7 +1830,7 @@ msgstr "Remova a exigência de 4 GB ou mais de RAM, inicialização segura e TPM
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
-msgstr "Remover o requisito para uma conta online da Microsoft"
+msgstr "Remover a exigência para uma conta online da Microsoft"
 
 #. • MSG_331
 msgid "Disable data collection (Skip privacy questions)"
@@ -1838,7 +1838,7 @@ msgstr "Desative a coleta de dados (Pular as perguntas sobre privacidade)"
 
 #. • MSG_332
 msgid "Prevent Windows To Go from accessing internal disks"
-msgstr "Impedir que o Windows To Go acesse discos internos"
+msgstr "Impeça que o Windows To Go acesse discos internos"
 
 #. • MSG_333
 msgid "Create a local account with username:"
@@ -1846,4 +1846,4 @@ msgstr "Crie uma conta local com nome de usuário:"
 
 #. • MSG_334
 msgid "Set regional options to the same values as this user's"
-msgstr "Defina as opções local com os mesmos valores deste usuário"
+msgstr "Defina as opções regionais com os mesmos valores deste usuário"
