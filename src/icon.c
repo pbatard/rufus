@@ -118,6 +118,7 @@ BOOL ExtractAppIcon(const char* path, BOOL bSilent)
 	// Write icon data
 	offset = 3*sizeof(WORD) + icondir->idCount*sizeof(ICONDIRENTRY);
 	for (i=0; i<icondir->idCount; i++) {
+		
 		// Write the common part of ICONDIRENTRY
 		if (!WriteFileWithRetry(hFile, &icondir->idEntries[i], sizeof(GRPICONDIRENTRY)-sizeof(WORD), &Size, WRITE_RETRIES)) {
 			uprintf("Could not write ICONDIRENTRY[%d]: %s.", i, WindowsErrorString());
@@ -151,7 +152,7 @@ out:
 }
 
 /*
- * Create an autorun.inf, if none exists
+ Create an autorun.inf, if none exists
  * We use this to set the icon as well as labels that are longer than 11/32 chars or,
  * in the case of FAT, contain non-English characters
  */
