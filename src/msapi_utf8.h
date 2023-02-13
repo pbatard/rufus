@@ -6,7 +6,7 @@
  *
  * See also: https://utf8everywhere.org
  *
- * Copyright © 2010-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2010-2023 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -359,7 +359,8 @@ static __inline int GetWindowTextU(HWND hWnd, char* lpString, int nMaxCount)
 		err = GetLastError();
 	}
 	wfree(lpString);
-	lpString[nMaxCount - 1] = 0;
+	if (lpString != NULL)
+		lpString[nMaxCount - 1] = 0;
 	SetLastError(err);
 	return ret;
 }

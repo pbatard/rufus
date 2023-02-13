@@ -418,9 +418,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x048D
-#define FORCED_PID 0x4030
-#define FORCED_NAME "HP iLO Internal SD-CARD USB Device"
+#define FORCED_VID 0x0781
+#define FORCED_PID 0x55AE
+#define FORCED_NAME "SanDisk Extreme 55AE SCSI Disk Device"
 #endif
 
 void ClearDrives(void)

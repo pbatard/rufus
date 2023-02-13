@@ -3638,14 +3638,14 @@ skip_args_processing:
 		nWindowsVersion = forced_windows_version;
 
 	// ...and nothing of value was lost
-	// TODO: Set to <= for 3.22
+	// TODO: Set to <= for 3.23
 	if (nWindowsVersion < WINDOWS_7) {
 		// Load the translation before we print the error
 		get_loc_data_file(loc_file, selected_locale);
 		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
 		// Set MB_SYSTEMMODAL to prevent Far Manager from stealing focus...
 		MessageBoxExU(NULL,
-			lmprintf(MSG_294, (nWindowsVersion == WINDOWS_7) ? 3 : 2, (nWindowsVersion == WINDOWS_7) ? 21 : 18),
+			lmprintf(MSG_294, (nWindowsVersion == WINDOWS_7) ? 3 : 2, (nWindowsVersion == WINDOWS_7) ? 22 : 18),
 			lmprintf(MSG_293), MB_ICONSTOP | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
 		goto out;
 	}
