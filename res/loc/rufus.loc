@@ -4354,7 +4354,7 @@ t MSG_334 "Définir les options régionales avec les mêmes valeurs que celles d
 t MSG_335 "Désactiver l'encryption automatique BitLocker"
 t MSG_336 "Log persistent"
 t MSG_900 "Rufus est un utilitaire permettant de formater et de créer des média USB amorçables, tels que clés USB, mémoire flash, etc."
-t MSG_901 "Site official : %s"
+t MSG_901 "Site officiel : %s"
 t MSG_902 "Code source: %s"
 t MSG_904 "Cette application est fournie sous les termes de la Licence publique générale GNU (GPL) version 3.\nVeuillez consulter https://www.gnu.org/licenses/gpl-3.0.fr.html pour plus de details."
 t MSG_905 "Amorçable"

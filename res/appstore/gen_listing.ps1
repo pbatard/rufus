@@ -137,10 +137,12 @@ foreach($row in $csv) {
         }
       }
     } elseif ($row.Field.StartsWith("DesktopScreenshot")) {
+      # NB: Per https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/import-and-export-store-listings?pivots=store-installer-msix#update-listing-info
+      # you need to use slashes rather than backslashes and include the name of the folder to upload as part of the path.
       $row.default = ""
       foreach ($lang in $langs) {
-        $path = $lang  + "\" + $row.Field.Replace("Desktop", "") + ".png"
-        if (Test-Path -Path ("listing\" + $path)) {
+        $path = "listing/" + $lang  + "/" + $row.Field.Replace("Desktop", "") + ".png"
+        if (Test-Path -Path $path) {
           $row.$lang = $path
         }
       }

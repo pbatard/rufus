@@ -30,8 +30,8 @@
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
 • ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus est un utilitaire permettant de formater et de créer des média USB amorçables, tels que clés USB, mémoire flash, etc.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
+• Site officiel : https://rufus.ie
+• Code source: https://github.com/pbatard/rufus
 • ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus ist ein Werkzeug, welches dabei hilft, bootfähige USB-Laufwerke zu erstellen, wie beispielweise USB-Keys, Speichersticks usw.
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
@@ -130,11 +130,12 @@
 "DevStudio","9","Text","Pete Batard",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "CopyrightTrademarkInformation","12","Text","© 2011-2023 Pete Batard",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "AdditionalLicenseTerms","13","Text","https://www.gnu.org/licenses/gpl-3.0.html","This application is licensed under the terms of the GNU Public License (GPL) version 3.
-See https://www.gnu.org/licenses/gpl-3.0.en.html for details","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"DesktopScreenshot1","100","Relative path (or URL to file in Partner Center)","","en-us\Screenshot1.png","ar-sa\Screenshot1.png","bg-bg\Screenshot1.png","zh-cn\Screenshot1.png","zh-tw\Screenshot1.png","hr-hr\Screenshot1.png","cs-cz\Screenshot1.png","da-dk\Screenshot1.png","nl-nl\Screenshot1.png","fi-fi\Screenshot1.png","fr-fr\Screenshot1.png","de-de\Screenshot1.png","el-gr\Screenshot1.png","he-il\Screenshot1.png","hu-hu\Screenshot1.png","id-id\Screenshot1.png","it-it\Screenshot1.png","ja-jp\Screenshot1.png","ko-kr\Screenshot1.png","lv-lv\Screenshot1.png","lt-lt\Screenshot1.png","ms-my\Screenshot1.png","nb-no\Screenshot1.png","fa-ir\Screenshot1.png","pl-pl\Screenshot1.png","pt-br\Screenshot1.png","pt-pt\Screenshot1.png","ro-ro\Screenshot1.png","ru-ru\Screenshot1.png","sr-latn-rs\Screenshot1.png","sk-sk\Screenshot1.png","sl-si\Screenshot1.png","es-es\Screenshot1.png","sv-se\Screenshot1.png","th-th\Screenshot1.png","tr-tr\Screenshot1.png","uk-ua\Screenshot1.png","vi-vn\Screenshot1.png"
-"DesktopScreenshot2","101","Relative path (or URL to file in Partner Center)","","en-us\Screenshot2.png",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-"DesktopScreenshot3","102","Relative path (or URL to file in Partner Center)","","en-us\Screenshot3.png",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-"DesktopScreenshot4","103","Relative path (or URL to file in Partner Center)","","en-us\Screenshot4.png",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+See https://www.gnu.org/licenses/gpl-3.0.en.html for details.","","","","","","","","","","Cette application est fournie sous les termes de la Licence publique générale GNU (GPL) version 3.
+Veuillez consulter https://www.gnu.org/licenses/gpl-3.0.fr.html pour plus de details.","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"DesktopScreenshot1","100","Relative path (or URL to file in Partner Center)","","listing/en-us/Screenshot1.png","listing/ar-sa/Screenshot1.png","listing/bg-bg/Screenshot1.png","listing/zh-cn/Screenshot1.png","listing/zh-tw/Screenshot1.png","listing/hr-hr/Screenshot1.png","listing/cs-cz/Screenshot1.png","listing/da-dk/Screenshot1.png","listing/nl-nl/Screenshot1.png","listing/fi-fi/Screenshot1.png","listing/fr-fr/Screenshot1.png","listing/de-de/Screenshot1.png","listing/el-gr/Screenshot1.png","listing/he-il/Screenshot1.png","listing/hu-hu/Screenshot1.png","listing/id-id/Screenshot1.png","listing/it-it/Screenshot1.png","listing/ja-jp/Screenshot1.png","listing/ko-kr/Screenshot1.png","listing/lv-lv/Screenshot1.png","listing/lt-lt/Screenshot1.png","listing/ms-my/Screenshot1.png","listing/nb-no/Screenshot1.png","listing/fa-ir/Screenshot1.png","listing/pl-pl/Screenshot1.png","listing/pt-br/Screenshot1.png","listing/pt-pt/Screenshot1.png","listing/ro-ro/Screenshot1.png","listing/ru-ru/Screenshot1.png","listing/sr-latn-rs/Screenshot1.png","listing/sk-sk/Screenshot1.png","listing/sl-si/Screenshot1.png","listing/es-es/Screenshot1.png","listing/sv-se/Screenshot1.png","listing/th-th/Screenshot1.png","listing/tr-tr/Screenshot1.png","listing/uk-ua/Screenshot1.png","listing/vi-vn/Screenshot1.png"
+"DesktopScreenshot2","101","Relative path (or URL to file in Partner Center)","","listing/en-us/Screenshot2.png",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"DesktopScreenshot3","102","Relative path (or URL to file in Partner Center)","","listing/en-us/Screenshot3.png",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"DesktopScreenshot4","103","Relative path (or URL to file in Partner Center)","","listing/en-us/Screenshot4.png",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "DesktopScreenshot5","104","Relative path (or URL to file in Partner Center)","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "DesktopScreenshot6","105","Relative path (or URL to file in Partner Center)","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "DesktopScreenshot7","106","Relative path (or URL to file in Partner Center)","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -225,19 +226,19 @@ See https://www.gnu.org/licenses/gpl-3.0.en.html for details","","","","","","",
 "OptionalPromo358x358","611","Relative path (or URL to file in Partner Center)","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "OptionalPromo1000x800","612","Relative path (or URL to file in Partner Center)","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "OptionalPromo414x180","613","Relative path (or URL to file in Partner Center)","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-"Feature1","700","Text","","Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature2","701","Text","","Create FreeDOS bootable USB drives","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature3","702","Text","","Create bootable drives from bootable ISOs (Windows, Linux, etc.)","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature4","703","Text","","Create bootable drives from bootable disk images, including compressed ones","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature5","704","Text","","Create BIOS or UEFI bootable drives, including UEFI bootable NTFS","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature6","705","Text","","Create 'Windows To Go' drives","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature7","706","Text","","Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature8","707","Text","","Create persistent Linux partitions","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature9","708","Text","","Create a VHD/DD image of a drive","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature10","709","Text","","Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature11","710","Text","","Perform bad blocks checks, including detection of ""fake"" flash drives","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature12","711","Text","","Download official Microsoft Windows retail ISOs","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature13","712","Text","","Download UEFI Shell ISOs","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature1","700","Text","","Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","","","","","","","","","","Formatez des périphériques USB, des cartes flash et des disques virtuels en FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature2","701","Text","","Create FreeDOS bootable USB drives","","","","","","","","","","Créez des disques amorçable FreeDOS","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature3","702","Text","","Create bootable drives from bootable ISOs (Windows, Linux, etc.)","","","","","","","","","","Créez des disques amorçables à partir d'images ISOs (Windows, Linux, etc.)","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature4","703","Text","","Create bootable drives from bootable disk images, including compressed ones","","","","","","","","","","Créez des disques amorçables à partir d'images disque, y compris à partir d'images compressées","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature5","704","Text","","Create BIOS or UEFI bootable drives, including UEFI bootable NTFS","","","","","","","","","","Créez des disques amorçables BIOS ou UEFI, y compris des disques UEFI amorçables utilisant NTFS","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature6","705","Text","","Create 'Windows To Go' drives","","","","","","","","","","Créez des disques 'Windows To Go'","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature7","706","Text","","Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot","","","","","","","","","","Créez des disques d'installation Windows 11 pour des PCs qui ne disposent pas de TPM ou Secure Boot","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature8","707","Text","","Create persistent Linux partitions","","","","","","","","","","Créez des partitions persistentes pour Linux","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature9","708","Text","","Create VHD/DD images of the selected drive","","","","","","","","","","Créez des images VHD/DD du périphérique sélectionné","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature10","709","Text","","Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image","","","","","","","","","","Calculez les sommes de contrôle MD5, SHA-1, SHA-256 et SHA-512 de l'image sélectionnée","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature11","710","Text","","Perform bad blocks checks, including detection of ""fake"" flash drives","","","","","","","","","","Executez un test de mauvais secteurs avec detection des ""fake drives\","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature12","711","Text","","Download official Microsoft Windows retail ISOs","","","","","","","","","","Téléchargez des images ISOs commerciales officielles de Microsoft Windows","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature13","712","Text","","Download UEFI Shell ISOs","","","","","","","","","","Téléchargez des images ISOs du Shell UEFI","","","","","","","","","","","","","","","","","","","","","","","","","","",""
 "Feature14","713","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "Feature15","714","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "Feature16","715","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -267,7 +268,7 @@ See https://www.gnu.org/licenses/gpl-3.0.en.html for details","","","","","","",
 "RecommendedHardwareReq9","858","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "RecommendedHardwareReq10","859","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "RecommendedHardwareReq11","860","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-"SearchTerm1","900","Text","Boot","Boot","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"SearchTerm1","900","Text","Boot","Boot","","","","","","","","","","Amorçable","","","","","","","","","","","","","","","","","","","","","","","","","","",""
 "SearchTerm2","901","Text","USB",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "SearchTerm3","902","Text","ISO",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "SearchTerm4","903","Text","Windows",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

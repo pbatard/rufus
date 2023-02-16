@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2023-02-08 17:07+0000\n"
-"PO-Revision-Date: 2023-02-08 17:08+0000\n"
+"PO-Revision-Date: 2023-02-15 21:54+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -1856,7 +1856,7 @@ msgstr "Rufus est un utilitaire permettant de formater et de créer des média U
 
 #. • MSG_901
 msgid "Official site: %s"
-msgstr "Site official : %s"
+msgstr "Site officiel : %s"
 
 #. • MSG_902
 msgid "Source Code: %s"
