@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2023-02-17 10:50+0100\n"
-"PO-Revision-Date: 2023-02-17 17:08+0000\n"
+"PO-Revision-Date: 2023-02-17 17:34+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: it_IT\n"
@@ -1915,7 +1915,7 @@ msgstr "Crea unità avviabili da immagini disco avviabili, incluse quelle compre
 
 #. • MSG_914
 msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
-msgstr "Creare unità avviabili BIOS o UEFI, incluso NTFS avviabile UEFI"
+msgstr "Crea unità avviabili BIOS o UEFI, incluso NTFS avviabile UEFI"
 
 #. • MSG_915
 msgid "Create 'Windows To Go' drives"
@@ -1923,7 +1923,7 @@ msgstr "Crea unità 'Windows To Go'"
 
 #. • MSG_916
 msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
-msgstr "Creare unità di installazione di Windows 11 per PC che non dispongono di TPM o avvio protetto"
+msgstr "Crea unità di installazione di Windows 11 per PC che non dispongono di TPM o avvio protetto"
 
 #. • MSG_917
 msgid "Create persistent Linux partitions"
