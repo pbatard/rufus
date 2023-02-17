@@ -61,8 +61,10 @@ char* CreateUnattendXml(int arch, int flags)
 	int i, order;
 	const char* xml_arch_names[5] = { "x86", "amd64", "arm", "arm64" };
 	unattend_xml_flags = flags;
-	if (arch < ARCH_X86_32 || arch > ARCH_ARM_64 || flags == 0)
+	if (arch < ARCH_X86_32 || arch > ARCH_ARM_64 || flags == 0) {
+		uprintf("Note: No Windows User Experience options selected");
 		return NULL;
+	}
 	arch--;
 	// coverity[swapped_arguments]
 	if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, path) == 0)
@@ -71,6 +73,7 @@ char* CreateUnattendXml(int arch, int flags)
 	if (fd == NULL)
 		return NULL;
 
+	uprintf("Selected Windows User Experience options:");
 	fprintf(fd, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 	fprintf(fd, "<unattend xmlns=\"urn:schemas-microsoft-com:unattend\">\n");
 
@@ -91,6 +94,7 @@ char* CreateUnattendXml(int arch, int flags)
 		fprintf(fd, "        </ProductKey>\n");
 		fprintf(fd, "      </UserData>\n");
 		if (flags & UNATTEND_SECUREBOOT_TPM_MINRAM) {
+			uprintf("• Bypass SB/TPM/RAM");
 			fprintf(fd, "      <RunSynchronous>\n");
 			for (i = 0; i < ARRAYSIZE(bypass_name); i++) {
 				fprintf(fd, "        <RunSynchronousCommand wcm:action=\"add\">\n");
@@ -113,6 +117,7 @@ char* CreateUnattendXml(int arch, int flags)
 		fprintf(fd, "      <RunSynchronous>\n");
 		// This part was picked from https://github.com/AveYo/MediaCreationTool.bat/blob/main/bypass11/AutoUnattend.xml
 		if (flags & UNATTEND_NO_ONLINE_ACCOUNT) {
+			uprintf("• Bypass online account requirement");
 			fprintf(fd, "        <RunSynchronousCommand wcm:action=\"add\">\n");
 			fprintf(fd, "          <Order>%d</Order>\n", order++);
 			fprintf(fd, "          <Path>reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OOBE /v BypassNRO /t REG_DWORD /d 1 /f</Path>\n");
@@ -134,6 +139,7 @@ char* CreateUnattendXml(int arch, int flags)
 			// It is really super insidous of Microsoft to call this option "ProtectYourPC", when it's really only about
 			// data collection. But of course, if it was called "AllowDataCollection", everyone would turn it off...
 			if (flags & UNATTEND_NO_DATA_COLLECTION) {
+				uprintf("• Disable data collection");
 				fprintf(fd, "      <OOBE>\n");
 				fprintf(fd, "        <ProtectYourPC>3</ProtectYourPC>\n");
 				fprintf(fd, "      </OOBE>\n");
@@ -143,7 +149,7 @@ char* CreateUnattendXml(int arch, int flags)
 					(stricmp(unattend_username, "Guest") == 0)) {
 					uprintf("WARNING: '%s' is not allowed as local account name - Option ignored", unattend_username);
 				} else {
-					uprintf("Will use '%s' for local account name", unattend_username);
+					uprintf("• Use '%s' for local account name", unattend_username);
 					// If we create a local account in unattend.xml, then we can get Windows 11
 					// 22H2 to skip MSA even if the network is connected during installation.
 					fprintf(fd, "      <UserAccounts>\n");
@@ -176,6 +182,7 @@ char* CreateUnattendXml(int arch, int flags)
 			fprintf(fd, "    </component>\n");
 		}
 		if (flags & UNATTEND_OOBE_INTERNATIONAL_MASK) {
+			uprintf("• Use the same regional options as this user's");
 			fprintf(fd, "    <component name=\"Microsoft-Windows-International-Core\" processorArchitecture=\"%s\" language=\"neutral\" "
 				"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
@@ -193,6 +200,7 @@ char* CreateUnattendXml(int arch, int flags)
 			fprintf(fd, "    </component>\n");
 		}
 		if (flags & UNATTEND_DISABLE_BITLOCKER) {
+			uprintf("• Disable bitlocker");
 			fprintf(fd, "    <component name=\"Microsoft-Windows-SecureStartup-FilterDriver\" processorArchitecture=\"%s\" language=\"neutral\" "
 				"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
@@ -205,6 +213,7 @@ char* CreateUnattendXml(int arch, int flags)
 	if (flags & UNATTEND_OFFLINE_SERVICING_MASK) {
 		fprintf(fd, "  <settings pass=\"offlineServicing\">\n");
 		if (flags & UNATTEND_OFFLINE_INTERNAL_DRIVES) {
+			uprintf("• Set internal drives offline");
 			fprintf(fd, "    <component name=\"Microsoft-Windows-PartitionManager\" processorArchitecture=\"%s\" language=\"neutral\" "
 				"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);

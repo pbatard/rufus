@@ -515,7 +515,7 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 	if (usb_debug) {
 		static_strcat(str, "Device score: ");
 		for (i = 0; i < score_list_size; i++)
-			static_sprintf(&str[strlen(str)], "%+d", score_list[i]);
+			safe_sprintf(&str[strlen(str)], sizeof(str) - strlen(str), "%+d", score_list[i]);
 		uprintf("%s=%+d → Detected as %s", str, score, (score > 0) ? "HDD" : "UFD");
 	}
 
