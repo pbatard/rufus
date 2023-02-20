@@ -6,7 +6,7 @@
 # • v3.22 "en-US" "English (English)"
 # • v3.5  "ar-SA" "Arabic (العربية)"
 # • v3.5  "bg-BG" "Bulgarian (Български)"
-# • v3.14 "zh-CN" "Chinese Simplified (简体中文)"
+# • v3.22 "zh-CN" "Chinese Simplified (简体中文)"
 # • v3.14 "zh-TW" "Chinese Traditional (正體中文)"
 # • v3.14 "hr-HR" "Croatian (Hrvatski)"
 # • v3.22 "cs-CZ" "Czech (Čeština)"
@@ -1359,7 +1359,7 @@ t MSG_900 "Rufus е програма, с чиято помощ лесно мож
 
 #########################################################################
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004
-v 3.14
+v 3.22
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -1612,6 +1612,7 @@ t MSG_195 "使用 %s 文件的嵌入版本"
 t MSG_196 "重要事项: 本驱动器使用了非标准的扇区大小!\n\n传统的驱动器使用 512 字节扇区大小而本驱动器使用 %d 字节的扇区。在许多情况下，这意味着你将不可以从本驱动器引导。\nRufus 可以尝试创建一个可引导驱动器，但是不保证它有效。"
 t MSG_197 "检测到非标准扇区大小"
 t MSG_198 "'Windows To Go' 只可以在一个 GPT 分区的拥有 FIXED 属性设置的驱动器上安装当前驱动器没有被检测为 FIXED(固定盘)。"
+t MSG_199 "此功能在此平台上不可用。"
 t MSG_201 "取消中 - 请稍候..."
 t MSG_202 "正在扫描镜像..."
 t MSG_203 "未能扫描镜像"
@@ -1737,13 +1738,34 @@ t MSG_322 "无法打开或读取 '%s'"
 t MSG_325 "正在应用 Windows 设置: %s"
 t MSG_326 "正在应用用户设置..."
 t MSG_327 "Windows 用户体验"
-t MSG_328 "自定义 Windows 安装"
+t MSG_328 "自定义 Windows 安装？"
 t MSG_329 "移除对 4GB+ 内存、安全引导和 TPM 2.0 的要求"
 t MSG_330 "移除对登录微软账户的要求"
 t MSG_331 "禁止数据收集 (跳过隐私设置)"
 t MSG_332 "阻止 Windows To Go 访问内部磁盘"
 t MSG_333 "创建一个使用此用户名的本地账号:"
-t MSG_334 "使用当前的区域设置"
+t MSG_334 "使用当前用户的区域设置"
+t MSG_335 "禁用 BitLocker 自动设备加密"
+t MSG_336 "持久化日志"
+t MSG_900 "Rufus 是一个帮助您格式化并创建可启动 USB 驱动器（如 U 盘和存储卡）的工具。"
+t MSG_901 "官方网站: %s"
+t MSG_902 "源代码: %s"
+t MSG_903 "更新日志: %s"
+t MSG_904 "本应用采用 GNU 通用公共许可证 (GPL) 第三版。\n具体许可证见 https://www.gnu.org/licenses/gpl-3.0.zh-cn.html。"
+t MSG_905 "启动"
+t MSG_910 "将 U 盘、存储卡或虚拟驱动器格式化为 FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3 格式"
+t MSG_911 "创建 FreeDOS  可启动驱动器"
+t MSG_912 "从可启动 ISO 文件 (Windows 和 Linux 等) 创建可启动驱动器"
+t MSG_913 "从可启动硬盘镜像 (包括压缩镜像) 创建可启动驱动器"
+t MSG_914 "创建 BIOS 或 UEFI 可启动驱动器，包括 UEFI 可启动的 NTFS 驱动器"
+t MSG_915 "创建 'Windows To Go' 驱动器"
+t MSG_916 "为没有 TPM 或安全启动功能的电脑创建 Windows 11 安装驱动器"
+t MSG_917 "创建持久 Linux 分区"
+t MSG_918 "为选择的驱动器创建 VHD/DD 镜像"
+t MSG_919 "计算被选择镜像的 MD5、SHA-1、SHA-256 和 SHA-512 校验码"
+t MSG_920 "执行坏块检查，包括对”假“U盘的检测"
+t MSG_921 "下载微软官方 Windows 镜像"
+t MSG_922 "下载 UEFI Shell 镜像"
 
 #########################################################################
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04

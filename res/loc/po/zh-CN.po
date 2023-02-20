@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2022-12-10 21:43+0800\n"
-"PO-Revision-Date: 2023-02-17 17:29+0000\n"
+"POT-Creation-Date: 2023-02-19 23:07+0800\n"
+"PO-Revision-Date: 2023-02-20 13:37+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -953,7 +953,7 @@ msgid "Download using a browser"
 msgstr "使用浏览器下载"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
 msgstr "由于短时间内下载过多，已被微软临时封禁。请稍后再试。"
 
 #. • MSG_145
@@ -1208,6 +1208,10 @@ msgstr "检测到非标准扇区大小"
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "'Windows To Go' 只可以在一个 GPT 分区的拥有 FIXED 属性设置的驱动器上安装当前驱动器没有被检测为 FIXED(固定盘)。"
+
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "此功能在此平台上不可用。"
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1821,7 +1825,7 @@ msgstr "Windows 用户体验"
 
 #. • MSG_328
 msgid "Customize Windows installation?"
-msgstr "自定义 Windows 安装"
+msgstr "自定义 Windows 安装？"
 
 #. • MSG_329
 msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
@@ -1845,4 +1849,101 @@ msgstr "创建一个使用此用户名的本地账号:"
 
 #. • MSG_334
 msgid "Set regional options to the same values as this user's"
-msgstr "使用当前的区域设置"
+msgstr "使用当前用户的区域设置"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "禁用 BitLocker 自动设备加密"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "持久化日志"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus 是一个帮助您格式化并创建可启动 USB 驱动器（如 U 盘和存储卡）的工具。"
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "官方网站: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "源代码: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "更新日志: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"本应用采用 GNU 通用公共许可证 (GPL) 第三版。\n"
+"具体许可证见 https://www.gnu.org/licenses/gpl-3.0.zh-cn.html。"
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr "启动"
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "将 U 盘、存储卡或虚拟驱动器格式化为 FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3 格式"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "创建 FreeDOS  可启动驱动器"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "从可启动 ISO 文件 (Windows 和 Linux 等) 创建可启动驱动器"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "从可启动硬盘镜像 (包括压缩镜像) 创建可启动驱动器"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "创建 BIOS 或 UEFI 可启动驱动器，包括 UEFI 可启动的 NTFS 驱动器"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "创建 'Windows To Go' 驱动器"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "为没有 TPM 或安全启动功能的电脑创建 Windows 11 安装驱动器"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "创建持久 Linux 分区"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "为选择的驱动器创建 VHD/DD 镜像"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "计算被选择镜像的 MD5、SHA-1、SHA-256 和 SHA-512 校验码"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "执行坏块检查，包括对”假“U盘的检测"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "下载微软官方 Windows 镜像"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "下载 UEFI Shell 镜像"
