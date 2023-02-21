@@ -365,32 +365,37 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 	if ((props->is_cfg) || (props->is_conf)) {
 		// Older versions of GRUB EFI used "linuxefi", newer just use "linux".
 		// Also, in their great wisdom, the openSUSE maintainers added a 'set linux=linux'
-		// line to their grub.cfg, which means that their kernel option token is no longer
+		// line to their grub.cfg, which means that their kernel option cfg_token is no longer
 		//'linux' but '$linux'... and we have to add a workaround for that.
-		// Finally, newer Arch and derivatives added an extra "search --label ..." command
+		// Then, newer Arch and derivatives added an extra "search --label ..." command
 		// in their GRUB conf, which we need to cater for in supplement of the kernel line.
-		static const char* grub_token[] = { "linux", "linuxefi", "$linux", "search" };
+		// Finally, we're just shoving the known isolinux/syslinux tokens in there to process
+		// all config files equally.
+		static const char* cfg_token[] = { "options", "append", "linux", "linuxefi", "$linux", "search" };
 		iso_label = replace_char(img_report.label, ' ', "\\x20");
 		usb_label = replace_char(img_report.usb_label, ' ', "\\x20");
 		if ((iso_label != NULL) && (usb_label != NULL)) {
-			if (props->is_grub_cfg) {
-				for (int i = 0; i < ARRAYSIZE(grub_token); i++)
-					if (replace_in_token_data(src, grub_token[i], iso_label, usb_label, TRUE) != NULL)
-						modified = TRUE;
-				if (modified)
-					uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
-			} else if (replace_in_token_data(src, (props->is_conf) ? "options" : "append",
-				iso_label, usb_label, TRUE) != NULL) {
-				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
-				modified = TRUE;
+			for (int i = 0; i < ARRAYSIZE(cfg_token); i++) {
+				if (replace_in_token_data(src, cfg_token[i], iso_label, usb_label, TRUE) != NULL)
+					modified = TRUE;
 			}
+			if (modified)
+				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
 			// Since version 8.2, and https://github.com/rhinstaller/anaconda/commit/a7661019546ec1d8b0935f9cb0f151015f2e1d95,
 			// Red Hat derivatives have changed their CD-ROM detection policy which leads to the installation source
 			// not being found. So we need to use 'inst.repo' instead of 'inst.stage2' in the kernel options.
-			if (img_report.rh8_derivative && (replace_in_token_data(src, props->is_grub_cfg ?
-				"linuxefi" : "append", "inst.stage2", "inst.repo", TRUE) != NULL)) {
-				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, "inst.stage2", "inst.repo");
-				modified = TRUE;
+			// *EXCEPT* this should not be done for netinst media such as Fedora 37 netinstall and trying to differentiate
+			// netinst from regular is a pain. So, because I don't have all day to fix the mess that Red-Hat created when
+			// they introduced a kernel option to decide where the source packages should be picked from we're just going
+			// to *hope* that users didn't rename their ISOs and check whether it contains 'netinst' or not. Oh well...
+			modified = FALSE;
+			if (img_report.rh8_derivative && (strstr(image_path, "netinst") == NULL)) {
+				for (int i = 0; i < ARRAYSIZE(cfg_token); i++) {
+					if (replace_in_token_data(src, cfg_token[i], "inst.stage2", "inst.repo", TRUE) != NULL)
+						modified = TRUE;
+				}
+				if (modified)
+					uprintf("  Patched %s: '%s' ➔ '%s'\n", src, "inst.stage2", "inst.repo");
 			}
 		}
 		safe_free(iso_label);
