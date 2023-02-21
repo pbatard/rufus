@@ -713,7 +713,7 @@ msgid ""
 "If you are sure you want to cancel, click YES. Otherwise, click NO."
 msgstr ""
 "La cancellazione potrebbe lasciare il dispositivo in uno stato NON USABILE.\n"
-"Sei sicuro di volerlo cancellare, seleziona 'SI'. Altrimenti, seleziona 'NO'."
+"Se sei sicuro di volerlo cancellare, seleziona 'SI'. Altrimenti, seleziona 'NO'."
 
 #. • MSG_106
 msgid "Please select folder"
