@@ -654,7 +654,7 @@ msgid ""
 "\n"
 "Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"IMPORTANTE: stai tentando di installare 'Windows To Go', ma l'unità destinazione non ha l'attributo 'FISSO'. Windows molto probabilmente si bloccherà durante il boot, poiché non è stato disegnato per lavorare con unità che hanno invece l'attributo 'RIMOVIBILE'.\n"
+"IMPORTANTE: stai tentando di installare 'Windows To Go', ma l'unità destinazione non ha l'attributo 'FISSO'. Windows molto probabilmente si bloccherà durante il boot, poiché non è stato progettato per lavorare con unità che hanno invece l'attributo 'RIMOVIBILE'.\n"
 "\n"
 "Vuoi ancora procedere?\n"
 "\n"
@@ -678,7 +678,7 @@ msgid ""
 "Do you want to visit the 7-zip download page?"
 msgstr ""
 "Il tuo sistema operativo non può estrarre file dall'archivio WIM. L'estrazione WIM è necessaria per creare una unità USB avviabile EFI Windows 7 e Windows Vista. Puoi correggere ciò installando una versione recente di 7-Zip.\n"
-"Vuoi visitare la pagina web in cui scaricare di 7-zip?"
+"Vuoi visitare la pagina web da cui scaricare 7-zip?"
 
 #. • MSG_103
 msgid "Download %s?"
@@ -856,7 +856,7 @@ msgstr ""
 
 #. • MSG_126
 msgid "Set the partition size units."
-msgstr "Imposta l'unità della dimensione partizione."
+msgstr "Imposta la dimensione di partizione dell'unità."
 
 #. • MSG_127
 msgid "Do not show this message again"
@@ -872,7 +872,7 @@ msgid ""
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
 "Hai appena creato un media che utilizza il bootloader UEFI:NTFS.\n"
-"Ricordati che per avviare questo supporto è NECESSARIO DISATTIVARE IL BOOT SICURO.\n"
+"Ricordati che per avviare questo supporto è NECESSARIO DISATTIVARE L'AVVIO PROTETTO.\n"
 "Per i dettagli sul motivo per cui è necessario, seleziona il pulsante 'Altre info'."
 
 #. • MSG_130
@@ -1511,7 +1511,7 @@ msgstr "Supporto ISO"
 #.
 #. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
 msgid "Use PROPER size units"
-msgstr "Usa unità dimensione CORRETTA"
+msgstr "Usa unità dimensione APPROPRIATA"
 
 #. • MSG_264
 msgid "Deleting directory '%s'"
@@ -1705,7 +1705,7 @@ msgid ""
 "\n"
 "In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
 msgstr ""
-"Rufus non può validare che la data/ora del pacchetto aggiornamento sia più recente di quello per l'attuale eseguibile.\n"
+"Rufus non può validare che la data/ora del pacchetto aggiornamento sia più recente di quelle per l'attuale eseguibile.\n"
 "\n"
 "Per prevenire possibili scenari di un attacco malware, il processo di aggiornamento è stato interrotto e il file scaricato verrà eliminato. Per maggiori dettagli controlla il registro eventi."
 
@@ -1832,9 +1832,7 @@ msgstr "Rimuovi requisiti per 4GB+ RAM, Secure Boot e TPM 2.0"
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
-msgstr ""
-"Rimuovi requisiti per Microsoft account\n"
-" online"
+msgstr "Rimuovi requisiti per Microsoft account online"
 
 #. • MSG_331
 msgid "Disable data collection (Skip privacy questions)"
@@ -1899,7 +1897,7 @@ msgstr "Avvio"
 #.
 #. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
 msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
-msgstr "Formatta USB, flash card unità virtuali in FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Formatta USB, flash card e unità virtuali in FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
 
 #. • MSG_911
 msgid "Create FreeDOS bootable USB drives"
