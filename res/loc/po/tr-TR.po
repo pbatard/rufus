@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-23 13:25+0000\n"
-"PO-Revision-Date: 2023-02-23 13:28+0000\n"
+"POT-Creation-Date: 2023-02-23 15:14+0300\n"
+"PO-Revision-Date: 2023-02-24 13:21+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: tr_TR\n"
@@ -33,7 +33,7 @@ msgstr "Seç"
 
 #. • IDD_DIALOG → IDS_IMAGE_OPTION_TXT
 msgid "Image Option"
-msgstr "İmaj Seçeneği"
+msgstr "Yansı Seçeneği"
 
 #. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
 msgid "Partition scheme"
@@ -288,31 +288,31 @@ msgstr "byte"
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr ""
+msgstr "KB"
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr ""
+msgstr "PB"
 
 #. • MSG_027
 msgid "kilobytes"
@@ -359,7 +359,7 @@ msgstr "%d geçiş %s"
 
 #. • MSG_036
 msgid "ISO Image"
-msgstr "ISO İmajı"
+msgstr "ISO Yansısı"
 
 #. • MSG_037
 msgid "Application"
@@ -395,7 +395,7 @@ msgstr "USB Depolama Aygıtı (Genel)"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
-msgstr ""
+msgstr "%s (Disk %d) [%s]"
 
 #. • MSG_047
 #.
@@ -729,7 +729,7 @@ msgstr "Rufus günlüğü"
 
 #. • MSG_109
 msgid "0x%02X (Disk %d)"
-msgstr ""
+msgstr "0x%02X (Disk %d)"
 
 #. • MSG_110
 #.
@@ -811,7 +811,7 @@ msgstr "Standart Windows yüklemesi"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr ""
+msgstr "Windows To Go"
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -966,7 +966,7 @@ msgstr "İndirme komutu çalıştırılıyor..."
 
 #. • MSG_149
 msgid "Download ISO Image"
-msgstr "ISO İmajını İndir"
+msgstr "ISO yansısı İndir"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
@@ -1094,6 +1094,7 @@ msgid "Version %d.%d (Build %d)"
 msgstr "Sürüm %d.%d (Yapı %d)"
 
 #. • MSG_176
+#, fuzzy
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
 msgstr "Türkçe Çeviri:\\line• Mehmetali KURAN <mailto:mehmetalikuran@gmail.com>\\line• İlhami TUĞRAL <mailto:ilhamitugral@gmail.com>"
 
@@ -1143,7 +1144,7 @@ msgstr ""
 
 #. • MSG_187
 msgid "Invalid image for selected boot option"
-msgstr "Seçilen açılış seçeneği için geçersiz imaj"
+msgstr "Seçilen açılış seçeneği için geçersiz yansı"
 
 #. • MSG_188
 msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
@@ -1542,7 +1543,7 @@ msgstr "Yansı sağlaması hesaplanıyor: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
-msgstr "Seçilen imaj için MD5, SHA1 ve SHA256 sağlamasını hesapla"
+msgstr "Seçilen yansı için MD5, SHA1 ve SHA256 sağlamasını hesapla"
 
 #. • MSG_273
 msgid "Change the application language"
@@ -1562,7 +1563,7 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"Seçtiğiniz yansı bir 'ISOHybrid' yansısıdır. Bu da yansının ya %s (dosya kopyalama) modunda ya da %s (disk imajı) modunda yazılabileceği anlamına geliyor.\n"
+"Seçtiğiniz yansı bir 'ISOHybrid' yansısıdır. Bu da yansının ya %s (dosya kopyalama) modunda ya da %s (disk yansısı) modunda yazılabileceği anlamına geliyor.\n"
 "Rufus %s modunun kullanılmasını önerir, Böylece yazdırmadan sonra, sürücüye her zaman tam erişim sağlanabilir.\n"
 "Ancak, Önyükleme sırasında sorunlarla karşılaşırsanız, yansıyı %s modunda yeniden yazmayı deneyebilirsiniz.\n"
 "\n"
@@ -1656,7 +1657,7 @@ msgid ""
 "The last version of Rufus compatible with this platform is v%d.%d."
 msgstr ""
 "Windows'un bu sürümü artık Rufus tarafından desteklenmiyor.\n"
-"Rufus'un bu platformla uyumlu son sürümü v%d.%d'tür."
+"Rufus'un bu platformla uyumlu son sürümü v%d.%d'dir."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2023-02-22 14:51+0000\n"
-"PO-Revision-Date: 2023-02-23 13:20+0000\n"
+"PO-Revision-Date: 2023-02-24 13:17+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_PT\n"
@@ -953,7 +953,7 @@ msgstr "Transferir no browser"
 
 #. • MSG_144
 msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
-msgstr "A transferência de ISOs do Windows não está disponível porque a Microsoft alterou oseu site para evitá-lo."
+msgstr "A transferência de ISOs do Windows não está disponível porque a Microsoft alterou o seu site para evitá-la."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
