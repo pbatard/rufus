@@ -1,9 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2021-04-06 17:15+0200\n"
-"PO-Revision-Date: 2021-04-06 21:34+0200\n"
+"POT-Creation-Date: 2023-02-26 22:16+0000\n"
+"PO-Revision-Date: 2023-02-26 22:16+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: sk_SK\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Slovak (Slovensky)\n"
 "X-Rufus-LCID: 0x041B\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -52,7 +52,7 @@ msgstr "Zobraziť zoznam USB pevných diskov (USB HDD)"
 #. It is acceptable to drop the parenthesis () if you are running out of space
 #. as there is a tooltip (MSG_169) providing these details.
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
-msgstr "Pridať úpravy pre staré BIOSy"
+msgstr "Pridať úpravy pre staré BIOSy (extra partície, ...)"
 
 #. • IDD_DIALOG → IDC_RUFUS_MBR
 #.
@@ -117,7 +117,7 @@ msgstr "Licencia"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
-msgstr "OK"
+msgstr ""
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
@@ -189,7 +189,7 @@ msgstr "Poznámky k vydaniu"
 #. • IDD_NEW_VERSION → IDC_DOWNLOAD
 #. • MSG_040
 msgid "Download"
-msgstr "Sťahovanie"
+msgstr "Stiahnuť"
 
 #. • MSG_001
 msgid "Other instance detected"
@@ -290,31 +290,31 @@ msgstr "bajtov"
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr "KB"
+msgstr ""
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr "MB"
+msgstr ""
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr "GB"
+msgstr ""
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr "TB"
+msgstr ""
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr "PB"
+msgstr ""
 
 #. • MSG_027
 msgid "kilobytes"
@@ -393,11 +393,11 @@ msgstr "Stiahnuť súbor"
 
 #. • MSG_045
 msgid "USB Storage Device (Generic)"
-msgstr "Úložné zariadenie USB (Generic)"
+msgstr "Úložné zariadenie USB (všeobecné)"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
-msgstr "%s (Disk %d) [%s]"
+msgstr ""
 
 #. • MSG_047
 #.
@@ -407,7 +407,7 @@ msgstr "Zariadenie s viacerým oddielmi"
 
 #. • MSG_048
 msgid "Rufus - Flushing buffers"
-msgstr "Rufus - Vyprázdňovanie bufferov"
+msgstr "Rufus - Vyprázdňovanie dočasnej pamäte"
 
 #. • MSG_049
 msgid "Rufus - Cancellation"
@@ -543,11 +543,11 @@ msgid ""
 "\n"
 "We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
 msgstr ""
-"Program Rufus zistil, že Windows stále vyprázdňuje interné buffery na USB zariadení.\n"
+"Program Rufus zistil, že Windows stále vyprázdňuje internú vyrovnávajúcu pamäť na USB zariadení.\n"
 "\n"
-"Doba tejto operácie závisí na rýchlosti vášho USB disku,  môže trvať dlhší čas, špeciálne pri veľkých súboroch.\n"
+"Doba tejto operácie závisí na rýchlosti vášho USB disku, môže trvať dlhší čas, špeciálne pri veľkých súboroch.\n"
 "\n"
-"Doporučujeme nechať Windows dokončiť akciu, zabránite tak poškodeniu dát.Ak bude operácia trvať príliš dlho, môžete odpojiť zariadenie..."
+"Doporučujeme nechať Windows dokončiť akciu, zabránite tak poškodeniu dát. Ak bude operácia trvať príliš dlho, môžete odpojiť zariadenie..."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -735,7 +735,7 @@ msgstr "Záznam programu Rufus"
 
 #. • MSG_109
 msgid "0x%02X (Disk %d)"
-msgstr "0x%02X (Disk %d)"
+msgstr ""
 
 #. • MSG_110
 #.
@@ -746,7 +746,7 @@ msgid ""
 "Please change the Cluster size or use FreeDOS."
 msgstr ""
 "MS-DOS nemôže byť bootovaný z jednotky používajúcich klastre s veľkosťou 64kb.\n"
-"Zmeňte veľkosť klastra alebo použite FREDOS."
+"Zmeňte veľkosť klastra alebo použite FreeDOS."
 
 #. • MSG_111
 msgid "Incompatible Cluster size"
@@ -756,7 +756,7 @@ msgstr "Nekompatibilná veľkosť klastra"
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "Formátovanie veľkých UDF zväzkov môže trvať dlhý čas. Rýchlosť USB 2.0 určuje trvanie formátovania (približne %d:%02d), počas procesu sa vám môže zdať, že aplikácia zamrzla. Budte trpezlivý!"
+msgstr "Formátovanie veľkých UDF zväzkov môže trvať dlhý čas. Rýchlosť USB 2.0 určuje trvanie formátovania (približne %d:%02d), počas procesu sa vám môže zdať, že aplikácia zamrzla. Buďte trpezlivý!"
 
 #. • MSG_113
 msgid "Large UDF volume"
@@ -876,7 +876,7 @@ msgid ""
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
 "Práve ste vytvorili médium, ktoré používa UEFI: NTFS bootloader. Pamätajte prosím, že na zavedenie tohto média, MUSÍTE VYPNÚŤ SECURE BOOT.\n"
-"Podrobnosti o tom, prečo je to potrebné, nájdete v nižšie uvedenom tlačidle \"Ďalšie informácie\"."
+"Podrobnosti o tom, prečo je to potrebné, nájdete v nižšie zobrazenom tlačidle \"Ďalšie informácie\"."
 
 #. • MSG_130
 msgid "Windows image selection"
@@ -904,9 +904,9 @@ msgid ""
 msgstr ""
 "Program Rufus zistil, že sa pokúšate vytvoriť Windows To Go médium založeného na 1809 ISO.\n"
 "\n"
-"Kvôli *MICROSOFT BUG*, toto médium môže zlyhať počas zavádzania systému Windows (modrá obrazovka smrti), pokiaľ manuálne nenahradíte súbor \"WppRecorder. sys\" verziou 1803.\n"
+"Kvôli *MICROSOFT BUG*, toto médium môže zlyhať počas zavádzania systému Windows (modrá obrazovka smrti), pokiaľ manuálne nenahradíte súbor „WppRecorder. sys\" verziou 1803.\n"
 "\n"
-"Dôvodom, prečo program Rufus nemôže automaticky toto opraviť to, že súbor \"WppRecorder.sys\" je chránený súbor spoločnosti Microsoft, takže nie je legálne vložiť kópiu súboru do aplikácie..."
+"Dôvodom, prečo program Rufus nemôže automaticky toto opraviť to, že súbor „WppRecorder.sys\" je chránený súbor spoločnosti Microsoft, takže nie je legálne vložiť kópiu súboru do aplikácie..."
 
 #. • MSG_134
 msgid ""
@@ -952,11 +952,11 @@ msgstr "Čakajte prosím..."
 
 #. • MSG_143
 msgid "Download using a browser"
-msgstr "Prevzatie pomocou prehliadača"
+msgstr "Sťahovanie pomocou prehliadača"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Dočasne zakázané spoločnosťou Microsoft pre príliš časté pokusy o sťahovanie. Skúste to prosím neskôr..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "Sťahovanie bolo zakázané spoločnosťou Microsoft, pretože Microsoft zmenil svoju stránku, aby tomu zabránil."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -964,11 +964,11 @@ msgstr "Pre spustenie tohto skriptu je potrebný PowerShell 3.0 alebo novší."
 
 #. • MSG_146
 msgid "Do you want to go online and download it?"
-msgstr "Chcete prejsť do režimu online a stiahnúť ho?"
+msgstr "Chcete prejsť do režimu online a stiahnuť ho?"
 
 #. • MSG_148
 msgid "Running download script..."
-msgstr "Spúšťanie sťahovania skriptu..."
+msgstr "Spúšťanie skriptu sťahovania..."
 
 #. • MSG_149
 msgid "Download ISO Image"
@@ -1032,7 +1032,7 @@ msgstr ""
 
 #. • MSG_162
 msgid "Uncheck this box to use the \"slow\" format method"
-msgstr "Odznačením tohto políčka použijete pomalú metódu formátovania"
+msgstr "Odznačením tohto políčka použijete „pomalú\" metódu formátovania"
 
 #. • MSG_163
 msgid "Method that will be used to create partitions"
@@ -1211,6 +1211,10 @@ msgstr "Zistená neštandardná veľkosť sektora"
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "„Windows To Go\" môže byť nainštalovaný iba na oddiely rozdelenú GPT jednotku ak má nastavený atribút UPRAVENÝ. Aktuálna jednotka nebola zistená ako UPRAVENÁ."
 
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "Táto funkcia nie je na tejto platforme k dispozícii."
+
 #. • MSG_201
 msgid "Cancelling - Please wait..."
 msgstr "Ukončuje sa operácia - čakajte prosím..."
@@ -1276,11 +1280,11 @@ msgstr "NEÚSPEŠNÉ"
 #.
 #. Used when a new update has been downloaded and launched
 msgid "Launching new application..."
-msgstr "Spúšťanie aktualizovaného programu..."
+msgstr "Spúšťanie novej aplikácie..."
 
 #. • MSG_214
 msgid "Failed to launch new application"
-msgstr "Neúspešné spustenie aktualizovaného programu"
+msgstr "Neúspešné spustenie novej aplikácie"
 
 #. • MSG_215
 #.
@@ -1410,7 +1414,7 @@ msgid ""
 "\n"
 "The download will be deleted. Please check the log for more details."
 msgstr ""
-"Podpis stiahnutej aktualizáce nemôže byť overený. To by mohlo znamenať, že váš systém nie je správne nastavený pre overenie podpisu alebo indikuje škodlivé sťahovanie.\n"
+"Podpis stiahnutej aktualizácie nemôže byť overený. To by mohlo znamenať, že váš systém nie je správne nastavený pre overenie podpisu alebo indikuje škodlivé sťahovanie.\n"
 "\n"
 "Stiahnutý súbor bude vymazaný. Pre viac informácií skontrolujte záznam."
 
@@ -1436,7 +1440,7 @@ msgstr "Aktualizácia: Nedostupné údaje o verzii"
 
 #. • MSG_246
 msgid "A new version of Rufus is available!"
-msgstr "Je dostuná nová verzia programu Rufus!"
+msgstr "Je dostupná nová verzia programu Rufus!"
 
 #. • MSG_247
 msgid "No new version of Rufus was found"
@@ -1444,7 +1448,7 @@ msgstr "Nebola nájdená novšia verzia programu"
 
 #. • MSG_248
 msgid "Application registry keys successfully deleted"
-msgstr "Kľúče registrov programu boli vymazané"
+msgstr "Kľúče registrov programu boli úspešné vymazané"
 
 #. • MSG_249
 msgid "Failed to delete application registry keys"
@@ -1470,7 +1474,7 @@ msgstr "Vyhľadávanie USB HDD"
 
 #. • MSG_254
 msgid "Force large FAT32 formatting"
-msgstr "Formátovanie force large FAT32"
+msgstr "Formátovanie Force large FAT32"
 
 #. • MSG_255
 msgid "NoDriveTypeAutorun will be deleted on exit"
@@ -1632,7 +1636,7 @@ msgstr "Zisťovanie nie-USB vymeniteľných zariadení"
 
 #. • MSG_288
 msgid "Missing elevated privileges"
-msgstr "Chýbajúce oprávnenia"
+msgstr "Chýbajúce zvýšené oprávnenia"
 
 #. • MSG_289
 msgid "This application can only run with elevated privileges"
@@ -1655,8 +1659,12 @@ msgid "Unsupported Windows version"
 msgstr "Nepodporovaná veria systému Windows"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Táto verzia systému Windows už nie je podporovaná programom Rufus."
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"Táto verzia systému Windows už nie je podporovaná programom Rufus.\n"
+"Posledná verzia programu Rufus je kompatibilná s touto platformou: v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1688,7 +1696,7 @@ msgstr ""
 "\n"
 "Ak ste získali tento súbor z internetu, pokúste sa znova stiahnuť novú kópiu tohto súboru a overiť ju MD5 alebo SHA kontrolným súčtom s originálnym súborom.\n"
 "\n"
-"Ak chcete vypočítať kontrólny súčet MD5 alebo SHA pre vybraný súbor v programe Rufus, stlačte tlačidlo (✓)."
+"Ak chcete vypočítať kontrolný súčet MD5 alebo SHA pre vybraný súbor v programe Rufus, stlačte tlačidlo (✓)."
 
 #. • MSG_299
 msgid "Timestamp validation error"
@@ -1721,8 +1729,8 @@ msgid "Create a disk image of the selected device"
 msgstr "Vytvoriť obraz disku z vybraného zariadenia"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "Použite túto možnosť, ak chcete použiť toto zariadenie na inštaláciu systému Windows na iný disk, alebo ak chcete spustiť systém Windows priamo z tohto zariadenia (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "Pomocou tejto možnosti môže použiť toto zariadenie na inštaláciu systému Windows na iný disk, alebo ak chcete spustiť systém Windows priamo z tohto zariadenia (Windows To Go)."
 
 #. • MSG_306
 #.
@@ -1732,8 +1740,8 @@ msgid "Fast-zeroing drive: %s"
 msgstr "Rýchle vymazávanie zariadenia: %s"
 
 #. • MSG_307
-msgid "This may take a while"
-msgstr "Môže to chvíľu trvať"
+msgid "this may take a while"
+msgstr "môže to chvíľu trvať"
 
 #. • MSG_308
 msgid "VHD detection"
@@ -1800,3 +1808,144 @@ msgid ""
 msgstr ""
 "Obráz, ktorý ste vybrali, je ISOHybrid a nie je kompatibilný s ISO/režim kopírovania súboru.\n"
 "V dôsledku toho sa vynúti režim zápisu obrazu DD."
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "Nedá sa otvoriť alebo prečítať „%s\""
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "Použitie prispôsobenia systému Windows: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "Použitie používateľských nastavení..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "Používateľská skúsenosť so systémom Windows"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "Prajete si prispôsobiť inštaláciu systému Windows?"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "Odstrániť požiadavku pre 4GB+ RAM, Secure Boot a TPM 2.0"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "Odstrániť požiadavky na online konto Microsoft"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "Zakázať zhromažďovanie údajov (preskočiť otázky týkajúce sa ochrany osobných údajov)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "Zabrániť funkcii Windows To Go v prístupe na interné disky"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "Vytvorte si lokálny účet s používateľským menom:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "Nastaviť miestne možnosti na rovnaké hodnoty, ako možnosti tohto používateľa"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "Vypnutie automatického šifrovania zariadenia BitLocker"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "Trvalý záznam činností"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus je utilita, ktorá vám pomôže naformátovať a vytvoriť bootovacie jednotky USB Flash, ako sú napr. USB kľúče, pamäťové karty, atď."
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "Oficiálna stránka: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "Zdrojový kód: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "Zoznam zmien: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"Táto aplikácia je licencovaná podľa podmienok GNU Public License (GPL) verzia 3.\n"
+"Podrobnosti nájdete na https://www.gnu.org/licenses/gpl-3.0.html."
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr ""
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Naformátujte USB, kartu a virtuálne disky do FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "Vytvorte bootovacie usb zariadenia FreeDOS"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "Vytvorte bootovacie jednotky z ISO súborov (Windows, Linux atď.)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "Vytvorte bootovacie jednotky z diskových obrazov, vrátane tých komprimovaných"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "Vytvorte bootovacie jednotky systému BIOS alebo UEFI vrátane UEFI bootovateľnej jednotky NTFS"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "Vytvorte jednotky „Windows To Go\""
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "Vytvorte inštalačné jednotky Windows 11 pre počítače, ktoré nemajú modul TPM, ani Secure Boot"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "Vytvorte trvalé oblasti systému Linux"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "Vytvorte obrazy VHD/DD z vybratej jednotky"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "Vypočítajte kontrolné súčty vybratého obrazu (MD5, SHA-1, SHA-256 a SHA-512)"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "Vykonajte kontroly zlých blokov vrátane detekcie „falošných\" prenosných diskov"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "Stiahnite si oficiálne ISO pre Microsoft Windows"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "Stiahnite UEFI Shell ISO"
