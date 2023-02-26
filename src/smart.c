@@ -440,8 +440,8 @@ BOOL SmartGetVersion(HANDLE hdevice)
  */
 int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 {
-	int score = 0, score_list_size = 0;
-	size_t i, mlen, ilen;
+	int score = 0;
+	size_t i, mlen, ilen, score_list_size = 0;
 	BOOL wc;
 	uint64_t drive_size;
 	int8_t score_list[16];

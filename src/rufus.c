@@ -1894,13 +1894,48 @@ static __inline const char* IsAlphaOrBeta(void)
 #endif
 }
 
+static __inline DWORD GetApplicationArch(void)
+{
+#if defined(_M_AMD64)
+	return IMAGE_FILE_MACHINE_AMD64;
+#elif defined(_M_IX86)
+	return IMAGE_FILE_MACHINE_I386;
+#elif defined(_M_ARM64)
+	return IMAGE_FILE_MACHINE_ARM64;
+#elif defined(_M_ARM)
+	return IMAGE_FILE_MACHINE_ARM;
+#else
+	return IMAGE_FILE_MACHINE_UNKNOWN;
+#endif
+}
+
+static const char* GetArchName(USHORT uArch)
+{
+	switch (uArch) {
+	case IMAGE_FILE_MACHINE_AMD64:
+		return "x64";
+	case IMAGE_FILE_MACHINE_I386:
+		return "x86";
+	case IMAGE_FILE_MACHINE_ARM64:
+		return "Arm64";
+	case IMAGE_FILE_MACHINE_ARM:
+		return "Arm";
+	default:
+		return "(Unknown Arch)";
+	}
+}
+
 static void InitDialog(HWND hDlg)
 {
 	DWORD len;
 	HDC hDC;
+	USHORT ProcessMachine = IMAGE_FILE_MACHINE_UNKNOWN, NativeMachine = IMAGE_FILE_MACHINE_UNKNOWN;
 	int i, lfHeight;
 	char tmp[128], *token, *buf, *ext, *msg;
 	static char* resource[2] = { MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V6_SYS) };
+
+	PF_TYPE_DECL(WINAPI, BOOL, IsWow64Process2, (HANDLE, USHORT*, USHORT*));
+	PF_INIT(IsWow64Process2, Kernel32);
 
 #ifdef RUFUS_TEST
 	ShowWindow(GetDlgItem(hDlg, IDC_TEST), SW_SHOW);
@@ -1987,6 +2022,16 @@ static void InitDialog(HWND hDlg)
 	}
 	uprintf(APPLICATION_NAME " " APPLICATION_ARCH " v%d.%d.%d%s%s", rufus_version[0], rufus_version[1], rufus_version[2],
 		IsAlphaOrBeta(), (ini_file != NULL)?"(Portable)": (appstore_version ? "(AppStore version)" : ""));
+	// Display a notice if running x86 emulation on ARM
+	// Oh, and https://devblogs.microsoft.com/oldnewthing/20220209-00/?p=106239 is *WRONG*:
+	// Get­Native­System­Info() will not tell you what the native system architecture is when
+	// running x86 code on ARM64. Instead you have to use IsWow64Process2(), which is only
+	// available on Windows 10 1511 or later...
+	if ((pfIsWow64Process2 != NULL) && pfIsWow64Process2(GetCurrentProcess(), &ProcessMachine, &NativeMachine)) {
+		if ((NativeMachine == IMAGE_FILE_MACHINE_ARM || NativeMachine == IMAGE_FILE_MACHINE_ARM64) &&
+			(ProcessMachine == IMAGE_FILE_MACHINE_I386 || ProcessMachine == IMAGE_FILE_MACHINE_I386))
+			uprintf("Notice: Running emulated on %s platform", GetArchName(NativeMachine));
+	}
 	for (i = 0; i < ARRAYSIZE(resource); i++) {
 		len = 0;
 		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, TRUE);
