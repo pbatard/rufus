@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
- * Copyright © 2011-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
  * Based on libcdio's iso & udf samples:
  * Copyright © 2003-2014 Rocky Bernstein <rocky@gnu.org>
  *
@@ -607,8 +607,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	return 0;
 
 out:
-	if (p_udf_dirent != NULL)
-		udf_dirent_free(p_udf_dirent);
+	udf_dirent_free(p_udf_dirent);
 	ISO_BLOCKING(safe_closehandle(file_handle));
 	safe_free(psz_sanpath);
 	safe_free(psz_fullpath);
@@ -677,7 +676,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size, err;
 	EXTRACT_PROPS props;
-	BOOL is_symlink, is_identical;
+	BOOL is_symlink, is_identical, free_p_statbuf = FALSE;
 	int length, r = 1;
 	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename = NULL, *psz_sanpath = NULL;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
@@ -708,6 +707,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	_CDIO_LIST_FOREACH(p_entnode, p_entlist) {
 		if (FormatStatus) goto out;
 		p_statbuf = (iso9660_stat_t*) _cdio_list_node_data(p_entnode);
+		free_p_statbuf = FALSE;
 		if (scan_only && (p_statbuf->rr.b3_rock == yep) && enable_rockridge) {
 			if (p_statbuf->rr.u_su_fields & ISO_ROCK_SUF_PL) {
 				if (!img_report.has_deep_directories)
@@ -738,13 +738,9 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			safe_strcpy(psz_basename, sizeof(psz_fullpath) - length - 1, p_statbuf->filename);
 			if (safe_strlen(p_statbuf->filename) > 64)
 				img_report.has_long_filename = TRUE;
-			// libcdio has a memleak for Rock Ridge symlinks. It doesn't look like there's an easy fix there as
-			// a generic list that's unaware of RR extensions is being used, so we prevent that memleak ourselves
 			is_symlink = (p_statbuf->rr.psz_symlink != NULL);
 			if (is_symlink)
 				img_report.has_symlinks = SYMLINKS_RR;
-			if (scan_only)
-				safe_free(p_statbuf->rr.psz_symlink);
 		} else {
 			iso9660_name_translate_ext(p_statbuf->filename, psz_basename, joliet_level);
 		}
@@ -768,7 +764,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (check_iso_props(psz_path, file_length, psz_basename, psz_fullpath, &props)) {
 				continue;
 			}
-			print_extracted_file(psz_fullpath, file_length);
+			if (!is_symlink)
+				print_extracted_file(psz_fullpath, file_length);
 			for (i = 0; i < NB_OLD_C32; i++) {
 				if (props.is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
@@ -786,15 +783,35 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				uprintf("  File name sanitized to '%s'", psz_sanpath);
 			if (is_symlink) {
 				if (file_length == 0) {
-					// Special handling for ISOs that have a syslinux → isolinux symbolic link (e.g. Knoppix)
 					if ((safe_stricmp(p_statbuf->filename, "syslinux") == 0) &&
+						// Special handling for ISOs that have a syslinux → isolinux symbolic link (e.g. Knoppix)
 						(safe_stricmp(p_statbuf->rr.psz_symlink, "isolinux") == 0)) {
 						static_strcpy(symlinked_syslinux, psz_fullpath);
+						print_extracted_file(psz_fullpath, file_length);
 						uprintf("  Found Rock Ridge symbolic link to '%s'", p_statbuf->rr.psz_symlink);
-					} else
+					} else if (strcmp(psz_path, "/firmware") == 0) {
+						// Special handling for ISOs that use symlinks for /firmware/ (e.g. Debian non-free)
+						// TODO: Do we want to do this for all file symlinks?
+						char target_path[256];
+						static_sprintf(target_path, "%s/%s", psz_path, p_statbuf->rr.psz_symlink);
+						p_statbuf = iso9660_ifs_stat_translate(p_iso, target_path);
+						if (p_statbuf != NULL) {
+							// The original p_statbuf will be freed automatically, but not
+							// the new one so we need to force an explicit free.
+							free_p_statbuf = TRUE;
+							file_length = p_statbuf->total_size;
+							print_extracted_file(psz_fullpath, file_length);
+							uprintf("  Duplicated from '%s'", target_path);
+						} else {
+							uprintf("Could not resolve Rock Ridge Symlink - ABORTING!");
+							goto out;
+						}
+					} else {
+						// TODO: Ideally, we'd want to create a text file that contains the target link
+						print_extracted_file(psz_fullpath, file_length);
 						uprintf("  Ignoring Rock Ridge symbolic link to '%s'", p_statbuf->rr.psz_symlink);
+					}
 				}
-				safe_free(p_statbuf->rr.psz_symlink);
 			}
 			file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
 				FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
@@ -830,6 +847,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 				if (!SetFileTime(file_handle, ft, ft, ft))
 					uprintf("  Could not set timestamp: %s", WindowsErrorString());
 			}
+			if (free_p_statbuf)
+				iso9660_stat_free(p_statbuf);
 			ISO_BLOCKING(safe_closehandle(file_handle));
 			if (props.is_cfg || props.is_conf)
 				fix_config(psz_sanpath, psz_path, psz_basename, &props);
@@ -1245,10 +1264,8 @@ out:
 			bled_exit();
 		}
 	}
-	if (p_iso != NULL)
-		iso9660_close(p_iso);
-	if (p_udf != NULL)
-		udf_close(p_udf);
+	iso9660_close(p_iso);
+	udf_close(p_udf);
 	if ((r != 0) && (FormatStatus == 0))
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR((scan_only?ERROR_ISO_SCAN:ERROR_ISO_EXTRACT));
 	return (r == 0);
@@ -1342,17 +1359,11 @@ try_iso:
 
 out:
 	safe_closehandle(file_handle);
-	if (p_statbuf != NULL)
-		safe_free(p_statbuf->rr.psz_symlink);
-	safe_free(p_statbuf);
-	if (p_udf_root != NULL)
-		udf_dirent_free(p_udf_root);
-	if (p_udf_file != NULL)
-		udf_dirent_free(p_udf_file);
-	if (p_iso != NULL)
-		iso9660_close(p_iso);
-	if (p_udf != NULL)
-		udf_close(p_udf);
+	iso9660_stat_free(p_statbuf);
+	udf_dirent_free(p_udf_root);
+	udf_dirent_free(p_udf_file);
+	iso9660_close(p_iso);
+	udf_close(p_udf);
 	return r;
 }
 
@@ -1412,17 +1423,11 @@ try_iso:
 	r = wim_header[3];
 
 out:
-	if (p_statbuf != NULL)
-		safe_free(p_statbuf->rr.psz_symlink);
-	safe_free(p_statbuf);
-	if (p_udf_root != NULL)
-		udf_dirent_free(p_udf_root);
-	if (p_udf_file != NULL)
-		udf_dirent_free(p_udf_file);
-	if (p_iso != NULL)
-		iso9660_close(p_iso);
-	if (p_udf != NULL)
-		udf_close(p_udf);
+	iso9660_stat_free(p_statbuf);
+	udf_dirent_free(p_udf_root);
+	udf_dirent_free(p_udf_file);
+	iso9660_close(p_iso);
+	udf_close(p_udf);
 	safe_free(wim_path);
 	return bswap_uint32(r);
 }
@@ -1541,12 +1546,9 @@ BOOL HasEfiImgBootLoaders(void)
 out:
 	if (lf_fs != NULL)
 		libfat_close(lf_fs);
-	if (p_statbuf != NULL)
-		safe_free(p_statbuf->rr.psz_symlink);
-	safe_free(p_statbuf);
+	iso9660_stat_free(p_statbuf);
+	iso9660_close(p_iso);
 	safe_free(p_private);
-	if (p_iso != NULL)
-		iso9660_close(p_iso);
 	return ret;
 }
 
@@ -1671,12 +1673,9 @@ out:
 			libfat_close(lf_fs);
 			lf_fs = NULL;
 		}
-		if (p_statbuf != NULL)
-			safe_free(p_statbuf->rr.psz_symlink);
-		safe_free(p_statbuf);
+		iso9660_stat_free(p_statbuf);;
+		iso9660_close(p_iso);
 		safe_free(p_private);
-		if (p_iso != NULL)
-			iso9660_close(p_iso);
 	}
 	safe_closehandle(handle);
 	safe_free(name);
