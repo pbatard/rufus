@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2020 Pete Batard <pete@akeo.ie>
-  Copyright (C) 2005, 2008, 2010-2011, 2014, 2017 Rocky Bernstein
+  Copyright (C) 2020, 2023 Pete Batard <pete@akeo.ie>
+  Copyright (C) 2005, 2008, 2010-2011, 2014, 2017, 2022 Rocky Bernstein
   <rocky@gnu.org>
 
   Adapted from GNU/Linux fs/isofs/rock.c (C) 1992, 1993 Eric Youngdale
@@ -94,34 +94,36 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
 
 /* This is a way of ensuring that we have something in the system
    use fields that is compatible with Rock Ridge */
-#define CHECK_SP(FAIL)	       			\
-      if(rr->u.SP.magic[0] != 0xbe) FAIL;	\
-      if(rr->u.SP.magic[1] != 0xef) FAIL;       \
+#define CHECK_SP(FAIL)				\
+      if (rr->u.SP.magic[0] != 0xbe) FAIL;	\
+      if (rr->u.SP.magic[1] != 0xef) FAIL;	\
       p_stat->rr.s_rock_offset = rr->u.SP.skip;
 /* We define a series of macros because each function must do exactly the
    same thing in certain places.  We use the macros to ensure that everything
    is done correctly */
 
 #define CONTINUE_DECLS \
-  int cont_extent = 0, cont_offset = 0, cont_size = 0;   \
-  void *buffer = NULL
+  uint32_t cont_extent = 0, cont_offset = 0, cont_size = 0;	\
+  uint8_t *buffer = NULL
 
-#define CHECK_CE				 \
-  { cont_extent = from_733(*rr->u.CE.extent);	 \
-    cont_offset = from_733(*rr->u.CE.offset);	 \
-    cont_size = from_733(*rr->u.CE.size);	 \
-    (void)cont_extent; (void)cont_offset, (void)cont_size; }
+#define CHECK_CE(FAIL)				\
+  { cont_extent = from_733(*rr->u.CE.extent);	\
+    cont_offset = from_733(*rr->u.CE.offset);	\
+    if (cont_offset >= ISO_BLOCKSIZE) FAIL;	\
+    cont_size = from_733(*rr->u.CE.size);	\
+    if (cont_size >= ISO_BLOCKSIZE) FAIL;	\
+  }
 
-#define SETUP_ROCK_RIDGE(DE,CHR,LEN)	      		      	\
+#define SETUP_ROCK_RIDGE(DE,CHR,LEN)				\
   {								\
     LEN= sizeof(iso9660_dir_t) + DE->filename.len;		\
-    if(LEN & 1) LEN++;						\
+    if (LEN & 1) LEN++;						\
     CHR = ((unsigned char *) DE) + LEN;				\
     LEN = *((unsigned char *) DE) - LEN;			\
     if (0xff != p_stat->rr.s_rock_offset)			\
       {								\
-	LEN -= p_stat->rr.s_rock_offset;		       	\
-	CHR += p_stat->rr.s_rock_offset;		       	\
+	LEN -= p_stat->rr.s_rock_offset;			\
+	CHR += p_stat->rr.s_rock_offset;			\
 	if (LEN<0) LEN=0;					\
       }								\
   }
@@ -130,22 +132,22 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
    the specified field of a iso_rock_statbuf_t.
    non-paramater variables are p_stat, rr, and cnt.
 */
-#define add_time(FLAG, TIME_FIELD)				  \
-  if (rr->u.TF.flags & FLAG) {					  \
-    p_stat->rr.TIME_FIELD.b_used = true;			  \
-    p_stat->rr.TIME_FIELD.b_longdate =				  \
-      (0 != (rr->u.TF.flags & ISO_ROCK_TF_LONG_FORM));		  \
-    if (p_stat->rr.TIME_FIELD.b_longdate) {			  \
-      memcpy(&(p_stat->rr.TIME_FIELD.t.ltime),			  \
-	     &(rr->u.TF.time_bytes[cnt]),			  \
-	     sizeof(iso9660_ltime_t)); 				  \
-      cnt += sizeof(iso9660_ltime_t);				  \
-    } else {							  \
-      memcpy(&(p_stat->rr.TIME_FIELD.t.dtime),			  \
-	     &(rr->u.TF.time_bytes[cnt]),			  \
-	     sizeof(iso9660_dtime_t)); 				  \
-      cnt += sizeof(iso9660_dtime_t);				  \
-    }								  \
+#define add_time(FLAG, TIME_FIELD)				\
+  if (rr->u.TF.flags & FLAG) {					\
+    p_stat->rr.TIME_FIELD.b_used = true;			\
+    p_stat->rr.TIME_FIELD.b_longdate =				\
+      (0 != (rr->u.TF.flags & ISO_ROCK_TF_LONG_FORM));		\
+    if (p_stat->rr.TIME_FIELD.b_longdate) {			\
+      memcpy(&(p_stat->rr.TIME_FIELD.t.ltime),			\
+	     &(rr->u.TF.time_bytes[cnt]),			\
+	     sizeof(iso9660_ltime_t));				\
+      cnt += sizeof(iso9660_ltime_t);				\
+    } else {							\
+      memcpy(&(p_stat->rr.TIME_FIELD.t.dtime),			\
+	     &(rr->u.TF.time_bytes[cnt]),			\
+	     sizeof(iso9660_dtime_t));				\
+      cnt += sizeof(iso9660_dtime_t);				\
+    }								\
   }
 
 /* Indicates if we should process deep directory entries */
@@ -202,7 +204,7 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
 
       switch(sig) {
       case SIG('S','P'):
-	CHECK_SP(goto out);
+	CHECK_SP({cdio_warn("Invalid Rock Ridge SP field"); goto out;});
 	p_stat->rr.u_su_fields |= ISO_ROCK_SUF_SP;
 	break;
       case SIG('C','E'):
@@ -213,8 +215,17 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
 	  if ('\1' == p_iso9660_dir->filename.str[1] && 1 == i_fname)
 	    break;
 	}
-	CHECK_CE;
+	CHECK_CE({cdio_warn("Invalid Rock Ridge CE field"); goto out;});
 	p_stat->rr.u_su_fields |= ISO_ROCK_SUF_CE;
+	/* We may already be processing a continuation block so free it */
+	free(buffer);
+	buffer = calloc(1, ISO_BLOCKSIZE);
+	if (!buffer)
+	  goto out;
+	if (iso9660_iso_seek_read(p_image, buffer, cont_extent, 1) != ISO_BLOCKSIZE)
+	  goto out;
+	chr = &buffer[cont_offset];
+	len = cont_size;
 	break;
       case SIG('E','R'):
 	cdio_debug("ISO 9660 Extensions: ");
@@ -471,7 +482,7 @@ iso9660_get_rock_attr_str(posix_mode_t st_mode)
   result[ 8] = (st_mode & ISO_ROCK_IWOTH) ? 'w' : '-';
   result[ 9] = (st_mode & ISO_ROCK_IXOTH) ? 'x' : '-';
 
-  result[11] = '\0';
+  result[10] = '\0';
 
   return result;
 }

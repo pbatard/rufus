@@ -98,23 +98,23 @@ PRAGMA_BEGIN_PACKED
 
 /*! system-use-sharing protocol */
 typedef struct iso_su_sp_s{
-  unsigned char magic[2];
+  uint8_t       magic[2];
   uint8_t       skip;
 } GNUC_PACKED iso_su_sp_t;
 
 /*! system-use extension record */
 typedef struct iso_su_er_s {
   iso711_t      len_id;  /**< Identifier length. Value 10?. */
-  unsigned char len_des;
-  unsigned char len_src;
+  uint8_t       len_des;
+  uint8_t       len_src;
   iso711_t      ext_ver; /**< Extension version. Value 1? */
-  char data[EMPTY_ARRAY_SIZE];
+  char          data[EMPTY_ARRAY_SIZE];
 } GNUC_PACKED iso_su_er_t;
 
 typedef struct iso_su_ce_s {
-  char extent[8];
-  char offset[8];
-  char size[8];
+  uint8_t       extent[8];
+  uint8_t       offset[8];
+  uint8_t       size[8];
 } iso_su_ce_t;
 
 /*! POSIX file attributes, PX. See Rock Ridge Section 4.1.2 */
@@ -165,7 +165,7 @@ typedef struct iso_rock_sl_part_s {
 
 /*! Symbolic link. See Rock Ridge Section 4.1.3 */
 typedef struct iso_rock_sl_s {
-  unsigned char flags;
+  uint8_t flags;
   iso_rock_sl_part_t link;
 } GNUC_PACKED iso_rock_sl_t ;
 
@@ -184,7 +184,7 @@ typedef enum {
 
 
 typedef struct iso_rock_nm_s {
-  unsigned char flags;
+  uint8_t flags;
   char name[EMPTY_ARRAY_SIZE];
 } GNUC_PACKED iso_rock_nm_t ;
 
