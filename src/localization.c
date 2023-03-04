@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Localization functions, a.k.a. "Everybody is doing it wrong but me!"
- * Copyright © 2013-2017 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -627,7 +627,7 @@ const char* get_name_from_id(int id)
  * pack having been installed.
  */
 static BOOL found_lang;
-static BOOL CALLBACK EnumUILanguagesProc(LPTSTR lpUILanguageString, LONG_PTR lParam)
+static BOOL CALLBACK EnumUILanguagesProc(LPWSTR lpUILanguageString, LONG_PTR lParam)
 {
 	wchar_t* wlang = (wchar_t*)lParam;
 	if (wcscmp(wlang, lpUILanguageString) == 0)

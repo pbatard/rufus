@@ -3636,8 +3636,9 @@ skip_args_processing:
 	// Init localization
 	init_localization();
 
-	// Seek for a loc file in the current directory
-	if (GetFileAttributesU(rufus_loc) == INVALID_FILE_ATTRIBUTES) {
+	// Seek for a loc file in the application directory
+	static_sprintf(loc_file, "%s\\%s", app_dir, rufus_loc);
+	if (GetFileAttributesU(loc_file) == INVALID_FILE_ATTRIBUTES) {
 		uprintf("loc file not found in current directory - embedded one will be used");
 
 		loc_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_LC_RUFUS_LOC), _RT_RCDATA, "embedded.loc", &loc_size, FALSE);
@@ -3661,9 +3662,9 @@ skip_args_processing:
 		uprintf("localization: extracted data to '%s'", loc_file);
 		safe_closehandle(hFile);
 	} else {
-		static_sprintf(loc_file, "%s\\%s", app_dir, rufus_loc);
 		external_loc_file = TRUE;
-		uprintf("using external loc file '%s'", loc_file);
+		// We do want to report if an external loc file is being used, in the UI log
+		ubprintf("Using external loc file '%s'", loc_file);
 	}
 
 	if ( (!get_supported_locales(loc_file))
