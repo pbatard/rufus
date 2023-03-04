@@ -1,9 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2021-04-06 09:41+0300\n"
-"PO-Revision-Date: 2021-04-06 10:41+0300\n"
+"POT-Creation-Date: 2023-03-03 15:43+0200\n"
+"PO-Revision-Date: 2023-03-03 16:58+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: fi_FI\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Finnish (Suomi)\n"
 "X-Rufus-LCID: 0x040B\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -949,8 +949,8 @@ msgid "Download using a browser"
 msgstr "Lataa käyttäen selainta"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Väliaikaisesti estetty Microsoftin toimesta liian usean latauspyynnön vuoksi - Yritä myöhemmin uudelleen..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "Windowsin ISO-levykuvien lataaminen ei ole mahdollista, koska Microsoft on muuttanut verkkosivujaan sen estämiseksi."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -1202,6 +1202,10 @@ msgstr "Epästandardi sektorikoko havaittu"
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "'Windows To Go' voidaan asentaa GPT-osioidulle asemalla vain, jos asema on merkitty kiinteäksi. Valittua asemaa ei havaittu asetetuksi kiinteäksi."
+
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "Tämä ominaisuus ei ole käytettävissä tällä alustalla."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1647,8 +1651,12 @@ msgid "Unsupported Windows version"
 msgstr "Tätä Windows-versiota ei tueta"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Rufus ei enää tue tätä Windows-versiota."
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"Rufus ei enää tue tätä Windows-versiota.\n"
+"Viimeisin alustan kanssa yhteensopiva Rufus-versio on v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1713,8 +1721,8 @@ msgid "Create a disk image of the selected device"
 msgstr "Luo levykuva valitusta laitteesta"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "Käytä tätä vaihtoehtoa valitaksesi haluatko käyttää valittua laitetta Windowsin asentamiseen toiselle levylle, vai haluatko käyttää Windowsia suoraan tältä asemalta (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "Tällä valinnalla voit määrittää, aiotko asentaa Windowsin toiselle levylle vai haluatko käyttää Windowsia suoraan tältä asemalta (Windows To Go)."
 
 #. • MSG_306
 #.
@@ -1724,7 +1732,7 @@ msgid "Fast-zeroing drive: %s"
 msgstr "Pikanollataan asemaa: %s"
 
 #. • MSG_307
-msgid "This may take a while"
+msgid "this may take a while"
 msgstr "Tämä voi viedä hetken"
 
 #. • MSG_308
@@ -1792,3 +1800,144 @@ msgid ""
 msgstr ""
 "Valitsemasi levykuva on ISOHybrid-muotoinen, mutta sen tekijät eivät ole tehneet siitä yhteensopivaa ISO/tiedostotyyppisen kopiointitilan kanssa.\n"
 "Tämän vuoksi käyttöön otetaan DD-kuvan kirjoitustila."
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "Ei voitu avata tai lukea kohdetta '%s'"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "Asetetaan Windowsin mukautusasetuksia: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "Asetetaan käyttäjäasetuksia..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "Windows-käyttäjäkokemus"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "Mukauta Windows-asennusta?"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "Poista vaatimus 4GB+ keskusmuistille, Secure Bootille ja TPM 2.0:lle"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "Poista vaatimus Microsoftin online-käyttäjätilille"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "Poista käytöstä datan keräys (Ohita yksityisyyskysymykset)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "Estä Windows To Go:n pääsy sisäisiin levyihin"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "Luo paikallinen käyttäjätili käyttäjänimellä:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "Aseta alueelliset vaihtoehdot samoihin asetuksiin kuin tällä käyttäjällä"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "Poista käytöstä automaattinen laitteen BitLocker-salaus"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "Pysyvä lokitiedosto"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus on ohjelma, joka auttaa alustamaan ja luomaan boottaavia USB-laitteita, kuten esimerkiksi USB-avaimia, muistitikkuja jne."
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "Virallinen sivusto: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "Lähdekoodi: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "Muutosloki: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"Tämä sovellus on lisensoitu GNU Public License (GPL) version 3 ehtojen mukaisesti.\n"
+"Lisätietoja osoitteessa https://www.gnu.org/licenses/gpl-3.0.html (englanniksi)."
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr "Boottaus"
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Alusta USB-asemia, muistikortteja ja virtuaalisia asemia muotoon FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "Luo boottaavia FreeDOS USB-asemia"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "Luo käynnistysasemia boottaavista ISO-kuvista (Windows, Linux jne.)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "Luo käynnistysasemia boottaavista levykuvista, pakatut kuvat mukaanlukien"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "Luo BIOS- tai UEFI-boottaavia asemia, mukaanlukien UEFI-boottaavat NTFS-asemat"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "Luo 'Windows To Go' -asemia"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "Luo Windows 11 -asennusasemia tietokoneille, jotka eivät tue TPM- tai Secure Boot -ominaisuuksia"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "Luo pysyviä Linux-osioita"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "Luo VHD/DD-kuvia valitusta asemasta"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "Laske MD5, SHA-1, SHA-256 ja SHA-512 tarkistussummia valitusta levykuvasta"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "Suorita viallisten lohkojen tarkistuksia, sisältäen \"valheellisten\" muistitikkujen tunnistamisen"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "Lataa virallisia Microsoft Windowsin jälleenmyyntiversion ISO-levykuvia"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "Lataa UEFI Shell ISO-levykuvia"
