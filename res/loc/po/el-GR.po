@@ -1,9 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.5\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-04-17 12:17+0100\n"
-"PO-Revision-Date: 2020-04-17 12:20+0100\n"
+"POT-Creation-Date: 2023-03-04 18:22+0000\n"
+"PO-Revision-Date: 2023-03-04 18:27+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: el_GR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Greek (Ελληνικά)\n"
 "X-Rufus-LCID: 0x0408\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -946,8 +946,8 @@ msgid "Download using a browser"
 msgstr "Λήψη με τη χρήση περιηγητή"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Προσωρινή απαγόρευση από την Microsoft για λόγο πολλαπλής αίτησης λήψεων. Παρακλώ δοκιμάστε αργότερα..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "Η λήψη των ISO των Windows δεν είναι διαθέσιμη επειδή η Microsoft έχει τροποποιήσει τον ιστότοπό της για να την αποτρέψει."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -1092,7 +1092,7 @@ msgstr "Εκδοχή %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Μετάφραση στα ελληνικά:\\line• Konstantinos Margaritis <mailto:kotsos.marga@gmail.com>\\line• Nikolaos Margaritis <mailto:marga.nikos@gmail.com>\\line• Alex F. <mailto:alirael@outlook.com>"
+msgstr "Μετάφραση στα ελληνικά:\\line• Konstantinos Margaritis <mailto:kotsos.marga@gmail.com>\\line• Nikolaos Margaritis <mailto:marga.nikos@gmail.com>\\line• Alex F. <mailto:alirael@outlook.com>\\line• Christos Alvanos <mailto:chrisalvanos17@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1200,6 +1200,10 @@ msgstr "Ανιχνεύθηκε μη προσαρμοσμένο μέγεθος δ
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "Τα 'Windows To Go' μπορούν να εγκαταστηθούν μόνο σε δίσκους με διαμερισμό GPT εάν αυτοί διαθέτουν το χαρακτηριστικό ΄ΣΤΑΘΕΡΟΣ'. Ο επιλεγμενος δίσκος δε διαθέτει αυτο το χαρακτηριστικό."
 
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "Αυτή η δυνατότητα δεν είναι διαθέσιμη σε αυτήν την πλατφόρμα."
+
 #. • MSG_201
 msgid "Cancelling - Please wait..."
 msgstr "Ακύρωση - Παρακαλώ περιμένετε..."
@@ -1306,8 +1310,8 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "Γίνεται Διαμόρφωση(%s) - εκτιμώμενη διάρκεια %d:%02d..."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "Ορισμός ετικέτας (Αυτή η διαδικασία ίσως διαρκέσει αρκετά)..."
+msgid "Setting label (%s)..."
+msgstr "Ορισμός ετικέτας (%s)..."
 
 #. • MSG_222
 #.
@@ -1337,7 +1341,7 @@ msgstr "Κλείσιμο υπάρχοντος τόμου..."
 
 #. • MSG_228
 msgid "Writing Master Boot Record..."
-msgstr "Εγγραφή MBR..."
+msgstr "Εγγραφή Master Boot Record..."
 
 #. • MSG_229
 msgid "Writing Partition Boot Record..."
@@ -1352,8 +1356,8 @@ msgid "Copying ISO files: %s"
 msgstr "Αντιγραφή αρχείων ISO: %s"
 
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "Ρυθμίσεις εκκίνησης Win7 EFI (η διαδικασία ίσως διαρκέσει αρκετά)..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "Ρυθμίσεις εκκίνησης Win7 EFI (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1388,8 +1392,8 @@ msgid "Partitioning (%s)..."
 msgstr "Διαμερισμός (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "Διαγραφή διαμερισμάτων..."
+msgid "Deleting partitions (%s)..."
+msgstr "Διαγραφή διαμερισμάτων (%s)..."
 
 #. • MSG_240
 #.
@@ -1527,7 +1531,7 @@ msgstr "Διατήρηση ημερομηνιών αρχείων"
 
 #. • MSG_270
 msgid "USB debug"
-msgstr ""
+msgstr "Έλεγχος USB"
 
 #. • MSG_271
 msgid "Computing image checksums: %s"
@@ -1542,8 +1546,8 @@ msgid "Change the application language"
 msgstr "Αλλαγή γλώσσας"
 
 #. • MSG_274
-msgid "ISOHybrid image detected"
-msgstr "Ανιχνεύθηκε είδωλο τύπου ISOHybrid"
+msgid "%s image detected"
+msgstr "Ανιχνεύθηκε είδωλο τύπου %s"
 
 #. • MSG_275
 #.
@@ -1644,8 +1648,12 @@ msgid "Unsupported Windows version"
 msgstr "Μη υποστηριζόμενη εκδοχή Windows"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Το Rufus δεν υποστηρίζει αυτή την εκδοχή των Windows."
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"Το Rufus δεν υποστηρίζει αυτή την εκδοχή των Windows.\n"
+"Η τελευταία έκδοση του Rufus που είναι συμβατή με αυτήν την πλατφόρμα είναι η v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1710,8 +1718,8 @@ msgid "Create a disk image of the selected device"
 msgstr "Δημιουργία ειδώλου δίσκου από την επιλεγμένη συσκευή"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "Επιλέξτε αυτό αν θέλετε να χρησιμοποιήσετε αυτή τη συσκευή για να εγκαταστήσετε τα Windows σε κάποιο δίσκο, ή θέλετε να τα τρέχετε κατευθείαν από την συσκευή (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "Χρησιμοποιήστε αυτήν την επιλογή εάν σκοπεύετε να εγκαταστήσετε τα Windows σε διαφορετικό δίσκο ή εάν θέλετε να εκτελέσετε τα Windows απευθείας από αυτήν τη μονάδα δίσκου (Windows To Go)."
 
 #. • MSG_306
 #.
@@ -1719,3 +1727,214 @@ msgstr "Επιλέξτε αυτό αν θέλετε να χρησιμοποιή�
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
 msgstr "Γρήγορος μηδενισμός μονάδας δίσκου: %s"
+
+#. • MSG_307
+msgid "this may take a while"
+msgstr "η διαδικασία ίσως διαρκέσει αρκετά"
+
+#. • MSG_308
+msgid "VHD detection"
+msgstr "Εντοπισμός VHD"
+
+#. • MSG_309
+msgid "Compressed archive"
+msgstr "Συμπιεσμένο αρχείο"
+
+#. • MSG_310
+msgid ""
+"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"Το ISO που επιλέξατε χρησιμοποιεί UEFI και είναι αρκετά μικρό ώστε να γραφτεί ως διαμέρισμα συστήματος EFI (ESP). Η εγγραφή σε ένα ESP, αντί της εγγραφής σε ένα διαμέρισμα γενικών δεδομένων που καταλαμβάνει ολόκληρο τον δίσκο, μπορεί να είναι προτιμότερο για ορισμένους τύπους εγκαταστάσεων.\n"
+"\n"
+"Παρακαλούμε επιλέξτε τη λειτουργία που θέλετε να χρησιμοποιήσετε για να γράψετε αυτή την εικόνα:"
+
+#. • MSG_311
+msgid "Use %s (in the main application window) to enable."
+msgstr "Χρησιμοποιήστε %s (στο κύριο παράθυρο της εφαρμογής) για ενεργοποίηση."
+
+#. • MSG_312
+msgid "Extra hashes (SHA512)"
+msgstr "Επιπλέον hashes  (SHA512)"
+
+#. • MSG_313
+msgid "Save to VHD"
+msgstr "Αποθήκευση σε VHD"
+
+#. • MSG_314
+msgid "Compute image checksums"
+msgstr "Υπολογίστε αθροίσματα ελέγχου εικόνας"
+
+#. • MSG_315
+msgid "Multiple buttons"
+msgstr "Πολλαπλά κουμπιά"
+
+#. • MSG_316
+msgid "Number of passes"
+msgstr "Αριθμός περασμάτων"
+
+#. • MSG_317
+msgid "Disk ID"
+msgstr "ID δίσκου"
+
+#. • MSG_318
+msgid "Default thread priority: %d"
+msgstr "Προεπιλεγμένη προτεραιότητα πυρήνα  %d"
+
+#. • MSG_319
+msgid "Ignore Boot Marker"
+msgstr "Αγνοήστε τον Boot marker"
+
+#. • MSG_320
+msgid "Refreshing partition layout (%s)..."
+msgstr "Ανανέωση διάταξης διαμερισμάτων (%s)..."
+
+#. • MSG_321
+msgid ""
+"The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
+"As a result, DD image writing mode will be enforced."
+msgstr ""
+"Η εικόνα που επιλέξατε είναι ISOHybrid, αλλά οι δημιουργοί της δεν την έχουν κάνει συμβατή με τη λειτουργία αντιγραφής ISO/Αρχείου.\n"
+"Ως αποτέλεσμα, θα επιβληθεί η λειτουργία εγγραφής εικόνας DD."
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "Δεν είναι δυνατό το άνοιγμα ή η ανάγνωση του '%s'"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "Εφαρμογή προσαρμογής των Windows: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "Εφαρμογή επιλογών χρήστη..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "Εμπειρία χρήστη των Windows"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "Προσαρμογή εγκατάστασης των Windows;"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "Κατάργηση απαίτησης για 4 GB+ RAM, Ασφαλής εκκίνηση και TPM 2.0"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "Καταργήστε την απαίτηση για έναν ηλεκτρονικό λογαριασμό Microsoft"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "Απενεργοποίηση συλλογής δεδομένων (Παράβλεψη ερωτήσεων απορρήτου)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "Αποτρέψτε την πρόσβαση των Windows To Go σε εσωτερικούς δίσκους"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "Δημιουργήστε έναν τοπικό λογαριασμό με όνομα χρήστη:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "Ορίστε τις τοπικές επιλογές στις ίδιες τιμές με αυτές του χρήστη"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "Απενεργοποιήστε την αυτόματη κρυπτογράφηση συσκευής BitLocker"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "Διατήρηση log"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Το Rufus είναι ένα βοηθητικό πρόγραμμα που βοηθά στη διαμόρφωση και τη δημιουργία μονάδων flash USB με δυνατότητα εκκίνησης, όπως κλειδιά USB/pendrives,κάρτες μνήμης κ.λπ."
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "Επίσημος ιστότοπος: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "Πηγαίος κώδικας: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "Αρχείο καταγραφής αλλαγών: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"Αυτή η εφαρμογή έχει άδεια χρήσης σύμφωνα με τους όρους της GNU Public License (GPL) έκδοση 3.\n"
+"Δείτε https://www.gnu.org/licenses/gpl-3.0.html για λεπτομέρειες."
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr ""
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Μορφοποίηση USB, κάρτας flash και εικονικών μονάδων δίσκου σε FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "Δημιουργήστε μονάδες USB με δυνατότητα εκκίνησης FreeDOS"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "Δημιουργήστε εκκινήσιμες μονάδες από ISO με δυνατότητα εκκίνησης (Windows, Linux, κ.λπ.)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "Δημιουργήστε μονάδες εκκίνησης από εικόνες δίσκου με δυνατότητα εκκίνησης, συμπεριλαμβανομένων συμπιεσμένων"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "Δημιουργήστε μονάδες δίσκου με δυνατότητα εκκίνησης BIOS ή UEFI, συμπεριλαμβανομένων NTFS με δυνατότητα εκκίνησης UEFI"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "Δημιουργήστε μονάδες δίσκου \"Windows To Go\""
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "Δημιουργήστε μονάδες εγκατάστασης των Windows 11 για υπολογιστές που δεν διαθέτουν TPM ή Ασφαλή Εκκίνηση"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "Δημιουργήστε μόνιμα διαμερίσματα Linux"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "Δημιουργήστε εικόνες VHD/DD της επιλεγμένης μονάδας δίσκου"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "Υπολογίστε τα αθροίσματα ελέγχου MD5, SHA-1, SHA-256 και SHA-512 της επιλεγμένης εικόνας"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "Εκτελέστε ελέγχους εσφαλμένων block, συμπεριλαμβανομένου του εντοπισμού \"ψευδών\" μονάδων flash"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "Κατεβάστε τα επίσημα retail ISO των Microsoft Windows"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "Κατεβάστε τα ISO Shell UEFI"
