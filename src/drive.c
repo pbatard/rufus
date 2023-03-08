@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -203,7 +203,9 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 		uprintf("Could not lock access to %s: %s", Path, WindowsErrorString());
 		// See if we can report the processes are accessing the drive
 		if (!IS_ERROR(FormatStatus) && (access_mask == 0))
-			access_mask = SearchProcess(DevPath, SEARCH_PROCESS_TIMEOUT, TRUE, TRUE, FALSE);
+			// Double the search process timeout here, as Windows is so bloated with processes
+			// that 10 seconds has become way too small to get much of any results these days...
+			access_mask = SearchProcess(DevPath, 2 * SEARCH_PROCESS_TIMEOUT, TRUE, TRUE, FALSE);
 		// Try to continue if the only access rights we saw were for read-only
 		if ((access_mask & 0x07) != 0x01)
 			safe_closehandle(hDrive);
@@ -252,10 +254,10 @@ char* GetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrail
 	static const char* ignore_device[] = { "\\Device\\CdRom", "\\Device\\Floppy" };
 	static const char* volume_start = "\\\\?\\";
 	char *ret = NULL, volume_name[MAX_PATH], path[MAX_PATH];
-	BOOL bPrintHeader = TRUE;
+	BOOL r, bPrintHeader = TRUE;
 	HANDLE hDrive = INVALID_HANDLE_VALUE, hVolume = INVALID_HANDLE_VALUE;
 	VOLUME_DISK_EXTENTS_REDEF DiskExtents;
-	DWORD size;
+	DWORD size = 0;
 	UINT drive_type;
 	StrArray found_name;
 	uint64_t found_offset[MAX_PARTITIONS] = { 0 };
@@ -312,9 +314,10 @@ char* GetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrail
 			continue;
 		}
 
-		if ((!DeviceIoControl(hDrive, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0,
-			&DiskExtents, sizeof(DiskExtents), &size, NULL)) || (size <= 0)) {
-			suprintf("Could not get Disk Extents: %s", WindowsErrorString());
+		r = DeviceIoControl(hDrive, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0,
+			&DiskExtents, sizeof(DiskExtents), &size, NULL);
+		if ((!r) || (size == 0)) {
+			suprintf("Could not get Disk Extents: %s", r ? "(empty data)" : WindowsErrorString());
 			safe_closehandle(hDrive);
 			continue;
 		}
@@ -1059,15 +1062,17 @@ int GetDriveNumber(HANDLE hDrive, char* path)
 {
 	STORAGE_DEVICE_NUMBER_REDEF DeviceNumber;
 	VOLUME_DISK_EXTENTS_REDEF DiskExtents;
-	DWORD size;
+	DWORD size = 0;
+	BOOL s;
 	int r = -1;
 
 	if (!DeviceIoControl(hDrive, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, NULL, 0,
 		&DiskExtents, sizeof(DiskExtents), &size, NULL) || (size <= 0) || (DiskExtents.NumberOfDiskExtents < 1) ) {
 		// DiskExtents are NO_GO (which is the case for external USB HDDs...)
-		if(!DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0,
-			&DeviceNumber, sizeof(DeviceNumber), &size, NULL ) || (size <= 0)) {
-			uprintf("Could not get device number for device %s: %s", path, WindowsErrorString());
+		s = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0, &DeviceNumber, sizeof(DeviceNumber),
+			&size, NULL);
+		if ((!s) || (size == 0)) {
+			uprintf("Could not get device number for device %s %s", path, s ? "(empty data)" : WindowsErrorString());
 			return -1;
 		}
 		r = (int)DeviceNumber.DeviceNumber;
