@@ -135,7 +135,8 @@ extern BOOL WimExtractFile_API(const char* image, int index, const char* src, co
 extern BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst, BOOL bSilent);
 extern BOOL WimApplyImage(const char* image, int index, const char* dst);
 extern char* WimMountImage(const char* image, int index);
-extern BOOL WimUnmountImage(const char* image, int index);
+extern BOOL WimUnmountImage(const char* image, int index, BOOL commit);
+extern char* GetExistingMountPoint(const char* image, int index);
 extern BOOL WimIsValidIndex(const char* image, int index);
 extern int8_t IsBootableImage(const char* path);
 extern BOOL AppendVHDFooter(const char* vhd_path);

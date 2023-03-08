@@ -883,7 +883,7 @@ out:
 	}
 	if (mount_path) {
 		uprintf("Unmounting '%s[%d]'...", boot_wim_path, wim_index);
-		WimUnmountImage(boot_wim_path, wim_index);
+		WimUnmountImage(boot_wim_path, wim_index, TRUE);
 		UpdateProgressWithInfo(OP_PATCH, MSG_325, PATCH_PROGRESS_TOTAL, PATCH_PROGRESS_TOTAL);
 	}
 	free(mount_path);
