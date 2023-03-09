@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2022-01-10 19:23+0800\n"
-"PO-Revision-Date: 2022-01-10 20:13+0800\n"
-"Last-Translator: SiderealArt <admin@siderealart.me>\n"
+"POT-Creation-Date: 2023-03-09 10:01+0000\n"
+"PO-Revision-Date: 2023-03-09 10:01+0000\n"
+"Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Chinese Traditional (正體中文)\n"
 "X-Rufus-LCID: 0x0404, 0x0c04, 0x1404, 0x7c04\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -946,8 +946,8 @@ msgid "Download using a browser"
 msgstr "使用瀏覽器下載"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "下載要求過多，已被微軟暫時列入黑名單 - 請稍後再嘗試..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "由於 Microsoft 已更改其網站以阻止下載 Windows ISO，因此無法下載。"
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -1092,7 +1092,7 @@ msgstr "版本 %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "正體中文譯者: 佚 <mailto:mmmeow@gmail.com>\\line Chocobo1 <https://github.com/Chocobo1>\\line SiderealArt <https://github.com/SiderealArt>"
+msgstr "正體中文譯者: 佚 <mailto:mmmeow@gmail.com>\\line Chocobo1 <https://github.com/Chocobo1>\\line SiderealArt <https://github.com/SiderealArt>\\line Ocha <https://github.com/cupofocha>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1197,6 +1197,10 @@ msgstr "偵測到非標準磁區大小"
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "'Windows To Go' 只能安裝於有 '固定' 屬性的 GPT 分割裝置。目前裝置屬性不是 '固定'。"
+
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "此功能在此平台上不可用。"
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1642,8 +1646,12 @@ msgid "Unsupported Windows version"
 msgstr "不支援的 Windows 版本"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Rufus 已不再支援此 Windows 版本。"
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"Rufus 已不再支援此 Windows 版本。\n"
+"此平台Rufus所支援的最新版本為v%d.%d。"
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1708,12 +1716,8 @@ msgid "Create a disk image of the selected device"
 msgstr "建立選擇的裝置的磁碟映像"
 
 #. • MSG_305
-msgid ""
-"Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go).\r\n"
-"In 'Extended Windows 11 Installation' mode, Rufus will patch the media so that Windows 11 can be installed on platforms that don't meet the TPM 2.0 or Secure Boot requirements."
-msgstr ""
-"是否要使用此裝置來安裝 Windows 在另一個磁碟上，或是要直接在此磁碟上執行 Windows (Windows To Go)。\r\n"
-"在「擴充 Windows 11 安裝」模式中，Rufus 將修補裝置，以使 Windows 11 能夠安裝在不符合 TPM 2.0 或安全開機要求的系統上。"
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "是否要使用此裝置來安裝 Windows 在另一個磁碟上，或是要直接在此磁碟上執行 Windows (Windows To Go)。"
 
 #. • MSG_306
 #.
@@ -1793,17 +1797,142 @@ msgstr ""
 "因此強制使用 DD 映像寫入模式。"
 
 #. • MSG_322
-msgid "Standard Windows 11 Installation (TPM 2.0 + Secure Boot)"
-msgstr "標準 Windows 11 安裝 (TPM 2.0 + 安全開機)"
-
-#. • MSG_323
-msgid "Extended Windows 11 Installation (no TPM / no Secure Boot)"
-msgstr "擴充 Windows 11 安裝 (無 TPM 和安全開機)"
-
-#. • MSG_324
-msgid "Removing Windows 11 installation restrictions: %s"
-msgstr "正在移除 Windows 11 安裝限制: %s"
-
-#. • MSG_325
 msgid "Unable to open or read '%s'"
 msgstr "無法開啟或讀取 '%s'"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "正在應用 Windows 自定義設置：%s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "正在應用用戶設置..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "Windows 用戶體驗"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "自定義 Windows 安裝？"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "移除對 4GB+ 內存、安全引導和 TPM 2.0 的要求"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "移除對登錄微軟賬戶的要求"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "關閉數據收集 (跳過隱私設置)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "阻止 Windows To Go 訪問內部磁盤"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "創建一個使用此用戶名的本地賬號:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "使用當前用戶的區域設置"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "關閉 BitLocker 自動設備加密"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "持久化日誌"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus 是個能格式化並製作可開機 USB 快閃磁碟機（USB 隨身碟、Memory Stick 等等）的工具。"
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "官方網站: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "源代碼: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "更新日誌: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"本應用採用 GNU 通用公共許可證 (GPL) 第三版。\n"
+"具體許可證見 https://www.gnu.org/licenses/gpl-3.0.zh-tw.html。"
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr "啟動"
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "將 U 盤、存儲卡或虛擬驅動器格式化為 FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3 格式"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "創建 FreeDOS  可啟動驅動器"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "從可啟動 ISO 文件 (Windows 和 Linux 等) 創建可啟動驅動器"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "從可啟動硬盤鏡像 (包括壓縮鏡像) 創建可啟動驅動器"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "創建 BIOS 或 UEFI 可啟動驅動器，包括 UEFI 可啟動的 NTFS 驅動器"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "創建 'Windows To Go' 驅動"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "為沒有 TPM 或安全啟動功能的電腦創建 Windows 11 安裝驅動"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "創建持久 Linux 分區"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "為選中的驅動創建 VHD/DD 鏡像"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "計算被選中鏡像的 MD5、SHA-1、SHA-256 和 SHA-512 校驗碼"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "執行壞塊檢查，包括對”假“USB 快閃磁碟機的檢測"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "下載微軟官方 Windows 鏡像"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "下載 UEFI Shell 鏡像"
