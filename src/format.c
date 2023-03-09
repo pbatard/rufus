@@ -1428,7 +1428,6 @@ DWORD WINAPI FormatThread(void* param)
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
 	SYSTEMTIME lt;
-	FILE* log_fd;
 	uint8_t *buffer = NULL, extra_partitions = 0;
 	char *bb_msg, *volume_name = NULL;
 	char drive_name[] = "?:\\";
@@ -1561,6 +1560,7 @@ DWORD WINAPI FormatThread(void* param)
 
 	if (IsChecked(IDC_BAD_BLOCKS)) {
 		do {
+			FILE* log_fd;
 			int sel = ComboBox_GetCurSel(hNBPasses);
 			// create a log file for bad blocks report. Since %USERPROFILE% may
 			// have localized characters, we use the UTF-8 API.
@@ -1573,7 +1573,8 @@ DWORD WINAPI FormatThread(void* param)
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 			log_fd = fopenU(logfile, "w+");
 			if (log_fd == NULL) {
-				uprintf("Could not create log file for bad blocks check");
+				uprintf("Error: Could not create log file for bad blocks check");
+				goto out;
 			} else {
 				fprintf(log_fd, APPLICATION_NAME " bad blocks check started on: %04d.%02d.%02d %02d:%02d:%02d",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);

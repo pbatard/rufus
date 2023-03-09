@@ -2607,14 +2607,12 @@ BOOL InitializeDisk(HANDLE hDrive)
 			(BYTE*)&CreateDisk, size, NULL, 0, &size, NULL );
 	if (!r) {
 		uprintf("Could not delete drive layout: %s", WindowsErrorString());
-		safe_closehandle(hDrive);
 		return FALSE;
 	}
 
 	r = DeviceIoControl(hDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL );
 	if (!r) {
 		uprintf("Could not refresh drive layout: %s", WindowsErrorString());
-		safe_closehandle(hDrive);
 		return FALSE;
 	}
 
