@@ -1,9 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.5\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-04-17 12:14+0100\n"
-"PO-Revision-Date: 2020-04-17 12:14+0100\n"
+"POT-Creation-Date: 2023-03-13 17:25+0000\n"
+"PO-Revision-Date: 2023-03-13 17:25+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: fa_IR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Persian (پارسی)\n"
 "X-Rufus-LCID: 0x0429\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -174,7 +174,7 @@ msgstr "شامل نسخه‌های آزمایشی (Beta)"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
-msgstr "همین الآن بررسی کن!"
+msgstr "همین الآن بررسی کن"
 
 #. • IDD_NEW_VERSION → IDD_NEW_VERSION
 msgid "Check For Updates - Rufus"
@@ -186,7 +186,7 @@ msgstr "نسخه جدیدی از نرم‌افزار موجود است. لطفا
 
 #. • IDD_NEW_VERSION → IDC_WEBSITE
 msgid "Click here to go to the website"
-msgstr "برای رفتن به سایت نرم‌افزار، کلیک کنید."
+msgstr "برای رفتن به سایت نرم‌افزار، کلیک کنید"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
 msgid "Release Notes"
@@ -217,9 +217,8 @@ msgid ""
 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
 "To continue with this operation, click OK. To quit click CANCEL."
 msgstr ""
-"هشدار!\n"
-"تمام داده‌ها و اطلاعات موجود در درایو '‪%s‬' پاک خواهد شد.\n"
-"آیا برای ادامه این عملیات مطمئن هستید؟"
+"هشدار:تمام داده‌ها و اطلاعات موجود در درایو '‪%s‬' پاک خواهد شد.\n"
+"آیا برای ادامه این عملیات مطمئن هستید."
 
 #. • MSG_004
 msgid "Rufus update policy"
@@ -387,7 +386,7 @@ msgstr "اجرا"
 
 #. • MSG_041
 msgid "Operation cancelled by the user"
-msgstr "کاربر ادامه فرآیند را لغو کرد."
+msgstr "کاربر ادامه فرآیند را لغو کرد"
 
 #. • MSG_042
 msgid "Error"
@@ -413,7 +412,7 @@ msgstr ""
 #.
 #. Used when a drive is detected that contains more than one partition
 msgid "Multiple Partitions"
-msgstr "درایو بیش از یک پارتیشن دارد."
+msgstr "درایو بیش از یک پارتیشن دارد"
 
 #. • MSG_048
 msgid "Rufus - Flushing buffers"
@@ -429,7 +428,7 @@ msgstr "موفق بود."
 
 #. • MSG_051
 msgid "Undetermined error while formatting."
-msgstr "برخورد با خطای نامشخص، هنگام فرمت کردن"
+msgstr "برخورد با خطای نامشخص، هنگام فرمت کردن."
 
 #. • MSG_052
 msgid "Cannot use the selected file system for this media."
@@ -481,15 +480,15 @@ msgstr "خطا در تخصیص حافظه (Memory Allocation)"
 
 #. • MSG_064
 msgid "Read error."
-msgstr "خطا در خواندن"
+msgstr "خطا در خواندن."
 
 #. • MSG_065
 msgid "Write error."
-msgstr "خطا در نوشتن"
+msgstr "خطا در نوشتن."
 
 #. • MSG_066
 msgid "Installation failure"
-msgstr "فرآیند نصب ناموفق بود."
+msgstr "فرآیند نصب ناموفق بود"
 
 #. • MSG_067
 msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
@@ -499,7 +498,7 @@ msgstr ""
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "خطا در هنگام پارتیشن‌بندی درایو"
+msgstr "خطا در هنگام پارتیشن‌بندی درایو."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
@@ -641,7 +640,7 @@ msgid ""
 msgstr ""
 "هشدار مهم! درایو انتخاب‌شده چندین پارتیشن دارد.\n"
 "\n"
-"ممکن است این پارتیشن‌ها پنهان باشند و شما آن‌ها را در فهرست ویندوز نبینید. اگر می‌خواهید ادامه دهید، مسئولیت هرگونه پاک شدن اطلاعات در این پارتیشن‌ها به عهده خود شما است!"
+"ممکن است این پارتیشن‌ها پنهان باشند و شما آن‌ها را در فهرست ویندوز نبینید. اگر می‌خواهید ادامه دهید، مسئولیت هرگونه پاک شدن اطلاعات در این پارتیشن‌ها به عهده خود شما است."
 
 #. • MSG_094
 msgid "Multiple partitions detected"
@@ -726,7 +725,7 @@ msgid ""
 "If you are sure you want to cancel, click YES. Otherwise, click NO."
 msgstr ""
 "لغو این فرآیند ممکن است درایو موردنظر را در وضعیت غیرقابل استفاده (UNUSABLE) قرار دهد.\n"
-"آیا مطمئن هستید که می‌خواهید این فرآیند را لغو کنید؟"
+"آیا مطمئن هستید که می‌خواهید این فرآیند را لغو کنید."
 
 #. • MSG_106
 msgid "Please select folder"
@@ -867,7 +866,7 @@ msgstr "برای ایجاد live USB با قابلیت ذخیره‌سازی ا�
 
 #. • MSG_126
 msgid "Set the partition size units."
-msgstr "واحد اندازه‌گیری پارتیشن را تعیین کنید"
+msgstr "واحد اندازه‌گیری پارتیشن را تعیین کنید."
 
 #. • MSG_127
 msgid "Do not show this message again"
@@ -959,7 +958,7 @@ msgid "Download using a browser"
 msgstr "دانلود با استفاده از مرورگر"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
 msgstr "به دلیل درخواست‌های دانلود خیلی زیاد؛ به طور موقت از طرف مایکروسافت بسته شد. لطفا بعدا دوباره امتحان کنید..."
 
 #. • MSG_145
@@ -980,17 +979,17 @@ msgstr "دانلود ایمیج ISO"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
-msgstr "نوع کامپیوتری که می‌خواهید درایو USB ساخته‌شده را در آن استفاده کنید. شما می‌بایست قبل از ساختن درایو نوع راه‌اندازی کامپیوتر مقصد را شناسایی و مشخص کنید که از نوع BIOS است یا UEFI. اگرنه ممکن است با استفاده از این درایو نتوانید سیستم مورد نظر را راه‌اندازی کنید"
+msgstr "نوع کامپیوتری که می‌خواهید درایو USB ساخته‌شده را در آن استفاده کنید. شما می‌بایست قبل از ساختن درایو نوع راه‌اندازی کامپیوتر مقصد را شناسایی و مشخص کنید که از نوع BIOS است یا UEFI. اگرنه ممکن است با استفاده از این درایو نتوانید سیستم مورد نظر را راه‌اندازی کنید."
 
 #. • MSG_151
 #.
 #. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
 msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
-msgstr "'UEFI-CSM' به این معنی است که این دستگاه بجای راه‌اندازی به روش اصلی UEFI، در حالت شبیه‌سازی BIOS بالا می‌آید که به 'Legacy Mode' مشهور است. "
+msgstr "'UEFI-CSM' به این معنی است که این دستگاه بجای راه‌اندازی به روش اصلی UEFI، در حالت شبیه‌سازی BIOS بالا می‌آید که به 'Legacy Mode' مشهور است."
 
 #. • MSG_152
 msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-msgstr "'non CSM' به این معنی است که این دستگاه برخلاف روش شبیه‌سازی BIOS ('Legacy Mode') به روش اصلی UEFI راه‌اندازی می‌شود"
+msgstr "'non CSM' به این معنی است که این دستگاه برخلاف روش شبیه‌سازی BIOS ('Legacy Mode') به روش اصلی UEFI راه‌اندازی می‌شود."
 
 #. • MSG_153
 msgid "Test pattern: 0x%02X"
@@ -1012,13 +1011,13 @@ msgstr "الگوی آزمایش: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
 msgid "Sets the target filesystem"
 msgstr ""
 "سیستم فایل موردنظر را انتخاب کنید.\n"
-"اگر نمی‌دانید کدام گزینه مناسب است؛ مقدار پیش‌فرض را انتخاب کنید."
+"اگر نمی‌دانید کدام گزینه مناسب است؛ مقدار پیش‌فرض را انتخاب کنید"
 
 #. • MSG_158
 msgid "Minimum size that a block of data will occupy in the filesystem"
 msgstr ""
 "کمترین مقداری که یک بلاک داده (Data block) در سیستم فایل اشغال می‌کند.\n"
-"اگر نمی‌دانید کدام گزینه مناسب است؛ مقدار پیش‌فرض را انتخاب کنید."
+"اگر نمی‌دانید کدام گزینه مناسب است؛ مقدار پیش‌فرض را انتخاب کنید"
 
 #. • MSG_159
 msgid ""
@@ -1036,7 +1035,7 @@ msgstr "بررسی وجود بدسکتور (Bad sector) در حافظه و در�
 
 #. • MSG_162
 msgid "Uncheck this box to use the \"slow\" format method"
-msgstr "برای فرمت کردن به روش آهسته یا کامل (Full format) این گزینه را غیرفعال کنید."
+msgstr "برای فرمت کردن به روش آهسته یا کامل (Full format) این گزینه را غیرفعال کنید"
 
 #. • MSG_163
 msgid "Method that will be used to create partitions"
@@ -1056,7 +1055,7 @@ msgstr "اگر نامی که برای درایو موردنظر انتخاب ک�
 
 #. • MSG_167
 msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "نصبِ MBR سفارشیِ نرم‌افزارِ Rufus که با استفاده از آن می‌توان نحوه راه‌اندازی را انتخاب و شناسه (ID) درایو USB بایوس را جعل کرد."
+msgstr "نصبِ MBR سفارشیِ نرم‌افزارِ Rufus که با استفاده از آن می‌توان نحوه راه‌اندازی را انتخاب و شناسه (ID) درایو USB بایوس را جعل کرد"
 
 #. • MSG_168
 msgid ""
@@ -1074,7 +1073,7 @@ msgstr "افزودن تنظیماتی مثل ساختن یک پارتیشن اض
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
-msgstr "لطفاً با آگاهی کامل این گزینه را انتخاب کنید و در صورت نیاز حتماً از اطلاعات موجود در هارد اکسترنال یک نسخه پشتیبان (بکاپ) تهیه کنید."
+msgstr "لطفاً با آگاهی کامل این گزینه را انتخاب کنید و در صورت نیاز حتماً از اطلاعات موجود در هارد اکسترنال یک نسخه پشتیبان (بکاپ) تهیه کنید!!!"
 
 #. • MSG_171
 msgid ""
@@ -1082,7 +1081,7 @@ msgid ""
 "This will DESTROY any data on the target!"
 msgstr ""
 "شروع فرآیند فرمت کردن\n"
-" با این کار، همه اطلاعات موجود در درایوی که انتخاب کرده‌اید «پاک» می‌شود"
+" با این کار، همه اطلاعات موجود در درایوی که انتخاب کرده‌اید «پاک» می‌شود!"
 
 #. • MSG_172
 #.
@@ -1093,7 +1092,7 @@ msgstr "امضای فایل دانلود شده معتبر نیست"
 
 #. • MSG_173
 msgid "Click to select..."
-msgstr "برای انتخاب کلیک کنید"
+msgstr "برای انتخاب کلیک کنید..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
@@ -1105,7 +1104,7 @@ msgstr "نسخه %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "ترجمه فارسی: سید ضیاءالدین عظیمی «mailto:s.zia.azimi@gmail.com»"
+msgstr "ترجمه فارسی:\\line‏ •سید عرفان <mailto:aa3245540@gmail.com>\\line‏ •ضیاءالدین عظیمی <mailto:s.zia.azimi@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1161,7 +1160,7 @@ msgstr "این فایل ایمیج (Image)، با تنظیمات راه‌اند
 
 #. • MSG_189
 msgid "This ISO image is not compatible with the selected filesystem"
-msgstr "این فایل ایمیج (Image) با سیستم فایل انتخاب‌شده سازگار نیست."
+msgstr "این فایل ایمیج (Image) با سیستم فایل انتخاب‌شده سازگار نیست"
 
 #. • MSG_190
 msgid "Incompatible drive detected"
@@ -1204,7 +1203,7 @@ msgstr ""
 "این درایو اندازه سکتور غیراستانداردی دارد.\n"
 "\n"
 "درایوهای شناخته‌شده، اندازه سکتور ۵۱۲ بایت دارند اما این درایو از %d بایت استفاده می‌کند. این به این معنی است که (در بیشتر موارد) شما قادر به راه‌اندازی سیستم با استفاده از این درایو نخواهید بود.\n"
-"نرم‌افزار Rufus تلاش می‌کند یک درایو قابل راه‌اندازی را بسازد؛ اما در مورد درست کار کردن آن تضمینی نخواهد داد!"
+"نرم‌افزار Rufus تلاش می‌کند یک درایو قابل راه‌اندازی را بسازد؛ اما در مورد درست کار کردن آن تضمینی نخواهد داد."
 
 #. • MSG_197
 msgid "Nonstandard sector size detected"
@@ -1213,6 +1212,10 @@ msgstr "شناسایی اندازه سکتور غیراستاندارد"
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "استفاده از قابلیت «Windows To Go» فقط در درایوهای پارتیشن‌بندی‌شده به روش GPT که دارای ویژگی «FIXED» هستند؛ امکان‌پذیر است. درایوی که شما انتخاب کرده‌اید ویژگی «FIXED» را ندارد."
+
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "این ویژگی در این پلتفرم موجود نیست."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1317,11 +1320,11 @@ msgstr "ایجاد ساختار NTFS Fixup؛ درصد پیشرفت: %d%%"
 #. Example: "Formatting (UDF) - Estimated duration 3:21..."
 #. If "estimated duration" is too long, just use "estimated" or an abbreviation
 msgid "Formatting (%s) - estimated duration %d:%02d..."
-msgstr "در حال فرمت کردن (%s)؛ زمان تخمینی: %d:%02d"
+msgstr "در حال فرمت کردن (%s)؛ زمان تخمینی: %d:%02d."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "در حال نام‌گذاری درایو (ممکن است کمی زمان‌بر باشد)..."
+msgid "Setting label (%s)..."
+msgstr "در حال نام‌گذاری درایو (%s)..."
 
 #. • MSG_222
 #.
@@ -1366,8 +1369,8 @@ msgid "Copying ISO files: %s"
 msgstr "در حال کپی کردن محتویات فایل ISO: ‏%s"
 
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "در حال نصب راه‌انداز EFI ویندوز ۷ (ممکن است کمی زمان‌بر باشد)..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "در حال نصب راه‌انداز EFI ویندوز ۷ (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1402,8 +1405,8 @@ msgid "Partitioning (%s)..."
 msgstr "در حال پارتیشن‌بندی (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "در حال حذف پارتیشن‌ها..."
+msgid "Deleting partitions (%s)..."
+msgstr "در حال حذف پارتیشن‌ (%s)..."
 
 #. • MSG_240
 #.
@@ -1418,11 +1421,11 @@ msgstr ""
 
 #. • MSG_241
 msgid "Downloading: %s"
-msgstr "در حال دانلود: %s"
+msgstr "در حال دانلود کردن %s"
 
 #. • MSG_242
 msgid "Failed to download file."
-msgstr "دانلود فایل ناموفق بود"
+msgstr "دانلود فایل ناموفق بود."
 
 #. • MSG_243
 msgid "Checking for Rufus updates..."
@@ -1456,11 +1459,11 @@ msgstr "حذف کلیدهای رجیستری برنامه ناموفق بود"
 #.
 #. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
 msgid "%s enabled"
-msgstr "%s فعال شد."
+msgstr "%s فعال شد"
 
 #. • MSG_251
 msgid "%s disabled"
-msgstr "%s غیرفعال شد."
+msgstr "%s غیرفعال شد"
 
 #. • MSG_252
 msgid "Size checks"
@@ -1476,7 +1479,7 @@ msgstr "وادار کردن استفاده از فرمت Large FAT32"
 
 #. • MSG_255
 msgid "NoDriveTypeAutorun will be deleted on exit"
-msgstr "هنگام خروج، NoDriveTypeAutorun حذف خواهد شد."
+msgstr "هنگام خروج، NoDriveTypeAutorun حذف خواهد شد"
 
 #. • MSG_256
 msgid "Fake drive detection"
@@ -1500,7 +1503,7 @@ msgstr "فشرده‌سازی NTFS"
 
 #. • MSG_261
 msgid "Writing image: %s"
-msgstr "در حال نوشتن اطلاعات ایمیج؛ درصد پیشرفت: %s"
+msgstr "در حال استفاده از ایمیج: %s"
 
 #. • MSG_262
 #.
@@ -1529,7 +1532,7 @@ msgstr "روش دوگانه UEFI/BIOS"
 
 #. • MSG_267
 msgid "Applying Windows image: %s"
-msgstr "در حال استفاده از ایمیج ویندوز؛ درصد پیشرفت: %s"
+msgstr "در حال استفاده از ایمیج ویندوز: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
@@ -1556,8 +1559,8 @@ msgid "Change the application language"
 msgstr "تغییر زبان برنامه"
 
 #. • MSG_274
-msgid "ISOHybrid image detected"
-msgstr "ایمیج ISOHybrid شناسایی شد"
+msgid "%s image detected"
+msgstr "ایمیج %s شناسایی شد"
 
 #. • MSG_275
 #.
@@ -1573,7 +1576,7 @@ msgstr ""
 "Rufus استفاده از روش «%s» را پیشنهاد می‌کند. در این روش پس از نوشتن اطلاعات در درایو، شما همیشه دسترسی کاملی به درایو خواهید داشت. \n"
 "با این حال، اگر هنگام راه‌اندازی (boot) سیستم‌عامل با مشکلی برخورد کردید؛ شما می‌توانید دوباره نوشتن اطلاعات به روش «%s» را امتحان کنید.\n"
 "\n"
-"لطفاً شیوه‌ای را که می‌خواهید با استفاده از آن اطلاعات ایمیج نوشته شود؛ انتخاب کنید."
+"لطفاً شیوه‌ای را که می‌خواهید با استفاده از آن اطلاعات ایمیج نوشته شود؛ انتخاب کنید:"
 
 #. • MSG_276
 #.
@@ -1627,7 +1630,7 @@ msgstr ""
 
 #. • MSG_286
 msgid "Zeroing drive: %s"
-msgstr "درحال بازنویسی درایو با داده صفر؛ درصد پیشرفت: %s"
+msgstr "صفر کردن درایو: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
@@ -1658,8 +1661,10 @@ msgid "Unsupported Windows version"
 msgstr "نسخه ویندوز پشتیبانی نمی‌شود"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Rufus دیگر این نسخه از ویندوز را پشتیبانی نمی‌کند"
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr "Rufus دیگر این نسخه از ویندوز را پشتیبانی نمی‌کند آخرین ورژن قابل پشتیبانی برنامه Rufus نصب این نسخه از ویندوز v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1705,7 +1710,7 @@ msgid ""
 msgstr ""
 "از نظر برنامه، برچسب زمانی آپدیت دانلود شده معتبر نیست. \n"
 "\n"
-"برای پیشگیری از حملات هک احتمالی، فرآیند به‌روزرسانی متوقف و فایل دانلود شده حذف خواهد شد. لطفا برای جزئیات بیشتر گزارش‌ها (لاگ) را بررسی کنید"
+"برای پیشگیری از حملات هک احتمالی، فرآیند به‌روزرسانی متوقف و فایل دانلود شده حذف خواهد شد. لطفا برای جزئیات بیشتر گزارش‌ها (لاگ) را بررسی کنید."
 
 #. • MSG_301
 msgid "Show application settings"
@@ -1724,7 +1729,7 @@ msgid "Create a disk image of the selected device"
 msgstr "ساخت ایمیج از دستگاه انتخاب‌شده"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
 msgstr "با استفاده از این گزینه مشخص کنید که آیا می‌خواهید از این درایو برای نصب ویندوز استفاده کنید یا اینکه می‌خواهید مستقیما ویندوز را از روی آن اجرا کنید (Windows To Go)."
 
 #. • MSG_306
@@ -1733,3 +1738,211 @@ msgstr "با استفاده از این گزینه مشخص کنید که آیا
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
 msgstr "درحال بازنویسی سریع درایو با داده صفر؛ درصد پیشرفت: %s"
+
+#. • MSG_307
+msgid "this may take a while"
+msgstr "ممکن است کمی زمان‌بر باشد"
+
+#. • MSG_308
+msgid "VHD detection"
+msgstr "پیداشدن VHD"
+
+#. • MSG_309
+msgid "Compressed archive"
+msgstr "آرشیو فشرده"
+
+#. • MSG_310
+msgid ""
+"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr "ISO که انتخاب کرده اید از UEFI استفاده می کند و به اندازه کافی کوچک است که به عنوان یک پارتیشن سیستم EFI (ESP) نوشته شود. نوشتن به ESP، به جای نوشتن به یک پارتیشن داده عمومی اشغال کل دیسک، می تواند برای برخی از انواع تاسیسات ترجیح داده شود. لطفا حالتی را که می خواهید برای نوشتن این تصویر استفاده کنید انتخاب کنید:"
+
+#. • MSG_311
+msgid "Use %s (in the main application window) to enable."
+msgstr "برای فعال کردن از %s (در پنجره اصلی برنامه) استفاده کنید."
+
+#. • MSG_312
+msgid "Extra hashes (SHA512)"
+msgstr "هش های اضافی (SHA512)"
+
+#. • MSG_313
+msgid "Save to VHD"
+msgstr "ثبت در VHD"
+
+#. • MSG_314
+msgid "Compute image checksums"
+msgstr "جمع های چک تصویر را محاسبه کنید"
+
+#. • MSG_315
+msgid "Multiple buttons"
+msgstr "چندین دکمه"
+
+#. • MSG_316
+msgid "Number of passes"
+msgstr "ردیف عدد"
+
+#. • MSG_317
+msgid "Disk ID"
+msgstr "شناسه دیسک"
+
+#. • MSG_318
+msgid "Default thread priority: %d"
+msgstr "اولویت موضوع پیش فرض: %d"
+
+#. • MSG_319
+msgid "Ignore Boot Marker"
+msgstr "Boot Marker را نادیده بگیرید"
+
+#. • MSG_320
+msgid "Refreshing partition layout (%s)..."
+msgstr "در حال تازه کردن طرح پارتیشن (%s)..."
+
+#. • MSG_321
+msgid ""
+"The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
+"As a result, DD image writing mode will be enforced."
+msgstr ""
+"تصویری که انتخاب کرده‌اید ISOHybrid است، اما سازندگان آن آنرا با حالت کپی ISO/File سازگار نکرده‌اند.\n"
+"در نتیجه حالت نوشتن تصویر DD اعمال خواهد شد."
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "باز کردن یا خواندن %s ممکن نیست"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "اعمال سفارشی سازی ویندوز: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "اعمال گزینه های کاربر..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "تجربه کاربری ویندوز"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "شخصی سازی نصب ویندوز؟"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "نیاز به رم 4 گیگابایتی، Secure Boot و TPM 2.0 را حذف کنید"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "نیاز به حساب آنلاین مایکروسافت را حذف کنید"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "غیرفعال کردن جمع آوری داده ها (رد شدن از سوالات حریم خصوصی)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "از دسترسی Windows To Go به دیسک های داخلی جلوگیری کنید"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "یک حساب کاربری محلی با نام کاربری ایجاد کنید:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "گزینه های منطقه ای را روی همان مقادیر این کاربر تنظیم کنید"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "رمزگذاری خودکار دستگاه BitLocker را غیرفعال کنید"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr ""
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus ابزاری است که به فرمت و ایجاد درایوهای فلش USB قابل بوت، مانند کلیدهای USB/pendrives، مموری استیک ها و غیره به شما کمک می کند."
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "سایت رسمی: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "منبع کد: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "لیست تغییرات %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"این برنامه تحت شرایط مجوز عمومی گنو (GPL) نسخه 3 مجوز دارد.\n"
+"برای جزئیات به https://www.gnu.org/licenses/gpl-3.0.html مراجعه کنید."
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr "راه‌اندازی"
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "فرمت USB، فلش کارت و درایوهای مجازی به FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "درایوهای USB قابل بوت FreeDOS را ایجاد کنید"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "ایجاد درایوهای قابل بوت از ISOهای قابل بوت (ویندوز، لینوکس و غیره)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "درایوهای قابل بوت را از تصاویر دیسک قابل بوت، از جمله موارد فشرده، ایجاد کنید"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "درایوهای قابل بوت بایوس یا UEFI از جمله NTFS قابل بوت UEFI ایجاد کنید"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "درایوهای \"Windows To Go\" را ایجاد کنید"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "درایوهای نصب ویندوز 11 را برای رایانه هایی که TPM یا Secure Boot ندارند ایجاد کنید"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "ایجاد پارتیشن های لینوکس دائمی"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "تصاویر VHD/DD از درایو انتخاب شده ایجاد کنید"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "MD5، SHA-1، SHA-256 و SHA-512 را برای تصویر انتخابی محاسبه کنید"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "بررسی بلوک های بد، از جمله تشخیص درایوهای فلش \"جعلی\" را انجام دهید"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "ISO های رسمی ماکروسافت را دریافت کنید"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "ISO های پوسته UEFI را دانلود کنید"
