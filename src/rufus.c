@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -702,19 +702,15 @@ static void SetProposedLabel(int ComboIndex)
 {
 	const char no_label[] = STR_NO_LABEL, empty[] = "";
 
+	// If the user manually changed the label, try to preserve it
+	if (user_changed_label)
+		return;
+
 	app_changed_label = TRUE;
 	// If bootable ISO creation is selected, and we have an ISO selected with a valid name, use that
 	// Also some distros (eg. Arch) require the USB to have the same label as the ISO
 	if ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.label[0] != 0)) {
 		SetWindowTextU(hLabel, img_report.label);
-		// If we force the ISO label, we need to reset the user_changed_label flag
-		user_changed_label = FALSE;
-		return;
-	}
-
-	// If the user manually changed the label, try to preserve it
-	if (user_changed_label) {
-		app_changed_label = FALSE;
 		return;
 	}
 
@@ -1393,9 +1389,10 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 			SetFileSystemAndClusterSize(NULL);
 			SetFSFromISO();
 			SetMBRProps();
+			user_changed_label = FALSE;
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
 		} else {
-			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL<<16) | IDC_FILE_SYSTEM,
+			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL << 16) | IDC_FILE_SYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
 		}
 		// Lose the focus on the select ISO (but place it on Close)
@@ -2055,6 +2052,11 @@ static void InitDialog(HWND hDlg)
 			"one. Because of this, some messages will only be displayed in English.", selected_locale->txt[1]);
 		uprintf("If you think you can help update this translation, please e-mail the author of this application");
 	}
+	// Detect and report system limitations
+	if (ReadRegistryKeyBool(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Policies\\Microsoft\\FVE"))
+		uprintf("WARNING: This system has a policy set to prevent write access to FIXED drives not using BitLocker");
+	if (ReadRegistryKeyBool(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\StorageDevicePolicies\\WriteProtect"))
+		uprintf("WARNING: This system has a policy set to prevent write access to storage devices");
 	if (!is_vds_available)
 		uprintf("Notice: Windows VDS is unavailable");
 
@@ -2839,7 +2841,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				if (!op_in_progress) {
 					queued_hotplug_event = FALSE;
 					GetDevices((DWORD)ComboBox_GetCurItemData(hDeviceList));
-					user_changed_label = FALSE;
 					EnableControls(TRUE, FALSE);
 					if (ComboBox_GetCurSel(hDeviceList) < 0) {
 						SetPartitionSchemeAndTargetSystem(FALSE);
