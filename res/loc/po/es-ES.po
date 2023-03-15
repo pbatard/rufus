@@ -1,9 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2021-04-07 19:16+0200\n"
-"PO-Revision-Date: 2021-04-07 21:04+0100\n"
+"POT-Creation-Date: 2023-03-15 23:07+0000\n"
+"PO-Revision-Date: 2023-03-15 23:15+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: es_ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Spanish (Español)\n"
 "X-Rufus-LCID: 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -41,7 +41,7 @@ msgstr "Esquema de partición"
 
 #. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
 msgid "Target system"
-msgstr "Sistema destino"
+msgstr "Sistema de destino"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
@@ -52,7 +52,7 @@ msgstr "Listar los discos duros USB"
 #. It is acceptable to drop the parenthesis () if you are running out of space
 #. as there is a tooltip (MSG_169) providing these details.
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
-msgstr "Opciones de compatibilidad para BIOS antiguas"
+msgstr "Agrega correcciones para BIOS viejos (partición extra, alineación, etc.)"
 
 #. • IDD_DIALOG → IDC_RUFUS_MBR
 #.
@@ -151,7 +151,7 @@ msgstr "Guardar"
 
 #. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
 msgid "Update policy and settings"
-msgstr "Configuración de auto-actualización"
+msgstr "Actualizar la política y configuración"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
 msgid "Settings"
@@ -179,7 +179,7 @@ msgstr "Hay una nueva versión disponible. ¡Por favor, descargue la última ver
 
 #. • IDD_NEW_VERSION → IDC_WEBSITE
 msgid "Click here to go to the website"
-msgstr "Haga clic aquí para ir al sitio de Rufus"
+msgstr "Haga clic aquí para ir al sitio web de Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
 msgid "Release Notes"
@@ -208,16 +208,16 @@ msgid ""
 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
 "To continue with this operation, click OK. To quit click CANCEL."
 msgstr ""
-"ADVERTENCIA: TODOS LOS DATOS EN %s SERÁN ELIMINADOS.\n"
+"ADVERTENCIA: TODOS LOS DATOS EN LA UNIDAD %s SERÁN ELIMINADOS.\n"
 "Para continuar, haga clic en OK. Para detener la operación, haga clic en CANCELAR."
 
 #. • MSG_004
 msgid "Rufus update policy"
-msgstr "Actualización de Rufus"
+msgstr "Política de actualización de Rufus"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
-msgstr "¿Permitir que Rufus busque actualizaciones en línea?"
+msgstr "¿Quieres permitir que Rufus busque actualizaciones en línea?"
 
 #. • MSG_007
 msgid "Cancel"
@@ -253,7 +253,7 @@ msgstr ""
 
 #. • MSG_013
 msgid "Disabled"
-msgstr "Nunca"
+msgstr "Deshabilitado"
 
 #. • MSG_014
 msgid "Daily"
@@ -457,11 +457,11 @@ msgstr "El tamaño del volúmen no es válido."
 
 #. • MSG_061
 msgid "Please insert a removable media in drive."
-msgstr "Inserte un dispositivo en el lector."
+msgstr "Inserte un dispositivo en la unidad."
 
 #. • MSG_062
 msgid "An unsupported command was received."
-msgstr "Comando no soportado."
+msgstr "Se ha recibido un comando no compatible."
 
 #. • MSG_063
 msgid "Memory allocation error."
@@ -485,7 +485,7 @@ msgstr "Imposible abrir el medio - otro proceso lo está usando. Desconecte y vu
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "No se pudo realizar el particionado del dispositivo."
+msgstr "No se pudo particionar la unidad."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
@@ -519,7 +519,7 @@ msgstr "No se pudo volver a montar el volumen."
 
 #. • MSG_076
 msgid "Unable to patch/setup files for boot."
-msgstr "Imposible arreglar/configurar ficheros de arranque."
+msgstr "Imposible parchear/configurar ficheros de arranque."
 
 #. • MSG_077
 msgid "Unable to assign a drive letter."
@@ -952,8 +952,8 @@ msgid "Download using a browser"
 msgstr "Descargar usando un navegador"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Temporalmente expulsado por Microsoft por solicitar demasiadas descargas - Inténtelo más tarde, por favor..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "La descarga de ISO de Windows no está disponible debido a que Microsoft modificó su sitio web para evitarlo."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -1090,7 +1090,7 @@ msgstr "Haga clic para seleccionar..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr "Rufus - La herramienta de formateo de USBs en la que puedes confiar"
+msgstr "Rufus, la herramienta de formateo de USBs en la que puedes confiar"
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
@@ -1098,9 +1098,7 @@ msgstr "Versión %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr ""
-"Traducción al español:\\tab José Pineda <mailto:battletroll@gmail.com>\\line\n"
-"\\tab\\tab\\tab MaKK <mailto:jordikab@gmail.com>"
+msgstr "Traducción al español:\\line• José Pineda <mailto:battletroll@gmail.com>\\line• MaKK <mailto:jordikab@gmail.com>\\line• Marco A. Ramirez Madrid <mailto:rastrillin@hotmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1208,6 +1206,10 @@ msgstr "Detectado tamaño de sector no estándar"
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "'Windows To Go' sólo puede ser instalado en una partición GPT si tiene el atributo FIXED activo. El dispositivoactual no ha sido detectado como FIXED."
 
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "Esta función no está disponible en esta plataforma."
+
 #. • MSG_201
 msgid "Cancelling - Please wait..."
 msgstr "Cancelando - por favor espere..."
@@ -1294,7 +1296,6 @@ msgstr "%s guardado"
 #. • MSG_217
 #.
 #. Formatting status
-#, fuzzy
 msgid "Formatting: %s"
 msgstr "Formateando: %s"
 
@@ -1315,7 +1316,6 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "Formateando (%s) - duración estimada %d:%02d..."
 
 #. • MSG_221
-#, fuzzy
 msgid "Setting label (%s)..."
 msgstr "Escribiendo la etiqueta del volumen (%s)..."
 
@@ -1346,12 +1346,10 @@ msgid "Closing existing volume..."
 msgstr "Cerrando el volumen existente..."
 
 #. • MSG_228
-#, fuzzy
 msgid "Writing Master Boot Record..."
 msgstr "Escribiendo el registro maestro de arranque (Master Boot Record)..."
 
 #. • MSG_229
-#, fuzzy
 msgid "Writing Partition Boot Record..."
 msgstr "Escribiendo el registro de arranque de la partición (Partition Boot Record)..."
 
@@ -1360,12 +1358,10 @@ msgid "Copying DOS files..."
 msgstr "Copiando archivos DOS..."
 
 #. • MSG_231
-#, fuzzy
 msgid "Copying ISO files: %s"
 msgstr "Copiando archivos ISO: %s"
 
 #. • MSG_232
-#, fuzzy
 msgid "Win7 EFI boot setup (%s)..."
 msgstr "Configuración de arranque Win7 EFI (%s)..."
 
@@ -1402,7 +1398,6 @@ msgid "Partitioning (%s)..."
 msgstr "Particionando (%s)..."
 
 #. • MSG_239
-#, fuzzy
 msgid "Deleting partitions (%s)..."
 msgstr "Borrando particiones (%s)..."
 
@@ -1419,7 +1414,6 @@ msgstr ""
 "La descargas será borrada. Revise el registro para más detalles."
 
 #. • MSG_241
-#, fuzzy
 msgid "Downloading: %s"
 msgstr "Descargando: %s"
 
@@ -1502,7 +1496,6 @@ msgid "NTFS compression"
 msgstr "Compresión NTFS"
 
 #. • MSG_261
-#, fuzzy
 msgid "Writing image: %s"
 msgstr "Escribiendo imagen: %s"
 
@@ -1531,7 +1524,6 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "Modo dual EFI/BIOS"
 
 #. • MSG_267
-#, fuzzy
 msgid "Applying Windows image: %s"
 msgstr "Aplicando imagen Windows: %s"
 
@@ -1548,7 +1540,6 @@ msgid "USB debug"
 msgstr "Depuración USB"
 
 #. • MSG_271
-#, fuzzy
 msgid "Computing image checksums: %s"
 msgstr "Calculando checksums de la imagen: %s"
 
@@ -1561,7 +1552,6 @@ msgid "Change the application language"
 msgstr "Cambiar idioma"
 
 #. • MSG_274
-#, fuzzy
 msgid "%s image detected"
 msgstr "Imagen %s detectada"
 
@@ -1632,7 +1622,6 @@ msgstr ""
 "¿Está seguro que desea ejecutar este fichero?"
 
 #. • MSG_286
-#, fuzzy
 msgid "Zeroing drive: %s"
 msgstr "Borrando a ceros la unidad: %s"
 
@@ -1665,8 +1654,12 @@ msgid "Unsupported Windows version"
 msgstr "Versión de Windows no soportada"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Esta versión de Windows ya no está soportada por Rufus."
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"Esta versión de Windows ya no es compatible con Rufus.\n"
+"La última versión de Rufus compatible con esta plataforma es v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1731,20 +1724,19 @@ msgid "Create a disk image of the selected device"
 msgstr "Crear una imagen de disco del dispositivo seleccionado"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
 msgstr "Use esta opción para indicar si desea usar este dispositivo para instalar Windows en otro disco, o si quiere ejecutar Windows directamente desde esta unidad (Windows To Go)."
 
 #. • MSG_306
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-#, fuzzy
 msgid "Fast-zeroing drive: %s"
 msgstr "Borrando a ceros la unidad de forma rápida: %s"
 
 #. • MSG_307
-msgid "This may take a while"
-msgstr "Puede tardar un rato"
+msgid "this may take a while"
+msgstr "esto puede tardar un rato"
 
 #. • MSG_308
 msgid "VHD detection"
@@ -1811,3 +1803,144 @@ msgid ""
 msgstr ""
 "La imagen seleccionada es ISOHybrid, pero sus creadores no la han creado compatible con el modo de copia ISO/FILE.\n"
 "Por consiguiente, se forzará el modo de escritura de imágenes DD."
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "No se puede abrir o leer '%s'"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "Aplicando personalización de Windows: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "Aplicando opciones de usuario..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "Experiencia de usuario de Windows"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "¿Personalizar la instalación de Windows?"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "Eliminar el requisito de más de 4 GB de RAM, Arranque seguro y TPM 2.0"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "Eliminar el requisito de una cuenta de Microsoft en línea"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "Deshabilitar la recopilación de datos (Omitir preguntas de privacidad)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "Impedir que Windows To Go acceda a los discos internos"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "Crear una cuenta local con nombre de usuario:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "Establezca las opciones regionales en los mismos valores que las de este usuario"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "Deshabilitar el cifrado automático de dispositivos BitLocker"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "Registro persistente"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus es una utilidad que le ayuda a formatear y crear dispositivos flash booteables, como «pendrives», tarjetas de memoria, etcétera."
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "Sitio oficial %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "Código fuente %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "Registro de cambios %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"Esta aplicación tiene licencia bajo los términos de la Licencia Pública GNU (GPL) versión 3.\n"
+"Consulte https://www.gnu.org/licenses/gpl-3.0.html para obtener más información."
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr "Arranque"
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Formatee USB, tarjetas flash y unidades virtuales a FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "Crear unidades USB de arranque FreeDOS"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "Cree unidades de arranque desde ISO de arranque (Windows, Linux, etc.)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "Cree unidades de arranque a partir de imágenes de disco de arranque, incluidas las comprimidas"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "Cree unidades de arranque BIOS o UEFI, incluido NTFS de arranque UEFI"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "Cree unidades 'Windows To Go'"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "Cree unidades de instalación de Windows 11 para PC que no tienen TPM o Arranque seguro"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "Crear particiones persistentes de Linux"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "Cree imágenes VHD/DD de la unidad seleccionada"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "Calcule las sumas de comprobación MD5, SHA-1, SHA-256 y SHA-512 de la imagen seleccionada"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "Realice comprobaciones de bloques defectuosos, incluida la detección de unidades flash \"falsas\""
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "Descargue los ISO oficiales de Microsoft Windows"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "Descargar ISO de UEFI Shell"
