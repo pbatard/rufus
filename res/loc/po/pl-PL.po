@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2021-04-11 16:36+0200\n"
-"PO-Revision-Date: 2022-05-02 11:18+0100\n"
+"POT-Creation-Date: 2023-03-16 00:35+0000\n"
+"PO-Revision-Date: 2023-03-16 00:44+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pl_PL\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Polish (Polski)\n"
 "X-Rufus-LCID: 0x0415\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -949,8 +949,8 @@ msgid "Download using a browser"
 msgstr "Pobierz za pomocą przeglądarki"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Tymczasowo zbanowany przez Microsoft za żądanie zbyt wielu pobrań - spróbuj ponownie później ..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "Tymczasowo zablokowany przez Microsoft za żądanie zbyt wielu pobrań - spróbuj ponownie później..."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -1095,7 +1095,7 @@ msgstr "Wersja %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Polskie tłumaczenie:\\line• Piotr Halama <http://halamix2.pl>\\line• Poprawki: Krzysztof J. Szklarski\\line• Jakub Zieciak <mailto:jakub.zieciak@gmail.com>"
+msgstr "Polskie tłumaczenie:\\line• Piotr Halama <http://halamix2.pl>\\line• Krzysztof J. Szklarski\\line• Jakub Zieciak <mailto:jakub.zieciak@gmail.com>\\line• Jakub Mierzejewski <mailto:jakmierzejewski@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1202,6 +1202,10 @@ msgstr "Wykryto niestandardowy rozmiar sektora"
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "'Windows To Go' może zostać zainstalowany jedynie na dysku ze strukturą GPT jeżeli ma on ustawiony atrybut LOKALNY. Obecny dysk nie został wykryty jako LOKALNY."
+
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "Ta funkcja nie jest dostępna na tej platformie."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1647,8 +1651,12 @@ msgid "Unsupported Windows version"
 msgstr "Niewspierana wersja Windowsa"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Ta wersja Windowsa nie jest już wspierana przez Rufusa."
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"Ta wersja Windowsa nie jest już wspierana przez Rufusa.\n"
+"Ostatnia wersja w pełni wspierana przez Rufusa:  v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1713,8 +1721,8 @@ msgid "Create a disk image of the selected device"
 msgstr "Utwórz obraz dysku wybranego urządzenia"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "Użyj tej opcji, aby wskazać, czy chcesz użyć tego dysku do instalacji Windowsa na innym dysku, czy chcesz uruchomić Windowsa bezpośrednio z tego dysku (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "Użyj tej opcji, aby wskazać, czy chcesz użyć tego dysku do instalacji Windowsa na innym dysku, czy chcesz uruchomić Windowsa bezpośrednio z dysku (Windows To Go)."
 
 #. • MSG_306
 #.
@@ -1724,8 +1732,8 @@ msgid "Fast-zeroing drive: %s"
 msgstr "Szybkie zerowanie dysku: %s"
 
 #. • MSG_307
-msgid "This may take a while"
-msgstr "To może chwilę potrwać"
+msgid "this may take a while"
+msgstr "to może chwilę potrwać"
 
 #. • MSG_308
 msgid "VHD detection"
@@ -1792,3 +1800,144 @@ msgid ""
 msgstr ""
 "Obraz, który został wybrany jest Hybrydą ISO i nie jest zgodny z trybem kopiowania ISO.\n"
 "Wynikiem tego będzie przymusowe zapisywanie w trybie DD."
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "Nie można otworzyć '%s'"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "Zastosuj niestandardowe ustawienia Windows: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "Aplikowanie ustawień użytkownika..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr ""
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "Niestandardowe ustawienia Windows?"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "Dezaktywuj wymaganie niezbędnej minimalnej ilości pamięci RAM (4GB+), Secure Boot i TPM 2.0"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "Usuń wymaganie konta Microsoft online"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "Wyłącz zbieranie osobistych danych"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "Zapobiegnij używania wewnętrznego magazynu danych przez Windows To Go"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "Stwórz konto lokalne o nazwie użytkownika:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "Ustaw taką samą lokalizację i wartości jak obecny użytkownik"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "Dezaktywuj automatyczne szyfrowanie BitLocker"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "Stały dziennik (log)"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus to narzędzie, które pomaga formatować i tworzyć bootowalne dyski flash USB, takie jak klucze USB / pendrive, pendrive'y itp."
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "Oficjalna strona: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "Kod źródłowy: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "Zmiany: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"Ta aplikacja jest objęta licencją na warunkach licencji publicznej GNU (GPL) w wersji 3.\n"
+"Z obacz https://www.gnu.org/licenses/gpl-3.0.html, aby uzyskać szczegółowe informacje."
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr ""
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Sformatuj nośnik używając: FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "Stwórz bootowalny nośnik USB FreeDOS"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "Twórz dyski rozruchowe z obrazów ISO (Windows, Linux itp.)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "Twórz dyski rozruchowe z obrazów dysków, włączając skompresowane"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "Stwórz dysk rozruchowy BIOS lub UEFI, włączając bootowalny dysk UEFI NTFS"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "Stwórz dysk 'Windows To Go'"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "Twórz dyski instalacyjne systemu Windows 11 dla komputerów, które nie posiadają modułu TPM ani Secure Boot"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "Stwórz particje persistent Linuxa"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "Stwórz obraz VHD/DD z wybranego dysku"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "Oblicz sumy kontrolne MD5, SHA-1, SHA-256 i SHA-512 dla wybranego obrazu"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "Sprawdź dysk pod względem spójności danych lub wykryj \"nieorginalny\" pendrive"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "Pobierz oficjalny obraz ISO systemu Microsoft Windows"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "Ściągnij obrazy ISO UEFI Shell"
