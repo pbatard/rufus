@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2022-06-07 16:25+0100\n"
-"PO-Revision-Date: 2022-06-27 23:47+0100\n"
+"PO-Revision-Date: 2023-03-17 14:32+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Portuguese Brazilian (Português do Brasil)\n"
 "X-Rufus-LCID: 0x0416\n"
-"X-Generator: Poedit 3.1\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -481,7 +481,7 @@ msgstr "Falha na instalação"
 
 #. • MSG_067
 msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
-msgstr "Impossível abrir a mídia. Ela pode estar sendo utilizada por outro processo. Desconecte e volte a conectar a unidade, e tente novamente."
+msgstr "Impossível abrir a mídia. Ela pode estar sendo utilizada por outro processo. Por favor, reconecte a mídia e tente novamente."
 
 #. • MSG_068
 msgid "Could not partition drive."
@@ -499,7 +499,7 @@ msgstr "Cancelado pelo usuário."
 #.
 #. See http://en.wikipedia.org/wiki/Thread_%28computing%29
 msgid "Unable to start thread."
-msgstr "Impossível iniciar encadeamento de execução."
+msgstr "Impossível iniciar thread."
 
 #. • MSG_072
 msgid "Bad blocks check didn't complete."
@@ -950,8 +950,8 @@ msgid "Download using a browser"
 msgstr "Baixar usando um navegador"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Banido temporariamente pela Microsoft pelo alto número de requisições - Por favor, tente mais tarde..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "Download de ISOs do Windows não está disponível porque a Microsoft alterou o seu site para evitá-lo."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -1096,7 +1096,7 @@ msgstr "Versão %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Tradutores: Tiago Rinaldi <trinaldi@gmail.com>\\line\\tab      Chateaubriand Vieira Moura <chateaubriand@ifse.com.br>"
+msgstr "Tradutores:\\line• Tiago Rinaldi <mailto:trinaldi@gmail.com>\\line• Chateaubriand Vieira Moura <mailto:chateaubriand@ifse.com.br>\\line• Maison da Silva <mailto:maisonmdsgreen@hotmail.com>\\line• Marcos Mello <mailto:marcosfrm@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1203,6 +1203,10 @@ msgstr "Detectado tamanho de setor fora do padrão"
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "'Windows Para Levar' só pode ser instalado em um drive particionado como GPT se ele tiver o atributo FIXO ativo. O drive atual não apresenta o atributo FIXO."
+
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "Este recurso não está disponível nesta plataforma."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1648,8 +1652,12 @@ msgid "Unsupported Windows version"
 msgstr "Versão do Windows não suportada"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Esta versão do Windows não é mais suportada pelo Rufus."
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"Esta versão do Windows não é mais suportada pelo Rufus.\n"
+"A última versão do Rufus compatível com esta plataforma é a v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1750,7 +1758,7 @@ msgstr ""
 
 #. • MSG_311
 msgid "Use %s (in the main application window) to enable."
-msgstr "Usar %s para habilitar (na janela principal da aplicação)."
+msgstr "Usar %s (na janela principal da aplicação) para habilitar."
 
 #. • MSG_312
 msgid "Extra hashes (SHA512)"
@@ -1762,7 +1770,7 @@ msgstr "Salvar em VHD"
 
 #. • MSG_314
 msgid "Compute image checksums"
-msgstr "Calcular cheksums da imagem"
+msgstr "Calcular somas de verificação da imagem"
 
 #. • MSG_315
 msgid "Multiple buttons"
@@ -1797,13 +1805,142 @@ msgstr ""
 "Como resultado, o modo de gravação de imagem DD será aplicado."
 
 #. • MSG_322
-msgid "Standard Windows 11 Installation (TPM 2.0 + Secure Boot)"
-msgstr "Instalação padrão do Windows 11 (TPM 2.0 + Secure Boot)"
+msgid "Unable to open or read '%s'"
+msgstr "Impossível abrir ou ler '%s'"
 
-#. • MSG_323
-msgid "Extended Windows 11 Installation (no TPM / no Secure Boot)"
-msgstr "Instalação estendida do Windows 11 (sem TPM / sem Secure Boot)"
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "Aplicando a personalização do Windows: %s"
 
-#. • MSG_324
-msgid "Removing Windows 11 installation restrictions: %s"
-msgstr "Removendo as restrições de instalação do Windows 11: %s"
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "Aplicando opções do usuário..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "Experiência do Usuário do Windows"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "Personalizar a instalação do Windows?"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "Remover a exigência de 4GB+ RAM, Secure Boot e TPM 2.0"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "Remover a exigência de uma conta online da Microsoft"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "Desativar a coleta de dados (Pular as perguntas sobre privacidade)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "Impedir que o Windows To Go acesse discos internos"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "Criar uma conta local com nome de usuário:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "Definir as opções regionais com os mesmos valores deste usuário"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "Desativar a encriptação automática BitLocker"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "Registo persistente"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus é um utilitário que ajuda a formatar e a criar unidades flash USB inicializáveis, tais como pendrives USB, cartões de memória, etc."
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "Site oficial: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "Código fonte: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "Registro de alterações: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"Este software está licenciado sob os termos da GNU Public License (GPL) versão 3.\n"
+"Consulte https://www.gnu.org/licenses/gpl-3.0.pt-br.html para mais detalhes."
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr "Inicialização"
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Formatar dispositivos USB, cartões flash e discos virtuais com FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "Criar discos USB inicializáveis FreeDOS"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "Criar discos inicializáveis a partir de ISOs inicializáveis (Windows, Linux, etc.)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "Criar discos inicializáveis a partir de imagens de disco inicializáveis, inclusive de imagens compactadas"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "Criar discos inicializáveis ​​BIOS ou UEFI, inclusive discos UEFI inicializáveis ​​usando NTFS"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "Criar discos 'Windows To Go'"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "Criar discos de instalação do Windows 11 para PCs que não possuem TPM ou Secure Boot"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "Criar partições persistentes para Linux"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "Criar imagens VHD/DD do dispositivo selecionado"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "Calcular somas de verificação MD5, SHA-1, SHA-256 e SHA-512 da imagem selecionada"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "Executar verificações de blocos defeituosos, incluindo detecção de unidades flash \"falsificadas\""
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "Baixar ISOs oficiais do Microsoft Windows"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "Baixar ISOs do Shell UEFI"
