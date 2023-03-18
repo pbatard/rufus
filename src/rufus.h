@@ -160,7 +160,7 @@
 #define static_sprintf(dst, ...) safe_sprintf(dst, sizeof(dst), __VA_ARGS__)
 #define safe_atoi(str) ((((char*)(str))==NULL)?0:atoi(str))
 #define safe_strlen(str) ((((char*)(str))==NULL)?0:strlen(str))
-#define safe_strdup _strdup
+#define safe_strdup(str) ((((char*)(str))==NULL)?NULL:_strdup(str))
 #if defined(_MSC_VER)
 #define safe_vsnprintf(buf, size, format, arg) _vsnprintf_s(buf, size, _TRUNCATE, format, arg)
 #else
