@@ -103,7 +103,7 @@ static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm
 // If the disc was mastered properly, GRUB/EFI will take care of itself
 static const char* grub_dirname[] = { "/boot/grub/i386-pc", "/boot/grub2/i386-pc" };
 static const char* grub_cfg[] = { "grub.cfg", "loopback.cfg" };
-static const char* menu_cfg[] = { "menu.cfg", "menu.lst" };
+static const char* menu_cfg = "menu.cfg";
 // NB: Do not alter the order of the array below without validating hardcoded indexes in check_iso_props
 static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf", "txt.cfg" };
 static const char* isolinux_bin[] = { "isolinux.bin", "boot.bin" };
@@ -200,9 +200,8 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 				if (safe_stricmp(psz_basename, grub_cfg[i]) == 0)
 					props->is_grub_cfg = TRUE;
 			}
-			for (i = 0; i < ARRAYSIZE(menu_cfg); i++) {
-				if (safe_stricmp(psz_basename, menu_cfg[i]) == 0)
-					props->is_menu_cfg = TRUE;
+			if (safe_stricmp(psz_basename, menu_cfg) == 0) {
+				props->is_menu_cfg = TRUE;
 			}
 		}
 
