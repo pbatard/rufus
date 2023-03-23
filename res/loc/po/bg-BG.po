@@ -1,9 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.5\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2020-04-17 12:17+0100\n"
-"PO-Revision-Date: 2020-04-17 12:19+0100\n"
+"POT-Creation-Date: 2023-03-23 15:50+0000\n"
+"PO-Revision-Date: 2023-03-23 15:53+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: bg_BG\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Bulgarian (Български)\n"
 "X-Rufus-LCID: 0x0402\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -433,7 +433,7 @@ msgstr "Устройството е защитено срещу записван
 
 #. • MSG_055
 msgid "The device is in use by another process. Please close any other process that may be accessing the device."
-msgstr "Това устройство се използва от друг процес.Моля, спрете всички процеси, които използват това устройство."
+msgstr "Това устройство се използва от друг процес. Моля, спрете всички процеси, които използват това устройство."
 
 #. • MSG_056
 msgid "Quick format is not available for this device."
@@ -869,7 +869,7 @@ msgid ""
 "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
-"Създадохте носител, който използва UEFI: NTFS буутлоудър. Моля, не забравяйте, че за да заредите този носител, ТРЯБВА ДА ЗАБРАНИТЕ ЗАЩИТЕНОТО ЗАРЕЖДАНЕ.\n"
+"Създадохте носител, който използва UEFI: NTFS bootloader. Моля, не забравяйте, че за да заредите този носител, ТРЯБВА ДА ЗАБРАНИТЕ ЗАЩИТЕНОТО ЗАРЕЖДАНЕ.\n"
 "За подробности относно защо това е необходимо, вижте бутона \"Повече информация\" по-долу."
 
 #. • MSG_130
@@ -898,7 +898,7 @@ msgid ""
 msgstr ""
 "Rufus забеляза, че се опитвате да създадете носител с \"Windows To Go\", базиран на 1809 ISO.\n"
 "\n"
-"Поради *MICROSOFT BUG*, този носител ще крашне при зареждане на Windows (Blue Screen Of Death), ако не замените ръчно файла 'WppRecorder.sys' със същия от версия 1803.\n"
+"Поради *MICROSOFT BUG*, този носител ще крашне при зареждане на Windows (Син екран на смъртта), ако не замените ръчно файла 'WppRecorder.sys' със същия от версия 1803.\n"
 "\n"
 "Забележка: Rufus не може автоматично да поправи това, защото файлът 'WppRecorder.sys' е запазен с авторско право от Microsoft, поради което не можем да съхраняваме легално копие на този файл в програмата..."
 
@@ -949,8 +949,8 @@ msgid "Download using a browser"
 msgstr "Изтегляне чрез браузър"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Временно ограничено от Microsoft за направени твърде много заявки - Моля, опитайте отново по-късно..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "Изтеглянето на Windows ISO образи е недостъпно, тъй като Microsoft измени сайта си, за да го предотврати."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -1071,7 +1071,7 @@ msgid ""
 "Start the formatting operation.\n"
 "This will DESTROY any data on the target!"
 msgstr ""
-"Стартирай форматиращата операция.\n"
+"Стартиране на форматиращата операция.\n"
 "Това ще УНИЩОЖИ всякаква информация на целта!"
 
 #. • MSG_172
@@ -1204,6 +1204,10 @@ msgstr "Засечен е нестандартен размер на секто�
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "'Windows To Go' може да се инсталира само на устройство с GPT дялове и с атрибут FIXED. Настоящият дял не притежава атрибутът FIXED."
 
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "Тази функция не е налична на тази платформа."
+
 #. • MSG_201
 msgid "Cancelling - Please wait..."
 msgstr "Прекратяване - Моля изчакайте..."
@@ -1291,7 +1295,7 @@ msgstr "Запазен %s"
 #.
 #. Formatting status
 msgid "Formatting: %s"
-msgstr "Форматирането е: %s"
+msgstr "Форматиране: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1310,8 +1314,8 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "Форматиране (%s) - Приблизително времетраене %d:%02d..."
 
 #. • MSG_221
-msgid "Setting Label (This may take a while)..."
-msgstr "Задаване на етикет (Това може да отнеме време)..."
+msgid "Setting label (%s)..."
+msgstr "Задаване на етикет (%s)..."
 
 #. • MSG_222
 #.
@@ -1356,8 +1360,8 @@ msgid "Copying ISO files: %s"
 msgstr "Копиране на ISO файловете: %s"
 
 #. • MSG_232
-msgid "Win7 EFI boot setup (This may take a while)..."
-msgstr "Win7 EFI стартиращ план (Това може да отнеме време)..."
+msgid "Win7 EFI boot setup (%s)..."
+msgstr "Win7 EFI стартиращ план (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1392,8 +1396,8 @@ msgid "Partitioning (%s)..."
 msgstr "Създаване на дял(ове) (%s)..."
 
 #. • MSG_239
-msgid "Deleting partitions..."
-msgstr "Изтриване на дялове..."
+msgid "Deleting partitions (%s)..."
+msgstr "Изтриване на дялове (%s)..."
 
 #. • MSG_240
 #.
@@ -1546,8 +1550,8 @@ msgid "Change the application language"
 msgstr "Смени езикът на приложението"
 
 #. • MSG_274
-msgid "ISOHybrid image detected"
-msgstr "Засечен е ISOHybrid образ"
+msgid "%s image detected"
+msgstr "Засечен е %s образ"
 
 #. • MSG_275
 #.
@@ -1648,8 +1652,12 @@ msgid "Unsupported Windows version"
 msgstr "Неподдържана версия на Windows"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Тази версия на Windows вече не се поддържа от Rufus."
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"Тази версия на Windows вече не се поддържа от Rufus.\n"
+"Последната версия на Rufus, съвместима с тази платформа е v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1714,8 +1722,8 @@ msgid "Create a disk image of the selected device"
 msgstr "Създай дисков образ на избраното устройство"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "Използвайте тази опция, за да покажете дали искате да използвате това устройство, за да инсталирате Windows на друг диск, или за да стартирате Windows директно от това устройство (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "Използвайте тази опция, за да изберете дали искате да използвате това устройство, за да инсталирате Windows на друг диск, или за да създадете преносима инсталация на Windows на това устройство (Windows To Go)."
 
 #. • MSG_306
 #.
@@ -1723,3 +1731,214 @@ msgstr "Използвайте тази опция, за да покажете �
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
 msgstr "Бързо нулиране на устройството: %s"
+
+#. • MSG_307
+msgid "this may take a while"
+msgstr "Това може да отнеме време"
+
+#. • MSG_308
+msgid "VHD detection"
+msgstr "Засичане на VHD"
+
+#. • MSG_309
+msgid "Compressed archive"
+msgstr "Компресиран архив"
+
+#. • MSG_310
+msgid ""
+"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"\n"
+"Please select the mode that you want to use to write this image:"
+msgstr ""
+"ISO-то, което сте избрали, използва UEFI и е достатъчно малко да бъде записано като EFI System Partition (ESP). Записването в ESP, вместо в обикновен дял, може да е по-подходящо за някои типове инсталации.\n"
+"\n"
+"Моля, изберете режимът, който искате да използвате, за да запишете този образ:"
+
+#. • MSG_311
+msgid "Use %s (in the main application window) to enable."
+msgstr "Използвайте %s (в основният прозорец на програмата), за да го включите."
+
+#. • MSG_312
+msgid "Extra hashes (SHA512)"
+msgstr "Допълнителни хешове (SHA512)"
+
+#. • MSG_313
+msgid "Save to VHD"
+msgstr "Запазване като VHD"
+
+#. • MSG_314
+msgid "Compute image checksums"
+msgstr "Изчисляване на чексуми на образа"
+
+#. • MSG_315
+msgid "Multiple buttons"
+msgstr "Множество бутони"
+
+#. • MSG_316
+msgid "Number of passes"
+msgstr "Брой пробези"
+
+#. • MSG_317
+msgid "Disk ID"
+msgstr "ID на диск"
+
+#. • MSG_318
+msgid "Default thread priority: %d"
+msgstr "Приоритет на нишката по подразбиране: %d"
+
+#. • MSG_319
+msgid "Ignore Boot Marker"
+msgstr "Игнорирай Boot маркер"
+
+#. • MSG_320
+msgid "Refreshing partition layout (%s)..."
+msgstr "Обновяване на дяловете (%s)..."
+
+#. • MSG_321
+msgid ""
+"The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
+"As a result, DD image writing mode will be enforced."
+msgstr ""
+"Образът, който сте избрали, е ISOHybrid, но създателите му не са го направили съвместим с ISO/File режим на копиране.\n"
+"Затова ще бъде използван DD метод на записване на образа."
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "Неуспешно отваряне или прочитане на '%s'"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "Прилагане на персонализации на Windows: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "Прилагане на настройки на потребителя..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr ""
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "Персонализиране на инсталацията на Windows?"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "Премахване на изискването за 4GB+ RAM, Secure Boot и TPM 2.0"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "Премахване на изискването за онлайн Microsoft акаунт"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "Изключване на събирането на данни (пропускане на въпросите за поверителност)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "Предотврати достъпа на Windows To Go до вътрешни дискове"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "Създаване на локален акаунт с потребителско име:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "Задаване на регионални настройки със същите стойности, като на този потребител"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "Изключване на автоматичното криптиране на устройството с BitLocker"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "Устойчив лог"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus е програма, с която можете лесно да форматирате и създавате стартиращи USB устройства, карти с памет и др."
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "Официален сайт: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "Изходен код: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "Лог на промените: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"Тази програма е лицензирана според условията на GNU Public License (GPL) версия 3.\n"
+"Вижте https://www.gnu.org/licenses/gpl-3.0.html за подробности."
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr ""
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Форматиране на USB, карти памет и виртуални устройства с FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "Създаване на FreeDOS стартиращ USB устройства"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "Създаване на стартиращи устройства от ISO образи (Windows, Linux и др.)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "Създаване на стартиращи устройства от образи, включително компресирани такива"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "Създаване на BIOS или UEFI стартиращи устройства, включително UEFI стартиращ NTFS"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "Създаване на 'Windows To Go' устройства"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "Създаване на Windows 11 инсталационно устройство за компютри, които нямат TPM или Secure Boot"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "Създаване на устойчиви Linux дялове"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "Създаване на VHD/DD образи на избраното устройство"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "Изчисляване на MD5, SHA-1, SHA-256 и SHA-512 чексуми на избраният образ"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "Проверяване за лоши блокове, включително засичане на \"фалшиви\" устройства"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "Изтегляне на официални Microsoft Windows ISO образи"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "Изтегляне на UEFI Shell образи"
