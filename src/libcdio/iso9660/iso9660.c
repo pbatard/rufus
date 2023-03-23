@@ -729,7 +729,7 @@ iso9660_dir_add_entry_su(void *dir,
   unsigned int offset = 0;
   uint32_t dsize = from_733(idr->size);
   int length, su_offset;
-  struct tm temp_tm;
+  struct tm temp_tm = { 0 };
   cdio_assert (sizeof(iso9660_dir_t) == 33);
 
   if (!dsize && !idr->length)

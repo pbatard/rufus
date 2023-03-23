@@ -20,7 +20,8 @@
 */
 /* Rock Ridge Extensions to iso9660 */
 
-
+
+
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -104,17 +105,17 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
 
 #define CONTINUE_DECLS \
   uint32_t cont_extent = 0, cont_offset = 0, cont_size = 0;	\
-  uint8_t *buffer = NULL
+  uint8_t *buffer = NULL, ce_count = 0
 
 #define CHECK_CE(FAIL)				\
-  { cont_extent = from_733(*rr->u.CE.extent);	\
-    cont_offset = from_733(*rr->u.CE.offset);	\
+  { cont_extent = from_733(rr->u.CE.extent);	\
+    cont_offset = from_733(rr->u.CE.offset);	\
     if (cont_offset >= ISO_BLOCKSIZE) FAIL;	\
-    cont_size = from_733(*rr->u.CE.size);	\
+    cont_size = from_733(rr->u.CE.size);	\
     if (cont_size >= ISO_BLOCKSIZE) FAIL;	\
   }
 
-#define SETUP_ROCK_RIDGE(DE,CHR,LEN)				\
+#define SETUP_ROCK_RIDGE(DE, CHR, LEN)				\
   {								\
     LEN= sizeof(iso9660_dir_t) + DE->filename.len;		\
     if (LEN & 1) LEN++;						\
@@ -181,7 +182,7 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
   *psz_name = 0;
 
   SETUP_ROCK_RIDGE(p_iso9660_dir, chr, len);
-  /*repeat:*/
+repeat:
   {
     iso_extension_record_t * rr;
     int sig;
@@ -217,15 +218,10 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
 	}
 	CHECK_CE({cdio_warn("Invalid Rock Ridge CE field"); goto out;});
 	p_stat->rr.u_su_fields |= ISO_ROCK_SUF_CE;
-	/* We may already be processing a continuation block so free it */
-	free(buffer);
-	buffer = calloc(1, ISO_BLOCKSIZE);
-	if (!buffer)
-	  goto out;
-	if (iso9660_iso_seek_read(p_image, buffer, cont_extent, 1) != ISO_BLOCKSIZE)
-	  goto out;
-	chr = &buffer[cont_offset];
-	len = cont_size;
+	/* Though no mastering utility in its right mind would produce anything
+	   like this, the specs make it theoretically possible to have more RR
+	   extensions after a CE, so we delay the CE block processing for later.
+	*/
 	break;
       case SIG('E','R'):
 	cdio_debug("ISO 9660 Extensions: ");
@@ -379,9 +375,26 @@ get_rock_ridge_filename(iso9660_dir_t * p_iso9660_dir,
       }
     }
   }
-  free(buffer);
+  /* Process delayed CE blocks */
+  if (cont_size != 0) {
+      free(buffer);
+      buffer = calloc(1, ISO_BLOCKSIZE);
+      if (!buffer)
+	  goto out;
+      if (iso9660_iso_seek_read(p_image, buffer, cont_extent, 1) != ISO_BLOCKSIZE)
+	  goto out;
+      chr = &buffer[cont_offset];
+      len = cont_size;
+      cont_size = 0;
+      /* Someone abusing the specs may also be creating looping CEs */
+      if (ce_count++ < 64)
+	  goto repeat;
+      else
+	  cdio_warn("More than 64 consecutive Rock Ridge CEs detected");
+  }
   if (p_stat->rr.u_su_fields & ISO_ROCK_SUF_FORMAL)
     p_stat->rr.b3_rock = yep;
+  free(buffer);
   return i_namelen; /* If 0, this file did not have a NM field */
 out:
   free(buffer);

@@ -41,6 +41,7 @@
     <ClInclude Include="..\src\libcdio\cdio\iso9660.h" />
     <ClInclude Include="..\src\libcdio\cdio\logging.h" />
     <ClInclude Include="..\src\libcdio\cdio\portable.h" />
+    <ClInclude Include="..\src\libcdio\cdio\rock.h" />
     <ClInclude Include="..\src\libcdio\cdio\utf8.h" />
     <ClInclude Include="..\src\libcdio\cdio\util.h" />
     <ClInclude Include="..\src\libcdio\config.h" />

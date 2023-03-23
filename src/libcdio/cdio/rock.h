@@ -112,10 +112,10 @@ typedef struct iso_su_er_s {
 } GNUC_PACKED iso_su_er_t;
 
 typedef struct iso_su_ce_s {
-  uint8_t       extent[8];
-  uint8_t       offset[8];
-  uint8_t       size[8];
-} iso_su_ce_t;
+  iso733_t      extent;
+  iso733_t      offset;
+  iso733_t      size;
+} GNUC_PACKED iso_su_ce_t;
 
 /*! POSIX file attributes, PX. See Rock Ridge Section 4.1.2 */
 typedef struct iso_rock_px_s {

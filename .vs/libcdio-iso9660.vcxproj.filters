@@ -53,6 +53,9 @@
     <ClInclude Include="..\src\libcdio\cdio\portable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libcdio\cdio\rock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libcdio\iso9660\iso9660_fs.c">
