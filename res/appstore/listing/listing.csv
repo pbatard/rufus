@@ -1,65 +1,65 @@
-﻿"Field","ID","Type (Type)","default","en-us","ar-sa","bg-bg","zh-cn","zh-tw","hr-hr","cs-cz","da-dk","nl-nl","fi-fi","fr-fr","de-de","el-gr","he-il","hu-hu","id-id","it-it","ja-jp","ko-kr","lv-lv","lt-lt","ms-my","nb-no","fa-ir","pl-pl","pt-br","pt-pt","ro-ro","ru-ru","sr-latn-rs","sk-sk","sl-si","es-es","sv-se","th-th","tr-tr","uk-ua","vi-vn"
+"Field","ID","Type (Type)","default","en-us","ar-sa","bg-bg","zh-cn","zh-tw","hr-hr","cs-cz","da-dk","nl-nl","fi-fi","fr-fr","de-de","el-gr","he-il","hu-hu","id-id","it-it","ja-jp","ko-kr","lv-lv","lt-lt","ms-my","nb-no","fa-ir","pl-pl","pt-br","pt-pt","ro-ro","ru-ru","sr-latn-rs","sk-sk","sl-si","es-es","sv-se","th-th","tr-tr","uk-ua","vi-vn"
 "Description","2","Text","","Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc.
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
 • ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","برنامج Rufus هو أداة تساعد في تنسيق وإنشاء أقراص الإقلاع عن طريق USB، مثل مفاتيح USB، بطاقات الذاكرة، وغيرها.
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus е програма, с чиято помощ лесно можете да форматирате и създавате зареждащи USB Keys/Pendrives дискове, карти с памет и др.
+• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus е програма, с която можете лесно да форматирате и създавате стартиращи USB устройства, карти с памет и др.
+• Официален сайт: https://rufus.ie
+• Изходен код: https://github.com/pbatard/rufus
+• Лог на промените: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus 是一个帮助您格式化并创建可启动 USB 驱动器（如 U 盘和存储卡）的工具。
+• 官方网站: https://rufus.ie
+• 源代码: https://github.com/pbatard/rufus
+• 更新日志: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus 是個能格式化並製作可開機 USB 快閃磁碟機（USB 隨身碟、Memory Stick 等等）的工具。
+• 官方網站: https://rufus.ie
+• 源代碼: https://github.com/pbatard/rufus
+• 更新日誌: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus je aplikacija koja olakšava formatiranje i stvaranje USB pokretačkih jedinica.
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus 是一个帮助格式化和创建可启动USB闪存驱动器的工具，如USB钥匙/软盘、记忆棒等。
+• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus je nástroj, který pomáhá formátovat a vytvářet bootovací USB flash disky, jako jsou USB klíče, paměťové karty atd.
+• Oficiální stránky: https://rufus.ie
+• Zdrojový kód: https://github.com/pbatard/rufus
+• Protokol změn: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus er et værktøj, der hjælper med at formatere og skabe startbare USB-flashdrev, såsom USB-nøgler/USB-pinde, USB-stik, osv.
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus 是個能格式化並製作可開機 USB 快閃磁碟機（USB 隨身碟、Memory Stick 等等）的工具。
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus je aplikacija koja olakšava formatiranje i stvaranje USB pokretačkih jedinica.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Nástroj Rufus nabízí snadnou tvorbu a formátování bootovacích USB disků: USB klíčenek, paměťových karet,...
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus er et værktøj, der hjælper med at formatere og skabe startbare USB-flashdrev, såsom USB-nøgler/USB-pinde, USB-stik, osv.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus is een programma dat helpt bij het formatteren en aanmaken van opstartbare USB-flash-drives, zoals USB-sticks, USB-hd's,...
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus on ohjelma, joka auttaa alustamaan ja luomaan boottaavia USB-laitteita, kuten esimerkiksi USB-avaimia, muistitikkuja jne.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus est un utilitaire permettant de formater et de créer des média USB amorçables, tels que clés USB, mémoire flash, etc.
+• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus is een programma dat helpt bij het formatteren en aanmaken van opstartbare USB-flash-drives, zoals USB-sticks, geheugensticks, enz.
+• Officiële site: https://rufus.ie
+• Broncode: https://github.com/pbatard/rufus
+• Wijzigingslog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus on ohjelma, joka auttaa alustamaan ja luomaan boottaavia USB-laitteita, kuten esimerkiksi USB-avaimia, muistitikkuja jne.
+• Virallinen sivusto: https://rufus.ie
+• Lähdekoodi: https://github.com/pbatard/rufus
+• Muutosloki: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus est un utilitaire permettant de formater et de créer des média USB amorçables, tels que clés USB, mémoire flash, etc.
 • Site officiel : https://rufus.ie
 • Code source: https://github.com/pbatard/rufus
 • ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus ist ein Werkzeug, welches dabei hilft, bootfähige USB-Laufwerke zu erstellen, wie beispielweise USB-Keys, Speichersticks usw.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Το Rufus είναι ένα πρόγραμμα που σας βοηθά με τη διαμόρφωση και τη δημιουργία USB με δυνατότητα εκκίνησης, όπως USB keys /pendrives, κάρτες μνήμης, κτλ.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus הוא כלי המסייע באתחול ויצירת כונני הבזק מסוג USB הניתנים לאתחול, כמו ""דיסק און קי, כרטיסי זיכרון וכו׳.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","A Rufus egy segédprogram, amellyel indítható USB flash meghajtókat formázhat és készíthet, például USB kulcsokat/pendrive-okat, memóriakártyákat, stb.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus adalah alat yang membantu untuk memformat dan membuat perangkat USB flash menjadi bootable, seperti flashdisk, kartu memori, dll.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus è un programma che ti aiuta a formattare e creare una unità flash USB avviabile, come una chiavetta/penna/unità USB, memory stick, ecc.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
+• Offizielle Website: https://rufus.ie
+• Quellcode: https://github.com/pbatard/rufus
+• Änderungsprotokoll: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Το Rufus είναι ένα βοηθητικό πρόγραμμα που βοηθά στη διαμόρφωση και τη δημιουργία μονάδων flash USB με δυνατότητα εκκίνησης, όπως κλειδιά USB/pendrives,κάρτες μνήμης κ.λπ.
+• Επίσημος ιστότοπος: https://rufus.ie
+• Πηγαίος κώδικας: https://github.com/pbatard/rufus
+• Αρχείο καταγραφής αλλαγών: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus הוא כלי המסייע באתחול ויצירת כונני הבזק מסוג USB הניתנים לאתחול, כמו דיסק און קי, כרטיסי זיכרון וכו׳.
+• האתר הרשמי: https://rufus.ie
+• קוד מקור: https://github.com/pbatard/rufus
+• הערות שחרור: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","A Rufus egy segédprogram, amellyel bootolható USB flash meghajtókat formázhat és készíthet, például USB kulcsokat/pendrive-okat, memóriakártyákat, stb.
+• Hivatalos oldal: https://rufus.ie
+• Forráskód: https://github.com/pbatard/rufus
+• Változási napló: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus adalah alat yang membantu untuk memformat dan membuat perangkat USB flash menjadi bootable, seperti USB flashdisk, kartu memori, dll.
+• Situs resmi: https://rufus.ie
+• Kode Sumber: https://github.com/pbatard/rufus
+• Catatan pergantian: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus è un programma che ti aiuta a formattare e creare una unità flash USB avviabile, come una unità USB, memory stick, ecc.
+• Sito ufficiale: https://rufus.ie
+• Codice sorgente: https://github.com/pbatard/rufus
 • ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus (ルーファス) とは、起動可能なUSBフラッシュドライブ（USBメモリなど）を作成したり、フォーマットをするためのソフトウェアです。
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
 • ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus는 USB 메모리 및 플래시 드라이브를 포맷하고 부팅할 수 있도록 만드는 도구입니다.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus ir instruments ar kura palīdzību var formatēt un izveidot operētājsistēmas ielādes ierīci uz tādiem nesējiem, kā USB pieslēguma zibatmiņas, atmiņas kartes u.c.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus programa leidžia suženklinti ir sukurti sistemų paleidimo laikmenas, kaip pvz. USB atmintukus, atminties korteles ir pan.
+• 공식 사이트: https://rufus.ie
+• 소스 코드: https://github.com/pbatard/rufus
+• 변경 사항: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus ir instruments ar kura palīdzību var formatēt un izveidot USB ielādes ierīces uz tādiem nesējiem, kā USB pieslēguma zibatmiņas, atmiņas kartes u.c.
+• Oficiālā mājas lapa: https://rufus.ie
+• Sākotnējais kods: https://github.com/pbatard/rufus
+• Izmaiņas: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus programa leidžia suženklinti ir sukurti sistemų paleidimo laikmenas, kaip pvz. USB atmintukus, atminties korteles ir pan.
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
 • ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus adalah utiliti yang membantu memformat dan mencipta pemacu kilat USB boot, seperti pemacu pen/kekunci USB, kayu memori, dan lain-lain.
@@ -68,70 +68,98 @@
 • ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus er et verktøy som hjelper til med å formatere og lage oppstartbare USB-stasjoner, for eksempel USB-minnepinner, USB-harddisker, og lignende.
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus ابزاری است که به فرمت کردن و ساختن فلش درایوهای USB مانند پن‌درایوهای ""یو اس بی و ... کمک می‌کند.
+• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus ابزاری است که به فرمت و ایجاد درایوهای فلش USB قابل بوت، مانند کلیدهای USB/pendrives، مموری استیک ها و غیره به شما کمک می کند.
+• سایت رسمی: https://rufus.ie
+• منبع کد: https://github.com/pbatard/rufus
+• لیست تغییرات https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus to narzędzie, które pomaga formatować i tworzyć bootowalne dyski flash USB, takie jak klucze USB / pendrive, pendrive'y itp.
+• Oficjalna strona: https://rufus.ie
+• Kod źródłowy: https://github.com/pbatard/rufus
+• Zmiany: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus é um utilitário que ajuda a formatar e a criar unidades flash USB inicializáveis, tais como pendrives USB, cartões de memória, etc.
+• Site oficial: https://rufus.ie
+• Código fonte: https://github.com/pbatard/rufus
+• Registro de alterações: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus é um utilitário que ajuda a formatar e a criar unidades USB inicializáveis, tais como dispositivos USB/pendrives, cartões de memória, etc.
+• Site oficial: https://rufus.ie
+• Código fonte: https://github.com/pbatard/rufus
+• Alterações: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus este un utilitar care ajută la formatarea și crearea de drive-uri USB bootabile, precum cheile sau pendriverele USB, unități de memorie, etc.
+• Site official: https://rufus.ie
+• Codul Sursei: https://github.com/pbatard/rufus
+• Listă de schimbări: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus - это утилита для форматирования и создания загрузочных флеш-накопителей USB.
+• Официальный сайт: https://rufus.ie
+• Исходный код: https://github.com/pbatard/rufus
+• Изменения: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus je uslužni program koji pomaže u formatiranju i kreiranju USB fleš diskova koji se mogu pokretati, kao što su USB ključevi, memorijski štapići itd.
+• Zvaničan sajt: https://rufus.ie
+• Izvorni kod: https://github.com/pbatard/rufus
+• Evidencija promena: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus je utilita, ktorá vám pomôže naformátovať a vytvoriť bootovacie jednotky USB Flash, ako sú napr. USB kľúče, pamäťové karty, atď.
+• Oficiálna stránka: https://rufus.ie
+• Zdrojový kód: https://github.com/pbatard/rufus
+• Zoznam zmien: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus je program za formatiranje in ustvarjanje zagonskih naprav USB.
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus to narzędzie pomagające formatować i tworzyć nośniki rozruchowe USB, takie jak dyski flash USB/pendrive, karty pamięci itp.
+• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus es una utilidad que le ayuda a formatear y crear dispositivos flash booteables, como «pendrives», tarjetas de memoria, etcétera.
+• Sitio oficial https://rufus.ie
+• Código fuente https://github.com/pbatard/rufus
+• Registro de cambios https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus är ett program som hjälper dig formatera och skapa startbara USB-diskar, så som USB-minnen, minneskort, etc.
+• Officiell webbplats: https://rufus.ie
+• Källkod: https://github.com/pbatard/rufus
+• Ändringslogg: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufusคือโปรแกรมที่ช่วยฟอร์แมทและสร้างUSBแฟลชไดรฟ์ที่สามารถบูทได้ เช่นคีย์ USB / pendrives, Memory Sticks, ฯลฯ
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus é uma ferramenta que ajuda a formatar e criar flash drives USB bootaveis, como pendrives, USBkeys, cartões de memória e etc.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus é um utilitário que ajuda a formatar e a criar unidades USB inicializáveis, tais como dispositivos USB/pendrives, cartões de memória, etc.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus este un utilitar care ajută la formatarea și crearea de drive-uri USB bootabile.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus - это утилита, которая помогает форматировать и создавать загрузочные Flash/Pen/Key диски, карты памяти и т.д.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus je alat koji pomaže da napravite butabilne USB fleš diskove, kao što su USB ključevi/pendrajvovi, memorijski stikovi, itd.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus je utilita, ktorá pomôže naformátovať a vytvoriť bootovacie jednotky USB Flash, ako sú napr. USB kľúče, pamäťové karty, atď.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus je program za formatiranje in ustvarjanje zagonskih naprav USB.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus es una utilidad que le ayuda a formatear y crear soportes USB de arranque, como «pendrives», tarjetas de memoria, etcétera.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus är ett program som hjälper dig formatera och skapa startbara USB-diskar, så som USB-minnen, minneskort, etc.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufusคือโปรแกรมที่ช่วยฟอร์แมทและสร้างUSBแฟลชไดรฟ์ที่สามารถบูทได้ เช่นคีย์ USB / pendrives, Memory Sticks, ฯลฯ
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus, USB anahtar/bellekler, hafıza kartları vb. gibi USB sürücüleri biçimlendirmeye ve önyüklemeli hale getirmeye yardımcı olan bir araçtır.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus це утиліта, яка допомагає форматувати та створювати завантажувальні Flash/Pen/Key диски, картки пам'яті, тощо.
-• Official site: https://rufus.ie
-• Source Code: https://github.com/pbatard/rufus
-• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus là một tiện ích giúp định dạng và tạo khả năng khởi động cho USB, chẳng hạn như thẻ USB/đĩa di động, thẻ nhớ, vv.
+• ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus, USB anahtar/bellekler, hafıza kartları vb. USB sürücüleri, biçimlendirmeye ve önyüklemeli hale getirmeye yardımcı olan bir araçtır.
+• Resmi site: https://rufus.ie
+• Kaynak Kodu: https://github.com/pbatard/rufus
+• Sürüm Notları https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus це утиліта, яка допомагає форматувати та створювати завантажувальні флешки, картки пам'яті, тощо.
+• Офіційний сайт: https://rufus.ie
+• Сирцевий код: https://github.com/pbatard/rufus
+• Список змін: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus là một tiện ích giúp định dạng và tạo khả năng khởi động cho USB, chẳng hạn như thẻ USB/đĩa di động, thẻ nhớ, vv.
 • Official site: https://rufus.ie
 • Source Code: https://github.com/pbatard/rufus
 • ChangeLog: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt"
-"ReleaseNotes","3","Text","• Allow the provision of an arbitrary local account username in the Windows User Experience dialog
-• Improve Windows version reporting from ISO/.wim
-• Update UEFI:NTFS' NTFS drivers to v1.4 and exFAT drivers to v1.9
-• Switch to remote download for nonstandard GRUB (Fedora 37, openSUSE Live, GeckoLinux)
-• Fix UEFI:NTFS partition not being set in MBR mode for ISOs with a >4GB file (UwUntu)
-• Fix GRUB support for Arch and derivatives, when a non FAT compliant label is used
-• Fix incorrect detection of GRUB with nonstandard prefixes
-• Fix tab order not working on the Windows User Experience dialog",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"ReleaseNotes","3","Text","• Add SHA-1 and SHA-256 x86 acceleration on CPUs that support it (courtesy of Jeffrey Walton)
+• Add an option to disable BitLocker device encryption in the Windows User Experience dialog
+• Add a cheat mode (Ctrl-P) to preserve the log between sessions
+• Fix potential media creation errors by forcing the unmount of stale WIM images
+• Fix potential access errors in ISO → ESP mode by forcing Large FAT32 formatting
+• Fix user-specified label not being preserved on error/cancel
+• Fix some large SSD devices being listed by default
+• Fix processing of Rock Ridge CE fields
+• Work around the use of Rock Ridge symbolic links for Linux firmware packages (Debian)
+• Remove the ISO download feature on Windows 7",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "Title","4","Text","Rufus",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "ShortTitle","5","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "SortTitle","6","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "VoiceTitle","7","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-"ShortDescription","8","Text","","Rufus - The Reliable USB Formatting Utility","Rufus - أداة فرمتة الـ USB جديرة بالثقة","Rufus - Надеждната USB форматираща програма","Rufus - 可靠的 USB 格式化工具","Rufus - 快速可靠的 USB 格式化工具","Rufus - Pouzdan alat za formatiranje USB-a","Rufus - Spolehlivý program pro formátování USB","Rufus - Det pålidelige USB-formateringsværktøj","Rufus - de betrouwbare USB-formatteertool","Rufus - Luotettava USB-alustusohjelma","Rufus - L'utilitaire de formatage USB fiable","Rufus - Das zuverlässige USB-Formatierungstool","Rufus - Μία αξιόπιστη εφαρμογή διαμόρφωσης USB","Rufus - הכלי לאתחול USB האמין ביותר","Rufus - A megbízható USB-formázó segédprogram","Rufus - Utilitas Pemformatan USB yang Handal","Rufus - Utility affidabile per la formattazione di unità USB","Rufus - 信頼性の高い USB フォーマット ユーティリティ","Rufus - 신뢰할 수 있는 USB 포맷 유틸리티","Rufus - uzticama un vienkārša USB formatēšanas utilīta","Rufus - patikima USB formatavimo priemonė","Rufus - Utiliti pemformatan USB yang dipercayai","Rufus - Det pålitelige USB-formateringsprogrammet","Rufus، ابزاری کاربردی و قابل‌اطمینان برای فرمت کردن درایوهای USB","Rufus - niezawodne narzędzie do formatowania USB","Rufus - O Utilitário de Formatação USB Confiável","Rufus - O utilitário de confiança para formatação USB","Rufus - Instrumentul de încredere pentru formatări USB","Rufus - Надежная утилита для форматирования USB","Rufus - Pouzdan Alat Za Formatiranje USB diska","Rufus - Spoľahlivý program pre formátovanie USB","Rufus - zanesljivi pripomoček za USB formatiranje","Rufus - La herramienta de formateo de USBs en la que puedes confiar","Rufus - Det pålitliga verktyget för USB-formatering","Rufus - ยูทิลิตี้การฟอร์แมต USB ที่เชื่อถือได้","Rufus - Güvenilir USB Biçimlendirme Programı","Rufus - надійна утиліта для форматування USB-дисків","Rufus - Tiện ích Định dạng USB Đáng tin cậy"
+"ShortDescription","8","Text","","Rufus - The Reliable USB Formatting Utility","Rufus - أداة فرمتة الـ USB جديرة بالثقة","Rufus - Надеждната USB форматираща програма","Rufus - 可靠的 USB 格式化工具","Rufus - 快速可靠的 USB 格式化工具","Rufus - Pouzdan alat za formatiranje USB-a","Rufus - Spolehlivý program pro formátování USB","Rufus - Det pålidelige USB-formateringsværktøj","Rufus - de betrouwbare USB-formatteertool","Rufus - Luotettava USB-alustusohjelma","Rufus - L'utilitaire de formatage USB fiable","Rufus - Das zuverlässige USB-Formatierungstool","Rufus - Μία αξιόπιστη εφαρμογή διαμόρφωσης USB","Rufus - הכלי לאתחול USB האמין ביותר","Rufus - A megbízható USB-formázó segédprogram","Rufus - Utilitas Pemformatan USB yang Handal","Rufus - Utility affidabile per la formattazione di unità USB","Rufus - 信頼性の高い USB フォーマット ユーティリティ","Rufus - 신뢰할 수 있는 USB 포맷 유틸리티","Rufus - uzticama un vienkārša USB formatēšanas utilīta","Rufus - patikima USB formatavimo priemonė","Rufus - Utiliti pemformatan USB yang dipercayai","Rufus - Det pålitelige USB-formateringsprogrammet","Rufus، ابزاری کاربردی و قابل‌اطمینان برای فرمت کردن درایوهای USB","Rufus - niezawodne narzędzie do formatowania USB","Rufus - O Utilitário de Formatação USB Confiável","Rufus - O utilitário de confiança para formatação USB","Rufus - Instrumentul de încredere pentru formatări USB","Rufus - Надежная утилита для форматирования USB","Rufus - Pouzdan Alat Za Formatiranje USB diska","Rufus - Spoľahlivý program pre formátovanie USB","Rufus - zanesljivi pripomoček za USB formatiranje","Rufus, la herramienta de formateo de USBs en la que puedes confiar","Rufus - Det pålitliga verktyget för USB-formatering","Rufus - ยูทิลิตี้การฟอร์แมต USB ที่เชื่อถือได้","Rufus - Güvenilir USB Biçimlendirme Programı","Rufus - надійна утиліта для форматування USB-накопичувачів","Rufus - Tiện ích Định dạng USB Đáng tin cậy"
 "DevStudio","9","Text","Pete Batard",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "CopyrightTrademarkInformation","12","Text","© 2011-2023 Pete Batard",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "AdditionalLicenseTerms","13","Text","https://www.gnu.org/licenses/gpl-3.0.html","This application is licensed under the terms of the GNU Public License (GPL) version 3.
-See https://www.gnu.org/licenses/gpl-3.0.en.html for details.","","","","","","","","","","Cette application est fournie sous les termes de la Licence publique générale GNU (GPL) version 3.
-Veuillez consulter https://www.gnu.org/licenses/gpl-3.0.fr.html pour plus de details.","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+See https://www.gnu.org/licenses/gpl-3.0.en.html for details.","","Тази програма е лицензирана според условията на GNU Public License (GPL) версия 3.
+Вижте https://www.gnu.org/licenses/gpl-3.0.html за подробности.","本应用采用 GNU 通用公共许可证 (GPL) 第三版。
+具体许可证见 https://www.gnu.org/licenses/gpl-3.0.zh-cn.html。","本應用採用 GNU 通用公共許可證 (GPL) 第三版。
+具體許可證見 https://www.gnu.org/licenses/gpl-3.0.zh-tw.html。","","Tato aplikace je licencována podle podmínek GNU Public License (GPL) verze 3.
+Podrobnosti naleznete na adrese https://www.gnu.org/licenses/gpl-3.0.html.","","Deze toepassing valt onder de voorwaarden van de GNU Public License (GPL) versie 3.
+Zie https://www.gnu.org/licenses/gpl-3.0.nl.html voor details.","Tämä sovellus on lisensoitu GNU Public License (GPL) version 3 ehtojen mukaisesti.
+Lisätietoja osoitteessa https://www.gnu.org/licenses/gpl-3.0.html (englanniksi).","Cette application est fournie sous les termes de la Licence publique générale GNU (GPL) version 3.
+Veuillez consulter https://www.gnu.org/licenses/gpl-3.0.fr.html pour plus de details.","Diese Anwendung ist unter den Bedingungen der GNU Public License (GPL) Version 3 lizenziert.
+Siehe https://www.gnu.org/licenses/gpl-3.0.de.html für Details.","Αυτή η εφαρμογή έχει άδεια χρήσης σύμφωνα με τους όρους της GNU Public License (GPL) έκδοση 3.
+Δείτε https://www.gnu.org/licenses/gpl-3.0.html για λεπτομέρειες.","יישום זה ברישיון תחת התנאים של גרסה 3 של הרישיון הציבורי של גנו (GPL).
+לפרטים נוספים, יש להיכנס אל https://www.gnu.org/licenses/gpl-3.0.html.","Ezen alkalmazás használata a GNU Public License (GPL) 3-as verzió feltételei szerint engedélyezett.
+További információ: https://www.gnu.org/licenses/gpl-3.0.html.","Aplikasi ini dilisensikan di bawah ketentuan GNU Public License (GPL) versi 3.
+Lihat https://www.gnu.org/licenses/gpl-3.0.html untuk detail lebih lanjut.","Questa applicazione è rilasciata sotto i termini della GNU Public License (GPL) versione 3.
+Vedere https://www.gnu.org/licenses/gpl-3.0.html per dettagli.","","이 응용 프로그램은 GNU Public License (GPL) 버전 3의 조건에 따라 라이선스가 부여됩니다.
+자세한 내용은 https://www.gnu.org/licenses/gpl-3.0.html 을 참조하십시오.","Šai programmai ir licences noteikumi, kā GNU Public License (GPL) version 3.
+Papildinformācijai skatīt https://www.gnu.org/licenses/gpl-3.0.html.","","","","این برنامه تحت شرایط مجوز عمومی گنو (GPL) نسخه 3 مجوز دارد.
+برای جزئیات به https://www.gnu.org/licenses/gpl-3.0.html مراجعه کنید.","Ta aplikacja jest objęta licencją na warunkach licencji publicznej GNU (GPL) w wersji 3.
+Z obacz https://www.gnu.org/licenses/gpl-3.0.html, aby uzyskać szczegółowe informacje.","Este software está licenciado sob os termos da GNU Public License (GPL) versão 3.
+Consulte https://www.gnu.org/licenses/gpl-3.0.pt-br.html para mais detalhes.","Este software está licenciado sob os termos da GNU Public License (GPL) versão 3.
+Consulte https://www.gnu.org/licenses/gpl-3.0.html para mais detalhes.","Această aplicație este sub liciența și termenii și condițiile ale lui GNU Public License (GPL) versiunea a 3-a.
+Vazi https://www.gnu.org/licenses/gpl-3.0.en.html pentru detalii.","Это приложение - под лицензией GNU Public License (GPL) версии 3.
+Подробнее см. https://www.gnu.org/licenses/gpl-3.0.ru.html.","Ova aplikacija je licencirana pod uslovima GNU Javne licence (GPL) verzije 3. 
+Pogledajte https://www.gnu.org/licenses/gpl-3.0.en.html za više informacija.","Táto aplikácia je licencovaná podľa podmienok GNU Public License (GPL) verzia 3.
+Podrobnosti nájdete na https://www.gnu.org/licenses/gpl-3.0.html.","","Esta aplicación tiene licencia bajo los términos de la Licencia Pública GNU (GPL) versión 3.
+Consulte https://www.gnu.org/licenses/gpl-3.0.html para obtener más información.","Denna applikation är licensierad under villkoren i GNU Public License (GPL) version 3.
+Se https://www.gnu.org/licenses/gpl-3.0.en.html för mer information.","","Bu uygulama, GNU Kamu Lisansı (GPL) sürüm 3'ün koşulları altında lisanslanmıştır.
+Detaylar için https://www.gnu.org/licenses/gpl-3.0.tr.html sayfasını ziyaret edin.","Ця програма ліцензована згідно з умовами GNU Public License (GPL) version 3.
+Більше: https://www.gnu.org/licenses/gpl-3.0.uk.html.",""
 "DesktopScreenshot1","100","Relative path (or URL to file in Partner Center)","","listing/en-us/Screenshot1.png","listing/ar-sa/Screenshot1.png","listing/bg-bg/Screenshot1.png","listing/zh-cn/Screenshot1.png","listing/zh-tw/Screenshot1.png","listing/hr-hr/Screenshot1.png","listing/cs-cz/Screenshot1.png","listing/da-dk/Screenshot1.png","listing/nl-nl/Screenshot1.png","listing/fi-fi/Screenshot1.png","listing/fr-fr/Screenshot1.png","listing/de-de/Screenshot1.png","listing/el-gr/Screenshot1.png","listing/he-il/Screenshot1.png","listing/hu-hu/Screenshot1.png","listing/id-id/Screenshot1.png","listing/it-it/Screenshot1.png","listing/ja-jp/Screenshot1.png","listing/ko-kr/Screenshot1.png","listing/lv-lv/Screenshot1.png","listing/lt-lt/Screenshot1.png","listing/ms-my/Screenshot1.png","listing/nb-no/Screenshot1.png","listing/fa-ir/Screenshot1.png","listing/pl-pl/Screenshot1.png","listing/pt-br/Screenshot1.png","listing/pt-pt/Screenshot1.png","listing/ro-ro/Screenshot1.png","listing/ru-ru/Screenshot1.png","listing/sr-latn-rs/Screenshot1.png","listing/sk-sk/Screenshot1.png","listing/sl-si/Screenshot1.png","listing/es-es/Screenshot1.png","listing/sv-se/Screenshot1.png","listing/th-th/Screenshot1.png","listing/tr-tr/Screenshot1.png","listing/uk-ua/Screenshot1.png","listing/vi-vn/Screenshot1.png"
 "DesktopScreenshot2","101","Relative path (or URL to file in Partner Center)","","listing/en-us/Screenshot2.png",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "DesktopScreenshot3","102","Relative path (or URL to file in Partner Center)","","listing/en-us/Screenshot3.png",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -226,19 +254,19 @@ Veuillez consulter https://www.gnu.org/licenses/gpl-3.0.fr.html pour plus de det
 "OptionalPromo358x358","611","Relative path (or URL to file in Partner Center)","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "OptionalPromo1000x800","612","Relative path (or URL to file in Partner Center)","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "OptionalPromo414x180","613","Relative path (or URL to file in Partner Center)","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-"Feature1","700","Text","","Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","","","","","","","","","","Formatez des périphériques USB, des cartes flash et des disques virtuels en FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature2","701","Text","","Create FreeDOS bootable USB drives","","","","","","","","","","Créez des disques amorçable FreeDOS","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature3","702","Text","","Create bootable drives from bootable ISOs (Windows, Linux, etc.)","","","","","","","","","","Créez des disques amorçables à partir d'images ISOs (Windows, Linux, etc.)","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature4","703","Text","","Create bootable drives from bootable disk images, including compressed ones","","","","","","","","","","Créez des disques amorçables à partir d'images disque, y compris à partir d'images compressées","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature5","704","Text","","Create BIOS or UEFI bootable drives, including UEFI bootable NTFS","","","","","","","","","","Créez des disques amorçables BIOS ou UEFI, y compris des disques UEFI amorçables utilisant NTFS","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature6","705","Text","","Create 'Windows To Go' drives","","","","","","","","","","Créez des disques 'Windows To Go'","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature7","706","Text","","Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot","","","","","","","","","","Créez des disques d'installation Windows 11 pour des PCs qui ne disposent pas de TPM ou Secure Boot","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature8","707","Text","","Create persistent Linux partitions","","","","","","","","","","Créez des partitions persistentes pour Linux","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature9","708","Text","","Create VHD/DD images of the selected drive","","","","","","","","","","Créez des images VHD/DD du périphérique sélectionné","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature10","709","Text","","Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image","","","","","","","","","","Calculez les sommes de contrôle MD5, SHA-1, SHA-256 et SHA-512 de l'image sélectionnée","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature11","710","Text","","Perform bad blocks checks, including detection of ""fake"" flash drives","","","","","","","","","","Executez un test de mauvais secteurs avec detection des ""fake drives\","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature12","711","Text","","Download official Microsoft Windows retail ISOs","","","","","","","","","","Téléchargez des images ISOs commerciales officielles de Microsoft Windows","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-"Feature13","712","Text","","Download UEFI Shell ISOs","","","","","","","","","","Téléchargez des images ISOs du Shell UEFI","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"Feature1","700","Text","","Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","","Форматиране на USB, карти памет и виртуални устройства с FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","将 U 盘、存储卡或虚拟驱动器格式化为 FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3 格式","將 U 盤、存儲卡或虛擬驅動器格式化為 FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3 格式","","Formátování USB, flash karet a virtuálních jednotek na FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","","USB, flashkaart en virtuele schijven formatteren naar FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Alusta USB-asemia, muistikortteja ja virtuaalisia asemia muotoon FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Formatez des périphériques USB, des cartes flash et des disques virtuels en FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Formatieren von USB, Flash-Karte und virtuellen Laufwerken in FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Μορφοποίηση USB, κάρτας flash και εικονικών μονάδων δίσκου σε FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","אתחול USB, כרטיסי זיכרון וכוננים וירטואליים ל־FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","USB, flash memóriakártyák és virtuális meghajtók formázása FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3 fájlrendszerre","Format USB, kartu flash dan penyimpanan maya ke FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Formatta USB, flash card e unità virtuali in FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","","USB, 플래시 카드 및 가상 드라이브를 FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3로 포맷","Formatē USB, atmiņas kartes un virtuālos diskus formātos FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","","","","فرمت USB، فلش کارت و درایوهای مجازی به FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Sformatuj nośnik używając: FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Formatar dispositivos USB, cartões flash e discos virtuais com FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Formatar dispositivos USB, cartão de memória e drives virtuais em FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Formatează USB, card flash si drive-uri virtuale la FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Форматировать USB, флешки и виртуальные диски в FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Formatiraj USB, flash kartice, i virtualne diskove u FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Naformátujte USB, kartu a virtuálne disky do FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","","Formatee USB, tarjetas flash y unidades virtuales a FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","Formatera USB-enheter, flash-kort och virtuella enheter till FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3","","USB, flash kart ve sanal sürücüleri FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3 olarak biçimlendirin","Форматування USB-накопичувачів, флешок, карток пам'яті у FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3",""
+"Feature2","701","Text","","Create FreeDOS bootable USB drives","","Създаване на FreeDOS стартиращ USB устройства","创建 FreeDOS 可启动驱动器","創建 FreeDOS 可啟動驅動器","","Vytvoření bootovacích disků USB se systémem FreeDOS","","FreeDOS opstartbare USB-schijven aanmaken","Luo boottaavia FreeDOS USB-asemia","Créez des disques amorçable FreeDOS","FreeDOS-bootfähige USB-Laufwerke erstellen","Δημιουργήστε μονάδες USB με δυνατότητα εκκίνησης FreeDOS","יצירת כונני USB הניתנים לאתחול של FreeDOS","Bootolható FreeDOS USB meghajtó készítése","Buat perangkat USB FreeDOS yang dapat di boot","Crea unità USB avviabili FreeDOS","","FreeDOS 부팅 가능한 USB 드라이브 만들기","Izveido FreeDOS ielādes USB ierīces","","","","درایوهای USB قابل بوت FreeDOS را ایجاد کنید","Stwórz bootowalny nośnik USB FreeDOS","Criar discos USB inicializáveis FreeDOS","Criar unidades USB inicializáveis FreeDOS","Crează drive USB bootabil FreeDOS","Создать загрузочные USB-диски FreeDOS","Kreiraj FreeDOS butabilni USB disk","Vytvorte bootovacie usb zariadenia FreeDOS","","Crear unidades USB de arranque FreeDOS","Skapa FreeDOS startbara USB-enheter","","FreeDOS önyüklenebilir USB sürücüleri oluşturun","Створення завантажувальних пристроїв FreeDOS",""
+"Feature3","702","Text","","Create bootable drives from bootable ISOs (Windows, Linux, etc.)","","Създаване на стартиращи устройства от ISO образи (Windows, Linux и др.)","从可启动 ISO 文件 (Windows 和 Linux 等) 创建可启动驱动器","從可啟動 ISO 文件 (Windows 和 Linux 等) 創建可啟動驅動器","","Vytváření bootovacích jednotek ze zaváděcích ISO (Windows, Linux atd.)","","Opstartbare schijven aanmaken via opstartbare ISO's (Windows, Linux, enz)","Luo käynnistysasemia boottaavista ISO-kuvista (Windows, Linux jne.)","Créez des disques amorçables à partir d'images ISOs (Windows, Linux, etc.)","Erstellen bootfähiger Laufwerke aus bootfähigen ISOs (Windows, Linux, etc.)","Δημιουργήστε εκκινήσιμες μονάδες από ISO με δυνατότητα εκκίνησης (Windows, Linux, κ.λπ.)","יצירת כוננים הניתנים לאתחול מקובצי ISO הניתנים לאתחול (Windows‏, Linux וכו')","Bootolható meghajtók készítése bootolható ISO képfájlokból (Windows, Linux, stb.)","Buat perangkat yang dapat di boot dari ISO (Windows, Linux, dll.)","Crea unità avviabili da ISO avviabili (Windows, Linux, ecc.)","","부팅 가능한 ISO (Windows, Linux 등)에서 부팅 가능한 드라이브 만들기","Izveido ielādes ierīces no ISO failiem (Windows, Linux, u.c.)","","","","ایجاد درایوهای قابل بوت از ISOهای قابل بوت (ویندوز، لینوکس و غیره)","Twórz dyski rozruchowe z obrazów ISO (Windows, Linux itp.)","Criar discos inicializáveis a partir de ISOs inicializáveis (Windows, Linux, etc.)","Criar unidades inicializáveis a partir de ISOs inicializáveis (Windows, Linux, etc.)","Crează drive-uri bootabile de la ISO-uri bootabile (Windows, Linux, etc.)","Создать загрузочные диски из загрузочных ISO-образов (Windows, Linux и т.д.)","Kreirajte disk jedinice za pokretanje sistema od ISO-a koji se mogu pokretanja sistema (Windows, Linux itd.)","Vytvorte bootovacie jednotky z ISO súborov (Windows, Linux atď.)","","Cree unidades de arranque desde ISO de arranque (Windows, Linux, etc.)","Skapa startbara enheter från startbara ISO-filer (Windows, Linux, etc.)","","Önyüklenebilir ISO'lardan önyüklenebilir sürücüler oluşturun (Windows, Linux, vb.)","Створення завантажувальних пристроїв з завантажувальних образів (Windows, Linux, тощо)",""
+"Feature4","703","Text","","Create bootable drives from bootable disk images, including compressed ones","","Създаване на стартиращи устройства от образи, включително компресирани такива","从可启动硬盘镜像 (包括压缩镜像) 创建可启动驱动器","從可啟動硬盤鏡像 (包括壓縮鏡像) 創建可啟動驅動器","","Vytváření zaváděcích jednotek ze zaváděcích obrazů disků, včetně komprimovaných","","Opstartbare schijven aanmaken van opstartbare schijf-images, inclusief gecomprimeerde images","Luo käynnistysasemia boottaavista levykuvista, pakatut kuvat mukaanlukien","Créez des disques amorçables à partir d'images disque, y compris à partir d'images compressées","Erstellen bootfähiger Laufwerke aus bootfähigen Festplatten-Images, einschließlich komprimierter Images","Δημιουργήστε μονάδες εκκίνησης από εικόνες δίσκου με δυνατότητα εκκίνησης, συμπεριλαμβανομένων συμπιεσμένων","יצירת כוננים הניתנים לאתחול מקובצי תמונת דיסק הניתנים לאתחול, כולל קבצים דחוסים","Bootolható meghajtók készítése bootolható lemez képfájlokból, beleértve a tömörítetteket is","Buat perangkat yang dapat di boot dari Disk Image, termasuk yang Disk Image yang terkompresi","Crea unità avviabili da immagini disco avviabili, incluse quelle compresse","","압축된 이미지를 포함하여 부팅 가능한 디스크 이미지에서 부팅 가능한 드라이브 만들기","Izveido ielādes ierīces no ielādes disku virtuālajiem attēliem, tai skaitā arī no saspiestajiem","","","","درایوهای قابل بوت را از تصاویر دیسک قابل بوت، از جمله موارد فشرده، ایجاد کنید","Twórz dyski rozruchowe z obrazów dysków, włączając skompresowane","Criar discos inicializáveis a partir de imagens de disco inicializáveis, inclusive de imagens compactadas","Criar unidades inicializáveis a partir de imagens de disco inicializáveis, inclusive de imagens compactadas","Crează drive-uri de la imagini de disc bootabile, incluzând cele compresate","Создать загрузочные диски из образов загрузочных дисков, в том числе сжатых","Kreiranje disk jedinica za pokretanje sistema sa slika diska koji se može pokretanja, uključujući kompresovane","Vytvorte bootovacie jednotky z diskových obrazov, vrátane tých komprimovaných","","Cree unidades de arranque a partir de imágenes de disco de arranque, incluidas las comprimidas","Skapa startbara enheter från startbara diskavbildningar, inklusive komprimerade","","Sıkıştırılmış olanlar da dahil olmak üzere önyüklenebilir disk yansısından önyüklenebilir sürücüler oluşturun","Створення завантажувальних пристроїв з завантажувальних образів, у тому числі стиснутих",""
+"Feature5","704","Text","","Create BIOS or UEFI bootable drives, including UEFI bootable NTFS","","Създаване на BIOS или UEFI стартиращи устройства, включително UEFI стартиращ NTFS","创建 BIOS 或 UEFI 可启动驱动器，包括 UEFI 可启动的 NTFS 驱动器","創建 BIOS 或 UEFI 可啟動驅動器，包括 UEFI 可啟動的 NTFS 驅動器","","Vytvořte zaváděcí jednotky BIOS nebo UEFI, včetně zaváděcích souborů NTFS UEFI","","BIOS of UEFI opstartbare schijven aanmaken, inclusief UEFI opstartbare NTFS","Luo BIOS- tai UEFI-boottaavia asemia, mukaanlukien UEFI-boottaavat NTFS-asemat","Créez des disques amorçables BIOS ou UEFI, y compris des disques UEFI amorçables utilisant NTFS","Erstellen von BIOS- oder UEFI-bootfähigen Laufwerken, einschließlich UEFI-bootfähigem NTFS","Δημιουργήστε μονάδες δίσκου με δυνατότητα εκκίνησης BIOS ή UEFI, συμπεριλαμβανομένων NTFS με δυνατότητα εκκίνησης UEFI","יצירת כוננים הניתנים לאתחול ממחשבים התומכים ב־BIOS או UEFI, לרבות כוננים הניתנים לאתחול מ־UEFI, המשתמשים במערכת הקבצים NTFS","BIOS-ból vagy UEFI-ből bootolható meghajtók készítése, beleértve az UEFI-ből bootolható NTFS meghajtókat is","Buat perangkat BIOS atau UEFI yang dapat di boot, termasuk perangkat NTFS yang dapat di boot oleh UEFI","Crea unità avviabili BIOS o UEFI, incluso NTFS avviabile UEFI","","UEFI 부팅 가능한 NTFS를 포함하여 BIOS 또는 UEFI 부팅 가능 드라이브 만들기","Izveido BIOS vai UEFI ielādes ierīces, ieskaitot UEFI ielādi no NTFS","","","","درایوهای قابل بوت بایوس یا UEFI از جمله NTFS قابل بوت UEFI ایجاد کنید","Stwórz dysk rozruchowy BIOS lub UEFI, włączając bootowalny dysk UEFI NTFS","Criar discos inicializáveis ​​BIOS ou UEFI, inclusive discos UEFI inicializáveis ​​usando NTFS","Criar discos inicializáveis ​​BIOS ou UEFI, inclusive discos UEFI inicializáveis ​​usando NTFS","Crează discuri bootabile BIOS sau UEFI, incluzând NTFS-uri bootabile de UEFI","Создать загрузочные диски BIOS или UEFI, включая загрузочный UEFI NTFS","Kreiranje BIOS ili UEFI disk jedinica za pokretanje sistema, uključujući NTFS sa UEFI pokretanjem sistema","Vytvorte bootovacie jednotky systému BIOS alebo UEFI vrátane UEFI bootovateľnej jednotky NTFS","","Cree unidades de arranque BIOS o UEFI, incluido NTFS de arranque UEFI","Skapa BIOS- eller UEFI-startbara enheter, inklusive UEFI-startbar NTFS","","UEFI önyüklenebilir NTFS dahil BIOS ya da UEFI önyüklenebilir sürücüler oluşturun","Створення завантажувальних пристроїв BIOS чи UEFI, включаючи завантажувальний UEFI NTFS",""
+"Feature6","705","Text","","Create 'Windows To Go' drives","","Създаване на 'Windows To Go' устройства","创建 'Windows To Go' 驱动器","創建 'Windows To Go' 驅動","","Vytvoření jednotek ""Windows To Go","","'Windows To Go'-schijven aanmaken","Luo 'Windows To Go' -asemia","Créez des disques 'Windows To Go'","Erstellen von ""Windows To Go""-Laufwerken","Δημιουργήστε μονάδες δίσκου ""Windows To Go\","יצירת כונני Windows To Go","'Windows To Go' meghajtók készítése","Buat perangkat Windows To Go","Crea unità 'Windows To Go'","","'Windows To Go' 드라이브 만들기","Izveido 'Windows To Go' ierīces","","","","درایوهای ""Windows To Go"" را ایجاد کنید","Stwórz dysk 'Windows To Go'","Criar discos 'Windows To Go'","Criar discos 'Windows To Go'","Crează discuri 'Windows To Go'","Создание дисков Windows To Go","Kreiranje disk jedinica ""Windows to Go\","Vytvorte jednotky „Windows To Go\","","Cree unidades 'Windows To Go'","Skapa 'Windows To Go'-enheter","","'Windows To Go' sürücüleri oluşturun","Створення пристроїв 'Windows To Go'",""
+"Feature7","706","Text","","Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot","","Създаване на Windows 11 инсталационно устройство за компютри, които нямат TPM или Secure Boot","为没有 TPM 或安全启动功能的电脑创建 Windows 11 安装驱动器","為沒有 TPM 或安全啟動功能的電腦創建 Windows 11 安裝驅動","","Vytvoření instalačních jednotek systému Windows 11 pro počítače bez čipu TPM nebo Secure Boot","","Windows 11 installatieschijven aanmaken voor pc's die geen TPM of Secure Boot hebben","Luo Windows 11 -asennusasemia tietokoneille, jotka eivät tue TPM- tai Secure Boot -ominaisuuksia","Créez des disques d'installation Windows 11 pour des PCs qui ne disposent pas de TPM ou Secure Boot","Erstellen von Windows 11-Installationslaufwerken für PCs ohne TPM oder Secure Boot","Δημιουργήστε μονάδες εγκατάστασης των Windows 11 για υπολογιστές που δεν διαθέτουν TPM ή Ασφαλή Εκκίνηση","יצירת כונני התקנה של Windows 11 עבור מחשבים שאין להם TPM או Secure Boot","Windows 11 telepítési meghajtók készítése olyan PC-k számára, amelyek nem rendelkeznek TPM vagy Secure Boot funkciókkal","Buat perangkat pemasang Windows 11 untuk PC yang tidak mempunyai TPM atau Secure Boot","Crea unità di installazione di Windows 11 per PC che non dispongono di TPM o avvio protetto","","TPM 또는 보안 부팅이 없는 PC용 Windows 11 설치 드라이브 만들기","Izveido Windows 11 instalācijas ierīces datoriem, kam nav TPM vai Secure Boot","","","","درایوهای نصب ویندوز 11 را برای رایانه هایی که TPM یا Secure Boot ندارند ایجاد کنید","Twórz dyski instalacyjne systemu Windows 11 dla komputerów, które nie posiadają modułu TPM ani Secure Boot","Criar discos de instalação do Windows 11 para PCs que não possuem TPM ou Secure Boot","Criar discos de instalação do Windows 11 para PCs que não possuem TPM ou Secure Boot","Crează drive de instalare Windows 11 pe computere care nu au TPM sau Bootare Securizată","Создать установочные диски Windows 11 для компьютеров без TPM или безопасной загрузки","Kreiranje windows 11 instalacionih disk jedinica za računare koji nemaju TPM ili bezbedno pokretanje sistema","Vytvorte inštalačné jednotky Windows 11 pre počítače, ktoré nemajú modul TPM, ani Secure Boot","","Cree unidades de instalación de Windows 11 para PC que no tienen TPM o Arranque seguro","Skapa installationsenheter till Windows 11 för datorer som inte har TPM eller säker start","","TPM ya da Güvenli Önyüklemeye sahip olmayan bilgisayarlar için Windows 11 kurulum sürücüleri oluşturun","Створення інсталяційних дисків Windows 11 для ПК, які не мають TPM чи Secure Boot",""
+"Feature8","707","Text","","Create persistent Linux partitions","","Създаване на устойчиви Linux дялове","创建持久 Linux 分区","創建持久 Linux 分區","","Vytvoření trvalých oddílů systému Linux","","Persistent Linux partities aanmaken","Luo pysyviä Linux-osioita","Créez des partitions persistentes pour Linux","Persistente Linux-Partitionen erstellen","Δημιουργήστε μόνιμα διαμερίσματα Linux","יצירת מחיצות Linux קבועות","Tartós Linux partíciók készítése","Buat partisi Linux yang tetap/persistent","Crea partizioni persistenti Linux","","영구 리눅스 파티션 만들기","Izveido pastāvīgas Linux partīcijas","","","","ایجاد پارتیشن های لینوکس دائمی","Stwórz particje persistent Linuxa","Criar partições persistentes para Linux","Crie partições persistentes para Linux","Crează partiție de Linux persistentă","Создать постоянные разделы Linux","Kreiranje upornih Linux particija","Vytvorte trvalé oblasti systému Linux","","Crear particiones persistentes de Linux","Skapa beständiga Linux-partitioner","","Kalıcı Linux bölümleri oluşturun","Створення розділу збереження Linux",""
+"Feature9","708","Text","","Create VHD/DD images of the selected drive","","Създаване на VHD/DD образи на избраното устройство","为选择的驱动器创建 VHD/DD 镜像","為選中的驅動創建 VHD/DD 鏡像","","Vytvoření obrazů VHD/DD z vybrané jednotky","","VHD/DD-images van de geselecteerde schijf aanmaken","Luo VHD/DD-kuvia valitusta asemasta","Créez des images VHD/DD du périphérique sélectionné","VHD/DD-Images des ausgewählten Laufwerks erstellen","Δημιουργήστε εικόνες VHD/DD της επιλεγμένης μονάδας δίσκου","יצירת קובצי תמונה מסוג VHD/DD של הכונן שנבחר","VHD/DD képfájl készítése a kiválasztott meghajtóról","Buat image VHD/DD dari penyimpanan yang dipilih","Crea immagini VHD/DD dell'unità selezionata","","선택한 드라이브의 VHD/DD 이미지 만들기","Izveido izvēlētā diska VHD/DD virtuālos attēlus","","","","تصاویر VHD/DD از درایو انتخاب شده ایجاد کنید","Stwórz obraz VHD/DD z wybranego dysku","Criar imagens VHD/DD do dispositivo selecionado","Criar imagens VHD/DD do dispositivo selecionado","Crează imagini VHD/DD de pe drive-ul selectat","Создать образы VHD/DD выбранного диска","Kreiranje VHD/DD slika izabrane disk jedinice","Vytvorte obrazy VHD/DD z vybratej jednotky","","Cree imágenes VHD/DD de la unidad seleccionada","Skapa VHD/DD-avbilder av den valda enheten","","Seçilen sürücünün VHD/DD yansılarını oluşturun","Створення образів VHD/DD з вибраних дисків",""
+"Feature10","709","Text","","Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image","","Изчисляване на MD5, SHA-1, SHA-256 и SHA-512 чексуми на избраният образ","计算被选择镜像的 MD5、SHA-1、SHA-256 和 SHA-512 校验码","計算被選中鏡像的 MD5、SHA-1、SHA-256 和 SHA-512 校驗碼","","Výpočet kontrolních součtů MD5, SHA-1, SHA-256 a SHA-512 vybraného obrazu","","MD5, SHA-1, SHA-256 en SHA-512 controlesommen berekenen van de geselecteerde image","Laske MD5, SHA-1, SHA-256 ja SHA-512 tarkistussummia valitusta levykuvasta","Calculez les sommes de contrôle MD5, SHA-1, SHA-256 et SHA-512 de l'image sélectionnée","Berechnung von MD5-, SHA-1-, SHA-256- und SHA-512-Prüfsummen für das ausgewählte Bild","Υπολογίστε τα αθροίσματα ελέγχου MD5, SHA-1, SHA-256 και SHA-512 της επιλεγμένης εικόνας","חישוב סיכומי ביקורת מסוג MD5,‏ SHA-1,‏ SHA-256 ו־SHA-512 של קובץ התמונה שנבחרה","A kiválasztott képfájl MD5, SHA-1, SHA-256 és SHA-512 ellenőrző összegének kiszámítása","Hitung checksum MD5, SHA-1, SHA-256 dan SHA-512 dari image yang dipilih","Calcola i checksum MD5, SHA-1, SHA-256 e SHA-512 dell'immagine selezionata","","선택한 이미지의 MD5, SHA-1, SHA-256 및 SHA-512 체크섬 계산","Izskaitļo izvēlētā virtuālā attēla MD5, SHA-1, SHA-256 un SHA-512 kontrolsummas","","","","MD5، SHA-1، SHA-256 و SHA-512 را برای تصویر انتخابی محاسبه کنید","Oblicz sumy kontrolne MD5, SHA-1, SHA-256 i SHA-512 dla wybranego obrazu","Calcular somas de verificação MD5, SHA-1, SHA-256 e SHA-512 da imagem selecionada","Calcular checksums MD5, SHA-1, SHA-256 e SHA-512 da imagem selecionada","Compută MD5, SHA-1, SHA-256 și SHA-512 suma de control ale imaginilor selectate","Вычислить контрольные суммы MD5, SHA-1, SHA-256 и SHA-512 выбранного образа","Izračunajte MD5, SHA-1, SHA-256 i SHA-512 kontrolne preglede izabrane slike","Vypočítajte kontrolné súčty vybratého obrazu (MD5, SHA-1, SHA-256 a SHA-512)","","Calcule las sumas de comprobación MD5, SHA-1, SHA-256 y SHA-512 de la imagen seleccionada","Beräkna kontrollsummor MD5, SHA-1, SHA-256 och SHA-512 för den valda avbilden","","Seçilen yansının MD5, SHA-1, SHA-256 ve SHA-512 sağlama toplamlarını hesaplayın","Обчислення контрольних сум MD5, SHA-1, SHA-256 та SHA-512 для вибраних образів",""
+"Feature11","710","Text","","Perform bad blocks checks, including detection of ""fake"" flash drives","","Проверяване за лоши блокове, включително засичане на ""фалшиви"" устройства","执行坏块检查，包括对”假“U盘的检测","執行壞塊檢查，包括對”假“USB 快閃磁碟機的檢測","","Provést kontrolu vadných bloků, včetně detekce ""falešných"" bloků. flash disky","","Controles uitvoeren op slechte blokken, inclusief detectie van ""valse"" flashdrives","Suorita viallisten lohkojen tarkistuksia, sisältäen ""valheellisten"" muistitikkujen tunnistamisen","Executez un test de mauvais secteurs avec detection des ""fake drives\","Durchführung von Prüfungen auf fehlerhafte Blöcke, einschließlich der Erkennung von ""gefälschten"" Flash-Laufwerken","Εκτελέστε ελέγχους εσφαλμένων block, συμπεριλαμβανομένου του εντοπισμού ""ψευδών"" μονάδων flash","ביצוע בדיקות אחר בלוקים (אזורים) פגומים, כולל זיהוי של כונני הבזק ""מזוייפים\","Hibás blokkok ellenőrzése, beleértve a ""hamis"" flash meghajtók detektálását","Lakukan cek Blok yang buruk, termasuk deteksi USB Flash Disk ""PALSU\","Esegui controlli dei blocchi danneggiati, incluso il rilevamento di unità flash ""false\","","""위조"" 플래시 드라이브 감지를 포함하여 불량 블록 검사 수행","Izpilda bojāto bloku pārbaudi ieskaitot ""falsificēto"" nesēju noteikšanu","","","","بررسی بلوک های بد، از جمله تشخیص درایوهای فلش ""جعلی"" را انجام دهید","Sprawdź dysk pod względem spójności danych lub wykryj ""nieorginalny"" pendrive","Executar verificações de blocos defeituosos, incluindo detecção de unidades flash ""falsificadas\","Executar verificações de blocos inválidos, incluindo a detecção de unidades flash ""falsas\","Verifică blocuri rele, incluzând detectarea de drive-uri flash ""false\","Проверить наличие плохих блоков, обнаружить ""поддельные"" флешки","Izvršite provere loših blokova, uključujući otkrivanje ""lažnih"" fleš diskova","Vykonajte kontroly zlých blokov vrátane detekcie „falošných"" prenosných diskov","","Realice comprobaciones de bloques defectuosos, incluida la detección de unidades flash ""falsas\","Utför kontroll av trasiga block, inklusive upptäckt av ""falska"" USB-minnen","","""Sahte"" flash sürücülerin tespiti de dahil olmak üzere hatalı blok kontrolleri gerçekleştirin","Перевірка дисків (включаючи фальшиві диски)",""
+"Feature12","711","Text","","Download official Microsoft Windows retail ISOs","","Изтегляне на официални Microsoft Windows ISO образи","下载微软官方 Windows 镜像","下載微軟官方 Windows 鏡像","","Stažení oficiálních souborů ISO systému Microsoft Windows","","Officiële Microsoft Windows retail ISO's downloaden","Lataa virallisia Microsoft Windowsin jälleenmyyntiversion ISO-levykuvia","Téléchargez des images ISOs commerciales officielles de Microsoft Windows","Offizielle Microsoft Windows-ISOs herunterladen","Κατεβάστε τα επίσημα retail ISO των Microsoft Windows","הורדת קובצי ה־ISO הקמעונאיים הרשמיים של Microsoft Windows","Hivatalos Microsoft Windows kiskereskedelmi ISO képfájlok letöltése","Unduh ISO Microsoft Windows resmi","Scarica le ISO ufficiali di Microsoft Windows","","공식 Microsoft Windows 리테일 ISO 다운로드","Lejupielādē oficiālos Microsoft ISO failus","","","","ISO های رسمی ماکروسافت را دریافت کنید","Pobierz oficjalny obraz ISO systemu Microsoft Windows","Baixar ISOs oficiais do Microsoft Windows","Transferir ISOs oficiais do Microsoft Windows Retail","Descarcă un Microsoft Windows ISO oficial de vânzare","Загрузить официальные ISO-образы Windows","Preuzmite zvanične Microsoft Windows maloprodajne ISO-ove","Stiahnite si oficiálne ISO pre Microsoft Windows","","Descargue los ISO oficiales de Microsoft Windows","Ladda ner officiella Microsoft Windows ISO-filer","","Resmi Microsoft Windows Retail ISO'larını indirin","Завантаження офіційних образів Microsoft Windows",""
+"Feature13","712","Text","","Download UEFI Shell ISOs","","Изтегляне на UEFI Shell образи","下载 UEFI Shell 镜像","下載 UEFI Shell 鏡像","","Stažení souborů UEFI Shell ISO","","UEFI Shell ISO's downloaden","Lataa UEFI Shell ISO-levykuvia","Téléchargez des images ISOs du Shell UEFI","UEFI-Shell-ISOs herunterladen","Κατεβάστε τα ISO Shell UEFI","הורדת קובצי ISO של מעטפת UEFI","UEFI Shell ISO képfájlok letöltése","Unduh Shell ISO UEFI","Scarica le ISO della shell UEFI","","UEFI Shell ISO 다운로드","Lejupielādē UEFI OS ISO failus","","","","ISO های پوسته UEFI را دانلود کنید","Ściągnij obrazy ISO UEFI Shell","Baixar ISOs do Shell UEFI","Transferir ISOs de UEFI Shell","Descarcă UEFI Shell ISO-uri","Загрузить ISO-образы оболочки UEFI","Preuzmite UEFI Shell ISOs","Stiahnite UEFI Shell ISO","","Descargar ISO de UEFI Shell","Ladda ner UEFI-shell ISO-filer","","UEFI Shell ISO'larını indirin","Завантаження командної оболонки UEFI ISO",""
 "Feature14","713","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "Feature15","714","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "Feature16","715","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -268,7 +296,7 @@ Veuillez consulter https://www.gnu.org/licenses/gpl-3.0.fr.html pour plus de det
 "RecommendedHardwareReq9","858","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "RecommendedHardwareReq10","859","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "RecommendedHardwareReq11","860","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-"SearchTerm1","900","Text","Boot","Boot","","","","","","","","","","Amorçable","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+"SearchTerm1","900","Text","Boot","Boot","","","启动","啟動","","","","","Boottaus","Amorçable","","","בוט","","","Avvio","","부팅","","","","","راه‌اندازی","","Inicialização","Inicializável","Bootează","Загрузочный","","","","Arranque","Uppstart","","Önyükle","Отримати",""
 "SearchTerm2","901","Text","USB",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "SearchTerm3","902","Text","ISO",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "SearchTerm4","903","Text","Windows",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
