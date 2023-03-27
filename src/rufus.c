@@ -3325,7 +3325,7 @@ FARPROC WINAPI dllDelayLoadHook(unsigned dliNotify, PDelayLoadInfo pdli)
 {
 	if (dliNotify == dliNotePreLoadLibrary) {
 		// Windows 7 without KB2533623 does not support the LOAD_LIBRARY_SEARCH_SYSTEM32 flag.
-		// That is is OK, because the delay load handler will interrupt the NULL return value
+		// That is OK, because the delay load handler will interrupt the NULL return value
 		// to mean that it should perform a normal LoadLibrary.
 		return (FARPROC)LoadLibraryExA(pdli->szDll, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
 	}
@@ -3685,8 +3685,7 @@ skip_args_processing:
 		nWindowsVersion = forced_windows_version;
 
 	// ...and nothing of value was lost
-	// TODO: Set to <= for 3.23
-	if (nWindowsVersion < WINDOWS_7) {
+	if (nWindowsVersion <= WINDOWS_7) {
 		// Load the translation before we print the error
 		get_loc_data_file(loc_file, selected_locale);
 		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);

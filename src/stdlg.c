@@ -1351,7 +1351,7 @@ LONG GetEntryWidth(HWND hDropDown, const char *entry)
 }
 
 /*
- * Windows 7 taskbar icon handling (progress bar overlay, etc)
+ * Windows taskbar icon handling (progress bar overlay, etc)
  */
 static ITaskbarList3* ptbl = NULL;
 

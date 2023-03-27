@@ -1,4 +1,4 @@
-o Version 3.22 (2022.03.25)
+o Version 3.22 (2023.03.25)
     Add SHA-1 and SHA-256 x86 acceleration on CPUs that support it (courtesy of Jeffrey Walton)
     Add an option to disable BitLocker device encryption in the Windows User Experience dialog
     Add a cheat mode (Ctrl-P) to preserve the log between sessions

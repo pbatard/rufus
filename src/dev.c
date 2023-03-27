@@ -103,24 +103,22 @@ static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 		r = TRUE;
 	}
 
-	// In their great wisdom, Microsoft decided to BREAK the USB speed report between Windows 7 and Windows 8
-	if (nWindowsVersion >= WINDOWS_8) {
-		size = sizeof(conn_info_v2);
-		memset(&conn_info_v2, 0, size);
-		conn_info_v2.ConnectionIndex = (ULONG)props->port;
-		conn_info_v2.Length = size;
-		conn_info_v2.SupportedUsbProtocols.Usb300 = 1;
-		if (!DeviceIoControl(handle, IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX_V2, &conn_info_v2, size, &conn_info_v2, size, &size, NULL)) {
-			uprintf("Could not get node connection information (V2) for device '%s': %s", device_id, WindowsErrorString());
-		} else if (conn_info_v2.Flags.DeviceIsOperatingAtSuperSpeedPlusOrHigher) {
-			props->speed = USB_SPEED_SUPER_PLUS;
-		} else if (conn_info_v2.Flags.DeviceIsOperatingAtSuperSpeedOrHigher) {
-			props->speed = USB_SPEED_SUPER;
-		} else if (conn_info_v2.Flags.DeviceIsSuperSpeedPlusCapableOrHigher) {
-			props->lower_speed = 2;
-		} else if (conn_info_v2.Flags.DeviceIsSuperSpeedCapableOrHigher) {
-			props->lower_speed = 1;
-		}
+	// The USB speed report of modern Windows is a complete mess
+	size = sizeof(conn_info_v2);
+	memset(&conn_info_v2, 0, size);
+	conn_info_v2.ConnectionIndex = (ULONG)props->port;
+	conn_info_v2.Length = size;
+	conn_info_v2.SupportedUsbProtocols.Usb300 = 1;
+	if (!DeviceIoControl(handle, IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX_V2, &conn_info_v2, size, &conn_info_v2, size, &size, NULL)) {
+		uprintf("Could not get node connection information (V2) for device '%s': %s", device_id, WindowsErrorString());
+	} else if (conn_info_v2.Flags.DeviceIsOperatingAtSuperSpeedPlusOrHigher) {
+		props->speed = USB_SPEED_SUPER_PLUS;
+	} else if (conn_info_v2.Flags.DeviceIsOperatingAtSuperSpeedOrHigher) {
+		props->speed = USB_SPEED_SUPER;
+	} else if (conn_info_v2.Flags.DeviceIsSuperSpeedPlusCapableOrHigher) {
+		props->lower_speed = 2;
+	} else if (conn_info_v2.Flags.DeviceIsSuperSpeedCapableOrHigher) {
+		props->lower_speed = 1;
 	}
 
 out:

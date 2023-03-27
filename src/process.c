@@ -610,7 +610,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 		if (!bGotCmdLine)
 			bGotCmdLine = (GetModuleFileNameExU(processHandle, 0, cmdline, MAX_PATH - 1) != 0);
 
-		// The above may not work on Windows 7, so try QueryFullProcessImageName (Vista or later)
+		// The above may not work on all Windows version, so fall back to QueryFullProcessImageName
 		if (!bGotCmdLine) {
 			bGotCmdLine = (QueryFullProcessImageNameW(processHandle, 0, wexe_path, &size) != FALSE);
 			if (bGotCmdLine)

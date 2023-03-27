@@ -636,7 +636,7 @@ char* GetExistingMountPoint(const char* image, int index)
 	return (path[0] == 0) ? NULL: path;
 }
 
-// Extract a file from a WIM image using wimgapi.dll (Windows 7 or later)
+// Extract a file from a WIM image using wimgapi.dll
 // NB: if you want progress from a WIM callback, you must run the WIM API call in its own thread
 // (which we don't do here) as it won't work otherwise. Thanks go to Erwan for figuring this out!
 BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst, BOOL bSilent)
@@ -857,7 +857,7 @@ out:
 	return r;
 }
 
-// Apply a WIM image using wimgapi.dll (Windows 7 or later)
+// Apply a WIM image using wimgapi.dll
 // https://docs.microsoft.com/en-us/previous-versions/msdn10/dd851944(v=msdn.10)
 // To get progress, we must run this call within its own thread
 static DWORD WINAPI WimApplyImageThread(LPVOID param)
