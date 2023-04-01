@@ -760,6 +760,14 @@ out:
 	#proc, #name, WindowsErrorString()); goto out;} } while(0)
 #define PF_INIT_OR_SET_STATUS(proc, name)	do {PF_INIT(proc, name);         \
 	if ((pf##proc == NULL) && (NT_SUCCESS(status))) status = STATUS_NOT_IMPLEMENTED; } while(0)
+#if defined(_MSC_VER)
+#define TRY_AND_HANDLE(exception, TRY_CODE, EXCEPTION_CODE) __try TRY_CODE   \
+	__except (GetExceptionCode() == exception ? EXCEPTION_EXECUTE_HANDLER :  \
+			  EXCEPTION_CONTINUE_SEARCH) EXCEPTION_CODE
+#else
+// NB: Eventually we may try __try1 and __except1 from MinGW...
+#define TRY_AND_HANDLE(exception, TRY_CODE, EXCEPTION_CODE) TRY_CODE
+#endif
 
 /* Custom application errors */
 #define FAC(f)                         ((f)<<16)
