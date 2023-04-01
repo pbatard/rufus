@@ -875,17 +875,21 @@ void GetGrubVersion(char* buf, size_t buf_size)
 	// https://src.fedoraproject.org/rpms/grub2/blob/rawhide/f/0024-Don-t-say-GNU-Linux-in-generated-menus.patch
 	const char* grub_version_str[] = { "GRUB  version %s", "GRUB version %s" };
 	const char* grub_debug_is_enabled_str = "grub_debug_is_enabled";
+	const size_t max_string_size = 32;	// The strings above *MUST* be no longer than this value
 	char *p, unauthorized[] = {'<', '>', ':', '|', '*', '?', '\\', '/'};
 	size_t i, j;
 	BOOL has_grub_debug_is_enabled = FALSE;
 
-	for (i = 0; i < buf_size; i++) {
-		for (j = 0; j < ARRAYSIZE(grub_version_str); j++) {
-			if (memcmp(&buf[i], grub_version_str[j], strlen(grub_version_str[j]) + 1) == 0)
-				static_strcpy(img_report.grub2_version, &buf[i + strlen(grub_version_str[j]) + 1]);
+	// Make sure we don't overflow our buffer
+	if (buf_size > max_string_size) {
+		for (i = 0; i < buf_size - max_string_size; i++) {
+			for (j = 0; j < ARRAYSIZE(grub_version_str); j++) {
+				if (memcmp(&buf[i], grub_version_str[j], strlen(grub_version_str[j]) + 1) == 0)
+					static_strcpy(img_report.grub2_version, &buf[i + strlen(grub_version_str[j]) + 1]);
+			}
+			if (memcmp(&buf[i], grub_debug_is_enabled_str, strlen(grub_debug_is_enabled_str)) == 0)
+				has_grub_debug_is_enabled = TRUE;
 		}
-		if (memcmp(&buf[i], grub_debug_is_enabled_str, strlen(grub_debug_is_enabled_str)) == 0)
-			has_grub_debug_is_enabled = TRUE;
 	}
 	// Sanitize the string
 	for (p = &img_report.grub2_version[0]; *p; p++) {

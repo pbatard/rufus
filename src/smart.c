@@ -462,7 +462,7 @@ int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid)
 			score_list[score_list_size] = 15;
 			score += score_list[score_list_size++];
 		}
-	} else if (drive_size < 32 * GB) {
+	} else if (drive_size < 128 * GB) {
 		score_list[score_list_size] = -15;
 		score += score_list[score_list_size++];
 	}
