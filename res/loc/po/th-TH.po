@@ -1,9 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2021-04-12 20:29+0700\n"
-"PO-Revision-Date: 2021-04-12 21:35+0700\n"
+"POT-Creation-Date: 2023-04-01 15:43+0200\n"
+"PO-Revision-Date: 2023-04-01 15:43+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: th_TH\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Thai (ไทย)\n"
 "X-Rufus-LCID: 0x041e\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -288,31 +288,31 @@ msgstr "ไบต์"
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr "KB"
+msgstr ""
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr "MB"
+msgstr ""
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr "GB"
+msgstr ""
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr "TB"
+msgstr ""
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr "PB"
+msgstr ""
 
 #. • MSG_027
 msgid "kilobytes"
@@ -515,7 +515,7 @@ msgstr "การแตกไฟล์อิมเมจ ISO ผิดพลา�
 
 #. • MSG_075
 msgid "Unable to remount volume."
-msgstr "ไม่สามารถ Remount โวลุ่มได้"
+msgstr "ไม่สามารถ Remount ตัว volume ได้"
 
 #. • MSG_076
 msgid "Unable to patch/setup files for boot."
@@ -527,7 +527,7 @@ msgstr "ตั้งอักษรประจำไดร์ฟไม่ได
 
 #. • MSG_078
 msgid "Can't mount GUID volume."
-msgstr "ไม่สามารถเมาท์ GUID โวลุ่มได้"
+msgstr "ไม่สามารถเมาท์ GUID volume ได้"
 
 #. • MSG_079
 msgid "The device is not ready."
@@ -541,7 +541,7 @@ msgid ""
 "\n"
 "We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
 msgstr ""
-"ขณะนี้พบว่าวินโดวส์กำลังดำเนินการเขียนไฟล์ลงบนอุปกรณ์ USB\n"
+"ขณะนี้พบว่า Windows กำลังดำเนินการเขียนไฟล์ลงบนอุปกรณ์ USB\n"
 "\n"
 "ความเร็วขึ้นอยู่กับความสามารถของ USB ของคุณ ดังนั้นการกระทำนี้อาจใช้เวลานานโดยเฉพาะอย่างยิ่งกับไฟล์ที่มีขนาดใหญ่มากๆ\n"
 "\n"
@@ -626,7 +626,7 @@ msgid ""
 "\n"
 "This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
 msgstr ""
-"สำคัญมาก:ไดร์ฟนี้มีหลายพาร์ทิชั่น!!\n"
+"คำเตือน:ไดร์ฟนี้มีหลายพาร์ทิชั่น!!\n"
 "\n"
 "ซึ่งอาจรวมไปถึงพาร์ทิชั่นที่ไม่สามารถมองเห็นได้บน Windows หากดำเนินการต่อ ข้อมูลบนพาร์ทิชั่นดังกล่าวจะหายไปอย่างถาวร"
 
@@ -654,7 +654,7 @@ msgid ""
 "\n"
 "Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"สำคัญมาก: คุณกำลังเลือกติดตั้งแบบ 'Windows To Go' แต่อุปกรณ์ของคุณไม่มีแอททริบิวต์แบบ 'FIXED' ดังนั้น Windows อาจจะค้างขณะทำการบูตได้ เพราะ Microsoft ไม่ได้ออกแบบให้ทำงานบนอุปกรณ์แบบถอดได้ (Removable Attribute)\n"
+"คำเตือน: คุณกำลังเลือกติดตั้งแบบ 'Windows To Go' แต่อุปกรณ์ของคุณไม่มีแอททริบิวต์แบบ 'FIXED' ดังนั้น Windows อาจจะค้างขณะทำการบูตได้ เพราะ Microsoft ไม่ได้ออกแบบให้ทำงานบนอุปกรณ์แบบถอดได้ (Removable Attribute)\n"
 "\n"
 "คุณต้องการดำเนินการต่อหรือไม่?\n"
 "\n"
@@ -698,7 +698,7 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"%s หรือใหม่กว่า จำเป็นต้องมี  '%s' ติดตั้งไว้\n"
+"%s หรือใหม่กว่า จำเป็นต้องมี '%s' ติดตั้งไว้\n"
 "เนื่องจากไฟล์นี้มีขนาดใหญ่กว่า 100 KB และพบตลอดใน ISO อิมเมจไฟล์จึงไม่ได้รวมไว้ในโปรแกรม Rufus\n"
 "\n"
 "Rufus สามารถดาวน์โหลดไฟล์ดังกล่าวให้คุณได้:\n"
@@ -725,7 +725,7 @@ msgstr "ไฟล์ทั้งหมด"
 
 #. • MSG_108
 msgid "Rufus log"
-msgstr "Rufus log"
+msgstr ""
 
 #. • MSG_109
 msgid "0x%02X (Disk %d)"
@@ -750,11 +750,11 @@ msgstr "ขนาดของคลัสเตอร์ไม่รองรั
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "การฟอร์แมทโวลุ่ม UDF ขนาดใหญ่อาจใช้เวลานาน โดยความเร็วของ USB 2.0 ความเร็วการฟอร์แมทโดยประมาณคือ %d:%02d โดยขณะทำงาน แถบแสดงความคืบหน้าอาจหยุดนิ่ง โปรดรอ"
+msgstr "การฟอร์แมท UDF volume ขนาดใหญ่อาจใช้เวลานาน โดยความเร็วของ USB 2.0 ความเร็วการฟอร์แมทโดยประมาณคือ %d:%02d โดยขณะทำงาน แถบแสดงความคืบหน้าอาจหยุดนิ่ง โปรดรอ"
 
 #. • MSG_113
 msgid "Large UDF volume"
-msgstr "โวลุ่ม UDF ขนาดใหญ่"
+msgstr "UDF volume ขนาดใหญ่"
 
 #. • MSG_114
 msgid ""
@@ -811,7 +811,7 @@ msgstr "ตัวติดตั้ง Windows มาตรฐาน"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr "Windows To Go"
+msgstr ""
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -949,8 +949,8 @@ msgid "Download using a browser"
 msgstr "ดาวน์โหลดโดยใช้เบราว์เซอร์"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "โดนแบนโดย Microsoft ชั่วคราวเนื่องจากการขอดาวน์โหลดที่มากเกินไป - โปรดลองใหม่ในภายหลัง..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "ไม่สามารถดาวน์โหลดไฟล์  Windows ได้ เนื่องจาก Microsoft ได้ทำการเปลี่ยนเว็บไซต์เพื่อป้องกันเอาไว้ - โปรดลองใหม่ในภายหลัง..."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -1085,14 +1085,14 @@ msgstr "คลิกเพื่อเลือก..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr "Rufus - ยูทิลิตี้การฟอร์แมต USB ที่เชื่อถือได้"
+msgstr "Rufus - ยูทิลิตี้การฟอร์แมต USB ที่ไว้ใจได้"
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
 msgstr "เวอร์ชั่น %d.%d (Build %d)"
 
 #. • MSG_176
-msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
+msgid "mailto:support@akeo.ie"
 msgstr "แปลไทยโดย: Sippapas Wangsri <mailto:sippapas_w@cmu.ac.th>"
 
 #. • MSG_177
@@ -1141,7 +1141,7 @@ msgstr ""
 
 #. • MSG_187
 msgid "Invalid image for selected boot option"
-msgstr "อิมเมจสำหรับตัวเลือกการบูทไม่ถูกต้อง"
+msgstr "อิมเมจสำหรับตัวเลือกการบูตไม่ถูกต้อง"
 
 #. • MSG_188
 msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
@@ -1201,6 +1201,10 @@ msgstr "พบไดร์ฟที่มีขนาดของเซคเต
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "'Windows To Go' สามารถติดตั้งลงบนพาร์ทิชั่นแบบ GPT เท่านั้นหากมีแอททริบิทต์แบบ FIXED แต่ไดร์ฟปัจจุบันพบว่าไม่มีแอททริบิวต์แบบ FIXED"
 
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "ฟีเจอร์นี้ไม่พร้อมใช้งานบนแพลตฟอร์มนี้"
+
 #. • MSG_201
 msgid "Cancelling - Please wait..."
 msgstr "กำลังยกเลิก - โปรดรอสักครู่..."
@@ -1236,7 +1240,7 @@ msgstr "ไม่พบไฟล์ %s"
 #. The name proposed by Windows' Computer Management → Disk Management when you try to format
 #. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
 msgid "New Volume"
-msgstr "โวลุ่มใหม่"
+msgstr "Volume ใหม่"
 
 #. • MSG_208
 #.
@@ -1307,7 +1311,6 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "กำลังฟอร์แมท (%s) - เวลาคงเหลือ %d:%02d..."
 
 #. • MSG_221
-#, fuzzy
 msgid "Setting label (%s)..."
 msgstr "กำลังตั้งชื่อไดร์ฟ (%s)..."
 
@@ -1335,7 +1338,7 @@ msgstr "กำลังวิเคราะห์ Boot Record..."
 
 #. • MSG_227
 msgid "Closing existing volume..."
-msgstr "กำลังปิดโวลุ่มปัจจุบัน..."
+msgstr "กำลังปิด volume ปัจจุบัน..."
 
 #. • MSG_228
 msgid "Writing Master Boot Record..."
@@ -1445,11 +1448,11 @@ msgstr "ไม่สามารถลบ Registry Keys ของแอพพล
 #.
 #. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
 msgid "%s enabled"
-msgstr "เปิดใช้งาน%s แล้ว"
+msgstr "เปิดใช้งาน %s แล้ว"
 
 #. • MSG_251
 msgid "%s disabled"
-msgstr "ปิดใช้งาน%s แล้ว"
+msgstr "ปิดใช้งาน %s แล้ว"
 
 #. • MSG_252
 msgid "Size checks"
@@ -1485,7 +1488,7 @@ msgstr "บังคับอัพเดต"
 
 #. • MSG_260
 msgid "NTFS compression"
-msgstr "บีบอัดแบบ NTFS"
+msgstr "การบีบอัด NTFS"
 
 #. • MSG_261
 msgid "Writing image: %s"
@@ -1544,7 +1547,6 @@ msgid "Change the application language"
 msgstr "เปลี่ยนภาษา"
 
 #. • MSG_274
-#, fuzzy
 msgid "%s image detected"
 msgstr "พบอิมเมจแบบ %s"
 
@@ -1593,7 +1595,6 @@ msgid "%s (Please select)"
 msgstr "%s (กรุณาเลือก)"
 
 #. • MSG_282
-#, fuzzy
 msgid "Exclusive USB drive locking"
 msgstr "การล็อค Exclusive USB Drive"
 
@@ -1616,7 +1617,6 @@ msgstr ""
 "คุณต้องการจะเปิดไฟล์นี้หรือไม่?"
 
 #. • MSG_286
-#, fuzzy
 msgid "Zeroing drive: %s"
 msgstr "กำลังเขียนไดร์ฟด้วย zero byte: %s"
 
@@ -1649,8 +1649,12 @@ msgid "Unsupported Windows version"
 msgstr "เวอร์ชั่นของ Windows ไม่รองรับ"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "เวอร์ชั่นของ Windows นี้ไม่ได้รับการสนับสนุนโดย Rufus อีกต่อไป"
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"เวอร์ชั่นของ Windows นี้ไม่ได้รับการสนับสนุนโดย Rufus อีกต่อไป\n"
+"Rufus เวอร์ชันล่าสุดที่เข้ากันได้กับแพลตฟอร์มนี้คือ v%d.%d"
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1715,19 +1719,18 @@ msgid "Create a disk image of the selected device"
 msgstr "สร้างดิสก์อิมเมจของอุปกรณ์ที่เลือก"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "เลือกตัวเลือกนี้หากต้องการเลือกว่าท่านจะใช้อุปกรณ์นี้ในการลง Windows บนเครื่องอื่นหรือต้องการจะเรียกใช้ Windows จากอุปกรณ์นี้โดยตรง (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr "เลือกตัวเลือกนี้หากต้องการเลือกว่าท่านจะใช้อุปกรณ์นี้ในการติดตั้ง Windows บนเครื่องอื่น หรือหากต้องการจะเรียกใช้ Windows จากอุปกรณ์นี้โดยตรง (Windows To Go)"
 
 #. • MSG_306
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-#, fuzzy
 msgid "Fast-zeroing drive: %s"
 msgstr "กำลังล้างไดร์ฟแบบรวดเร็ว: สำเร็จแล้ว: %s"
 
 #. • MSG_307
-msgid "This may take a while"
+msgid "this may take a while"
 msgstr "อาจใช้เวลาสักครู่"
 
 #. • MSG_308
@@ -1735,12 +1738,10 @@ msgid "VHD detection"
 msgstr "การตรวจหา VHD"
 
 #. • MSG_309
-#, fuzzy
 msgid "Compressed archive"
 msgstr "ไฟล์บีบอัด"
 
 #. • MSG_310
-#, fuzzy
 msgid ""
 "The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
 "\n"
@@ -1751,7 +1752,6 @@ msgstr ""
 "โปรดเลือกโหมดที่คุณต้องการใช้ในการเขียนอิมเมจไฟล์นี้:"
 
 #. • MSG_311
-#, fuzzy
 msgid "Use %s (in the main application window) to enable."
 msgstr "ใช้ %s (ในหน้าต่างโปรแกรมหลัก) เพื่อเปิดการใช้งาน"
 
@@ -1798,3 +1798,144 @@ msgid ""
 msgstr ""
 "อิมเมจไฟล์ที่คุณใช้เป็นแบบ ISOHybrid แต่ผู้ผลิตไม่ได้ทำให้รองรับกับการคัดลอกไฟล์ ISO\n"
 "นั่นทำให้โหมดการเขียนอิมเมจแบบ DD image writing จะถูกเรียกใช้งาน"
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "ไม่สามารถเปิดหรืออ่าน '%s' ได้"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "ปรับใช้งานการปรับแต่งขั้นตอนการติดตั้ง Windows: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "ปรับใช้งานการตั้งค่าของผู้ใช้..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "โปรแกรมประสบการณ์ผู้ใช้งาน Windows"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "ต้องการปรับแต่งขั้นตอนการติดตั้ง Windows หรือไม่?"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "ยกเลิกการตรวจสอบ: แรม 4 GB ขึ้นไป, Secure Boot และ TPM 2.0"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "ยกเลิกการบังคับใช้บัญชี Microsoft"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "ยกเลิกการเก็บข้อมูลผู้ใช้ (ข้ามคำถามเกี่ยวกับความเป็นส่วนตัว)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "ป้องกันไม่ให้ Windows To Go เข้าถึงข้อมูลในดิสก์ภายใน"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "สร้างบัญชีผู้ใช้ด้วยชื่อผู้ใช้:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "ตั้งค่าภูมิภาคให้เหมือนกับของที่ตั้งค่าอยู่บนคอมพิวเตอร์เครื่องนี้"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "ยกเลิกการเข้ารหัสอุปกรณ์อัตโนมัติด้วย BitLocker"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "Log แบบถาวร"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus คือ โปรแกรมที่ช่วยฟอร์แมท และสร้าง USB แฟลชไดรฟ์ที่สามารถบูตได้จาก USB keys, pendrives, memory sticks เป็นต้น"
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "เว็บไซต์ทางการ: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "ซอร์สโค้ด: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "บันทึกการเปลี่ยนแปลง: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"แอปพลิเคชันนี้ได้รับอนุญาตภายใต้เงื่อนไขของ GNU Public License (GPL) เวอร์ชั่น 3\n"
+"ดูรายละเอียดได้ที่ https://www.gnu.org/licenses/gpl-3.0.html"
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr ""
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "ฟอร์แมต USB, แฟลชการ์ด หรือไดร์ฟจำลองให้อยู่ในรูปแบบของ FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "สร้าง USB ไดร์ฟที่บูตได้สำหรับระบบ FreeDOS"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "สร้าง USB ไดร์ฟที่บูตได้จากไฟล์อิมเมจที่บูตได้ (เช่น ไฟล์ติดตั้ง Windows หรือ Linux เป็นต้น)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "สร้างไดร์ฟที่บูตได้จากดิสก์อิมเมจที่บูตได้ รวมไปถึงอันที่ถูกบีบอัด"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "สร้างไดร์ฟที่บูตได้จาก BIOS หรือ UEFI รวมไปถึง NTFS ที่บูตได้จาก UEFI"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "สร้างไดร์ฟของ 'Windows To Go'"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "สร้างไดร์ฟติดตั้ง Windows 11 สำหรับคอมพิวเตอร์ที่ไม่มี TPM หรือ SecureBoot"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "สร้างพาร์ทิชั่นของ Linux แบบถาวร"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "สร้างอิมเมจไฟล์แบบ VHD/DD ของไดร์ฟที่เลือก"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "คำนวนรหัส MD5, SHA-1, SHA-256, SHA-512 ของไฟล์อิมเมจที่เลือก"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "ดำเนินการตรวจสอบบล็อกข้อมูลที่พัง รวมไปถึงการทดสอบว่าเป็นแฟลชไดร์ฟ \"ปลอม\" หรือไม่"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "ดาวน์โหลดอิมเมจไฟล์ของ Windows จากเว็บไซต์ทางการ"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "ดาวน์โหลดอิมเมจไฟล์ของ UEFI Shell"
