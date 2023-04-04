@@ -2026,7 +2026,7 @@ static void InitDialog(HWND hDlg)
 	// available on Windows 10 1511 or later...
 	if ((pfIsWow64Process2 != NULL) && pfIsWow64Process2(GetCurrentProcess(), &ProcessMachine, &NativeMachine)) {
 		if ((NativeMachine == IMAGE_FILE_MACHINE_ARM || NativeMachine == IMAGE_FILE_MACHINE_ARM64) &&
-			(ProcessMachine == IMAGE_FILE_MACHINE_I386 || ProcessMachine == IMAGE_FILE_MACHINE_I386))
+			(ProcessMachine == IMAGE_FILE_MACHINE_I386 || ProcessMachine == IMAGE_FILE_MACHINE_AMD64))
 			uprintf("Notice: Running emulated on %s platform", GetArchName(NativeMachine));
 	}
 	for (i = 0; i < ARRAYSIZE(resource); i++) {
