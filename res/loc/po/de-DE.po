@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2023-02-18 16:30+0100\n"
-"PO-Revision-Date: 2023-02-18 17:19+0000\n"
+"PO-Revision-Date: 2023-04-05 12:34+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -553,7 +553,7 @@ msgstr "Nicht unterstützte Image-Datei"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "Dieses Image  ist nicht startfähig oder benutzt eine nicht unterstützte Start- oder Kompressionsmethode."
+msgstr "Dieses Image ist nicht startfähig oder benutzt eine nicht unterstützte Start- oder Kompressionsmethode."
 
 #. • MSG_083
 msgid "Replace %s?"
@@ -1295,7 +1295,7 @@ msgstr "Gespeichert %s"
 #.
 #. Formatting status
 msgid "Formatting: %s"
-msgstr "Formatieren: %"
+msgstr "Formatieren: %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
@@ -1756,7 +1756,7 @@ msgstr ""
 
 #. • MSG_311
 msgid "Use %s (in the main application window) to enable."
-msgstr "Verwende  %s (Hauptfenster der Anwendung) zum aktivieren."
+msgstr "Verwende %s (Hauptfenster der Anwendung) zum aktivieren."
 
 #. • MSG_312
 msgid "Extra hashes (SHA512)"

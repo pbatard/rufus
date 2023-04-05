@@ -739,7 +739,7 @@ msgid ""
 "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
 "Please change the Cluster size or use FreeDOS."
 msgstr ""
-"MS-DOS kan ikke boote fra en stasjon  som brukeren  64 kilobytes Cluster størrelse.\n"
+"MS-DOS kan ikke boote fra en stasjon som brukeren 64 kilobytes Cluster størrelse.\n"
 "Vennligst bytt Cluster-størrelse eller bruk FreeDOS."
 
 #. • MSG_111
@@ -862,7 +862,7 @@ msgstr "Ikke vis denne beskjeden igjen"
 
 #. • MSG_128
 msgid "Important notice about %s"
-msgstr "Viktig varsel om% s"
+msgstr "Viktig varsel om %s"
 
 #. • MSG_129
 msgid ""
@@ -908,7 +908,7 @@ msgid ""
 "\n"
 "Are you sure you want to continue?"
 msgstr ""
-"Fordi MBR er valgt for partisjonsskjemaet, kan Rufus bare opprette en partisjon på opptil 2 TB på dette mediet, noe som vil føre til at% s diskplass ikke er tilgjengelig.\n"
+"Fordi MBR er valgt for partisjonsskjemaet, kan Rufus bare opprette en partisjon på opptil 2 TB på dette mediet, noe som vil føre til at %s diskplass ikke er tilgjengelig.\n"
 "\n"
 "Er du sikker på at du vil fortsette?"
 
@@ -1202,6 +1202,10 @@ msgstr "Ikke standard sektorstørrelse oppdaget"
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "'Windows To Go' kan kun installeres på en GPT-partisjonert stasjon hvis den er FAST stasjonstype. Den aktuelle stasjonen ble ikke oppdaget som FAST."
+
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "Denne funksjonen er ikke tilgjengelig på denne plattformen."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1647,8 +1651,13 @@ msgid "Unsupported Windows version"
 msgstr "Ikke støttet Windows-versjon"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Denne versjonen av Windows er ikke støttet av Rufus lengre."
+#, fuzzy
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"Denne versjonen av Windows er ikke støttet av Rufus lengre.\n"
+"Den siste versjonen av Rufus som er kompatibel med denne plattformen er v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"

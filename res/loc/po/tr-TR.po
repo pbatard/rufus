@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2023-02-23 15:14+0300\n"
-"PO-Revision-Date: 2023-02-24 13:21+0000\n"
+"PO-Revision-Date: 2023-04-05 12:42+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: tr_TR\n"
@@ -579,7 +579,7 @@ msgstr ""
 "- Varolan ISO dosyasını olduğu gibi bırakmak için 'Hayır'ı seçin\n"
 "Ne yapacağınızı bilmiyorsanız, 'Evet'i seçmelisiniz.\n"
 "\n"
-"Not: Yeni dosya mevcut dizine indirilecek ve  '%s'  orada var olunca, otomatik olarak kullanılacak."
+"Not: Yeni dosya mevcut dizine indirilecek ve '%s' orada var olunca, otomatik olarak kullanılacak."
 
 #. • MSG_085
 msgid "Downloading %s"
@@ -1094,7 +1094,6 @@ msgid "Version %d.%d (Build %d)"
 msgstr "Sürüm %d.%d (Yapı %d)"
 
 #. • MSG_176
-#, fuzzy
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
 msgstr "Türkçe Çeviri:\\line• Mehmetali KURAN <mailto:mehmetalikuran@gmail.com>\\line• İlhami TUĞRAL <mailto:ilhamitugral@gmail.com>"
 
@@ -1756,7 +1755,7 @@ msgstr ""
 
 #. • MSG_311
 msgid "Use %s (in the main application window) to enable."
-msgstr "Etkinleştirmek için % s (ana uygulama penceresinde) kullanın."
+msgstr "Etkinleştirmek için %s (ana uygulama penceresinde) kullanın."
 
 #. • MSG_312
 msgid "Extra hashes (SHA512)"

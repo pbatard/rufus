@@ -1408,7 +1408,7 @@ out:
 
 /*
  * Standalone thread for the formatting operation
- * According to http://msdn.microsoft.com/en-us/library/windows/desktop/aa364562.aspx
+ * According to https://learn.microsoft.com/windows/win32/api/winioctl/ni-winioctl-fsctl_dismount_volume
  * To change a volume file system
  *   Open a volume.
  *   Lock the volume.
