@@ -1,9 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2021-04-20 01:27+0900\n"
-"PO-Revision-Date: 2021-04-27 23:31+0900\n"
+"POT-Creation-Date: 2023-04-06 11:46+0900\n"
+"PO-Revision-Date: 2023-04-06 18:36+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: ja_JP\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Japanese (日本語)\n"
 "X-Rufus-LCID: 0x0411\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -484,7 +484,6 @@ msgid "Could not open media. It may be in use by another process. Please re-plug
 msgstr "メディアを開けませんでした。他のプログラムで使われている可能性があります。もう一度接続し、やり直してください。"
 
 #. • MSG_068
-#, fuzzy
 msgid "Could not partition drive."
 msgstr "ドライブのパーティション設定中にエラーが発生しました。"
 
@@ -666,7 +665,6 @@ msgid "Filesystem limitation"
 msgstr "ファイル システム制限"
 
 #. • MSG_100
-#, fuzzy
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
 msgstr "ISO イメージに 4 GB より大きなファイルがあります。FAT、FAT32 ファイル システムで使用可能な最大のサイズを超えています。"
 
@@ -952,7 +950,7 @@ msgid "Download using a browser"
 msgstr "ブラウザーを使ってダウンロードする"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
 msgstr "リクエストが多すぎたため Microsoft が一時的にダウンロードを禁止しました - しばらくしてからもう一度お試しください..."
 
 #. • MSG_145
@@ -1100,7 +1098,7 @@ msgstr "バージョン %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "日本語翻訳: チャンテラ・ジャクソン <mailto:chantella-eng@live.com> \\line校正、翻訳: Tiryoh <mailto:tiryoh+rufus@gmail.com>"
+msgstr "日本語翻訳:\\line• チャンテラ・ジャクソン <mailto:chantella-eng@live.com>\\line• Tiryoh <mailto:tiryoh+rufus@gmail.com>\\line• 五月雨 <mailto:samidare3desu@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1208,6 +1206,10 @@ msgstr "標準以外のセクタサイズが検出されました。"
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "“FIXED” 属性が設定されている場合に限り、 GPT パーティションのドライブに Windows To Go をインストールすることができます。 現在のドライブは FIXED として検出されませんでした。"
 
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "この機能は、このプラットフォームでは利用できません。"
+
 #. • MSG_201
 msgid "Cancelling - Please wait..."
 msgstr "キャンセル中 - お待ちください..."
@@ -1294,7 +1296,6 @@ msgstr "%s を保存しました。"
 #. • MSG_217
 #.
 #. Formatting status
-#, fuzzy
 msgid "Formatting: %s"
 msgstr "フォーマット中: %s"
 
@@ -1315,7 +1316,6 @@ msgid "Formatting (%s) - estimated duration %d:%02d..."
 msgstr "フォーマット中 (%s) - 残り約 %d:%02d..."
 
 #. • MSG_221
-#, fuzzy
 msgid "Setting label (%s)..."
 msgstr "ラベル作成中 (%s)..."
 
@@ -1346,12 +1346,10 @@ msgid "Closing existing volume..."
 msgstr "ボリュームを閉じています..."
 
 #. • MSG_228
-#, fuzzy
 msgid "Writing Master Boot Record..."
 msgstr "マスター ブート レコードを書き込んでいます..."
 
 #. • MSG_229
-#, fuzzy
 msgid "Writing Partition Boot Record..."
 msgstr "パーティション ブート レコードを書き込んでいます..."
 
@@ -1360,12 +1358,10 @@ msgid "Copying DOS files..."
 msgstr "DOS ファイルをコピー中..."
 
 #. • MSG_231
-#, fuzzy
 msgid "Copying ISO files: %s"
 msgstr "ISO ファイルをコピー中: %s"
 
 #. • MSG_232
-#, fuzzy
 msgid "Win7 EFI boot setup (%s)..."
 msgstr "Win7 EFI ブート セットアップ中 (%s)..."
 
@@ -1402,7 +1398,6 @@ msgid "Partitioning (%s)..."
 msgstr "パーティション分割中 (%s)..."
 
 #. • MSG_239
-#, fuzzy
 msgid "Deleting partitions (%s)..."
 msgstr "パーティション削除中 (%s)..."
 
@@ -1419,7 +1414,6 @@ msgstr ""
 "ダウンロードは削除されます。詳しくはログを確認してください。"
 
 #. • MSG_241
-#, fuzzy
 msgid "Downloading: %s"
 msgstr "ダウンロード中: %s"
 
@@ -1502,7 +1496,6 @@ msgid "NTFS compression"
 msgstr "NTFS 圧縮"
 
 #. • MSG_261
-#, fuzzy
 msgid "Writing image: %s"
 msgstr "イメージを書き込み中: %s"
 
@@ -1531,7 +1524,6 @@ msgid "Dual UEFI/BIOS mode"
 msgstr "デュアル UEFI/BIOS モード"
 
 #. • MSG_267
-#, fuzzy
 msgid "Applying Windows image: %s"
 msgstr "Windows イメージを適用中: %s"
 
@@ -1548,7 +1540,6 @@ msgid "USB debug"
 msgstr "USB デバッグ"
 
 #. • MSG_271
-#, fuzzy
 msgid "Computing image checksums: %s"
 msgstr "イメージのチェックサムを計算中: %s"
 
@@ -1561,7 +1552,6 @@ msgid "Change the application language"
 msgstr "アプリケーションの使用言語を変更します。"
 
 #. • MSG_274
-#, fuzzy
 msgid "%s image detected"
 msgstr "%s イメージの検出"
 
@@ -1633,7 +1623,6 @@ msgstr ""
 "このファイルを実行しますか?"
 
 #. • MSG_286
-#, fuzzy
 msgid "Zeroing drive: %s"
 msgstr "“0” をドライブへ書き込み初期化中: %s"
 
@@ -1666,8 +1655,12 @@ msgid "Unsupported Windows version"
 msgstr "サポートされていない Windows のバージョンです。"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "このバージョンの Windows は Rufus のサポート対象外となりました。"
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"このバージョンの Windows は Rufus のサポート対象外となりました。\n"
+"このプラットフォームと互換性のあるRufusの最終バージョンはv%d.%dです。"
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1732,20 +1725,18 @@ msgid "Create a disk image of the selected device"
 msgstr "選択したデバイスのディスク イメージを作成します。"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
 msgstr "このデバイスを使用して別のディスクに Windows をインストールしたい場合、またはこのドライブから Windows を直接実行 (Windows To Go) したい場合にこのオプションを使用します。"
 
 #. • MSG_306
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
-#, fuzzy
 msgid "Fast-zeroing drive: %s"
 msgstr "ドライブを高速完全消去中: %s"
 
 #. • MSG_307
-#, fuzzy
-msgid "This may take a while"
+msgid "this may take a while"
 msgstr "時間がかかることがあります"
 
 #. • MSG_308
@@ -1813,3 +1804,144 @@ msgid ""
 msgstr ""
 "選択されたイメージはハイブリッド ISO 形式ですが、 ISO イメージ モード / ファイル コピー モードと互換性がありません。\n"
 "そのため、書き込みには DD イメージ モードが適用されます。"
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "'%s'の読み取り"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "Windowsカスタムを適応: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "ユーザー設定を適応中..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "Windows ユーザーエクスペリエンス"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "インストーラーをカスタムしますか?"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "4GB以上のRAM、セキュアブート及びTPM 2.0の要件を削除"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "オンラインアカウントの要件を削除"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "データ収集を無効化"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "Windows To Goへの内部ディスクからのアクセスを防ぐ"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "ローカルアカウントを次の名前で作成:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "地域設定をこのユーザーと同じものに設定"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "BitLocker 自動デバイス暗号化を無効化します。"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "永続ログ"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus (ルーファス) とは、起動可能なUSBフラッシュドライブ（USBメモリなど）を作成したり、フォーマットをするためのソフトウェアです。"
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "公式サイト: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "ソースコード: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "変更履歴: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"このアプリケーションはGNU Public License (GPL) version 3でライセンスされています。\n"
+"詳細は https://www.gnu.org/licenses/gpl-3.0.ja.html をご覧ください。"
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr "起動"
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "USBメモリやSDカード、仮想ドライブをFAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3でフォーマットします。"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "FreeDOSの起動可能ドライブを作成します。"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "WindowsやLinuxなどのISOファイルから起動可能ドライブを作成します。"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "圧縮済みのものを含むディスクイメージから起動可能ドライブを作成します。"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "UEFI:NTFSを含むBIOS及びUEFIで起動可能なドライブを作成します。"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "Windows To Goドライブを作成します。"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "TPM及びセキュアブート非対応のPC向けのWindows 11インストールドライブを作成します"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "記録用Linuxパーティションを作成します。"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "選択されたドライブのVHD/DDイメージを作成します。"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "選択されたイメージのMD5、SHA-1、SHA-256及びSHA-512チェックサムを計算します。"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "不良ブロックチェック及び容量詐欺ドライブの検知を行います。"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "マイクロソフト公式のWindows ISOをダウンロードします。"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "UEFIシェルのISOをダウンロードします。"
