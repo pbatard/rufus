@@ -7,7 +7,7 @@ This image, which can be mounted as a FAT file system or opened in 7-zip,
 contains the following data:
 
 o Secure Boot signed NTFS UEFI drivers, derived from ntfs-3g [1].
-  These drivers are the exact same as the read-only binaries from release 1.4,
+  These drivers are the exact same as the read-only binaries from release 1.5,
   except for the addition of Microsoft's Secure Boot signature.
   Note that, per Microsoft's current Secure Boot signing policies, the 32-bit
   ARM driver (ntfs_arm.efi) is not Secure Boot signed.
