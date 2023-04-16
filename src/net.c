@@ -625,17 +625,16 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	int status = 0;
 	const char* server_url = RUFUS_URL "/";
 	int i, j, k, max_channel, verbose = 0, verpos[4];
-	static const char* archname[] = {"win_x86", "win_x64", "win_arm", "win_arm64", "win_none"};
-	static const char* channel[] = {"release", "beta", "test"};		// release channel
-	const char* accept_types[] = {"*/*\0", NULL};
+	static const char* channel[] = { "release", "beta", "test" };		// release channel
+	const char* accept_types[] = { "*/*\0", NULL };
 	char* buf = NULL;
 	char agent[64], hostname[64], urlpath[128], sigpath[256];
 	DWORD dwSize, dwDownloaded, dwTotalSize, dwStatus;
 	BYTE *sig = NULL;
-	OSVERSIONINFOA os_version = {sizeof(OSVERSIONINFOA), 0, 0, 0, 0, ""};
+	OSVERSIONINFOA os_version = { sizeof(OSVERSIONINFOA), 0, 0, 0, 0, "" };
 	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
-	URL_COMPONENTSA UrlParts = {sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
-		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1};
+	URL_COMPONENTSA UrlParts = { sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
+		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1 };
 	SYSTEMTIME ServerTime, LocalTime;
 	FILETIME FileTime;
 	int64_t local_time = 0, reg_time, server_time, update_interval;
@@ -734,10 +733,10 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// and then remove each of the <os_> components until we find our match. For instance, we may first
 		// look for rufus_win_x64_6.2.ver (Win8 x64) but only get a match for rufus_win_x64_6.ver (Vista x64 or later)
 		// This allows sunsetting OS versions (eg XP) or providing different downloads for different archs/groups.
-		static_sprintf(urlpath, "%s%s%s_%s_%lu.%lu.ver", APPLICATION_NAME, (k==0)?"":"_",
-			(k==0)?"":channel[k], archname[GetCpuArch()], os_version.dwMajorVersion, os_version.dwMinorVersion);
+		static_sprintf(urlpath, "%s%s%s_win_%s_%lu.%lu.ver", APPLICATION_NAME, (k == 0) ? "": "_",
+			(k == 0) ? "" : channel[k], GetAppArchName(), os_version.dwMajorVersion, os_version.dwMinorVersion);
 		vuprintf("Base update check: %s", urlpath);
-		for (i=0, j=(int)safe_strlen(urlpath)-5; (j>0)&&(i<ARRAYSIZE(verpos)); j--) {
+		for (i = 0, j = (int)safe_strlen(urlpath) - 5; (j > 0) && (i < ARRAYSIZE(verpos)); j--) {
 			if ((urlpath[j] == '.') || (urlpath[j] == '_')) {
 				verpos[i++] = j;
 			}

@@ -557,8 +557,8 @@ extern char app_data_dir[MAX_PATH], *image_path, *fido_url;
  */
 extern void GetWindowsVersion(void);
 extern BOOL is_x64(void);
-extern int GetCpuArch(void);
-extern const char *WindowsErrorString(void);
+extern const char* GetAppArchName(void);
+extern const char* WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, ...);
 #define PrintStatus(...) PrintStatusInfo(FALSE, FALSE, __VA_ARGS__)

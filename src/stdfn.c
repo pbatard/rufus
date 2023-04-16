@@ -223,22 +223,18 @@ BOOL is_x64(void)
 	return ret;
 }
 
-int GetCpuArch(void)
-{
-	SYSTEM_INFO info = { 0 };
-	GetNativeSystemInfo(&info);
-	switch (info.wProcessorArchitecture) {
-	case PROCESSOR_ARCHITECTURE_AMD64:
-		return ARCH_X86_64;
-	case PROCESSOR_ARCHITECTURE_INTEL:
-		return ARCH_X86_64;
-	case PROCESSOR_ARCHITECTURE_ARM64:
-		return ARCH_ARM_64;
-	case PROCESSOR_ARCHITECTURE_ARM:
-		return ARCH_ARM_32;
-	default:
-		return ARCH_UNKNOWN;
-	}
+const char* GetAppArchName(void) {
+#if defined(_M_AMD64)
+	return "x64";
+#elif defined(_M_IX86)
+	return "x86";
+#elif defined(_M_ARM64)
+	return "arm64";
+#elif defined(_M_ARM)
+	return "arm";
+#else
+	return "unknown";
+#endif
 }
 
 static const char* GetEdition(DWORD ProductType)

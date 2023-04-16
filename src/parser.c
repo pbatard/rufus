@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Elementary Unicode compliant find/replace parser
- * Copyright © 2012-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -914,14 +914,13 @@ void parse_update(char* buf, size_t len)
 	char allowed_rtf_chars[] = "abcdefghijklmnopqrstuvwxyz|~-_:*'";
 	char allowed_std_chars[] = "\r\n ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"$%^&+=<>(){}[].,;#@/?";
 	char download_url_name[24];
-	char *arch_names[5] = { "unknown", "x86", "x64", "arm", "arm64" };
 
 	// strchr includes the NUL terminator in the search, so take care of backslash before NUL
 	if ((buf == NULL) || (len < 2) || (len > 64 * KB) || (buf[len-1] != 0) || (buf[len-2] == '\\'))
 		return;
 	// Sanitize the data - Not a silver bullet, but it helps
 	len = safe_strlen(buf)+1;	// Someone may be inserting NULs
-	for (i=0; i<len-1; i++) {
+	for (i = 0; i < len - 1; i++) {
 		// Check for valid RTF sequences as well as allowed chars if not RTF
 		if (buf[i] == '\\') {
 			// NB: we have a zero terminator, so we can afford a +1 without overflow
@@ -933,25 +932,25 @@ void parse_update(char* buf, size_t len)
 		}
 	}
 
-	for (i=0; i<3; i++)
+	for (i = 0; i < 3; i++)
 		update.version[i] = 0;
 	update.platform_min[0] = 5;
 	update.platform_min[1] = 2;	// XP or later
 	safe_free(update.download_url);
 	safe_free(update.release_notes);
 	if ((data = get_sanitized_token_data_buffer("version", 1, buf, len)) != NULL) {
-		for (i=0; (i<3) && ((token = strtok((i==0)?data:NULL, ".")) != NULL); i++) {
+		for (i = 0; (i < 3) && ((token = strtok((i == 0) ? data : NULL, ".")) != NULL); i++) {
 			update.version[i] = (uint16_t)atoi(token);
 		}
 		safe_free(data);
 	}
 	if ((data = get_sanitized_token_data_buffer("platform_min", 1, buf, len)) != NULL) {
-		for (i=0; (i<2) && ((token = strtok((i==0)?data:NULL, ".")) != NULL); i++) {
+		for (i = 0; (i < 2) && ((token = strtok((i == 0) ? data : NULL, ".")) != NULL); i++) {
 			update.platform_min[i] = (uint32_t)atoi(token);
 		}
 		safe_free(data);
 	}
-	static_sprintf(download_url_name, "download_url_%s", arch_names[GetCpuArch()]);
+	static_sprintf(download_url_name, "download_url_%s", GetAppArchName());
 	update.download_url = get_sanitized_token_data_buffer(download_url_name, 1, buf, len);
 	if (update.download_url == NULL)
 		update.download_url = get_sanitized_token_data_buffer("download_url", 1, buf, len);
