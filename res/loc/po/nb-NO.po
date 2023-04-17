@@ -1,9 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2021-04-11 17:32+0200\n"
-"PO-Revision-Date: 2021-04-11 17:46+0200\n"
+"POT-Creation-Date: 2023-04-17 13:44+0100\n"
+"PO-Revision-Date: 2023-04-17 13:46+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: nb_NO\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Norwegian (Norsk)\n"
 "X-Rufus-LCID: 0x0414\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -316,11 +316,11 @@ msgstr ""
 
 #. • MSG_027
 msgid "kilobytes"
-msgstr ""
+msgstr "kilobyte"
 
 #. • MSG_028
 msgid "megabytes"
-msgstr ""
+msgstr "megabyte"
 
 #. • MSG_029
 msgid "Default"
@@ -949,8 +949,8 @@ msgid "Download using a browser"
 msgstr "Last ned ved hjelp av en nettleser"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Midlertidig utestengt av Microsoft for å be om for mange nedlastinger - Prøv igjen senere ..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "Nedlasting av Windows ISO fra Microsoft er ikke tilgjengelig. Microsoft har endret websiden for å forhindre nedlastinger på denne måten."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -1651,7 +1651,6 @@ msgid "Unsupported Windows version"
 msgstr "Ikke støttet Windows-versjon"
 
 #. • MSG_294
-#, fuzzy
 msgid ""
 "This version of Windows is no longer supported by Rufus.\n"
 "The last version of Rufus compatible with this platform is v%d.%d."
@@ -1722,7 +1721,7 @@ msgid "Create a disk image of the selected device"
 msgstr "Opprett et diskbilde av den valgte enheten"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
 msgstr "Bruk dette alternativet for å angi om du vil bruke denne enheten til å installere Windows på en annen disk, eller hvis du vil kjøre Windows direkte fra denne stasjonen (Windows To Go)."
 
 #. • MSG_306
@@ -1733,8 +1732,8 @@ msgid "Fast-zeroing drive: %s"
 msgstr "Hurtig nullstilling av disken: %s"
 
 #. • MSG_307
-msgid "This may take a while"
-msgstr "Dette kan ta litt tid"
+msgid "this may take a while"
+msgstr "dette kan ta litt tid"
 
 #. • MSG_308
 msgid "VHD detection"
@@ -1780,7 +1779,7 @@ msgstr "Antall pasninger"
 
 #. • MSG_317
 msgid "Disk ID"
-msgstr "Disk ID"
+msgstr ""
 
 #. • MSG_318
 msgid "Default thread priority: %d"
@@ -1801,3 +1800,144 @@ msgid ""
 msgstr ""
 "Bildet du har valgt er en ISOHybrid, men skaperne har ikke gjort det kompatibelt med ISO / File copy modus.\n"
 "Som et resultat vil DD-skrivemodus bli håndhevet."
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "Kan ikke åpne eller lese '%s'"
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "Utfører tilpasning av Windows: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "Aktiverer brukertilpasninger..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "Windows brukeropplevelse"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "Tilpasse Windows installasjonen?"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "Fjern krav om 4GB+ RAM, Secure Boot og TPM 2.0"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "Fjern krav om en Microsoft konto"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "Slå av all datainnsamling (hopp over spørsmålene)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "Ikke gi Windows To Go tilgang til interne harddisker"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "Lag en lokal brukerkongot med med brukernavnet:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "Sett regionale instillinger til det samme som den aktive brukerkontoen"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "Deaktiver BitLocker kryptering av enheten"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "Behold log"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus er et verktøy som hjelper til med å formatere og lage oppstartbare USB-stasjoner, for eksempel USB-minnepinner, USB-harddisker, og lignende."
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "Offisiell webside: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "Kildekode: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "Endringslogg: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"Dette programmet er lisensiert under GNU Public Licence (GPL) versjon 3.\n"
+"Se https://www.gnu.org/licenses/gpl-3.0.html for mer informasjon."
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr "Oppstart"
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Formater USB, minnekort og virtuelle disker til FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "Lag FreeDos oppstartbar USB stick"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "Lag oppstartabar enhet/disk fra ISOer (Windows, Linux, etc.)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "Lag oppstartbare disker fra images, inkludert komprimerte sådan"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "Lag BIOS eller UEFI oppstartbare disker, inkludert UEFI oppstartbar NTFS"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "Lag 'Windows To Go' disker"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "Lag oppstartsmedia for Windows 11 som ikke krever TPM eller Secure Boot"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "Lag persistente Linux partisjoner"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "Lag VHD/DD speilinger av valgt disk"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "Kalkuler MD5, SHA-1, SHA-256 og SHA-512 sjekksummer fra valgt speiling"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "Utfør sjekk for dårlige sektorer, inkludert sjekk for forfalskede flash disker"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "Last ned offisielle Windows ISOer"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "Last ned UEFI kommandolinje ISOer"
