@@ -1423,7 +1423,7 @@ DWORD WINAPI FormatThread(void* param)
 	BOOL ret, use_large_fat32, windows_to_go, actual_lock_drive = lock_drive, write_as_ext = FALSE;
 	// Windows 11 and VDS (which I suspect is what fmifs.dll's FormatEx() is now calling behind the scenes)
 	// require us to unlock the physical drive to format the drive, else access denied is returned.
-	BOOL need_logical = FALSE, must_unlock_physical = (use_vds || nWindowsVersion >= WINDOWS_11);
+	BOOL need_logical = FALSE, must_unlock_physical = (use_vds || WindowsVersion.Version >= WINDOWS_11);
 	DWORD cr, DriveIndex = (DWORD)(uintptr_t)param, ClusterSize, Flags;
 	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
 	HANDLE hLogicalVolume = INVALID_HANDLE_VALUE;
@@ -1462,7 +1462,7 @@ DWORD WINAPI FormatThread(void* param)
 		actual_lock_drive = FALSE;
 	// Windows 11 is a lot more proactive in locking ESPs and MSRs than previous versions
 	// were, meaning that we also can't lock the drive without incurring errors...
-	if ((nWindowsVersion >= WINDOWS_11) && extra_partitions)
+	if ((WindowsVersion.Version >= WINDOWS_11) && extra_partitions)
 		actual_lock_drive = FALSE;
 	// Fixed drives + ext2/ext3 don't play nice and require the same handling as ESPs
 	write_as_ext = IS_EXT(fs_type) && (GetDriveTypeFromIndex(DriveIndex) == DRIVE_FIXED);

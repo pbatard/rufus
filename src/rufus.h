@@ -478,8 +478,7 @@ typedef enum TASKBAR_PROGRESS_FLAGS
 
 /* Windows versions */
 enum WindowsVersion {
-	WINDOWS_UNDEFINED = -1,
-	WINDOWS_UNSUPPORTED = 0,
+	WINDOWS_UNDEFINED = 0,
 	WINDOWS_XP = 0x51,
 	WINDOWS_2003 = 0x52,	// Also XP_64
 	WINDOWS_VISTA = 0x60,	// Also Server 2008
@@ -489,7 +488,7 @@ enum WindowsVersion {
 	WINDOWS_10_PREVIEW1 = 0x64,
 	WINDOWS_10 = 0xA0,		// Also Server 2016, also Server 2019
 	WINDOWS_11 = 0xB0,		// Also Server 2022
-	WINDOWS_MAX
+	WINDOWS_MAX = 0xFFFF,
 };
 
 enum ArchType {
@@ -505,6 +504,15 @@ enum ArchType {
 	ARCH_EBC,
 	ARCH_MAX
 };
+
+typedef struct {
+	DWORD Version;
+	DWORD Major;
+	DWORD Minor;
+	DWORD BuildNumber;
+	DWORD Edition;
+	char VersionStr[128];
+} windows_version_t;
 
 // Windows User Experience (unattend.xml) flags and masks
 #define UNATTEND_SECUREBOOT_TPM_MINRAM      0x00001
@@ -545,17 +553,17 @@ extern uint64_t persistence_size;
 extern size_t ubuffer_pos;
 extern const int nb_steps[FS_MAX];
 extern float fScale;
-extern int nWindowsVersion, nWindowsBuildNumber, nWindowsEdition, dialog_showing, force_update;
-extern int fs_type, boot_type, partition_type, target_type;
+extern windows_version_t WindowsVersion;
+extern int dialog_showing, force_update, fs_type, boot_type, partition_type, target_type;
 extern unsigned long syslinux_ldlinux_len[2];
-extern char WindowsVersionStr[128], ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
+extern char ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
 extern char app_data_dir[MAX_PATH], *image_path, *fido_url;
 
 /*
  * Shared prototypes
  */
-extern void GetWindowsVersion(void);
+extern void GetWindowsVersion(windows_version_t* WindowsVersion);
 extern BOOL is_x64(void);
 extern const char* GetAppArchName(void);
 extern const char* WindowsErrorString(void);

@@ -226,10 +226,10 @@ static void SetBootOptions(void)
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hBootType));
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_279)), BT_NON_BOOTABLE));
-	if (nWindowsVersion < WINDOWS_10)	// The diskcopy.dll along with its MS-DOS floppy image was removed in Windows 10
+	if (WindowsVersion.Version < WINDOWS_10)	// The diskcopy.dll along with its MS-DOS floppy image was removed in Windows 10
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), BT_MSDOS));
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), BT_FREEDOS));
-	image_index = (nWindowsVersion < WINDOWS_10) ? 3 : 2;
+	image_index = (WindowsVersion.Version < WINDOWS_10) ? 3 : 2;
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType,
 		(image_path == NULL) ? lmprintf(MSG_281, lmprintf(MSG_280)) : short_image_path), BT_IMAGE));
 
@@ -411,12 +411,12 @@ static BOOL IsRefsAvailable(MEDIA_TYPE MediaType)
 
 	if (MediaType != FixedMedia)
 		return FALSE;
-	if (nWindowsVersion < WINDOWS_8_1 || nWindowsBuildNumber <= 0)
+	if (WindowsVersion.Version < WINDOWS_8_1 || WindowsVersion.BuildNumber <= 0)
 		return FALSE;
 	// Per https://gist.github.com/0xbadfca11/da0598e47dd643d933dc
-	if (nWindowsBuildNumber < 16226)
+	if (WindowsVersion.BuildNumber < 16226)
 		return TRUE;
-	switch (nWindowsEdition) {
+	switch (WindowsVersion.Edition) {
 	case 0x0000000A: // Enterprise Server
 	case 0x0000001B: // Enterprise N
 	case 0x00000046: // Enterprise E
@@ -1494,7 +1494,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				goto out;
 			}
 			if (SelectedDrive.MediaType != FixedMedia) {
-				if ((target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT) && (nWindowsBuildNumber < 15000)) {
+				if ((target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT) && (WindowsVersion.BuildNumber < 15000)) {
 					// Up to Windows 10 Creators Update (1703), we were screwed, since we need access to 2 partitions at the same time.
 					// Thankfully, the newer Windows allow mounting multiple partitions on the same REMOVABLE drive.
 					MessageBoxExU(hMainDialog, lmprintf(MSG_198), lmprintf(MSG_190), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
@@ -1511,7 +1511,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			default:
 				break;
 			}
-			if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_1X(img_report)) {
+			if ((WindowsVersion.Version >= WINDOWS_8) && IS_WINDOWS_1X(img_report)) {
 				StrArray options;
 				int arch = _log2(img_report.has_efi >> 1);
 				uint8_t map[8] = { 0 }, b = 1;
@@ -1573,7 +1573,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			MessageBoxExU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
 		}
-		if ((nWindowsVersion >= WINDOWS_8) && IS_WINDOWS_1X(img_report) && (!is_windows_to_go)) {
+		if ((WindowsVersion.Version >= WINDOWS_8) && IS_WINDOWS_1X(img_report) && (!is_windows_to_go)) {
 			StrArray options;
 			int arch = _log2(img_report.has_efi >> 1);
 			uint8_t map[8] = { 0 }, b = 1;
@@ -2041,7 +2041,7 @@ static void InitDialog(HWND hDlg)
 			free(buf);
 		}
 	}
-	uprintf("Windows version: %s", WindowsVersionStr);
+	uprintf("Windows version: %s", WindowsVersion.VersionStr);
 	uprintf("Syslinux versions: %s%s, %s%s", embedded_sl_version_str[0], embedded_sl_version_ext[0],
 		embedded_sl_version_str[1], embedded_sl_version_ext[1]);
 	uprintf("Grub versions: %s, %s", GRUB4DOS_VERSION, GRUB2_PACKAGE_VERSION);
@@ -2453,7 +2453,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				nHeight = DialogRect.bottom - DialogRect.top;
 				GetWindowRect(hDlg, &DialogRect);
 				offset = GetSystemMetrics(SM_CXBORDER);
-				if (nWindowsVersion >= WINDOWS_10) {
+				if (WindowsVersion.Version >= WINDOWS_10) {
 					// See https://stackoverflow.com/a/42491227/1069307
 					// I agree with Stephen Hazel: Whoever at Microsoft thought it would be a great idea to
 					// add a *FRIGGING INVISIBLE BORDER* in Windows 10 should face the harshest punishment!
@@ -2925,7 +2925,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// The things one must do to get an ellipsis and text alignment on the status bar...
 		if (wParam == IDC_STATUS) {
 			pDI = (DRAWITEMSTRUCT*)lParam;
-			if (nWindowsVersion >= WINDOWS_10)
+			if (WindowsVersion.Version >= WINDOWS_10)
 				pDI->rcItem.top += (int)(1.0f * fScale);
 			else if (fScale >= 1.49f)
 				pDI->rcItem.top -= (int)(1.5f * fScale);
@@ -3207,7 +3207,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (BlockingProcess.Index > 0) {
 				ListDialog(lmprintf(MSG_042), lmprintf(MSG_055), BlockingProcess.String, BlockingProcess.Index);
 			} else {
-				if (nWindowsVersion >= WINDOWS_10) {
+				if (WindowsVersion.Version >= WINDOWS_10) {
 					// Try to detect if 'Controlled Folder Access' is enabled on Windows 10 or later. See also:
 					// http://www.winhelponline.com/blog/use-controlled-folder-access-windows-10-windows-defender
 					char cmdline[256];
@@ -3402,6 +3402,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 	its_a_me_mario = GetUserNameA((char*)(uintptr_t)&u, &size) && (u == 7104878);
 	// coverity[pointless_string_compare]
+	// TODO: We'll need to change this when/if we switch to x86_64 default binary
 	is_x86_32 = (strcmp(APPLICATION_ARCH, "x86") == 0);
 
 	// Retrieve various app & system directories.
@@ -3678,20 +3679,22 @@ skip_args_processing:
 	selected_langid = get_language_id(selected_locale);
 
 	// Set the Windows version
-	GetWindowsVersion();
+	GetWindowsVersion(&WindowsVersion);
 	// Force a version if specified as parameter, but without allowing folks running
 	// a version of Windows we no longer support to use the option as a bypass!
-	if (nWindowsVersion > WINDOWS_7 && forced_windows_version != 0)
-		nWindowsVersion = forced_windows_version;
+	if (WindowsVersion.Version > WINDOWS_7 && forced_windows_version != 0)
+		WindowsVersion.Version = forced_windows_version;
 
 	// ...and nothing of value was lost
-	if (nWindowsVersion <= WINDOWS_7) {
+	if (WindowsVersion.Version <= WINDOWS_7) {
 		// Load the translation before we print the error
 		get_loc_data_file(loc_file, selected_locale);
 		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
 		// Set MB_SYSTEMMODAL to prevent Far Manager from stealing focus...
 		MessageBoxExU(NULL,
-			lmprintf(MSG_294, (nWindowsVersion == WINDOWS_7) ? 3 : 2, (nWindowsVersion == WINDOWS_7) ? 22 : 18),
+			lmprintf(MSG_294,
+				(WindowsVersion.Version == WINDOWS_7) ? 3 : 2,
+				(WindowsVersion.Version == WINDOWS_7) ? 22 : 18),
 			lmprintf(MSG_293), MB_ICONSTOP | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
 		goto out;
 	}

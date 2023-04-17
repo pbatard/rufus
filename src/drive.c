@@ -73,7 +73,7 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_
  */
 RUFUS_DRIVE_INFO SelectedDrive;
 extern BOOL write_as_esp;
-extern int nWindowsVersion, nWindowsBuildNumber;
+extern windows_version_t WindowsVersion;
 uint64_t partition_offset[PI_MAX];
 uint64_t persistence_size = 0;
 
@@ -1592,7 +1592,7 @@ BOOL ToggleEsp(DWORD DriveIndex, uint64_t PartitionOffset)
 		{ 0x0c, { 'F', 'A', 'T', '3', '2', ' ', ' ', ' ' } },
 	};
 
-	if ((PartitionOffset == 0) && (nWindowsVersion < WINDOWS_10)) {
+	if ((PartitionOffset == 0) && (WindowsVersion.Version < WINDOWS_10)) {
 		uprintf("ESP toggling is only available for Windows 10 or later");
 		return FALSE;
 	}
@@ -2318,7 +2318,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	// Having the ESP up front may help (and is the Microsoft recommended way) but this
 	// is only achievable if we can mount more than one partition at once, which means
 	// either fixed drive or Windows 10 1703 or later.
-	if (((SelectedDrive.MediaType == FixedMedia) || (nWindowsBuildNumber > 15000)) &&
+	if (((SelectedDrive.MediaType == FixedMedia) || (WindowsVersion.BuildNumber > 15000)) &&
 		(extra_partitions & XP_ESP)) {
 		assert(partition_style == PARTITION_STYLE_GPT);
 		extra_part_name = L"EFI System Partition";

@@ -1640,7 +1640,7 @@ void SetFidoCheck(void)
 		return;
 	}
 
-	if (nWindowsVersion < WINDOWS_8) {
+	if (WindowsVersion.Version < WINDOWS_8) {
 		ubprintf("Notice: The ISO download feature has been deactivated because "
 			"your version of Windows is too old.");
 		return;

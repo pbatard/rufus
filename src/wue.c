@@ -430,7 +430,7 @@ BOOL PopulateWindowsVersion(void)
 
 	memset(&img_report.win_version, 0, sizeof(img_report.win_version));
 
-	if ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck(TRUE) & 4) == 0))
+	if ((WindowsVersion.Version < WINDOWS_8) || ((WimExtractCheck(TRUE) & 4) == 0))
 		return FALSE;
 
 	// If we're not using a straight install.wim, we need to mount the ISO to access it
@@ -486,7 +486,7 @@ int SetWinToGoIndex(void)
 	// Sanity checks
 	wintogo_index = -1;
 	wininst_index = 0;
-	if ((nWindowsVersion < WINDOWS_8) || ((WimExtractCheck(FALSE) & 4) == 0) ||
+	if ((WindowsVersion.Version < WINDOWS_8) || ((WimExtractCheck(FALSE) & 4) == 0) ||
 		(ComboBox_GetCurItemData(hFileSystem) != FS_NTFS)) {
 		return -1;
 	}
@@ -606,7 +606,7 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 
 	uprintf("Windows To Go mode selected");
 	// Additional sanity checks
-	if ((use_esp) && (SelectedDrive.MediaType != FixedMedia) && (nWindowsBuildNumber < 15000)) {
+	if ((use_esp) && (SelectedDrive.MediaType != FixedMedia) && (WindowsVersion.BuildNumber < 15000)) {
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_SUPPORTED;
 		return FALSE;
 	}

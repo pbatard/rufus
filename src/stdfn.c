@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Windows function calls
- * Copyright © 2013-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,10 +34,7 @@
 
 #include "settings.h"
 
-int nWindowsVersion = WINDOWS_UNDEFINED;
-int nWindowsBuildNumber = -1;
-int nWindowsEdition = 0;
-char WindowsVersionStr[128] = "Windows ";
+windows_version_t WindowsVersion = { 0 };
 
 /*
  * Hash table functions - modified From glibc 2.3.2:
@@ -339,7 +336,7 @@ static const char* GetEdition(DWORD ProductType)
 /*
  * Modified from smartmontools' os_win32.cpp
  */
-void GetWindowsVersion(void)
+void GetWindowsVersion(windows_version_t* WindowsVersion)
 {
 	OSVERSIONINFOEXA vi, vi2;
 	DWORD dwProductType = 0;
@@ -347,12 +344,12 @@ void GetWindowsVersion(void)
 	const char* w64 = "32 bit";
 	char *vptr;
 	size_t vlen;
-	unsigned major, minor;
+	DWORD major = 0, minor = 0;
 	ULONGLONG major_equal, minor_equal;
 	BOOL ws;
 
-	nWindowsVersion = WINDOWS_UNDEFINED;
-	static_strcpy(WindowsVersionStr, "Windows Undefined");
+	memset(WindowsVersion, 0, sizeof(windows_version_t));
+	static_strcpy(WindowsVersion->VersionStr, "Windows Undefined");
 
 	memset(&vi, 0, sizeof(vi));
 	vi.dwOSVersionInfoSize = sizeof(vi);
@@ -397,8 +394,8 @@ void GetWindowsVersion(void)
 
 		if (vi.dwMajorVersion <= 0xf && vi.dwMinorVersion <= 0xf) {
 			ws = (vi.wProductType <= VER_NT_WORKSTATION);
-			nWindowsVersion = vi.dwMajorVersion << 4 | vi.dwMinorVersion;
-			switch (nWindowsVersion) {
+			WindowsVersion->Version = vi.dwMajorVersion << 4 | vi.dwMinorVersion;
+			switch (WindowsVersion->Version) {
 			case WINDOWS_XP: w = "XP";
 				break;
 			case WINDOWS_2003: w = (ws ? "XP_64" : (!GetSystemMetrics(89) ? "Server 2003" : "Server 2003_R2"));
@@ -419,26 +416,29 @@ void GetWindowsVersion(void)
 					w = (ws ? "10" : ((vi.dwBuildNumber < 17763) ? "Server 2016" : "Server 2019"));
 					break;
 				}
-				nWindowsVersion = WINDOWS_11;
+				WindowsVersion->Version = WINDOWS_11;
+				major = 11;
 				// Fall through
 			case WINDOWS_11: w = (ws ? "11" : "Server 2022");
 				break;
 			default:
-				if (nWindowsVersion < WINDOWS_XP)
-					nWindowsVersion = WINDOWS_UNSUPPORTED;
+				if (WindowsVersion->Version < WINDOWS_XP)
+					WindowsVersion->Version = WINDOWS_UNDEFINED;
 				else
 					w = "12 or later";
 				break;
 			}
 		}
 	}
+	WindowsVersion->Major = major;
+	WindowsVersion->Minor = minor;
 
 	if (is_x64())
 		w64 = "64-bit";
 
 	GetProductInfo(vi.dwMajorVersion, vi.dwMinorVersion, vi.wServicePackMajor, vi.wServicePackMinor, &dwProductType);
-	vptr = &WindowsVersionStr[sizeof("Windows ") - 1];
-	vlen = sizeof(WindowsVersionStr) - sizeof("Windows ") - 1;
+	vptr = &WindowsVersion->VersionStr[sizeof("Windows ") - 1];
+	vlen = sizeof(WindowsVersion->VersionStr) - sizeof("Windows ") - 1;
 	if (!w)
 		safe_sprintf(vptr, vlen, "%s %u.%u %s", (vi.dwPlatformId == VER_PLATFORM_WIN32_NT ? "NT" : "??"),
 			(unsigned)vi.dwMajorVersion, (unsigned)vi.dwMinorVersion, w64);
@@ -450,18 +450,18 @@ void GetWindowsVersion(void)
 		safe_sprintf(vptr, vlen, "%s%s%s, %s",
 			w, (dwProductType != 0) ? " " : "", GetEdition(dwProductType), w64);
 
-	nWindowsEdition = (int)dwProductType;
+	WindowsVersion->Edition = (int)dwProductType;
 
 	// Add the build number (including UBR if available) for Windows 8.0 and later
-	nWindowsBuildNumber = vi.dwBuildNumber;
-	if (nWindowsVersion >= 0x62) {
+	WindowsVersion->BuildNumber = vi.dwBuildNumber;
+	if (WindowsVersion->Version >= WINDOWS_8) {
 		int nUbr = ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\Windows NT\\CurrentVersion\\UBR");
-		vptr = &WindowsVersionStr[safe_strlen(WindowsVersionStr)];
-		vlen = sizeof(WindowsVersionStr) - safe_strlen(WindowsVersionStr) - 1;
+		vptr = &WindowsVersion->VersionStr[safe_strlen(WindowsVersion->VersionStr)];
+		vlen = sizeof(WindowsVersion->VersionStr) - safe_strlen(WindowsVersion->VersionStr) - 1;
 		if (nUbr > 0)
-			safe_sprintf(vptr, vlen, " (Build %d.%d)", nWindowsBuildNumber, nUbr);
+			safe_sprintf(vptr, vlen, " (Build %d.%d)", WindowsVersion->BuildNumber, nUbr);
 		else
-			safe_sprintf(vptr, vlen, " (Build %d)", nWindowsBuildNumber);
+			safe_sprintf(vptr, vlen, " (Build %d)", WindowsVersion->BuildNumber);
 	}
 }
 

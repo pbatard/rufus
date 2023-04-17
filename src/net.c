@@ -309,7 +309,7 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 	}
 	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
 		rufus_version[0], rufus_version[1], rufus_version[2],
-		nWindowsVersion >> 4, nWindowsVersion & 0x0F, is_x64() ? "; WOW64" : "");
+		WindowsVersion.Major, WindowsVersion.Minor, is_x64() ? "; WOW64" : "");
 	hSession = pfInternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	// Set the timeouts
 	pfInternetSetOptionA(hSession, INTERNET_OPTION_CONNECT_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
@@ -631,7 +631,6 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	char agent[64], hostname[64], urlpath[128], sigpath[256];
 	DWORD dwSize, dwDownloaded, dwTotalSize, dwStatus;
 	BYTE *sig = NULL;
-	OSVERSIONINFOA os_version = { sizeof(OSVERSIONINFOA), 0, 0, 0, 0, "" };
 	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
 	URL_COMPONENTSA UrlParts = { sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
 		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1 };
@@ -692,22 +691,18 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	PrintInfoDebug(3000, MSG_243);
 	status++;	// 1
 
-	if (!GetVersionExA(&os_version)) {
-		uprintf("Could not read Windows version - Check for updates cancelled.");
-		goto out;
-	}
-
 	if (!pfInternetCrackUrlA(server_url, (DWORD)safe_strlen(server_url), 0, &UrlParts))
 		goto out;
 	hostname[sizeof(hostname)-1] = 0;
 
 	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
 		rufus_version[0], rufus_version[1], rufus_version[2],
-		nWindowsVersion >> 4, nWindowsVersion & 0x0F, is_x64() ? "; WOW64" : "");
+		WindowsVersion.Major, WindowsVersion.Minor, is_x64() ? "; WOW64" : "");
 	hSession = GetInternetSession(FALSE);
 	if (hSession == NULL)
 		goto out;
-	hConnection = pfInternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
+	hConnection = pfInternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort,
+		NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
 	if (hConnection == NULL)
 		goto out;
 
@@ -723,7 +718,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	max_channel = releases_only ? 1 : (int)ARRAYSIZE(channel) - 1;
 #endif
 	vuprintf("Using %s for the update check", RUFUS_URL);
-	for (k=0; (k<max_channel) && (!found_new_version); k++) {
+	for (k = 0; (k < max_channel) && (!found_new_version); k++) {
 		// Free any previous buffers we might have used
 		safe_free(buf);
 		safe_free(sig);
@@ -734,7 +729,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// look for rufus_win_x64_6.2.ver (Win8 x64) but only get a match for rufus_win_x64_6.ver (Vista x64 or later)
 		// This allows sunsetting OS versions (eg XP) or providing different downloads for different archs/groups.
 		static_sprintf(urlpath, "%s%s%s_win_%s_%lu.%lu.ver", APPLICATION_NAME, (k == 0) ? "": "_",
-			(k == 0) ? "" : channel[k], GetAppArchName(), os_version.dwMajorVersion, os_version.dwMinorVersion);
+			(k == 0) ? "" : channel[k], GetAppArchName(), WindowsVersion.Major, WindowsVersion.Minor);
 		vuprintf("Base update check: %s", urlpath);
 		for (i = 0, j = (int)safe_strlen(urlpath) - 5; (j > 0) && (i < ARRAYSIZE(verpos)); j--) {
 			if ((urlpath[j] == '.') || (urlpath[j] == '_')) {
@@ -825,8 +820,8 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		vuprintf("  url: %s", update.download_url);
 
 		found_new_version = ((to_uint64_t(update.version) > to_uint64_t(rufus_version)) || (force_update))
-			&& ((os_version.dwMajorVersion > update.platform_min[0])
-				|| ((os_version.dwMajorVersion == update.platform_min[0]) && (os_version.dwMinorVersion >= update.platform_min[1])));
+			&& ((WindowsVersion.Major > update.platform_min[0])
+				|| ((WindowsVersion.Major == update.platform_min[0]) && (WindowsVersion.Minor >= update.platform_min[1])));
 		uprintf("N%sew %s version found%c", found_new_version ? "" : "o n", channel[k], found_new_version ? '!' : '.');
 	}
 
