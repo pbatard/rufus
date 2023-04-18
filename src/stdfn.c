@@ -204,22 +204,6 @@ uint32_t htab_hash(char* str, htab_table* htab)
 	return idx;
 }
 
-BOOL is_x64(void)
-{
-	BOOL ret = FALSE;
-	PF_TYPE_DECL(WINAPI, BOOL, IsWow64Process, (HANDLE, PBOOL));
-	// Detect if we're running a 32 or 64 bit system
-	if (sizeof(uintptr_t) < 8) {
-		PF_INIT(IsWow64Process, Kernel32);
-		if (pfIsWow64Process != NULL) {
-			(*pfIsWow64Process)(GetCurrentProcess(), &ret);
-		}
-	} else {
-		ret = TRUE;
-	}
-	return ret;
-}
-
 const char* GetAppArchName(void) {
 #if defined(_M_AMD64)
 	return "x64";
@@ -230,7 +214,8 @@ const char* GetAppArchName(void) {
 #elif defined(_M_ARM)
 	return "arm";
 #else
-	return "unknown";
+	// Keep in line with what we were doing in 3.x
+	return "none";
 #endif
 }
 
@@ -336,20 +321,24 @@ static const char* GetEdition(DWORD ProductType)
 /*
  * Modified from smartmontools' os_win32.cpp
  */
-void GetWindowsVersion(windows_version_t* WindowsVersion)
+void GetWindowsVersion(windows_version_t* windows_version)
 {
 	OSVERSIONINFOEXA vi, vi2;
 	DWORD dwProductType = 0;
-	const char* w = 0;
-	const char* w64 = "32 bit";
+	const char* w = NULL;
+	const char* arch_name;
 	char *vptr;
 	size_t vlen;
 	DWORD major = 0, minor = 0;
+	USHORT ProcessMachine = IMAGE_FILE_MACHINE_UNKNOWN, NativeMachine = IMAGE_FILE_MACHINE_UNKNOWN;
 	ULONGLONG major_equal, minor_equal;
-	BOOL ws;
+	BOOL ws, is_wow64 = FALSE;
 
-	memset(WindowsVersion, 0, sizeof(windows_version_t));
-	static_strcpy(WindowsVersion->VersionStr, "Windows Undefined");
+	PF_TYPE_DECL(WINAPI, BOOL, IsWow64Process2, (HANDLE, USHORT*, USHORT*));
+	PF_INIT(IsWow64Process2, Kernel32);
+
+	memset(windows_version, 0, sizeof(windows_version_t));
+	static_strcpy(windows_version->VersionStr, "Windows Undefined");
 
 	memset(&vi, 0, sizeof(vi));
 	vi.dwOSVersionInfoSize = sizeof(vi);
@@ -394,8 +383,8 @@ void GetWindowsVersion(windows_version_t* WindowsVersion)
 
 		if (vi.dwMajorVersion <= 0xf && vi.dwMinorVersion <= 0xf) {
 			ws = (vi.wProductType <= VER_NT_WORKSTATION);
-			WindowsVersion->Version = vi.dwMajorVersion << 4 | vi.dwMinorVersion;
-			switch (WindowsVersion->Version) {
+			windows_version->Version = vi.dwMajorVersion << 4 | vi.dwMinorVersion;
+			switch (windows_version->Version) {
 			case WINDOWS_XP: w = "XP";
 				break;
 			case WINDOWS_2003: w = (ws ? "XP_64" : (!GetSystemMetrics(89) ? "Server 2003" : "Server 2003_R2"));
@@ -416,52 +405,67 @@ void GetWindowsVersion(windows_version_t* WindowsVersion)
 					w = (ws ? "10" : ((vi.dwBuildNumber < 17763) ? "Server 2016" : "Server 2019"));
 					break;
 				}
-				WindowsVersion->Version = WINDOWS_11;
+				windows_version->Version = WINDOWS_11;
 				major = 11;
 				// Fall through
 			case WINDOWS_11: w = (ws ? "11" : "Server 2022");
 				break;
 			default:
-				if (WindowsVersion->Version < WINDOWS_XP)
-					WindowsVersion->Version = WINDOWS_UNDEFINED;
+				if (windows_version->Version < WINDOWS_XP)
+					windows_version->Version = WINDOWS_UNDEFINED;
 				else
 					w = "12 or later";
 				break;
 			}
 		}
 	}
-	WindowsVersion->Major = major;
-	WindowsVersion->Minor = minor;
+	windows_version->Major = major;
+	windows_version->Minor = minor;
 
-	if (is_x64())
-		w64 = "64-bit";
+	if ((pfIsWow64Process2 != NULL) && pfIsWow64Process2(GetCurrentProcess(), &ProcessMachine, &NativeMachine)) {
+		windows_version->Arch = NativeMachine;
+	} else {
+		// Assume same arch as the app
+		windows_version->Arch = GetApplicationArch();
+		// Fix the Arch if we have a 32-bit app running under WOW64
+		if ((sizeof(uintptr_t) < 8) && IsWow64Process(GetCurrentProcess(), &is_wow64) && is_wow64) {
+			if (windows_version->Arch == IMAGE_FILE_MACHINE_I386)
+				windows_version->Arch = IMAGE_FILE_MACHINE_AMD64;
+			else if (windows_version->Arch == IMAGE_FILE_MACHINE_ARM)
+				windows_version->Arch = IMAGE_FILE_MACHINE_ARM64;
+			else // I sure wanna be made aware of this scenario...
+				assert(FALSE);
+		}
+		uprintf("Note: Underlying Windows architecture was guessed and may be incorrect...");
+	}
+	arch_name = GetArchName(windows_version->Arch);
 
 	GetProductInfo(vi.dwMajorVersion, vi.dwMinorVersion, vi.wServicePackMajor, vi.wServicePackMinor, &dwProductType);
-	vptr = &WindowsVersion->VersionStr[sizeof("Windows ") - 1];
-	vlen = sizeof(WindowsVersion->VersionStr) - sizeof("Windows ") - 1;
+	vptr = &windows_version->VersionStr[sizeof("Windows ") - 1];
+	vlen = sizeof(windows_version->VersionStr) - sizeof("Windows ") - 1;
 	if (!w)
 		safe_sprintf(vptr, vlen, "%s %u.%u %s", (vi.dwPlatformId == VER_PLATFORM_WIN32_NT ? "NT" : "??"),
-			(unsigned)vi.dwMajorVersion, (unsigned)vi.dwMinorVersion, w64);
+			(unsigned)vi.dwMajorVersion, (unsigned)vi.dwMinorVersion, arch_name);
 	else if (vi.wServicePackMinor)
-		safe_sprintf(vptr, vlen, "%s SP%u.%u %s", w, vi.wServicePackMajor, vi.wServicePackMinor, w64);
+		safe_sprintf(vptr, vlen, "%s SP%u.%u %s", w, vi.wServicePackMajor, vi.wServicePackMinor, arch_name);
 	else if (vi.wServicePackMajor)
-		safe_sprintf(vptr, vlen, "%s SP%u %s", w, vi.wServicePackMajor, w64);
+		safe_sprintf(vptr, vlen, "%s SP%u %s", w, vi.wServicePackMajor, arch_name);
 	else
-		safe_sprintf(vptr, vlen, "%s%s%s, %s",
-			w, (dwProductType != 0) ? " " : "", GetEdition(dwProductType), w64);
+		safe_sprintf(vptr, vlen, "%s%s%s %s",
+			w, (dwProductType != 0) ? " " : "", GetEdition(dwProductType), arch_name);
 
-	WindowsVersion->Edition = (int)dwProductType;
+	windows_version->Edition = (int)dwProductType;
 
 	// Add the build number (including UBR if available) for Windows 8.0 and later
-	WindowsVersion->BuildNumber = vi.dwBuildNumber;
-	if (WindowsVersion->Version >= WINDOWS_8) {
+	windows_version->BuildNumber = vi.dwBuildNumber;
+	if (windows_version->Version >= WINDOWS_8) {
 		int nUbr = ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\Windows NT\\CurrentVersion\\UBR");
-		vptr = &WindowsVersion->VersionStr[safe_strlen(WindowsVersion->VersionStr)];
-		vlen = sizeof(WindowsVersion->VersionStr) - safe_strlen(WindowsVersion->VersionStr) - 1;
+		vptr = &windows_version->VersionStr[safe_strlen(windows_version->VersionStr)];
+		vlen = sizeof(windows_version->VersionStr) - safe_strlen(windows_version->VersionStr) - 1;
 		if (nUbr > 0)
-			safe_sprintf(vptr, vlen, " (Build %d.%d)", WindowsVersion->BuildNumber, nUbr);
+			safe_sprintf(vptr, vlen, " (Build %lu.%d)", windows_version->BuildNumber, nUbr);
 		else
-			safe_sprintf(vptr, vlen, " (Build %d)", WindowsVersion->BuildNumber);
+			safe_sprintf(vptr, vlen, " (Build %lu)", windows_version->BuildNumber);
 	}
 }
 

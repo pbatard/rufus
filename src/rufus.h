@@ -476,6 +476,52 @@ typedef enum TASKBAR_PROGRESS_FLAGS
 	TASKBAR_PAUSED = 0x8
 } TASKBAR_PROGRESS_FLAGS;
 
+/* We can't use the Microsoft enums as we want to have RISC-V */
+enum ArchType {
+	ARCH_UNKNOWN = 0,
+	ARCH_X86_32,
+	ARCH_X86_64,
+	ARCH_ARM_32,
+	ARCH_ARM_64,
+	ARCH_IA_64,
+	ARCH_RISCV_32,
+	ARCH_RISCV_64,
+	ARCH_RISCV_128,
+	ARCH_EBC,
+	ARCH_MAX
+};
+
+static __inline USHORT GetApplicationArch(void)
+{
+#if defined(_M_AMD64)
+	return IMAGE_FILE_MACHINE_AMD64;
+#elif defined(_M_IX86)
+	return IMAGE_FILE_MACHINE_I386;
+#elif defined(_M_ARM64)
+	return IMAGE_FILE_MACHINE_ARM64;
+#elif defined(_M_ARM)
+	return IMAGE_FILE_MACHINE_ARM;
+#else
+	return IMAGE_FILE_MACHINE_UNKNOWN;
+#endif
+}
+
+static __inline const char* GetArchName(USHORT uArch)
+{
+	switch (uArch) {
+	case IMAGE_FILE_MACHINE_AMD64:
+		return "x64";
+	case IMAGE_FILE_MACHINE_I386:
+		return "x86";
+	case IMAGE_FILE_MACHINE_ARM64:
+		return "Arm64";
+	case IMAGE_FILE_MACHINE_ARM:
+		return "Arm";
+	default:
+		return "(Unknown Arch)";
+	}
+}
+
 /* Windows versions */
 enum WindowsVersion {
 	WINDOWS_UNDEFINED = 0,
@@ -491,26 +537,13 @@ enum WindowsVersion {
 	WINDOWS_MAX = 0xFFFF,
 };
 
-enum ArchType {
-	ARCH_UNKNOWN = 0,
-	ARCH_X86_32,
-	ARCH_X86_64,
-	ARCH_ARM_32,
-	ARCH_ARM_64,
-	ARCH_IA_64,
-	ARCH_RISCV_32,
-	ARCH_RISCV_64,
-	ARCH_RISCV_128,
-	ARCH_EBC,
-	ARCH_MAX
-};
-
 typedef struct {
 	DWORD Version;
 	DWORD Major;
 	DWORD Minor;
 	DWORD BuildNumber;
 	DWORD Edition;
+	USHORT Arch;
 	char VersionStr[128];
 } windows_version_t;
 
@@ -564,7 +597,6 @@ extern char app_data_dir[MAX_PATH], *image_path, *fido_url;
  * Shared prototypes
  */
 extern void GetWindowsVersion(windows_version_t* WindowsVersion);
-extern BOOL is_x64(void);
 extern const char* GetAppArchName(void);
 extern const char* WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);

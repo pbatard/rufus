@@ -265,6 +265,13 @@ static char* GetShortName(const char* url)
 	return short_name;
 }
 
+static __inline BOOL is_WOW64(void)
+{
+	BOOL ret = FALSE;
+	IsWow64Process(GetCurrentProcess(), &ret);
+	return ret;
+}
+
 // Open an Internet session
 static HINTERNET GetInternetSession(BOOL bRetry)
 {
@@ -307,9 +314,9 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 		SetLastError(ERROR_INTERNET_DISCONNECTED);
 		goto out;
 	}
-	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
+	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %lu.%lu%s)",
 		rufus_version[0], rufus_version[1], rufus_version[2],
-		WindowsVersion.Major, WindowsVersion.Minor, is_x64() ? "; WOW64" : "");
+		WindowsVersion.Major, WindowsVersion.Minor, is_WOW64() ? "; WOW64" : "");
 	hSession = pfInternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	// Set the timeouts
 	pfInternetSetOptionA(hSession, INTERNET_OPTION_CONNECT_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
@@ -695,9 +702,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		goto out;
 	hostname[sizeof(hostname)-1] = 0;
 
-	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %d.%d%s)",
+	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %lu.%lu%s)",
 		rufus_version[0], rufus_version[1], rufus_version[2],
-		WindowsVersion.Major, WindowsVersion.Minor, is_x64() ? "; WOW64" : "");
+		WindowsVersion.Major, WindowsVersion.Minor, is_WOW64() ? "; WOW64" : "");
 	hSession = GetInternetSession(FALSE);
 	if (hSession == NULL)
 		goto out;
@@ -763,7 +770,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		}
 		if (dwStatus != 200) {
 			vuprintf("Could not find a %s version file on server %s", channel[k], server_url);
-			if ((releases_only) || (k+1 >= ARRAYSIZE(channel)))
+			if ((releases_only) || (k + 1 >= ARRAYSIZE(channel)))
 				goto out;
 			continue;
 		}
@@ -777,14 +784,15 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		if ( (!pfHttpQueryInfoA(hRequest, HTTP_QUERY_DATE|HTTP_QUERY_FLAG_SYSTEMTIME, (LPVOID)&ServerTime, &dwSize, NULL))
 			|| (!SystemTimeToFileTime(&ServerTime, &FileTime)) )
 			goto out;
-		server_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
+		server_time = ((((int64_t)FileTime.dwHighDateTime) << 32) + FileTime.dwLowDateTime) / 10000000;
 		vvuprintf("Server time: %" PRId64, server_time);
 		// Always store the server response time - the only clock we trust!
 		WriteSetting64(SETTING_LAST_UPDATE, server_time);
 		// Might as well let the user know
 		if (!force_update_check) {
 			if ((local_time > server_time + 600) || (local_time < server_time - 600)) {
-				uprintf("IMPORTANT: Your local clock is more than 10 minutes in the %s. Unless you fix this, " APPLICATION_NAME " may not be able to check for updates...",
+				uprintf("IMPORTANT: Your local clock is more than 10 minutes in the %s. Unless you fix this, "
+					APPLICATION_NAME " may not be able to check for updates...",
 					(local_time > server_time + 600)?"future":"past");
 			}
 		}
@@ -794,7 +802,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 			goto out;
 
 		// Make sure the file is NUL terminated
-		buf = (char*)calloc(dwTotalSize+1, 1);
+		buf = (char*)calloc(dwTotalSize + 1, 1);
 		if (buf == NULL)
 			goto out;
 		// This is a version file - we should be able to gulp it down in one go

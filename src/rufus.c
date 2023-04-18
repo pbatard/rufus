@@ -1891,37 +1891,6 @@ static __inline const char* IsAlphaOrBeta(void)
 #endif
 }
 
-static __inline DWORD GetApplicationArch(void)
-{
-#if defined(_M_AMD64)
-	return IMAGE_FILE_MACHINE_AMD64;
-#elif defined(_M_IX86)
-	return IMAGE_FILE_MACHINE_I386;
-#elif defined(_M_ARM64)
-	return IMAGE_FILE_MACHINE_ARM64;
-#elif defined(_M_ARM)
-	return IMAGE_FILE_MACHINE_ARM;
-#else
-	return IMAGE_FILE_MACHINE_UNKNOWN;
-#endif
-}
-
-static const char* GetArchName(USHORT uArch)
-{
-	switch (uArch) {
-	case IMAGE_FILE_MACHINE_AMD64:
-		return "x64";
-	case IMAGE_FILE_MACHINE_I386:
-		return "x86";
-	case IMAGE_FILE_MACHINE_ARM64:
-		return "Arm64";
-	case IMAGE_FILE_MACHINE_ARM:
-		return "Arm";
-	default:
-		return "(Unknown Arch)";
-	}
-}
-
 static void InitDialog(HWND hDlg)
 {
 	DWORD len;
@@ -2023,8 +1992,13 @@ static void InitDialog(HWND hDlg)
 	// Oh, and https://devblogs.microsoft.com/oldnewthing/20220209-00/?p=106239 is *WRONG*:
 	// Get­Native­System­Info() will not tell you what the native system architecture is when
 	// running x86 code on ARM64. Instead you have to use IsWow64Process2(), which is only
-	// available on Windows 10 1511 or later...
+	// available on Windows 10 1709 or later...
 	if ((pfIsWow64Process2 != NULL) && pfIsWow64Process2(GetCurrentProcess(), &ProcessMachine, &NativeMachine)) {
+		// x64 running emulated on ARM64 returns IMAGE_FILE_MACHINE_UNKNOWN for ProcessMachine
+		// because Microsoft does not consider it a WOW64 process. So we need to fix
+		// ProcessMachine ourselves to *ACTUALLY* return the bloody process machine...
+		if (ProcessMachine == IMAGE_FILE_MACHINE_UNKNOWN)
+			ProcessMachine = GetApplicationArch();
 		if ((NativeMachine == IMAGE_FILE_MACHINE_ARM || NativeMachine == IMAGE_FILE_MACHINE_ARM64) &&
 			(ProcessMachine == IMAGE_FILE_MACHINE_I386 || ProcessMachine == IMAGE_FILE_MACHINE_AMD64))
 			uprintf("Notice: Running emulated on %s platform", GetArchName(NativeMachine));
@@ -3354,7 +3328,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount = TRUE;
 	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE, vc = IsRegistryNode(REGKEY_HKCU, vs_reg);
-	BOOL alt_pressed = FALSE, alt_command = FALSE;
+	BOOL alt_pressed = FALSE, alt_command = FALSE, is_WOW64 = FALSE;
 	BYTE *loc_data;
 	DWORD loc_size, u = 0, size = sizeof(u);
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH] = "", ini_flags[] = "rb";
@@ -3440,7 +3414,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	static_strcpy(sysnative_dir, system_dir);
 	// But if the app is 32 bit and the OS is 64 bit, Sysnative must differ from System32
 #if (!defined(_WIN64) && !defined(BUILD64))
-	if (is_x64()) {
+	IsWow64Process(GetCurrentProcess(), &is_WOW64);
+	if (is_WOW64) {
 		if (GetSystemWindowsDirectoryU(sysnative_dir, sizeof(sysnative_dir)) == 0) {
 			uprintf("Could not get Windows directory: %s", WindowsErrorString());
 			static_strcpy(sysnative_dir, "C:\\Windows");
