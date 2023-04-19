@@ -778,6 +778,16 @@ BOOL GetDevices(DWORD devnum)
 				break;
 			}
 		}
+		// Windows has the bad habit of appending "SCSI Disk Device" to the description
+		// of UAS devices, which of course screws up detection of device that actually
+		// describe themselves as SCSI-like disks, so replace that with "UAS Device".
+		if (props.is_UASP) {
+			const char scsi_disk_device_str[] = "SCSI Disk Device";
+			const char uas_device_str[] = "UAS Device";
+			char* marker = strstr(buffer, scsi_disk_device_str);
+			if (marker != NULL && marker[sizeof(scsi_disk_device_str)] == 0)
+				memcpy(marker, uas_device_str, sizeof(uas_device_str));
+		}
 		if (props.is_VHD) {
 			uprintf("Found VHD device '%s'", buffer);
 		} else if ((props.is_CARD) && ((!props.is_USB) || ((props.vid == 0) && (props.pid == 0)))) {
@@ -821,8 +831,8 @@ BOOL GetDevices(DWORD devnum)
 			}
 			if (props.speed >= USB_SPEED_MAX)
 				props.speed = 0;
-			uprintf("Found %s%s%s device '%s' (%s) %s", props.is_UASP?"UAS (":"",
-				usb_speed_name[props.speed], props.is_UASP?")":"", buffer, str, method_str);
+			uprintf("Found %s%s%s device '%s' (%s) %s", props.is_UASP ? "UAS (" : "",
+				usb_speed_name[props.speed], props.is_UASP ? ")" : "", buffer, str, method_str);
 			if (props.lower_speed)
 				uprintf("NOTE: This device is a USB 3.%c device operating at lower speed...", '0' + props.lower_speed - 1);
 		}

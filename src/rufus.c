@@ -3328,7 +3328,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	FILE* fd;
 	BOOL attached_console = FALSE, external_loc_file = FALSE, lgp_set = FALSE, automount = TRUE;
 	BOOL disable_hogger = FALSE, previous_enable_HDDs = FALSE, vc = IsRegistryNode(REGKEY_HKCU, vs_reg);
-	BOOL alt_pressed = FALSE, alt_command = FALSE, is_WOW64 = FALSE;
+	BOOL alt_pressed = FALSE, alt_command = FALSE;
 	BYTE *loc_data;
 	DWORD loc_size, u = 0, size = sizeof(u);
 	char tmp_path[MAX_PATH] = "", loc_file[MAX_PATH] = "", ini_path[MAX_PATH] = "", ini_flags[] = "rb";
@@ -3414,13 +3414,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	static_strcpy(sysnative_dir, system_dir);
 	// But if the app is 32 bit and the OS is 64 bit, Sysnative must differ from System32
 #if (!defined(_WIN64) && !defined(BUILD64))
-	IsWow64Process(GetCurrentProcess(), &is_WOW64);
-	if (is_WOW64) {
-		if (GetSystemWindowsDirectoryU(sysnative_dir, sizeof(sysnative_dir)) == 0) {
-			uprintf("Could not get Windows directory: %s", WindowsErrorString());
-			static_strcpy(sysnative_dir, "C:\\Windows");
+	{
+		BOOL is_WOW64 = FALSE;
+		IsWow64Process(GetCurrentProcess(), &is_WOW64);
+		if (is_WOW64) {
+			if (GetSystemWindowsDirectoryU(sysnative_dir, sizeof(sysnative_dir)) == 0) {
+				uprintf("Could not get Windows directory: %s", WindowsErrorString());
+				static_strcpy(sysnative_dir, "C:\\Windows");
+			}
+			static_strcat(sysnative_dir, "\\Sysnative");
 		}
-		static_strcat(sysnative_dir, "\\Sysnative");
 	}
 #endif
 
