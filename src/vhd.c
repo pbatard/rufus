@@ -211,7 +211,7 @@ static BOOL IsCompressedBootableImage(const char* path)
 			if (buf == NULL)
 				return FALSE;
 			FormatStatus = 0;
-			bled_init(_uprintf, NULL, NULL, NULL, NULL, &FormatStatus);
+			bled_init(uprintf, NULL, NULL, NULL, NULL, &FormatStatus);
 			dc = bled_uncompress_to_buffer(path, (char*)buf, MBR_SIZE, file_assoc[i].type);
 			bled_exit();
 			if (dc != MBR_SIZE) {

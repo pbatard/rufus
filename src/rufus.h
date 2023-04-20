@@ -172,20 +172,18 @@ static __inline void static_repchr(char* p, char s, char r) {
 #define to_unix_path(str) static_repchr(str, '\\', '/')
 #define to_windows_path(str) static_repchr(str, '/', '\\')
 
-extern void _uprintf(const char *format, ...);
-extern void _uprintfs(const char *str);
-#define uprintf(...) _uprintf(__VA_ARGS__)
-#define uprintfs(s) _uprintfs(s)
-#define vuprintf(...) do { if (verbose) _uprintf(__VA_ARGS__); } while(0)
-#define vvuprintf(...) do { if (verbose > 1) _uprintf(__VA_ARGS__); } while(0)
-#define suprintf(...) do { if (!bSilent) _uprintf(__VA_ARGS__); } while(0)
-#define uuprintf(...) do { if (usb_debug) _uprintf(__VA_ARGS__); } while(0)
+extern void uprintf(const char *format, ...);
+extern void uprintfs(const char *str);
+#define vuprintf(...) do { if (verbose) uprintf(__VA_ARGS__); } while(0)
+#define vvuprintf(...) do { if (verbose > 1) uprintf(__VA_ARGS__); } while(0)
+#define suprintf(...) do { if (!bSilent) uprintf(__VA_ARGS__); } while(0)
+#define uuprintf(...) do { if (usb_debug) uprintf(__VA_ARGS__); } while(0)
 #define ubprintf(...) do { safe_sprintf(&ubuffer[ubuffer_pos], UBUFFER_SIZE - ubuffer_pos - 4, __VA_ARGS__); \
 	ubuffer_pos = strlen(ubuffer); ubuffer[ubuffer_pos++] = '\r'; ubuffer[ubuffer_pos++] = '\n'; \
 	ubuffer[ubuffer_pos] = 0; } while(0)
 #define ubflush() do { if (ubuffer_pos) uprintf("%s", ubuffer); ubuffer_pos = 0; } while(0)
 #ifdef _DEBUG
-#define duprintf(...) _uprintf(__VA_ARGS__)
+#define duprintf uprintf
 #else
 #define duprintf(...)
 #endif

@@ -2255,7 +2255,8 @@ DWORD CheckDriveAccess(DWORD dwTimeOut, BOOL bPrompt)
 			proceed = FALSE;
 			uprintf("Found potentially blocking process(es) against %s:", &PhysicalPath[4]);
 			for (j = 0; j < BlockingProcess.Index; j++)
-				uprintf(BlockingProcess.String[j]);
+				// BlockingProcess.String[j] may contain a '%' so don't feed it as a naked format string
+				uprintf("%s", BlockingProcess.String[j]);
 		}
 	}
 
@@ -2275,7 +2276,8 @@ DWORD CheckDriveAccess(DWORD dwTimeOut, BOOL bPrompt)
 				proceed = FALSE;
 				uprintf("Found potentially blocking process(es) against %s", drive_name);
 				for (j = 0; j < BlockingProcess.Index; j++)
-					uprintf(BlockingProcess.String[j]);
+					// BlockingProcess.String[j] may contain a '%' so don't feed it as a naked format string
+					uprintf("%s", BlockingProcess.String[j]);
 			}
 		}
 	}
@@ -3547,7 +3549,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			if (list_params) {
 				uprintf("Command line arguments:");
 				for (i = 1; i < argc; i++)
-					uprintf(argv[i]);
+					// argv[i] may contain a '%' so don't feed it as a naked format string.
+					uprintf("%s", argv[i]);
 			}
 		}
 	} else {

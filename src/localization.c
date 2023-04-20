@@ -513,7 +513,7 @@ void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, .
 	va_start(args, msg_id);
 	safe_vsnprintf(msg_cur, MSG_LEN, format, args);
 	va_end(args);
-	msg_cur[MSG_LEN-1] = '\0';
+	msg_cur[MSG_LEN - 1] = '\0';
 
 	if ((duration != 0) || (!bStatusTimerArmed))
 		OutputMessage(info, msg_cur);
@@ -534,8 +534,9 @@ void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, .
 		va_start(args, msg_id);
 		safe_vsnprintf(buf, MSG_LEN, format, args);
 		va_end(args);
-		buf[MSG_LEN-1] = '\0';
-		uprintf(buf);
+		buf[MSG_LEN - 1] = '\0';
+		// buf may(?) containt a '%' so don't feed it as a naked format string
+		uprintf("%s", buf);
 	}
 }
 

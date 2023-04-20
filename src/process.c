@@ -493,7 +493,8 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 			// If we're switching process and found a match, print it
 			if (bFound) {
 				static_sprintf (tmp, "● [%06u] %s (%s)", (uint32_t)pid[cur_pid], cmdline, access_rights_str[access_rights & 0x7]);
-				vuprintf(tmp);
+				// tmp may contain a '%' so don't feed it as a naked format string
+				vuprintf("%s", tmp);
 				StrArrayAdd(&BlockingProcess, tmp, TRUE);
 				bFound = FALSE;
 				access_rights = 0;

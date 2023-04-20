@@ -762,8 +762,8 @@ DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
 					output = malloc(dwAvail + 1);
 					if ((output != NULL) && (ReadFile(hOutputRead, output, dwAvail, &dwRead, NULL)) && (dwRead != 0)) {
 						output[dwAvail] = 0;
-						// coverity[tainted_string]
-						uprintf(output);
+						// output may contain a '%' so don't feed it as a naked format string
+						uprintf("%s", output);
 					}
 					free(output);
 				}

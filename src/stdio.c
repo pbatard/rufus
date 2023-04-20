@@ -1,8 +1,8 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard User I/O Routines (logging, status, error, etc.)
+ * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
  * Copyright © 2020 Mattiwatti <mattiwatti@gmail.com>
- * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ HWND hStatus;
 size_t ubuffer_pos = 0;
 char ubuffer[UBUFFER_SIZE];	// Buffer for ubpushf() messages we don't log right away
 
-void _uprintf(const char *format, ...)
+void uprintf(const char *format, ...)
 {
 	static char buf[4096];
 	char* p = buf;
@@ -82,7 +82,7 @@ void _uprintf(const char *format, ...)
 	free(wbuf);
 }
 
-void _uprintfs(const char* str)
+void uprintfs(const char* str)
 {
 	wchar_t* wstr;
 	wstr = utf8_to_wchar(str);

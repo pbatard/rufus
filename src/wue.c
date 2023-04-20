@@ -673,6 +673,8 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /v /f %s /s %s", sysnative_dir, drive_name,
 		HAS_BOOTMGR_BIOS(img_report) ? (HAS_BOOTMGR_EFI(img_report) ? "ALL" : "BIOS") : "UEFI",
 		(use_esp) ? ms_efi : drive_name);
+	// I don't believe we can ever have a stray '%' in cmd, but just in case...
+	assert(strchr(cmd, '%') == NULL);
 	uprintf(cmd);
 	if (RunCommand(cmd, sysnative_dir, usb_debug) != 0) {
 		// Try to continue... but report a failure
@@ -698,6 +700,7 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	uprintf("Disabling use of the Windows Recovery Environment using command:");
 	static_sprintf(cmd, "%s\\bcdedit.exe /store %s\\EFI\\Microsoft\\Boot\\BCD /set {default} recoveryenabled no",
 		sysnative_dir, (use_esp) ? ms_efi : drive_name);
+	assert(strchr(cmd, '%') == NULL);
 	uprintf(cmd);
 	RunCommand(cmd, sysnative_dir, usb_debug);
 
