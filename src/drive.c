@@ -1129,7 +1129,7 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 		goto out;
 	}
 	if (size > sizeof(drives)) {
-		uprintf("GetLogicalDriveStrings: Buffer too small (required %d vs. %d)", size, sizeof(drives));
+		uprintf("GetLogicalDriveStrings: Buffer too small (required %lu vs. %zu)", size, sizeof(drives));
 		goto out;
 	}
 
@@ -1266,7 +1266,7 @@ char GetUnusedDriveLetter(void)
 		return 0;
 	}
 	if (size > sizeof(drives)) {
-		uprintf("GetLogicalDriveStrings: Buffer too small (required %d vs. %d)", size, sizeof(drives));
+		uprintf("GetLogicalDriveStrings: Buffer too small (required %lu vs. %zu)", size, sizeof(drives));
 		return 0;
 	}
 
@@ -1295,7 +1295,7 @@ BOOL IsDriveLetterInUse(const char drive_letter)
 		return TRUE;
 	}
 	if (size > sizeof(drives)) {
-		uprintf("GetLogicalDriveStrings: Buffer too small (required %d vs. %d)", size, sizeof(drives));
+		uprintf("GetLogicalDriveStrings: Buffer too small (required %lu vs. %zu)", size, sizeof(drives));
 		return TRUE;
 	}
 

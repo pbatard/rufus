@@ -394,17 +394,17 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	}
 
 	// Now we're committed - print some info first
-	uprintf("Size : %s %u sectors", SizeToHumanReadable(piDrive.PartitionLength.QuadPart, TRUE, FALSE), TotalSectors);
-	uprintf("Cluster size %d bytes, %d bytes per sector", SectorsPerCluster * BytesPerSect, BytesPerSect);
+	uprintf("Size : %s %lu sectors", SizeToHumanReadable(piDrive.PartitionLength.QuadPart, TRUE, FALSE), TotalSectors);
+	uprintf("Cluster size %lu bytes, %lu bytes per sector", SectorsPerCluster * BytesPerSect, BytesPerSect);
 	uprintf("Volume ID is %x:%x", VolumeId >> 16, VolumeId & 0xffff);
-	uprintf("%d Reserved sectors, %d sectors per FAT, %d FATs", ReservedSectCount, FatSize, NumFATs);
-	uprintf("%d Total clusters", ClusterCount);
+	uprintf("%lu Reserved sectors, %lu sectors per FAT, %lu FATs", ReservedSectCount, FatSize, NumFATs);
+	uprintf("%llu Total clusters", ClusterCount);
 
 	// Fix up the FSInfo sector
 	pFAT32FsInfo->dFree_Count = (UserAreaSize / SectorsPerCluster) - 1;
 	pFAT32FsInfo->dNxt_Free = 3; // clusters 0-1 reserved, we used cluster 2 for the root dir
 
-	uprintf("%d Free clusters", pFAT32FsInfo->dFree_Count);
+	uprintf("%lu Free clusters", pFAT32FsInfo->dFree_Count);
 	// Work out the Cluster count
 
 	// First zero out ReservedSect + FatSize * NumFats + SectorsPerCluster

@@ -994,7 +994,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES,
 		dwPipeSize, dwPipeSize, 0, NULL);
 	if (hPipe == INVALID_HANDLE_VALUE) {
-		uprintf("Could not create pipe '%s': %s", pipe, WindowsErrorString);
+		uprintf("Could not create pipe '%s': %s", pipe, WindowsErrorString());
 		goto out;
 	}
 

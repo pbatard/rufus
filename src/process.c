@@ -728,7 +728,7 @@ BOOL SearchProcessAlt(char* HandleName)
 		bFound = TRUE;
 		uprintf("WARNING: The following process(es) or service(s) are accessing %s:", HandleName);
 		for (i = 0; i < info->NumberOfProcessIdsInList; i++) {
-			uprintf("o Process with PID %ld", info->ProcessIdList[i]);
+			uprintf("o Process with PID %llu", (uint64_t)info->ProcessIdList[i]);
 		}
 	}
 

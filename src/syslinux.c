@@ -72,7 +72,7 @@ int libfat_readfile(intptr_t pp, void *buf, size_t secsize, libfat_sector_t sect
 	}
 
 	if (bytes_read != secsize) {
-		uprintf("Sector %llu: Read %d bytes instead of %d requested", sector, bytes_read, secsize);
+		uprintf("Sector %llu: Read %lu bytes instead of %zu requested", sector, bytes_read, secsize);
 		return 0;
 	}
 

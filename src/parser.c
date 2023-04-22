@@ -1341,7 +1341,7 @@ static BOOL get_data_from_asn1_internal(const uint8_t* buf, size_t buf_len, cons
 			}
 
 			if (len > buf_len - pos) {
-				uprintf("get_data_from_asn1: Overflow error (computed length %d is larger than remaining data)", len);
+				uprintf("get_data_from_asn1: Overflow error (computed length %zu is larger than remaining data)", len);
 				return FALSE;
 			}
 		}

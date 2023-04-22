@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * DOS boot file extraction, from the FAT12 floppy image in diskcopy.dll
  * (MS WinME DOS) or from the embedded FreeDOS resource files
- * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -235,7 +235,7 @@ static BOOL ExtractFAT(int entry, const char* path)
 	filestart = (dir_entry->FirstCluster + FAT12_CLUSTER_OFFSET)*FAT12_CLUSTER_SIZE;
 	filesize = dir_entry->FileSize;
 	if ((filestart + filesize) > DiskImageSize) {
-		uprintf("FAT File %s would be out of bounds: %X, %X", filename, filestart, filesize);
+		uprintf("FAT File %s would be out of bounds: %zX, %zX", filename, filestart, filesize);
 		uprintf("%X, %X", dir_entry->FirstCluster, dir_entry->FileSize);
 		return FALSE;
 	}
@@ -278,7 +278,7 @@ static BOOL ExtractFAT(int entry, const char* path)
 	}
 
 	safe_closehandle(hFile);
-	uprintf("Successfully wrote '%s' (%d bytes)", filename, filesize);
+	uprintf("Successfully wrote '%s' (%zu bytes)", filename, filesize);
 
 	return TRUE;
 }

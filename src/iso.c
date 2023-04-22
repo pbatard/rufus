@@ -1465,7 +1465,7 @@ int iso9660_readfat(intptr_t pp, void *buf, size_t secsize, libfat_sector_t sec)
 	iso9660_readfat_private* p_private = (iso9660_readfat_private*)pp;
 
 	if (sizeof(p_private->buf) % secsize != 0) {
-		uprintf("iso9660_readfat: Sector size %d is not a divisor of %d", secsize, sizeof(p_private->buf));
+		uprintf("iso9660_readfat: Sector size %zu is not a divisor of %zu", secsize, sizeof(p_private->buf));
 		return 0;
 	}
 

@@ -368,7 +368,7 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 	case WIM_MSG_ERROR:
 		if (level == NULL) level = "error";
 		SetLastError((DWORD)lParam);
-		uprintf("WIM processing %s: %S [err = %d]\n", level, (PWSTR)wParam, WindowsErrorString());
+		uprintf("WIM processing %s: %S [%s]\n", level, (PWSTR)wParam, WindowsErrorString());
 		break;
 	}
 
