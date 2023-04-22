@@ -322,7 +322,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 // Apply various workarounds to Linux config files
 static void fix_config(const char* psz_fullpath, const char* psz_path, const char* psz_basename, EXTRACT_PROPS* props)
 {
-	BOOL modified = FALSE;
+	BOOL modified;
 	size_t nul_pos;
 	char *iso_label = NULL, *usb_label = NULL, *src, *dst;
 
@@ -338,19 +338,23 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 			if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
 				"file=/cdrom/preseed", "persistent file=/cdrom/preseed", TRUE) != NULL) {
 				// Ubuntu & derivatives are assumed to use 'file=/cdrom/preseed/...'
+				// or 'layerfs-path=minimal.standard.live.squashfs' (see below)
 				// somewhere in their kernel options and use 'persistent' as keyword.
 				uprintf("  Added 'persistent' kernel option");
-				modified = TRUE;
 				// Also remove Ubuntu's "maybe-ubiquity" to avoid splash screen (GRUB only)
 				if ((props->is_grub_cfg) && replace_in_token_data(src, "linux",
 					"maybe-ubiquity", "", TRUE))
+					uprintf("  Removed 'maybe-ubiquity' kernel option");
+			} else if (replace_in_token_data(src, "linux", "layerfs-path=minimal.standard.live.squashfs",
+				"persistent layerfs-path=minimal.standard.live.squashfs", TRUE) != NULL) {
+				uprintf("  Added 'persistent' kernel option");
+				if (replace_in_token_data(src, "linux", "maybe-ubiquity", "", TRUE))
 					uprintf("  Removed 'maybe-ubiquity' kernel option");
 			} else if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
 				"boot=live", "boot=live persistence", TRUE) != NULL) {
 				// Debian & derivatives are assumed to use 'boot=live' in
 				// their kernel options and use 'persistence' as keyword.
 				uprintf("  Added 'persistence' kernel option");
-				modified = TRUE;
 			}
 			// Other distros can go to hell. Seriously, just check all partitions for
 			// an ext volume with the right label and use persistence *THEN*. I mean,
@@ -375,6 +379,7 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 		iso_label = replace_char(img_report.label, ' ', "\\x20");
 		usb_label = replace_char(img_report.usb_label, ' ', "\\x20");
 		if ((iso_label != NULL) && (usb_label != NULL)) {
+			modified = FALSE;
 			for (int i = 0; i < ARRAYSIZE(cfg_token); i++) {
 				if (replace_in_token_data(src, cfg_token[i], iso_label, usb_label, TRUE) != NULL)
 					modified = TRUE;
