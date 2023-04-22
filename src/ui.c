@@ -123,7 +123,7 @@ void GetBasicControlsWidth(HWND hDlg)
 	sz.cy = rc.bottom;
 
 	// TODO: figure out the specifics of each Windows version
-	if (WindowsVersion.Version == WINDOWS_10) {
+	if (WindowsVersion.Version >= WINDOWS_10) {
 		checkbox_internal_spacing = 10;
 		dropdown_internal_spacing = 13;
 	}

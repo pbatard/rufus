@@ -1347,8 +1347,7 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 	if (DeviceIoControl(hPhysical, IOCTL_STORAGE_CHECK_VERIFY, NULL, 0, NULL, 0, &size, NULL))
 		AutorunLabel = get_token_data_file("label", AutorunPath);
 	else if (GetLastError() == ERROR_NOT_READY)
-		uprintf("Ignoring 'autorun.inf' label for drive %c: %s", toupper(letters[0]),
-		(HRESULT_CODE(GetLastError()) == ERROR_NOT_READY)?"No media":WindowsErrorString());
+		uprintf("Ignoring 'autorun.inf' label for drive %c: No media", toupper(letters[0]));
 	safe_closehandle(hPhysical);
 	if (AutorunLabel != NULL) {
 		uprintf("Using 'autorun.inf' label for drive %c: '%s'", toupper(letters[0]), AutorunLabel);
