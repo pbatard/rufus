@@ -3498,14 +3498,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					// No need to reprocess that option
 					break;
 				case 'i':
-					if (_access(optarg, 0) != -1) {
+					safe_free(image_path);
+					image_path = calloc(1, MAX_PATH);
+					if (image_path == NULL)
+						break;
+					IGNORE_RETVAL(_chdirU(app_dir));
+					IGNORE_RETVAL(GetFullPathNameU(optarg, MAX_PATH, image_path, NULL));
+					// FILE_ATTRIBUTE_DIRECTORY is set for both dir and access error
+					if (GetFileAttributesU(image_path) & FILE_ATTRIBUTE_DIRECTORY) {
+						printf("Could not find image '%s'\n", image_path);
 						safe_free(image_path);
-						image_path = safe_strdup(optarg);
-						img_provided = TRUE;
+						break;
 					}
-					else {
-						printf("Could not find ISO image '%s'\n", optarg);
-					}
+					img_provided = TRUE;
 					break;
 				case 'l':
 					if (isdigitU(optarg[0])) {
