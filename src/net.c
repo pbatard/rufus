@@ -52,7 +52,7 @@ HANDLE update_check_thread = NULL;
 
 extern loc_cmd* selected_locale;
 extern HANDLE dialog_handle;
-extern BOOL is_x86_32;
+extern BOOL is_x86_64;
 static DWORD error_code, fido_len = 0;
 static BOOL force_update_check = FALSE;
 static const char* request_headers = "Accept-Encoding: gzip, deflate";
@@ -669,7 +669,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// It would of course be a lot nicer to use a timer and wake the thread, but my
 		// development time is limited and this is FASTER to implement.
 		do {
-			for (i=0; (i<30) && (!force_update_check); i++)
+			for (i = 0; ( i < 30) && (!force_update_check); i++)
 				Sleep(500);
 		} while ((!force_update_check) && ((op_in_progress || (dialog_showing > 0))));
 		if (!force_update_check) {
@@ -686,7 +686,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 			GetSystemTime(&LocalTime);
 			if (!SystemTimeToFileTime(&LocalTime, &FileTime))
 				goto out;
-			local_time = ((((int64_t)FileTime.dwHighDateTime)<<32) + FileTime.dwLowDateTime) / 10000000;
+			local_time = ((((int64_t)FileTime.dwHighDateTime) << 32) + FileTime.dwLowDateTime) / 10000000;
 			vvuprintf("Local time: %" PRId64, local_time);
 			if (local_time < reg_time + update_interval) {
 				vuprintf("Next update check in %" PRId64 " seconds.", reg_time + update_interval - local_time);
@@ -714,8 +714,8 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		goto out;
 
 	status++;	// 2
-	// BETAs are only made available for x86_32
-	if (is_x86_32)
+	// BETAs are only made available when the application arch is x86_64
+	if (is_x86_64)
 		releases_only = !ReadSettingBool(SETTING_INCLUDE_BETAS);
 
 	// Test releases get their own distribution channel (and also force beta checks)
@@ -735,8 +735,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// and then remove each of the <os_> components until we find our match. For instance, we may first
 		// look for rufus_win_x64_6.2.ver (Win8 x64) but only get a match for rufus_win_x64_6.ver (Vista x64 or later)
 		// This allows sunsetting OS versions (eg XP) or providing different downloads for different archs/groups.
+		// Note that for BETAs, we only catter for x64 regardless of the OS arch.
 		static_sprintf(urlpath, "%s%s%s_win_%s_%lu.%lu.ver", APPLICATION_NAME, (k == 0) ? "": "_",
-			(k == 0) ? "" : channel[k], GetAppArchName(), WindowsVersion.Major, WindowsVersion.Minor);
+			(k == 0) ? "" : channel[k], GetArchName(WindowsVersion.Arch), WindowsVersion.Major, WindowsVersion.Minor);
 		vuprintf("Base update check: %s", urlpath);
 		for (i = 0, j = (int)safe_strlen(urlpath) - 5; (j > 0) && (i < ARRAYSIZE(verpos)); j--) {
 			if ((urlpath[j] == '.') || (urlpath[j] == '_')) {

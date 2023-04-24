@@ -950,7 +950,7 @@ void parse_update(char* buf, size_t len)
 		}
 		safe_free(data);
 	}
-	static_sprintf(download_url_name, "download_url_%s", GetAppArchName());
+	static_sprintf(download_url_name, "download_url_%s", GetArchName(WindowsVersion.Arch));
 	update.download_url = get_sanitized_token_data_buffer(download_url_name, 1, buf, len);
 	if (update.download_url == NULL)
 		update.download_url = get_sanitized_token_data_buffer("download_url", 1, buf, len);

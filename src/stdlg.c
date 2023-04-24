@@ -45,7 +45,7 @@
 #include "license.h"
 
 /* Globals */
-extern BOOL is_x86_32, appstore_version;
+extern BOOL is_x86_64, appstore_version;
 extern char unattend_username[MAX_USERNAME_LENGTH];
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
@@ -1494,7 +1494,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		IGNORE_RETVAL(ComboBox_SetItemData(hFrequency, ComboBox_AddStringU(hFrequency, lmprintf(MSG_016)), 2629800));
 		freq = ReadSetting32(SETTING_UPDATE_INTERVAL);
 		EnableWindow(GetDlgItem(hDlg, IDC_CHECK_NOW), (freq != 0));
-		EnableWindow(hBeta, (freq >= 0) && is_x86_32);
+		EnableWindow(hBeta, (freq >= 0) && is_x86_64);
 		switch(freq) {
 		case -1:
 			IGNORE_RETVAL(ComboBox_SetCurSel(hFrequency, 0));
@@ -1516,7 +1516,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		}
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, lmprintf(MSG_008)));
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, lmprintf(MSG_009)));
-		IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, (ReadSettingBool(SETTING_INCLUDE_BETAS) && is_x86_32) ? 0 : 1));
+		IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, (ReadSettingBool(SETTING_INCLUDE_BETAS) && is_x86_64) ? 0 : 1));
 		hPolicy = GetDlgItem(hDlg, IDC_POLICY);
 		SendMessage(hPolicy, EM_AUTOURLDETECT, 1, 0);
 		static_sprintf(update_policy_text, update_policy, lmprintf(MSG_179|MSG_RTF),
@@ -1558,7 +1558,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 				break;
 			freq = (int32_t)ComboBox_GetCurItemData(hFrequency);
 			WriteSetting32(SETTING_UPDATE_INTERVAL, (DWORD)freq);
-			EnableWindow(hBeta, (freq >= 0) && is_x86_32);
+			EnableWindow(hBeta, (freq >= 0) && is_x86_64);
 			return (INT_PTR)TRUE;
 		case IDC_INCLUDE_BETAS:
 			if (HIWORD(wParam) != CBN_SELCHANGE)

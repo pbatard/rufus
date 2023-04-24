@@ -204,21 +204,6 @@ uint32_t htab_hash(char* str, htab_table* htab)
 	return idx;
 }
 
-const char* GetAppArchName(void) {
-#if defined(_M_AMD64)
-	return "x64";
-#elif defined(_M_IX86)
-	return "x86";
-#elif defined(_M_ARM64)
-	return "arm64";
-#elif defined(_M_ARM)
-	return "arm";
-#else
-	// Keep in line with what we were doing in 3.x
-	return "none";
-#endif
-}
-
 static const char* GetEdition(DWORD ProductType)
 {
 	static char unknown_edition_str[64];

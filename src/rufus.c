@@ -121,7 +121,7 @@ DWORD MainThreadId;
 HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hImageOption, hLogDialog = NULL, hProgress = NULL, hDiskID;
 HANDLE dialog_handle = NULL;
-BOOL is_x86_32, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE, lock_drive = TRUE;
+BOOL is_x86_64, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE, lock_drive = TRUE;
 BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, its_a_me_mario = FALSE;
 BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32;
@@ -3378,8 +3378,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 	its_a_me_mario = GetUserNameA((char*)(uintptr_t)&u, &size) && (u == 7104878);
 	// coverity[pointless_string_compare]
-	// TODO: We'll need to change this when/if we switch to x86_64 default binary
-	is_x86_32 = (strcmp(APPLICATION_ARCH, "x86") == 0);
+	is_x86_64 = (strcmp(APPLICATION_ARCH, "x64") == 0);
 
 	// Retrieve various app & system directories.
 	if (GetCurrentDirectoryU(sizeof(app_dir), app_dir) == 0) {
@@ -3502,7 +3501,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					image_path = calloc(1, MAX_PATH);
 					if (image_path == NULL)
 						break;
-					IGNORE_RETVAL(_chdirU(app_dir));
 					IGNORE_RETVAL(GetFullPathNameU(optarg, MAX_PATH, image_path, NULL));
 					// FILE_ATTRIBUTE_DIRECTORY is set for both dir and access error
 					if (GetFileAttributesU(image_path) & FILE_ATTRIBUTE_DIRECTORY) {

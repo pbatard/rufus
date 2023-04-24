@@ -512,11 +512,11 @@ static __inline const char* GetArchName(USHORT uArch)
 	case IMAGE_FILE_MACHINE_I386:
 		return "x86";
 	case IMAGE_FILE_MACHINE_ARM64:
-		return "Arm64";
+		return "arm64";
 	case IMAGE_FILE_MACHINE_ARM:
-		return "Arm";
+		return "arm";
 	default:
-		return "(Unknown Arch)";
+		return "unknown";
 	}
 }
 
@@ -595,7 +595,6 @@ extern char app_data_dir[MAX_PATH], *image_path, *fido_url;
  * Shared prototypes
  */
 extern void GetWindowsVersion(windows_version_t* WindowsVersion);
-extern const char* GetAppArchName(void);
 extern const char* WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, ...);
