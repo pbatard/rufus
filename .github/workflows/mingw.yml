@@ -84,7 +84,7 @@ jobs:
       run: sha256sum ./${{ matrix.exe }}
 
     - name: Upload to VirusTotal
-      if: ${{ github.event_name == 'push' }}
+      if: ${{ github.event_name == 'push' && matrix.env == 'x86_64'  }}
       continue-on-error: true
       run: |
         curl --request POST --url https://www.virustotal.com/vtapi/v2/file/scan --form apikey=${{ secrets.VIRUSTOTAL_API_KEY }} --form file=@./${{ matrix.exe }}

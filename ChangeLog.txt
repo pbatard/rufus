@@ -1,3 +1,16 @@
+o Version 4.0 (2023.04.26)
+    Fix persistence partition not working with Ubuntu 23.04
+    Fix out of range pointer error with Ubuntu 23.04 when booting in BIOS mode
+    Fix boot freeze with Ubuntu Studio when Secure Boot is enabled
+    Fix incorrect architecture detection when checking for updates
+    Fix a Windows Store application crash when processing GRUB bootloaders
+    Fix a Windows Store application crash when enumerating processes that contain a % sign
+    Fix a Windows Store application crash when using the German localization
+    Note that the major version was bumped on account of:
+      - New versions of Rufus requiring Windows 8 or later
+      - New versions of Rufus defaulting to a 64-bit executable
+      - Old versions of Rufus potentially not being able to update properly
+
 o Version 3.22 (2023.03.25)
     Add SHA-1 and SHA-256 x86 acceleration on CPUs that support it (courtesy of Jeffrey Walton)
     Add an option to disable BitLocker device encryption in the Windows User Experience dialog
