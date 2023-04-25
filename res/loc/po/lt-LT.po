@@ -1,9 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.14\n"
+"Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2021-04-29 23:33+0300\n"
-"PO-Revision-Date: 2021-04-30 00:16+0300\n"
+"POT-Creation-Date: 2023-04-25 13:16+0100\n"
+"PO-Revision-Date: 2023-04-25 13:48+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: lt_LT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,9 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Lithuanian (Lietuvių)\n"
 "X-Rufus-LCID: 0x0427\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.3\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -874,14 +874,14 @@ msgstr ""
 
 #. • MSG_130
 msgid "Windows image selection"
-msgstr "\"Windows\" atvaizdo pasirinkimas"
+msgstr "Windows atvaizdo pasirinkimas"
 
 #. • MSG_131
 msgid ""
 "This ISO contains multiple Windows images.\n"
 "Please select the image you wish to use for this installation:"
 msgstr ""
-"Šiame ISO yra keli \"Windows\" atvaizdai.\n"
+"Šiame ISO yra keli Windows atvaizdai.\n"
 "Pasirinkite atvaizdą, kurį norite naudoti šiam diegimui:"
 
 #. • MSG_132
@@ -898,7 +898,7 @@ msgid ""
 msgstr ""
 "Rufus aptiko, kad jūs bandote sukurti Windows To Go laikmeną remiantis 1809 ISO.\n"
 "\n"
-"Dėl  *MICROSOFT klaidos*, ši laikmena užlūš įkraunant Windows (mėlynas mirties ekranas), nebent jūs rankiniu būdu pakeisite failą \"WppRecorder. sys\" į 1803 versiją.\n"
+"Dėl *MICROSOFT klaidos*, ši laikmena užlūš įkraunant Windows (mėlynas mirties ekranas), nebent jūs rankiniu būdu pakeisite failą \"WppRecorder. sys\" į 1803 versiją.\n"
 "\n"
 "Taip pat atkreipkite dėmesį, kad Rufus negali automatiškai pataisyti to už jus, nes \"WppRecorder. sys\" yra \"Microsoft\" autorių teisėmis apsaugotas failas, todėl mes negalime legaliai įterpti šio failo kopijos mūsų programoje..."
 
@@ -949,8 +949,8 @@ msgid "Download using a browser"
 msgstr "Atsisiųsti naudojant naršyklę"
 
 #. • MSG_144
-msgid "Temporarily banned by Microsoft for requesting too many downloads - Please try again later..."
-msgstr "Laikinai uždrausta Microsoft dėl per didelio atsisiuntimų skaičiaus - Bandykite vėliau..."
+msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
+msgstr "Windows ISO atsisiuntimas nepasiekiamas, nes Microsoft pakeitė savo svetainę, kad to išvengtų."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -1202,6 +1202,10 @@ msgstr "Aptiktas nestandartinis sektoriaus dydis"
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr "'Windows To Go' gali būti įdiegta tik į GPT skaidinių diską, jei jis turi įjungtą atributą 'FIKSUOTAS'. Pasirinktas diskas nebuvo aptiktas kaip FIKSUOTAS."
+
+#. • MSG_199
+msgid "This feature is not available on this platform."
+msgstr "Ši funkcija šioje platformoje nepasiekiama."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
@@ -1647,8 +1651,12 @@ msgid "Unsupported Windows version"
 msgstr "Nepalaikoma Windows versija"
 
 #. • MSG_294
-msgid "This version of Windows is no longer supported by Rufus."
-msgstr "Šios Windows versijos Rufus nebepalaiko."
+msgid ""
+"This version of Windows is no longer supported by Rufus.\n"
+"The last version of Rufus compatible with this platform is v%d.%d."
+msgstr ""
+"Šios Windows versijos Rufus nebepalaiko.\n"
+"Paskutinė Rufus versija, suderinama su šia platforma, yra v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1713,7 +1721,7 @@ msgid "Create a disk image of the selected device"
 msgstr "Kurti pasirinkto įrenginio disko atvaizdą"
 
 #. • MSG_305
-msgid "Use this option to indicate whether you want to use this device to install Windows on another disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
 msgstr "Šią parinktį naudokite norėdami nurodyti ar naudosite šį įrenginį įdiegti Windows į kitą diską, ar norėsite vykdyti Windows tiesiogiai iš šio disko (Windows To Go)."
 
 #. • MSG_306
@@ -1792,3 +1800,144 @@ msgid ""
 msgstr ""
 "Jūsų pasirinktas atvaizdas yra \"ISOHybrid\" atvaizdas, tačiau jo kūrėjai nepadarė jo suderinamu su ISO/failų kopijavimo režimu.\n"
 "Dėl to bus įgalintas DD atvaizdo įrašymo režimas."
+
+#. • MSG_322
+msgid "Unable to open or read '%s'"
+msgstr "Nepavyksta atidaryti arba perskaityti \"%s\""
+
+#. • MSG_325
+msgid "Applying Windows customization: %s"
+msgstr "Windows tinkinimo taikymas: %s"
+
+#. • MSG_326
+msgid "Applying user options..."
+msgstr "Vartotojo parinkčių taikymas..."
+
+#. • MSG_327
+msgid "Windows User Experience"
+msgstr "Windows vartotojo patirtis"
+
+#. • MSG_328
+msgid "Customize Windows installation?"
+msgstr "Tinkinti Windows diegimą?"
+
+#. • MSG_329
+msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
+msgstr "Pašalinkite 4 GB + RAM, saugaus įkrovimo ir TPM 2.0 reikalavimus"
+
+#. • MSG_330
+msgid "Remove requirement for an online Microsoft account"
+msgstr "Pašalinkite internetinės Microsoft paskyros reikalavimą"
+
+#. • MSG_331
+msgid "Disable data collection (Skip privacy questions)"
+msgstr "Išjungti duomenų rinkimą (praleisti klausimus apie privatumą)"
+
+#. • MSG_332
+msgid "Prevent Windows To Go from accessing internal disks"
+msgstr "Neleiskite Windows To Go pasiekti vidinių diskų"
+
+#. • MSG_333
+msgid "Create a local account with username:"
+msgstr "Sukurkite vietinę paskyrą naudodami vartotojo vardą:"
+
+#. • MSG_334
+msgid "Set regional options to the same values as this user's"
+msgstr "Regiono parinkčių nustatymas į tas pačias reikšmes kaip ir šio vartotojo"
+
+#. • MSG_335
+msgid "Disable BitLocker automatic device encryption"
+msgstr "BitLocker automatinio įrenginių šifravimo išjungimas"
+
+#. • MSG_336
+msgid "Persistent log"
+msgstr "Nuolatinis žurnalas"
+
+#. • MSG_900
+#.
+#. The following messages are for the Windows Store listing only and are not used by the application
+msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
+msgstr "Rufus programa leidžia suženklinti ir sukurti sistemų paleidimo laikmenas, kaip pvz. USB atmintukus, atminties korteles ir pan."
+
+#. • MSG_901
+msgid "Official site: %s"
+msgstr "Oficiali svetainė: %s"
+
+#. • MSG_902
+msgid "Source Code: %s"
+msgstr "Šaltinio kodas: %s"
+
+#. • MSG_903
+msgid "ChangeLog: %s"
+msgstr "Pakeitimų žurnalas: %s"
+
+#. • MSG_904
+#.
+#. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
+#. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
+msgid ""
+"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
+msgstr ""
+"Ši programa yra licencijuota pagal GNU viešosios licencijos (GPL) 3 versijos sąlygas.\n"
+"Daugiau informacijos rasite https://www.gnu.org/licenses/gpl-3.0.html."
+
+#. • MSG_905
+#.
+#. Keyword for "boot" will be used for search in the Windows Store
+msgid "Boot"
+msgstr "Batas"
+
+#. • MSG_910
+#.
+#. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
+msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Suformatuokite USB, flash kortelę ir virtualius diskus į FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+
+#. • MSG_911
+msgid "Create FreeDOS bootable USB drives"
+msgstr "Sukurkite FreeDOS įkrovos USB diskus"
+
+#. • MSG_912
+msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
+msgstr "Sukurkite įkrovos diskus iš įkrovos ISO (Windows, Linux ir kt.)"
+
+#. • MSG_913
+msgid "Create bootable drives from bootable disk images, including compressed ones"
+msgstr "Sukurkite įkrovos diskus iš įkrovos disko vaizdų, įskaitant suspaustus"
+
+#. • MSG_914
+msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
+msgstr "Sukurkite BIOS arba UEFI įkrovos diskus, įskaitant UEFI įkrovos NTFS"
+
+#. • MSG_915
+msgid "Create 'Windows To Go' drives"
+msgstr "Sukurkite \"Windows To Go\" diskus"
+
+#. • MSG_916
+msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
+msgstr "Sukurkite Windows 11 diegimo diskus kompiuteriams, kuriuose nėra TPM arba saugaus įkrovimo"
+
+#. • MSG_917
+msgid "Create persistent Linux partitions"
+msgstr "Sukurkite nuolatinius Linux skaidinius"
+
+#. • MSG_918
+msgid "Create VHD/DD images of the selected drive"
+msgstr "Sukurkite pasirinkto disko VHD / DD vaizdus"
+
+#. • MSG_919
+msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
+msgstr "Apskaičiuokite pasirinkto vaizdo MD5, SHA-1, SHA-256 ir SHA-512 kontrolines sumas"
+
+#. • MSG_920
+msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
+msgstr "Atlikite blogų blokų patikrinimus, įskaitant \"netikrų\" flash diskų aptikimą"
+
+#. • MSG_921
+msgid "Download official Microsoft Windows retail ISOs"
+msgstr "Atsisiųskite oficialius Microsoft Windows mažmeninės prekybos ISO"
+
+#. • MSG_922
+msgid "Download UEFI Shell ISOs"
+msgstr "Atsisiųskite UEFI Shell ISO"
