@@ -19,7 +19,7 @@ TARGET        := $(word 1,$(subst -, ,$(TUPLE)))
 DEF_SUFFIX    := $(if $(TARGET:x86_64=),.def,.def64)
 
 .PHONY: all
-all: dwmapi-delaylib.lib wintrust-delaylib.lib
+all: dwmapi-delaylib.lib virtdisk-delaylib.lib wintrust-delaylib.lib
 
 %.def64: %.def
 	$(AM_V_SED) "s/@.*//" $< >$@
@@ -29,4 +29,3 @@ all: dwmapi-delaylib.lib wintrust-delaylib.lib
 
 clean:
 	$(RM) -rf *.lib
-	

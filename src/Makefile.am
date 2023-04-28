@@ -2,7 +2,7 @@ SUBDIRS = ../.mingw bled ext2fs ms-sys syslinux/libfat syslinux/libinstaller sys
 # As far as I can tell, the following libraries are *not* vulnerable to side-loading, so we link using their regular version:
 NONVULNERABLE_LIBS = -lsetupapi -lole32 -lgdi32 -lshlwapi -lcrypt32 -lcomdlg32 -lcomctl32 -luuid
 # The following libraries are vulnerable (or have an unknown vulnerability status), so we link using our delay-loaded replacement:
-VULNERABLE_LIBS = -ldwmapi-delaylib -lwintrust-delaylib
+VULNERABLE_LIBS = -ldwmapi-delaylib -lvirtdisk-delaylib -lwintrust-delaylib
 
 noinst_PROGRAMS = rufus
 

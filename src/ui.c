@@ -1053,7 +1053,7 @@ void CreateAdditionalControls(HWND hDlg)
 	hDll = GetLibraryHandle("ComDlg32");
 	hIconDown = (HICON)LoadImage(hDll, MAKEINTRESOURCE(577), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 	hIconUp = (HICON)LoadImage(hDll, MAKEINTRESOURCE(578), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
-	// Fallback to using Shell32 if we can't locate the icons we want in ComDlg32
+	// Fallback to using Shell32 if we can't locate the icons we want in ComDlg32 (Windows 8)
 	hDll = GetLibraryHandle("Shell32");
 	if (hIconUp == NULL)
 		hIconUp = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16749), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
@@ -1082,9 +1082,6 @@ void CreateAdditionalControls(HWND hDlg)
 	GetWindowRect(GetDlgItem(hDlg, IDC_ADVANCED_DRIVE_PROPERTIES), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SendMessage(hAdvancedDeviceToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
-	// Yeah, so, like, TB_GETIDEALSIZE totally super doesn't work on Windows 7, for low zoom factor and when compiled with MSVC...
-	if (sz.cx < 16)
-		sz.cx = fw;
 	SetWindowPos(hAdvancedDeviceToolbar, hTargetSystem, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
 	SetAccessibleName(hAdvancedDeviceToolbar, lmprintf(MSG_119));
 
@@ -1104,8 +1101,6 @@ void CreateAdditionalControls(HWND hDlg)
 	GetWindowRect(GetDlgItem(hDlg, IDC_ADVANCED_FORMAT_OPTIONS), &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	SendMessage(hAdvancedFormatToolbar, TB_GETIDEALSIZE, (WPARAM)FALSE, (LPARAM)&sz);
-	if (sz.cx < 16)
-		sz.cx = fw;
 	SetWindowPos(hAdvancedFormatToolbar, hClusterSize, rc.left + toolbar_dx, rc.top, sz.cx, rc.bottom - rc.top, 0);
 	SetAccessibleName(hAdvancedFormatToolbar, lmprintf(MSG_120));
 

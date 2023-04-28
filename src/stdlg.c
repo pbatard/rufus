@@ -52,8 +52,7 @@ static char* szMessageText = NULL;
 static char* szMessageTitle = NULL;
 static char **szDialogItem;
 static int nDialogItems;
-static HWND hBrowseEdit, hUpdatesDlg;
-static WNDPROC pOrgBrowseWndproc;
+static HWND hUpdatesDlg;
 static const SETTEXTEX friggin_microsoft_unicode_amateurs = { ST_DEFAULT, CP_UTF8 };
 static BOOL notification_is_question;
 static const notification_info* notification_more_info;
@@ -82,160 +81,6 @@ static int update_settings_reposition_ids[] = {
 void SetDialogFocus(HWND hDlg, HWND hCtrl)
 {
 	SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)hCtrl, TRUE);
-}
-
-/*
- * We need a sub-callback to read the content of the edit box on exit and update
- * our path, else if what the user typed does match the selection, it is discarded.
- * Talk about a convoluted way of producing an intuitive folder selection dialog
- */
-INT CALLBACK BrowseDlgCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch(message) {
-	case WM_DESTROY:
-		GetWindowTextU(hBrowseEdit, szFolderPath, sizeof(szFolderPath));
-		break;
-	}
-	return (INT)CallWindowProc(pOrgBrowseWndproc, hDlg, message, wParam, lParam);
-}
-
-/*
- * Main BrowseInfo callback to set the initial directory and populate the edit control
- */
-INT CALLBACK BrowseInfoCallback(HWND hDlg, UINT message, LPARAM lParam, LPARAM pData)
-{
-	char dir[MAX_PATH];
-	wchar_t* wpath;
-	LPITEMIDLIST pidl;
-
-	switch(message) {
-	case BFFM_INITIALIZED:
-		pOrgBrowseWndproc = (WNDPROC)SetWindowLongPtr(hDlg, GWLP_WNDPROC, (LONG_PTR)BrowseDlgCallback);
-		// Windows hides the full path in the edit box by default, which is bull.
-		// Get a handle to the edit control to fix that
-		hBrowseEdit = FindWindowExA(hDlg, NULL, "Edit", NULL);
-		SetWindowTextU(hBrowseEdit, szFolderPath);
-		SetDialogFocus(hDlg, hBrowseEdit);
-		// On Windows 7, MinGW only properly selects the specified folder when using a pidl
-		wpath = utf8_to_wchar(szFolderPath);
-		pidl = SHSimpleIDListFromPath(wpath);
-		safe_free(wpath);
-		// NB: see http://connect.microsoft.com/VisualStudio/feedback/details/518103/bffm-setselection-does-not-work-with-shbrowseforfolder-on-windows-7
-		// for details as to why we send BFFM_SETSELECTION twice.
-		SendMessageW(hDlg, BFFM_SETSELECTION, (WPARAM)FALSE, (LPARAM)pidl);
-		Sleep(100);
-		PostMessageW(hDlg, BFFM_SETSELECTION, (WPARAM)FALSE, (LPARAM)pidl);
-		break;
-	case BFFM_SELCHANGED:
-		// Update the status
-		if (SHGetPathFromIDListU((LPITEMIDLIST)lParam, dir)) {
-			SendMessageLU(hDlg, BFFM_SETSTATUSTEXT, 0, dir);
-			SetWindowTextU(hBrowseEdit, dir);
-		}
-		break;
-	}
-	return 0;
-}
-
-/*
- * Browse for a folder and update the folder edit box
- */
-void BrowseForFolder(void) {
-
-	BROWSEINFOW bi;
-	LPITEMIDLIST pidl;
-	WCHAR *wpath;
-	size_t i;
-	HRESULT hr;
-	IShellItem *psi = NULL;
-	IShellItem *si_path = NULL;	// Automatically freed
-	IFileOpenDialog *pfod = NULL;
-	WCHAR *fname;
-	char* tmp_path = NULL;
-
-	dialog_showing++;
-	hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_INPROC,
-		&IID_IFileOpenDialog, (LPVOID)&pfod);
-	if (FAILED(hr) || pfod == NULL) {
-		uprintf("CoCreateInstance for FileOpenDialog failed: error %X\n", hr);
-		if (pfod != NULL) {
-			IFileOpenDialog_Release(pfod);
-			pfod = NULL;	// Just in case
-		}
-		goto fallback;
-	}
-	hr = IFileOpenDialog_SetOptions(pfod, FOS_PICKFOLDERS);
-	if (FAILED(hr)) {
-		uprintf("Failed to set folder option for FileOpenDialog: error %X\n", hr);
-		goto fallback;
-	}
-	// Set the initial folder (if the path is invalid, will simply use last)
-	wpath = utf8_to_wchar(szFolderPath);
-	// The new IFileOpenDialog makes us split the path
-	fname = NULL;
-	if ((wpath != NULL) && (wcslen(wpath) >= 1)) {
-		for (i = wcslen(wpath) - 1; i != 0; i--) {
-			if (wpath[i] == L'\\') {
-				wpath[i] = 0;
-				fname = &wpath[i + 1];
-				break;
-			}
-		}
-	}
-
-	hr = SHCreateItemFromParsingName(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
-	if (SUCCEEDED(hr) && pfod != NULL) {
-		if (wpath != NULL) {
-			IFileOpenDialog_SetFolder(pfod, si_path);
-		}
-		if (fname != NULL) {
-			IFileOpenDialog_SetFileName(pfod, fname);
-		}
-	}
-	safe_free(wpath);
-
-	hr = IFileOpenDialog_Show(pfod, hMainDialog);
-	if (SUCCEEDED(hr) && pfod != NULL) {
-		hr = IFileOpenDialog_GetResult(pfod, &psi);
-		if (SUCCEEDED(hr)) {
-			IShellItem_GetDisplayName(psi, SIGDN_FILESYSPATH, &wpath);
-			tmp_path = wchar_to_utf8(wpath);
-			CoTaskMemFree(wpath);
-			if (tmp_path == NULL) {
-				uprintf("Could not convert path\n");
-			} else {
-				static_strcpy(szFolderPath, tmp_path);
-				safe_free(tmp_path);
-			}
-		} else {
-			uprintf("Failed to set folder option for FileOpenDialog: error %X\n", hr);
-		}
-	} else if ((hr & 0xFFFF) != ERROR_CANCELLED) {
-		// If it's not a user cancel, assume the dialog didn't show and fallback
-		uprintf("Could not show FileOpenDialog: error %X\n", hr);
-		goto fallback;
-	}
-	IFileOpenDialog_Release(pfod);
-	dialog_showing--;
-	return;
-fallback:
-	if (pfod != NULL) {
-		IFileOpenDialog_Release(pfod);
-	}
-
-	memset(&bi, 0, sizeof(BROWSEINFOW));
-	bi.hwndOwner = hMainDialog;
-	bi.lpszTitle = utf8_to_wchar(lmprintf(MSG_106));
-	bi.lpfn = BrowseInfoCallback;
-	// BIF_NONEWFOLDERBUTTON = 0x00000200 is unknown on MinGW
-	bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS |
-		BIF_DONTGOBELOWDOMAIN | BIF_EDITBOX | 0x00000200;
-	pidl = SHBrowseForFolderW(&bi);
-	if (pidl != NULL) {
-		CoTaskMemFree(pidl);
-	}
-	safe_free(bi.lpszTitle);
-	dialog_showing--;
 }
 
 /*
@@ -1626,7 +1471,6 @@ void SetFidoCheck(void)
 	// - Powershell being installed
 	// - Rufus running in AppStore mode or update check being enabled
 	// - URL for the script being reachable
-	// - Windows version being Windows 8.0 or later
 	if ((ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\PowerShell\\1\\Install") <= 0) &&
 		(ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\PowerShell\\3\\Install") <= 0)) {
 		ubprintf("Notice: The ISO download feature has been deactivated because "
@@ -1637,12 +1481,6 @@ void SetFidoCheck(void)
 	if (!appstore_version && (ReadSetting32(SETTING_UPDATE_INTERVAL) <= 0)) {
 		ubprintf("Notice: The ISO download feature has been deactivated because "
 			"'Check for updates' is disabled in your settings.");
-		return;
-	}
-
-	if (WindowsVersion.Version < WINDOWS_8) {
-		ubprintf("Notice: The ISO download feature has been deactivated because "
-			"your version of Windows is too old.");
 		return;
 	}
 

@@ -441,17 +441,15 @@ void GetWindowsVersion(windows_version_t* windows_version)
 
 	windows_version->Edition = (int)dwProductType;
 
-	// Add the build number (including UBR if available) for Windows 8.0 and later
+	// Add the build number (including UBR if available)
 	windows_version->BuildNumber = vi.dwBuildNumber;
-	if (windows_version->Version >= WINDOWS_8) {
-		int nUbr = ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\Windows NT\\CurrentVersion\\UBR");
-		vptr = &windows_version->VersionStr[safe_strlen(windows_version->VersionStr)];
-		vlen = sizeof(windows_version->VersionStr) - safe_strlen(windows_version->VersionStr) - 1;
-		if (nUbr > 0)
-			safe_sprintf(vptr, vlen, " (Build %lu.%d)", windows_version->BuildNumber, nUbr);
-		else
-			safe_sprintf(vptr, vlen, " (Build %lu)", windows_version->BuildNumber);
-	}
+	windows_version->Ubr = ReadRegistryKey32(REGKEY_HKLM, "Software\\Microsoft\\Windows NT\\CurrentVersion\\UBR");
+	vptr = &windows_version->VersionStr[safe_strlen(windows_version->VersionStr)];
+	vlen = sizeof(windows_version->VersionStr) - safe_strlen(windows_version->VersionStr) - 1;
+	if (windows_version->Ubr != 0)
+		safe_sprintf(vptr, vlen, " (Build %lu.%lu)", windows_version->BuildNumber, windows_version->Ubr);
+	else
+		safe_sprintf(vptr, vlen, " (Build %lu)", windows_version->BuildNumber);
 }
 
 /*

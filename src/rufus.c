@@ -3337,7 +3337,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	char *tmp, *locale_name = NULL, **argv = NULL;
 	wchar_t **wenv, **wargv;
 	PF_TYPE_DECL(CDECL, int, __wgetmainargs, (int*, wchar_t***, wchar_t***, int, int*));
-	PF_TYPE_DECL(WINAPI, BOOL, SetDefaultDllDirectories, (DWORD));
 	HANDLE mutex = NULL, hogmutex = NULL, hFile = NULL;
 	HWND hDlg = NULL;
 	HDC hDC;
@@ -3366,14 +3365,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// 'somelib.dll;%(DelayLoadDLLs)' must be added to the 'Delay Loaded Dlls' option of
 	// the linker properties in Visual Studio (which means this won't work with MinGW).
 	// For all other DLLs, use SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32).
-	// Finally, we need to perform the whole gymkhana below, where we can't call on
-	// SetDefaultDllDirectories() directly, because Windows 7 doesn't have the API exposed.
-	// Also, no, Coverity, we never need to care about freeing kernel32 as a library.
-	// coverity[leaked_storage]
-	pfSetDefaultDllDirectories = (SetDefaultDllDirectories_t)
-		GetProcAddress(LoadLibraryW(L"kernel32.dll"), "SetDefaultDllDirectories");
-	if (pfSetDefaultDllDirectories != NULL)
-		pfSetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
+	SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 	its_a_me_mario = GetUserNameA((char*)(uintptr_t)&u, &size) && (u == 7104878);

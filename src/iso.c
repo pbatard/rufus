@@ -1698,14 +1698,6 @@ out:
 	return ret;
 }
 
-// VirtDisk API Prototypes - Only available for Windows 8 or later
-PF_TYPE_DECL(WINAPI, DWORD, OpenVirtualDisk, (PVIRTUAL_STORAGE_TYPE, PCWSTR,
-	VIRTUAL_DISK_ACCESS_MASK, OPEN_VIRTUAL_DISK_FLAG, POPEN_VIRTUAL_DISK_PARAMETERS, PHANDLE));
-PF_TYPE_DECL(WINAPI, DWORD, AttachVirtualDisk, (HANDLE, PSECURITY_DESCRIPTOR,
-	ATTACH_VIRTUAL_DISK_FLAG, ULONG, PATTACH_VIRTUAL_DISK_PARAMETERS, LPOVERLAPPED));
-PF_TYPE_DECL(WINAPI, DWORD, DetachVirtualDisk, (HANDLE, DETACH_VIRTUAL_DISK_FLAG, ULONG));
-PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskPhysicalPath, (HANDLE, PULONG, PWSTR));
-
 static char physical_path[128] = "";
 static HANDLE mounted_handle = INVALID_HANDLE_VALUE;
 
@@ -1719,14 +1711,10 @@ char* MountISO(const char* path)
 	wconvert(path);
 	char* ret = NULL;
 
-	PF_INIT_OR_OUT(OpenVirtualDisk, VirtDisk);
-	PF_INIT_OR_OUT(AttachVirtualDisk, VirtDisk);
-	PF_INIT_OR_OUT(GetVirtualDiskPhysicalPath, VirtDisk);
-
 	if ((mounted_handle != NULL) && (mounted_handle != INVALID_HANDLE_VALUE))
 		UnMountISO();
 
-	r = pfOpenVirtualDisk(&vtype, wpath, VIRTUAL_DISK_ACCESS_READ | VIRTUAL_DISK_ACCESS_GET_INFO,
+	r = OpenVirtualDisk(&vtype, wpath, VIRTUAL_DISK_ACCESS_READ | VIRTUAL_DISK_ACCESS_GET_INFO,
 		OPEN_VIRTUAL_DISK_FLAG_NONE, NULL, &mounted_handle);
 	if (r != ERROR_SUCCESS) {
 		SetLastError(r);
@@ -1735,7 +1723,7 @@ char* MountISO(const char* path)
 	}
 
 	vparams.Version = ATTACH_VIRTUAL_DISK_VERSION_1;
-	r = pfAttachVirtualDisk(mounted_handle, NULL, ATTACH_VIRTUAL_DISK_FLAG_READ_ONLY |
+	r = AttachVirtualDisk(mounted_handle, NULL, ATTACH_VIRTUAL_DISK_FLAG_READ_ONLY |
 		ATTACH_VIRTUAL_DISK_FLAG_NO_DRIVE_LETTER, 0, &vparams, NULL);
 	if (r != ERROR_SUCCESS) {
 		SetLastError(r);
@@ -1743,7 +1731,7 @@ char* MountISO(const char* path)
 		goto out;
 	}
 
-	r = pfGetVirtualDiskPhysicalPath(mounted_handle, &size, wtmp);
+	r = GetVirtualDiskPhysicalPath(mounted_handle, &size, wtmp);
 	if (r != ERROR_SUCCESS) {
 		SetLastError(r);
 		uprintf("Could not obtain physical path for mounted ISO '%s': %s", path, WindowsErrorString());
@@ -1761,12 +1749,10 @@ out:
 
 void UnMountISO(void)
 {
-	PF_INIT_OR_OUT(DetachVirtualDisk, VirtDisk);
-
 	if ((mounted_handle == NULL) || (mounted_handle == INVALID_HANDLE_VALUE))
 		goto out;
 
-	pfDetachVirtualDisk(mounted_handle, DETACH_VIRTUAL_DISK_FLAG_NONE, 0);
+	DetachVirtualDisk(mounted_handle, DETACH_VIRTUAL_DISK_FLAG_NONE, 0);
 	safe_closehandle(mounted_handle);
 out:
 	physical_path[0] = 0;

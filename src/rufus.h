@@ -540,6 +540,7 @@ typedef struct {
 	DWORD Major;
 	DWORD Minor;
 	DWORD BuildNumber;
+	DWORD Ubr;
 	DWORD Edition;
 	USHORT Arch;
 	char VersionStr[128];
@@ -774,11 +775,6 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
 		goto out;
 	}
 	h = LoadLibraryExW(wszLibraryName, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
-	// Some Windows 7 platforms (most likely the ones missing KB2533623 per the
-	// official LoadLibraryEx doc) can return ERROR_INVALID_PARAMETER when using
-	// the Ex() version. If that's the case, fallback to using LoadLibraryW().
-	if ((h == NULL) && (SCODE_CODE(GetLastError()) == ERROR_INVALID_PARAMETER))
-		h = LoadLibraryW(wszLibraryName);
 	if (h != NULL)
 		OpenedLibrariesHandle[OpenedLibrariesHandleSize++] = h;
 	else
