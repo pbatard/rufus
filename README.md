@@ -17,7 +17,7 @@ Features
 --------
 
 * Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3
-* Create DOS bootable USB drives, using [FreeDOS](https://www.freedos.org) or MS-DOS (Windows 8.1 or earlier)
+* Create DOS bootable USB drives using [FreeDOS](https://www.freedos.org)
 * Create BIOS or UEFI bootable drives, including [UEFI bootable NTFS](https://github.com/pbatard/uefi-ntfs)
 * Create bootable drives from bootable ISOs (Windows, Linux, etc.)
 * Create bootable drives from bootable disk images, including compressed ones
