@@ -863,6 +863,66 @@ const char* StrError(DWORD error_code, BOOL use_default_locale)
 	return ret;
 }
 
+typedef struct
+{
+	LPCWSTR lpFileName;
+	DWORD dwDesiredAccess;
+	DWORD dwShareMode;
+	DWORD dwCreationDisposition;
+	DWORD dwFlagsAndAttributes;
+	HANDLE hFile;
+	DWORD dwError;
+} cfx_params_t;
+
+// Thread used by CreateFileWithTimeout() below
+DWORD WINAPI CreateFileWithTimeoutThread(void* params)
+{
+	cfx_params_t* cfx_params = (cfx_params_t*)params;
+	HANDLE hFile = CreateFileW(cfx_params->lpFileName, cfx_params->dwDesiredAccess,
+		cfx_params->dwShareMode, NULL, cfx_params->dwCreationDisposition,
+		cfx_params->dwFlagsAndAttributes, NULL);
+
+	cfx_params->dwError = (hFile == INVALID_HANDLE_VALUE) ? GetLastError() : NOERROR;
+	cfx_params->hFile = hFile;
+
+	return cfx_params->dwError;
+}
+
+// A UTF-8 CreateFile() with timeout
+HANDLE CreateFileWithTimeout(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
+	LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
+	DWORD dwFlagsAndAttributes, HANDLE hTemplateFile, DWORD dwTimeOut)
+{
+	HANDLE hThread;
+	wconvert(lpFileName);
+
+	cfx_params_t params = {
+		wlpFileName,
+		dwDesiredAccess,
+		dwShareMode,
+		dwCreationDisposition,
+		dwFlagsAndAttributes,
+		INVALID_HANDLE_VALUE,
+		ERROR_IO_PENDING,
+	};
+
+	hThread = CreateThread(NULL, 0, CreateFileWithTimeoutThread, &params, 0, NULL);
+	if (hThread != NULL) {
+		if (WaitForSingleObject(hThread, dwTimeOut) == WAIT_TIMEOUT) {
+			CancelSynchronousIo(hThread);
+			WaitForSingleObject(hThread, INFINITE);
+			params.dwError = WAIT_TIMEOUT;
+		}
+		CloseHandle(hThread);
+	} else {
+		params.dwError = GetLastError();
+	}
+
+	wfree(lpFileName);
+	SetLastError(params.dwError);
+	return params.hFile;
+}
+
 // A WriteFile() equivalent, with up to nNumRetries write attempts on error.
 BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries)

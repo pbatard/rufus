@@ -1149,10 +1149,13 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 			continue;
 
 		static_sprintf(logical_drive, "\\\\.\\%c:", toupper(drive[0]));
-		hDrive = CreateFileA(logical_drive, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE,
-			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		// This call appears to freeze on some systems and we don't want to spend more
+		// time than needed waiting for unresponsive drives, so use a 3 seconds timeout.
+		hDrive = CreateFileWithTimeout(logical_drive, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+				NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL, 3000);
 		if (hDrive == INVALID_HANDLE_VALUE) {
-//			uprintf("Warning: could not open drive %c: %s", toupper(drive[0]), WindowsErrorString());
+			if (GetLastError() == WAIT_TIMEOUT)
+				uprintf("Warning: Time-out while trying to query drive %c", toupper(drive[0]));
 			continue;
 		}
 
