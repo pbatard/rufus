@@ -403,7 +403,7 @@ typedef struct {
 	uint16_t sl_version;	// Syslinux/Isolinux version
 	char sl_version_str[12];
 	char sl_version_ext[32];
-	char grub2_version[64];
+	char grub2_version[192];
 } RUFUS_IMG_REPORT;
 
 /* Isolate the Syslinux version numbers */
@@ -676,6 +676,7 @@ extern char* replace_in_token_data(const char* filename, const char* token, cons
 extern char* replace_char(const char* src, const char c, const char* rep);
 extern void parse_update(char* buf, size_t len);
 extern void* get_data_from_asn1(const uint8_t* buf, size_t buf_len, const char* oid_str, uint8_t asn1_type, size_t* data_len);
+extern int sanitize_label(char* label);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 extern char* GetSignatureName(const char* path, const char* country_code, BOOL bSilent);
 extern uint64_t GetSignatureTimeStamp(const char* path);

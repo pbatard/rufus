@@ -1480,3 +1480,67 @@ void* get_data_from_asn1(const uint8_t* buf, size_t buf_len, const char* oid_str
 	free(oid);
 	return data;
 }
+
+/*
+ * Sanitize an ISO volume label or GRUB version, so that we can use it for bootloader lookup.
+ * Note that this call modifies the string passed as parameter.
+ */
+int sanitize_label(char* label)
+{
+	// Notice: Do not add "-beta" to this list as we have existing GRUB lookups for
+	// "grub-2.02-beta2" and stuff...
+	static const char* remove[] = { "-i386", "-i686", "-amd64", "-x86-64", ".x86-64",
+		"-x64", "-armhf", "-arm64", "-aarch64", "-32-bit", "-64-bit", "-32bit", "-64bit",
+		"-intel", "-cd", "-dvd", "-standard", "-live", "-install", "-server", "-net",
+		"-desktop", "-lts", "-studio", "-baseos", "-kde", "-xfce", "-lxde", "-gnome",
+		"-mate", "-unstable", "-debug", "-release", "-final", "-stream", "-cinnamon",
+		"-cinn", "-leap", "-tumbleweed", "-budgie", "-ws", "-iot", "-ostree", ".iso"
+	};
+	size_t i, len;
+	char *s;
+
+	len = strlen(label);
+	for (i = 0; i < len; i++) {
+		char c = label[i];
+		// Convert to lowercase
+		if (c >= 'A' && c <= 'Z')
+			c += 0x20;
+		// Convert non alphanum (except '.') to dash
+		if ((c < '0' && c != '.') || (c > '9' && c < 'a') || (c > 'z'))
+			c = '-';
+		label[i] = c;
+	}
+
+	// Remove all leading '-'
+	for (i = 0; i < len && label[i] == '-'; i++);
+	if (i != 0)
+		memcpy(label, &label[i], len - i);
+	len = strlen(label);
+	if (len <= 1)
+		return -1;
+
+	// Remove all trailing '-'
+	for (i = len - 1; i > 0 && label[i] == '-'; i--)
+		label[i] = 0;
+	len = strlen(label);
+	if (len <= 1)
+		return -1;
+
+	// Remove all duplicate '-' (non-optimized!)
+	for (i = 0; len >= 2 && i < len - 2; i++) {
+		if (label[i] == '-' && label[i + 1] == '-') {
+			memcpy(&label[i + 1], &label[i + 2], len - i - 1);
+			len--;
+			i--;
+		}
+	}
+
+	// Remove specific substrings
+	for (i = 0; i < ARRAYSIZE(remove); i++) {
+		s = strstr(label, remove[i]);
+		if (s != NULL)
+			strcpy(s, &s[strlen(remove[i])]);
+	}
+
+	return 0;
+}

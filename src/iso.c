@@ -887,7 +887,6 @@ void GetGrubVersion(char* buf, size_t buf_size)
 	const char* grub_version_str[] = { "GRUB  version %s", "GRUB version %s" };
 	const char* grub_debug_is_enabled_str = "grub_debug_is_enabled";
 	const size_t max_string_size = 32;	// The strings above *MUST* be no longer than this value
-	char *p, unauthorized[] = {'<', '>', ':', '|', '*', '?', '\\', '/'};
 	size_t i, j;
 	BOOL has_grub_debug_is_enabled = FALSE;
 
@@ -902,13 +901,9 @@ void GetGrubVersion(char* buf, size_t buf_size)
 				has_grub_debug_is_enabled = TRUE;
 		}
 	}
-	// Sanitize the string
-	for (p = &img_report.grub2_version[0]; *p; p++) {
-		for (i = 0; i < sizeof(unauthorized); i++) {
-			if (*p == unauthorized[i])
-				*p = '_';
-		}
-	}
+
+	uprintf("  Reported Grub version: %s", img_report.grub2_version);
+
 	// <Shakes fist angrily> "KASPERSKYYYYYY!!!..." (https://github.com/pbatard/rufus/issues/467)
 	// But seriously, these guys should know better than "security" through obscurity...
 	if (img_report.grub2_version[0] == '0')
@@ -931,16 +926,33 @@ void GetGrubVersion(char* buf, size_t buf_size)
 	//   if [ -e /boot/grub2/i386-pc/normal.mod ]; then set prefix = ...
 	// you still must embed 'configfile.mod' and 'normal.mod' in 'core.img' in order
 	// to do that, which ends up tripling the file size...
-	// Also, as mentioned above, Fedora have started applying *BREAKING* patches
-	// willy-nilly, without bothering to alter the GRUB version string.
-	// Soooo, since the universe is conspiring against us and since we already have
-	// a facility for it, we'll use it to dowload the relevant 'core.img' by
-	// appending a missing version suffix as needed...
+	// Also, as mentioned above, Fedora, Ubuntu and others have started applying
+	// *BREAKING* patches willy-nilly, without bothering to alter the GRUB version
+	// string. And it gets worse with 2.06 since there are patches we can't detect
+	// that will produce "452: out of range pointer" whether they are applied OR NOT
+	// (meaning that if you use a patched GRUB 2.06 with unpatched GRUB 2.06 modules
+	// you will get the error, and if you use unpatched with patched modules, you
+	// will also get the error).
+	// Soooo, since the universe, and project maintainers who do not REALISE that
+	// NOT RELEASING IN A TIMELY MANNER *DOES* HAVE VERY NEGATIVE CONSEQUENCES FOR
+	// END USERS, are conspiring against us, and since we already have a facility
+	// for it, we'll use it to dowload the relevant 'core.img' by appending a missing
+	// version suffix as needed. Especially, if GRUB only identifies itself as '2.06'
+	// we'll append a sanitized version of the ISO label to try to differentiate
+	// between GRUB 2.06 incompatible versions...
 	if (img_report.grub2_version[0] != 0) {
-		if (has_grub_debug_is_enabled)
-			strcat(img_report.grub2_version, "-fedora");
+		// Make sure we append '-nonstandard' and '-gdie' before the sanitized label.
+		BOOL append_label = (safe_strcmp(img_report.grub2_version, "2.06") == 0);
+		// Must be in the same order as we have on the server
 		if (img_report.has_grub2 > 1)
-			strcat(img_report.grub2_version, "-nonstandard");
+			safe_strcat(img_report.grub2_version, sizeof(img_report.grub2_version), "-nonstandard");
+		if (has_grub_debug_is_enabled)
+			safe_strcat(img_report.grub2_version, sizeof(img_report.grub2_version), "-gdie");
+		if (append_label) {
+			safe_strcat(img_report.grub2_version, sizeof(img_report.grub2_version), "-");
+			safe_strcat(img_report.grub2_version, sizeof(img_report.grub2_version), img_report.label);
+		}
+		sanitize_label(img_report.grub2_version);
 	}
 }
 
@@ -1188,9 +1200,7 @@ out:
 				free(buf);
 				DeleteFileU(path);
 			}
-			if (img_report.grub2_version[0] != 0) {
-				uprintf("  Detected Grub version: %s", img_report.grub2_version);
-			} else {
+			if (img_report.grub2_version[0] == 0) {
 				uprintf("  Could not detect Grub version");
 				img_report.has_grub2 = 0;
 			}

@@ -1118,7 +1118,7 @@ static void DisplayISOProps(void)
 	PRINT_ISO_PROP(HAS_KOLIBRIOS(img_report), "  Uses: KolibriOS");
 	PRINT_ISO_PROP(HAS_REACTOS(img_report), "  Uses: ReactOS");
 	PRINT_ISO_PROP(img_report.has_grub4dos, "  Uses: Grub4DOS");
-	PRINT_ISO_PROP(img_report.has_grub2, "  Uses: GRUB2");
+	PRINT_ISO_PROP(img_report.has_grub2, "  Uses: GRUB2 (%s)", img_report.grub2_version);
 	if (img_report.has_efi == 0x80)
 		uprintf("  Uses: EFI (through '%s')", img_report.efi_img_path);
 	else
@@ -1430,7 +1430,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	const char* ldlinux = "ldlinux";
 	const char* syslinux = "syslinux";
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
-	char tmp[MAX_PATH], tmp2[MAX_PATH];
+	char tmp[MAX_PATH], tmp2[MAX_PATH], c;
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	safe_free(grub2_buf);
@@ -1658,23 +1658,17 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					static_sprintf(tmp, "%s-%s", grub, img_report.grub2_version);
 					IGNORE_RETVAL(_mkdir(tmp));
 					IGNORE_RETVAL(_chdir(tmp));
-					static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, img_report.grub2_version, core_img);
-					grub2_len = (long)DownloadSignedFile(tmp, core_img, hMainDialog, FALSE);
-					if ((grub2_len == 0) && (DownloadStatus == 404)) {
-						// Manjaro (always them!) are using "2.03.5" as identifier, so we must detect first dot...
-						BOOL first_dot = TRUE;
-						// Couldn't locate the file on the server => try to download without the version extra
-						uprintf("Extended version was not found, trying main version...");
-						static_strcpy(tmp2, img_report.grub2_version);
-						// Isolate the #.### part
-						for (i = 0; ((tmp2[i] >= '0') && (tmp2[i] <= '9')) || ((tmp2[i] == '.') && first_dot); i++) {
-							if (tmp2[i] == '.')
-								first_dot = FALSE;
-						}
-						tmp2[i] = 0;
-						static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, tmp2, core_img);
-						grub2_len = (long)DownloadSignedFile(tmp, core_img, hMainDialog, FALSE);
+					// The following loops through the grub2 version (which may have the ISO label appended)
+					// and breaks it according to '.' or '-' until it finds a match on the server.
+					// 
+					for (i = (int)strlen(img_report.grub2_version), grub2_len = 0; i > 0 && grub2_len <= 0; i--) {
+						c = img_report.grub2_version[i];
+						if (c != 0 && c != '.' && c != '-')
+							continue;
+						img_report.grub2_version[i] = 0;
 						static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, img_report.grub2_version, core_img);
+						grub2_len = (long)DownloadSignedFile(tmp, core_img, hMainDialog, FALSE);
+						img_report.grub2_version[i] = c;
 					}
 					if (grub2_len <= 0) {
 						PrintInfo(0, MSG_195, "Grub2");
@@ -3829,7 +3823,25 @@ extern int TestChecksum(void);
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-			TestChecksum();
+			char tmp[256], c;
+			char label[256] = "2.06-blah-bli-ubutnu.23.2.1-blo";
+			size_t i;
+			for (i = strlen(label); i > 0; i--) {
+				c = label[i];
+				if (c != 0 && c != '.' && c != '-')
+					continue;
+				label[i] = 0;
+				static_sprintf(tmp, "%s/%s-%s/core.img", FILES_URL, "grub", label);
+				uprintf(tmp);
+				label[i] = c;
+			}
+//			TestChecksum();
+			//FILE* fd = fopen("D:\\ISOs\\vol.txt", "r");
+			//while (fgets(label, 256, fd) != NULL) {
+			//	sanitize_label(label);
+			//	uprintf(label);
+			//}
+			//fclose(fd);
 			continue;
 		}
 #endif
