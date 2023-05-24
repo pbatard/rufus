@@ -273,10 +273,10 @@ static __inline BOOL is_WOW64(void)
 }
 
 // Open an Internet session
-static HINTERNET GetInternetSession(BOOL bRetry)
+static HINTERNET GetInternetSession(const char* user_agent, BOOL bRetry)
 {
 	int i;
-	char agent[64];
+	char default_agent[64];
 	BOOL decodingSupport = TRUE;
 	VARIANT_BOOL InternetConnection = VARIANT_FALSE;
 	DWORD dwFlags, dwTimeout = NET_SESSION_TIMEOUT, dwProtocolSupport = HTTP_PROTOCOL_FLAG_HTTP2;
@@ -314,10 +314,11 @@ static HINTERNET GetInternetSession(BOOL bRetry)
 		SetLastError(ERROR_INTERNET_DISCONNECTED);
 		goto out;
 	}
-	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %lu.%lu%s)",
+	static_sprintf(default_agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %lu.%lu%s)",
 		rufus_version[0], rufus_version[1], rufus_version[2],
 		WindowsVersion.Major, WindowsVersion.Minor, is_WOW64() ? "; WOW64" : "");
-	hSession = pfInternetOpenA(agent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	hSession = pfInternetOpenA((user_agent == NULL) ? default_agent : user_agent,
+		INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	// Set the timeouts
 	pfInternetSetOptionA(hSession, INTERNET_OPTION_CONNECT_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
 	pfInternetSetOptionA(hSession, INTERNET_OPTION_SEND_TIMEOUT, (LPVOID)&dwTimeout, sizeof(dwTimeout));
@@ -341,7 +342,8 @@ out:
  * Note that when a buffer is used, the actual size of the buffer is one more than its reported
  * size (with the extra byte set to 0) to accommodate for calls that need a NUL-terminated buffer.
  */
-uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress)
+uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char* user_agent,
+	BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress)
 {
 	const char* accept_types[] = {"*/*\0", NULL};
 	const char* short_name;
@@ -395,7 +397,7 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 	}
 	hostname[sizeof(hostname)-1] = 0;
 
-	hSession = GetInternetSession(TRUE);
+	hSession = GetInternetSession(user_agent, TRUE);
 	if (hSession == NULL) {
 		uprintf("Could not open Internet session: %s", WinInetErrorString());
 		goto out;
@@ -427,7 +429,7 @@ uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer
 	if (DownloadStatus != 200) {
 		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
 		SetLastError(ERROR_SEVERITY_ERROR | FAC(FACILITY_HTTP) | error_code);
-		uprintf("Unable to access file: %d", DownloadStatus);
+		uprintf("%s: %d", (DownloadStatus == 404) ? "File not found" : "Unable to access file", DownloadStatus);
 		goto out;
 	}
 	dwSize = sizeof(strsize);
@@ -705,7 +707,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 	static_sprintf(agent, APPLICATION_NAME "/%d.%d.%d (Windows NT %lu.%lu%s)",
 		rufus_version[0], rufus_version[1], rufus_version[2],
 		WindowsVersion.Major, WindowsVersion.Minor, is_WOW64() ? "; WOW64" : "");
-	hSession = GetInternetSession(FALSE);
+	hSession = GetInternetSession(NULL, FALSE);
 	if (hSession == NULL)
 		goto out;
 	hConnection = pfInternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort,
@@ -1125,7 +1127,7 @@ BOOL IsDownloadable(const char* url)
 	hostname[sizeof(hostname) - 1] = 0;
 
 	// Open an Internet session
-	hSession = GetInternetSession(FALSE);
+	hSession = GetInternetSession(NULL, FALSE);
 	if (hSession == NULL)
 		goto out;
 

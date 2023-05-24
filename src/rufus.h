@@ -120,6 +120,11 @@
 #define SECURE_BOOT_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#Why_do_I_need_to_disable_Secure_Boot_to_use_UEFINTFS"
 #define WPPRECORDER_MORE_INFO_URL   "https://github.com/pbatard/rufus/wiki/FAQ#BSODs_with_Windows_To_Go_drives_created_from_Windows_10_1809_ISOs"
 #define SEVENZIP_URL                "https://www.7-zip.org"
+#define DISKCOPY_URL                "https://msdl.microsoft.com/download/symbols/diskcopy.dll/54505118173000/diskcopy.dll"
+#define DISKCOPY_USER_AGENT         "Microsoft-Symbol-Server/10.0.22621.755"
+#define DISKCOPY_SIZE               0x16ee00
+#define DISKCOPY_IMAGE_OFFSET       0x66d8
+#define DISKCOPY_IMAGE_SIZE         0x168000
 #define DEFAULT_ESP_MOUNT_POINT     "S:\\"
 #define IS_POWER_OF_2(x)            ((x != 0) && (((x) & ((x) - 1)) == 0))
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
@@ -654,7 +659,10 @@ extern BOOL MountRegistryHive(const HKEY key, const char* pszHiveName, const cha
 extern BOOL UnmountRegistryHive(const HKEY key, const char* pszHiveName);
 extern BOOL SetLGP(BOOL bRestore, BOOL* bExistingKey, const char* szPath, const char* szPolicy, DWORD dwValue);
 extern LONG GetEntryWidth(HWND hDropDown, const char* entry);
-extern uint64_t DownloadToFileOrBuffer(const char* url, const char* file, BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress);
+extern uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char* user_agent,
+	BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress);
+#define DownloadToFileOrBuffer(url, file, buffer, hProgressDialog, bTaskBarProgress) \
+	DownloadToFileOrBufferEx(url, file, NULL, buffer, hProgressDialog, bTaskBarProgress)
 extern DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog, BOOL PromptOnError);
 extern HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError);
 extern INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);

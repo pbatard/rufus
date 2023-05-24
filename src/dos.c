@@ -33,6 +33,7 @@
 #include "rufus.h"
 #include "missing.h"
 #include "resource.h"
+#include "msapi_utf8.h"
 
 #include "dos.h"
 
@@ -289,8 +290,9 @@ static BOOL ExtractMSDOS(const char* path)
 {
 	int i, j;
 	BOOL r = FALSE;
-	HMODULE hDLL = NULL;
+	uint8_t* diskcopy_buffer = NULL;
 	char locale_path[MAX_PATH];
+	char diskcopy_dll_path[MAX_PATH];
 	char* extractlist[] = { "MSDOS   SYS", "COMMAND COM", "IO      SYS", "MODE    COM",
 		"KEYB    COM", "KEYBOARDSYS", "KEYBRD2 SYS", "KEYBRD3 SYS", "KEYBRD4 SYS",
 		"DISPLAY SYS", "EGA     CPI", "EGA2    CPI", "EGA3    CPI" };
@@ -298,27 +300,21 @@ static BOOL ExtractMSDOS(const char* path)
 	if (path == NULL)
 		return FALSE;
 
+	// There should be a diskcopy.dll in the user's AppData directory.
+	// Since we're working with a known copy of diskcopy.dll, just load it
+	// in memory and point to the known disk image resource buffer.
+	static_sprintf(diskcopy_dll_path, "%s\\%s\\diskcopy.dll", app_data_dir, FILES_DIR);
+	if (read_file(diskcopy_dll_path, &diskcopy_buffer) != DISKCOPY_SIZE) {
+		uprintf("'diskcopy.dll' was either not found or is invalid");
+		goto out;
+	}
+	DiskImage = &diskcopy_buffer[DISKCOPY_IMAGE_OFFSET];
+	DiskImageSize = DISKCOPY_IMAGE_SIZE;
+
 	// Reduce the visible mess by placing all the locale files into a subdir
 	static_strcpy(locale_path, path);
 	static_strcat(locale_path, "LOCALE\\");
 	CreateDirectoryA(locale_path, NULL);
-
-	hDLL = GetLibraryHandle("diskcopy");
-	if (hDLL == NULL) {
-		uprintf("Unable to open 'diskcopy.dll': %s", WindowsErrorString());
-		goto out;
-	}
-
-	DiskImageSize = 0;
-	DiskImage = (BYTE*)GetResource(hDLL, MAKEINTRESOURCEA(1), "BINFILE", "disk image", &DiskImageSize, TRUE);
-	if (DiskImage == NULL)
-		goto out;
-
-	// Sanity check
-	if (DiskImageSize < 700*KB) {
-		uprintf("MS-DOS disk image is too small (%d bytes)", DiskImageSize);
-		goto out;
-	}
 
 	for (i = 0, r = TRUE; r && i < FAT_FN_DIR_ENTRY_LAST; i++) {
 		if (DiskImage[FAT12_ROOTDIR_OFFSET + i * FAT_BYTES_PER_DIRENT] == FAT_DIRENT_DELETED)
@@ -335,7 +331,7 @@ static BOOL ExtractMSDOS(const char* path)
 		r = SetDOSLocale(path, FALSE);
 
 out:
-	safe_free(DiskImage);
+	safe_free(diskcopy_buffer);
 	return r;
 }
 

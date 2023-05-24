@@ -226,12 +226,11 @@ static void SetBootOptions(void)
 
 	IGNORE_RETVAL(ComboBox_ResetContent(hBootType));
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, lmprintf(MSG_279)), BT_NON_BOOTABLE));
-	if (WindowsVersion.Version < WINDOWS_10)	// The diskcopy.dll along with its MS-DOS floppy image was removed in Windows 10
-		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), BT_MSDOS));
-	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), BT_FREEDOS));
-	image_index = (WindowsVersion.Version < WINDOWS_10) ? 3 : 2;
 	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType,
 		(image_path == NULL) ? lmprintf(MSG_281, lmprintf(MSG_280)) : short_image_path), BT_IMAGE));
+	image_index = 1;
+	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "MS-DOS"), BT_MSDOS));
+	IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "FreeDOS"), BT_FREEDOS));
 
 	if (advanced_mode_device) {
 		static_sprintf(tmp, "Syslinux %s", embedded_sl_version_str[0]);
@@ -1824,8 +1823,24 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	} else if (boot_type == BT_MSDOS) {
 		if ((size_check) && (ComboBox_GetCurItemData(hClusterSize) >= 65536)) {
 			// MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size
-			MessageBoxExU(hMainDialog, lmprintf(MSG_110), lmprintf(MSG_111), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
+			MessageBoxExU(hMainDialog, lmprintf(MSG_110), lmprintf(MSG_111), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
+		}
+		static_sprintf(tmp, "%s\\%s\\diskcopy.dll", app_data_dir, FILES_DIR);
+		if (_accessU(tmp, 0) != -1) {
+			uprintf("Will reuse '%s' for MS-DOS installation", tmp);
+		} else {
+			r = MessageBoxExU(hMainDialog, lmprintf(MSG_337), lmprintf(MSG_115),
+				MB_YESNOCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+			if (r != IDYES)
+				goto out;
+			IGNORE_RETVAL(_chdirU(app_data_dir));
+			IGNORE_RETVAL(_mkdir(FILES_DIR));
+			IGNORE_RETVAL(_chdir(FILES_DIR));
+			if (DownloadToFileOrBufferEx(DISKCOPY_URL, tmp, DISKCOPY_USER_AGENT, NULL, hMainDialog, FALSE) != DISKCOPY_SIZE) {
+				ret = BOOTCHECK_DOWNLOAD_ERROR;
+				goto out;
+			}
 		}
 	} else if (boot_type == BT_GRUB4DOS) {
 		IGNORE_RETVAL(_chdirU(app_data_dir));
@@ -3823,25 +3838,7 @@ extern int TestChecksum(void);
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-			char tmp[256], c;
-			char label[256] = "2.06-blah-bli-ubutnu.23.2.1-blo";
-			size_t i;
-			for (i = strlen(label); i > 0; i--) {
-				c = label[i];
-				if (c != 0 && c != '.' && c != '-')
-					continue;
-				label[i] = 0;
-				static_sprintf(tmp, "%s/%s-%s/core.img", FILES_URL, "grub", label);
-				uprintf(tmp);
-				label[i] = c;
-			}
-//			TestChecksum();
-			//FILE* fd = fopen("D:\\ISOs\\vol.txt", "r");
-			//while (fgets(label, 256, fd) != NULL) {
-			//	sanitize_label(label);
-			//	uprintf(label);
-			//}
-			//fclose(fd);
+			TestChecksum();
 			continue;
 		}
 #endif
