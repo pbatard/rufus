@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-08 17:07+0000\n"
-"PO-Revision-Date: 2023-02-15 21:54+0000\n"
+"POT-Creation-Date: 2023-05-26 12:25+0100\n"
+"PO-Revision-Date: 2023-05-26 12:25+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: French (Français)\n"
 "X-Rufus-LCID: 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.3.1\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1847,6 +1847,20 @@ msgstr "Désactiver l'encryption automatique BitLocker"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Log persistent"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Un fichier supplémentaire ('diskcopy.dll') doit être téléchargé depuis Microsoft pour installer MS-DOS :\n"
+"- Sélectionnez 'Oui' pour vous connecter à Internet et le télécharger\n"
+"- Sélectionnez 'Non' pour annuler l’opération\n"
+"\n"
+"Note : Ce fichier sera téléchargé dans le répertoire de l'application et réutilisé automatiquement s'il est présent."
 
 #. • MSG_900
 #.

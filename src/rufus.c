@@ -1831,7 +1831,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			uprintf("Will reuse '%s' for MS-DOS installation", tmp);
 		} else {
 			r = MessageBoxExU(hMainDialog, lmprintf(MSG_337), lmprintf(MSG_115),
-				MB_YESNOCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid);
 			if (r != IDYES)
 				goto out;
 			IGNORE_RETVAL(_chdirU(app_data_dir));
