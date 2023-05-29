@@ -269,8 +269,6 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x05ac, 0x8405, -20},
 	{ 0x05ac, 0x8406, -20},
 	{ 0x05ac, 0x8407, -20},
-	// No idea who these guys are. They don't exist in usb.ids.
-	{ 0x6557, 0x0021, -5},
 	// Prolific exceptions
 	{ 0x067b, 0x2506, -20 },	// 8 GB Micro Hard Drive
 	{ 0x067b, 0x2517, -20 },	// 1 GB UFD
@@ -303,4 +301,8 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x18a5, 0x3327, -20 },
 	// More Innostor
 	{ 0x1f75, 0x0917, -10 },	// Intenso Speed Line USB Device
+	// ??? (https://github.com/pbatard/rufus/issues/2247)
+	{ 0x23a9, 0xef18, -10 },
+	// No idea who these guys are. They don't exist in usb.ids.
+	{ 0x6557, 0x0021, -5 },
 };
