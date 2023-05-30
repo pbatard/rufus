@@ -206,6 +206,11 @@ char* CreateUnattendXml(int arch, int flags)
 				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
 			fprintf(fd, "      <PreventDeviceEncryption>true</PreventDeviceEncryption>\n");
 			fprintf(fd, "    </component>\n");
+			fprintf(fd, "    <component name=\"Microsoft-Windows-EnhancedStorage-Adm\" processorArchitecture=\"%s\" language=\"neutral\" "
+				"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
+			fprintf(fd, "      <TCGSecurityActivationDisabled>1</TCGSecurityActivationDisabled>\n");
+			fprintf(fd, "    </component>\n");
 		}
 		fprintf(fd, "  </settings>\n");
 	}
