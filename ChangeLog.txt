@@ -1,3 +1,10 @@
+o Version 4.1 (2023.05.31)
+    Add timeouts on enumeration queries that may stall on some systems
+    Restore MS-DOS drive creation through the download of binaries from Microsoft
+    Update the log button icon
+    Fix UEFI:NTFS incompatibility with Windows Dev Kit 2023 platform
+    Fix more out of range pointer errors with Ubuntu/Fedora when booting in BIOS mode
+
 o Version 4.0 (2023.04.26)
     Fix persistent partition not working with Ubuntu 23.04
     Fix out of range pointer error with Ubuntu 23.04 when booting in BIOS mode

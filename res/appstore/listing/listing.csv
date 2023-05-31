@@ -114,17 +114,11 @@
 • Trang web chính thức: https://rufus.ie
 • Mã nguồn: https://github.com/pbatard/rufus
 • Nhật ký thay đổi: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt"
-"ReleaseNotes","3","Text","• Fix persistence partition not working with Ubuntu 23.04
-• Fix out of range pointer error with Ubuntu 23.04 when booting in BIOS mode
-• Fix boot freeze with Ubuntu Studio when Secure Boot is enabled
-• Fix incorrect architecture detection when checking for updates
-• Fix a Windows Store application crash when processing GRUB bootloaders
-• Fix a Windows Store application crash when enumerating processes that contain a % sign
-• Fix a Windows Store application crash when using the German localization
-• Note that the major version was bumped on account of:
-•   - New versions of Rufus requiring Windows 8 or later
-•   - New versions of Rufus defaulting to a 64-bit executable
-•   - Old versions of Rufus potentially not being able to update properly",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"ReleaseNotes","3","Text","• Add timeouts on enumeration queries that may stall on some systems
+• Restore MS-DOS drive creation through the download of binaries from Microsoft
+• Update the log button icon
+• Fix UEFI:NTFS incompatibility with Windows Dev Kit 2023 platform
+• Fix more out of range pointer errors with Ubuntu/Fedora when booting in BIOS mode",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "Title","4","Text","Rufus",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "ShortTitle","5","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "SortTitle","6","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

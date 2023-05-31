@@ -28,7 +28,7 @@ Features
 * Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image
 * Improve Windows installation experience by automatically setting up OOBE parameters (local account, privacy options, etc.)
 * Perform bad blocks checks, including detection of "fake" flash drives
-* Download official Microsoft Windows 7, Windows 8, Windows 10 or Windows 11 retail ISOs
+* Download official Microsoft Windows 8, Windows 10 or Windows 11 retail ISOs
 * Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs
 * Modern and familiar UI, with [38 languages natively supported](https://github.com/pbatard/rufus/wiki/FAQ#What_languages_are_natively_supported_by_Rufus)
 * Small footprint. No installation required.
