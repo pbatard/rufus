@@ -1104,7 +1104,7 @@ out:
 			// Extract all of the isolinux.bin files we found to identify their versions
 			for (i=0; i<isolinux_path.Index; i++) {
 				char isolinux_tmp[MAX_PATH];
-				static_sprintf(isolinux_tmp, "%s\\isolinux.tmp", temp_dir);
+				static_sprintf(isolinux_tmp, "%sisolinux.tmp", temp_dir);
 				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], isolinux_tmp, FILE_ATTRIBUTE_NORMAL);
 				if (size == 0) {
 					uprintf("  Could not access %s", isolinux_path.String[i]);

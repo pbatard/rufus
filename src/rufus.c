@@ -3398,9 +3398,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		uprintf("Could not get system directory: %s", WindowsErrorString());
 		static_strcpy(system_dir, "C:\\Windows\\System32");
 	}
+	// Per documentation, the returned string ends with a backslash
 	if (GetTempPathU(sizeof(temp_dir), temp_dir) == 0) {
 		uprintf("Could not get temp directory: %s", WindowsErrorString());
 		static_strcpy(temp_dir, ".\\");
+	} else {
+		// Some folks have found nothing better than configure their Windows installation to use
+		// a symlink for their temp dir, and it so happens that the Windows WIM mounting facility,
+		// which we need for applying the WUE options, can't handle symlinked directories. So we
+		// *attempt* to resolve the actual symlinked temp dir for this super limited number of
+		// users, with the hope that doing so is not going to break stuff elsewhere...
+		HANDLE handle = CreateFileU(temp_dir, GENERIC_READ, FILE_SHARE_READ, NULL,
+			OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+		// GetFinalPathNameByHandle returns a UNC path, which should be prefixed by '\\?\' or '\\.\'
+		if ((GetFinalPathNameByHandleU(handle, temp_dir, sizeof(temp_dir), FILE_NAME_OPENED) == 0) ||
+			((strstr(temp_dir, "\\\\?\\") != temp_dir) && (strstr(temp_dir, "\\\\.\\") != temp_dir))) {
+			uprintf("Could not get actual temp directory: %s", WindowsErrorString());
+			static_strcpy(temp_dir, ".\\");
+		} else {
+			// Need to remove the '\\?\' prefix or else we'll get issues with the Fido icon
+			strcpy(temp_dir, &temp_dir[4]);
+			// And me must re-append the '\' that gets removed by GetFinalPathNameByHandle()
+			static_strcat(temp_dir, "\\");
+		}
+		CloseHandle(handle);
 	}
 	if (!SHGetSpecialFolderPathU(NULL, app_data_dir, CSIDL_LOCAL_APPDATA, FALSE)) {
 		uprintf("Could not get app data directory: %s", WindowsErrorString());

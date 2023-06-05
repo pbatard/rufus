@@ -724,6 +724,21 @@ static __inline DWORD GetModuleFileNameExU(HANDLE hProcess, HMODULE hModule, cha
 	return ret;
 }
 
+static __inline DWORD GetFinalPathNameByHandleU(HANDLE hFile, char* lpszFilePath, DWORD cchFilePath, DWORD dwFlags)
+{
+	DWORD ret = 0, err = ERROR_INVALID_DATA;
+	walloc(lpszFilePath, cchFilePath);
+	ret = GetFinalPathNameByHandleW(hFile, wlpszFilePath, cchFilePath, dwFlags);
+	err = GetLastError();
+	if ((ret != 0)
+		&& ((ret = wchar_to_utf8_no_alloc(wlpszFilePath, lpszFilePath, cchFilePath)) == 0)) {
+		err = GetLastError();
+	}
+	wfree(lpszFilePath);
+	SetLastError(err);
+	return ret;
+}
+
 static __inline DWORD GetFileVersionInfoSizeU(const char* lpFileName, LPDWORD lpdwHandle)
 {
 	DWORD ret = 0, err = ERROR_INVALID_DATA;
