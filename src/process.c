@@ -159,6 +159,9 @@ static NTSTATUS PhDestroyHeap(VOID)
  */
 static PVOID PhAllocate(SIZE_T Size)
 {
+	if (PhHeapHandle == NULL)
+		return NULL;
+
 	PF_INIT(RtlAllocateHeap, Ntdll);
 	if (pfRtlAllocateHeap == NULL)
 		return NULL;
@@ -174,8 +177,10 @@ static PVOID PhAllocate(SIZE_T Size)
  */
 static VOID PhFree(PVOID Memory)
 {
-	PF_INIT(RtlFreeHeap, Ntdll);
+	if (PhHeapHandle == NULL)
+		return;
 
+	PF_INIT(RtlFreeHeap, Ntdll);
 	if (pfRtlFreeHeap != NULL)
 		pfRtlFreeHeap(PhHeapHandle, 0, Memory);
 }
