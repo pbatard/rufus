@@ -397,7 +397,7 @@
     <ClCompile Include="..\src\process.c" />
     <ClCompile Include="..\src\re.c" />
     <ClCompile Include="..\src\rufus.c" />
-    <ClCompile Include="..\src\checksum.c" />
+    <ClCompile Include="..\src\hash.c" />
     <ClCompile Include="..\src\smart.c" />
     <ClCompile Include="..\src\stdfn.c" />
     <ClCompile Include="..\src\stdio.c" />

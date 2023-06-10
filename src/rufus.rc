@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 4.2.2047"
+CAPTION "Rufus 4.2.2048"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
@@ -95,7 +95,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,253,216,50,12,WS_GROUP
 END
 
-IDD_CHECKSUM DIALOGEX 0, 0, 301, 110
+IDD_HASH DIALOGEX 0, 0, 301, 110
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Checksums"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
@@ -247,12 +247,12 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#ifndef _USING_V110_SDK71_\r\n"
     "#define _USING_V110_SDK71_\r\n"
@@ -264,7 +264,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "\r\n"
     "IDR_LC_RUFUS_LOC        RCDATA                  ""../res/loc/embedded.loc""\r\n"
@@ -351,7 +351,7 @@ BEGIN
     BEGIN
     END
 
-    IDD_CHECKSUM, DIALOG
+    IDD_HASH, DIALOG
     BEGIN
     END
 
@@ -392,8 +392,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,2,2047,0
- PRODUCTVERSION 4,2,2047,0
+ FILEVERSION 4,2,2048,0
+ PRODUCTVERSION 4,2,2048,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -411,13 +411,13 @@ BEGIN
             VALUE "Comments", "https://rufus.ie"
             VALUE "CompanyName", "Akeo Consulting"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "4.2.2047"
+            VALUE "FileVersion", "4.2.2048"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2023 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "https://www.gnu.org/licenses/gpl-3.0.html"
             VALUE "OriginalFilename", "rufus-4.2.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "4.2.2047"
+            VALUE "ProductVersion", "4.2.2048"
         END
     END
     BLOCK "VarFileInfo"

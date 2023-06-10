@@ -865,7 +865,7 @@ static void EnableControls(BOOL enable, BOOL remove_checkboxes)
 {
 	op_in_progress = !enable;
 
-	// The following only get disabled on format/checksum and otherwise remain enabled,
+	// The following only get disabled on format/hash and otherwise remain enabled,
 	// even if no device or image are selected
 	EnableWindow(hDeviceList, enable);
 	EnableWindow(hBootType, enable);
@@ -877,7 +877,7 @@ static void EnableControls(BOOL enable, BOOL remove_checkboxes)
 	SendMessage(hMultiToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_ABOUT, (LPARAM)enable);
 	SendMessage(hMultiToolbar, TB_ENABLEBUTTON, (WPARAM)IDC_SETTINGS, (LPARAM)enable);
 
-	// Checksum button is enabled if an image has been selected
+	// Hash button is enabled if an image has been selected
 	EnableWindow(hHashToolbar, enable && (boot_type == BT_IMAGE) && (image_path != NULL));
 
 	// Toggle CLOSE/CANCEL
@@ -2320,7 +2320,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	static ULONG ulRegister = 0;
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static SHChangeNotifyEntry NotifyEntry;
-	static DWORD_PTR thread_affinity[CHECKSUM_MAX + 1];
+	static DWORD_PTR thread_affinity[HASH_MAX + 1];
 	static HFONT hyperlink_font = NULL;
 	static wchar_t wtooltip[128];
 	LONG lPos;
@@ -2742,14 +2742,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				// Disable all controls except cancel
 				EnableControls(FALSE, FALSE);
 				InitProgress(FALSE);
-				SetThreadAffinity(thread_affinity, CHECKSUM_MAX + 1);
-				format_thread = CreateThread(NULL, 0, SumThread, (LPVOID)thread_affinity, 0, NULL);
+				SetThreadAffinity(thread_affinity, HASH_MAX + 1);
+				format_thread = CreateThread(NULL, 0, HashThread, (LPVOID)thread_affinity, 0, NULL);
 				if (format_thread != NULL) {
 					SetThreadPriority(format_thread, default_thread_priority);
 					PrintInfo(0, -1);
 					SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 				} else {
-					uprintf("Unable to start checksum thread");
+					uprintf("Unable to start hash thread");
 					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
 					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 				}
@@ -3855,11 +3855,14 @@ relaunch:
 			continue;
 		}
 #if defined(_DEBUG) || defined(TEST) || defined(ALPHA)
-extern int TestChecksum(void);
+extern int TestHashes(void);
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-			TestChecksum();
+//			uint8_t sum[32] = { 0 };
+//			PE256("D:\\Incoming\\bootx64.efi", sum);
+//			DumpBufferHex(sum, 32);
+			TestHashes();
 			continue;
 		}
 #endif

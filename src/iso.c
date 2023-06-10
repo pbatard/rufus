@@ -664,7 +664,7 @@ static void update_md5sum(void)
 		size = read_file(modified_path.String[i], &buf);
 		if (size == 0)
 			continue;
-		HashBuffer(CHECKSUM_MD5, buf, size, sum);
+		HashBuffer(HASH_MD5, buf, size, sum);
 		free(buf);
 		while ((pos > 0) && (md5_data[pos - 1] != '\n'))
 			pos--;

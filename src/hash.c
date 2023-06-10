@@ -5,7 +5,7 @@
  * Copyright © 2004-2019 Tom St Denis
  * Copyright © 2004 g10 Code GmbH
  * Copyright © 2002-2015 Wei Dai & Igor Pavlov
- * Copyright © 2015-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2023 Pete Batard <pete@akeo.ie>
  * Copyright © 2022 Jeffrey Walton <noloader@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -61,6 +61,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <errno.h>
+#include <windows.h>
 #include <windowsx.h>
 
 #include "db.h"
@@ -112,9 +113,9 @@
                                 // would modify the buffer being processed.
 
 /* Globals */
-char sum_str[CHECKSUM_MAX][150];
-uint32_t proc_bufnum, sum_count[CHECKSUM_MAX] = { MD5_HASHSIZE, SHA1_HASHSIZE, SHA256_HASHSIZE, SHA512_HASHSIZE };
-HANDLE data_ready[CHECKSUM_MAX] = { 0 }, thread_ready[CHECKSUM_MAX] = { 0 };
+char hash_str[HASH_MAX][150];
+uint32_t proc_bufnum, hash_count[HASH_MAX] = { MD5_HASHSIZE, SHA1_HASHSIZE, SHA256_HASHSIZE, SHA512_HASHSIZE };
+HANDLE data_ready[HASH_MAX] = { 0 }, thread_ready[HASH_MAX] = { 0 };
 DWORD read_size[NUM_BUFFERS];
 BOOL enable_extra_hashes = FALSE;
 uint8_t ALIGNED(64) buffer[NUM_BUFFERS][BUFFER_SIZE];
@@ -173,16 +174,16 @@ static const uint64_t K512[80] = {
 };
 
 /*
- * For convenience, we use a common context for all the checksum algorithms,
+ * For convenience, we use a common context for all the hash algorithms,
  * which means some elements may be unused...
  */
 typedef struct ALIGNED(64) {
 	uint8_t buf[MAX_BLOCKSIZE];
 	uint64_t state[8];
 	uint64_t bytecount;
-} SUM_CONTEXT;
+} HASH_CONTEXT;
 
-static void md5_init(SUM_CONTEXT *ctx)
+static void md5_init(HASH_CONTEXT *ctx)
 {
 	memset(ctx, 0, sizeof(*ctx));
 	ctx->state[0] = 0x67452301;
@@ -191,7 +192,7 @@ static void md5_init(SUM_CONTEXT *ctx)
 	ctx->state[3] = 0x10325476;
 }
 
-static void sha1_init(SUM_CONTEXT *ctx)
+static void sha1_init(HASH_CONTEXT *ctx)
 {
 	memset(ctx, 0, sizeof(*ctx));
 	ctx->state[0] = 0x67452301;
@@ -201,7 +202,7 @@ static void sha1_init(SUM_CONTEXT *ctx)
 	ctx->state[4] = 0xc3d2e1f0;
 }
 
-static void sha256_init(SUM_CONTEXT *ctx)
+static void sha256_init(HASH_CONTEXT *ctx)
 {
 	memset(ctx, 0, sizeof(*ctx));
 	ctx->state[0] = 0x6a09e667;
@@ -214,7 +215,7 @@ static void sha256_init(SUM_CONTEXT *ctx)
 	ctx->state[7] = 0x5be0cd19;
 }
 
-static void sha512_init(SUM_CONTEXT* ctx)
+static void sha512_init(HASH_CONTEXT* ctx)
 {
 	memset(ctx, 0, sizeof(*ctx));
 	ctx->state[0] = 0x6a09e667f3bcc908ULL;
@@ -228,7 +229,7 @@ static void sha512_init(SUM_CONTEXT* ctx)
 }
 
 /* Transform the message X which consists of 16 32-bit-words (SHA-1) */
-static void sha1_transform_cc(SUM_CONTEXT *ctx, const uint8_t *data)
+static void sha1_transform_cc(HASH_CONTEXT *ctx, const uint8_t *data)
 {
 	uint32_t a, b, c, d, e, tm, x[16];
 
@@ -572,7 +573,7 @@ static void sha1_transform_x86(uint64_t state64[5], const uint8_t *data, size_t 
 #endif /* CPU_X86_SHA1_ACCELERATION */
 
 /* Transform the message X which consists of 16 32-bit-words (SHA-1) */
-static void sha1_transform(SUM_CONTEXT *ctx, const uint8_t *data)
+static void sha1_transform(HASH_CONTEXT *ctx, const uint8_t *data)
 {
 #ifdef CPU_X86_SHA1_ACCELERATION
 	if (cpu_has_sha1_accel)
@@ -589,7 +590,7 @@ static void sha1_transform(SUM_CONTEXT *ctx, const uint8_t *data)
 }
 
 /* Transform the message X which consists of 16 32-bit-words (SHA-256) */
-static __inline void sha256_transform_cc(SUM_CONTEXT *ctx, const uint8_t *data)
+static __inline void sha256_transform_cc(HASH_CONTEXT *ctx, const uint8_t *data)
 {
 	uint32_t a, b, c, d, e, f, g, h, j, x[16];
 
@@ -883,7 +884,7 @@ static __inline void sha256_transform_x86(uint64_t state64[8], const uint8_t *da
 }
 #endif /* CPU_X86_SHA256_ACCELERATION */
 
-static __inline void sha256_transform(SUM_CONTEXT *ctx, const uint8_t *data)
+static __inline void sha256_transform(HASH_CONTEXT *ctx, const uint8_t *data)
 {
 #ifdef CPU_X86_SHA256_ACCELERATION
 	if (cpu_has_sha256_accel)
@@ -904,7 +905,7 @@ static __inline void sha256_transform(SUM_CONTEXT *ctx, const uint8_t *data)
  * This is an algorithm that *REALLY* benefits from being executed as 64-bit
  * code rather than 32-bit, as it's more than twice as fast then...
  */
-static __inline void sha512_transform(SUM_CONTEXT* ctx, const uint8_t* data)
+static __inline void sha512_transform(HASH_CONTEXT* ctx, const uint8_t* data)
 {
 	uint64_t a, b, c, d, e, f, g, h, W[80];
 	uint32_t i;
@@ -967,7 +968,7 @@ static __inline void sha512_transform(SUM_CONTEXT* ctx, const uint8_t* data)
 }
 
 /* Transform the message X which consists of 16 32-bit-words (MD5) */
-static void md5_transform(SUM_CONTEXT *ctx, const uint8_t *data)
+static void md5_transform(HASH_CONTEXT *ctx, const uint8_t *data)
 {
 	uint32_t a, b, c, d, x[16];
 
@@ -1080,7 +1081,7 @@ static void md5_transform(SUM_CONTEXT *ctx, const uint8_t *data)
 }
 
 /* Update the message digest with the contents of the buffer (SHA-1) */
-static void sha1_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len)
+static void sha1_write(HASH_CONTEXT *ctx, const uint8_t *buf, size_t len)
 {
 	size_t num = ctx->bytecount & (SHA1_BLOCKSIZE - 1);
 
@@ -1132,7 +1133,7 @@ static void sha1_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len)
 }
 
 /* Update the message digest with the contents of the buffer (SHA-256) */
-static void sha256_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len)
+static void sha256_write(HASH_CONTEXT *ctx, const uint8_t *buf, size_t len)
 {
 	size_t num = ctx->bytecount & (SHA256_BLOCKSIZE - 1);
 
@@ -1184,7 +1185,7 @@ static void sha256_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len)
 }
 
 /* Update the message digest with the contents of the buffer (SHA-512) */
-static void sha512_write(SUM_CONTEXT* ctx, const uint8_t* buf, size_t len)
+static void sha512_write(HASH_CONTEXT* ctx, const uint8_t* buf, size_t len)
 {
 	size_t num = ctx->bytecount & (SHA512_BLOCKSIZE - 1);
 
@@ -1219,7 +1220,7 @@ static void sha512_write(SUM_CONTEXT* ctx, const uint8_t* buf, size_t len)
 }
 
 /* Update the message digest with the contents of the buffer (MD5) */
-static void md5_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len)
+static void md5_write(HASH_CONTEXT *ctx, const uint8_t *buf, size_t len)
 {
 	size_t num = ctx->bytecount & (MD5_BLOCKSIZE - 1);
 
@@ -1254,7 +1255,7 @@ static void md5_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len)
 }
 
 /* Finalize the computation and write the digest in ctx->state[] (SHA-1) */
-static void sha1_final(SUM_CONTEXT *ctx)
+static void sha1_final(HASH_CONTEXT *ctx)
 {
 	size_t pos = ((size_t)ctx->bytecount) & (SHA1_BLOCKSIZE - 1);
 	uint64_t bitcount = ctx->bytecount << 3;
@@ -1297,7 +1298,7 @@ static void sha1_final(SUM_CONTEXT *ctx)
 }
 
 /* Finalize the computation and write the digest in ctx->state[] (SHA-256) */
-static void sha256_final(SUM_CONTEXT *ctx)
+static void sha256_final(HASH_CONTEXT *ctx)
 {
 	size_t pos = ((size_t)ctx->bytecount) & (SHA256_BLOCKSIZE - 1);
 	uint64_t bitcount = ctx->bytecount << 3;
@@ -1343,7 +1344,7 @@ static void sha256_final(SUM_CONTEXT *ctx)
 }
 
 /* Finalize the computation and write the digest in ctx->state[] (SHA-256) */
-static void sha512_final(SUM_CONTEXT* ctx)
+static void sha512_final(HASH_CONTEXT* ctx)
 {
 	size_t pos = ((size_t)ctx->bytecount) & (SHA512_BLOCKSIZE - 1);
 	/* 16 EB ought to be enough for everybody... */
@@ -1400,7 +1401,7 @@ static void sha512_final(SUM_CONTEXT* ctx)
 }
 
 /* Finalize the computation and write the digest in ctx->state[] (MD5) */
-static void md5_final(SUM_CONTEXT *ctx)
+static void md5_final(HASH_CONTEXT *ctx)
 {
 	size_t count = ((size_t)ctx->bytecount) & (MD5_BLOCKSIZE - 1);
 	uint64_t bitcount = ctx->bytecount << 3;
@@ -1456,29 +1457,29 @@ static void md5_final(SUM_CONTEXT *ctx)
 //#define NULL_TEST
 #ifdef NULL_TEST
 // These 'null' calls are useful for testing load balancing and individual algorithm speed
-static void null_init(SUM_CONTEXT *ctx) { memset(ctx, 0, sizeof(*ctx)); }
-static void null_write(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len) { }
-static void null_final(SUM_CONTEXT *ctx) { }
+static void null_init(HASH_CONTEXT *ctx) { memset(ctx, 0, sizeof(*ctx)); }
+static void null_write(HASH_CONTEXT *ctx, const uint8_t *buf, size_t len) { }
+static void null_final(HASH_CONTEXT *ctx) { }
 #endif
 
-typedef void sum_init_t(SUM_CONTEXT *ctx);
-typedef void sum_write_t(SUM_CONTEXT *ctx, const uint8_t *buf, size_t len);
-typedef void sum_final_t(SUM_CONTEXT *ctx);
-sum_init_t *sum_init[CHECKSUM_MAX] = { md5_init, sha1_init , sha256_init, sha512_init };
-sum_write_t *sum_write[CHECKSUM_MAX] = { md5_write, sha1_write , sha256_write, sha512_write };
-sum_final_t *sum_final[CHECKSUM_MAX] = { md5_final, sha1_final , sha256_final, sha512_final };
+typedef void hash_init_t(HASH_CONTEXT *ctx);
+typedef void hash_write_t(HASH_CONTEXT *ctx, const uint8_t *buf, size_t len);
+typedef void hash_final_t(HASH_CONTEXT *ctx);
+hash_init_t *hash_init[HASH_MAX] = { md5_init, sha1_init , sha256_init, sha512_init };
+hash_write_t *hash_write[HASH_MAX] = { md5_write, sha1_write , sha256_write, sha512_write };
+hash_final_t *hash_final[HASH_MAX] = { md5_final, sha1_final , sha256_final, sha512_final };
 
-// Compute an individual checksum without threading or buffering, for a single file
-BOOL HashFile(const unsigned type, const char* path, uint8_t* sum)
+// Compute an individual hash without threading or buffering, for a single file
+BOOL HashFile(const unsigned type, const char* path, uint8_t* hash)
 {
 	BOOL r = FALSE;
-	SUM_CONTEXT sum_ctx = { {0} };
+	HASH_CONTEXT hash_ctx = { {0} };
 	HANDLE h = INVALID_HANDLE_VALUE;
 	DWORD rs = 0;
 	uint64_t rb;
 	uint8_t buf[4096];
 
-	if ((type >= CHECKSUM_MAX) || (path == NULL) || (sum == NULL))
+	if ((type >= HASH_MAX) || (path == NULL) || (hash == NULL))
 		goto out;
 
 	h = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
@@ -1488,7 +1489,7 @@ BOOL HashFile(const unsigned type, const char* path, uint8_t* sum)
 		goto out;
 	}
 
-	sum_init[type](&sum_ctx);
+	hash_init[type](&hash_ctx);
 	for (rb = 0; ; rb += rs) {
 		CHECK_FOR_USER_CANCEL;
 		if (!ReadFile(h, buf, sizeof(buf), &rs, NULL)) {
@@ -1498,11 +1499,11 @@ BOOL HashFile(const unsigned type, const char* path, uint8_t* sum)
 		}
 		if (rs == 0)
 			break;
-		sum_write[type](&sum_ctx, buf, (size_t)rs);
+		hash_write[type](&hash_ctx, buf, (size_t)rs);
 	}
-	sum_final[type](&sum_ctx);
+	hash_final[type](&hash_ctx);
 
-	memcpy(sum, sum_ctx.buf, sum_count[type]);
+	memcpy(hash, hash_ctx.buf, hash_count[type]);
 	r = TRUE;
 
 out:
@@ -1510,19 +1511,19 @@ out:
 	return r;
 }
 
-BOOL HashBuffer(const unsigned type, const uint8_t* buf, const size_t len, uint8_t* sum)
+BOOL HashBuffer(const unsigned type, const uint8_t* buf, const size_t len, uint8_t* hash)
 {
 	BOOL r = FALSE;
-	SUM_CONTEXT sum_ctx = { {0} };
+	HASH_CONTEXT hash_ctx = { {0} };
 
-	if ((type >= CHECKSUM_MAX) || (sum == NULL))
+	if ((type >= HASH_MAX) || (hash == NULL))
 		goto out;
 
-	sum_init[type](&sum_ctx);
-	sum_write[type](&sum_ctx, buf, len);
-	sum_final[type](&sum_ctx);
+	hash_init[type](&hash_ctx);
+	hash_write[type](&hash_ctx, buf, len);
+	hash_final[type](&hash_ctx);
 
-	memcpy(sum, sum_ctx.buf, sum_count[type]);
+	memcpy(hash, hash_ctx.buf, hash_count[type]);
 	r = TRUE;
 
 out:
@@ -1530,9 +1531,9 @@ out:
 }
 
 /*
- * Checksum dialog callback
+ * Hash dialog callback
  */
-INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK HashCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int i, dw, dh;
 	RECT rc;
@@ -1541,7 +1542,7 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 
 	switch (message) {
 	case WM_INITDIALOG:
-		apply_localization(IDD_CHECKSUM, hDlg);
+		apply_localization(IDD_HASH, hDlg);
 		hDC = GetDC(hDlg);
 		hFont = CreateFontA(-MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72),
 			0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
@@ -1551,11 +1552,11 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		SendDlgItemMessageA(hDlg, IDC_SHA1, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendDlgItemMessageA(hDlg, IDC_SHA256, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendDlgItemMessageA(hDlg, IDC_SHA512, WM_SETFONT, (WPARAM)hFont, TRUE);
-		SetWindowTextA(GetDlgItem(hDlg, IDC_MD5), sum_str[0]);
-		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA1), sum_str[1]);
-		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA256), sum_str[2]);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_MD5), hash_str[0]);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA1), hash_str[1]);
+		SetWindowTextA(GetDlgItem(hDlg, IDC_SHA256), hash_str[2]);
 		if (enable_extra_hashes)
-			SetWindowTextA(GetDlgItem(hDlg, IDC_SHA512), sum_str[3]);
+			SetWindowTextA(GetDlgItem(hDlg, IDC_SHA512), hash_str[3]);
 		else
 			SetWindowTextU(GetDlgItem(hDlg, IDC_SHA512), lmprintf(MSG_311, "<Alt>-<H>"));
 
@@ -1566,7 +1567,7 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		GetWindowRect(GetDlgItem(hDlg, IDC_MD5), &rc);
 		dw = rc.right - rc.left;
 		dh = rc.bottom - rc.top;
-		DrawTextU(hDC, sum_str[0], -1, &rc, DT_CALCRECT);
+		DrawTextU(hDC, hash_str[0], -1, &rc, DT_CALCRECT);
 		dw = rc.right - rc.left - dw + 12;	// Ideally we'd compute the field borders from the system, but hey...
 		dh = rc.bottom - rc.top - dh + 6;
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA256), 0, 0, dw, dh, 1.0f);
@@ -1574,7 +1575,7 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 
 		GetWindowRect(GetDlgItem(hDlg, IDC_SHA1), &rc);
 		dw = rc.right - rc.left;
-		DrawTextU(hDC, sum_str[1], -1, &rc, DT_CALCRECT);
+		DrawTextU(hDC, hash_str[1], -1, &rc, DT_CALCRECT);
 		dw = rc.right - rc.left - dw + 12;
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_MD5), 0, 0, dw, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SHA1), 0, 0, dw, 0, 1.0f);
@@ -1594,7 +1595,7 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		switch (LOWORD(wParam)) {
 		case IDOK:
 		case IDCANCEL:
-			reset_localization(IDD_CHECKSUM);
+			reset_localization(IDD_HASH);
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		}
@@ -1603,12 +1604,12 @@ INT_PTR CALLBACK ChecksumCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 }
 
 // Individual thread that computes one of MD5, SHA1, SHA256 or SHA512 in parallel
-DWORD WINAPI IndividualSumThread(void* param)
+DWORD WINAPI IndividualHashThread(void* param)
 {
-	SUM_CONTEXT sum_ctx = { {0} }; // There's a memset in sum_init, but static analyzers still bug us
+	HASH_CONTEXT hash_ctx = { {0} }; // There's a memset in hash_init, but static analyzers still bug us
 	uint32_t i = (uint32_t)(uintptr_t)param, j;
 
-	sum_init[i](&sum_ctx);
+	hash_init[i](&hash_ctx);
 	// Signal that we're ready to service requests
 	if (!SetEvent(thread_ready[i]))
 		goto error;
@@ -1616,45 +1617,45 @@ DWORD WINAPI IndividualSumThread(void* param)
 	// Wait for requests
 	while (1) {
 		if (WaitForSingleObject(data_ready[i], WAIT_TIME) != WAIT_OBJECT_0) {
-			uprintf("Failed to wait for event for checksum thread #%d: %s", i, WindowsErrorString());
+			uprintf("Failed to wait for event for hash thread #%d: %s", i, WindowsErrorString());
 			return 1;
 		}
 		if (read_size[proc_bufnum] != 0) {
-			sum_write[i](&sum_ctx, buffer[proc_bufnum], (size_t)read_size[proc_bufnum]);
+			hash_write[i](&hash_ctx, buffer[proc_bufnum], (size_t)read_size[proc_bufnum]);
 			if (!SetEvent(thread_ready[i]))
 				goto error;
 		} else {
-			sum_final[i](&sum_ctx);
-			memset(&sum_str[i], 0, ARRAYSIZE(sum_str[i]));
-			for (j = 0; j < sum_count[i]; j++) {
-				sum_str[i][2 * j] = ((sum_ctx.buf[j] >> 4) < 10) ?
-					((sum_ctx.buf[j] >> 4) + '0') : ((sum_ctx.buf[j] >> 4) - 0xa + 'a');
-				sum_str[i][2 * j + 1] = ((sum_ctx.buf[j] & 15) < 10) ?
-					((sum_ctx.buf[j] & 15) + '0') : ((sum_ctx.buf[j] & 15) - 0xa + 'a');
+			hash_final[i](&hash_ctx);
+			memset(&hash_str[i], 0, ARRAYSIZE(hash_str[i]));
+			for (j = 0; j < hash_count[i]; j++) {
+				hash_str[i][2 * j] = ((hash_ctx.buf[j] >> 4) < 10) ?
+					((hash_ctx.buf[j] >> 4) + '0') : ((hash_ctx.buf[j] >> 4) - 0xa + 'a');
+				hash_str[i][2 * j + 1] = ((hash_ctx.buf[j] & 15) < 10) ?
+					((hash_ctx.buf[j] & 15) + '0') : ((hash_ctx.buf[j] & 15) - 0xa + 'a');
 			}
-			sum_str[i][2 * j] = 0;
+			hash_str[i][2 * j] = 0;
 			return 0;
 		}
 	}
 error:
-	uprintf("Failed to set event for checksum thread #%d: %s", i, WindowsErrorString());
+	uprintf("Failed to set event for hash thread #%d: %s", i, WindowsErrorString());
 	return 1;
 }
 
-DWORD WINAPI SumThread(void* param)
+DWORD WINAPI HashThread(void* param)
 {
 	DWORD_PTR* thread_affinity = (DWORD_PTR*)param;
-	HANDLE sum_thread[CHECKSUM_MAX] = { NULL, NULL, NULL, NULL };
+	HANDLE hash_thread[HASH_MAX] = { NULL, NULL, NULL, NULL };
 	DWORD wr;
 	VOID* fd = NULL;
 	uint64_t processed_bytes;
 	int i, read_bufnum, r = -1;
-	int num_checksums = CHECKSUM_MAX - (enable_extra_hashes ? 0 : 1);
+	int num_hashes = HASH_MAX - (enable_extra_hashes ? 0 : 1);
 
 	if ((image_path == NULL) || (thread_affinity == NULL))
 		ExitThread(r);
 
-	uprintf("\r\nComputing checksum for '%s'...", image_path);
+	uprintf("\r\nComputing hash for '%s'...", image_path);
 
 	if (thread_affinity[0] != 0)
 		// Use the first affinity mask, as our read thread is the least
@@ -1663,24 +1664,24 @@ DWORD WINAPI SumThread(void* param)
 		// is usually in this first mask, for other tasks.
 		SetThreadAffinityMask(GetCurrentThread(), thread_affinity[0]);
 
-	for (i = 0; i < num_checksums; i++) {
+	for (i = 0; i < num_hashes; i++) {
 		// NB: Can't use a single manual-reset event for data_ready as we
 		// wouldn't be able to ensure the event is reset before the thread
 		// gets into its next wait loop
 		data_ready[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
 		thread_ready[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
 		if ((data_ready[i] == NULL) || (thread_ready[i] == NULL)) {
-			uprintf("Unable to create checksum thread event: %s", WindowsErrorString());
+			uprintf("Unable to create hash thread event: %s", WindowsErrorString());
 			goto out;
 		}
-		sum_thread[i] = CreateThread(NULL, 0, IndividualSumThread, (LPVOID)(uintptr_t)i, 0, NULL);
-		if (sum_thread[i] == NULL) {
-			uprintf("Unable to start checksum thread #%d", i);
+		hash_thread[i] = CreateThread(NULL, 0, IndividualHashThread, (LPVOID)(uintptr_t)i, 0, NULL);
+		if (hash_thread[i] == NULL) {
+			uprintf("Unable to start hash thread #%d", i);
 			goto out;
 		}
-		SetThreadPriority(sum_thread[i], default_thread_priority);
+		SetThreadPriority(hash_thread[i], default_thread_priority);
 		if (thread_affinity[i+1] != 0)
-			SetThreadAffinityMask(sum_thread[i], thread_affinity[i+1]);
+			SetThreadAffinityMask(hash_thread[i], thread_affinity[i+1]);
 	}
 
 	fd = CreateFileAsync(image_path, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
@@ -1717,12 +1718,12 @@ DWORD WINAPI SumThread(void* param)
 		// 3. Launch the next asynchronous read operation
 		ReadFileAsync(fd, buffer[read_bufnum], BUFFER_SIZE);
 
-		// 4. Wait for all the sum threads to indicate that they are ready to process data
-		wr = WaitForMultipleObjects(num_checksums, thread_ready, TRUE, WAIT_TIME);
+		// 4. Wait for all the hash threads to indicate that they are ready to process data
+		wr = WaitForMultipleObjects(num_hashes, thread_ready, TRUE, WAIT_TIME);
 		if (wr != WAIT_OBJECT_0) {
 			if (wr == STATUS_TIMEOUT)
 				SetLastError(ERROR_TIMEOUT);
-			uprintf("Checksum threads failed to signal: %s", WindowsErrorString());
+			uprintf("Hash threads failed to signal: %s", WindowsErrorString());
 			goto out;
 		}
 
@@ -1731,43 +1732,43 @@ DWORD WINAPI SumThread(void* param)
 		proc_bufnum = (read_bufnum + NUM_BUFFERS - 1) % NUM_BUFFERS;
 
 		// 6. Signal the waiting threads that there is data available
-		for (i = 0; i < num_checksums; i++) {
+		for (i = 0; i < num_hashes; i++) {
 			if (!SetEvent(data_ready[i])) {
-				uprintf("Could not signal checksum thread %d: %s", i, WindowsErrorString());
+				uprintf("Could not signal hash thread %d: %s", i, WindowsErrorString());
 				goto out;
 			}
 		}
 	}
 
 	// Our last event with read_size=0 signaled the threads to exit - wait for that to happen
-	if (WaitForMultipleObjects(num_checksums, sum_thread, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
-		uprintf("Checksum threads did not finalize: %s", WindowsErrorString());
+	if (WaitForMultipleObjects(num_hashes, hash_thread, TRUE, WAIT_TIME) != WAIT_OBJECT_0) {
+		uprintf("Hash threads did not finalize: %s", WindowsErrorString());
 		goto out;
 	}
 
-	uprintf("  MD5:    %s", sum_str[0]);
-	uprintf("  SHA1:   %s", sum_str[1]);
-	uprintf("  SHA256: %s", sum_str[2]);
+	uprintf("  MD5:    %s", hash_str[0]);
+	uprintf("  SHA1:   %s", hash_str[1]);
+	uprintf("  SHA256: %s", hash_str[2]);
 	if (enable_extra_hashes) {
-		char c = sum_str[3][SHA512_HASHSIZE];
-		sum_str[3][SHA512_HASHSIZE] = 0;
-		uprintf("  SHA512: %s", sum_str[3]);
-		sum_str[3][SHA512_HASHSIZE] = c;
-		uprintf("          %s", &sum_str[3][SHA512_HASHSIZE]);
+		char c = hash_str[3][SHA512_HASHSIZE];
+		hash_str[3][SHA512_HASHSIZE] = 0;
+		uprintf("  SHA512: %s", hash_str[3]);
+		hash_str[3][SHA512_HASHSIZE] = c;
+		uprintf("          %s", &hash_str[3][SHA512_HASHSIZE]);
 	}
 	r = 0;
 
 out:
-	for (i = 0; i < num_checksums; i++) {
-		if (sum_thread[i] != NULL)
-			TerminateThread(sum_thread[i], 1);
+	for (i = 0; i < num_hashes; i++) {
+		if (hash_thread[i] != NULL)
+			TerminateThread(hash_thread[i], 1);
 		safe_closehandle(data_ready[i]);
 		safe_closehandle(thread_ready[i]);
 	}
 	CloseFileAsync(fd);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 	if (r == 0)
-		MyDialogBox(hMainInstance, IDD_CHECKSUM, hMainDialog, ChecksumCallback);
+		MyDialogBox(hMainInstance, IDD_HASH, hMainDialog, HashCallback);
 	ExitThread(r);
 }
 
@@ -1777,11 +1778,11 @@ out:
 BOOL IsBufferInDB(const unsigned char* buf, const size_t len)
 {
 	int i;
-	uint8_t sum[32];
-	if (!HashBuffer(CHECKSUM_SHA256, buf, len, sum))
+	uint8_t hash[32];
+	if (!HashBuffer(HASH_SHA256, buf, len, hash))
 		return FALSE;
 	for (i = 0; i < ARRAYSIZE(sha256db); i += 32)
-		if (memcmp(sum, &sha256db[i], 32) == 0)
+		if (memcmp(hash, &sha256db[i], 32) == 0)
 			return TRUE;
 	return FALSE;
 }
@@ -1789,11 +1790,11 @@ BOOL IsBufferInDB(const unsigned char* buf, const size_t len)
 BOOL IsFileInDB(const char* path)
 {
 	int i;
-	uint8_t sum[32];
-	if (!HashFile(CHECKSUM_SHA256, path, sum))
+	uint8_t hash[32];
+	if (!HashFile(HASH_SHA256, path, hash))
 		return FALSE;
 	for (i = 0; i < ARRAYSIZE(sha256db); i += 32)
-		if (memcmp(sum, &sha256db[i], 32) == 0)
+		if (memcmp(hash, &sha256db[i], 32) == 0)
 			return TRUE;
 	return FALSE;
 }
@@ -1838,7 +1839,7 @@ const char test_msg[] = "Did you ever hear the tragedy of Darth Plagueis The Wis
  * Much rather copy paste from md5sum/sha#sum output from Linux and just
  * convert the string.
  */
-const char* test_hash[CHECKSUM_MAX][4] = {
+const char* test_hash[HASH_MAX][4] = {
 	{
 		"d41d8cd98f00b204e9800998ecf8427e",
 		"74cac558072300385f7ab4dff7465e3c",
@@ -1863,12 +1864,12 @@ const char* test_hash[CHECKSUM_MAX][4] = {
 };
 
 /* Tests the message digest algorithms */
-int TestChecksum(void)
+int TestHashes(void)
 {
-	const uint32_t blocksize[CHECKSUM_MAX] = { MD5_BLOCKSIZE, SHA1_BLOCKSIZE, SHA256_BLOCKSIZE, SHA512_BLOCKSIZE };
+	const uint32_t blocksize[HASH_MAX] = { MD5_BLOCKSIZE, SHA1_BLOCKSIZE, SHA256_BLOCKSIZE, SHA512_BLOCKSIZE };
 	const char* hash_name[4] = { "MD5   ", "SHA1  ", "SHA256", "SHA512" };
 	int i, j, errors = 0;
-	uint8_t sum[MAX_HASHSIZE], *sum_expected;
+	uint8_t hash[MAX_HASHSIZE], *hash_expected;
 	size_t full_msg_len = strlen(test_msg);
 	char* msg = malloc(full_msg_len + 1);
 	if (msg == NULL)
@@ -1878,7 +1879,7 @@ int TestChecksum(void)
 	uprintf("SHA1   acceleration: %s", (cpu_has_sha1_accel ? "TRUE" : "FALSE"));
 	uprintf("SHA256 acceleration: %s", (cpu_has_sha256_accel ? "TRUE" : "FALSE"));
 
-	for (j = 0; j < CHECKSUM_MAX; j++) {
+	for (j = 0; j < HASH_MAX; j++) {
 		size_t copy_msg_len[4];
 		copy_msg_len[0] = 0;
 		copy_msg_len[1] = 3;
@@ -1890,15 +1891,15 @@ int TestChecksum(void)
 			memset(msg, 0, full_msg_len + 1);
 			if (i != 0)
 				memcpy(msg, test_msg, copy_msg_len[i]);
-			HashBuffer(j, msg, copy_msg_len[i], sum);
-			sum_expected = to_bin(test_hash[j][i]);
-			if (memcmp(sum, sum_expected, sum_count[j]) != 0) {
+			HashBuffer(j, msg, copy_msg_len[i], hash);
+			hash_expected = to_bin(test_hash[j][i]);
+			if (memcmp(hash, hash_expected, hash_count[j]) != 0) {
 				uprintf("Test %s %d: FAIL", hash_name[j], i);
 				errors++;
 			} else {
 				uprintf("Test %s %d: PASS", hash_name[j], i);
 			}
-			free(sum_expected);
+			free(hash_expected);
 		}
 	}
 

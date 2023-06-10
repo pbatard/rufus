@@ -307,12 +307,12 @@ enum image_option_type {
 	IMOP_MAX
 };
 
-enum checksum_type {
-	CHECKSUM_MD5 = 0,
-	CHECKSUM_SHA1,
-	CHECKSUM_SHA256,
-	CHECKSUM_SHA512,
-	CHECKSUM_MAX
+enum hash_type {
+	HASH_MD5 = 0,
+	HASH_SHA1,
+	HASH_SHA256,
+	HASH_SHA512,
+	HASH_MAX
 };
 
 enum file_io_type {
@@ -721,7 +721,7 @@ extern HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAcce
 #define GetTextWidth(hDlg, id) GetTextSize(GetDlgItem(hDlg, id), NULL).cx
 
 DWORD WINAPI SaveImageThread(void* param);
-DWORD WINAPI SumThread(void* param);
+DWORD WINAPI HashThread(void* param);
 
 /* Hash tables */
 typedef struct htab_entry {

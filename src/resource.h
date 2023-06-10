@@ -10,7 +10,7 @@
 #define IDD_LOG                         106
 #define IDD_UPDATE_POLICY               107
 #define IDD_NEW_VERSION                 108
-#define IDD_CHECKSUM                    109
+#define IDD_HASH                        109
 #define IDD_LIST                        110
 #define IDI_ICON                        120
 #define IDI_LANG_16                     121

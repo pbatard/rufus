@@ -87,13 +87,14 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-am_rufus_OBJECTS = rufus-badblocks.$(OBJEXT) rufus-checksum.$(OBJEXT) \
-	rufus-cpu.$(OBJEXT) rufus-dev.$(OBJEXT) rufus-dos.$(OBJEXT) \
+am_rufus_OBJECTS = rufus-badblocks.$(OBJEXT) rufus-cpu.$(OBJEXT) \
+	rufus-dev.$(OBJEXT) rufus-dos.$(OBJEXT) \
 	rufus-dos_locale.$(OBJEXT) rufus-drive.$(OBJEXT) \
 	rufus-format.$(OBJEXT) rufus-format_ext.$(OBJEXT) \
-	rufus-format_fat32.$(OBJEXT) rufus-icon.$(OBJEXT) \
-	rufus-iso.$(OBJEXT) rufus-localization.$(OBJEXT) \
-	rufus-net.$(OBJEXT) rufus-parser.$(OBJEXT) rufus-pki.$(OBJEXT) \
+	rufus-format_fat32.$(OBJEXT) rufus-hash.$(OBJEXT) \
+	rufus-icon.$(OBJEXT) rufus-iso.$(OBJEXT) \
+	rufus-localization.$(OBJEXT) rufus-net.$(OBJEXT) \
+	rufus-parser.$(OBJEXT) rufus-pki.$(OBJEXT) \
 	rufus-process.$(OBJEXT) rufus-re.$(OBJEXT) \
 	rufus-rufus.$(OBJEXT) rufus-smart.$(OBJEXT) \
 	rufus-stdfn.$(OBJEXT) rufus-stdio.$(OBJEXT) \
@@ -281,7 +282,7 @@ AM_V_WINDRES_0 = @echo "  RC     $@";$(WINDRES)
 AM_V_WINDRES_1 = $(WINDRES)
 AM_V_WINDRES_ = $(AM_V_WINDRES_$(AM_DEFAULT_VERBOSITY))
 AM_V_WINDRES = $(AM_V_WINDRES_$(V))
-rufus_SOURCES = badblocks.c checksum.c cpu.c dev.c dos.c dos_locale.c drive.c format.c format_ext.c format_fat32.c icon.c iso.c \
+rufus_SOURCES = badblocks.c cpu.c dev.c dos.c dos_locale.c drive.c format.c format_ext.c format_fat32.c hash.c icon.c iso.c \
 	localization.c net.c parser.c pki.c process.c re.c rufus.c smart.c stdfn.c stdio.c stdlg.c syslinux.c ui.c vhd.c wue.c
 
 rufus_CFLAGS = -I$(srcdir)/ms-sys/inc -I$(srcdir)/syslinux/libfat -I$(srcdir)/syslinux/libinstaller -I$(srcdir)/syslinux/win -I$(srcdir)/libcdio $(AM_CFLAGS) \
@@ -351,12 +352,6 @@ rufus-badblocks.o: badblocks.c
 rufus-badblocks.obj: badblocks.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-badblocks.obj `if test -f 'badblocks.c'; then $(CYGPATH_W) 'badblocks.c'; else $(CYGPATH_W) '$(srcdir)/badblocks.c'; fi`
 
-rufus-checksum.o: checksum.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-checksum.o `test -f 'checksum.c' || echo '$(srcdir)/'`checksum.c
-
-rufus-checksum.obj: checksum.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-checksum.obj `if test -f 'checksum.c'; then $(CYGPATH_W) 'checksum.c'; else $(CYGPATH_W) '$(srcdir)/checksum.c'; fi`
-
 rufus-cpu.o: cpu.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-cpu.o `test -f 'cpu.c' || echo '$(srcdir)/'`cpu.c
 
@@ -404,6 +399,12 @@ rufus-format_fat32.o: format_fat32.c
 
 rufus-format_fat32.obj: format_fat32.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-format_fat32.obj `if test -f 'format_fat32.c'; then $(CYGPATH_W) 'format_fat32.c'; else $(CYGPATH_W) '$(srcdir)/format_fat32.c'; fi`
+
+rufus-hash.o: hash.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-hash.o `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
+
+rufus-hash.obj: hash.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-hash.obj `if test -f 'hash.c'; then $(CYGPATH_W) 'hash.c'; else $(CYGPATH_W) '$(srcdir)/hash.c'; fi`
 
 rufus-icon.o: icon.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-icon.o `test -f 'icon.c' || echo '$(srcdir)/'`icon.c
