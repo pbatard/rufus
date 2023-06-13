@@ -698,6 +698,7 @@ extern HANDLE CreateFileWithTimeout(LPCSTR lpFileName, DWORD dwDesiredAccess, DW
 	HANDLE hTemplateFile, DWORD dwTimeOut);
 extern BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads);
 extern BOOL HashFile(const unsigned type, const char* path, uint8_t* sum);
+extern BOOL PE256File(const char* path, uint8_t* hash);
 extern BOOL HashBuffer(const unsigned type, const uint8_t* buf, const size_t len, uint8_t* sum);
 extern BOOL IsFileInDB(const char* path);
 extern BOOL IsBufferInDB(const unsigned char* buf, const size_t len);

@@ -7,6 +7,7 @@
  * Copyright © 2002-2015 Wei Dai & Igor Pavlov
  * Copyright © 2015-2023 Pete Batard <pete@akeo.ie>
  * Copyright © 2022 Jeffrey Walton <noloader@gmail.com>
+ * Copyright © 2016 Alexander Graf
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +29,8 @@
  * SHA-256 taken from 7-zip's Sha256.c, itself based on Crypto++ - Public Domain
  *
  * SHA-512 modified from LibTomCrypt - Public Domain
+ *
+ * PE256 modified from u-boot's efi_image_loader.c - GPLv2.0+
  *
  * CPU accelerated SHA code taken from SHA-Intrinsics - Public Domain
  *
@@ -1469,7 +1472,7 @@ hash_init_t *hash_init[HASH_MAX] = { md5_init, sha1_init , sha256_init, sha512_i
 hash_write_t *hash_write[HASH_MAX] = { md5_write, sha1_write , sha256_write, sha512_write };
 hash_final_t *hash_final[HASH_MAX] = { md5_final, sha1_final , sha256_final, sha512_final };
 
-// Compute an individual hash without threading or buffering, for a single file
+/* Compute an individual hash without threading or buffering, for a single file */
 BOOL HashFile(const unsigned type, const char* path, uint8_t* hash)
 {
 	BOOL r = FALSE;
@@ -1511,6 +1514,318 @@ out:
 	return r;
 }
 
+/* A part of an image, used for hashing */
+struct image_region {
+	const uint8_t*      data;
+	uint32_t            size;
+};
+
+/**
+ * struct efi_image_regions - A list of memory regions
+ *
+ * @max:    Maximum number of regions
+ * @num:    Number of regions
+ * @reg:    Array of regions
+ */
+struct efi_image_regions {
+	int                 max;
+	int                 num;
+	struct image_region reg[];
+};
+
+/**
+ * efi_image_region_add() - add an entry of region
+ * @regs:       Pointer to array of regions
+ * @start:      Start address of region (included)
+ * @end:        End address of region (excluded)
+ * @nocheck:    Flag against overlapped regions
+ *
+ * Take one entry of region \[@start, @end\[ and insert it into the list.
+ *
+ * * If @nocheck is false, the list will be sorted ascending by address.
+ *   Overlapping entries will not be allowed.
+ *
+ * * If @nocheck is true, the list will be sorted ascending by sequence
+ *   of adding the entries. Overlapping is allowed.
+ *
+ * Return:  TRUE on success, FALSE on error
+ */
+BOOL efi_image_region_add(struct efi_image_regions* regs,
+	const void* start, const void* end, int nocheck)
+{
+	struct image_region* reg;
+	int i, j;
+
+	if (regs->num >= regs->max) {
+		uprintf("%s: no more room for regions", __func__);
+		return FALSE;
+	}
+
+	if (end < start)
+		return FALSE;
+
+	for (i = 0; i < regs->num; i++) {
+		reg = &regs->reg[i];
+		if (nocheck)
+			continue;
+
+		/* new data after registered region */
+		if ((uint8_t*)start >= reg->data + reg->size)
+			continue;
+
+		/* new data preceding registered region */
+		if ((uint8_t*)end <= reg->data) {
+			for (j = regs->num - 1; j >= i; j--)
+				memcpy(&regs->reg[j + 1], &regs->reg[j],
+					sizeof(*reg));
+			break;
+		}
+
+		/* new data overlapping registered region */
+		uprintf("%s: new region already part of another", __func__);
+		return FALSE;
+	}
+
+	reg = &regs->reg[i];
+	reg->data = start;
+	reg->size = (uint32_t)((uintptr_t)end - (uintptr_t)start);
+	regs->num++;
+
+	return TRUE;
+}
+
+/**
+ * cmp_pe_section() - compare virtual addresses of two PE image sections
+ * @arg1:   Pointer to pointer to first section header
+ * @arg2:   Pointer to pointer to second section header
+ *
+ * Compare the virtual addresses of two sections of an portable executable.
+ * The arguments are defined as const void * to allow usage with qsort().
+ *
+ * Return:  -1 if the virtual address of arg1 is less than that of arg2,
+ *           0 if the virtual addresses are equal, 1 if the virtual address
+ *             of arg1 is greater than that of arg2.
+ */
+static int cmp_pe_section(const void* arg1, const void* arg2)
+{
+	const IMAGE_SECTION_HEADER* section1, * section2;
+
+	section1 = *((const IMAGE_SECTION_HEADER**)arg1);
+	section2 = *((const IMAGE_SECTION_HEADER**)arg2);
+
+	if (section1->VirtualAddress < section2->VirtualAddress)
+		return -1;
+	else if (section1->VirtualAddress == section2->VirtualAddress)
+		return 0;
+	else
+		return 1;
+}
+
+/**
+ * efi_image_parse() - parse a PE image
+ * @efi:    Pointer to image
+ * @len:    Size of @efi
+ * @regp:   Pointer to a list of regions
+ *
+ * Parse image binary in PE32(+) format, assuming that sanity of PE image
+ * has been checked by a caller.
+ *
+ * Return:  TRUE on success, FALSE on error
+ */
+BOOL efi_image_parse(uint8_t* efi, size_t len, struct efi_image_regions** regp)
+{
+	struct efi_image_regions* regs;
+	IMAGE_DOS_HEADER* dos;
+	IMAGE_NT_HEADERS32* nt;
+	IMAGE_SECTION_HEADER *sections, **sorted;
+	int num_regions, num_sections, i;
+	DWORD ctidx = IMAGE_DIRECTORY_ENTRY_SECURITY;
+	uint32_t align, size, authsz;
+	size_t bytes_hashed;
+
+	dos = (void*)efi;
+	nt = (void*)(efi + dos->e_lfanew);
+
+	/*
+	 * Count maximum number of regions to be digested.
+	 * We don't have to have an exact number here.
+	 * See efi_image_region_add()'s in parsing below.
+	 */
+	num_regions = 3; /* for header */
+	num_regions += nt->FileHeader.NumberOfSections;
+	num_regions++; /* for extra */
+
+	regs = calloc(sizeof(*regs) + sizeof(struct image_region) * num_regions, 1);
+	if (!regs)
+		goto err;
+	regs->max = num_regions;
+
+	/*
+	 * Collect data regions for hash calculation
+	 * 1. File headers
+	 */
+	if (nt->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
+		IMAGE_NT_HEADERS64* nt64 = (void*)nt;
+		IMAGE_OPTIONAL_HEADER64* opt = &nt64->OptionalHeader;
+
+		/* Skip CheckSum */
+		efi_image_region_add(regs, efi, &opt->CheckSum, 0);
+		if (nt64->OptionalHeader.NumberOfRvaAndSizes <= ctidx) {
+			efi_image_region_add(regs,
+				&opt->Subsystem,
+				efi + opt->SizeOfHeaders, 0);
+		} else {
+			/* Skip Certificates Table */
+			efi_image_region_add(regs,
+				&opt->Subsystem,
+				&opt->DataDirectory[ctidx], 0);
+			efi_image_region_add(regs,
+				&opt->DataDirectory[ctidx] + 1,
+				efi + opt->SizeOfHeaders, 0);
+
+			authsz = opt->DataDirectory[ctidx].Size;
+		}
+
+		bytes_hashed = opt->SizeOfHeaders;
+		align = opt->FileAlignment;
+	} else if (nt->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
+		IMAGE_OPTIONAL_HEADER32* opt = &nt->OptionalHeader;
+
+		/* Skip CheckSum */
+		efi_image_region_add(regs, efi, &opt->CheckSum, 0);
+		if (nt->OptionalHeader.NumberOfRvaAndSizes <= ctidx) {
+			efi_image_region_add(regs,
+				&opt->Subsystem,
+				efi + opt->SizeOfHeaders, 0);
+		} else {
+			/* Skip Certificates Table */
+			efi_image_region_add(regs, &opt->Subsystem,
+				&opt->DataDirectory[ctidx], 0);
+			efi_image_region_add(regs,
+				&opt->DataDirectory[ctidx] + 1,
+				efi + opt->SizeOfHeaders, 0);
+
+			authsz = opt->DataDirectory[ctidx].Size;
+		}
+
+		bytes_hashed = opt->SizeOfHeaders;
+		align = opt->FileAlignment;
+	} else {
+		uprintf("%s: Invalid optional header magic %x", __func__,
+			nt->OptionalHeader.Magic);
+		goto err;
+	}
+
+	/* 2. Sections */
+	num_sections = nt->FileHeader.NumberOfSections;
+	sections = (void*)((uint8_t*)&nt->OptionalHeader +
+		nt->FileHeader.SizeOfOptionalHeader);
+	sorted = calloc(sizeof(IMAGE_SECTION_HEADER*), num_sections);
+	if (!sorted) {
+		uprintf("%s: Out of memory", __func__);
+		goto err;
+	}
+
+	/*
+	 * Make sure the section list is in ascending order.
+	 */
+	for (i = 0; i < num_sections; i++)
+		sorted[i] = &sections[i];
+	qsort(sorted, num_sections, sizeof(sorted[0]), cmp_pe_section);
+
+	for (i = 0; i < num_sections; i++) {
+		if (!sorted[i]->SizeOfRawData)
+			continue;
+
+		size = (sorted[i]->SizeOfRawData + align - 1) & ~(align - 1);
+		efi_image_region_add(regs, efi + sorted[i]->PointerToRawData,
+			efi + sorted[i]->PointerToRawData + size, 0);
+		//uprintf("section[%d](%s): raw: 0x%x-0x%x, virt: %x-%x",
+		//	i, sorted[i]->Name,
+		//	sorted[i]->PointerToRawData,
+		//	sorted[i]->PointerToRawData + size,
+		//	sorted[i]->VirtualAddress,
+		//	sorted[i]->VirtualAddress
+		//	+ sorted[i]->Misc.VirtualSize);
+
+		bytes_hashed += size;
+	}
+	free(sorted);
+
+	/* 3. Extra data excluding Certificates Table */
+	if (bytes_hashed + authsz < len) {
+		//uprintf("extra data for hash: %zu",
+		//	len - (bytes_hashed + authsz));
+		efi_image_region_add(regs, efi + bytes_hashed,
+			efi + len - authsz, 0);
+	}
+
+	*regp = regs;
+	return TRUE;
+
+err:
+	free(regs);
+	return FALSE;
+}
+
+/*
+ * Compute the PE256 (a.k.a. Applocker SHA256) hash of a single EFI executable.
+ * This is a SHA-256 hash applied to only specific parts of a PE binary.
+ * See https://security.stackexchange.com/a/199627/270178.
+ * Oh, and you'd think that Windows's ImageGetDigestStream() API could be used
+ * for some part of this but you'd be very, very wrong since the PE sections it
+ * feeds to the hash function does include the PE header checksum field...
+ */
+BOOL PE256File(const char* path, uint8_t* hash)
+{
+	BOOL r = FALSE;
+	HASH_CONTEXT hash_ctx = { {0} };
+	int i;
+	uint32_t rb;
+	uint8_t* buf = NULL;
+	struct __stat64 stat64 = { 0 };
+	struct efi_image_regions* regs = NULL;
+
+	if ((path == NULL) || (hash == NULL))
+		goto out;
+
+	/* Filter anything that would be out of place as a EFI bootloader */
+	if (_stat64U(path, &stat64) != 0) {
+		uprintf("Could not open '%s", path);
+		goto out;
+	}
+	if ((stat64.st_size < 1 * KB) || (stat64.st_size > 64 * MB)) {
+		uprintf("'%s' is either too small or too large for PE-256", path);
+		goto out;
+	}
+
+	/* Read the executable into a memory buffer */
+	rb = read_file(path, &buf);
+	if (rb < 1 * KB)
+		goto out;
+
+	/* Isolate the PE sections to hash */
+	if (!efi_image_parse(buf, rb, &regs))
+		goto out;
+
+	/* Hash the relevant PE data */
+	sha256_init(&hash_ctx);
+	for (i = 0; i < regs->num; i++)
+		sha256_write(&hash_ctx, regs->reg[i].data, regs->reg[i].size);
+	sha256_final(&hash_ctx);
+
+	memcpy(hash, hash_ctx.buf, SHA256_HASHSIZE);
+	r = TRUE;
+
+out:
+	free(regs);
+	free(buf);
+	return r;
+}
+
+/*
+ * Compute the hash of a single buffer.
+ */
 BOOL HashBuffer(const unsigned type, const uint8_t* buf, const size_t len, uint8_t* hash)
 {
 	BOOL r = FALSE;
@@ -1603,7 +1918,7 @@ INT_PTR CALLBACK HashCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	return (INT_PTR)FALSE;
 }
 
-// Individual thread that computes one of MD5, SHA1, SHA256 or SHA512 in parallel
+/* Individual thread that computes one of MD5, SHA1, SHA256 or SHA512 in parallel */
 DWORD WINAPI IndividualHashThread(void* param)
 {
 	HASH_CONTEXT hash_ctx = { {0} }; // There's a memset in hash_init, but static analyzers still bug us

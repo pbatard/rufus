@@ -3859,10 +3859,10 @@ extern int TestHashes(void);
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-//			uint8_t sum[32] = { 0 };
-//			PE256("D:\\Incoming\\bootx64.efi", sum);
-//			DumpBufferHex(sum, 32);
-			TestHashes();
+			uint8_t sum[32] = { 0 };
+			PE256File("C:\\Projects\\rufus\\bootx64.efi", sum);
+			DumpBufferHex(sum, 32);
+//			TestHashes();
 			continue;
 		}
 #endif
