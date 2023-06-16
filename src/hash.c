@@ -1645,6 +1645,7 @@ BOOL efi_image_parse(uint8_t* efi, size_t len, struct efi_image_regions** regp)
 
 	dos = (void*)efi;
 	nt = (void*)(efi + dos->e_lfanew);
+	authsz = 0;
 
 	/*
 	 * Count maximum number of regions to be digested.
@@ -2093,11 +2094,11 @@ out:
 BOOL IsBufferInDB(const unsigned char* buf, const size_t len)
 {
 	int i;
-	uint8_t hash[32];
+	uint8_t hash[SHA256_HASHSIZE];
 	if (!HashBuffer(HASH_SHA256, buf, len, hash))
 		return FALSE;
-	for (i = 0; i < ARRAYSIZE(sha256db); i += 32)
-		if (memcmp(hash, &sha256db[i], 32) == 0)
+	for (i = 0; i < ARRAYSIZE(sha256db); i += SHA256_HASHSIZE)
+		if (memcmp(hash, &sha256db[i], SHA256_HASHSIZE) == 0)
 			return TRUE;
 	return FALSE;
 }
@@ -2105,13 +2106,28 @@ BOOL IsBufferInDB(const unsigned char* buf, const size_t len)
 BOOL IsFileInDB(const char* path)
 {
 	int i;
-	uint8_t hash[32];
+	uint8_t hash[SHA256_HASHSIZE];
 	if (!HashFile(HASH_SHA256, path, hash))
 		return FALSE;
-	for (i = 0; i < ARRAYSIZE(sha256db); i += 32)
-		if (memcmp(hash, &sha256db[i], 32) == 0)
+	for (i = 0; i < ARRAYSIZE(sha256db); i += SHA256_HASHSIZE)
+		if (memcmp(hash, &sha256db[i], SHA256_HASHSIZE) == 0)
 			return TRUE;
 	return FALSE;
+}
+
+int IsUefiBootloaderRevoked(const char* path)
+{
+	int i;
+	uint8_t hash[SHA256_HASHSIZE];
+	if (!PE256File(path, hash))
+		return -1;
+	for (i = 0; i < ARRAYSIZE(pe256dbx); i += SHA256_HASHSIZE)
+		if (memcmp(hash, &pe256dbx[i], SHA256_HASHSIZE) == 0)
+			return 1;
+	for (i = 0; i < ARRAYSIZE(pe256ssp); i += SHA256_HASHSIZE)
+		if (memcmp(hash, &pe256ssp[i], SHA256_HASHSIZE) == 0)
+			return 2;
+	return 0;
 }
 
 #if defined(_DEBUG) || defined(TEST) || defined(ALPHA)

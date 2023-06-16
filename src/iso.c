@@ -86,15 +86,15 @@ BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlin
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
 static const char* bootmgr_name = "bootmgr";
-static const char* bootmgr_efi_name = "bootmgr.efi";
+const char* bootmgr_efi_name = "bootmgr.efi";
 static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
 static const char* md5sum_name[] = { "MD5SUMS", "md5sum.txt" };
 static const char* casper_dirname = "/casper";
 static const char* proxmox_dirname = "/proxmox";
-static const char* efi_dirname = "/efi/boot";
-static const char* efi_bootname[ARCH_MAX] = {
+const char* efi_dirname = "/efi/boot";
+const char* efi_bootname[ARCH_MAX] = {
 	"boot.efi", "bootia32.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi", "bootia64.efi",
 	"bootriscv32.efi", "bootriscv64.efi", "bootriscv128.efi", "bootebc.efi" };
 static const char* sources_str = "/sources";
