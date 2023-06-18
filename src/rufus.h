@@ -577,16 +577,17 @@ extern RUFUS_UPDATE update;
 extern RUFUS_IMG_REPORT img_report;
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hLogDialog, hStatus, hDeviceList, hCapacity, hImageOption;
-extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog;
-extern HWND hInfo, hProgress, hDiskID;
+extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType;
+extern HWND hNBPasses, hLog, hInfo, hProgress, hDiskID;
 extern WORD selected_langid;
 extern DWORD FormatStatus, DownloadStatus, MainThreadId, LastWriteError;
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, op_in_progress, right_to_left_mode;
 extern BOOL allow_dual_uefi_bios, large_drive, usb_debug;
-extern int64_t iso_blocking_status;
-extern uint8_t image_options;
+extern uint8_t image_options, *pe256ssp;
 extern uint16_t rufus_version[3], embedded_sl_version[2];
+extern uint32_t pe256ssp_size;
 extern uint64_t persistence_size;
+extern int64_t iso_blocking_status;
 extern size_t ubuffer_pos;
 extern const int nb_steps[FS_MAX];
 extern float fScale;
@@ -594,8 +595,8 @@ extern windows_version_t WindowsVersion;
 extern int dialog_showing, force_update, fs_type, boot_type, partition_type, target_type;
 extern unsigned long syslinux_ldlinux_len[2];
 extern char ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
-extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH], sysnative_dir[MAX_PATH];
-extern char app_data_dir[MAX_PATH], *image_path, *fido_url;
+extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH];
+extern char sysnative_dir[MAX_PATH], app_data_dir[MAX_PATH], *image_path, *fido_url;
 
 /*
  * Shared prototypes
@@ -690,6 +691,7 @@ extern char* GetSignatureName(const char* path, const char* country_code, BOOL b
 extern uint64_t GetSignatureTimeStamp(const char* path);
 extern LONG ValidateSignature(HWND hDlg, const char* path);
 extern BOOL ValidateOpensslSignature(BYTE* pbBuffer, DWORD dwBufferLen, BYTE* pbSignature, DWORD dwSigLen);
+extern BOOL ParseSKUSiPolicy(void);
 extern BOOL IsFontAvailable(const char* font_name);
 extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries);

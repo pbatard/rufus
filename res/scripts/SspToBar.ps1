@@ -13,7 +13,9 @@
 [cmdletbinding()]
 param(
 	# (Optional) The path to the .p7b to process
-	[string]$BinaryFilePath = "SkuSiPolicyp.p7b"
+	[string]$BinaryFilePath = "SkuSiPolicy.p7b",
+	# (Optional) Output the straight values
+	[switch]$Raw = $false
 )
 #endregion
 
@@ -55,7 +57,7 @@ try {
 		$ContentType = $null
 		try {
 			$ContentType = [Security.Cryptography.Pkcs.ContentInfo]::GetContentType($CIPolicyBytes)
-		} catch { Write-Host "WTF!" }
+		} catch { }
 
 		# Check for PKCS#7 ASN.1 SignedData type
 		if ($ContentType -and $ContentType.Value -eq '1.2.840.113549.1.7.2') {
@@ -183,14 +185,17 @@ try {
 		# Sort the array and remove duplicates
 		$HashArray.Sort()
 		$HashArray = $HashArray | Select-Object -Unique
-		# Output as C array data
 		foreach ($HashStr in $HashArray) {
-			$HashChars = $HashStr.ToCharArray()
-			$Line = "`t"
-			for ($i = 0; $i -lt $Pe256HashLength; $i++) {
-				$Line += "0x" + $HashChars[2 * $i] + $HashChars[2 * $i + 1] + ", "
+			if ($Raw) {
+				Write-Output $HashStr
+			} else {
+				$HashChars = $HashStr.ToCharArray()
+				$Line = "`t"
+				for ($i = 0; $i -lt $Pe256HashLength; $i++) {
+					$Line += "0x" + $HashChars[2 * $i] + $HashChars[2 * $i + 1] + ", "
+				}
+				Write-Output $Line
 			}
-			Write-Output $Line
 		}
 	}
 	

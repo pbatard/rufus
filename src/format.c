@@ -1908,6 +1908,18 @@ DWORD WINAPI FormatThread(void* param)
 							FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_PATCH);
 						}
 					}
+				} else if ((target_type == TT_UEFI) && IS_WINDOWS_1X(img_report) && pe256ssp_size > 0) {
+					// Copy this system's SkuSiPolicy.p7b to the target drive so that UEFI bootloaders
+					// revoked by Windows through WDAC policy do get flagged as revoked.
+					char src[MAX_PATH], dst[MAX_PATH];
+					struct __stat64 stat64 = { 0 };
+					static_sprintf(src, "%s\\SecureBootUpdates\\SKUSiPolicy.p7b", system_dir);
+					static_sprintf(dst, "%s\\efi\\microsoft\\boot\\SKUSiPolicy.p7b", drive_name);
+					if ((_stat64U(dst, &stat64) != 0) && (_stat64U(src, &stat64) == 0)) {
+						uprintf("Copying: %s (%s) (from %s)", dst, SizeToHumanReadable(stat64.st_size, FALSE, FALSE), src);
+						if (!CopyFileU(src, dst, TRUE))
+							uprintf("  Error writing file: %s", WindowsErrorString());
+					}
 				}
 				if ( (target_type == TT_BIOS) && HAS_WINPE(img_report) ) {
 					// Apply WinPE fixup

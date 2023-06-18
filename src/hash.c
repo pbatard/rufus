@@ -123,6 +123,8 @@ DWORD read_size[NUM_BUFFERS];
 BOOL enable_extra_hashes = FALSE;
 uint8_t ALIGNED(64) buffer[NUM_BUFFERS][BUFFER_SIZE];
 extern int default_thread_priority;
+uint32_t pe256ssp_size = 0;
+uint8_t* pe256ssp = NULL;
 
 /*
  * Rotate 32 or 64 bit integers by n bytes.
@@ -2117,14 +2119,14 @@ BOOL IsFileInDB(const char* path)
 
 int IsUefiBootloaderRevoked(const char* path)
 {
-	int i;
+	uint32_t i;
 	uint8_t hash[SHA256_HASHSIZE];
 	if (!PE256File(path, hash))
 		return -1;
 	for (i = 0; i < ARRAYSIZE(pe256dbx); i += SHA256_HASHSIZE)
 		if (memcmp(hash, &pe256dbx[i], SHA256_HASHSIZE) == 0)
 			return 1;
-	for (i = 0; i < ARRAYSIZE(pe256ssp); i += SHA256_HASHSIZE)
+	for (i = 0; i < pe256ssp_size * SHA256_HASHSIZE; i += SHA256_HASHSIZE)
 		if (memcmp(hash, &pe256ssp[i], SHA256_HASHSIZE) == 0)
 			return 2;
 	return 0;

@@ -2061,6 +2061,10 @@ static void InitDialog(HWND hDlg)
 			"one. Because of this, some messages will only be displayed in English.", selected_locale->txt[1]);
 		uprintf("If you think you can help update this translation, please e-mail the author of this application");
 	}
+	if (ParseSKUSiPolicy())
+		uprintf("Found %d revoked UEFI bootloaders from this system's SKUSiPolicy", pe256ssp_size);
+	else
+		uprintf("WARNING: Could not parse this system's SkuSiPolicy");
 	// Detect and report system limitations
 	if (ReadRegistryKeyBool(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Policies\\Microsoft\\FVE"))
 		uprintf("WARNING: This system has a policy set to prevent write access to FIXED drives not using BitLocker");
@@ -3885,17 +3889,7 @@ extern int TestHashes(void);
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-			uint8_t sum[32] = { 0 };
-			PE256File("C:\\Projects\\rufus\\winload_win10_1511.exe", sum);
-			DumpBufferHex(sum, 32);
-
-			int aya = IsUefiBootloaderRevoked("C:\\Projects\\WDACTools\\en_windows_10_multiple_editions_version_1607_updated_jan_2017_x64_dvd_9714399.iso\\efi\\boot\\bootx64.efi");
-			if (aya > 0) {
-				MessageBoxExU(hMainDialog, lmprintf(MSG_339,
-					(aya == 1) ? lmprintf(MSG_340) : lmprintf(MSG_341, "Error code: 0xc0000428")),
-					lmprintf(MSG_338), MB_ICONWARNING | MB_IS_RTL, selected_langid);
-			}
-//			TestHashes();
+			TestHashes();
 			continue;
 		}
 #endif
@@ -4236,6 +4230,7 @@ out:
 	safe_free(grub2_buf);
 	safe_free(fido_url);
 	safe_free(fido_script);
+	safe_free(pe256ssp);
 	if (argv != NULL) {
 		for (i=0; i<argc; i++) safe_free(argv[i]);
 		safe_free(argv);

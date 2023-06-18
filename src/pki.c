@@ -48,17 +48,61 @@ const char* cert_name[3] = { "Akeo Consulting", "Akeo Systems", "Pete Batard" };
 const char* cert_country = "IE";
 
 typedef struct {
-	LPWSTR lpszProgramName;
-	LPWSTR lpszPublisherLink;
-	LPWSTR lpszMoreInfoLink;
+	LPWSTR      lpszProgramName;
+	LPWSTR      lpszPublisherLink;
+	LPWSTR      lpszMoreInfoLink;
 } SPROG_PUBLISHERINFO, *PSPROG_PUBLISHERINFO;
 
 // https://msdn.microsoft.com/en-us/library/ee442238.aspx
 typedef struct {
-	BLOBHEADER BlobHeader;
-	RSAPUBKEY  RsaHeader;
-	BYTE       Modulus[256];	// 2048 bit modulus
+	BLOBHEADER  BlobHeader;
+	RSAPUBKEY   RsaHeader;
+	BYTE        Modulus[256];	// 2048 bit modulus
 } RSA_2048_PUBKEY;
+
+// For PKCS7 WDAC Code Integrity processing
+#define PE256_HASHSIZE  32
+
+const GUID SKU_CODE_INTEGRITY_POLICY = { 0x976d12c8, 0xcb9f, 0x4730, { 0xbe, 0x52, 0x54, 0x60, 0x08, 0x43, 0x23, 0x8e} };
+
+typedef struct {
+	WORD        Nano;
+	WORD        Micro;
+	WORD        Minor;
+	WORD        Major;
+} CIVersion;
+
+typedef struct {
+	DWORD       PolicyFormatVersion;
+	GUID        PolicyTypeGUID;
+	GUID        PlatformGUID;
+	DWORD       OptionFlags;
+	DWORD       EKURuleEntryCount;
+	DWORD       FileRuleEntryCount;
+	DWORD       SignerRuleEntryCount;
+	DWORD       SignerScenarioEntryCount;
+	CIVersion   PolicyVersion;
+	DWORD       HeaderLength;
+} CIHeader;
+
+typedef struct {
+	DWORD       Type;
+	DWORD       FileNameLength;
+	WCHAR       FileName[0];
+} CIFileRuleHeader;
+
+typedef struct {
+	DWORD       Unknown;
+	CIVersion   Version;
+	DWORD       HashLength;
+	BYTE        Hash[0];
+} CIFileRuleData;
+
+typedef enum {
+	CI_DENY = 0,
+	CI_ALLOW,
+	CI_FILE_ATTRIBUTES,
+};
 
 // The RSA public key modulus for the private key we use to sign the files on the server.
 // NOTE 1: This openssl modulus must be *REVERSED* to be usable with Microsoft APIs
@@ -745,5 +789,114 @@ out:
 		CryptDestroyHash(hHash);
 	if (hProv)
 		CryptReleaseContext(hProv, 0);
+	return r;
+}
+
+BOOL ParseSKUSiPolicy(void)
+{
+	char path[MAX_PATH];
+	wchar_t* wpath = NULL;
+	BOOL r = FALSE;
+	DWORD i, dwEncoding, dwContentType, dwFormatType;
+	DWORD dwPolicySize = 0, dwBaseIndex = 0, dwSizeCount;
+	HCRYPTMSG hMsg = NULL;
+	CRYPT_DATA_BLOB pkcsData = { 0 };
+	DWORD* pdwEkuRules;
+	BYTE* pbRule;
+	CIHeader* Header;
+	CIFileRuleHeader* FileRuleHeader;
+	CIFileRuleData* FileRuleData;
+
+	pe256ssp_size = 0;
+	safe_free(pe256ssp);
+	static_sprintf(path, "%s\\SecureBootUpdates\\SKUSiPolicy.p7b", system_dir);
+	wpath = utf8_to_wchar(path);
+	if (wpath == NULL)
+		goto out;
+
+	r = CryptQueryObject(CERT_QUERY_OBJECT_FILE, wpath, CERT_QUERY_CONTENT_FLAG_ALL,
+		CERT_QUERY_FORMAT_FLAG_ALL, 0, &dwEncoding, &dwContentType, &dwFormatType, NULL,
+		&hMsg, NULL);
+	if (!r || dwContentType != CERT_QUERY_CONTENT_PKCS7_SIGNED)
+		goto out;
+
+	r = CryptMsgGetParam(hMsg, CMSG_CONTENT_PARAM, 0, NULL, &pkcsData.cbData);
+	if (!r || pkcsData.cbData == 0) {
+		uprintf("ParseSKUSiPolicy: Failed to retreive CMSG_CONTENT_PARAM size: %s", WindowsErrorString());
+		goto out;
+	}
+	pkcsData.pbData = malloc(pkcsData.cbData);
+	if (pkcsData.pbData == NULL)
+		goto out;
+	r = CryptMsgGetParam(hMsg, CMSG_CONTENT_PARAM, 0, pkcsData.pbData, &pkcsData.cbData);
+	if (!r) {
+		uprintf("ParseSKUSiPolicy: Failed to retreive CMSG_CONTENT_PARAM: %s", WindowsErrorString());
+		goto out;
+	}
+
+	// Now process the actual Security Policy content
+	if (pkcsData.pbData[0] == 4) {
+		dwPolicySize = pkcsData.pbData[1];
+		dwBaseIndex = 2;
+		if ((dwPolicySize & 0x80) == 0x80) {
+			dwSizeCount = dwPolicySize & 0x7F;
+			dwBaseIndex += dwSizeCount;
+			dwPolicySize = 0;
+			for (i = 0; i < dwSizeCount; i++) {
+				dwPolicySize = dwPolicySize << 8;
+				dwPolicySize = dwPolicySize | pkcsData.pbData[2 + i];
+			}
+		}
+	}
+
+	// Sanity checks
+	Header = (CIHeader*)&pkcsData.pbData[dwBaseIndex];
+	if (Header->HeaderLength + sizeof(uint32_t) != sizeof(CIHeader)) {
+		uprintf("ParseSKUSiPolicy: Unexpected Code Integrity Header size (0x%02x)", Header->HeaderLength);
+		goto out;
+	}
+	if (!CompareGUID(&Header->PolicyTypeGUID, &SKU_CODE_INTEGRITY_POLICY)) {
+		uprintf("ParseSKUSiPolicy: Unexpected Policy Type GUID %s", GuidToString(&Header->PolicyTypeGUID));
+		goto out;
+	}
+
+	// Skip the EKU Rules
+	pdwEkuRules = (DWORD*) &pkcsData.pbData[dwBaseIndex + sizeof(CIHeader)];
+	for (i = 0; i < Header->EKURuleEntryCount; i++)
+		pdwEkuRules = &pdwEkuRules[(*pdwEkuRules + (2 * sizeof(DWORD) - 1)) / sizeof(DWORD)];
+
+	// Process the Files Rules
+	pbRule = (BYTE*)pdwEkuRules;
+	pe256ssp = malloc(Header->FileRuleEntryCount * PE256_HASHSIZE);
+	if (pe256ssp == NULL)
+		goto out;
+	for (i = 0; i < Header->FileRuleEntryCount; i++) {
+		FileRuleHeader = (CIFileRuleHeader*)pbRule;
+		pbRule = &pbRule[sizeof(CIFileRuleHeader)];
+		if (FileRuleHeader->FileNameLength != 0) {
+//			uprintf("%S", FileRuleHeader->FileName);
+			pbRule = &pbRule[((FileRuleHeader->FileNameLength + sizeof(DWORD) - 1) / sizeof(DWORD)) * sizeof(DWORD)];
+		}
+		FileRuleData = (CIFileRuleData*)pbRule;
+		if (FileRuleData->HashLength > 0x80) {
+			uprintf("ParseSKUSiPolicy: Unexpected hash length for entry %d (0x%02x)", i, FileRuleData->HashLength);
+			// We're probably screwed, so bail out
+			break;
+		}
+		//  We are only interested in 'DENY' type with PE256 hashes
+		if (FileRuleHeader->Type == CI_DENY && FileRuleData->HashLength == PE256_HASHSIZE) {
+			memcpy(&pe256ssp[pe256ssp_size * PE256_HASHSIZE], FileRuleData->Hash, PE256_HASHSIZE);
+			pe256ssp_size++;
+		}
+		pbRule = &pbRule[sizeof(CIFileRuleData) + ((FileRuleData->HashLength + sizeof(DWORD) - 1) / sizeof(DWORD)) * sizeof(DWORD)];
+	}
+
+	r = TRUE;
+
+out:
+	if (hMsg != NULL)
+		CryptMsgClose(hMsg);
+	free(pkcsData.pbData);
+	free(wpath);
 	return r;
 }
