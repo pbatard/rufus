@@ -792,6 +792,9 @@ out:
 	return r;
 }
 
+// The following SkuSiPolicy.p7b parsing code is derived from:
+// https://gist.github.com/mattifestation/92e545bf1ee5b68eeb71d254cec2f78e
+// by Matthew Graeber, with contributions by James Forshaw.
 BOOL ParseSKUSiPolicy(void)
 {
 	char path[MAX_PATH];

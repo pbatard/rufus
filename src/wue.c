@@ -473,6 +473,29 @@ out:
 	return ((img_report.win_version.major != 0) && (img_report.win_version.build != 0));
 }
 
+// Copy this system's SkuSiPolicy.p7b to the target drive so that UEFI bootloaders
+// revoked by Windows through WDAC policy do get flagged as revoked.
+BOOL CopySKUSiPolicy(const char* drive_name)
+{
+	BOOL r = FALSE;
+	char src[MAX_PATH], dst[MAX_PATH];
+	struct __stat64 stat64 = { 0 };
+
+	if ((target_type != TT_UEFI) || !IS_WINDOWS_1X(img_report) || pe256ssp_size == 0)
+		return r;
+
+	static_sprintf(src, "%s\\SecureBootUpdates\\SKUSiPolicy.p7b", system_dir);
+	static_sprintf(dst, "%s\\efi\\microsoft\\boot\\SKUSiPolicy.p7b", drive_name);
+	if ((_stat64U(dst, &stat64) != 0) && (_stat64U(src, &stat64) == 0)) {
+		uprintf("Copying: %s (%s) (from %s)", dst, SizeToHumanReadable(stat64.st_size, FALSE, FALSE), src);
+		r = CopyFileU(src, dst, TRUE);
+		if (!r)
+			uprintf("  Error writing file: %s", WindowsErrorString());
+	}
+
+	return r;
+}
+
 /// <summary>
 /// Checks which versions of Windows are available in an install image
 /// to set our extraction index. Asks the user to select one if needed.
@@ -686,6 +709,8 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		uprintf("Failed to enable boot");
 		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_ISO_EXTRACT);
 	}
+
+	CopySKUSiPolicy((use_esp) ? ms_efi : drive_name);
 
 	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, wim_proc_files + 2 * wim_extra_files, wim_nb_files);
 
