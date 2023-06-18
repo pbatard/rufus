@@ -800,10 +800,8 @@ out:
 		fclose(fd_in);
 		fd_in = NULL;
 	}
-	if (fd_out != NULL) {
+	if (fd_out != NULL)
 		fclose(fd_out);
-		fd_out = NULL;
-	}
 
 	// If an insertion occurred, delete existing file and use the new one
 	if (ret != NULL) {
@@ -821,8 +819,10 @@ out:
 		} else {
 			uprintf("Could not write '%s' - original file has been left unmodified\n", filename);
 			ret = NULL;
-			if (fd_in != NULL) fclose(fd_in);
-			if (fd_out != NULL) fclose(fd_out);
+			if (fd_in != NULL)
+				fclose(fd_in);
+			if (fd_out != NULL)
+				fclose(fd_out);
 		}
 	}
 	if (wtmpname != NULL)

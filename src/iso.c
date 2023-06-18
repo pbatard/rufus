@@ -1274,7 +1274,6 @@ out:
 					to_windows_path(symlinked_syslinux);
 					uprintf("Created: %s\\%s → %s", symlinked_syslinux, efi_cfg_name[i], &path[2]);
 					to_unix_path(symlinked_syslinux);
-					fd = NULL;
 				}
 			}
 		} else if (HAS_BOOTMGR(img_report) && enable_ntfs_compression) {
