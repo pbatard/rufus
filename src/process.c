@@ -473,8 +473,16 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 	for (i = 0; ; i++) {
 		ULONG attempts = 8;
-		PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX handleInfo =
-			(i < handles->NumberOfHandles) ? &handles->Handles[i] : NULL;
+		PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX handleInfo = NULL;
+
+		// We are seeing reports of application crashes due to access
+		// violation exceptions here, so, since this is not critical code,
+		// we add an exception handler to ignore them.
+		TRY_AND_HANDLE(
+			EXCEPTION_ACCESS_VIOLATION,
+			{ handleInfo = (i < handles->NumberOfHandles) ? &handles->Handles[i] : NULL; },
+			{ continue; }
+		);
 
 		if ((dupHandle != NULL) && (processHandle != NtCurrentProcess())) {
 			pfNtClose(dupHandle);
@@ -483,9 +491,6 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 		// Update the current handle's process PID and compare against last
 		// Note: Be careful about not trying to overflow our list!
-		// Also, we are seeing reports of application crashes due to access
-		// violation exceptions here, so, since this is not critical code,
-		// we add an exception handler to ignore them.
 		TRY_AND_HANDLE(
 			EXCEPTION_ACCESS_VIOLATION,
 			{ pid[cur_pid] = (handleInfo != NULL) ? handleInfo->UniqueProcessId : -1; },

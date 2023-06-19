@@ -1430,7 +1430,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	const char* ldlinux = "ldlinux";
 	const char* syslinux = "syslinux";
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
-	char tmp[MAX_PATH], tmp2[MAX_PATH], c;
+	char tmp[MAX_PATH], tmp2[MAX_PATH], efi[MAX_PATH], c;
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	safe_free(grub2_buf);
@@ -1544,35 +1544,10 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				WriteSetting32(SETTING_WUE_OPTIONS, (UNATTEND_DEFAULT_MASK << 16) | unattend_xml_mask);
 			}
 		} else if (target_type == TT_UEFI) {
-			char efi_path[MAX_PATH], tmp_path[MAX_PATH];
 			if (!IS_EFI_BOOTABLE(img_report)) {
 				// Unsupported ISO
 				MessageBoxExU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 				goto out;
-			}
-			// coverity[swapped_arguments]
-			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, tmp_path) != 0) {
-				int i, j;
-				for (i = 0; i < ARRAYSIZE(efi_bootname) + 1; i++) {
-					if ((img_report.has_efi & (1 << i)) == 0)
-						continue;
-					if (i == 0)
-						static_strcpy(efi_path, bootmgr_efi_name);
-					else
-						static_sprintf(efi_path, "%s/%s", efi_dirname, efi_bootname[i - 1]);
-					if (ExtractISOFile(image_path, efi_path, tmp_path, FILE_ATTRIBUTE_NORMAL) == 0) {
-						uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", efi_path);
-						continue;
-					}
-					j = IsUefiBootloaderRevoked(tmp_path);
-					if (j > 0) {
-						MessageBoxExU(hMainDialog, lmprintf(MSG_339,
-							(j == 1) ? lmprintf(MSG_340) : lmprintf(MSG_341, "Error code: 0xc0000428")),
-							lmprintf(MSG_338), MB_ICONWARNING | MB_IS_RTL, selected_langid);
-						break;
-					}
-				}
-				DeleteFileU(tmp_path);
 			}
 			if (HAS_WIN7_EFI(img_report) && (!WimExtractCheck(FALSE))) {
 				// Your platform cannot extract files from WIM archives => download 7-zip?
@@ -1643,6 +1618,33 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			if (i < 0)	// Cancel
 				goto out;
 			write_as_esp = (i & 2);
+		}
+
+		// Check UEFI bootloaders for revocation
+		if (target_type == TT_UEFI) {
+			// coverity[swapped_arguments]
+			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, tmp) != 0) {
+				for (i = 0; i < ARRAYSIZE(efi_bootname) + 1; i++) {
+					if ((img_report.has_efi & (1 << i)) == 0)
+						continue;
+					if (i == 0)
+						static_strcpy(efi, bootmgr_efi_name);
+					else
+						static_sprintf(efi, "%s/%s", efi_dirname, efi_bootname[i - 1]);
+					if (ExtractISOFile(image_path, efi, tmp, FILE_ATTRIBUTE_NORMAL) == 0) {
+						uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", efi);
+						continue;
+					}
+					r = IsUefiBootloaderRevoked(tmp);
+					if (r > 0) {
+						MessageBoxExU(hMainDialog, lmprintf(MSG_339,
+							(r == 1) ? lmprintf(MSG_340) : lmprintf(MSG_341, "Error code: 0xc0000428")),
+							lmprintf(MSG_338), MB_ICONWARNING | MB_IS_RTL, selected_langid);
+						break;
+					}
+				}
+				DeleteFileU(tmp);
+			}
 		}
 
 		// If the selected target doesn't include BIOS, skip file downloads for GRUB/Syslinux
