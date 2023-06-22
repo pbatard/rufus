@@ -888,8 +888,12 @@ BOOL ParseSKUSiPolicy(void)
 		}
 		//  We are only interested in 'DENY' type with PE256 hashes
 		if (FileRuleHeader->Type == CI_DENY && FileRuleData->HashLength == PE256_HASHSIZE) {
-			memcpy(&pe256ssp[pe256ssp_size * PE256_HASHSIZE], FileRuleData->Hash, PE256_HASHSIZE);
-			pe256ssp_size++;
+			// Microsoft has the bad habit of duplicating entries - only add a hash if it's different from previous entry
+			if ((pe256ssp_size == 0) ||
+				(memcmp(&pe256ssp[(pe256ssp_size - 1) * PE256_HASHSIZE], FileRuleData->Hash, PE256_HASHSIZE) != 0)) {
+				memcpy(&pe256ssp[pe256ssp_size * PE256_HASHSIZE], FileRuleData->Hash, PE256_HASHSIZE);
+				pe256ssp_size++;
+			}
 		}
 		pbRule = &pbRule[sizeof(CIFileRuleData) + ((FileRuleData->HashLength + sizeof(DWORD) - 1) / sizeof(DWORD)) * sizeof(DWORD)];
 	}

@@ -2117,7 +2117,7 @@ BOOL IsFileInDB(const char* path)
 	return FALSE;
 }
 
-int IsUefiBootloaderRevoked(const char* path)
+int IsBootloaderRevoked(const char* path)
 {
 	uint32_t i;
 	uint8_t hash[SHA256_HASHSIZE];
@@ -2130,6 +2130,15 @@ int IsUefiBootloaderRevoked(const char* path)
 		if (memcmp(hash, &pe256ssp[i], SHA256_HASHSIZE) == 0)
 			return 2;
 	return 0;
+}
+
+void PrintRevokedBootloaderInfo(void)
+{
+	uprintf("Found %d officially revoked UEFI bootloaders from embedded list", sizeof(pe256dbx) / SHA256_HASHSIZE);
+	if (ParseSKUSiPolicy())
+		uprintf("Found %d additional revoked UEFI bootloaders from this system's SKUSiPolicy.p7b", pe256ssp_size);
+	else
+		uprintf("WARNING: Could not parse this system's SkuSiPolicy.p7b for additional revoked UEFI bootloaders");
 }
 
 #if defined(_DEBUG) || defined(TEST) || defined(ALPHA)

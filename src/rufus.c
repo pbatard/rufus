@@ -1635,7 +1635,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 						uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", efi);
 						continue;
 					}
-					r = IsUefiBootloaderRevoked(tmp);
+					r = IsBootloaderRevoked(tmp);
 					if (r > 0) {
 						MessageBoxExU(hMainDialog, lmprintf(MSG_339,
 							(r == 1) ? lmprintf(MSG_340) : lmprintf(MSG_341, "Error code: 0xc0000428")),
@@ -2063,10 +2063,7 @@ static void InitDialog(HWND hDlg)
 			"one. Because of this, some messages will only be displayed in English.", selected_locale->txt[1]);
 		uprintf("If you think you can help update this translation, please e-mail the author of this application");
 	}
-	if (ParseSKUSiPolicy())
-		uprintf("Found %d revoked UEFI bootloaders from this system's SKUSiPolicy", pe256ssp_size);
-	else
-		uprintf("WARNING: Could not parse this system's SkuSiPolicy");
+	PrintRevokedBootloaderInfo();
 	// Detect and report system limitations
 	if (ReadRegistryKeyBool(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Policies\\Microsoft\\FVE"))
 		uprintf("WARNING: This system has a policy set to prevent write access to FIXED drives not using BitLocker");

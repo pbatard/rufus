@@ -485,7 +485,7 @@ BOOL CopySKUSiPolicy(const char* drive_name)
 		return r;
 
 	static_sprintf(src, "%s\\SecureBootUpdates\\SKUSiPolicy.p7b", system_dir);
-	static_sprintf(dst, "%s\\efi\\microsoft\\boot\\SKUSiPolicy.p7b", drive_name);
+	static_sprintf(dst, "%s\\EFI\\Microsoft\\Boot\\SKUSiPolicy.p7b", drive_name);
 	if ((_stat64U(dst, &stat64) != 0) && (_stat64U(src, &stat64) == 0)) {
 		uprintf("Copying: %s (%s) (from %s)", dst, SizeToHumanReadable(stat64.st_size, FALSE, FALSE), src);
 		r = CopyFileU(src, dst, TRUE);
