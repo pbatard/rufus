@@ -1029,7 +1029,7 @@ inflate_unzip_internal(STATE_PARAM transformer_state_t *xstate)
 	error_msg = "corrupted data";
 	if (setjmp(error_jmp)) {
 		/* Error from deep inside zip machinery */
-		bb_simple_error_msg("corrupted data");
+		bb_simple_error_msg("%s", error_msg);
 		n = -1;
 		goto ret;
 	}
@@ -1272,7 +1272,7 @@ unpack_gz_stream(transformer_state_t *xstate)
 
 	n = inflate_unzip_internal(PASS_STATE xstate);
 	if (n < 0) {
-		total = (n == -ENOSPC)?xstate->mem_output_size_max:n;
+		total = (n == -ENOSPC) ? xstate->mem_output_size_max : n;
 		goto ret;
 	}
 	total += n;

@@ -98,7 +98,7 @@ typedef struct {
 	BYTE        Hash[0];
 } CIFileRuleData;
 
-typedef enum {
+enum {
 	CI_DENY = 0,
 	CI_ALLOW,
 	CI_FILE_ATTRIBUTES,

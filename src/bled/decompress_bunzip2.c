@@ -42,7 +42,7 @@
 #include "bb_archive.h"
 
 #if 0
-# define dbg(...) bb_error_msg(__VA_ARGS__)
+# define dbg(...) bb_printf(__VA_ARGS__)
 #else
 # define dbg(...) ((void)0)
 #endif

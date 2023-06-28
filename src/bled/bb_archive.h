@@ -261,6 +261,8 @@ static inline int transformer_switch_file(transformer_state_t* xstate)
 		xstate->dst_fd = -1;
 	}
 	_snprintf_s(dst, sizeof(dst), _TRUNCATE, "%s/%s", xstate->dst_dir, xstate->dst_name);
+	free(xstate->dst_name);
+	xstate->dst_name = NULL;
 	for (i = 0; i < strlen(dst); i++) {
 		if (dst[i] == '/')
 			dst[i] = '\\';

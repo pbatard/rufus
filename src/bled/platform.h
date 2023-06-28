@@ -57,11 +57,7 @@
  */
 #if defined(__GNUC__)
 #define RETURNS_MALLOC __attribute__ ((malloc))
-#ifdef __MINGW32__
-#define PACKED __attribute__ ((packed, gcc_struct))
-#else
 #define PACKED __attribute__ ((__packed__))
-#endif
 #define ALIGNED(m) __attribute__ ((__aligned__(m)))
 #define PRAGMA_BEGIN_PACKED
 #define PRAGMA_END_PACKED

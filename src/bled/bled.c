@@ -1,7 +1,7 @@
 /*
  * Bled (Base Library for Easy Decompression)
  *
- * Copyright © 2014-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2023 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -54,7 +54,7 @@ unpacker_t unpacker[BLED_COMPRESSION_MAX] = {
 int64_t bled_uncompress(const char* src, const char* dst, int type)
 {
 	transformer_state_t xstate;
-	int64_t ret;
+	int64_t ret = -1;
 
 	if (!bled_initialized) {
 		bb_error_msg("The library has not been initialized");
@@ -85,17 +85,16 @@ int64_t bled_uncompress(const char* src, const char* dst, int type)
 
 	if (setjmp(bb_error_jmp))
 		goto err;
+
 	ret = unpacker[type](&xstate);
-	_close(xstate.src_fd);
-	_close(xstate.dst_fd);
-	return ret;
 
 err:
+	free(xstate.dst_name);
 	if (xstate.src_fd > 0)
 		_close(xstate.src_fd);
 	if (xstate.dst_fd > 0)
 		_close(xstate.dst_fd);
-	return -1;
+	return ret;
 }
 
 /* Uncompress using Windows handles */
@@ -132,6 +131,7 @@ int64_t bled_uncompress_with_handles(HANDLE hSrc, HANDLE hDst, int type)
 
 	if (setjmp(bb_error_jmp))
 		return -1;
+
 	return unpacker[type](&xstate);
 }
 
@@ -139,7 +139,7 @@ int64_t bled_uncompress_with_handles(HANDLE hSrc, HANDLE hDst, int type)
 int64_t bled_uncompress_to_buffer(const char* src, char* buf, size_t size, int type)
 {
 	transformer_state_t xstate;
-	int64_t ret;
+	int64_t ret = -1;
 
 	if (!bled_initialized) {
 		bb_error_msg("The library has not been initialized");
@@ -177,22 +177,21 @@ int64_t bled_uncompress_to_buffer(const char* src, char* buf, size_t size, int t
 
 	if (setjmp(bb_error_jmp))
 		goto err;
+
 	ret = unpacker[type](&xstate);
-	if (src[0] != 0)
-		_close(xstate.src_fd);
-	return ret;
 
 err:
-	if (xstate.src_fd > 0)
+	free(xstate.dst_name);
+	if ((src[0] != 0) && (xstate.src_fd > 0))
 		_close(xstate.src_fd);
-	return -1;
+	return ret;
 }
 
 /* Uncompress all files from archive 'src', compressed using 'type', to destination dir 'dir' */
 int64_t bled_uncompress_to_dir(const char* src, const char* dir, int type)
 {
 	transformer_state_t xstate;
-	int64_t ret;
+	int64_t ret = -1;
 
 	if (!bled_initialized) {
 		bb_error_msg("The library has not been initialized");
@@ -220,18 +219,16 @@ int64_t bled_uncompress_to_dir(const char* src, const char* dir, int type)
 
 	if (setjmp(bb_error_jmp))
 		goto err;
+
 	ret = unpacker[type](&xstate);
-	_close(xstate.src_fd);
-	if (xstate.dst_fd > 0)
-		_close(xstate.dst_fd);
-	return ret;
 
 err:
+	free(xstate.dst_name);
 	if (xstate.src_fd > 0)
 		_close(xstate.src_fd);
 	if (xstate.dst_fd > 0)
 		_close(xstate.dst_fd);
-	return -1;
+	return ret;
 }
 
 int64_t bled_uncompress_from_buffer_to_buffer(const char* src, const size_t src_len, char* dst, size_t dst_len, int type)
