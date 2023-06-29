@@ -140,6 +140,26 @@ do { if (BB_BIG_ENDIAN) { \
 	(cde).fmt.cdf_offset = SWAP_LE32((cde).fmt.cdf_offset); \
 }} while (0)
 
+/* Extra records */
+#define EXTRA_HEADER_LEN 4
+
+PRAGMA_BEGIN_PACKED
+typedef union {
+	uint8_t raw[EXTRA_HEADER_LEN];
+	struct {
+		uint16_t tag;
+		uint16_t length;
+		/* extra record follows */
+	} fmt PACKED;
+} extra_header_t;
+PRAGMA_END_PACKED
+
+#define FIX_ENDIANNESS_EXTRA(ext) \
+do { if (BB_BIG_ENDIAN) { \
+	(ext).fmt.tag = SWAP_LE16((ext).fmt.tag); \
+	(ext).fmt.length = SWAP_LE32((ext).fmt.length); \
+}} while (0)
+
 /* ZIP64 records */
 #define ZIP64_LEN 20
 
@@ -147,8 +167,8 @@ PRAGMA_BEGIN_PACKED
 typedef union {
 	uint8_t raw[ZIP64_LEN];
 	struct {
-		/* uint16_t signature; 00 01 */
-		uint16_t signature;
+		/* uint16_t tag; 00 01 */
+		uint16_t tag;
 		uint16_t length;
 		uint64_t ucmpsize PACKED;
 		uint64_t cmpsize PACKED;
@@ -158,8 +178,6 @@ PRAGMA_END_PACKED
 
 #define FIX_ENDIANNESS_ZIP64(z64) \
 do { if (BB_BIG_ENDIAN) { \
-	(z64).fmt.signature = SWAP_LE16((z64).fmt.signature); \
-	(z64).fmt.length = SWAP_LE32((z64).fmt.length); \
 	(z64).fmt.cmpsize = SWAP_LE64((z64).fmt.cmpsize); \
 	(z64).fmt.ucmpsize = SWAP_LE64((z64).fmt.ucmpsize); \
 }} while (0)
@@ -191,25 +209,22 @@ do { if (BB_BIG_ENDIAN) { \
 	(c64).fmt.cdf_offset = SWAP_LE64((c64).fmt.cdf_offset); \
 }} while (0)
 
-struct BUG {
+inline void BUG() {
 	/* Check the offset of the last element, not the length.  This leniency
 	 * allows for poor packing, whereby the overall struct may be too long,
 	 * even though the elements are all in the right place.
 	 */
-	char BUG_zip_header_must_be_26_bytes[
+	BUILD_BUG_ON(
 		offsetof(zip_header_t, fmt.extra_len) + 2
-			== ZIP_HEADER_LEN ? 1 : -1];
-	char BUG_cdf_header_must_be_42_bytes[
+			!= ZIP_HEADER_LEN);
+	BUILD_BUG_ON(
 		offsetof(cdf_header_t, fmt.relative_offset_of_local_header) + 4
-			== CDF_HEADER_LEN ? 1 : -1];
-	char BUG_cde_must_be_16_bytes[
-		sizeof(cde_t) == CDE_LEN ? 1 : -1];
-	char BUG_zip64_must_be_20_bytes[
-		sizeof(zip64_t) == ZIP64_LEN ? 1 : -1];
-	char BUG_cde64_must_be_52_bytes[
-		sizeof(cde64_t) == CDE64_LEN ? 1 : -1];
-};
-
+			!= CDF_HEADER_LEN);
+	BUILD_BUG_ON(sizeof(cde_t) != CDE_LEN);
+	BUILD_BUG_ON(sizeof(extra_header_t) != EXTRA_HEADER_LEN);
+	BUILD_BUG_ON(sizeof(zip64_t) != ZIP64_LEN);
+	BUILD_BUG_ON(sizeof(cde64_t) != CDE64_LEN);
+}
 
 /* This value means that we failed to find CDF */
 #define BAD_CDF_OFFSET ((uint32_t)0xffffffff)
@@ -381,6 +396,8 @@ static void unzip_skip(int fd, off_t skip)
 static void unzip_set_xstate(transformer_state_t* xstate, zip_header_t* zip)
 {
 	uint8_t* buf = NULL;
+	uint16_t i = 0;
+	extra_header_t* extra;
 	zip64_t* zip64;
 
 	/* Set the default sizes for non ZIP64 content */
@@ -396,20 +413,39 @@ static void unzip_set_xstate(transformer_state_t* xstate, zip_header_t* zip)
 	xstate->dst_name[zip->fmt.filename_len] = 0;
 
 	/* Read the extra data */
-	if (zip->fmt.extra_len != 0) {
+	if (zip->fmt.extra_len) {
+		dbg("Reading extra data");
 		buf = malloc(zip->fmt.extra_len);
 		if (buf == NULL)
 			goto err;
 		xread(xstate->src_fd, buf, zip->fmt.extra_len);
 	}
 
-	/* Process the ZIP64 data */
-	zip64 = (zip64_t*)buf;
-	FIX_ENDIANNESS_ZIP64(*zip64);
-	if (zip->fmt.cmpsize == 0xffffffffL && zip->fmt.ucmpsize == 0xffffffffL &&
-		zip->fmt.extra_len >= sizeof(zip64_t) && zip64->fmt.signature == SWAP_LE16(0x0001)) {
-		xstate->dst_size = zip64->fmt.ucmpsize;
-		xstate->bytes_in = zip64->fmt.cmpsize;
+	/* Process the extra records */
+	if (zip->fmt.extra_len < EXTRA_HEADER_LEN + 1)
+		goto err;
+	for (i = 0; i < zip->fmt.extra_len - EXTRA_HEADER_LEN; ) {
+		extra = (extra_header_t*)&buf[i];
+		FIX_ENDIANNESS_EXTRA(*extra);
+		dbg("  tag:0x%04x len:%u",
+			(unsigned)extra->fmt.tag,
+			(unsigned)extra->fmt.length
+		);
+		i += EXTRA_HEADER_LEN + extra->fmt.length;
+		/* Process the ZIP64 data */
+		if (extra->fmt.tag == SWAP_LE16(0x0001)) {
+			zip64 = (zip64_t*)extra;
+			FIX_ENDIANNESS_ZIP64(*zip64);
+			if ((zip->fmt.cmpsize == 0xffffffffL || zip->fmt.ucmpsize == 0xffffffffL) &&
+				EXTRA_HEADER_LEN + zip64->fmt.length >= ZIP64_LEN) {
+				dbg("Actual cmpsize:0x%"OFF_FMT"x ucmpsize:0x%"OFF_FMT"x",
+					zip64->fmt.cmpsize,
+					zip64->fmt.ucmpsize
+				);
+				xstate->dst_size = zip64->fmt.ucmpsize;
+				xstate->bytes_in = zip64->fmt.cmpsize;
+			}
+		}
 	}
 
 err:
@@ -448,7 +484,7 @@ unzip_extract(zip_header_t* zip, transformer_state_t* xstate)
 		 * and will seek to the correct beginning of next file.
 		 */
 		xstate->bytes_out = unpack_bz2_stream(xstate);
-		if (xstate->bytes_out < 0)
+		if ((int64_t)xstate->bytes_out < 0)
 			bb_simple_error_msg_and_die("inflate error");
 	}
 #endif
@@ -456,7 +492,7 @@ unzip_extract(zip_header_t* zip, transformer_state_t* xstate)
 	else if (zip->fmt.method == 14) {
 		/* Not tested yet */
 		xstate->bytes_out = unpack_lzma_stream(xstate);
-		if (xstate->bytes_out < 0)
+		if ((int64_t)xstate->bytes_out < 0)
 			bb_simple_error_msg_and_die("inflate error");
 	}
 #endif
@@ -464,7 +500,7 @@ unzip_extract(zip_header_t* zip, transformer_state_t* xstate)
 	else if (zip->fmt.method == 95) {
 		/* Not tested yet */
 		xstate->bytes_out = unpack_xz_stream(xstate);
-		if (xstate->bytes_out < 0)
+		if ((int64_t)xstate->bytes_out < 0)
 			bb_simple_error_msg_and_die("inflate error");
 	}
 #endif

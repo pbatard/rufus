@@ -149,7 +149,6 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_vtsi_stream(transformer_state_t* xsta
 	buf = (uint8_t*)segment + footer.segment_num * sizeof(VTSI_SEGMENT);
 
 	lseek(src_fd, footer.segment_offset, SEEK_SET);
-	/* coverity[tainted_data_argument] */
 	safe_read(src_fd, segment, footer.segment_num * sizeof(VTSI_SEGMENT));
 
 	if (!check_vtsi_segment(&footer, segment))

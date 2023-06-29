@@ -39,24 +39,25 @@
 #include <sys/types.h>
 #include <io.h>
 
-#define BB_BUFSIZE 0x40000
+#define BB_BUFSIZE                  0x40000
+#define ONE_TB                      1099511627776ULL
 
-#define ENABLE_DESKTOP 1
+#define ENABLE_DESKTOP              1
 #if ENABLE_DESKTOP
-#define IF_DESKTOP(x) x
+#define IF_DESKTOP(x)               x
 #define IF_NOT_DESKTOP(x)
 #else
 #define IF_DESKTOP(x)
-#define IF_NOT_DESKTOP(x) x
+#define IF_NOT_DESKTOP(x)           x
 #endif
 #define IF_NOT_FEATURE_LZMA_FAST(x) x
-#define ENABLE_FEATURE_UNZIP_CDF 1
-#define ENABLE_FEATURE_UNZIP_BZIP2 1
-#define ENABLE_FEATURE_UNZIP_LZMA 1
-#define ENABLE_FEATURE_UNZIP_XZ 1
+#define ENABLE_FEATURE_UNZIP_CDF    1
+#define ENABLE_FEATURE_UNZIP_BZIP2  1
+#define ENABLE_FEATURE_UNZIP_LZMA   1
+#define ENABLE_FEATURE_UNZIP_XZ     1
 
-#define uoff_t unsigned off_t
-#define OFF_FMT "ll"
+#define uoff_t                      unsigned off_t
+#define OFF_FMT                     "ll"
 
 #ifndef _MODE_T_
 #define _MODE_T_
@@ -147,7 +148,7 @@ extern unsigned long* bled_cancel_request;
 #define xfunc_die() longjmp(bb_error_jmp, 1)
 #define bb_printf(...) do { if (bled_printf != NULL) bled_printf(__VA_ARGS__); \
 	else { printf(__VA_ARGS__); putchar('\n'); } } while(0)
-#define bb_error_msg(...) bb_printf("Error: " __VA_ARGS__)
+#define bb_error_msg(...) bb_printf("\nError: " __VA_ARGS__)
 #define bb_error_msg_and_die(...) do {bb_error_msg(__VA_ARGS__); xfunc_die();} while(0)
 #define bb_error_msg_and_err(...) do {bb_error_msg(__VA_ARGS__); goto err;} while(0)
 #define bb_perror_msg bb_error_msg
@@ -191,6 +192,11 @@ static inline int full_read(int fd, void *buf, unsigned int count) {
 		errno = EFAULT;
 		return -1;
 	}
+	/* None of our r/w buffers should be larger than BB_BUFSIZE */
+	if (count > BB_BUFSIZE) {
+		errno = E2BIG;
+		return -1;
+	}
 	if ((bled_cancel_request != NULL) && (*bled_cancel_request != 0)) {
 		errno = EINTR;
 		return -1;
@@ -215,6 +221,12 @@ static inline int full_read(int fd, void *buf, unsigned int count) {
 
 static inline int full_write(int fd, const void* buffer, unsigned int count)
 {
+	/* None of our r/w buffers should be larger than BB_BUFSIZE */
+	if (count > BB_BUFSIZE) {
+		errno = E2BIG;
+		return -1;
+	}
+
 	return (bled_write != NULL) ? bled_write(fd, buffer, count) : _write(fd, buffer, count);
 }
 
@@ -225,6 +237,10 @@ static inline void bb_copyfd_exact_size(int fd1, int fd2, off_t size)
 
 	if (fd1 < 0 || fd2 < 0)
 		bb_error_msg_and_die("invalid fd");
+
+	/* Enforce a 1 TB limit to keep Coverity happy */
+	if (size > ONE_TB)
+		bb_error_msg_and_die("too large");
 
 	buf = malloc(BB_BUFSIZE);
 	if (buf == NULL)
@@ -246,7 +262,7 @@ static inline void bb_copyfd_exact_size(int fd1, int fd2, off_t size)
 			free(buf);
 			bb_error_msg_and_die("write error");
 		}
-		if (w == 0) {
+		if (w != r) {
 			bb_error_msg("short write");
 			break;
 		}

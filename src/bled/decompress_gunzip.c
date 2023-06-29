@@ -1197,9 +1197,13 @@ static int check_header_gzip(STATE_PARAM transformer_state_t *xstate)
 	if (header.formatted.flags & 0x18) {
 		while (1) {
 			do {
+				/* None of our buffers should be larger than BB_BUFSIZE */
+				if (bytebuffer_offset > BB_BUFSIZE) {
+					bb_error_msg("buffer overflow");
+					return 0;
+				}
 				if (!top_up(PASS_STATE 1))
 					return 0;
-			// coverity[tainted_data]
 			} while (bytebuffer[bytebuffer_offset++] != 0);
 			if ((header.formatted.flags & 0x18) != 0x18)
 				break;
