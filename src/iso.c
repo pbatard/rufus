@@ -1283,7 +1283,7 @@ out:
 		update_md5sum();
 		if (archive_path != NULL) {
 			uprintf("● Adding files from %s", archive_path);
-			bled_init(NULL, NULL, NULL, NULL, alt_print_extracted_file, NULL);
+			bled_init(256 * KB, NULL, NULL, NULL, NULL, alt_print_extracted_file, NULL);
 			bled_uncompress_to_dir(archive_path, dest_dir, BLED_COMPRESSION_ZIP);
 			bled_exit();
 		}

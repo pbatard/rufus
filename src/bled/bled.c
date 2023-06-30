@@ -31,6 +31,7 @@ jmp_buf bb_error_jmp;
 char* bb_virtual_buf = NULL;
 size_t bb_virtual_len = 0, bb_virtual_pos = 0;
 int bb_virtual_fd = -1;
+uint32_t BB_BUFSIZE = 0x10000;
 
 static long long int unpack_none(transformer_state_t *xstate)
 {
@@ -265,7 +266,8 @@ int64_t bled_uncompress_from_buffer_to_buffer(const char* src, const size_t src_
 }
 
 /* Initialize the library.
- * When the parameters are not NULL you can:
+ * When the parameters are not NULL or zero you can:
+ * - specify the buffer size to use (must be larger than 64KB and a power of two)
  * - specify the printf-like function you want to use to output message
  *   void print_function(const char* format, ...);
  * - specify the read/write functions you want to use;
@@ -275,18 +277,25 @@ int64_t bled_uncompress_from_buffer_to_buffer(const char* src, const size_t src_
  *   void switch_function(const char* filename, const uint64_t filesize);
  * - point to an unsigned long variable, to be used to cancel operations when set to non zero
  */
-int bled_init(printf_t print_function, read_t read_function, write_t write_function, 
+int bled_init(uint32_t buffer_size, printf_t print_function, read_t read_function, write_t write_function,
 	progress_t progress_function, switch_t switch_function, unsigned long* cancel_request)
 {
 	if (bled_initialized)
 		return -1;
-	bled_initialized = true;
+	BB_BUFSIZE = buffer_size;
+	/* buffer_size must be larger than 64 KB and a power of two */
+	if (buffer_size < 0x10000 || (buffer_size & (buffer_size - 1)) != 0) {
+		if (buffer_size != 0 && print_function != NULL)
+			print_function("bled_init: invalid buffer_size, defaulting to 64 KB");
+		BB_BUFSIZE = 0x10000;
+	}
 	bled_printf = print_function;
 	bled_read = read_function;
 	bled_write = write_function;
 	bled_progress = progress_function;
 	bled_switch = switch_function;
 	bled_cancel_request = cancel_request;
+	bled_initialized = true;
 	return 0;
 }
 

@@ -39,7 +39,6 @@
 #include <sys/types.h>
 #include <io.h>
 
-#define BB_BUFSIZE                  0x40000
 #define ONE_TB                      1099511627776ULL
 
 #define ENABLE_DESKTOP              1
@@ -105,6 +104,7 @@ typedef unsigned int uid_t;
 #define get_le16(ptr) (*(const uint16_t *)(ptr))
 #endif
 
+extern uint32_t BB_BUFSIZE;
 extern smallint bb_got_signal;
 extern uint32_t *global_crc32_table;
 extern jmp_buf bb_error_jmp;

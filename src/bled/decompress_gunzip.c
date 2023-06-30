@@ -45,10 +45,11 @@ typedef struct huft_t {
 	} v;
 } huft_t;
 
+/* gunzip_window size--must be a power of two, and
+ * at least 32K for zip's deflate method */
+#define GUNZIP_WSIZE BB_BUFSIZE
+
 enum {
-	/* gunzip_window size--must be a power of two, and
-	 * at least 32K for zip's deflate method */
-	GUNZIP_WSIZE = BB_BUFSIZE,
 	/* If BMAX needs to be larger than 16, then h and x[] should be ulg. */
 	BMAX = 16,	/* maximum bit length of any code (16 for explode) */
 	N_MAX = 288,	/* maximum number of codes in any set */
