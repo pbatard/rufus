@@ -185,10 +185,6 @@ static __inline uint16_t remap16(uint16_t src, uint16_t* map, const BOOL reverse
 #define ERROR_OFFSET_ALIGNMENT_VIOLATION        327
 #endif
 
-/* The following is used for native ISO mounting in Windows 8 or later */
-#define VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT \
-	{ 0xEC984AECL, 0xA0F9, 0x47e9, { 0x90, 0x1F, 0x71, 0x41, 0x5A, 0x66, 0x34, 0x5B } }
-
 /* RISC-V is still bleeding edge */
 #ifndef IMAGE_FILE_MACHINE_RISCV32
 #define IMAGE_FILE_MACHINE_RISCV32 0x5032

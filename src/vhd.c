@@ -18,13 +18,15 @@
  */
 
 #include <windows.h>
+#include <windowsx.h>
 #include <stdlib.h>
 #include <io.h>
 #include <rpc.h>
 #include <time.h>
 
-#include "vhd.h"
 #include "rufus.h"
+#include "ui.h"
+#include "vhd.h"
 #include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
@@ -45,7 +47,6 @@ PF_TYPE_DECL(WINAPI, BOOL, WIMGetImageInformation, (HANDLE, PVOID, PDWORD));
 PF_TYPE_DECL(WINAPI, BOOL, WIMCloseHandle, (HANDLE));
 PF_TYPE_DECL(WINAPI, DWORD, WIMRegisterMessageCallback, (HANDLE, FARPROC, PVOID));
 PF_TYPE_DECL(WINAPI, DWORD, WIMUnregisterMessageCallback, (HANDLE, FARPROC));
-PF_TYPE_DECL(RPC_ENTRY, RPC_STATUS, UuidCreate, (UUID __RPC_FAR*));
 
 typedef struct {
 	int index;
@@ -58,6 +59,8 @@ uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 HANDLE wim_thread = NULL;
 extern int default_thread_priority;
 extern BOOL ignore_boot_marker;
+extern RUFUS_DRIVE rufus_drive[MAX_DRIVES];
+extern HANDLE format_thread;
 
 static uint8_t wim_flags = 0;
 static uint32_t progress_report_mask;
@@ -76,102 +79,6 @@ static BOOL Get7ZipPath(void)
 		return (_accessU(sevenzip_path, 0) != -1);
 	}
 	return FALSE;
-}
-
-BOOL AppendVHDFooter(const char* vhd_path)
-{
-	const char creator_os[4] = VHD_FOOTER_CREATOR_HOST_OS_WINDOWS;
-	const char creator_app[4] = { 'r', 'u', 'f', 's' };
-	BOOL r = FALSE;
-	DWORD size;
-	LARGE_INTEGER li;
-	HANDLE handle = INVALID_HANDLE_VALUE;
-	vhd_footer* footer = NULL;
-	uint64_t totalSectors;
-	uint16_t cylinders = 0;
-	uint8_t heads, sectorsPerTrack;
-	uint32_t cylinderTimesHeads;
-	uint32_t checksum;
-	size_t i;
-
-	PF_INIT(UuidCreate, Rpcrt4);
-	handle = CreateFileU(vhd_path, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	li.QuadPart = 0;
-	if ((handle == INVALID_HANDLE_VALUE) || (!SetFilePointerEx(handle, li, &li, FILE_END))) {
-		uprintf("Could not open image '%s': %s", vhd_path, WindowsErrorString());
-		goto out;
-	}
-	footer = (vhd_footer*)calloc(1, sizeof(vhd_footer));
-	if (footer == NULL) {
-		uprintf("Could not allocate VHD footer");
-		goto out;
-	}
-
-	memcpy(footer->cookie, conectix_str, sizeof(footer->cookie));
-	footer->features = bswap_uint32(VHD_FOOTER_FEATURES_RESERVED);
-	footer->file_format_version = bswap_uint32(VHD_FOOTER_FILE_FORMAT_V1_0);
-	footer->data_offset = bswap_uint64(VHD_FOOTER_DATA_OFFSET_FIXED_DISK);
-	footer->timestamp = bswap_uint32((uint32_t)(_time64(NULL) - SECONDS_SINCE_JAN_1ST_2000));
-	memcpy(footer->creator_app, creator_app, sizeof(creator_app));
-	footer->creator_version = bswap_uint32((rufus_version[0]<<16)|rufus_version[1]);
-	memcpy(footer->creator_host_os, creator_os, sizeof(creator_os));
-	footer->original_size = bswap_uint64(li.QuadPart);
-	footer->current_size = footer->original_size;
-	footer->disk_type = bswap_uint32(VHD_FOOTER_TYPE_FIXED_HARD_DISK);
-	if ((pfUuidCreate == NULL) || (pfUuidCreate(&footer->unique_id) != RPC_S_OK))
-		uprintf("Warning: could not set VHD UUID");
-
-	// Compute CHS, as per the VHD specs
-	totalSectors = li.QuadPart / 512;
-	if (totalSectors > 65535 * 16 * 255) {
-		totalSectors = 65535 * 16 * 255;
-	}
-
-	if (totalSectors >= 65535 * 16 * 63) {
-		sectorsPerTrack = 255;
-		heads = 16;
-		cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
-	} else {
-		sectorsPerTrack = 17;
-		cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
-
-		heads = (cylinderTimesHeads + 1023) / 1024;
-
-		if (heads < 4) {
-			heads = 4;
-		}
-		if (cylinderTimesHeads >= ((uint32_t)heads * 1024) || heads > 16) {
-			sectorsPerTrack = 31;
-			heads = 16;
-			cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
-		}
-		if (cylinderTimesHeads >= ((uint32_t)heads * 1024)) {
-			sectorsPerTrack = 63;
-			heads = 16;
-			cylinderTimesHeads = (uint32_t)(totalSectors / sectorsPerTrack);
-		}
-	}
-	cylinders = cylinderTimesHeads / heads;
-	footer->disk_geometry.chs.cylinders = bswap_uint16(cylinders);
-	footer->disk_geometry.chs.heads = heads;
-	footer->disk_geometry.chs.sectors = sectorsPerTrack;
-
-	// Compute the VHD footer checksum
-	for (checksum=0, i=0; i<sizeof(vhd_footer); i++)
-		checksum += ((uint8_t*)footer)[i];
-	footer->checksum = bswap_uint32(~checksum);
-
-	if (!WriteFileWithRetry(handle, footer, sizeof(vhd_footer), &size, WRITE_RETRIES)) {
-		uprintf("Could not write VHD footer: %s", WindowsErrorString());
-		goto out;
-	}
-	r = TRUE;
-
-out:
-	safe_free(footer);
-	safe_closehandle(handle);
-	return r;
 }
 
 typedef struct {
@@ -976,4 +883,142 @@ BOOL WimApplyImage(const char* image, int index, const char* dst)
 		dw = 0;
 	wim_thread = NULL;
 	return dw;
+}
+
+// Since we no longer have to deal with Windows 7, we can call on CreateVirtualDisk()
+// to backup a physical disk to VHD/VHDX. Now if this could also be used to create an
+// ISO from optical media that would be swell, but no matter what I tried, it didn't
+// seem possible...
+static DWORD WINAPI SaveImageThread(void* param)
+{
+	IMG_SAVE* img_save = (IMG_SAVE*)param;
+	HANDLE handle = INVALID_HANDLE_VALUE;
+	WCHAR* wDst = utf8_to_wchar(img_save->ImagePath);
+	WCHAR* wSrc = utf8_to_wchar(GetPhysicalName(img_save->DeviceNum));
+	VIRTUAL_STORAGE_TYPE vtype = { img_save->Type, VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT };
+	STOPGAP_CREATE_VIRTUAL_DISK_PARAMETERS vparams = { 0 };
+	VIRTUAL_DISK_PROGRESS vprogress = { 0 };
+	OVERLAPPED overlapped = { 0 };
+	DWORD result, flags;
+
+	assert(img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD ||
+		img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHDX);
+
+	UpdateProgressWithInfoInit(NULL, FALSE);
+
+	vparams.Version = CREATE_VIRTUAL_DISK_VERSION_2;
+	vparams.Version2.UniqueId = GUID_NULL;
+	vparams.Version2.BlockSizeInBytes = CREATE_VIRTUAL_DISK_PARAMETERS_DEFAULT_BLOCK_SIZE;
+	vparams.Version2.SectorSizeInBytes = CREATE_VIRTUAL_DISK_PARAMETERS_DEFAULT_SECTOR_SIZE;
+	vparams.Version2.PhysicalSectorSizeInBytes = SelectedDrive.SectorSize;
+	vparams.Version2.SourcePath = wSrc;
+
+	// When CREATE_VIRTUAL_DISK_FLAG_CREATE_BACKING_STORAGE is specified with
+	// a source path, CreateVirtualDisk() automatically clones the source to
+	// the virtual disk.
+	flags = CREATE_VIRTUAL_DISK_FLAG_CREATE_BACKING_STORAGE;
+	// The following ensures that VHD images are stored uncompressed and can
+	// be used as DD images.
+	if (img_save->Type != VIRTUAL_STORAGE_TYPE_DEVICE_VHDX)
+		flags |= CREATE_VIRTUAL_DISK_FLAG_FULL_PHYSICAL_ALLOCATION;
+	// TODO: Use CREATE_VIRTUAL_DISK_FLAG_PREVENT_WRITES_TO_SOURCE_DISK?
+
+	overlapped.hEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
+
+	// CreateVirtualDisk() does not have an overwrite flag...
+	DeleteFileW(wDst);
+
+	result = CreateVirtualDisk(&vtype, wDst, VIRTUAL_DISK_ACCESS_NONE, NULL,
+		flags, 0, (PCREATE_VIRTUAL_DISK_PARAMETERS)&vparams, &overlapped, &handle);
+	if (result != ERROR_SUCCESS && result != ERROR_IO_PENDING) {
+		SetLastError(result);
+		uprintf("Could not create virtual disk: %s", WindowsErrorString());
+		goto out;
+	}
+
+	if (result == ERROR_IO_PENDING) {
+		while ((result = WaitForSingleObject(overlapped.hEvent, 100)) == WAIT_TIMEOUT) {
+			if (IS_ERROR(FormatStatus) && (SCODE_CODE(FormatStatus) == ERROR_CANCELLED)) {
+				CancelIoEx(handle, &overlapped);
+				goto out;
+			}
+			if (GetVirtualDiskOperationProgress(handle, &overlapped, &vprogress) == ERROR_SUCCESS) {
+				if (vprogress.OperationStatus == ERROR_IO_PENDING)
+					UpdateProgressWithInfo(OP_FORMAT, MSG_261, vprogress.CurrentValue, vprogress.CompletionValue);
+			}
+		}
+		if (result != WAIT_OBJECT_0) {
+			uprintf("Could not save virtual disk: %s", WindowsErrorString());
+			goto out;
+		}
+	}
+
+	UpdateProgressWithInfo(OP_FORMAT, MSG_261, SelectedDrive.DiskSize, SelectedDrive.DiskSize);
+	uprintf("Operation complete.");
+
+out:
+	safe_closehandle(handle);
+	safe_closehandle(overlapped.hEvent);
+	safe_free(wDst);
+	safe_free(wSrc);
+	safe_free(img_save->ImagePath);
+	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
+	ExitThread(0);
+}
+
+void SaveVHD(void)
+{
+	static IMG_SAVE img_save = { 0 };
+	char filename[128];
+	char path[MAX_PATH];
+	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
+	EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhdx", "*.vhd"), __VA_GROUP__(lmprintf(MSG_342), lmprintf(MSG_343)));
+	ULARGE_INTEGER free_space;
+
+	if ((DriveIndex < 0) || (format_thread != NULL))
+		return;
+
+	static_sprintf(filename, "%s.vhdx", rufus_drive[DriveIndex].label);
+	img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
+	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
+	img_save.Type = safe_strstr(img_save.ImagePath, ".vhdx") != NULL ?
+		VIRTUAL_STORAGE_TYPE_DEVICE_VHDX : VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
+	img_save.BufSize = DD_BUFFER_SIZE;
+	img_save.DeviceSize = SelectedDrive.DiskSize;
+	if (img_save.ImagePath != NULL) {
+		// Reset all progress bars
+		SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
+		FormatStatus = 0;
+		free_space.QuadPart = 0;
+		if ((GetVolumePathNameA(img_save.ImagePath, path, sizeof(path)))
+			&& (GetDiskFreeSpaceExA(path, &free_space, NULL, NULL))
+			&& ((LONGLONG)free_space.QuadPart > (SelectedDrive.DiskSize + 512))) {
+			// Disable all controls except cancel
+			EnableControls(FALSE, FALSE);
+			FormatStatus = 0;
+			InitProgress(TRUE);
+			format_thread = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
+			if (format_thread != NULL) {
+				uprintf("\r\nSave to VHD operation started");
+				PrintInfo(0, -1);
+				SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
+			} else {
+				uprintf("Unable to start VHD save thread");
+				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+				safe_free(img_save.ImagePath);
+				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+			}
+		} else {
+			if (free_space.QuadPart == 0) {
+				uprintf("Unable to isolate drive name for VHD save");
+				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_PATH_NOT_FOUND;
+			} else {
+				// TODO: Might be salvageable for compressed VHDX
+				uprintf("The VHD size is too large for the target drive");
+				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_FILE_TOO_LARGE;
+			}
+			safe_free(img_save.ImagePath);
+			PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+		}
+	}
 }

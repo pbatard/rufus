@@ -43,6 +43,8 @@
 #include <cdio/udf.h>
 
 #include "rufus.h"
+#include "ui.h"
+#include "drive.h"
 #include "libfat.h"
 #include "missing.h"
 #include "resource.h"
@@ -82,6 +84,7 @@ RUFUS_IMG_REPORT img_report;
 int64_t iso_blocking_status = -1;
 extern BOOL preserve_timestamps, enable_ntfs_compression;
 extern char* archive_path;
+extern HANDLE format_thread;
 BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
@@ -1713,7 +1716,7 @@ static HANDLE mounted_handle = INVALID_HANDLE_VALUE;
 char* MountISO(const char* path)
 {
 	VIRTUAL_STORAGE_TYPE vtype = { 1, VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT };
-	ATTACH_VIRTUAL_DISK_PARAMETERS vparams = {0};
+	ATTACH_VIRTUAL_DISK_PARAMETERS vparams = { 0 };
 	DWORD r;
 	wchar_t wtmp[128];
 	ULONG size = ARRAYSIZE(wtmp);
@@ -1765,4 +1768,155 @@ void UnMountISO(void)
 	safe_closehandle(mounted_handle);
 out:
 	physical_path[0] = 0;
+}
+
+// TODO: If we can't get save to ISO from virtdisk, we might as well drop this
+static DWORD WINAPI SaveISOThread(void* param)
+{
+	BOOL s;
+	DWORD rSize, wSize;
+	IMG_SAVE* img_save = (IMG_SAVE*)param;
+	HANDLE hPhysicalDrive = INVALID_HANDLE_VALUE;
+	HANDLE hDestImage = INVALID_HANDLE_VALUE;
+	LARGE_INTEGER li;
+	uint8_t* buffer = NULL;
+	uint64_t wb;
+	int i;
+
+	assert(img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_ISO);
+
+	PrintInfoDebug(0, MSG_225);
+	hPhysicalDrive = CreateFileA(img_save->DevicePath, GENERIC_READ, FILE_SHARE_READ,
+		NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
+		goto out;
+	}
+
+	// In case someone poked the disc before us
+	li.QuadPart = 0;
+	if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
+		uprintf("Warning: Unable to rewind device position - wrong data might be copied!");
+	hDestImage = CreateFileU(img_save->ImagePath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
+		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hDestImage == INVALID_HANDLE_VALUE) {
+		uprintf("Could not open image '%s': %s", img_save->ImagePath, WindowsErrorString());
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
+		goto out;
+	}
+
+	buffer = (uint8_t*)_mm_malloc(img_save->BufSize, 16);
+	if (buffer == NULL) {
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
+		uprintf("Could not allocate buffer");
+		goto out;
+	}
+
+	uprintf("Will use a buffer size of %s", SizeToHumanReadable(img_save->BufSize, FALSE, FALSE));
+	uprintf("Saving to image '%s'...", img_save->ImagePath);
+
+	// Don't bother trying for something clever, using double buffering overlapped and whatnot:
+	// With Windows' default optimizations, sync read + sync write for sequential operations
+	// will be as fast, if not faster, than whatever async scheme you can come up with.
+	UpdateProgressWithInfoInit(NULL, FALSE);
+	for (wb = 0; ; wb += wSize) {
+		// Optical drives do not appear to increment the sectors to read automatically
+		li.QuadPart = wb;
+		if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
+			uprintf("Warning: Unable to set device position - wrong data might be copied!");
+		s = ReadFile(hPhysicalDrive, buffer,
+			(DWORD)MIN(img_save->BufSize, img_save->DeviceSize - wb), &rSize, NULL);
+		if (!s) {
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
+			uprintf("Read error: %s", WindowsErrorString());
+			goto out;
+		}
+		if (rSize == 0)
+			break;
+		UpdateProgressWithInfo(OP_FORMAT, MSG_261, wb, img_save->DeviceSize);
+		for (i = 1; i <= WRITE_RETRIES; i++) {
+			CHECK_FOR_USER_CANCEL;
+			s = WriteFile(hDestImage, buffer, rSize, &wSize, NULL);
+			if ((s) && (wSize == rSize))
+				break;
+			if (s)
+				uprintf("Write error: Wrote %d bytes, expected %d bytes", wSize, rSize);
+			else
+				uprintf("Write error: %s", WindowsErrorString());
+			if (i < WRITE_RETRIES) {
+				li.QuadPart = wb;
+				uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
+				Sleep(WRITE_TIMEOUT);
+				if (!SetFilePointerEx(hDestImage, li, NULL, FILE_BEGIN)) {
+					uprintf("Write error: Could not reset position - %s", WindowsErrorString());
+					goto out;
+				}
+			} else {
+				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+				goto out;
+			}
+			Sleep(200);
+		}
+		if (i > WRITE_RETRIES)
+			goto out;
+	}
+	if (wb != img_save->DeviceSize) {
+		uprintf("Error: wrote %s, expected %s", SizeToHumanReadable(wb, FALSE, FALSE),
+			SizeToHumanReadable(img_save->DeviceSize, FALSE, FALSE));
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+		goto out;
+	}
+	uprintf("Operation complete (Wrote %s).", SizeToHumanReadable(wb, FALSE, FALSE));
+
+out:
+	safe_free(img_save->ImagePath);
+	safe_mm_free(buffer);
+	safe_closehandle(hDestImage);
+	safe_unlockclose(hPhysicalDrive);
+	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
+	ExitThread(0);
+}
+
+void SaveISO(void)
+{
+	static IMG_SAVE img_save = { 0 };
+	char filename[33] = "disc_image.iso";
+	EXT_DECL(img_ext, filename, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
+
+	if (op_in_progress || (format_thread != NULL))
+		return;
+
+	img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_ISO;
+	if (!GetOpticalMedia(&img_save)) {
+		uprintf("No dumpable optical media found.");
+		return;
+	}
+	// Adjust the buffer size according to the disc size so that we get a decent speed.
+	for (img_save.BufSize = 32 * MB;
+		(img_save.BufSize > 8 * MB) && (img_save.DeviceSize <= img_save.BufSize * 64);
+		img_save.BufSize /= 2);
+	if ((img_save.Label != NULL) && (img_save.Label[0] != 0))
+		static_sprintf(filename, "%s.iso", img_save.Label);
+
+	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
+	if (img_save.ImagePath == NULL)
+		return;
+
+	uprintf("ISO media size %s", SizeToHumanReadable(img_save.DeviceSize, FALSE, FALSE));
+	SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
+	FormatStatus = 0;
+	// Disable all controls except cancel
+	EnableControls(FALSE, FALSE);
+	InitProgress(TRUE);
+	format_thread = CreateThread(NULL, 0, SaveISOThread, &img_save, 0, NULL);
+	if (format_thread != NULL) {
+		uprintf("\r\nSave to ISO operation started");
+		PrintInfo(0, -1);
+		SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
+	} else {
+		uprintf("Unable to start ISO save thread");
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+		safe_free(img_save.ImagePath);
+		PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+	}
 }

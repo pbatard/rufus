@@ -71,6 +71,7 @@
 #define PATCH_PROGRESS_TOTAL        207
 #define MAX_LOG_SIZE                0x7FFFFFFE
 #define MAX_REFRESH                 25			// How long we should wait to refresh UI elements (in ms)
+#define MARQUEE_TIMER_REFRESH       10			// Time between progress bar marquee refreshes, in ms
 #define MAX_GUID_STRING_LENGTH      40
 #define MAX_PARTITIONS              16			// Maximum number of partitions we handle
 #define MAX_ESP_TOGGLE              8			// Maximum number of entries we record to toggle GPT ESP back and forth
@@ -88,7 +89,6 @@
 #define WRITE_TIMEOUT               5000		// How long we should wait between write retries (in ms)
 #define SEARCH_PROCESS_TIMEOUT      10000		// How long we should search for conflicting processes before giving up (in ms)
 #define NET_SESSION_TIMEOUT         3500		// How long we should wait to connect, send or receive internet data
-#define MARQUEE_TIMER_REFRESH       10			// Time between progress bar marquee refreshes, in ms
 #define FS_DEFAULT                  FS_FAT32
 #define SINGLE_CLUSTERSIZE_DEFAULT  0x00000100
 #define BADLOCKS_PATTERN_TYPES      5
@@ -433,9 +433,6 @@ typedef struct {
 	char* release_notes;
 } RUFUS_UPDATE;
 
-#define IMG_SAVE_TYPE_VHD 1
-#define IMG_SAVE_TYPE_ISO 2
-
 typedef struct {
 	DWORD Type;
 	DWORD DeviceNum;
@@ -726,7 +723,6 @@ extern HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAcce
 	DWORD dwFlagsAndAttributes, LONGLONG fileSize);
 #define GetTextWidth(hDlg, id) GetTextSize(GetDlgItem(hDlg, id), NULL).cx
 
-DWORD WINAPI SaveImageThread(void* param);
 DWORD WINAPI HashThread(void* param);
 
 /* Hash tables */

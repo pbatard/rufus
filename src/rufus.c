@@ -87,7 +87,6 @@ static int selected_pt = -1, selected_fs = FS_UNKNOWN, preselected_fs = FS_UNKNO
 static int image_index = 0, select_index = 0;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static UINT uMBRChecked = BST_UNCHECKED;
-static HANDLE format_thread = NULL;
 static HWND hSelectImage = NULL, hStart = NULL;
 static char szTimer[12] = "00:00:00";
 static unsigned int timer;
@@ -121,7 +120,7 @@ WORD selected_langid = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 DWORD MainThreadId;
 HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hImageOption, hLogDialog = NULL, hProgress = NULL, hDiskID;
-HANDLE dialog_handle = NULL;
+HANDLE dialog_handle = NULL, format_thread = NULL;
 BOOL is_x86_64, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE, lock_drive = TRUE;
 BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, its_a_me_mario = FALSE;
 BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE;
@@ -862,7 +861,7 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 }
 
 // Toggle controls according to operation
-static void EnableControls(BOOL enable, BOOL remove_checkboxes)
+void EnableControls(BOOL enable, BOOL remove_checkboxes)
 {
 	op_in_progress = !enable;
 
@@ -2161,104 +2160,6 @@ static void PrintStatusTimeout(const char* str, BOOL val)
 	PrintStatus(STATUS_MSG_TIMEOUT, (val)?MSG_250:MSG_251, str);
 }
 
-static void SaveVHD(void)
-{
-	static IMG_SAVE img_save = { 0 };
-	char filename[128];
-	char path[MAX_PATH];
-	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
-	EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhd"), __VA_GROUP__(lmprintf(MSG_095)));
-	ULARGE_INTEGER free_space;
-
-	if ((DriveIndex < 0) || (format_thread != NULL))
-		return;
-
-	static_sprintf(filename, "%s.vhd", rufus_drive[DriveIndex].label);
-	img_save.Type = IMG_SAVE_TYPE_VHD;
-	img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
-	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
-	img_save.BufSize = DD_BUFFER_SIZE;
-	img_save.DeviceSize = SelectedDrive.DiskSize;
-	if (img_save.ImagePath != NULL) {
-		// Reset all progress bars
-		SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
-		FormatStatus = 0;
-		free_space.QuadPart = 0;
-		if ((GetVolumePathNameA(img_save.ImagePath, path, sizeof(path)))
-			&& (GetDiskFreeSpaceExA(path, &free_space, NULL, NULL))
-			&& ((LONGLONG)free_space.QuadPart > (SelectedDrive.DiskSize + 512))) {
-			// Disable all controls except cancel
-			EnableControls(FALSE, FALSE);
-			FormatStatus = 0;
-			InitProgress(TRUE);
-			format_thread = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
-			if (format_thread != NULL) {
-				uprintf("\r\nSave to VHD operation started");
-				PrintInfo(0, -1);
-				SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
-			} else {
-				uprintf("Unable to start VHD save thread");
-				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
-				safe_free(img_save.ImagePath);
-				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
-			}
-		} else {
-			if (free_space.QuadPart == 0) {
-				uprintf("Unable to isolate drive name for VHD save");
-				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_PATH_NOT_FOUND;
-			} else {
-				uprintf("The VHD size is too large for the target drive");
-				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_FILE_TOO_LARGE;
-			}
-			safe_free(img_save.ImagePath);
-			PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
-		}
-	}
-}
-
-static void SaveISO(void)
-{
-	static IMG_SAVE img_save = { 0 };
-	char filename[33] = "disc_image.iso";
-	EXT_DECL(img_ext, filename, __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
-
-	if (op_in_progress || (format_thread != NULL))
-		return;
-
-	img_save.Type = IMG_SAVE_TYPE_ISO;
-	if (!GetOpticalMedia(&img_save)) {
-		uprintf("No dumpable optical media found.");
-		return;
-	}
-	// Adjust the buffer size according to the disc size so that we get a decent speed.
-	for (img_save.BufSize = 32 * MB;
-		(img_save.BufSize > 8 * MB) && (img_save.DeviceSize <= img_save.BufSize * 64);
-		img_save.BufSize /= 2);
-	if ((img_save.Label != NULL) && (img_save.Label[0] != 0))
-		static_sprintf(filename, "%s.iso", img_save.Label);
-	uprintf("ISO media size %s", SizeToHumanReadable(img_save.DeviceSize, FALSE, FALSE));
-
-	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
-	if (img_save.ImagePath == NULL)
-		return;
-	SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
-	FormatStatus = 0;
-	// Disable all controls except cancel
-	EnableControls(FALSE, FALSE);
-	InitProgress(TRUE);
-	format_thread = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
-	if (format_thread != NULL) {
-		uprintf("\r\nSave to ISO operation started");
-		PrintInfo(0, -1);
-		SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
-	} else {
-		uprintf("Unable to start ISO save thread");
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
-		safe_free(img_save.ImagePath);
-		PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
-	}
-}
-
 // Check for conflicting processes accessing the drive.
 // If bPrompt is true, ask the user whether they want to proceed.
 // dwTimeOut is the maximum amount of time we allow for this call to execute (in ms)
@@ -2764,6 +2665,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			MyDialogBox(hMainInstance, IDD_UPDATE_POLICY, hDlg, UpdateCallback);
 			break;
 		case IDC_HASH:
+			// TODO: Move this as a fn call in hash.c?
 			if ((format_thread == NULL) && (image_path != NULL)) {
 				FormatStatus = 0;
 				no_confirmation_on_cancel = TRUE;

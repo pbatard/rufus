@@ -31,6 +31,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <assert.h>
+#include <virtdisk.h>
 
 #include "rufus.h"
 #include "missing.h"
@@ -1038,7 +1039,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 #pragma warning(default: 6386)
 #endif
 			EXT_DECL(img_ext, GetShortName(url), __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
-			img_save.Type = IMG_SAVE_TYPE_ISO;
+			img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_ISO;
 			img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
 			if (img_save.ImagePath == NULL) {
 				goto out;

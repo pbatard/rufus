@@ -20,6 +20,7 @@
 #include <windows.h>
 #include <stdint.h>
 #include "resource.h"
+#include "localization.h"
 
 #pragma once
 
@@ -99,6 +100,7 @@ extern void ToggleAdvancedFormatOptions(BOOL enable);
 extern void ToggleImageOptions(void);
 extern void CreateSmallButtons(HWND hDlg);
 extern void CreateAdditionalControls(HWND hDlg);
+extern void EnableControls(BOOL enable, BOOL remove_checkboxes);
 extern void InitProgress(BOOL bOnlyFormat);
 extern void ShowLanguageMenu(RECT rcExclude);
 extern void SetPassesTooltip(void);

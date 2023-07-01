@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 #include <windows.h>
+#include <virtdisk.h>
 
 #pragma once
 
@@ -70,6 +71,49 @@
 
 #define MBR_SIZE							512	// Might need to review this once we see bootable 4k systems
 
+// TODO: Remove this once MinGW has been updated
+#define VIRTUAL_STORAGE_TYPE_DEVICE_VHDX                    3
+#define CREATE_VIRTUAL_DISK_VERSION_2                       2
+#define CREATE_VIRTUAL_DISK_FLAG_CREATE_BACKING_STORAGE     8
+
+#ifndef CREATE_VIRTUAL_DISK_PARAMETERS_DEFAULT_BLOCK_SIZE
+#define CREATE_VIRTUAL_DISK_PARAMETERS_DEFAULT_BLOCK_SIZE   0
+#endif
+
+#ifndef CREATE_VIRTUAL_DISK_PARAMETERS_DEFAULT_SECTOR_SIZE
+#define CREATE_VIRTUAL_DISK_PARAMETERS_DEFAULT_SECTOR_SIZE  0
+#endif
+
+typedef struct
+{
+	CREATE_VIRTUAL_DISK_VERSION Version;
+	union
+	{
+		struct
+		{
+			GUID                  UniqueId;
+			ULONGLONG             MaximumSize;
+			ULONG                 BlockSizeInBytes;
+			ULONG                 SectorSizeInBytes;
+			PCWSTR                ParentPath;
+			PCWSTR                SourcePath;
+		} Version1;
+		struct
+		{
+			GUID                   UniqueId;
+			ULONGLONG              MaximumSize;
+			ULONG                  BlockSizeInBytes;
+			ULONG                  SectorSizeInBytes;
+			ULONG                  PhysicalSectorSizeInBytes;
+			PCWSTR                 ParentPath;
+			PCWSTR                 SourcePath;
+			OPEN_VIRTUAL_DISK_FLAG OpenFlags;
+			VIRTUAL_STORAGE_TYPE   ParentVirtualStorageType;
+			VIRTUAL_STORAGE_TYPE   SourceVirtualStorageType;
+			GUID                   ResiliencyGuid;
+		} Version2;
+	};
+} STOPGAP_CREATE_VIRTUAL_DISK_PARAMETERS;
 
 // From https://docs.microsoft.com/en-us/previous-versions/msdn10/dd834960(v=msdn.10)
 // as well as https://msfn.org/board/topic/150700-wimgapi-wimmountimage-progressbar/
@@ -139,4 +183,5 @@ extern BOOL WimUnmountImage(const char* image, int index, BOOL commit);
 extern char* GetExistingMountPoint(const char* image, int index);
 extern BOOL WimIsValidIndex(const char* image, int index);
 extern int8_t IsBootableImage(const char* path);
-extern BOOL AppendVHDFooter(const char* vhd_path);
+extern void SaveVHD(void);
+extern void SaveISO(void);
