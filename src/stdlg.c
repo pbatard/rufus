@@ -103,7 +103,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 	IFileDialog *pfd = NULL;
 	IShellItem *psiResult;
 	COMDLG_FILTERSPEC* filter_spec = NULL;
-	wchar_t *wpath = NULL, *wfilename = NULL;
+	wchar_t *wpath = NULL, *wfilename = NULL, *wext = NULL;
 	IShellItem *si_path = NULL;	// Automatically freed
 
 	if ((ext == NULL) || (ext->count == 0) || (ext->extension == NULL) || (ext->description == NULL))
@@ -162,11 +162,20 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 		if (wfilename != NULL) {
 			IFileDialog_SetFileName(pfd, wfilename);
 		}
+		// Set a default extension so that when the user switches filters it gets
+		// automatically updated. Note that the IFileDialog::SetDefaultExtension()
+		// doc says the extension shouldn't be prefixed with unwanted characters
+		// but it appears to work regardless so we don't bother cleaning it.
+		wext = utf8_to_wchar((ext->extension == NULL) ? "" : ext->extension[0]);
+		if (wext != NULL) {
+			IFileDialog_SetDefaultExtension(pfd, wext);
+		}
 
 		// Display the dialog
 		hr = IFileDialog_Show(pfd, hMainDialog);
 
 		// Cleanup
+		safe_free(wext);
 		safe_free(wfilename);
 		for (i = 0; i < ext->count; i++) {
 			safe_free(filter_spec[i].pszSpec);

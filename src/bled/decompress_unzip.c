@@ -209,7 +209,7 @@ do { if (BB_BIG_ENDIAN) { \
 	(c64).fmt.cdf_offset = SWAP_LE64((c64).fmt.cdf_offset); \
 }} while (0)
 
-inline void BUG() {
+inline void BUG(void) {
 	/* Check the offset of the last element, not the length.  This leniency
 	 * allows for poor packing, whereby the overall struct may be too long,
 	 * even though the elements are all in the right place.
