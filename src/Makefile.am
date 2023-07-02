@@ -2,7 +2,10 @@ SUBDIRS = ../.mingw bled ext2fs ms-sys syslinux/libfat syslinux/libinstaller sys
 # As far as I can tell, the following libraries are *not* vulnerable to side-loading, so we link using their regular version:
 NONVULNERABLE_LIBS = -lsetupapi -lole32 -lgdi32 -lshlwapi -lcrypt32 -lcomdlg32 -lcomctl32 -luuid
 # The following libraries are vulnerable (or have an unknown vulnerability status), so we link using our delay-loaded replacement:
-VULNERABLE_LIBS = -ldwmapi-delaylib -lvirtdisk-delaylib -lwintrust-delaylib
+# Ideally there would also be virtdisk and wininet as delaylib's below, but the MinGW folks haven't quite sorted out delay-loading
+# for x86_32 so as soon as you try to call APIs from these, the application will crash!
+# See https://github.com/pbatard/rufus/issues/1877#issuecomment-1109683039 as well as https://github.com/pbatard/rufus/issues/2272
+VULNERABLE_LIBS = -ldwmapi-delaylib -lwintrust-delaylib
 
 noinst_PROGRAMS = rufus
 

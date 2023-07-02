@@ -885,6 +885,13 @@ BOOL WimApplyImage(const char* image, int index, const char* dst)
 	return dw;
 }
 
+// VirtDisk API Prototypes since we can't use delay-loading because of MinGW
+PF_TYPE_DECL(WINAPI, DWORD, CreateVirtualDisk, (PVIRTUAL_STORAGE_TYPE, PCWSTR,
+	VIRTUAL_DISK_ACCESS_MASK, PSECURITY_DESCRIPTOR, CREATE_VIRTUAL_DISK_FLAG, ULONG,
+	PCREATE_VIRTUAL_DISK_PARAMETERS, LPOVERLAPPED, PHANDLE));
+PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskOperationProgress, (HANDLE, LPOVERLAPPED,
+	PVIRTUAL_DISK_PROGRESS));
+
 // Since we no longer have to deal with Windows 7, we can call on CreateVirtualDisk()
 // to backup a physical disk to VHD/VHDX. Now if this could also be used to create an
 // ISO from optical media that would be swell, but no matter what I tried, it didn't
@@ -893,13 +900,16 @@ static DWORD WINAPI SaveImageThread(void* param)
 {
 	IMG_SAVE* img_save = (IMG_SAVE*)param;
 	HANDLE handle = INVALID_HANDLE_VALUE;
+	WCHAR* wSrc = utf8_to_wchar(img_save->DevicePath);
 	WCHAR* wDst = utf8_to_wchar(img_save->ImagePath);
-	WCHAR* wSrc = utf8_to_wchar(GetPhysicalName(img_save->DeviceNum));
 	VIRTUAL_STORAGE_TYPE vtype = { img_save->Type, VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT };
 	STOPGAP_CREATE_VIRTUAL_DISK_PARAMETERS vparams = { 0 };
 	VIRTUAL_DISK_PROGRESS vprogress = { 0 };
 	OVERLAPPED overlapped = { 0 };
 	DWORD result, flags;
+
+	PF_INIT_OR_OUT(CreateVirtualDisk, VirtDisk);
+	PF_INIT_OR_OUT(GetVirtualDiskOperationProgress, VirtDisk);
 
 	assert(img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD ||
 		img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHDX);
@@ -919,7 +929,7 @@ static DWORD WINAPI SaveImageThread(void* param)
 	flags = CREATE_VIRTUAL_DISK_FLAG_CREATE_BACKING_STORAGE;
 	// The following ensures that VHD images are stored uncompressed and can
 	// be used as DD images.
-	if (img_save->Type != VIRTUAL_STORAGE_TYPE_DEVICE_VHDX)
+	if (img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD)
 		flags |= CREATE_VIRTUAL_DISK_FLAG_FULL_PHYSICAL_ALLOCATION;
 	// TODO: Use CREATE_VIRTUAL_DISK_FLAG_PREVENT_WRITES_TO_SOURCE_DISK?
 
@@ -928,7 +938,7 @@ static DWORD WINAPI SaveImageThread(void* param)
 	// CreateVirtualDisk() does not have an overwrite flag...
 	DeleteFileW(wDst);
 
-	result = CreateVirtualDisk(&vtype, wDst, VIRTUAL_DISK_ACCESS_NONE, NULL,
+	result = pfCreateVirtualDisk(&vtype, wDst, VIRTUAL_DISK_ACCESS_NONE, NULL,
 		flags, 0, (PCREATE_VIRTUAL_DISK_PARAMETERS)&vparams, &overlapped, &handle);
 	if (result != ERROR_SUCCESS && result != ERROR_IO_PENDING) {
 		SetLastError(result);
@@ -942,7 +952,7 @@ static DWORD WINAPI SaveImageThread(void* param)
 				CancelIoEx(handle, &overlapped);
 				goto out;
 			}
-			if (GetVirtualDiskOperationProgress(handle, &overlapped, &vprogress) == ERROR_SUCCESS) {
+			if (pfGetVirtualDiskOperationProgress(handle, &overlapped, &vprogress) == ERROR_SUCCESS) {
 				if (vprogress.OperationStatus == ERROR_IO_PENDING)
 					UpdateProgressWithInfo(OP_FORMAT, MSG_261, vprogress.CurrentValue, vprogress.CompletionValue);
 			}
@@ -957,10 +967,11 @@ static DWORD WINAPI SaveImageThread(void* param)
 	uprintf("Operation complete.");
 
 out:
-	safe_closehandle(handle);
 	safe_closehandle(overlapped.hEvent);
-	safe_free(wDst);
+	safe_closehandle(handle);
 	safe_free(wSrc);
+	safe_free(wDst);
+	safe_free(img_save->DevicePath);
 	safe_free(img_save->ImagePath);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
 	ExitThread(0);
@@ -980,12 +991,13 @@ void SaveVHD(void)
 
 	static_sprintf(filename, "%s.vhdx", rufus_drive[DriveIndex].label);
 	img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
+	img_save.DevicePath = GetPhysicalName(img_save.DeviceNum);
 	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
 	img_save.Type = safe_strstr(img_save.ImagePath, ".vhdx") != NULL ?
 		VIRTUAL_STORAGE_TYPE_DEVICE_VHDX : VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
 	img_save.BufSize = DD_BUFFER_SIZE;
 	img_save.DeviceSize = SelectedDrive.DiskSize;
-	if (img_save.ImagePath != NULL) {
+	if (img_save.DevicePath != NULL && img_save.ImagePath != NULL) {
 		// Reset all progress bars
 		SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
 		FormatStatus = 0;
@@ -993,7 +1005,7 @@ void SaveVHD(void)
 		if ((GetVolumePathNameA(img_save.ImagePath, path, sizeof(path)))
 			&& (GetDiskFreeSpaceExA(path, &free_space, NULL, NULL))
 			&& ((LONGLONG)free_space.QuadPart > (SelectedDrive.DiskSize + 512))) {
-			// Disable all controls except cancel
+			// Disable all controls except Cancel
 			EnableControls(FALSE, FALSE);
 			FormatStatus = 0;
 			InitProgress(TRUE);
@@ -1005,6 +1017,7 @@ void SaveVHD(void)
 			} else {
 				uprintf("Unable to start VHD save thread");
 				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+				safe_free(img_save.DevicePath);
 				safe_free(img_save.ImagePath);
 				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 			}
@@ -1017,6 +1030,7 @@ void SaveVHD(void)
 				uprintf("The VHD size is too large for the target drive");
 				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_FILE_TOO_LARGE;
 			}
+			safe_free(img_save.DevicePath);
 			safe_free(img_save.ImagePath);
 			PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 		}
