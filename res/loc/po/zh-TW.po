@@ -1802,43 +1802,43 @@ msgstr "無法開啟或讀取 '%s'"
 
 #. • MSG_325
 msgid "Applying Windows customization: %s"
-msgstr "正在應用 Windows 自定義設置：%s"
+msgstr "正在套用 Windows 客製化設定：%s"
 
 #. • MSG_326
 msgid "Applying user options..."
-msgstr "正在應用用戶設置..."
+msgstr "正在套用使用者設定..."
 
 #. • MSG_327
 msgid "Windows User Experience"
-msgstr "Windows 用戶體驗"
+msgstr "Windows 使用者體驗"
 
 #. • MSG_328
 msgid "Customize Windows installation?"
-msgstr "自定義 Windows 安裝？"
+msgstr "客製化 Windows 安裝？"
 
 #. • MSG_329
 msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
-msgstr "移除對 4GB+ 內存、安全引導和 TPM 2.0 的要求"
+msgstr "移除對 4GB+ 記憶體、安全開機和 TPM 2.0 的要求"
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
-msgstr "移除對登錄微軟賬戶的要求"
+msgstr "將登入微軟帳號的要求移除"
 
 #. • MSG_331
 msgid "Disable data collection (Skip privacy questions)"
-msgstr "關閉數據收集 (跳過隱私設置)"
+msgstr "關閉資料收集 (跳過隱私設定)"
 
 #. • MSG_332
 msgid "Prevent Windows To Go from accessing internal disks"
-msgstr "阻止 Windows To Go 訪問內部磁盤"
+msgstr "防止 Windows To Go 存取內部磁碟"
 
 #. • MSG_333
 msgid "Create a local account with username:"
-msgstr "創建一個使用此用戶名的本地賬號:"
+msgstr "使用此使用者名建立一個本機帳戶:"
 
 #. • MSG_334
 msgid "Set regional options to the same values as this user's"
-msgstr "使用當前用戶的區域設置"
+msgstr "使用目前用戶的區域設定"
 
 #. • MSG_335
 msgid "Disable BitLocker automatic device encryption"
@@ -1860,7 +1860,7 @@ msgstr "官方網站: %s"
 
 #. • MSG_902
 msgid "Source Code: %s"
-msgstr "源代碼: %s"
+msgstr "源始碼: %s"
 
 #. • MSG_903
 msgid "ChangeLog: %s"
@@ -1887,52 +1887,52 @@ msgstr "啟動"
 #.
 #. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
 msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
-msgstr "將 U 盤、存儲卡或虛擬驅動器格式化為 FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3 格式"
+msgstr "將隨身碟、記憶卡或虛擬光碟機格式化為 FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3 格式"
 
 #. • MSG_911
 msgid "Create FreeDOS bootable USB drives"
-msgstr "創建 FreeDOS  可啟動驅動器"
+msgstr "建立 FreeDOS  可啟隨身碟"
 
 #. • MSG_912
 msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
-msgstr "從可啟動 ISO 文件 (Windows 和 Linux 等) 創建可啟動驅動器"
+msgstr "從可啟動 ISO 檔案 (Windows 和 Linux 等) 建立可啟動隨身碟"
 
 #. • MSG_913
 msgid "Create bootable drives from bootable disk images, including compressed ones"
-msgstr "從可啟動硬盤鏡像 (包括壓縮鏡像) 創建可啟動驅動器"
+msgstr "從可啟動硬碟映像檔 (包括壓縮映像檔) 建立可啟動隨身碟"
 
 #. • MSG_914
 msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
-msgstr "創建 BIOS 或 UEFI 可啟動驅動器，包括 UEFI 可啟動的 NTFS 驅動器"
+msgstr "建立 BIOS 或 UEFI 可啟動隨身碟，包括 UEFI 可啟動的 NTFS 隨身碟"
 
 #. • MSG_915
 msgid "Create 'Windows To Go' drives"
-msgstr "創建 'Windows To Go' 驅動"
+msgstr "建立 'Windows To Go' 隨身碟"
 
 #. • MSG_916
 msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
-msgstr "為沒有 TPM 或安全啟動功能的電腦創建 Windows 11 安裝驅動"
+msgstr "為沒有 TPM 或安全開機功能的電腦建立 Windows 11 安裝隨身碟"
 
 #. • MSG_917
 msgid "Create persistent Linux partitions"
-msgstr "創建持久 Linux 分區"
+msgstr "建立持續性 Linux 磁區"
 
 #. • MSG_918
 msgid "Create VHD/DD images of the selected drive"
-msgstr "為選中的驅動創建 VHD/DD 鏡像"
+msgstr "為選中的磁碟機建立 VHD/DD 映像檔"
 
 #. • MSG_919
 msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
-msgstr "計算被選中鏡像的 MD5、SHA-1、SHA-256 和 SHA-512 校驗碼"
+msgstr "計算被選中映像的 MD5、SHA-1、SHA-256 和 SHA-512 檢查碼"
 
 #. • MSG_920
 msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
-msgstr "執行壞塊檢查，包括對”假“USB 快閃磁碟機的檢測"
+msgstr "執行壞軌檢查，包括對”假“USB 快閃磁碟機的偵測"
 
 #. • MSG_921
 msgid "Download official Microsoft Windows retail ISOs"
-msgstr "下載微軟官方 Windows 鏡像"
+msgstr "下載微軟官方 Windows 映像檔"
 
 #. • MSG_922
 msgid "Download UEFI Shell ISOs"
-msgstr "下載 UEFI Shell 鏡像"
+msgstr "下載 UEFI Shell 映像檔"
