@@ -605,6 +605,7 @@ t MSG_340 "a \"Security Violation\" screen"
 t MSG_341 "a Windows Recovery Screen (BSOD) with '%s'"
 t MSG_342 "Compressed VHDX Image"
 t MSG_343 "Uncompressed VHD Image"
+t MSG_344 "Full Flash Update Image"
 # The following messages are for the Windows Store listing only and are not used by the application
 t MSG_900 "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
 t MSG_901 "Official site: %s"

@@ -396,7 +396,7 @@ UINT GetDriveTypeFromIndex(DWORD DriveIndex);
 char GetUnusedDriveLetter(void);
 BOOL IsDriveLetterInUse(const char drive_letter);
 char RemoveDriveLetters(DWORD DriveIndex, BOOL bUseLast, BOOL bSilent);
-BOOL GetDriveLabel(DWORD DriveIndex, char* letter, char** label);
+BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label, BOOL bSilent);
 uint64_t GetDriveSize(DWORD DriveIndex);
 BOOL IsMediaPresent(DWORD DriveIndex);
 BOOL AnalyzeMBR(HANDLE hPhysicalDrive, const char* TargetName, BOOL bSilent);

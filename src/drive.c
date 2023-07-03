@@ -1314,7 +1314,7 @@ BOOL IsDriveLetterInUse(const char drive_letter)
  * Return the drive letter and volume label
  * If the drive doesn't have a volume assigned, space is returned for the letter
  */
-BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
+BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label, BOOL bSilent)
 {
 	HANDLE hPhysical;
 	DWORD size, error;
@@ -1350,10 +1350,10 @@ BOOL GetDriveLabel(DWORD DriveIndex, char* letters, char** label)
 	if (DeviceIoControl(hPhysical, IOCTL_STORAGE_CHECK_VERIFY, NULL, 0, NULL, 0, &size, NULL))
 		AutorunLabel = get_token_data_file("label", AutorunPath);
 	else if (GetLastError() == ERROR_NOT_READY)
-		uprintf("Ignoring 'autorun.inf' label for drive %c: No media", toupper(letters[0]));
+		suprintf("Ignoring 'autorun.inf' label for drive %c: No media", toupper(letters[0]));
 	safe_closehandle(hPhysical);
 	if (AutorunLabel != NULL) {
-		uprintf("Using 'autorun.inf' label for drive %c: '%s'", toupper(letters[0]), AutorunLabel);
+		suprintf("Using 'autorun.inf' label for drive %c: '%s'", toupper(letters[0]), AutorunLabel);
 		static_strcpy(VolumeLabel, AutorunLabel);
 		safe_free(AutorunLabel);
 		*label = VolumeLabel;

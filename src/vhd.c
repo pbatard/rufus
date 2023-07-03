@@ -896,7 +896,7 @@ PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskOperationProgress, (HANDLE, LPOVERLAPP
 // to backup a physical disk to VHD/VHDX. Now if this could also be used to create an
 // ISO from optical media that would be swell, but no matter what I tried, it didn't
 // seem possible...
-static DWORD WINAPI SaveImageThread(void* param)
+static DWORD WINAPI SaveVHDThread(void* param)
 {
 	IMG_SAVE* img_save = (IMG_SAVE*)param;
 	HANDLE handle = INVALID_HANDLE_VALUE;
@@ -906,7 +906,7 @@ static DWORD WINAPI SaveImageThread(void* param)
 	STOPGAP_CREATE_VIRTUAL_DISK_PARAMETERS vparams = { 0 };
 	VIRTUAL_DISK_PROGRESS vprogress = { 0 };
 	OVERLAPPED overlapped = { 0 };
-	DWORD result, flags;
+	DWORD r = ERROR_NOT_FOUND, flags;
 
 	PF_INIT_OR_OUT(CreateVirtualDisk, VirtDisk);
 	PF_INIT_OR_OUT(GetVirtualDiskOperationProgress, VirtDisk);
@@ -938,16 +938,16 @@ static DWORD WINAPI SaveImageThread(void* param)
 	// CreateVirtualDisk() does not have an overwrite flag...
 	DeleteFileW(wDst);
 
-	result = pfCreateVirtualDisk(&vtype, wDst, VIRTUAL_DISK_ACCESS_NONE, NULL,
+	r = pfCreateVirtualDisk(&vtype, wDst, VIRTUAL_DISK_ACCESS_NONE, NULL,
 		flags, 0, (PCREATE_VIRTUAL_DISK_PARAMETERS)&vparams, &overlapped, &handle);
-	if (result != ERROR_SUCCESS && result != ERROR_IO_PENDING) {
-		SetLastError(result);
+	if (r != ERROR_SUCCESS && r != ERROR_IO_PENDING) {
+		SetLastError(r);
 		uprintf("Could not create virtual disk: %s", WindowsErrorString());
 		goto out;
 	}
 
-	if (result == ERROR_IO_PENDING) {
-		while ((result = WaitForSingleObject(overlapped.hEvent, 100)) == WAIT_TIMEOUT) {
+	if (r == ERROR_IO_PENDING) {
+		while ((r = WaitForSingleObject(overlapped.hEvent, 100)) == WAIT_TIMEOUT) {
 			if (IS_ERROR(FormatStatus) && (SCODE_CODE(FormatStatus) == ERROR_CANCELLED)) {
 				CancelIoEx(handle, &overlapped);
 				goto out;
@@ -957,12 +957,13 @@ static DWORD WINAPI SaveImageThread(void* param)
 					UpdateProgressWithInfo(OP_FORMAT, MSG_261, vprogress.CurrentValue, vprogress.CompletionValue);
 			}
 		}
-		if (result != WAIT_OBJECT_0) {
+		if (r != WAIT_OBJECT_0) {
 			uprintf("Could not save virtual disk: %s", WindowsErrorString());
 			goto out;
 		}
 	}
 
+	r = 0;
 	UpdateProgressWithInfo(OP_FORMAT, MSG_261, SelectedDrive.DiskSize, SelectedDrive.DiskSize);
 	uprintf("Operation complete.");
 
@@ -974,7 +975,36 @@ out:
 	safe_free(img_save->DevicePath);
 	safe_free(img_save->ImagePath);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
-	ExitThread(0);
+	ExitThread(r);
+}
+
+// FfuProvider.dll has some nice FfuApplyImage()/FfuCaptureImage() calls... which
+// Microsoft decided not make public!
+// Considering that trying to both figure out how to use these internal function
+// calls, as well as how to properly hook into the DLL for every arch/every release
+// of Windows, would be a massive timesink, we just take a shortcut by calling dism
+// directly, as imperfect as such a solution might be...
+static DWORD WINAPI SaveFFUThread(void* param)
+{
+	DWORD r;
+	IMG_SAVE* img_save = (IMG_SAVE*)param;
+	char cmd[MAX_PATH + 128], *letter = "", *label;
+
+	GetDriveLabel(SelectedDrive.DeviceNumber, letter, &label, TRUE);
+	static_sprintf(cmd, "dism /capture-ffu /capturedrive=%s /imagefile=\"%s\" "
+		"/name:\"%s\" /description:\"Created by %s (%s)\"",
+		img_save->DevicePath, img_save->ImagePath, label, APPLICATION_NAME, RUFUS_URL);
+	uprintf("Running command: '%s", cmd);
+	r = RunCommandWithProgress(cmd, sysnative_dir, TRUE, MSG_261);
+	if (r != 0 && !IS_ERROR(FormatStatus)) {
+		SetLastError(r);
+		uprintf("Failed to create FFU image: %s", WindowsErrorString());
+		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_WINDOWS) | SCODE_CODE(r);
+	}
+	safe_free(img_save->DevicePath);
+	safe_free(img_save->ImagePath);
+	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
+	ExitThread(r);
 }
 
 void SaveVHD(void)
@@ -983,7 +1013,8 @@ void SaveVHD(void)
 	char filename[128];
 	char path[MAX_PATH];
 	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
-	EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhdx", "*.vhd"), __VA_GROUP__(lmprintf(MSG_342), lmprintf(MSG_343)));
+	EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhdx", "*.vhd", "*.ffu"),
+		__VA_GROUP__(lmprintf(MSG_342), lmprintf(MSG_343), lmprintf(MSG_344)));
 	ULARGE_INTEGER free_space;
 
 	if ((DriveIndex < 0) || (format_thread != NULL))
@@ -992,9 +1023,17 @@ void SaveVHD(void)
 	static_sprintf(filename, "%s.vhdx", rufus_drive[DriveIndex].label);
 	img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
 	img_save.DevicePath = GetPhysicalName(img_save.DeviceNum);
+	// FFU support started with Windows 10 1709 (build 16299) and requires GPT
+	// TODO: Better check for FFU compatibility
+	if (WindowsVersion.Major < 10 || WindowsVersion.BuildNumber < 16299 ||
+		SelectedDrive.PartitionStyle != PARTITION_STYLE_GPT)
+		img_ext.count = 2;
 	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
-	img_save.Type = safe_strstr(img_save.ImagePath, ".vhdx") != NULL ?
-		VIRTUAL_STORAGE_TYPE_DEVICE_VHDX : VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
+	img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
+	if (safe_strstr(img_save.ImagePath, ".vhdx") != NULL)
+		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
+	else if (safe_strstr(img_save.ImagePath, ".ffu") != NULL)
+		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_FFU;
 	img_save.BufSize = DD_BUFFER_SIZE;
 	img_save.DeviceSize = SelectedDrive.DiskSize;
 	if (img_save.DevicePath != NULL && img_save.ImagePath != NULL) {
@@ -1009,7 +1048,8 @@ void SaveVHD(void)
 			EnableControls(FALSE, FALSE);
 			FormatStatus = 0;
 			InitProgress(TRUE);
-			format_thread = CreateThread(NULL, 0, SaveImageThread, &img_save, 0, NULL);
+			format_thread = CreateThread(NULL, 0, img_save.Type == VIRTUAL_STORAGE_TYPE_DEVICE_FFU ?
+				SaveFFUThread : SaveVHDThread, &img_save, 0, NULL);
 			if (format_thread != NULL) {
 				uprintf("\r\nSave to VHD operation started");
 				PrintInfo(0, -1);

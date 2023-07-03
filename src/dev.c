@@ -897,7 +897,7 @@ BOOL GetDevices(DWORD devnum)
 				break;
 			}
 
-			if (GetDriveLabel(drive_index, drive_letters, &label)) {
+			if (GetDriveLabel(drive_index, drive_letters, &label, FALSE)) {
 				if ((props.is_SCSI) && (!props.is_UASP) && (!props.is_VHD)) {
 					if (!props.is_Removable) {
 						// Non removables should have been eliminated above, but since we

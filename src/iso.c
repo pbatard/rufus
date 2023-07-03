@@ -1670,7 +1670,7 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 					buf = libfat_get_sector(lf_fs, s);
 					if (buf == NULL)
 						FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_SECTOR_NOT_FOUND;
-					if (FormatStatus)
+					if (IS_ERROR(FormatStatus))
 						goto out;
 					size = MIN(LIBFAT_SECTOR_SIZE, diritem.size - written);
 					if (!WriteFileWithRetry(handle, buf, size, &size, WRITE_RETRIES) ||
@@ -1724,7 +1724,7 @@ static HANDLE mounted_handle = INVALID_HANDLE_VALUE;
 
 char* MountISO(const char* path)
 {
-	VIRTUAL_STORAGE_TYPE vtype = { 1, VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT };
+	VIRTUAL_STORAGE_TYPE vtype = { VIRTUAL_STORAGE_TYPE_DEVICE_ISO, VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT };
 	ATTACH_VIRTUAL_DISK_PARAMETERS vparams = { 0 };
 	DWORD r;
 	wchar_t wtmp[128];

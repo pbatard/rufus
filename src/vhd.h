@@ -72,7 +72,10 @@
 #define MBR_SIZE							512	// Might need to review this once we see bootable 4k systems
 
 // TODO: Remove this once MinGW has been updated
+#ifndef VIRTUAL_STORAGE_TYPE_DEVICE_VHDX
 #define VIRTUAL_STORAGE_TYPE_DEVICE_VHDX                    3
+#endif
+#define VIRTUAL_STORAGE_TYPE_DEVICE_FFU                    99
 #define CREATE_VIRTUAL_DISK_VERSION_2                       2
 #define CREATE_VIRTUAL_DISK_FLAG_CREATE_BACKING_STORAGE     8
 

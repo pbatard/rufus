@@ -450,7 +450,7 @@ typedef struct {
  * to define an 'ext_t my_extensions' variable initialized with the relevant attributes.
  */
 typedef struct ext_t {
-	const size_t count;
+	size_t count;
 	const char* filename;
 	const char** extension;
 	const char** description;
@@ -652,7 +652,8 @@ extern char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options);
 extern BOOL FileIO(enum file_io_type io_type, char* path, char** buffer, DWORD* size);
 extern unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate);
 extern DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc);
-extern DWORD RunCommand(const char* cmdline, const char* dir, BOOL log);
+extern DWORD RunCommandWithProgress(const char* cmdline, const char* dir, BOOL log, int msg);
+#define RunCommand(cmd, dir, log) RunCommandWithProgress(cmd, dir, log, 0)
 extern BOOL CompareGUID(const GUID *guid1, const GUID *guid2);
 extern BOOL MountRegistryHive(const HKEY key, const char* pszHiveName, const char* pszHivePath);
 extern BOOL UnmountRegistryHive(const HKEY key, const char* pszHiveName);

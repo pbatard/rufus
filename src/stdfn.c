@@ -26,6 +26,7 @@
 #include <gpedit.h>
 #include <assert.h>
 
+#include "re.h"
 #include "rufus.h"
 #include "missing.h"
 #include "resource.h"
@@ -706,14 +707,19 @@ DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc)
 }
 
 // Run a console command, with optional redirection of stdout and stderr to our log
-DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
+// as well as optional progress reporting if msg is not 0.
+DWORD RunCommandWithProgress(const char* cmd, const char* dir, BOOL log, int msg)
 {
-	DWORD ret, dwRead, dwAvail, dwPipeSize = 4096;
-	STARTUPINFOA si = {0};
-	PROCESS_INFORMATION pi = {0};
+	DWORD i, ret, dwRead, dwAvail, dwPipeSize = 4096;
+	STARTUPINFOA si = { 0 };
+	PROCESS_INFORMATION pi = { 0 };
 	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
 	HANDLE hOutputRead = INVALID_HANDLE_VALUE, hOutputWrite = INVALID_HANDLE_VALUE;
+	int match_length;
 	static char* output;
+	// For detecting typical dism.exe commandline progress report of type:
+	// "\r[====                       8.0%                           ]\r\n"
+	re_t pattern = re_compile("\\s*\\[[= ]+[\\d\\.]+%[= ]+\\]\\s*");
 
 	si.cb = sizeof(si);
 	if (log) {
@@ -737,16 +743,56 @@ DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
 		goto out;
 	}
 
-	if (log) {
+	if (log || msg != 0) {
+		if (msg != 0)
+			UpdateProgressWithInfoInit(NULL, FALSE);
 		while (1) {
+			// Check for user cancel
+			if (IS_ERROR(FormatStatus) && (SCODE_CODE(FormatStatus) == ERROR_CANCELLED)) {
+				if (!TerminateProcess(pi.hProcess, ERROR_CANCELLED)) {
+					uprintf("Could not terminate command: %s", WindowsErrorString());
+				} else switch (WaitForSingleObject(pi.hProcess, 5000)) {
+				case WAIT_TIMEOUT:
+					uprintf("Command did not terminate within timeout duration");
+					break;
+				case WAIT_OBJECT_0:
+					uprintf("Command was terminated by user");
+					break;
+				default:
+					uprintf("Error while waiting for command to be terminated: %s", WindowsErrorString());
+					break;
+				}
+				ret = ERROR_CANCELLED;
+				goto out;
+			}
 			// coverity[string_null]
 			if (PeekNamedPipe(hOutputRead, NULL, dwPipeSize, NULL, &dwAvail, NULL)) {
 				if (dwAvail != 0) {
 					output = malloc(dwAvail + 1);
 					if ((output != NULL) && (ReadFile(hOutputRead, output, dwAvail, &dwRead, NULL)) && (dwRead != 0)) {
 						output[dwAvail] = 0;
-						// output may contain a '%' so don't feed it as a naked format string
-						uprintf("%s", output);
+						// Process a commandline progress bar into a percentage
+						if ((msg != 0) && (re_matchp(pattern, output, &match_length) != -1)) {
+							float f = 0.0f;
+							i = 0;
+next_progress_line:
+							for (; (i < dwAvail) && (output[i] < '0' || output[i] > '9'); i++);
+							IGNORE_RETVAL(sscanf(&output[i], "%f*", &f));
+							UpdateProgressWithInfo(OP_FORMAT, msg, (uint64_t)(f * 100.0f), 100 * 100ULL);
+							// Go to next line
+							while ((++i < dwAvail) && (output[i] != '\n') && (output[i] != '\r'));
+							while ((++i < dwAvail) && ((output[i] == '\n') || (output[i] == '\r')));
+							// Print additional lines, if any
+							if (i < dwAvail) {
+								// Might have two consecutive progress lines in our buffer
+								if (re_matchp(pattern, &output[i], &match_length) != -1)
+									goto next_progress_line;
+								uprintf("%s", &output[i]);
+							}
+						} else if (log) {
+							// output may contain a '%' so don't feed it as a naked format string
+							uprintf("%s", output);
+						}
 					}
 					free(output);
 				}
@@ -756,6 +802,7 @@ DWORD RunCommand(const char* cmd, const char* dir, BOOL log)
 			Sleep(100);
 		};
 	} else {
+		// TODO: Detect user cancellation here?
 		WaitForSingleObject(pi.hProcess, INFINITE);
 	}
 
