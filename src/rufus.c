@@ -1429,7 +1429,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	const char* ldlinux = "ldlinux";
 	const char* syslinux = "syslinux";
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
-	char tmp[MAX_PATH], tmp2[MAX_PATH], efi[MAX_PATH], c;
+	char tmp[MAX_PATH], tmp2[MAX_PATH], c;
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	safe_free(grub2_buf);
@@ -1449,7 +1449,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			goto out;
 		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 			// This ISO image is too big for the selected target
-			MessageBoxExU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
+			MessageBoxExU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
 		}
 		if (IS_DD_BOOTABLE(img_report)) {
@@ -1489,14 +1489,14 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		if (is_windows_to_go) {
 			if (fs_type != FS_NTFS) {
 				// Windows To Go only works for NTFS
-				MessageBoxExU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
+				MessageBoxExU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 				goto out;
 			}
 			if (SelectedDrive.MediaType != FixedMedia) {
 				if ((target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT) && (WindowsVersion.BuildNumber < 15000)) {
 					// Up to Windows 10 Creators Update (1703), we were screwed, since we need access to 2 partitions at the same time.
 					// Thankfully, the newer Windows allow mounting multiple partitions on the same REMOVABLE drive.
-					MessageBoxExU(hMainDialog, lmprintf(MSG_198), lmprintf(MSG_190), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
+					MessageBoxExU(hMainDialog, lmprintf(MSG_198), lmprintf(MSG_190), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 					goto out;
 				}
 			}
@@ -1623,22 +1623,19 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		if (target_type == TT_UEFI) {
 			// coverity[swapped_arguments]
 			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, tmp) != 0) {
-				for (i = 0; i < ARRAYSIZE(efi_bootname) + 1; i++) {
-					if ((img_report.has_efi & (1 << i)) == 0)
-						continue;
-					if (i == 0)
-						static_strcpy(efi, bootmgr_efi_name);
-					else
-						static_sprintf(efi, "%s/%s", efi_dirname, efi_bootname[i - 1]);
-					if (ExtractISOFile(image_path, efi, tmp, FILE_ATTRIBUTE_NORMAL) == 0) {
-						uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", efi);
+				// ExtractISOFile() is case sensitive, so we must use 
+				for (i = 0; i < ARRAYSIZE(img_report.efi_boot_path) && img_report.efi_boot_path[i][0] != 0; i++) {
+					if (ExtractISOFile(image_path, img_report.efi_boot_path[i], tmp, FILE_ATTRIBUTE_NORMAL) == 0) {
+						uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", img_report.efi_boot_path[i]);
 						continue;
 					}
 					r = IsBootloaderRevoked(tmp);
 					if (r > 0) {
-						MessageBoxExU(hMainDialog, lmprintf(MSG_339,
+						r = MessageBoxExU(hMainDialog, lmprintf(MSG_339,
 							(r == 1) ? lmprintf(MSG_340) : lmprintf(MSG_341, "Error code: 0xc0000428")),
-							lmprintf(MSG_338), MB_ICONWARNING | MB_IS_RTL, selected_langid);
+							lmprintf(MSG_338), MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+						if (r == IDCANCEL)
+							goto out;
 						break;
 					}
 				}
@@ -1677,7 +1674,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				fclose(fd);
 			} else {
 				r = MessageBoxExU(hMainDialog, lmprintf(MSG_116, img_report.grub2_version, GRUB2_PACKAGE_VERSION),
-					lmprintf(MSG_115), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid);
+					lmprintf(MSG_115), MB_YESNOCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
 				if (r == IDCANCEL)
 					goto out;
 				else if (r == IDYES) {
@@ -1735,7 +1732,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 						} else {
 							PrintInfo(0, MSG_204, old_c32_name[i]);
 							if (MessageBoxExU(hMainDialog, lmprintf(MSG_084, old_c32_name[i], old_c32_name[i]),
-									lmprintf(MSG_083, old_c32_name[i]), MB_YESNO|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDYES) {
+									lmprintf(MSG_083, old_c32_name[i]), MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDYES) {
 								static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[0]);
 								IGNORE_RETVAL(_mkdir(tmp));
 								static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, syslinux, embedded_sl_version_str[0], old_c32_name[i]);
@@ -1775,7 +1772,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				} else {
 					r = MessageBoxExU(hMainDialog, lmprintf(MSG_114, img_report.sl_version_str, img_report.sl_version_ext,
 						embedded_sl_version_str[1], embedded_sl_version_ext[1]),
-						lmprintf(MSG_115), MB_YESNO|MB_ICONWARNING|MB_IS_RTL, selected_langid);
+						lmprintf(MSG_115), MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid);
 					if (r != IDYES)
 						goto out;
 					for (i=0; i<2; i++) {
@@ -1834,7 +1831,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			PrintInfo(0, MSG_206, tmp);
 			// MSG_104: "Syslinux v5.0 or later requires a '%s' file to be installed"
 			r = MessageBoxExU(hMainDialog, lmprintf(MSG_104, "Syslinux v5.0", tmp, "Syslinux v5+", tmp),
-				lmprintf(MSG_103, tmp), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid);
+				lmprintf(MSG_103, tmp), MB_YESNOCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
 			if (r == IDCANCEL)
 				goto out;
 			if (r == IDYES) {
@@ -1883,7 +1880,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			static_sprintf(tmp, "grldr");
 			PrintInfo(0, MSG_206, tmp);
 			r = MessageBoxExU(hMainDialog, lmprintf(MSG_104, "Grub4DOS 0.4", tmp, "Grub4DOS", tmp),
-				lmprintf(MSG_103, tmp), MB_YESNOCANCEL|MB_ICONWARNING|MB_IS_RTL, selected_langid);
+				lmprintf(MSG_103, tmp), MB_YESNOCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
 			if (r == IDCANCEL)
 				goto out;
 			if (r == IDYES) {

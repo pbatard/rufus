@@ -55,7 +55,6 @@
 // How often should we update the progress bar (in 2K blocks) as updating
 // the progress bar for every block will bring extraction to a crawl
 #define PROGRESS_THRESHOLD        128
-#define FOUR_GIGABYTES            4294967296LL
 
 // Needed for UDF symbolic link testing
 #define S_IFLNK                   0xA000
@@ -243,6 +242,15 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 				img_report.has_bootmgr = TRUE;
 			}
 			if (safe_stricmp(psz_basename, bootmgr_efi_name) == 0) {
+				// We may extract the bootloaders for revocation validation later but
+				// to do so, since we're working with case sensitive file systems, we
+				// must store all found UEFI bootloader paths with the right case.
+				for (j = 0; j < ARRAYSIZE(img_report.efi_boot_path); j++) {
+					if (img_report.efi_boot_path[j][0] == 0) {
+						static_strcpy(img_report.efi_boot_path[j], psz_fullpath);
+						break;
+					}
+				}
 				img_report.has_efi |= 1;
 				img_report.has_bootmgr_efi = TRUE;
 			}
@@ -273,9 +281,17 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 
 		// Check for the EFI boot entries
 		if (safe_stricmp(psz_dirname, efi_dirname) == 0) {
-			for (i = 0; i < ARRAYSIZE(efi_bootname); i++)
-				if (safe_stricmp(psz_basename, efi_bootname[i]) == 0)
+			for (i = 0; i < ARRAYSIZE(efi_bootname); i++) {
+				if (safe_stricmp(psz_basename, efi_bootname[i]) == 0) {
 					img_report.has_efi |= (2 << i);	// start at 2 since "bootmgr.efi" is bit 0
+					for (j = 0; j < ARRAYSIZE(img_report.efi_boot_path); j++) {
+						if (img_report.efi_boot_path[j][0] == 0) {
+							static_strcpy(img_report.efi_boot_path[j], psz_fullpath);
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		if (psz_dirname != NULL) {
@@ -312,7 +328,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			if (props->is_old_c32[i])
 				img_report.has_old_c32[i] = TRUE;
 		}
-		if (file_length >= FOUR_GIGABYTES)
+		if (file_length >= 4 * GB)
 			img_report.has_4GB_file = TRUE;
 		// Compute projected size needed (NB: ISO_BLOCKSIZE = UDF_BLOCKSIZE)
 		if (file_length != 0)

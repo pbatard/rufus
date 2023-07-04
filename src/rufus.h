@@ -364,12 +364,28 @@ typedef struct {
 	uint16_t revision;
 } winver_t;
 
+/* We can't use the Microsoft enums as we want to have RISC-V */
+enum ArchType {
+	ARCH_UNKNOWN = 0,
+	ARCH_X86_32,
+	ARCH_X86_64,
+	ARCH_ARM_32,
+	ARCH_ARM_64,
+	ARCH_IA_64,
+	ARCH_RISCV_32,
+	ARCH_RISCV_64,
+	ARCH_RISCV_128,
+	ARCH_EBC,
+	ARCH_MAX
+};
+
 typedef struct {
 	char label[192];					// 3*64 to account for UTF-8
 	char usb_label[192];				// converted USB label for workaround
 	char cfg_path[128];					// path to the ISO's isolinux.cfg
 	char reactos_path[128];				// path to the ISO's freeldr.sys or setupldr.sys
 	char wininst_path[MAX_WININST][64];	// path to the Windows install image(s)
+	char efi_boot_path[ARCH_MAX][30];	// paths of detected UEFI bootloaders
 	char efi_img_path[128];				// path to an efi.img file
 	uint64_t image_size;
 	uint64_t archive_size;
@@ -475,21 +491,6 @@ typedef enum TASKBAR_PROGRESS_FLAGS
 	TASKBAR_ERROR = 0x4,
 	TASKBAR_PAUSED = 0x8
 } TASKBAR_PROGRESS_FLAGS;
-
-/* We can't use the Microsoft enums as we want to have RISC-V */
-enum ArchType {
-	ARCH_UNKNOWN = 0,
-	ARCH_X86_32,
-	ARCH_X86_64,
-	ARCH_ARM_32,
-	ARCH_ARM_64,
-	ARCH_IA_64,
-	ARCH_RISCV_32,
-	ARCH_RISCV_64,
-	ARCH_RISCV_128,
-	ARCH_EBC,
-	ARCH_MAX
-};
 
 static __inline USHORT GetApplicationArch(void)
 {
