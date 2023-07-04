@@ -2269,8 +2269,8 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	const DWORD size_to_clear = MAX_SECTORS_TO_CLEAR * SelectedDrive.SectorSize;
 	uint8_t* buffer;
 	size_t uefi_ntfs_size = 0;
-	CREATE_DISK CreateDisk = {PARTITION_STYLE_RAW, {{0}}};
-	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = {0};
+	CREATE_DISK CreateDisk = { PARTITION_STYLE_RAW, { { 0 } } };
+	DRIVE_LAYOUT_INFORMATION_EX4 DriveLayoutEx = { 0 };
 	BOOL r;
 	DWORD i, size, bufsize, pn = 0;
 	LONGLONG main_part_size_in_sectors, extra_part_size_in_tracks = 0;
@@ -2278,8 +2278,12 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions
 	// and folks using MacOS: https://github.com/pbatard/rufus/issues/979
 	LONGLONG esp_size = 260 * MB;
+	LONGLONG ClusterSize = (LONGLONG)ComboBox_GetCurItemData(hClusterSize);
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
+
+	if (ClusterSize == 0)
+		ClusterSize = 0x200;
 
 	if (partition_style == PARTITION_STYLE_SFD)
 		// Nothing to do
@@ -2307,9 +2311,6 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// CHS sizes that IBM imparted upon us. Long story short, we now align to a
 		// cylinder size that is itself aligned to the cluster size.
 		// If this actually breaks old systems, please send your complaints to IBM.
-		LONGLONG ClusterSize = (LONGLONG)ComboBox_GetCurItemData(hClusterSize);
-		if (ClusterSize == 0)
-			ClusterSize = 0x200;
 		DriveLayoutEx.PartitionEntry[pn].StartingOffset.QuadPart =
 			((bytes_per_track + (ClusterSize - 1)) / ClusterSize) * ClusterSize;
 		// GRUB2 no longer fits in the usual 31½ KB that the above computation provides
@@ -2398,6 +2399,16 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// this extra partition is indexed on main size, it does not overflow into the backup GPT.
 		main_part_size_in_sectors = ((main_part_size_in_sectors / SelectedDrive.SectorsPerTrack) -
 			extra_part_size_in_tracks) * SelectedDrive.SectorsPerTrack;
+	}
+	// Try to make sure that the main partition size is a multiple of the cluster size
+	// This can be especially important when trying to capture an NTFS partition as FFU, as, when
+	// the NTFS partition is aligned to cluster size, the FFU capture parses the NTFS allocated
+	// map to only record clusters that are in use, whereas, if not aligned, the FFU capture uses
+	// a full sector by sector scan of the NTFS partition and records any non-zero garbage, which
+	// may include garbage leftover data from a previous reformat...
+	if (ClusterSize % SelectedDrive.SectorSize == 0) {
+		main_part_size_in_sectors = (((main_part_size_in_sectors * SelectedDrive.SectorSize) /
+			ClusterSize) * ClusterSize) / SelectedDrive.SectorSize;
 	}
 	if (main_part_size_in_sectors <= 0) {
 		uprintf("Error: Invalid %S size", main_part_name);

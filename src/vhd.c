@@ -1023,10 +1023,9 @@ void SaveVHD(void)
 	static_sprintf(filename, "%s.vhdx", rufus_drive[DriveIndex].label);
 	img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
 	img_save.DevicePath = GetPhysicalName(img_save.DeviceNum);
-	// FFU support started with Windows 10 1709 (build 16299) and requires GPT
-	// TODO: Better check for FFU compatibility
-	if (WindowsVersion.Major < 10 || WindowsVersion.BuildNumber < 16299 ||
-		SelectedDrive.PartitionStyle != PARTITION_STYLE_GPT)
+	// FFU support started with Windows 10 1709 (through FfuProvider.dll) and requires GPT
+	static_sprintf(path, "%s\\dism\\FfuProvider.dll", sysnative_dir);
+	if ((_accessU(path, 0) != 0) || SelectedDrive.PartitionStyle != PARTITION_STYLE_GPT)
 		img_ext.count = 2;
 	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
 	img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
