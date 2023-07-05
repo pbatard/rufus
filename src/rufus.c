@@ -1861,7 +1861,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			IGNORE_RETVAL(_chdirU(app_data_dir));
 			IGNORE_RETVAL(_mkdir(FILES_DIR));
 			IGNORE_RETVAL(_chdir(FILES_DIR));
-			if (DownloadToFileOrBufferEx(DISKCOPY_URL, tmp, DISKCOPY_USER_AGENT, NULL, hMainDialog, FALSE) != DISKCOPY_SIZE) {
+			if (DownloadToFileOrBufferEx(DISKCOPY_URL, tmp, SYMBOL_SERVER_USER_AGENT, NULL, hMainDialog, FALSE) != DISKCOPY_SIZE) {
 				ret = BOOTCHECK_DOWNLOAD_ERROR;
 				goto out;
 			}
@@ -3787,7 +3787,18 @@ extern int TestHashes(void);
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-			TestHashes();
+//			TestHashes();
+			dll_resolver_t resolver = { 0 };
+			resolver.path = "C:\\Windows\\System32\\Dism\\FfuProvider.dll";
+			resolver.count = 3;
+			resolver.name = calloc(resolver.count, sizeof(char*));
+			resolver.address = calloc(resolver.count, sizeof(uint32_t));
+			resolver.name[0] = "FfuCaptureImage";
+			resolver.name[1] = "FfuApplyImage";
+			resolver.name[2] = "FfuMountImage";
+			uprintf("Got %d resolved addresses", ResolveDllAddress(&resolver));
+			free(resolver.name);
+			free(resolver.address);
 			continue;
 		}
 #endif

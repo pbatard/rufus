@@ -1541,7 +1541,7 @@ static BOOL StoreEspInfo(GUID* guid)
 		static_sprintf(key_name[0], "ToggleEsp%02u", j);
 		str = ReadSettingStr(key_name[0]);
 		if ((str == NULL) || (str[0] == 0))
-			return WriteSettingStr(key_name[0], GuidToString(guid));
+			return WriteSettingStr(key_name[0], GuidToString(guid, TRUE));
 	}
 	// All slots are used => Move every key down and add to last slot
 	// NB: No, we don't care that the slot we remove may not be the oldest.
@@ -1550,7 +1550,7 @@ static BOOL StoreEspInfo(GUID* guid)
 		static_sprintf(key_name[1], "ToggleEsp%02u", j + 1);
 		WriteSettingStr(key_name[0], ReadSettingStr(key_name[1]));
 	}
-	return WriteSettingStr(key_name[1], GuidToString(guid));
+	return WriteSettingStr(key_name[1], GuidToString(guid, TRUE));
 }
 
 static GUID* GetEspGuid(uint8_t index)
@@ -1990,7 +1990,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	case PARTITION_STYLE_GPT:
 		SelectedDrive.PartitionStyle = PARTITION_STYLE_GPT;
 		suprintf("Partition type: GPT, NB Partitions: %d", DriveLayout->PartitionCount);
-		suprintf("Disk GUID: %s", GuidToString(&DriveLayout->Gpt.DiskId));
+		suprintf("Disk GUID: %s", GuidToString(&DriveLayout->Gpt.DiskId, TRUE));
 		suprintf("Max parts: %d, Start Offset: %" PRIi64 ", Usable = %" PRIi64 " bytes",
 			DriveLayout->Gpt.MaxPartitionCount, DriveLayout->Gpt.StartingUsableOffset.QuadPart, DriveLayout->Gpt.UsableLength.QuadPart);
 		for (i = 0; i < DriveLayout->PartitionCount; i++) {
@@ -2006,7 +2006,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 				suprintf("  Name: '%S'", DriveLayout->PartitionEntry[i].Gpt.Name);
 			suprintf("  Detected File System: %s", GetFsName(hPhysical, DriveLayout->PartitionEntry[i].StartingOffset));
 			suprintf("  ID: %s\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Attributes: 0x%016" PRIX64,
-				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId),
+				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId, TRUE),
 				SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
 				DriveLayout->PartitionEntry[i].PartitionLength,
 				DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize,
@@ -2646,5 +2646,5 @@ const char* GetGPTPartitionType(const GUID* guid)
 {
 	int i;
 	for (i = 0; (i < ARRAYSIZE(gpt_type)) && !CompareGUID(guid, gpt_type[i].guid); i++);
-	return (i < ARRAYSIZE(gpt_type)) ? gpt_type[i].name : GuidToString(guid);
+	return (i < ARRAYSIZE(gpt_type)) ? gpt_type[i].name : GuidToString(guid, TRUE);
 }

@@ -860,7 +860,7 @@ BOOL ParseSKUSiPolicy(void)
 		goto out;
 	}
 	if (!CompareGUID(&Header->PolicyTypeGUID, &SKU_CODE_INTEGRITY_POLICY)) {
-		uprintf("ParseSKUSiPolicy: Unexpected Policy Type GUID %s", GuidToString(&Header->PolicyTypeGUID));
+		uprintf("ParseSKUSiPolicy: Unexpected Policy Type GUID %s", GuidToString(&Header->PolicyTypeGUID, TRUE));
 		goto out;
 	}
 

@@ -915,7 +915,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	// thinking that Rufus is doing something malicious...
 	IGNORE_RETVAL(CoCreateGuid(&guid));
 	// coverity[fixed_size_dest]
-	strcpy(&pipe[9], GuidToString(&guid));
+	strcpy(&pipe[9], GuidToString(&guid, TRUE));
 	static_sprintf(icon_path, "%s%s.ico", temp_dir, APPLICATION_NAME);
 	ExtractAppIcon(icon_path, TRUE);
 
@@ -973,7 +973,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 
 	assert((fido_script != NULL) && (fido_len != 0));
 
-	static_sprintf(script_path, "%s%s.ps1", temp_dir, GuidToString(&guid));
+	static_sprintf(script_path, "%s%s.ps1", temp_dir, GuidToString(&guid, TRUE));
 	hFile = CreateFileU(script_path, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_READONLY, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
 		uprintf("Unable to create download script '%s': %s", script_path, WindowsErrorString());

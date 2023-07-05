@@ -28,20 +28,25 @@
 #include <string.h>
 #include <stdlib.h>
 #include <winternl.h>
+#include <dbghelp.h>
 #include <assert.h>
 #include <ctype.h>
 #include <math.h>
 
 #include "rufus.h"
+#include "missing.h"
+#include "settings.h"
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
 
-#define FACILITY_WIM 322
+#define FACILITY_WIM            322
+#define DEFAULT_BASE_ADDRESS    0x100000000ULL
 
 /*
  * Globals
  */
+const HANDLE hRufus = (HANDLE)0x0000005275667573ULL;	// "\0\0\0Rufus"
 HWND hStatus;
 size_t ubuffer_pos = 0;
 char ubuffer[UBUFFER_SIZE];	// Buffer for ubpushf() messages we don't log right away
@@ -683,12 +688,13 @@ const char *WindowsErrorString(void)
 	return err_string;
 }
 
-char* GuidToString(const GUID* guid)
+char* GuidToString(const GUID* guid, BOOL bDecorated)
 {
 	static char guid_string[MAX_GUID_STRING_LENGTH];
 
 	if (guid == NULL) return NULL;
-	sprintf(guid_string, "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
+	sprintf(guid_string, bDecorated ? "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}" :
+		"%08X%04X%04X%02X%02X%02X%02X%02X%02X%02X%02X",
 		(uint32_t)guid->Data1, guid->Data2, guid->Data3,
 		guid->Data4[0], guid->Data4[1], guid->Data4[2], guid->Data4[3],
 		guid->Data4[4], guid->Data4[5], guid->Data4[6], guid->Data4[7]);
@@ -1142,4 +1148,115 @@ HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
 	pfRtlSetLastWin32ErrorAndNtStatusFromNtStatus(status);
 
 	return fileHandle;
+}
+
+// The following calls are used to resolve the addresses of DLL function calls
+// that are not publicly exposed by Microsoft. This is accomplished by downloading
+// the relevant .pdb and looking up the relevant address there. Once an address is
+// found, it is stored in the Rufus settings so that it can be reused.
+
+PF_TYPE_DECL(WINAPI, BOOL, SymInitialize, (HANDLE, PCSTR, BOOL));
+PF_TYPE_DECL(WINAPI, DWORD64, SymLoadModuleEx, (HANDLE, HANDLE, PCSTR, PCSTR, DWORD64, DWORD, PMODLOAD_DATA, DWORD));
+PF_TYPE_DECL(WINAPI, BOOL, SymGetModuleInfo64, (HANDLE, DWORD64, PIMAGEHLP_MODULE64));
+PF_TYPE_DECL(WINAPI, BOOL, SymUnloadModule64, (HANDLE, DWORD64));
+PF_TYPE_DECL(WINAPI, BOOL, SymEnumSymbols, (HANDLE, ULONG64, PCSTR, PSYM_ENUMERATESYMBOLS_CALLBACK, PVOID));
+PF_TYPE_DECL(WINAPI, BOOL, SymCleanup, (HANDLE));
+
+BOOL CALLBACK EnumSymProc(PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PVOID UserContext)
+{
+	dll_resolver_t* resolver = (dll_resolver_t*)UserContext;
+	uint32_t i;
+
+	for (i = 0; i < resolver->count; i++) {
+		if (safe_strcmp(pSymInfo->Name, resolver->name[i]) == 0) {
+			resolver->address[i] = (uint32_t)pSymInfo->Address;
+#if defined(_DEBUG)
+			uprintf("%08x: %s", resolver->address[i], resolver->name[i]);
+#endif
+		}
+	}
+
+	return TRUE;
+}
+
+uint32_t ResolveDllAddress(dll_resolver_t* resolver)
+{
+	uint32_t r = 0;
+	uint32_t i;
+	char url[MAX_PATH], saved_id[MAX_PATH], path[MAX_PATH];
+	DWORD64 base_address;
+	IMAGEHLP_MODULE64 info = { sizeof(IMAGEHLP_MODULE64) };
+
+	PF_INIT(SymInitialize, DbgHelp);
+	PF_INIT(SymLoadModuleEx, DbgHelp);
+	PF_INIT(SymGetModuleInfo64, DbgHelp);
+	PF_INIT(SymUnloadModule64, DbgHelp);
+	PF_INIT(SymEnumSymbols, DbgHelp);
+	PF_INIT(SymCleanup, DbgHelp);
+
+	if (pfSymInitialize == NULL || pfSymLoadModuleEx == NULL || pfSymGetModuleInfo64 == NULL ||
+		pfSymUnloadModule64 == NULL || pfSymEnumSymbols == NULL || pfSymCleanup == NULL ||
+		resolver->count == 0 || resolver->path == NULL || resolver->name == NULL || resolver->address == NULL)
+		return 0;
+
+	if (!pfSymInitialize(hRufus, NULL, FALSE)) {
+		uprintf("Could not initialize DLL symbol handler");
+		return 0;
+	}
+
+	// Get the PDB unique address from the DLL
+	base_address = pfSymLoadModuleEx(hRufus, NULL, resolver->path, NULL, DEFAULT_BASE_ADDRESS, 0, NULL, 0);
+	if (base_address == 0ULL || !pfSymGetModuleInfo64(hRufus, base_address, &info)) {
+		uprintf("Could not obtain DLL symbol info");
+		goto out;
+	}
+	assert(base_address == DEFAULT_BASE_ADDRESS);
+	pfSymUnloadModule64(hRufus, base_address);
+
+	// Check settings to see if we have existing data for these DLL calls.
+	for (i = 0; i < resolver->count; i++) {
+		static_sprintf(saved_id, "%s@%s%x:%s", _filenameU(resolver->path),
+			GuidToString(&info.PdbSig70, FALSE), (int)info.PdbAge, resolver->name[i]);
+		resolver->address[i] = ReadSetting32(saved_id);
+		if (resolver->address[i] == 0)
+			break;
+	}
+
+	if (i == resolver->count) {
+		// No need to download the PDB
+		r = resolver->count;
+		goto out;
+	}
+
+	// Download the PDB from Microsoft's symbol servers
+	if (MessageBoxExU(hMainDialog, lmprintf(MSG_345), lmprintf(MSG_115),
+		MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
+		goto out;
+	static_sprintf(path, "%s\\%s.pdb", temp_dir, info.ModuleName);
+	static_sprintf(url, "http://msdl.microsoft.com/download/symbols/%s.pdb/%s%x/%s.pdb",
+		info.ModuleName, GuidToString(&info.PdbSig70, FALSE), (int)info.PdbAge, info.ModuleName);
+	if (DownloadToFileOrBufferEx(url, path, SYMBOL_SERVER_USER_AGENT, NULL, hMainDialog, FALSE) < 200 * KB)
+		goto out;
+
+	// NB: SymLoadModuleEx() does not load a PDB unless the file has an explicit '.pdb' extension
+	base_address = pfSymLoadModuleEx(hRufus, NULL, path, NULL, DEFAULT_BASE_ADDRESS, 0, NULL, 0);
+	assert(base_address == DEFAULT_BASE_ADDRESS);
+	pfSymEnumSymbols(hRufus, base_address, "*!*", EnumSymProc, resolver);
+	DeleteFileU(path);
+
+	// Store the addresses
+	r = 0;
+	for (i = 0; i < resolver->count; i++) {
+		static_sprintf(saved_id, "%s@%s%x:%s", _filenameU(resolver->path),
+			GuidToString(&info.PdbSig70, FALSE), (int)info.PdbAge, resolver->name[i]);
+		if (resolver->address[i] != 0) {
+			WriteSetting32(saved_id, resolver->address[i]);
+			r++;
+		}
+	}
+
+out:
+	pfSymUnloadModule64(hRufus, base_address);
+	pfSymCleanup(hRufus);
+	return r;
 }
