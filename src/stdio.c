@@ -42,6 +42,7 @@
 
 #define FACILITY_WIM            322
 #define DEFAULT_BASE_ADDRESS    0x100000000ULL
+#define RSDS_SIG                0x53445352
 
 /*
  * Globals
@@ -50,6 +51,15 @@ const HANDLE hRufus = (HANDLE)0x0000005275667573ULL;	// "\0\0\0Rufus"
 HWND hStatus;
 size_t ubuffer_pos = 0;
 char ubuffer[UBUFFER_SIZE];	// Buffer for ubpushf() messages we don't log right away
+
+#pragma pack(push, 1)
+typedef struct {
+	DWORD   Signature;	// "RSDS"
+	GUID    Guid;
+	DWORD   Age;
+	CHAR    PdbName[1];
+} debug_info_t;
+#pragma pack(pop)
 
 void uprintf(const char *format, ...)
 {
@@ -1157,7 +1167,6 @@ HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
 
 PF_TYPE_DECL(WINAPI, BOOL, SymInitialize, (HANDLE, PCSTR, BOOL));
 PF_TYPE_DECL(WINAPI, DWORD64, SymLoadModuleEx, (HANDLE, HANDLE, PCSTR, PCSTR, DWORD64, DWORD, PMODLOAD_DATA, DWORD));
-PF_TYPE_DECL(WINAPI, BOOL, SymGetModuleInfo64, (HANDLE, DWORD64, PIMAGEHLP_MODULE64));
 PF_TYPE_DECL(WINAPI, BOOL, SymUnloadModule64, (HANDLE, DWORD64));
 PF_TYPE_DECL(WINAPI, BOOL, SymEnumSymbols, (HANDLE, ULONG64, PCSTR, PSYM_ENUMERATESYMBOLS_CALLBACK, PVOID));
 PF_TYPE_DECL(WINAPI, BOOL, SymCleanup, (HANDLE));
@@ -1183,40 +1192,50 @@ uint32_t ResolveDllAddress(dll_resolver_t* resolver)
 {
 	uint32_t r = 0;
 	uint32_t i;
+	debug_info_t* info = NULL;
 	char url[MAX_PATH], saved_id[MAX_PATH], path[MAX_PATH];
-	DWORD64 base_address;
-	IMAGEHLP_MODULE64 info = { sizeof(IMAGEHLP_MODULE64) };
+	uint8_t* buf = NULL;
+	DWORD* dbuf;
+	DWORD64 base_address = 0ULL;
 
 	PF_INIT(SymInitialize, DbgHelp);
 	PF_INIT(SymLoadModuleEx, DbgHelp);
-	PF_INIT(SymGetModuleInfo64, DbgHelp);
 	PF_INIT(SymUnloadModule64, DbgHelp);
 	PF_INIT(SymEnumSymbols, DbgHelp);
 	PF_INIT(SymCleanup, DbgHelp);
 
-	if (pfSymInitialize == NULL || pfSymLoadModuleEx == NULL || pfSymGetModuleInfo64 == NULL ||
-		pfSymUnloadModule64 == NULL || pfSymEnumSymbols == NULL || pfSymCleanup == NULL ||
-		resolver->count == 0 || resolver->path == NULL || resolver->name == NULL || resolver->address == NULL)
+	if (pfSymInitialize == NULL || pfSymLoadModuleEx == NULL || pfSymUnloadModule64 == NULL ||
+		pfSymEnumSymbols == NULL || pfSymCleanup == NULL || resolver->count == 0 ||
+		resolver->path == NULL || resolver->name == NULL || resolver->address == NULL)
 		return 0;
 
-	if (!pfSymInitialize(hRufus, NULL, FALSE)) {
-		uprintf("Could not initialize DLL symbol handler");
+	// Get the PDB unique address from the DLL. Note that we can *NOT* use SymGetModuleInfo64() to
+	// obtain the data we need because Microsoft either *BOTCHED* or *DELIBERATELY CRIPPLED* their
+	// SymLoadModuleEx()/SymLoadModule64() implementation on ARM64, so that the return value is always
+	// 0 with GetLastError() set to ERROR_SUCCESS, thereby *FALSELY* indicating that the module is
+	// already loaded... So we just load the whole DLL into a buffer and look for an "RSDS" section
+	// per https://www.godevtool.com/Other/pdb.htm
+	r = read_file(resolver->path, &buf);
+	if (r == 0)
 		return 0;
+
+	dbuf = (DWORD*)buf;
+	for (i = 0; i < (r - sizeof(debug_info_t)) / sizeof(DWORD); i++) {
+		if (dbuf[i] == RSDS_SIG) {
+			info = (debug_info_t*)&dbuf[i];
+			if (safe_strstr(info->PdbName, ".pdb") != NULL)
+				break;
+		}
 	}
-
-	// Get the PDB unique address from the DLL
-	base_address = pfSymLoadModuleEx(hRufus, NULL, resolver->path, NULL, DEFAULT_BASE_ADDRESS, 0, NULL, 0);
-	if (base_address == 0ULL || !pfSymGetModuleInfo64(hRufus, base_address, &info)) {
-		uprintf("Could not obtain DLL symbol info");
+	if (info == NULL) {
+		uprintf("Could not find debug info in '%s'", resolver->path);
 		goto out;
 	}
-	assert(base_address == DEFAULT_BASE_ADDRESS);
-	pfSymUnloadModule64(hRufus, base_address);
 
 	// Check settings to see if we have existing data for these DLL calls.
 	for (i = 0; i < resolver->count; i++) {
 		static_sprintf(saved_id, "%s@%s%x:%s", _filenameU(resolver->path),
-			GuidToString(&info.PdbSig70, FALSE), (int)info.PdbAge, resolver->name[i]);
+			GuidToString(&info->Guid, FALSE), info->Age, resolver->name[i]);
 		resolver->address[i] = ReadSetting32(saved_id);
 		if (resolver->address[i] == 0)
 			break;
@@ -1232,15 +1251,28 @@ uint32_t ResolveDllAddress(dll_resolver_t* resolver)
 	if (MessageBoxExU(hMainDialog, lmprintf(MSG_345), lmprintf(MSG_115),
 		MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
 		goto out;
-	static_sprintf(path, "%s\\%s.pdb", temp_dir, info.ModuleName);
-	static_sprintf(url, "http://msdl.microsoft.com/download/symbols/%s.pdb/%s%x/%s.pdb",
-		info.ModuleName, GuidToString(&info.PdbSig70, FALSE), (int)info.PdbAge, info.ModuleName);
+	static_sprintf(path, "%s\\%s", temp_dir, info->PdbName);
+	static_sprintf(url, "http://msdl.microsoft.com/download/symbols/%s/%s%x/%s",
+		info->PdbName, GuidToString(&info->Guid, FALSE), info->Age, info->PdbName);
 	if (DownloadToFileOrBufferEx(url, path, SYMBOL_SERVER_USER_AGENT, NULL, hMainDialog, FALSE) < 200 * KB)
 		goto out;
+
+	if (!pfSymInitialize(hRufus, NULL, FALSE)) {
+		uprintf("Could not initialize DLL symbol handler");
+		goto out;
+	}
 
 	// NB: SymLoadModuleEx() does not load a PDB unless the file has an explicit '.pdb' extension
 	base_address = pfSymLoadModuleEx(hRufus, NULL, path, NULL, DEFAULT_BASE_ADDRESS, 0, NULL, 0);
 	assert(base_address == DEFAULT_BASE_ADDRESS);
+	// On Windows 11 ARM64 the following call will return *TWO* different addresses for the same
+	// call, because most Windows DLL's are ARM64X, which means that they are an unholy union of
+	// both X64 and ARM64 code in the same binary...
+	// See https://learn.microsoft.com/en-us/windows/arm/arm64x-pe
+	// Now this would be all swell and dandy if Microsoft's debugging/symbol APIs had followed
+	// and would give us a hint of the architecture behind each duplicate address, but of course,
+	// the SYMBOL_INFO passed to EnumSymProc contains no such data. So we currently don't have a
+	// way to tell which of the two addresses we get on ARM64 is for which architecture... :(
 	pfSymEnumSymbols(hRufus, base_address, "*!*", EnumSymProc, resolver);
 	DeleteFileU(path);
 
@@ -1248,7 +1280,7 @@ uint32_t ResolveDllAddress(dll_resolver_t* resolver)
 	r = 0;
 	for (i = 0; i < resolver->count; i++) {
 		static_sprintf(saved_id, "%s@%s%x:%s", _filenameU(resolver->path),
-			GuidToString(&info.PdbSig70, FALSE), (int)info.PdbAge, resolver->name[i]);
+			GuidToString(&info->Guid, FALSE), info->Age, resolver->name[i]);
 		if (resolver->address[i] != 0) {
 			WriteSetting32(saved_id, resolver->address[i]);
 			r++;
@@ -1256,7 +1288,9 @@ uint32_t ResolveDllAddress(dll_resolver_t* resolver)
 	}
 
 out:
-	pfSymUnloadModule64(hRufus, base_address);
+	free(buf);
+	if (base_address != 0)
+		pfSymUnloadModule64(hRufus, base_address);
 	pfSymCleanup(hRufus);
 	return r;
 }
