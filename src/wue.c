@@ -440,7 +440,7 @@ BOOL PopulateWindowsVersion(void)
 
 	// If we're not using a straight install.wim, we need to mount the ISO to access it
 	if (!img_report.is_windows_img) {
-		mounted_iso = MountISO(image_path);
+		mounted_iso = VhdMountImage(image_path);
 		if (mounted_iso == NULL) {
 			uprintf("Could not mount Windows ISO for build number detection");
 			return FALSE;
@@ -468,7 +468,7 @@ BOOL PopulateWindowsVersion(void)
 out:
 	DeleteFileU(xml_file);
 	if (!img_report.is_windows_img)
-		UnMountISO();
+		VhdUnmountImage();
 
 	return ((img_report.win_version.major != 0) && (img_report.win_version.build != 0));
 }
@@ -532,7 +532,7 @@ int SetWinToGoIndex(void)
 
 	// If we're not using a straight install.wim, we need to mount the ISO to access it
 	if (!img_report.is_windows_img) {
-		mounted_iso = MountISO(image_path);
+		mounted_iso = VhdMountImage(image_path);
 		if (mounted_iso == NULL) {
 			uprintf("Could not mount ISO for Windows To Go selection");
 			return -1;
@@ -613,7 +613,7 @@ int SetWinToGoIndex(void)
 out:
 	DeleteFileU(xml_file);
 	if (!img_report.is_windows_img)
-		UnMountISO();
+		VhdUnmountImage();
 	return wintogo_index;
 }
 
@@ -640,7 +640,7 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	}
 
 	if (!img_report.is_windows_img) {
-		mounted_iso = MountISO(image_path);
+		mounted_iso = VhdMountImage(image_path);
 		if (mounted_iso == NULL) {
 			uprintf("Could not mount ISO for Windows To Go installation");
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_ISO_EXTRACT);
@@ -656,11 +656,11 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		if (!IS_ERROR(FormatStatus))
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_ISO_EXTRACT);
 		if (!img_report.is_windows_img)
-			UnMountISO();
+			VhdUnmountImage();
 		return FALSE;
 	}
 	if (!img_report.is_windows_img)
-		UnMountISO();
+		VhdUnmountImage();
 
 	if (use_esp) {
 		uprintf("Setting up EFI System Partition");

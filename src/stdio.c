@@ -1235,7 +1235,7 @@ uint32_t ResolveDllAddress(dll_resolver_t* resolver)
 	// Check settings to see if we have existing data for these DLL calls.
 	for (i = 0; i < resolver->count; i++) {
 		static_sprintf(saved_id, "%s@%s%x:%s", _filenameU(resolver->path),
-			GuidToString(&info->Guid, FALSE), info->Age, resolver->name[i]);
+			GuidToString(&info->Guid, FALSE), (int)info->Age, resolver->name[i]);
 		resolver->address[i] = ReadSetting32(saved_id);
 		if (resolver->address[i] == 0)
 			break;
@@ -1253,7 +1253,7 @@ uint32_t ResolveDllAddress(dll_resolver_t* resolver)
 		goto out;
 	static_sprintf(path, "%s\\%s", temp_dir, info->PdbName);
 	static_sprintf(url, "http://msdl.microsoft.com/download/symbols/%s/%s%x/%s",
-		info->PdbName, GuidToString(&info->Guid, FALSE), info->Age, info->PdbName);
+		info->PdbName, GuidToString(&info->Guid, FALSE), (int)info->Age, info->PdbName);
 	if (DownloadToFileOrBufferEx(url, path, SYMBOL_SERVER_USER_AGENT, NULL, hMainDialog, FALSE) < 200 * KB)
 		goto out;
 
@@ -1280,7 +1280,7 @@ uint32_t ResolveDllAddress(dll_resolver_t* resolver)
 	r = 0;
 	for (i = 0; i < resolver->count; i++) {
 		static_sprintf(saved_id, "%s@%s%x:%s", _filenameU(resolver->path),
-			GuidToString(&info->Guid, FALSE), info->Age, resolver->name[i]);
+			GuidToString(&info->Guid, FALSE), (int)info->Age, resolver->name[i]);
 		if (resolver->address[i] != 0) {
 			WriteSetting32(saved_id, resolver->address[i]);
 			r++;

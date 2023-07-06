@@ -128,7 +128,7 @@ BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fa
 BOOL usb_debug, use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
 BOOL write_as_image = FALSE, write_as_esp = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
-BOOL appstore_version = FALSE, is_vds_available = TRUE, persistent_log = FALSE;
+BOOL appstore_version = FALSE, is_vds_available = TRUE, persistent_log = FALSE, has_ffu_support = FALSE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1, imop_win_sel = 0;
 int default_fs, fs_type, boot_type, partition_type, target_type;
@@ -2588,8 +2588,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					img_provided = FALSE;	// One off thing...
 				} else {
 					char* old_image_path = image_path;
+					char extensions[128] = "*.iso;*.img;*.vhd;*.vhdx;*.usb;*.bz2;*.bzip2;*.gz;*.lzma;*.xz;*.Z;*.zip;*.wim;*.esd;*.vtsi";
+					if (has_ffu_support)
+						strcat(extensions, ";*.ffu");
 					// If declared globaly, lmprintf(MSG_036) would be called on each message...
-					EXT_DECL(img_ext, NULL, __VA_GROUP__("*.iso;*.img;*.vhd;*.usb;*.bz2;*.bzip2;*.gz;*.lzma;*.xz;*.Z;*.zip;*.wim;*.esd;*.vtsi"),
+					EXT_DECL(img_ext, NULL, __VA_GROUP__(extensions),
 						__VA_GROUP__(lmprintf(MSG_036)));
 					image_path = FileDialog(FALSE, NULL, &img_ext, 0);
 					if (image_path == NULL) {
@@ -2684,7 +2687,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			break;
 		case IDC_SAVE:
-			SaveVHD();
+			VhdSaveImage();
 			break;
 		case IDM_SELECT:
 		case IDM_DOWNLOAD:
@@ -3695,6 +3698,9 @@ skip_args_processing:
 	// Detect CPU acceleration for SHA-1/SHA-256
 	cpu_has_sha1_accel = DetectSHA1Acceleration();
 	cpu_has_sha256_accel = DetectSHA256Acceleration();
+	// FFU support started with Windows 10 1709 (through FfuProvider.dll)
+	static_sprintf(tmp_path, "%s\\dism\\FfuProvider.dll", sysnative_dir);
+	has_ffu_support = (_accessU(tmp_path, 0) == 0);
 
 relaunch:
 	ubprintf("Localization set to '%s'", selected_locale->txt[0]);
@@ -3964,7 +3970,7 @@ extern int TestHashes(void);
 			}
 			// Alt-O => Save from Optical drive to ISO
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'O')) {
-				SaveISO();
+				IsoSaveImage();
 				continue;
 			}
 			// Alt-P => Toggle GPT ESP to and from Basic Data type (Windows 10 or later)

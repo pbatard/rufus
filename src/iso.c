@@ -1726,83 +1726,8 @@ out:
 	return ret;
 }
 
-// VirtDisk API Prototypes since we can't use delay-loading because of MinGW
-// See https://github.com/pbatard/rufus/issues/2272#issuecomment-1615976013
-PF_TYPE_DECL(WINAPI, DWORD, OpenVirtualDisk, (PVIRTUAL_STORAGE_TYPE, PCWSTR,
-	VIRTUAL_DISK_ACCESS_MASK, OPEN_VIRTUAL_DISK_FLAG, POPEN_VIRTUAL_DISK_PARAMETERS, PHANDLE));
-PF_TYPE_DECL(WINAPI, DWORD, AttachVirtualDisk, (HANDLE, PSECURITY_DESCRIPTOR,
-	ATTACH_VIRTUAL_DISK_FLAG, ULONG, PATTACH_VIRTUAL_DISK_PARAMETERS, LPOVERLAPPED));
-PF_TYPE_DECL(WINAPI, DWORD, DetachVirtualDisk, (HANDLE, DETACH_VIRTUAL_DISK_FLAG, ULONG));
-PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskPhysicalPath, (HANDLE, PULONG, PWSTR));
-
-static char physical_path[128] = "";
-static HANDLE mounted_handle = INVALID_HANDLE_VALUE;
-
-char* MountISO(const char* path)
-{
-	VIRTUAL_STORAGE_TYPE vtype = { VIRTUAL_STORAGE_TYPE_DEVICE_ISO, VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT };
-	ATTACH_VIRTUAL_DISK_PARAMETERS vparams = { 0 };
-	DWORD r;
-	wchar_t wtmp[128];
-	ULONG size = ARRAYSIZE(wtmp);
-	wconvert(path);
-	char* ret = NULL;
-
-	PF_INIT_OR_OUT(OpenVirtualDisk, VirtDisk);
-	PF_INIT_OR_OUT(AttachVirtualDisk, VirtDisk);
-	PF_INIT_OR_OUT(GetVirtualDiskPhysicalPath, VirtDisk);
-
-	if ((mounted_handle != NULL) && (mounted_handle != INVALID_HANDLE_VALUE))
-		UnMountISO();
-
-	r = pfOpenVirtualDisk(&vtype, wpath, VIRTUAL_DISK_ACCESS_READ | VIRTUAL_DISK_ACCESS_GET_INFO,
-		OPEN_VIRTUAL_DISK_FLAG_NONE, NULL, &mounted_handle);
-	if (r != ERROR_SUCCESS) {
-		SetLastError(r);
-		uprintf("Could not open ISO '%s': %s", path, WindowsErrorString());
-		goto out;
-	}
-
-	vparams.Version = ATTACH_VIRTUAL_DISK_VERSION_1;
-	r = pfAttachVirtualDisk(mounted_handle, NULL, ATTACH_VIRTUAL_DISK_FLAG_READ_ONLY |
-		ATTACH_VIRTUAL_DISK_FLAG_NO_DRIVE_LETTER, 0, &vparams, NULL);
-	if (r != ERROR_SUCCESS) {
-		SetLastError(r);
-		uprintf("Could not mount ISO '%s': %s", path, WindowsErrorString());
-		goto out;
-	}
-
-	r = pfGetVirtualDiskPhysicalPath(mounted_handle, &size, wtmp);
-	if (r != ERROR_SUCCESS) {
-		SetLastError(r);
-		uprintf("Could not obtain physical path for mounted ISO '%s': %s", path, WindowsErrorString());
-		goto out;
-	}
-	wchar_to_utf8_no_alloc(wtmp, physical_path, sizeof(physical_path));
-	ret = physical_path;
-
-out:
-	if (ret == NULL)
-		UnMountISO();
-	wfree(path);
-	return ret;
-}
-
-void UnMountISO(void)
-{
-	PF_INIT_OR_OUT(DetachVirtualDisk, VirtDisk);
-
-	if ((mounted_handle == NULL) || (mounted_handle == INVALID_HANDLE_VALUE))
-		goto out;
-
-	pfDetachVirtualDisk(mounted_handle, DETACH_VIRTUAL_DISK_FLAG_NONE, 0);
-	safe_closehandle(mounted_handle);
-out:
-	physical_path[0] = 0;
-}
-
 // TODO: If we can't get save to ISO from virtdisk, we might as well drop this
-static DWORD WINAPI SaveISOThread(void* param)
+static DWORD WINAPI IsoSaveImageThread(void* param)
 {
 	BOOL s;
 	DWORD rSize, wSize;
@@ -1908,7 +1833,7 @@ out:
 	ExitThread(0);
 }
 
-void SaveISO(void)
+void IsoSaveImage(void)
 {
 	static IMG_SAVE img_save = { 0 };
 	char filename[33] = "disc_image.iso";
@@ -1939,7 +1864,7 @@ void SaveISO(void)
 	// Disable all controls except cancel
 	EnableControls(FALSE, FALSE);
 	InitProgress(TRUE);
-	format_thread = CreateThread(NULL, 0, SaveISOThread, &img_save, 0, NULL);
+	format_thread = CreateThread(NULL, 0, IsoSaveImageThread, &img_save, 0, NULL);
 	if (format_thread != NULL) {
 		uprintf("\r\nSave to ISO operation started");
 		PrintInfo(0, -1);
