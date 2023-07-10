@@ -655,7 +655,7 @@ extern BOOL DumpFatDir(const char* path, int32_t cluster);
 extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs);
 extern uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext);
 extern BOOL SetAutorun(const char* path);
-extern char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options);
+extern char* FileDialog(BOOL save, char* path, const ext_t* ext, UINT* selected_ext);
 extern BOOL FileIO(enum file_io_type io_type, char* path, char** buffer, DWORD* size);
 extern unsigned char* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate);
 extern DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc);

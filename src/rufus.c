@@ -139,7 +139,7 @@ char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
-char *archive_path = NULL, image_option_txt[128], *fido_url = NULL;
+char *archive_path = NULL, image_option_txt[128], *fido_url = NULL, *save_image_type = NULL;
 StrArray BlockingProcess, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
@@ -1013,7 +1013,7 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 				log_size = GetDlgItemTextU(hDlg, IDC_LOG_EDIT, log_buffer, log_size);
 				if (log_size != 0) {
 					log_size--;	// remove NUL terminator
-					filepath =  FileDialog(TRUE, user_dir, &log_ext, 0);
+					filepath =  FileDialog(TRUE, user_dir, &log_ext, NULL);
 					if (filepath != NULL)
 						FileIO(FILE_IO_WRITE, filepath, &log_buffer, &log_size);
 					safe_free(filepath);
@@ -2567,7 +2567,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				EXT_DECL(arch_ext, NULL, __VA_GROUP__("*.zip"), __VA_GROUP__(lmprintf(MSG_309)));
 				if (image_path == NULL)
 					break;
-				archive_path = FileDialog(FALSE, NULL, &arch_ext, 0);
+				archive_path = FileDialog(FALSE, NULL, &arch_ext, NULL);
 				if (archive_path != NULL) {
 					struct __stat64 stat64 = { 0 };
 					_stat64U(archive_path, &stat64);
@@ -2591,10 +2591,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					char extensions[128] = "*.iso;*.img;*.vhd;*.vhdx;*.usb;*.bz2;*.bzip2;*.gz;*.lzma;*.xz;*.Z;*.zip;*.wim;*.esd;*.vtsi";
 					if (has_ffu_support)
 						strcat(extensions, ";*.ffu");
-					// If declared globaly, lmprintf(MSG_036) would be called on each message...
+					// If declared globaly, lmprintf(MSG_280) would be called on each message...
 					EXT_DECL(img_ext, NULL, __VA_GROUP__(extensions),
-						__VA_GROUP__(lmprintf(MSG_036)));
-					image_path = FileDialog(FALSE, NULL, &img_ext, 0);
+						__VA_GROUP__(lmprintf(MSG_280)));
+					image_path = FileDialog(FALSE, NULL, &img_ext, NULL);
 					if (image_path == NULL) {
 						if (old_image_path != NULL) {
 							// Reselect previous image
@@ -3556,6 +3556,7 @@ skip_args_processing:
 	enable_extra_hashes = ReadSettingBool(SETTING_ENABLE_EXTRA_HASHES);
 	ignore_boot_marker = ReadSettingBool(SETTING_IGNORE_BOOT_MARKER);
 	persistent_log = ReadSettingBool(SETTING_PERSISTENT_LOG);
+	save_image_type = ReadSettingStr(SETTING_PREFERRED_SAVE_IMAGE_TYPE);
 	// This restores the Windows User Experience/unattend.xml mask from the saved user
 	// settings, and is designed to work even if we add new options later.
 	wue_options = ReadSetting32(SETTING_WUE_OPTIONS);

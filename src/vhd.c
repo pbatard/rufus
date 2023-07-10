@@ -29,6 +29,7 @@
 #include "vhd.h"
 #include "missing.h"
 #include "resource.h"
+#include "settings.h"
 #include "msapi_utf8.h"
 
 #include "drive.h"
@@ -58,6 +59,7 @@ typedef struct {
 uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 HANDLE wim_thread = NULL;
 extern int default_thread_priority;
+extern char* save_image_type;
 extern BOOL ignore_boot_marker, has_ffu_support;
 extern RUFUS_DRIVE rufus_drive[MAX_DRIVES];
 extern HANDLE format_thread;
@@ -1099,68 +1101,79 @@ static DWORD WINAPI FfuSaveImageThread(void* param)
 
 void VhdSaveImage(void)
 {
-	static IMG_SAVE img_save = { 0 };
+	UINT i;
+	static IMG_SAVE img_save;
 	char filename[128];
 	char path[MAX_PATH];
 	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
-	EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhdx", "*.vhd", "*.ffu"),
-		__VA_GROUP__(lmprintf(MSG_342), lmprintf(MSG_343), lmprintf(MSG_344)));
+	static EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhd", "*.vhdx", "*.ffu"),
+		__VA_GROUP__(lmprintf(MSG_343), lmprintf(MSG_342), lmprintf(MSG_344)));
 	ULARGE_INTEGER free_space;
 
+	memset(&img_save, 0, sizeof(IMG_SAVE));
 	if ((DriveIndex < 0) || (format_thread != NULL))
 		return;
 
-	static_sprintf(filename, "%s.vhdx", rufus_drive[DriveIndex].label);
+	static_sprintf(filename, "%s", rufus_drive[DriveIndex].label);
 	img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
 	img_save.DevicePath = GetPhysicalName(img_save.DeviceNum);
 	// FFU support requires GPT
 	if (!has_ffu_support || SelectedDrive.PartitionStyle != PARTITION_STYLE_GPT)
 		img_ext.count = 2;
-	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
-	img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
-	if (safe_strstr(img_save.ImagePath, ".vhdx") != NULL)
+	for (i = 1; i <= (UINT)img_ext.count && (safe_strcmp(&_img_ext_x[i - 1][2], save_image_type) != 0); i++);
+	if (i > (UINT)img_ext.count)
+		i = 2;
+	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, &i);
+	assert(i > 0 && i <= (UINT)img_ext.count);
+	save_image_type = (char*) &_img_ext_x[i - 1][2];
+	WriteSettingStr(SETTING_PREFERRED_SAVE_IMAGE_TYPE, save_image_type);
+	switch (i) {
+	case 1:
 		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
-	else if (safe_strstr(img_save.ImagePath, ".ffu") != NULL)
+		break;
+	case 3:
 		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_FFU;
+		break;
+	default:
+		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_VHDX;
+		break;
+	}
 	img_save.BufSize = DD_BUFFER_SIZE;
 	img_save.DeviceSize = SelectedDrive.DiskSize;
 	if (img_save.DevicePath != NULL && img_save.ImagePath != NULL) {
 		// Reset all progress bars
 		SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
 		FormatStatus = 0;
-		free_space.QuadPart = 0;
-		if ((GetVolumePathNameA(img_save.ImagePath, path, sizeof(path)))
-			&& (GetDiskFreeSpaceExA(path, &free_space, NULL, NULL))
-			&& ((LONGLONG)free_space.QuadPart > (SelectedDrive.DiskSize + 512))) {
-			// Disable all controls except Cancel
-			EnableControls(FALSE, FALSE);
-			FormatStatus = 0;
-			InitProgress(TRUE);
-			format_thread = CreateThread(NULL, 0, img_save.Type == VIRTUAL_STORAGE_TYPE_DEVICE_FFU ?
-				FfuSaveImageThread : VhdSaveImageThread, &img_save, 0, NULL);
-			if (format_thread != NULL) {
-				uprintf("\r\nSave to VHD operation started");
-				PrintInfo(0, -1);
-				SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
-			} else {
-				uprintf("Unable to start VHD save thread");
-				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
-				safe_free(img_save.DevicePath);
-				safe_free(img_save.ImagePath);
-				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
-			}
-		} else {
-			if (free_space.QuadPart == 0) {
-				uprintf("Unable to isolate drive name for VHD save");
-				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_PATH_NOT_FOUND;
-			} else {
-				// TODO: Might be salvageable for compressed VHDX
+		if (img_save.Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD) {
+			free_space.QuadPart = 0;
+			if ((GetVolumePathNameA(img_save.ImagePath, path, sizeof(path)))
+				&& (GetDiskFreeSpaceExA(path, &free_space, NULL, NULL))
+				&& ((LONGLONG)free_space.QuadPart < (SelectedDrive.DiskSize + 512))) {
 				uprintf("The VHD size is too large for the target drive");
 				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_FILE_TOO_LARGE;
+				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+				goto out;
 			}
-			safe_free(img_save.DevicePath);
-			safe_free(img_save.ImagePath);
+		}
+		// Disable all controls except Cancel
+		EnableControls(FALSE, FALSE);
+		FormatStatus = 0;
+		InitProgress(TRUE);
+		format_thread = CreateThread(NULL, 0, img_save.Type == VIRTUAL_STORAGE_TYPE_DEVICE_FFU ?
+			FfuSaveImageThread : VhdSaveImageThread, &img_save, 0, NULL);
+		if (format_thread != NULL) {
+			uprintf("\r\nSave to VHD operation started");
+			PrintInfo(0, -1);
+			SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
+		} else {
+			uprintf("Unable to start VHD save thread");
+			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
 			PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 		}
+	}
+out:
+	if (format_thread == NULL) {
+		safe_free(img_save.DevicePath);
+		safe_free(img_save.ImagePath);
 	}
 }

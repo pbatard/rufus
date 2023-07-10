@@ -1642,12 +1642,13 @@ DWORD WINAPI FormatThread(void* param)
 	if ((boot_type == BT_IMAGE) && write_as_image) {
 		// Special case for FFU images
 		if (img_report.compression_type == IMG_COMPRESSION_FFU) {
-			char cmd[MAX_PATH + 128], *physical;
+			char cmd[MAX_PATH + 128], *physical = NULL;
 			// Should have been filtered out beforehand
 			assert(has_ffu_support);
 			safe_unlockclose(hPhysicalDrive);
 			physical = GetPhysicalName(SelectedDrive.DeviceNumber);
 			static_sprintf(cmd, "dism /Apply-Ffu /ApplyDrive:%s /ImageFile:\"%s\"", physical, image_path);
+			safe_free(physical);
 			uprintf("Running command: '%s", cmd);
 			cr = RunCommandWithProgress(cmd, sysnative_dir, TRUE, MSG_261);
 			if (cr != 0 && !IS_ERROR(FormatStatus)) {

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Settings access, through either registry or INI file
- * Copyright © 2015-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include <windows.h>
 #include <stdint.h>
 #include "rufus.h"
+#include "msapi_utf8.h"
 #include "registry.h"
 
 #pragma once
@@ -52,6 +53,7 @@ extern char* ini_file;
 #define SETTING_USE_UDF_VERSION             "UseUdfVersion"
 #define SETTING_USE_VDS                     "UseVds"
 #define SETTING_PERSISTENT_LOG              "PersistentLog"
+#define SETTING_PREFERRED_SAVE_IMAGE_TYPE   "PreferredSaveImageType"
 #define SETTING_PRESERVE_TIMESTAMPS         "PreserveTimestamps"
 #define SETTING_VERBOSE_UPDATES             "VerboseUpdateCheck"
 #define SETTING_WUE_OPTIONS                 "WindowsUserExperienceOptions"

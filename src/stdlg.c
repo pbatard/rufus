@@ -90,14 +90,9 @@ void SetDialogFocus(HWND hDlg, HWND hCtrl)
  * *EACH* thread you invoke FileDialog from, as GetDisplayName() will
  * return error 0x8001010E otherwise.
  */
-char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
+char* FileDialog(BOOL save, char* path, const ext_t* ext, UINT* selected_ext)
 {
-	DWORD tmp;
-	OPENFILENAMEA ofn;
-	char selected_name[MAX_PATH];
-	char *ext_string = NULL, *all_files = NULL;
-	size_t i, j, ext_strlen;
-	BOOL r;
+	size_t i;
 	char* filepath = NULL;
 	HRESULT hr = FALSE;
 	IFileDialog *pfd = NULL;
@@ -108,167 +103,107 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, DWORD options)
 
 	if ((ext == NULL) || (ext->count == 0) || (ext->extension == NULL) || (ext->description == NULL))
 		return NULL;
-	dialog_showing++;
 
 	filter_spec = (COMDLG_FILTERSPEC*)calloc(ext->count + 1, sizeof(COMDLG_FILTERSPEC));
-	if (filter_spec != NULL) {
-		// Setup the file extension filter table
-		for (i = 0; i < ext->count; i++) {
-			filter_spec[i].pszSpec = utf8_to_wchar(ext->extension[i]);
-			filter_spec[i].pszName = utf8_to_wchar(ext->description[i]);
-		}
-		filter_spec[i].pszSpec = L"*.*";
-		filter_spec[i].pszName = utf8_to_wchar(lmprintf(MSG_107));
+	if (filter_spec == NULL)
+		return NULL;
 
-		hr = CoCreateInstance(save ? &CLSID_FileSaveDialog : &CLSID_FileOpenDialog, NULL, CLSCTX_INPROC,
-			&IID_IFileDialog, (LPVOID)&pfd);
+	dialog_showing++;
 
-		if (FAILED(hr)) {
-			SetLastError(hr);
-			uprintf("CoCreateInstance for FileOpenDialog failed: %s\n", WindowsErrorString());
-			if (pfd != NULL) {
-				IFileDialog_Release(pfd);
-				pfd = NULL;	// Just in case
-			}
-			goto fallback;
-		}
+	// Setup the file extension filter table
+	for (i = 0; i < ext->count; i++) {
+		filter_spec[i].pszSpec = utf8_to_wchar(ext->extension[i]);
+		filter_spec[i].pszName = utf8_to_wchar(ext->description[i]);
+	}
+	filter_spec[i].pszSpec = L"*.*";
+	filter_spec[i].pszName = utf8_to_wchar(lmprintf(MSG_107));
 
-		// Set the file extension filters
-		IFileDialog_SetFileTypes(pfd, (UINT)ext->count + 1, filter_spec);
+	hr = CoCreateInstance(save ? &CLSID_FileSaveDialog : &CLSID_FileOpenDialog, NULL, CLSCTX_INPROC,
+		&IID_IFileDialog, (LPVOID)&pfd);
 
-		if (path == NULL) {
-			// Try to use the "Downloads" folder as the initial default directory
-			const GUID download_dir_guid =
-				{ 0x374de290, 0x123f, 0x4565, { 0x91, 0x64, 0x39, 0xc4, 0x92, 0x5e, 0x46, 0x7b } };
-			hr = SHGetKnownFolderPath(&download_dir_guid, 0, 0, &wpath);
-			if (SUCCEEDED(hr)) {
-				hr = SHCreateItemFromParsingName(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
-				if (SUCCEEDED(hr)) {
-					IFileDialog_SetDefaultFolder(pfd, si_path);
-				}
-				CoTaskMemFree(wpath);
-			}
-		} else {
-			wpath = utf8_to_wchar(path);
+	if (FAILED(hr)) {
+		SetLastError(hr);
+		uprintf("CoCreateInstance for FileOpenDialog failed: %s\n", WindowsErrorString());
+		if (pfd != NULL)
+			goto out;
+	}
+
+	// Set the file extension filters
+	IFileDialog_SetFileTypes(pfd, (UINT)ext->count + 1, filter_spec);
+
+	if (path == NULL) {
+		// Try to use the "Downloads" folder as the initial default directory
+		const GUID download_dir_guid =
+			{ 0x374de290, 0x123f, 0x4565, { 0x91, 0x64, 0x39, 0xc4, 0x92, 0x5e, 0x46, 0x7b } };
+		hr = SHGetKnownFolderPath(&download_dir_guid, 0, 0, &wpath);
+		if (SUCCEEDED(hr)) {
 			hr = SHCreateItemFromParsingName(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
 			if (SUCCEEDED(hr)) {
-				IFileDialog_SetFolder(pfd, si_path);
+				IFileDialog_SetDefaultFolder(pfd, si_path);
 			}
-			safe_free(wpath);
+			CoTaskMemFree(wpath);
 		}
-
-		// Set the default filename
-		wfilename = utf8_to_wchar((ext->filename == NULL) ? "" : ext->filename);
-		if (wfilename != NULL) {
-			IFileDialog_SetFileName(pfd, wfilename);
-		}
-		// Set a default extension so that when the user switches filters it gets
-		// automatically updated. Note that the IFileDialog::SetDefaultExtension()
-		// doc says the extension shouldn't be prefixed with unwanted characters
-		// but it appears to work regardless so we don't bother cleaning it.
-		wext = utf8_to_wchar((ext->extension == NULL) ? "" : ext->extension[0]);
-		if (wext != NULL) {
-			IFileDialog_SetDefaultExtension(pfd, wext);
-		}
-
-		// Display the dialog
-		hr = IFileDialog_Show(pfd, hMainDialog);
-
-		// Cleanup
-		safe_free(wext);
-		safe_free(wfilename);
-		for (i = 0; i < ext->count; i++) {
-			safe_free(filter_spec[i].pszSpec);
-			safe_free(filter_spec[i].pszName);
-		}
-		safe_free(filter_spec[i].pszName);
-		safe_free(filter_spec);
-
+	} else {
+		wpath = utf8_to_wchar(path);
+		hr = SHCreateItemFromParsingName(wpath, NULL, &IID_IShellItem, (LPVOID)&si_path);
 		if (SUCCEEDED(hr)) {
-			// Obtain the result of the user's interaction with the dialog.
-			hr = IFileDialog_GetResult(pfd, &psiResult);
-			if (SUCCEEDED(hr)) {
-				hr = IShellItem_GetDisplayName(psiResult, SIGDN_FILESYSPATH, &wpath);
-				if (SUCCEEDED(hr)) {
-					filepath = wchar_to_utf8(wpath);
-					CoTaskMemFree(wpath);
-				} else {
-					SetLastError(hr);
-					uprintf("Unable to access file path: %s\n", WindowsErrorString());
-				}
-				IShellItem_Release(psiResult);
-			}
-		} else if ((hr & 0xFFFF) != ERROR_CANCELLED) {
-			// If it's not a user cancel, assume the dialog didn't show and fallback
-			SetLastError(hr);
-			uprintf("Could not show FileOpenDialog: %s\n", WindowsErrorString());
-			goto fallback;
+			IFileDialog_SetFolder(pfd, si_path);
 		}
-		IFileDialog_Release(pfd);
-		dialog_showing--;
-		return filepath;
+		safe_free(wpath);
 	}
 
-fallback:
+	// Set the default filename
+	wfilename = utf8_to_wchar((ext->filename == NULL) ? "" : ext->filename);
+	if (wfilename != NULL)
+		IFileDialog_SetFileName(pfd, wfilename);
+	// Set a default extension so that when the user switches filters it gets
+	// automatically updated. Note that the IFileDialog::SetDefaultExtension()
+	// doc says the extension shouldn't be prefixed with unwanted characters
+	// but it appears to work regardless so we don't bother cleaning it.
+	wext = utf8_to_wchar((ext->extension == NULL) ? "" : ext->extension[0]);
+	if (wext != NULL)
+		IFileDialog_SetDefaultExtension(pfd, wext);
+	// Set the current selected extension
+	IFileDialog_SetFileTypeIndex(pfd, selected_ext == NULL ? 0 : *selected_ext);
+
+	// Display the dialog and (optionally) get the selected extension index
+	hr = IFileDialog_Show(pfd, hMainDialog);
+	if (selected_ext != NULL)
+		IFileDialog_GetFileTypeIndex(pfd, selected_ext);
+
+	// Cleanup
+	safe_free(wext);
+	safe_free(wfilename);
+	for (i = 0; i < ext->count; i++) {
+		safe_free(filter_spec[i].pszSpec);
+		safe_free(filter_spec[i].pszName);
+	}
+	safe_free(filter_spec[i].pszName);
 	safe_free(filter_spec);
-	if (pfd != NULL) {
-		IFileDialog_Release(pfd);
+
+	if (SUCCEEDED(hr)) {
+		// Obtain the result of the user's interaction with the dialog.
+		hr = IFileDialog_GetResult(pfd, &psiResult);
+		if (SUCCEEDED(hr)) {
+			hr = IShellItem_GetDisplayName(psiResult, SIGDN_FILESYSPATH, &wpath);
+			if (SUCCEEDED(hr)) {
+				filepath = wchar_to_utf8(wpath);
+				CoTaskMemFree(wpath);
+			} else {
+				SetLastError(hr);
+				uprintf("Unable to access file path: %s", WindowsErrorString());
+			}
+			IShellItem_Release(psiResult);
+		}
+	} else if ((hr & 0xFFFF) != ERROR_CANCELLED) {
+		// If it's not a user cancel, assume the dialog didn't show and fallback
+		SetLastError(hr);
+		uprintf("Could not show FileOpenDialog: %s", WindowsErrorString());
 	}
 
-	memset(&ofn, 0, sizeof(ofn));
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = hMainDialog;
-	// Selected File name
-	static_sprintf(selected_name, "%s", (ext->filename == NULL)?"":ext->filename);
-	ofn.lpstrFile = selected_name;
-	ofn.nMaxFile = MAX_PATH;
-	// Set the file extension filters
-	all_files = lmprintf(MSG_107);
-	ext_strlen = 0;
-	for (i=0; i<ext->count; i++) {
-		ext_strlen += safe_strlen(ext->description[i]) + 2*safe_strlen(ext->extension[i]) + sizeof(" ()\r\r");
-	}
-	ext_strlen += safe_strlen(all_files) + sizeof(" (*.*)\r*.*\r");
-	ext_string = (char*)malloc(ext_strlen+1);
-	if (ext_string == NULL)
-		return NULL;
-	ext_string[0] = 0;
-	for (i=0, j=0; i<ext->count; i++) {
-		j += _snprintf(&ext_string[j], ext_strlen-j, "%s (%s)\r%s\r", ext->description[i], ext->extension[i], ext->extension[i]);
-	}
-	j = _snprintf(&ext_string[j], ext_strlen-j, "%s (*.*)\r*.*\r", all_files);
-	// Microsoft could really have picked a better delimiter!
-	for (i=0; i<ext_strlen; i++) {
-// Since the VS Code Analysis tool is dumb...
-#if defined(_MSC_VER)
-#pragma warning(suppress: 6385)
-#endif
-		if (ext_string[i] == '\r') {
-#if defined(_MSC_VER)
-#pragma warning(suppress: 6386)
-#endif
-			ext_string[i] = 0;
-		}
-	}
-	ofn.lpstrFilter = ext_string;
-	ofn.nFilterIndex = 1;
-	ofn.lpstrInitialDir = path;
-	ofn.Flags = OFN_OVERWRITEPROMPT | options;
-	// Show Dialog
-	if (save) {
-		r = GetSaveFileNameU(&ofn);
-	} else {
-		r = GetOpenFileNameU(&ofn);
-	}
-	if (r) {
-		filepath = safe_strdup(selected_name);
-	} else {
-		tmp = CommDlgExtendedError();
-		if (tmp != 0) {
-			uprintf("Could not select file for %s. Error %X\n", save?"save":"open", tmp);
-		}
-	}
-	safe_free(ext_string);
+out:
+	if (pfd != NULL)
+		IFileDialog_Release(pfd);
 	dialog_showing--;
 	return filepath;
 }
@@ -1700,7 +1635,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 					break;
 				}
 				dl_ext.filename = PathFindFileNameU(update.download_url);
-				filepath = FileDialog(TRUE, app_dir, &dl_ext, OFN_NOCHANGEDIR);
+				filepath = FileDialog(TRUE, app_dir, &dl_ext, NULL);
 				if (filepath == NULL) {
 					uprintf("Could not get save path");
 					break;

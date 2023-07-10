@@ -1040,7 +1040,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 #endif
 			EXT_DECL(img_ext, GetShortName(url), __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
 			img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_ISO;
-			img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, 0);
+			img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, NULL);
 			if (img_save.ImagePath == NULL) {
 				goto out;
 			}
