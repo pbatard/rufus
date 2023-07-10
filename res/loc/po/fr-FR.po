@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-05-26 12:25+0100\n"
-"PO-Revision-Date: 2023-05-26 12:25+0100\n"
+"POT-Creation-Date: 2023-07-10 11:13+0200\n"
+"PO-Revision-Date: 2023-07-10 11:25+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: French (Français)\n"
 "X-Rufus-LCID: 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c\n"
-"X-Generator: Poedit 3.3.1\n"
+"X-Generator: Poedit 3.3.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1090,7 +1090,7 @@ msgid "Version %d.%d (Build %d)"
 msgstr ""
 
 #. • MSG_176
-msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
+msgid "mailto:support@akeo.ie"
 msgstr "Traduction Française : Pete Batard <mailto:pete@akeo.ie>"
 
 #. • MSG_177
@@ -1861,6 +1861,52 @@ msgstr ""
 "- Sélectionnez 'Non' pour annuler l’opération\n"
 "\n"
 "Note : Ce fichier sera téléchargé dans le répertoire de l'application et réutilisé automatiquement s'il est présent."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Bootloader UEFI révoqué détecté"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus a détecté que l’ISO que vous avez sélectionnée contient un bootloader UEFI révoqué, qui devrait produire %s sur un système UEFI à jour, lorsque 'Secure Boot' est activé.\n"
+"\n"
+"- Si vous avez obtenu cette image ISO à partir d’une source douteuse, vous devriez envisager la possibilité qu’elle puisse contenir un logiciel malveillant, et éviter de démarrer à partir de celle-ci.\n"
+"- Si vous l’avez obtenu à partir d’une source fiable, vous devriez essayer de trouver une version plus récente, où cette notification ne se produit pas."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "un écran « Violation de sécurité »"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "un écran de récupération Windows (BSOD) avec '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Image VHDX compressée"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Image VHD non compressée"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Image 'Full Flash Update'"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Des données complémentaires doivent être téléchargées à partir du site Microsoft avant d'utiliser cette fonctionnalité :\n"
+"- Sélectionnez 'Oui' pour vous connecter à Internet et le télécharger ces données\n"
+"- Sélectionnez 'Non' pour annuler l’opération"
 
 #. • MSG_900
 #.

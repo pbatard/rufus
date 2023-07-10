@@ -7,6 +7,14 @@ Or simply download https://files.akeo.ie/pollock/pollock-1.5.exe and follow its 
 
 o v4.?? (202?.??.??)
   - *NEW*      MSG_337 "An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS (...)"
+  - *NEW*      MSG_338 "Revoked UEFI bootloader detected"
+  - *NEW*      MSG_339 "Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked (...)"
+  - *NEW*      MSG_340 "a \"Security Violation\" screen"
+  - *NEW*      MSG_341 "a Windows Recovery Screen (BSOD) with '%s'"
+  - *NEW       MSG_342 "Compressed VHDX Image"
+  - *NEW*      MSG_343 "Uncompressed VHD Image"
+  - *NEW*      MSG_344 "Full Flash Update Image"
+  - *NEW*      MSG_345 "Some additional data must be downloaded from Microsoft to use this functionality (...)"
 
 o v3.22 (2023.??.??)
   // MSG_144 is aimed the the ISO download feature
