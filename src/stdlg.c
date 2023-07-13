@@ -120,12 +120,13 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, UINT* selected_ext)
 
 	hr = CoCreateInstance(save ? &CLSID_FileSaveDialog : &CLSID_FileOpenDialog, NULL, CLSCTX_INPROC,
 		&IID_IFileDialog, (LPVOID)&pfd);
+	if (SUCCEEDED(hr) && (pfd == NULL))	// Never trust Microsoft APIs to do the right thing
+		hr = ERROR_SEVERITY_ERROR | FAC(FACILITY_WINDOWS) | ERROR_API_UNAVAILABLE;
 
 	if (FAILED(hr)) {
 		SetLastError(hr);
-		uprintf("CoCreateInstance for FileOpenDialog failed: %s\n", WindowsErrorString());
-		if (pfd != NULL)
-			goto out;
+		uprintf("CoCreateInstance for FileOpenDialog failed: %s", WindowsErrorString());
+		goto out;
 	}
 
 	// Set the file extension filters
@@ -195,13 +196,14 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, UINT* selected_ext)
 			}
 			IShellItem_Release(psiResult);
 		}
-	} else if ((hr & 0xFFFF) != ERROR_CANCELLED) {
+	} else if (HRESULT_CODE(hr) != ERROR_CANCELLED) {
 		// If it's not a user cancel, assume the dialog didn't show and fallback
 		SetLastError(hr);
 		uprintf("Could not show FileOpenDialog: %s", WindowsErrorString());
 	}
 
 out:
+	safe_free(filter_spec);
 	if (pfd != NULL)
 		IFileDialog_Release(pfd);
 	dialog_showing--;
