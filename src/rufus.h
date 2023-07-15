@@ -547,6 +547,13 @@ enum WindowsVersion {
 };
 
 typedef struct {
+	DWORD Major;
+	DWORD Minor;
+	DWORD Micro;
+	DWORD Nano;
+} version_t;
+
+typedef struct {
 	DWORD Version;
 	DWORD Major;
 	DWORD Minor;
@@ -608,6 +615,7 @@ extern char sysnative_dir[MAX_PATH], app_data_dir[MAX_PATH], *image_path, *fido_
  * Shared prototypes
  */
 extern void GetWindowsVersion(windows_version_t* WindowsVersion);
+extern version_t* GetExecutableVersion(const char* path);
 extern const char* WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
 extern void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int msg_id, ...);

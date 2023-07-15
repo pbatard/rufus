@@ -454,6 +454,46 @@ void GetWindowsVersion(windows_version_t* windows_version)
 }
 
 /*
+ * Why oh why does Microsoft make it so convoluted to retrieve a measly executable's version number ?
+ */
+version_t* GetExecutableVersion(const char* path)
+{
+	static version_t version, *r = NULL;
+	uint8_t* buf = NULL;
+	UINT uLen;
+	DWORD dwSize, dwHandle;
+	VS_FIXEDFILEINFO* version_info;
+
+	memset(&version, 0, sizeof(version));
+
+	dwSize = GetFileVersionInfoSizeU(path, &dwHandle);
+	if (dwSize == 0)
+		goto out;
+
+	buf = malloc(dwSize);
+	if (buf == NULL)
+		goto out;;
+	if (!GetFileVersionInfoU(path, dwHandle, dwSize, buf))
+		goto out;
+
+	if (!VerQueryValueA(buf, "\\", (LPVOID*)&version_info, &uLen) || uLen == 0)
+		goto out;
+
+	if (version_info->dwSignature != 0xfeef04bd)
+		goto out;
+
+	version.Major = (version_info->dwFileVersionMS >> 16) & 0xffff;
+	version.Minor = (version_info->dwFileVersionMS >> 0) & 0xffff;
+	version.Micro = (version_info->dwFileVersionLS >> 16) & 0xffff;
+	version.Nano = (version_info->dwFileVersionLS >> 0) & 0xffff;
+	r = &version;
+
+out:
+	free(buf);
+	return r;
+}
+
+/*
  * String array manipulation
  */
 void StrArrayCreate(StrArray* arr, uint32_t initial_size)

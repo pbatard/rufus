@@ -44,6 +44,7 @@ const char* bypass_name[] = { "BypassTPMCheck", "BypassSecureBootCheck", "Bypass
 int unattend_xml_flags = 0, wintogo_index = -1, wininst_index = 0;
 int unattend_xml_mask = UNATTEND_DEFAULT_SELECTION_MASK;
 char *unattend_xml_path = NULL, unattend_username[MAX_USERNAME_LENGTH];
+BOOL is_bootloader_revoked = FALSE;
 
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 
@@ -481,7 +482,9 @@ BOOL CopySKUSiPolicy(const char* drive_name)
 	char src[MAX_PATH], dst[MAX_PATH];
 	struct __stat64 stat64 = { 0 };
 
-	if ((target_type != TT_UEFI) || !IS_WINDOWS_1X(img_report) || pe256ssp_size == 0)
+	// Only copy SkuPolicy if we warned about the bootloader being revoked.
+	if ((target_type != TT_UEFI) || !IS_WINDOWS_1X(img_report) ||
+		(pe256ssp_size == 0) || !is_bootloader_revoked)
 		return r;
 
 	static_sprintf(src, "%s\\SecureBootUpdates\\SKUSiPolicy.p7b", system_dir);

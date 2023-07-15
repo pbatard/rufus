@@ -2119,8 +2119,10 @@ BOOL IsFileInDB(const char* path)
 
 int IsBootloaderRevoked(const char* path)
 {
+	version_t* ver;
 	uint32_t i;
 	uint8_t hash[SHA256_HASHSIZE];
+
 	if (!PE256File(path, hash))
 		return -1;
 	for (i = 0; i < ARRAYSIZE(pe256dbx); i += SHA256_HASHSIZE)
@@ -2129,6 +2131,12 @@ int IsBootloaderRevoked(const char* path)
 	for (i = 0; i < pe256ssp_size * SHA256_HASHSIZE; i += SHA256_HASHSIZE)
 		if (memcmp(hash, &pe256ssp[i], SHA256_HASHSIZE) == 0)
 			return 2;
+	ver = GetExecutableVersion(path);
+	// Blanket filter for Windows 10 1607 (excluded) to Windows 10 20H1 (excluded)
+	// TODO: Revoke all bootloaders prior to 2023.05 once Microsoft does
+// 	uprintf("Found UEFI bootloader version: %d.%d.%d.%d", ver->Major, ver->Minor, ver->Micro, ver->Nano);
+	if (ver != NULL && ver->Major == 10 && ver->Minor == 0 && ver->Micro > 14393 && ver->Micro < 19041)
+		return 3;
 	return 0;
 }
 

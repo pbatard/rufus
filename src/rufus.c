@@ -93,7 +93,7 @@ static unsigned int timer;
 static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], uppercase_cancel[64];
 
 extern HANDLE update_check_thread, wim_thread;
-extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes;
+extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes, is_bootloader_revoked;
 extern BYTE* fido_script;
 extern HWND hFidoDlg;
 extern uint8_t* grub2_buf;
@@ -1432,6 +1432,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	char tmp[MAX_PATH], tmp2[MAX_PATH], c;
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
+	is_bootloader_revoked = FALSE;
 	safe_free(grub2_buf);
 
 	if (ComboBox_GetCurSel(hDeviceList) == CB_ERR)
@@ -1631,6 +1632,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					}
 					r = IsBootloaderRevoked(tmp);
 					if (r > 0) {
+						is_bootloader_revoked = TRUE;
 						r = MessageBoxExU(hMainDialog, lmprintf(MSG_339,
 							(r == 1) ? lmprintf(MSG_340) : lmprintf(MSG_341, "Error code: 0xc0000428")),
 							lmprintf(MSG_338), MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
