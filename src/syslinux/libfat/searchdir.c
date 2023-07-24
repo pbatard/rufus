@@ -40,7 +40,8 @@ int32_t libfat_searchdir(struct libfat_filesystem *fs, int32_t dirclust,
 
 	for (nent = 0; nent < LIBFAT_SECTOR_SIZE;
 	     nent += sizeof(struct fat_dirent)) {
-	    if (!memcmp(dep->name, name, 11)) {
+	    // Volume label entry must be ignored: it is not a real directory
+	    if ((dep->attribute & 0x08) == 0 && !memcmp(dep->name, name, 11)) {
 		if (direntry) {
 		    memcpy(direntry->entry, dep, sizeof(*dep));
 		    direntry->sector = s;
