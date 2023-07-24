@@ -40,7 +40,8 @@ int32_t libfat_searchdir(struct libfat_filesystem *fs, int32_t dirclust,
 
 	for (nent = 0; nent < LIBFAT_SECTOR_SIZE;
 	     nent += sizeof(struct fat_dirent)) {
-	    if (!memcmp(dep->name, name, 11)) {
+	    /* Filter out volume labels (0x08) and devices (0x40) from the search */
+	    if (!(dep->attribute & 0x48) && !memcmp(dep->name, name, 11)) {
 		if (direntry) {
 		    memcpy(direntry->entry, dep, sizeof(*dep));
 		    direntry->sector = s;
