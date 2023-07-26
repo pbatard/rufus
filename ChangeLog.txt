@@ -1,11 +1,12 @@
-o Version 4.2 (2023.07.??)
+o Version 4.2 (2023.07.26)
     Add detection and warning for UEFI revoked bootloaders (including ones revoked through SkuSiPolicy.p7b)
     Add ZIP64 support, to extract .zip images that are larger than 4 GB
     Add saving and restoring current drive to/from compressed VHDX image
     Add saving and restoring current drive to/from compressed FFU (Full Flash Update) image [EXPERIMENTAL]
-    Fix a crash when trying to open Windows ISOs, with the x86 32-bit version
-    Increase ISO → ESP limit, for Debian 12 netinst images
-    Make sure the main partition size is aligned to the cluster size
+    Fix a crash when trying to open Windows ISOs, with the MinGW compiled x86 32-bit version
+    Fix an issue where ISOs that contain a boot image with an 'EFI' label are not be detected bootable
+    Increase the ISO → ESP limit for Debian 12 netinst images
+    Ensure that the main partition size is aligned to the cluster size
 
 o Version 4.1 (2023.05.31)
     Add timeouts on enumeration queries that may stall on some systems

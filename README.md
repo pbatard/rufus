@@ -23,8 +23,8 @@ Features
 * Create bootable drives from bootable disk images, including compressed ones
 * Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives
+* Create VHD/DD, VHDX and FFU images of an existing drive
 * Create persistent Linux partitions
-* Create VHD/DD images of a drive
 * Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image
 * Improve Windows installation experience by automatically setting up OOBE parameters (local account, privacy options, etc.)
 * Perform bad blocks checks, including detection of "fake" flash drives
