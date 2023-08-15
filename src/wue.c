@@ -117,6 +117,7 @@ char* CreateUnattendXml(int arch, int flags)
 			"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
 		fprintf(fd, "      <RunSynchronous>\n");
 		// This part was picked from https://github.com/AveYo/MediaCreationTool.bat/blob/main/bypass11/AutoUnattend.xml
+		// NB: This is INCOMPATIBLE with S-Mode below
 		if (flags & UNATTEND_NO_ONLINE_ACCOUNT) {
 			uprintf("• Bypass online account requirement");
 			fprintf(fd, "        <RunSynchronousCommand wcm:action=\"add\">\n");
@@ -224,6 +225,14 @@ char* CreateUnattendXml(int arch, int flags)
 				"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
 			fprintf(fd, "      <SanPolicy>4</SanPolicy>\n");
+			fprintf(fd, "    </component>\n");
+		}
+		if (flags & UNATTEND_FORCE_S_MODE) {
+			uprintf("• Enforce S Mode");
+			fprintf(fd, "    <component name=\"Microsoft-Windows-CodeIntegrity\" processorArchitecture=\"%s\" language=\"neutral\" "
+				"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
+			fprintf(fd, "      <SkuPolicyRequired>1</SkuPolicyRequired>\n");
 			fprintf(fd, "    </component>\n");
 		}
 		fprintf(fd, "  </settings>\n");

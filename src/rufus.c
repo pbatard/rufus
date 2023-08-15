@@ -129,6 +129,7 @@ BOOL usb_debug, use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALS
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
 BOOL write_as_image = FALSE, write_as_esp = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
 BOOL appstore_version = FALSE, is_vds_available = TRUE, persistent_log = FALSE, has_ffu_support = FALSE;
+BOOL expert_mode = FALSE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1, imop_win_sel = 0;
 int default_fs, fs_type, boot_type, partition_type, target_type;
@@ -1514,8 +1515,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			if ((WindowsVersion.Version >= WINDOWS_8) && IS_WINDOWS_1X(img_report)) {
 				StrArray options;
 				int arch = _log2(img_report.has_efi >> 1);
-				uint8_t map[8] = { 0 }, b = 1;
-				StrArrayCreate(&options, 2);
+				uint16_t map[16] = { 0 }, b = 1;
+				StrArrayCreate(&options, 8);
 				StrArrayAdd(&options, lmprintf(MSG_332), TRUE);
 				MAP_BIT(UNATTEND_OFFLINE_INTERNAL_DRIVES);
 				if (img_report.win_version.build >= 22500) {
@@ -1529,16 +1530,20 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
 				StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
 				MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
+				if (expert_mode) {
+					StrArrayAdd(&options, lmprintf(MSG_346), TRUE);
+					MAP_BIT(UNATTEND_FORCE_S_MODE);
+				}
 				i = CustomSelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
-					options.String, options.Index, remap8(unattend_xml_mask, map, FALSE), username_index);
+					options.String, options.Index, remap16(unattend_xml_mask, map, FALSE), username_index);
 				StrArrayDestroy(&options);
 				if (i < 0)
 					goto out;
 				// Remap i to the correct bit positions before calling CreateUnattendXml()
-				i = remap8(i, map, TRUE);
+				i = remap16(i, map, TRUE);
 				unattend_xml_path = CreateUnattendXml(arch, i | UNATTEND_WINDOWS_TO_GO);
 				// Keep the bits we didn't process
-				unattend_xml_mask &= ~(remap8(0xff, map, TRUE));
+				unattend_xml_mask &= ~(remap16(0x1ff, map, TRUE));
 				// And add back the bits we did process
 				unattend_xml_mask |= i;
 				WriteSetting32(SETTING_WUE_OPTIONS, (UNATTEND_DEFAULT_MASK << 16) | unattend_xml_mask);
@@ -1576,8 +1581,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		if ((WindowsVersion.Version >= WINDOWS_8) && IS_WINDOWS_1X(img_report) && (!is_windows_to_go)) {
 			StrArray options;
 			int arch = _log2(img_report.has_efi >> 1);
-			uint8_t map[8] = { 0 }, b = 1;
-			StrArrayCreate(&options, 4);
+			uint16_t map[16] = { 0 }, b = 1;
+			StrArrayCreate(&options, 10);
 			if (IS_WINDOWS_11(img_report)) {
 				StrArrayAdd(&options, lmprintf(MSG_329), TRUE);
 				MAP_BIT(UNATTEND_SECUREBOOT_TPM_MINRAM);
@@ -1595,15 +1600,19 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
 			StrArrayAdd(&options, lmprintf(MSG_335), TRUE);
 			MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
+			if (expert_mode) {
+				StrArrayAdd(&options, lmprintf(MSG_346), TRUE);
+				MAP_BIT(UNATTEND_FORCE_S_MODE);
+			}
 			i = CustomSelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
-				options.String, options.Index, remap8(unattend_xml_mask, map, FALSE), username_index);
+				options.String, options.Index, remap16(unattend_xml_mask, map, FALSE), username_index);
 			StrArrayDestroy(&options);
 			if (i < 0)
 				goto out;
-			i = remap8(i, map, TRUE);
+			i = remap16(i, map, TRUE);
 			unattend_xml_path = CreateUnattendXml(arch, i);
 			// Remember the user preferences for the current session.
-			unattend_xml_mask &= ~(remap8(0xff, map, TRUE));
+			unattend_xml_mask &= ~(remap16(0x1ff, map, TRUE));
 			unattend_xml_mask |= i;
 			WriteSetting32(SETTING_WUE_OPTIONS, (UNATTEND_DEFAULT_MASK << 16) | unattend_xml_mask);
 		}
@@ -3556,6 +3565,7 @@ skip_args_processing:
 	enable_file_indexing = ReadSettingBool(SETTING_ENABLE_FILE_INDEXING);
 	enable_VHDs = !ReadSettingBool(SETTING_DISABLE_VHDS);
 	enable_extra_hashes = ReadSettingBool(SETTING_ENABLE_EXTRA_HASHES);
+	expert_mode = ReadSettingBool(SETTING_EXPERT_MODE);
 	ignore_boot_marker = ReadSettingBool(SETTING_IGNORE_BOOT_MARKER);
 	persistent_log = ReadSettingBool(SETTING_PERSISTENT_LOG);
 	save_image_type = ReadSettingStr(SETTING_PREFERRED_SAVE_IMAGE_TYPE);
@@ -4074,6 +4084,14 @@ extern int TestHashes(void);
 			}
 
 			// Other hazardous cheat modes require Ctrl + Alt
+			// Ctrl-Alt-E => Expert Mode
+			if ((msg.message == WM_KEYDOWN) && (msg.wParam == 'E') &&
+				(GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {
+				expert_mode = !expert_mode;
+				WriteSettingBool(SETTING_EXPERT_MODE, expert_mode);
+				PrintStatusTimeout(lmprintf(MSG_347), expert_mode);
+				continue;
+			}
 			// Ctrl-Alt-F => List non USB removable drives such as eSATA, etc - CAUTION!!!
 			if ((msg.message == WM_KEYDOWN) && (msg.wParam == 'F') &&
 				(GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {

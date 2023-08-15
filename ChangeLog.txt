@@ -4,7 +4,7 @@ o Version 4.2 (2023.07.26)
     Add saving and restoring current drive to/from compressed VHDX image
     Add saving and restoring current drive to/from compressed FFU (Full Flash Update) image [EXPERIMENTAL]
     Fix a crash when trying to open Windows ISOs, with the MinGW compiled x86 32-bit version
-    Fix an issue where ISOs that contain a boot image with an 'EFI' label are not be detected bootable
+    Fix an issue where ISOs that contain a boot image with an 'EFI' label are not detected as bootable
     Increase the ISO → ESP limit for Debian 12 netinst images
     Ensure that the main partition size is aligned to the cluster size
 

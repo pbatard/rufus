@@ -609,6 +609,8 @@ t MSG_344 "Full Flash Update Image"
 t MSG_345 "Some additional data must be downloaded from Microsoft to use this functionality:\n"
 	"- Select 'Yes' to connect to the Internet and download it\n"
 	"- Select 'No' to cancel the operation"
+t MSG_346 "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+t MSG_347 "Expert Mode"
 # The following messages are for the Windows Store listing only and are not used by the application
 t MSG_900 "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
 t MSG_901 "Official site: %s"
