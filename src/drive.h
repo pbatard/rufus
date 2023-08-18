@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@
 #define VDS_RESCAN_REFRESH                  0x00000001
 #define VDS_RESCAN_REENUMERATE              0x00000002
 
-#define VDS_SET_ERROR(hr) do { if (hr != S_OK) { SetLastError(hr); FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE; } } while(0)
+#define VDS_SET_ERROR(hr) do { if (hr != S_OK) { SetLastError((DWORD)hr); FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE; } } while(0)
 
 #if !defined(__MINGW32__)
 typedef enum _FSINFOCLASS {

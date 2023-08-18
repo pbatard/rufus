@@ -35,6 +35,15 @@
 
 #include "settings.h"
 
+// MinGW doesn't yet know these (from wldp.h)
+typedef enum WLDP_WINDOWS_LOCKDOWN_MODE
+{
+	WLDP_WINDOWS_LOCKDOWN_MODE_UNLOCKED = 0,
+	WLDP_WINDOWS_LOCKDOWN_MODE_TRIAL,
+	WLDP_WINDOWS_LOCKDOWN_MODE_LOCKED,
+	WLDP_WINDOWS_LOCKDOWN_MODE_MAX,
+} WLDP_WINDOWS_LOCKDOWN_MODE, * PWLDP_WINDOWS_LOCKDOWN_MODE;
+
 windows_version_t WindowsVersion = { 0 };
 
 /*
@@ -304,6 +313,25 @@ static const char* GetEdition(DWORD ProductType)
 	}
 }
 
+PF_TYPE_DECL(WINAPI, HRESULT, WldpQueryWindowsLockdownMode, (PWLDP_WINDOWS_LOCKDOWN_MODE));
+BOOL isSMode(void)
+{
+	BOOL r = FALSE;
+	WLDP_WINDOWS_LOCKDOWN_MODE mode;
+	PF_INIT_OR_OUT(WldpQueryWindowsLockdownMode, Wldp);
+
+	HRESULT hr = pfWldpQueryWindowsLockdownMode(&mode);
+	if (hr != S_OK) {
+		SetLastError((DWORD)hr);
+		uprintf("Could not detect S Mode: %s", WindowsErrorString());
+	} else {
+		r = (mode != WLDP_WINDOWS_LOCKDOWN_MODE_UNLOCKED);
+	}
+
+out:
+	return r;
+}
+
 /*
  * Modified from smartmontools' os_win32.cpp
  */
@@ -451,6 +479,10 @@ void GetWindowsVersion(windows_version_t* windows_version)
 		safe_sprintf(vptr, vlen, " (Build %lu.%lu)", windows_version->BuildNumber, windows_version->Ubr);
 	else
 		safe_sprintf(vptr, vlen, " (Build %lu)", windows_version->BuildNumber);
+	vptr = &windows_version->VersionStr[safe_strlen(windows_version->VersionStr)];
+	vlen = sizeof(windows_version->VersionStr) - safe_strlen(windows_version->VersionStr) - 1;
+	if (isSMode())
+		safe_sprintf(vptr, vlen, " in S Mode");
 }
 
 /*
