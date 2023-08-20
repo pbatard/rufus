@@ -101,13 +101,13 @@ static comp_assoc file_assoc[] = {
 };
 
 // Look for a boot marker in the MBR area of the image
-static BOOL IsCompressedBootableImage(const char* path)
+static int8_t IsCompressedBootableImage(const char* path)
 {
 	char *ext = NULL, *physical_disk = NULL;
 	unsigned char *buf = NULL;
 	int i;
 	FILE* fd = NULL;
-	BOOL r = FALSE;
+	BOOL r = 0;
 	int64_t dc = 0;
 
 	img_report.compression_type = BLED_COMPRESSION_NONE;
@@ -119,7 +119,7 @@ static BOOL IsCompressedBootableImage(const char* path)
 			img_report.compression_type = file_assoc[i].type;
 			buf = malloc(MBR_SIZE);
 			if (buf == NULL)
-				return FALSE;
+				return 0;
 			FormatStatus = 0;
 			if (img_report.compression_type < BLED_COMPRESSION_MAX) {
 				bled_init(0, uprintf, NULL, NULL, NULL, NULL, &FormatStatus);
@@ -138,6 +138,7 @@ static BOOL IsCompressedBootableImage(const char* path)
 				if (has_ffu_support) {
 					fd = fopenU(path, "rb");
 					if (fd != NULL) {
+						img_report.is_vhd = TRUE;
 						dc = fread(buf, 1, MBR_SIZE, fd);
 						fclose(fd);
 						// The signature may not be constant, but since the only game in town to
@@ -156,6 +157,7 @@ static BOOL IsCompressedBootableImage(const char* path)
 			} else {
 				physical_disk = VhdMountImage(path);
 				if (physical_disk != NULL) {
+					img_report.is_vhd = TRUE;
 					fd = fopenU(physical_disk, "rb");
 					if (fd != NULL) {
 						dc = fread(buf, 1, MBR_SIZE, fd);
@@ -168,7 +170,10 @@ static BOOL IsCompressedBootableImage(const char* path)
 				free(buf);
 				return FALSE;
 			}
-			r = (buf[0x1FE] == 0x55) && (buf[0x1FF] == 0xAA);
+			if ((buf[0x1FE] == 0x55) && (buf[0x1FF] == 0xAA))
+				r = 1;
+			else if (ignore_boot_marker)
+				r = 2;
 			free(buf);
 			return r;
 		}
@@ -935,7 +940,7 @@ char* VhdMountImage(const char* path)
 		for (ext = (char*)&path[safe_strlen(path) - 1]; (*ext != '.') && (ext != path); ext--);
 	if (safe_stricmp(ext, ".vhdx") == 0)
 		vtype.DeviceId = VIRTUAL_STORAGE_TYPE_DEVICE_VHDX;
-	else if (safe_stricmp(ext, ".vhdx") == 0)
+	else if (safe_stricmp(ext, ".vhd") == 0)
 		vtype.DeviceId = VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
 
 	r = pfOpenVirtualDisk(&vtype, wpath, VIRTUAL_DISK_ACCESS_READ | VIRTUAL_DISK_ACCESS_GET_INFO,

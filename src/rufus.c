@@ -1338,7 +1338,8 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 			uprintf("  Image is a FORCED non-bootable image");
 		else
 			uprintf("  Image is a %sbootable %s image",
-				(img_report.compression_type != BLED_COMPRESSION_NONE) ? "compressed " : "", img_report.is_vhd ? "VHD" : "disk");
+				(img_report.compression_type != BLED_COMPRESSION_NONE && img_report.compression_type < BLED_COMPRESSION_MAX) ?
+				"compressed " : "", img_report.is_vhd ? "VHD" : "disk");
 		selection_default = BT_IMAGE;
 	}
 
