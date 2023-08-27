@@ -107,7 +107,7 @@ static const char* grub_dirname[] = { "/boot/grub/i386-pc", "/boot/grub2/i386-pc
 static const char* grub_cfg[] = { "grub.cfg", "loopback.cfg" };
 static const char* menu_cfg = "menu.cfg";
 // NB: Do not alter the order of the array below without validating hardcoded indexes in check_iso_props
-static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf", "txt.cfg" };
+static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.conf", "txt.cfg", "live.cfg" };
 static const char* isolinux_bin[] = { "isolinux.bin", "boot.bin" };
 static const char* pe_dirname[] = { "/i386", "/amd64", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
