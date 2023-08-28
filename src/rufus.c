@@ -135,7 +135,7 @@ int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection
 int default_fs, fs_type, boot_type, partition_type, target_type;
 int force_update = 0, default_thread_priority = THREAD_PRIORITY_ABOVE_NORMAL;
 char szFolderPath[MAX_PATH], app_dir[MAX_PATH], system_dir[MAX_PATH], temp_dir[MAX_PATH], sysnative_dir[MAX_PATH];
-char app_data_dir[MAX_PATH], user_dir[MAX_PATH];
+char app_data_dir[MAX_PATH], user_dir[MAX_PATH], cur_dir[MAX_PATH];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
@@ -3326,45 +3326,63 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Retrieve various app & system directories.
 	if (GetCurrentDirectoryU(sizeof(app_dir), app_dir) == 0) {
-		uprintf("Could not get current directory: %s", WindowsErrorString());
-		app_dir[0] = 0;
+		uprintf("Could not get application directory: %s", WindowsErrorString());
+		static_strcpy(app_dir, ".\\");
+	} else {
+		// Microsoft has a bad habit of making some of its APIs (_chdir/_wchdir) break
+		// when app_dir is a drive letter that doesn't have a trailing backslash. For
+		// instance _chdir("F:") does not change the directory, whereas _chdir("F:\\")
+		// does. So make sure we always have a trailing backslash.
+		static_strcat(app_dir, "\\");
 	}
-	// Microsoft has a bad habit of making some of its APIs (_chdir/_wchdir) break
-	// when app_dir is a drive letter that doesn't have a trailing backslash. For
-	// instance _chdir("F:") does not change the directory, whereas _chdir("F:\\")
-	// does. So make sure we add a trailing backslash if the app_dir is a drive.
-	if ((app_dir[1] == ':') && (app_dir[2] == 0)) {
-		app_dir[2] = '\\';
-		app_dir[3] = 0;
+
+	// In the wonderful world of Microsoft Windows, GetCurrentDirectory() returns the
+	// directory where the application resides, instead of the real current directory
+	// so we need another method to resolve the *ACTUAL* current directory.
+	static_strcpy(cur_dir, ".\\");
+	hFile = CreateFileU(cur_dir, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+		FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	if ((hFile == INVALID_HANDLE_VALUE) ||
+		(GetFinalPathNameByHandleU(hFile, cur_dir, sizeof(cur_dir), FILE_NAME_OPENED) == 0) ||
+		((strstr(cur_dir, "\\\\?\\") != cur_dir) && (strstr(cur_dir, "\\\\.\\") != cur_dir))) {
+		uprintf("Could not get current directory from '%s': %s", cur_dir, WindowsErrorString());
+		static_strcpy(cur_dir, ".\\");
+	} else {
+		// Need to remove the '\\?\' prefix and reappend the trailing '\'
+		strcpy(cur_dir, &cur_dir[4]);
+		static_strcat(cur_dir, "\\");
 	}
-	if (GetSystemDirectoryU(system_dir, sizeof(system_dir)) == 0) {
-		uprintf("Could not get system directory: %s", WindowsErrorString());
-		static_strcpy(system_dir, "C:\\Windows\\System32");
-	}
+	safe_closehandle(hFile);
+
 	// Per documentation, the returned string ends with a backslash
 	if (GetTempPathU(sizeof(temp_dir), temp_dir) == 0) {
 		uprintf("Could not get temp directory: %s", WindowsErrorString());
-		static_strcpy(temp_dir, ".\\");
+		static_strcpy(temp_dir, cur_dir);
 	} else {
 		// Some folks have found nothing better than configure their Windows installation to use
 		// a symlink for their temp dir, and it so happens that the Windows WIM mounting facility,
 		// which we need for applying the WUE options, can't handle symlinked directories. So we
 		// *attempt* to resolve the actual symlinked temp dir for this super limited number of
 		// users, with the hope that doing so is not going to break stuff elsewhere...
-		HANDLE handle = CreateFileU(temp_dir, GENERIC_READ, FILE_SHARE_READ, NULL,
+		hFile = CreateFileU(temp_dir, GENERIC_READ, FILE_SHARE_READ, NULL,
 			OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 		// GetFinalPathNameByHandle returns a UNC path, which should be prefixed by '\\?\' or '\\.\'
-		if ((GetFinalPathNameByHandleU(handle, temp_dir, sizeof(temp_dir), FILE_NAME_OPENED) == 0) ||
+		if ((hFile == INVALID_HANDLE_VALUE) ||
+			(GetFinalPathNameByHandleU(hFile, temp_dir, sizeof(temp_dir), FILE_NAME_OPENED) == 0) ||
 			((strstr(temp_dir, "\\\\?\\") != temp_dir) && (strstr(temp_dir, "\\\\.\\") != temp_dir))) {
-			uprintf("Could not get actual temp directory: %s", WindowsErrorString());
-			static_strcpy(temp_dir, ".\\");
+			uprintf("Could not get actual temp directory from '%s': %s", temp_dir, WindowsErrorString());
+			static_strcpy(temp_dir, cur_dir);
 		} else {
 			// Need to remove the '\\?\' prefix or else we'll get issues with the Fido icon
 			strcpy(temp_dir, &temp_dir[4]);
 			// And me must re-append the '\' that gets removed by GetFinalPathNameByHandle()
 			static_strcat(temp_dir, "\\");
 		}
-		CloseHandle(handle);
+		safe_closehandle(hFile);
+	}
+	if (GetSystemDirectoryU(system_dir, sizeof(system_dir)) == 0) {
+		uprintf("Could not get system directory: %s", WindowsErrorString());
+		static_strcpy(system_dir, "C:\\Windows\\System32");
 	}
 	if (!SHGetSpecialFolderPathU(NULL, app_data_dir, CSIDL_LOCAL_APPDATA, FALSE)) {
 		uprintf("Could not get app data directory: %s", WindowsErrorString());
@@ -3392,13 +3410,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	}
 #endif
+	uprintf("Cur dir: '%s'", cur_dir);
+	uprintf("App dir: '%s'", app_dir);
+	uprintf("Sys dir: '%s'", sysnative_dir);
+	uprintf("Usr dir: '%s'", user_dir);
+	uprintf("Dat dir: '%s'", app_data_dir);
+	uprintf("Tmp dir: '%s'", temp_dir);
 
 	// Look for a rufus.app file in the current app directory
 	// Since Microsoft makes it downright impossible to pass an arg in the app manifest
 	// and the automated VS2019 package building process doesn't like renaming the .exe
 	// right under its nose (else we would use the same trick as for portable vs regular)
 	// we use yet another workaround to detect if we are running the AppStore version...
-	static_sprintf(ini_path, "%s\\rufus.app", app_dir);
+	static_sprintf(ini_path, "%srufus.app", app_dir);
 	if (PathFileExistsU(ini_path)) {
 		appstore_version = TRUE;
 		goto skip_args_processing;
@@ -3530,7 +3554,7 @@ skip_args_processing:
 		uprintf("AppStore version detected");
 
 	// Look for a .ini file in the current app directory
-	static_sprintf(ini_path, "%s\\rufus.ini", app_dir);
+	static_sprintf(ini_path, "%srufus.ini", app_dir);
 	fd = fopenU(ini_path, ini_flags);	// Will create the file if portable mode is requested
 	// Using the string directly in safe_strcmp() would call GetSignatureName() twice
 	tmp = GetSignatureName(NULL, NULL, FALSE);
@@ -3590,7 +3614,7 @@ skip_args_processing:
 	init_localization();
 
 	// Seek for a loc file in the application directory
-	static_sprintf(loc_file, "%s\\%s", app_dir, rufus_loc);
+	static_sprintf(loc_file, "%s%s", app_dir, rufus_loc);
 	if (GetFileAttributesU(loc_file) == INVALID_FILE_ATTRIBUTES) {
 		uprintf("loc file not found in current directory - embedded one will be used");
 
@@ -4154,8 +4178,10 @@ out:
 	// Kill the update check thread if running
 	if (update_check_thread != NULL)
 		TerminateThread(update_check_thread, 1);
-	if ((!external_loc_file) && (loc_file[0] != 0))
-		DeleteFileU(loc_file);
+	if ((!external_loc_file) && (loc_file[0] != 0)) {
+		if (!DeleteFileU(loc_file))
+			uprintf("Could not delete '%s': %s", loc_file, WindowsErrorString());
+	}
 	DestroyAllTooltips();
 	ClrAlertPromptHook();
 	exit_localization();
