@@ -62,177 +62,6 @@ static const char* request_headers = "Accept-Encoding: gzip, deflate";
 #define INetworkListManager_get_IsConnectedToInternet INetworkListManager_IsConnectedToInternet
 #endif
 
-/*
- * FormatMessage does not handle internet errors
- * https://docs.microsoft.com/en-us/windows/desktop/wininet/wininet-errors
- */
-const char* WinInetErrorString(void)
-{
-	static char error_string[256];
-	DWORD size = sizeof(error_string);
-	PF_TYPE_DECL(WINAPI, BOOL, InternetGetLastResponseInfoA, (LPDWORD, LPSTR, LPDWORD));
-	PF_INIT(InternetGetLastResponseInfoA, WinInet);
-
-	error_code = HRESULT_CODE(GetLastError());
-
-	if ((error_code < INTERNET_ERROR_BASE) || (error_code > INTERNET_ERROR_LAST))
-		return WindowsErrorString();
-
-	switch(error_code) {
-	case ERROR_INTERNET_OUT_OF_HANDLES:
-		return "No more handles could be generated at this time.";
-	case ERROR_INTERNET_TIMEOUT:
-		return "The request has timed out.";
-	case ERROR_INTERNET_INTERNAL_ERROR:
-		return "An internal error has occurred.";
-	case ERROR_INTERNET_INVALID_URL:
-		return "The URL is invalid.";
-	case ERROR_INTERNET_UNRECOGNIZED_SCHEME:
-		return "The URL scheme could not be recognized or is not supported.";
-	case ERROR_INTERNET_NAME_NOT_RESOLVED:
-		return "The server name could not be resolved.";
-	case ERROR_INTERNET_PROTOCOL_NOT_FOUND:
-		return "The requested protocol could not be located.";
-	case ERROR_INTERNET_INVALID_OPTION:
-		return "A request specified an invalid option value.";
-	case ERROR_INTERNET_BAD_OPTION_LENGTH:
-		return "The length of an option supplied is incorrect for the type of option specified.";
-	case ERROR_INTERNET_OPTION_NOT_SETTABLE:
-		return "The request option cannot be set, only queried.";
-	case ERROR_INTERNET_SHUTDOWN:
-		return "The Win32 Internet function support is being shut down or unloaded.";
-	case ERROR_INTERNET_INCORRECT_USER_NAME:
-		return "The request to connect and log on to an FTP server could not be completed because the supplied user name is incorrect.";
-	case ERROR_INTERNET_INCORRECT_PASSWORD:
-		return "The request to connect and log on to an FTP server could not be completed because the supplied password is incorrect.";
-	case ERROR_INTERNET_LOGIN_FAILURE:
-		return "The request to connect to and log on to an FTP server failed.";
-	case ERROR_INTERNET_INVALID_OPERATION:
-		return "The requested operation is invalid.";
-	case ERROR_INTERNET_OPERATION_CANCELLED:
-		return "The operation was cancelled, usually because the handle on which the request was operating was closed before the operation completed.";
-	case ERROR_INTERNET_INCORRECT_HANDLE_TYPE:
-		return "The type of handle supplied is incorrect for this operation.";
-	case ERROR_INTERNET_INCORRECT_HANDLE_STATE:
-		return "The requested operation cannot be carried out because the handle supplied is not in the correct state.";
-	case ERROR_INTERNET_NOT_PROXY_REQUEST:
-		return "The request cannot be made via a proxy.";
-	case ERROR_INTERNET_REGISTRY_VALUE_NOT_FOUND:
-		return "A required registry value could not be located.";
-	case ERROR_INTERNET_BAD_REGISTRY_PARAMETER:
-		return "A required registry value was located but is an incorrect type or has an invalid value.";
-	case ERROR_INTERNET_NO_DIRECT_ACCESS:
-		return "Direct network access cannot be made at this time.";
-	case ERROR_INTERNET_NO_CONTEXT:
-		return "An asynchronous request could not be made because a zero context value was supplied.";
-	case ERROR_INTERNET_NO_CALLBACK:
-		return "An asynchronous request could not be made because a callback function has not been set.";
-	case ERROR_INTERNET_REQUEST_PENDING:
-		return "The required operation could not be completed because one or more requests are pending.";
-	case ERROR_INTERNET_INCORRECT_FORMAT:
-		return "The format of the request is invalid.";
-	case ERROR_INTERNET_ITEM_NOT_FOUND:
-		return "The requested item could not be located.";
-	case ERROR_INTERNET_CANNOT_CONNECT:
-		return "The attempt to connect to the server failed.";
-	case ERROR_INTERNET_CONNECTION_ABORTED:
-		return "The connection with the server has been terminated.";
-	case ERROR_INTERNET_CONNECTION_RESET:
-		return "The connection with the server has been reset.";
-	case ERROR_INTERNET_FORCE_RETRY:
-		return "Calls for the Win32 Internet function to redo the request.";
-	case ERROR_INTERNET_INVALID_PROXY_REQUEST:
-		return "The request to the proxy was invalid.";
-	case ERROR_INTERNET_HANDLE_EXISTS:
-		return "The request failed because the handle already exists.";
-	case ERROR_INTERNET_SEC_INVALID_CERT:
-		return "The SSL certificate is invalid.";
-	case ERROR_INTERNET_SEC_CERT_DATE_INVALID:
-		return "SSL certificate date that was received from the server is bad. The certificate is expired.";
-	case ERROR_INTERNET_SEC_CERT_CN_INVALID:
-		return "SSL certificate common name (host name field) is incorrect.";
-	case ERROR_INTERNET_SEC_CERT_ERRORS:
-		return "The SSL certificate contains errors.";
-	case ERROR_INTERNET_SEC_CERT_NO_REV:
-		return "The SSL certificate was not revoked.";
-	case ERROR_INTERNET_SEC_CERT_REV_FAILED:
-		return "The revocation check of the SSL certificate failed.";
-	case ERROR_INTERNET_HTTP_TO_HTTPS_ON_REDIR:
-		return "The application is moving from a non-SSL to an SSL connection because of a redirect.";
-	case ERROR_INTERNET_HTTPS_TO_HTTP_ON_REDIR:
-		return "The application is moving from an SSL to an non-SSL connection because of a redirect.";
-	case ERROR_INTERNET_MIXED_SECURITY:
-		return "Some of the content being viewed may have come from unsecured servers.";
-	case ERROR_INTERNET_CHG_POST_IS_NON_SECURE:
-		return "The application is posting and attempting to change multiple lines of text on a server that is not secure.";
-	case ERROR_INTERNET_POST_IS_NON_SECURE:
-		return "The application is posting data to a server that is not secure.";
-	case ERROR_FTP_TRANSFER_IN_PROGRESS:
-		return "The requested operation cannot be made on the FTP session handle because an operation is already in progress.";
-	case ERROR_FTP_DROPPED:
-		return "The FTP operation was not completed because the session was aborted.";
-	case ERROR_GOPHER_PROTOCOL_ERROR:
-	case ERROR_GOPHER_NOT_FILE:
-	case ERROR_GOPHER_DATA_ERROR:
-	case ERROR_GOPHER_END_OF_DATA:
-	case ERROR_GOPHER_INVALID_LOCATOR:
-	case ERROR_GOPHER_INCORRECT_LOCATOR_TYPE:
-	case ERROR_GOPHER_NOT_GOPHER_PLUS:
-	case ERROR_GOPHER_ATTRIBUTE_NOT_FOUND:
-	case ERROR_GOPHER_UNKNOWN_LOCATOR:
-		return "Gopher? Really??? What is this, 1994?";
-	case ERROR_HTTP_HEADER_NOT_FOUND:
-		return "The requested header could not be located.";
-	case ERROR_HTTP_DOWNLEVEL_SERVER:
-		return "The server did not return any headers.";
-	case ERROR_HTTP_INVALID_SERVER_RESPONSE:
-		return "The server response could not be parsed.";
-	case ERROR_HTTP_INVALID_HEADER:
-		return "The supplied header is invalid.";
-	case ERROR_HTTP_INVALID_QUERY_REQUEST:
-		return "The request made to HttpQueryInfo is invalid.";
-	case ERROR_HTTP_HEADER_ALREADY_EXISTS:
-		return "The header could not be added because it already exists.";
-	case ERROR_HTTP_REDIRECT_FAILED:
-		return "The redirection failed because either the scheme changed or all attempts made to redirect failed.";
-	case ERROR_INTERNET_SECURITY_CHANNEL_ERROR:
-		return "This system's SSL library is too old to be able to access this website.";
-	case ERROR_INTERNET_CLIENT_AUTH_CERT_NEEDED:
-		return "Client Authentication certificate needed";
-	case ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT:
-		return "Bad auto proxy script.";
-	case ERROR_INTERNET_UNABLE_TO_DOWNLOAD_SCRIPT:
-		return "Unable to download script.";
-	case ERROR_INTERNET_NOT_INITIALIZED:
-		return "Internet has not be initialized.";
-	case ERROR_INTERNET_UNABLE_TO_CACHE_FILE:
-		return "Unable to cache the file.";
-	case ERROR_INTERNET_TCPIP_NOT_INSTALLED:
-		return "TPC/IP not installed.";
-	case ERROR_INTERNET_DISCONNECTED:
-		return "Internet is disconnected.";
-	case ERROR_INTERNET_SERVER_UNREACHABLE:
-		return "Server could not be reached.";
-	case ERROR_INTERNET_PROXY_SERVER_UNREACHABLE:
-		return "Proxy server could not be reached.";
-	case ERROR_INTERNET_FAILED_DUETOSECURITYCHECK:
-		return "A security check prevented internet connection.";
-	case ERROR_INTERNET_NEED_MSN_SSPI_PKG:
-		return "This connection requires an MSN Security Support Provider Interface package.";
-	case ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY:
-		return "Please ask Microsoft about that one!";
-	case ERROR_INTERNET_EXTENDED_ERROR:
-		if (pfInternetGetLastResponseInfoA != NULL) {
-			pfInternetGetLastResponseInfoA(&error_code, error_string, &size);
-			return error_string;
-		}
-		// fall through
-	default:
-		static_sprintf(error_string, "Unknown internet error 0x%08lX", error_code);
-		return error_string;
-	}
-}
-
 static char* GetShortName(const char* url)
 {
 	static char short_name[128];
@@ -393,34 +222,34 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 
 	if ( (!pfInternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))
 	  || (UrlParts.lpszHostName == NULL) || (UrlParts.lpszUrlPath == NULL)) {
-		uprintf("Unable to decode URL: %s", WinInetErrorString());
+		uprintf("Unable to decode URL: %s", WindowsErrorString());
 		goto out;
 	}
 	hostname[sizeof(hostname)-1] = 0;
 
 	hSession = GetInternetSession(user_agent, TRUE);
 	if (hSession == NULL) {
-		uprintf("Could not open Internet session: %s", WinInetErrorString());
+		uprintf("Could not open Internet session: %s", WindowsErrorString());
 		goto out;
 	}
 
 	hConnection = pfInternetConnectA(hSession, UrlParts.lpszHostName, UrlParts.nPort, NULL, NULL, INTERNET_SERVICE_HTTP, 0, (DWORD_PTR)NULL);
 	if (hConnection == NULL) {
-		uprintf("Could not connect to server %s:%d: %s", UrlParts.lpszHostName, UrlParts.nPort, WinInetErrorString());
+		uprintf("Could not connect to server %s:%d: %s", UrlParts.lpszHostName, UrlParts.nPort, WindowsErrorString());
 		goto out;
 	}
 
 	hRequest = pfHttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
-		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|
-		INTERNET_FLAG_NO_COOKIES|INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE|INTERNET_FLAG_HYPERLINK|
+		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
+		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_HYPERLINK |
 		((UrlParts.nScheme==INTERNET_SCHEME_HTTPS)?INTERNET_FLAG_SECURE:0), (DWORD_PTR)NULL);
 	if (hRequest == NULL) {
-		uprintf("Could not open URL %s: %s", url, WinInetErrorString());
+		uprintf("Could not open URL %s: %s", url, WindowsErrorString());
 		goto out;
 	}
 
 	if (!pfHttpSendRequestA(hRequest, request_headers, -1L, NULL, 0)) {
-		uprintf("Unable to send request: %s", WinInetErrorString());
+		uprintf("Unable to send request: %s", WindowsErrorString());
 		goto out;
 	}
 
@@ -435,7 +264,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	}
 	dwSize = sizeof(strsize);
 	if (!pfHttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH, (LPVOID)strsize, &dwSize, NULL)) {
-		uprintf("Unable to retrieve file length: %s", WinInetErrorString());
+		uprintf("Unable to retrieve file length: %s", WindowsErrorString());
 		goto out;
 	}
 	total_size = strtoull(strsize, NULL, 10);
@@ -452,7 +281,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	if (file != NULL) {
 		hFile = CreateFileU(file, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hFile == INVALID_HANDLE_VALUE) {
-			uprintf("Unable to create file '%s': %s", short_name, WinInetErrorString());
+			uprintf("Unable to create file '%s': %s", short_name, WindowsErrorString());
 			goto out;
 		}
 	} else {
@@ -479,7 +308,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 			UpdateProgressWithInfo(OP_NOOP, MSG_241, size, total_size);
 		if (file != NULL) {
 			if (!WriteFile(hFile, buf, dwDownloaded, &dwWritten, NULL)) {
-				uprintf("Error writing file '%s': %s", short_name, WinInetErrorString());
+				uprintf("Error writing file '%s': %s", short_name, WindowsErrorString());
 				goto out;
 			} else if (dwDownloaded != dwWritten) {
 				uprintf("Error writing file '%s': Only %d/%d bytes written", short_name, dwWritten, dwDownloaded);
@@ -564,11 +393,11 @@ DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog
 	DownloadStatus = 206;	// Partial content
 	hFile = CreateFileU(file, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
-		uprintf("Unable to create file '%s': %s", PathFindFileNameU(file), WinInetErrorString());
+		uprintf("Unable to create file '%s': %s", PathFindFileNameU(file), WindowsErrorString());
 		goto out;
 	}
 	if (!WriteFile(hFile, buf, buf_len, &ret, NULL)) {
-		uprintf("Error writing file '%s': %s", PathFindFileNameU(file), WinInetErrorString());
+		uprintf("Error writing file '%s': %s", PathFindFileNameU(file), WindowsErrorString());
 		ret = 0;
 		goto out;
 	} else if (ret != buf_len) {
@@ -584,7 +413,7 @@ out:
 	if ((bPromptOnError) && (DownloadStatus != 200)) {
 		PrintInfo(0, MSG_242);
 		SetLastError(error_code);
-		MessageBoxExU(hMainDialog, IS_ERROR(FormatStatus) ? StrError(FormatStatus, FALSE) : WinInetErrorString(),
+		MessageBoxExU(hMainDialog, IS_ERROR(FormatStatus) ? StrError(FormatStatus, FALSE) : WindowsErrorString(),
 			lmprintf(MSG_044), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 	}
 	safe_closehandle(hFile);
@@ -758,7 +587,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 				INTERNET_FLAG_NO_COOKIES|INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE|INTERNET_FLAG_HYPERLINK|
 				((UrlParts.nScheme == INTERNET_SCHEME_HTTPS)?INTERNET_FLAG_SECURE:0), (DWORD_PTR)NULL);
 			if ((hRequest == NULL) || (!pfHttpSendRequestA(hRequest, request_headers, -1L, NULL, 0))) {
-				uprintf("Unable to send request: %s", WinInetErrorString());
+				uprintf("Unable to send request: %s", WindowsErrorString());
 				goto out;
 			}
 
@@ -1055,7 +884,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 					Notification(MSG_INFO, NULL, NULL, lmprintf(MSG_211), lmprintf(MSG_041));
 					PrintInfo(0, MSG_211);
 				} else {
-					Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_194, GetShortName(url)), lmprintf(MSG_043, WinInetErrorString()));
+					Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_194, GetShortName(url)), lmprintf(MSG_043, WindowsErrorString()));
 					PrintInfo(0, MSG_212);
 				}
 			} else {
