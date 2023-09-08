@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <wininet.h>
 #include <winternl.h>
 #include <dbghelp.h>
 #include <assert.h>
@@ -233,8 +234,11 @@ const char *WindowsErrorString(void)
 	error_code = GetLastError();
 	// Check for specific facility error codes
 	switch (HRESULT_FACILITY(error_code)) {
-	case FACILITY_HTTP:
-		hModule = GetModuleHandleA("wininet.dll");
+	case FACILITY_NULL:
+		// Special case for internet related errors, that don't actually have a facility
+		// set but still require a hModule into wininet to display the messages.
+		if ((error_code >= INTERNET_ERROR_BASE) && (error_code <= INTERNET_ERROR_LAST))
+			hModule = GetModuleHandleA("wininet.dll");
 		break;
 	case FACILITY_ITF:
 		hModule = GetModuleHandleA("vdsutil.dll");
@@ -248,6 +252,7 @@ const char *WindowsErrorString(void)
 	static_sprintf(err_string, "[0x%08lX] ", error_code);
 	presize = (DWORD)strlen(err_string);
 
+	// coverity[var_deref_model]
 	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS |
 		((hModule != NULL) ? FORMAT_MESSAGE_FROM_HMODULE : 0), hModule,
 		HRESULT_CODE(error_code), MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
