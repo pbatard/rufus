@@ -708,7 +708,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	EXTRACT_PROPS props;
 	BOOL is_symlink, is_identical, free_p_statbuf = FALSE;
 	int length, r = 1;
-	char tmp[128], psz_fullpath[MAX_PATH], *psz_basename = NULL, *psz_sanpath = NULL;
+	char psz_fullpath[MAX_PATH], *psz_basename = NULL, *psz_sanpath = NULL;
+	char tmp[128], target_path[256];
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
 	unsigned char buf[ISO_BLOCKSIZE];
 	CdioListNode_t* p_entnode;
@@ -792,6 +793,15 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 		} else {
 			file_length = p_statbuf->total_size;
 			if (check_iso_props(psz_path, file_length, psz_basename, psz_fullpath, &props)) {
+				// Add symlink duplicated files to total_size at scantime
+				if (is_symlink && (file_length == 0) && (strcmp(psz_path, "/firmware") == 0)) {
+					static_sprintf(target_path, "%s/%s", psz_path, p_statbuf->rr.psz_symlink);
+					iso9660_stat_t *p_statbuf2 = iso9660_ifs_stat_translate(p_iso, target_path);
+					if (p_statbuf2 != NULL) {
+						total_blocks += (p_statbuf2->total_size + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE;
+						iso9660_stat_free(p_statbuf2);
+					}
+				}
 				continue;
 			}
 			if (!is_symlink)
@@ -822,7 +832,6 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					} else if (strcmp(psz_path, "/firmware") == 0) {
 						// Special handling for ISOs that use symlinks for /firmware/ (e.g. Debian non-free)
 						// TODO: Do we want to do this for all file symlinks?
-						char target_path[256];
 						static_sprintf(target_path, "%s/%s", psz_path, p_statbuf->rr.psz_symlink);
 						p_statbuf = iso9660_ifs_stat_translate(p_iso, target_path);
 						if (p_statbuf != NULL) {
