@@ -172,8 +172,7 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 			uprintf("Warning: Could not obtain exclusive rights. Retrying with write sharing enabled...");
 			bWriteShare = TRUE;
 			// Try to report the process that is locking the drive
-			// We also use bit 6 as a flag to indicate that SearchProcess was called.
-			access_mask = SearchProcess(DevPath, SEARCH_PROCESS_TIMEOUT, TRUE, TRUE, FALSE) | 0x40;
+			access_mask = GetProcessSearch(SEARCH_PROCESS_TIMEOUT, 0x07, FALSE);
 		}
 		Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
 	}
@@ -203,9 +202,7 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 		uprintf("Could not lock access to %s: %s", Path, WindowsErrorString());
 		// See if we can report the processes are accessing the drive
 		if (!IS_ERROR(FormatStatus) && (access_mask == 0))
-			// Double the search process timeout here, as Windows is so bloated with processes
-			// that 10 seconds has become way too small to get much of any results these days...
-			access_mask = SearchProcess(DevPath, 2 * SEARCH_PROCESS_TIMEOUT, TRUE, TRUE, FALSE);
+			access_mask = GetProcessSearch(SEARCH_PROCESS_TIMEOUT, 0x07, FALSE);
 		// Try to continue if the only access rights we saw were for read-only
 		if ((access_mask & 0x07) != 0x01)
 			safe_closehandle(hDrive);

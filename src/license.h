@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Licensing Data
- * Copyright © 2011-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,8 +89,8 @@ const char* additional_copyrights =
 "https://www.codeguru.com/forum/showthread.php?p=1951973\\line\n"
 "Public Domain\\line\n"
 "\\line\n"
-"Handle search & process enumeration from Process Hacker by wj32 & dmex:\\line\n"
-"https://processhacker.sourceforge.io/\\line\n"
+"Handle search & process enumeration from System Informer by wj32 & dmex:\\line\n"
+"https://systeminformer.sourceforge.io/\\line\n"
 "GNU General Public License (GPL) v3 or later\\line\n"
 "\\line\n"
 "Decompression support from BusyBox/Bled:\\line\n"

@@ -2,8 +2,8 @@
  * Rufus: The Reliable USB Formatting Utility
  * Process search functionality
  *
- * Modified from Process Hacker:
- *   https://github.com/processhacker2/processhacker2/
+ * Modified from System Informer (a.k.a. Process Hacker):
+ *   https://github.com/winsiderss/systeminformer
  * Copyright © 2017-2023 Pete Batard <pete@akeo.ie>
  * Copyright © 2017 dmex
  * Copyright © 2009-2016 wj32
@@ -31,6 +31,7 @@
 #include <assert.h>
 
 #include "rufus.h"
+#include "drive.h"
 #include "process.h"
 #include "missing.h"
 #include "msapi_utf8.h"
@@ -53,10 +54,10 @@ PF_TYPE_DECL(NTAPI, NTSTATUS, NtAdjustPrivilegesToken, (HANDLE, BOOLEAN, PTOKEN_
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtClose, (HANDLE));
 
 static PVOID PhHeapHandle = NULL;
-static wchar_t* _wHandleName;
-static BOOL _bPartialMatch, _bIgnoreSelf, _bQuiet;
-static BYTE access_mask;
-extern StrArray BlockingProcess;
+static HANDLE hSearchProcessThread = NULL;
+static BlockingProcess blocking_process = { 0 };
+
+extern StrArray BlockingProcessList;
 
 /*
  * Convert an NT Status to an error message
@@ -110,7 +111,6 @@ char* NtStatusError(NTSTATUS Status) {
 	}
 }
 
-
 static NTSTATUS PhCreateHeap(VOID)
 {
 	NTSTATUS status = STATUS_SUCCESS;
@@ -155,7 +155,6 @@ static NTSTATUS PhDestroyHeap(VOID)
  * \param Size The number of bytes to allocate.
  *
  * \return A pointer to the allocated block of memory.
- *
  */
 static PVOID PhAllocate(SIZE_T Size)
 {
@@ -173,7 +172,6 @@ static PVOID PhAllocate(SIZE_T Size)
  * Frees a block of memory allocated with PhAllocate().
  *
  * \param Memory A pointer to a block of memory.
- *
  */
 static VOID PhFree(PVOID Memory)
 {
@@ -423,10 +421,18 @@ out:
 	return wcmdline;
 }
 
+
+/**
+ * The search process thread.
+ * Note: Avoid using uprintf statements here, as it may lock the thread.
+ *
+ * \param param The thread parameters.
+ *
+ * \return A thread exit code.
+ */
 static DWORD WINAPI SearchProcessThread(LPVOID param)
 {
-	const char *access_rights_str[8] = { "n", "r", "w", "rw", "x", "rx", "wx", "rwx" };
-	char tmp[MAX_PATH];
+	BOOL bInitSuccess = FALSE;
 	NTSTATUS status = STATUS_SUCCESS;
 	PSYSTEM_HANDLE_INFORMATION_EX handles = NULL;
 	POBJECT_NAME_INFORMATION buffer = NULL;
@@ -434,276 +440,533 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 	ULONG_PTR pid[2];
 	ULONG_PTR last_access_denied_pid = 0;
 	ULONG bufferSize;
-	USHORT wHandleNameLen;
+	wchar_t** wHandleName = NULL;
+	USHORT* wHandleNameLen = NULL;
 	HANDLE dupHandle = NULL;
 	HANDLE processHandle = NULL;
-	BOOLEAN bFound = FALSE, bGotCmdLine, verbose = !_bQuiet;
+	HANDLE hLock = NULL;
+	BOOLEAN bFound = FALSE, bGotCmdLine;
 	ULONG access_rights = 0;
 	DWORD size;
-	char cmdline[MAX_PATH] = { 0 };
 	wchar_t wexe_path[MAX_PATH], *wcmdline;
-	int cur_pid;
+	uint64_t start_time;
+	char cmdline[MAX_PATH] = { 0 }, tmp[64];
+	int cur_pid, j, nHandles = 0;
 
-	PF_INIT_OR_SET_STATUS(NtQueryObject, Ntdll);
-	PF_INIT_OR_SET_STATUS(NtDuplicateObject, NtDll);
-	PF_INIT_OR_SET_STATUS(NtClose, NtDll);
+	PF_INIT_OR_OUT(NtQueryObject, Ntdll);
+	PF_INIT_OR_OUT(NtDuplicateObject, NtDll);
+	PF_INIT_OR_OUT(NtClose, NtDll);
 
-	StrArrayClear(&BlockingProcess);
+	// Initialize the blocking process struct
+	memset(&blocking_process, 0, sizeof(blocking_process));
+	hLock = CreateMutexA(NULL, TRUE, NULL);
+	if (hLock == NULL)
+		goto out;
+	blocking_process.hStart = CreateEventA(NULL, TRUE, FALSE, NULL);
+	if (blocking_process.hStart == NULL)
+		goto out;
+	if (!ReleaseMutex(hLock))
+		goto out;
+	// Only assign the mutex handle once our init is complete
+	blocking_process.hLock = hLock;
 
-	if (NT_SUCCESS(status))
-		status = PhCreateHeap();
+	if (!NT_SUCCESS(PhCreateHeap()))
+		goto out;
 
-	if (NT_SUCCESS(status))
-		status = PhEnumHandlesEx(&handles);
-
-	if (!NT_SUCCESS(status)) {
-		uprintf("Warning: Could not enumerate process handles: %s", NtStatusError(status));
+	// Wait until we are signaled active one way or another
+	if (!blocking_process.bActive &&
+		(WaitForSingleObject(blocking_process.hStart, INFINITE) != WAIT_OBJECT_0)) {
 		goto out;
 	}
 
-	pid[0] = (ULONG_PTR)0;
-	cur_pid = 1;
-
-	wHandleNameLen = (USHORT)wcslen(_wHandleName);
-
-	bufferSize = 0x200;
-	buffer = PhAllocate(bufferSize);
-	if (buffer == NULL)
-		goto out;
-
-	for (i = 0; ; i++) {
-		ULONG attempts = 8;
-		PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX handleInfo = NULL;
-
-		// We are seeing reports of application crashes due to access
-		// violation exceptions here, so, since this is not critical code,
-		// we add an exception handler to ignore them.
-		TRY_AND_HANDLE(
-			EXCEPTION_ACCESS_VIOLATION,
-			{ handleInfo = (i < handles->NumberOfHandles) ? &handles->Handles[i] : NULL; },
-			{ continue; }
-		);
-
-		if ((dupHandle != NULL) && (processHandle != NtCurrentProcess())) {
-			pfNtClose(dupHandle);
-			dupHandle = NULL;
+	bInitSuccess = TRUE;
+	while (blocking_process.bActive) {
+		// Get a lock to our data
+		if (WaitForSingleObject(hLock, SEARCH_PROCESS_LOCK_TIMEOUT) != WAIT_OBJECT_0)
+			goto out;
+		// No handles to check => just sleep for a while
+		if (blocking_process.nHandles == 0) {
+			ReleaseMutex(hLock);
+			Sleep(500);
+			continue;
 		}
-
-		// Update the current handle's process PID and compare against last
-		// Note: Be careful about not trying to overflow our list!
-		TRY_AND_HANDLE(
-			EXCEPTION_ACCESS_VIOLATION,
-			{ pid[cur_pid] = (handleInfo != NULL) ? handleInfo->UniqueProcessId : -1; },
-			{ continue; }
-		);
-
-		if (pid[0] != pid[1]) {
-			cur_pid = (cur_pid + 1) % 2;
-
-			// If we're switching process and found a match, print it
-			if (bFound) {
-				static_sprintf (tmp, "● [%06u] %s (%s)", (uint32_t)pid[cur_pid], cmdline, access_rights_str[access_rights & 0x7]);
-				// tmp may contain a '%' so don't feed it as a naked format string
-				vuprintf("%s", tmp);
-				StrArrayAdd(&BlockingProcess, tmp, TRUE);
-				bFound = FALSE;
-				access_rights = 0;
+		// Work on our own copy of the handle names so we don't have to hold the
+		// mutex for string comparison. Update only if the version has changed.
+		if (blocking_process.nVersion[0] != blocking_process.nVersion[1]) {
+			assert(blocking_process.wHandleName != NULL && blocking_process.nHandles != 0);
+			if (blocking_process.wHandleName == NULL || blocking_process.nHandles == 0) {
+				ReleaseMutex(hLock);
+				goto out;
 			}
-
-			// Close the previous handle
-			if (processHandle != NULL) {
-				if (processHandle != NtCurrentProcess())
-					pfNtClose(processHandle);
-				processHandle = NULL;
+			if (wHandleName != NULL) {
+				for (i = 0; i < nHandles; i++)
+					free(wHandleName[i]);
+				free(wHandleName);
 			}
-		}
-
-		CHECK_FOR_USER_CANCEL;
-
-		// Exit loop condition
-		if (i >= handles->NumberOfHandles)
-			break;
-
-		if (handleInfo == NULL)
-			continue;
-
-		// Don't bother with processes we can't access
-		if (handleInfo->UniqueProcessId == last_access_denied_pid)
-			continue;
-
-		// Filter out handles that aren't opened with Read (bit 0), Write (bit 1) or Execute (bit 5) access
-		if ((handleInfo->GrantedAccess & 0x23) == 0)
-			continue;
-
-		// Open the process to which the handle we are after belongs, if not already opened
-		if (pid[0] != pid[1]) {
-			status = PhOpenProcess(&processHandle, PROCESS_DUP_HANDLE | PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
-				(HANDLE)handleInfo->UniqueProcessId);
-			// There exists some processes we can't access
-			if (!NT_SUCCESS(status)) {
-				uuprintf("SearchProcess: Could not open process %ld: %s",
-					handleInfo->UniqueProcessId, NtStatusError(status));
-				processHandle = NULL;
-				if (status == STATUS_ACCESS_DENIED) {
-					last_access_denied_pid = handleInfo->UniqueProcessId;
+			safe_free(wHandleNameLen);
+			nHandles = blocking_process.nHandles;
+			wHandleName = calloc(nHandles, sizeof(wchar_t*));
+			if (wHandleName == NULL) {
+				ReleaseMutex(hLock);
+				goto out;
+			}
+			wHandleNameLen = calloc(nHandles, sizeof(USHORT));
+			if (wHandleNameLen == NULL) {
+				ReleaseMutex(hLock);
+				goto out;
+			}
+			for (i = 0; i < nHandles; i++) {
+				wHandleName[i] = wcsdup(blocking_process.wHandleName[i]);
+				wHandleNameLen[i] = (USHORT)wcslen(blocking_process.wHandleName[i]);
+				if (wHandleName[i] == NULL) {
+					ReleaseMutex(hLock);
+					goto out;
 				}
-				continue;
 			}
+			blocking_process.nVersion[1] = blocking_process.nVersion[0];
+			blocking_process.nPass = 0;
+		}
+		ReleaseMutex(hLock);
+
+		start_time = GetTickCount64();
+		// Get a list of all opened handles
+		if (!NT_SUCCESS(PhEnumHandlesEx(&handles))) {
+			Sleep(1000);
+			continue;
 		}
 
-		// Now duplicate this handle onto our own process, so that we can access its properties
-		if (processHandle == NtCurrentProcess()) {
-			if (_bIgnoreSelf)
+		pid[0] = (ULONG_PTR)0;
+		cur_pid = 1;
+		bufferSize = 0x200;
+		buffer = PhAllocate(bufferSize);
+		if (buffer == NULL)
+			goto out;
+
+		for (i = 0; blocking_process.bActive; i++) {
+			ULONG attempts = 8;
+			PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX handleInfo = NULL;
+
+			// We are seeing reports of application crashes due to access
+			// violation exceptions here, so, since this is not critical code,
+			// we add an exception handler to ignore them.
+			TRY_AND_HANDLE(
+				EXCEPTION_ACCESS_VIOLATION,
+				{ handleInfo = (i < handles->NumberOfHandles) ? &handles->Handles[i] : NULL; },
+				{ continue; }
+			);
+
+			if ((dupHandle != NULL) && (processHandle != NtCurrentProcess())) {
+				pfNtClose(dupHandle);
+				dupHandle = NULL;
+			}
+
+			// Update the current handle's process PID and compare against last
+			// Note: Be careful about not trying to overflow our list!
+			TRY_AND_HANDLE(
+				EXCEPTION_ACCESS_VIOLATION,
+				{ pid[cur_pid] = (handleInfo != NULL) ? handleInfo->UniqueProcessId : -1; },
+				{ continue; }
+			);
+
+			if (pid[0] != pid[1]) {
+				cur_pid = (cur_pid + 1) % 2;
+
+				// If we're switching process and found a match, store it
+				if (bFound) {
+					if (WaitForSingleObject(hLock, SEARCH_PROCESS_LOCK_TIMEOUT) == WAIT_OBJECT_0) {
+						ProcessEntry* pe = blocking_process.Process;
+						// Prune entries that have not been detected for a few passes
+						for (j = 0; j < MAX_BLOCKING_PROCESSES; j++)
+							if (pe[j].pid != 0 && pe[j].seen_on_pass < blocking_process.nPass - 1)
+								pe[j].pid = 0;
+						// Try to reuse an existing entry for the current pid
+						for (j = 0; (j < MAX_BLOCKING_PROCESSES) && (pe[j].pid != pid[cur_pid]); j++);
+						if (j == MAX_BLOCKING_PROCESSES)
+							for (j = 0; (j < MAX_BLOCKING_PROCESSES) && (pe[j].pid != 0); j++);
+						if (j != MAX_BLOCKING_PROCESSES) {
+							pe[j].pid = pid[cur_pid];
+							pe[j].access_rights = access_rights & 0x7;
+							pe[j].seen_on_pass = blocking_process.nPass;
+							static_strcpy(pe[j].cmdline, cmdline);
+						} else if (usb_debug) {
+							OutputDebugStringA("SearchProcessThread: No empty slot!\n");
+						}
+						ReleaseMutex(hLock);
+					}
+					bFound = FALSE;
+					access_rights = 0;
+				}
+
+				// Close the previous handle
+				if (processHandle != NULL) {
+					if (processHandle != NtCurrentProcess())
+						pfNtClose(processHandle);
+					processHandle = NULL;
+				}
+			}
+
+			// Exit thread condition
+			if (!blocking_process.bActive)
+				goto out;
+
+			// Exit loop condition
+			if (i >= handles->NumberOfHandles)
+				break;
+
+			if (handleInfo == NULL)
 				continue;
-			dupHandle = (HANDLE)handleInfo->HandleValue;
-		} else {
+
+			// Don't bother with processes we can't access
+			if (handleInfo->UniqueProcessId == last_access_denied_pid)
+				continue;
+
+			// Filter out handles that aren't opened with Read (bit 0), Write (bit 1) or Execute (bit 5) access
+			if ((handleInfo->GrantedAccess & 0x23) == 0)
+				continue;
+
+			// Open the process to which the handle we are after belongs, if not already opened
+			if (pid[0] != pid[1]) {
+				status = PhOpenProcess(&processHandle, PROCESS_DUP_HANDLE | PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+					(HANDLE)handleInfo->UniqueProcessId);
+				// There exists some processes we can't access
+				if (!NT_SUCCESS(status)) {
+					processHandle = NULL;
+					if (status == STATUS_ACCESS_DENIED) {
+						last_access_denied_pid = handleInfo->UniqueProcessId;
+					}
+					continue;
+				}
+			}
+
+			// Now duplicate this handle onto our own process, so that we can access its properties
+			if (processHandle == NtCurrentProcess())
+				continue;
 			status = pfNtDuplicateObject(processHandle, (HANDLE)handleInfo->HandleValue,
 				NtCurrentProcess(), &dupHandle, 0, 0, 0);
 			if (!NT_SUCCESS(status))
 				continue;
-		}
 
-		// Filter non-storage handles. We're not interested in them and they make NtQueryObject() freeze
-		if (GetFileType(dupHandle) != FILE_TYPE_DISK)
-			continue;
+			// Filter non-storage handles. We're not interested in them and they make NtQueryObject() freeze
+			if (GetFileType(dupHandle) != FILE_TYPE_DISK)
+				continue;
 
-		// A loop is needed because the I/O subsystem likes to give us the wrong return lengths...
-		do {
-			ULONG returnSize;
-			// TODO: We might potentially still need a timeout on ObjectName queries, as PH does...
-			status = pfNtQueryObject(dupHandle, ObjectNameInformation, buffer, bufferSize, &returnSize);
-			if (status == STATUS_BUFFER_OVERFLOW || status == STATUS_INFO_LENGTH_MISMATCH ||
-				status == STATUS_BUFFER_TOO_SMALL) {
-				uuprintf("SearchProcess: Realloc from %d to %d", bufferSize, returnSize);
-				bufferSize = returnSize;
-				PhFree(buffer);
-				buffer = PhAllocate(bufferSize);
-			} else {
-				break;
+			// A loop is needed because the I/O subsystem likes to give us the wrong return lengths...
+			do {
+				ULONG returnSize;
+				// TODO: We might potentially still need a timeout on ObjectName queries, as PH does...
+				status = pfNtQueryObject(dupHandle, ObjectNameInformation, buffer, bufferSize, &returnSize);
+				if (status == STATUS_BUFFER_OVERFLOW || status == STATUS_INFO_LENGTH_MISMATCH ||
+					status == STATUS_BUFFER_TOO_SMALL) {
+					bufferSize = returnSize;
+					PhFree(buffer);
+					buffer = PhAllocate(bufferSize);
+				} else {
+					break;
+				}
+			} while (--attempts);
+			if (!NT_SUCCESS(status))
+				continue;
+
+			for (j = 0; j < nHandles; j++) {
+				// Don't bother comparing if length of our handle string is larger than the current data
+				if (wHandleNameLen[j] > buffer->Name.Length)
+					continue;
+				// Match against our target string(s)
+				if (wcsncmp(wHandleName[j], buffer->Name.Buffer, wHandleNameLen[j]) == 0)
+					break;
 			}
-		} while (--attempts);
-		if (!NT_SUCCESS(status)) {
-			uuprintf("SearchProcess: NtQueryObject failed for handle %X of process %ld: %s",
-				handleInfo->HandleValue, handleInfo->UniqueProcessId, NtStatusError(status));
-			continue;
+			if (j == nHandles)
+				continue;
+			bFound = TRUE;
+
+			// Keep a mask of all the access rights being used
+			access_rights |= handleInfo->GrantedAccess;
+			// The Executable bit is in a place we don't like => reposition it
+			if (access_rights & 0x20)
+				access_rights = (access_rights & 0x03) | 0x04;
+			access_rights &= 0x07;
+
+			// Where possible, try to get the full command line
+			bGotCmdLine = FALSE;
+			size = MAX_PATH;
+			wcmdline = GetProcessCommandLine(processHandle);
+			if (wcmdline != NULL) {
+				bGotCmdLine = TRUE;
+				wchar_to_utf8_no_alloc(wcmdline, cmdline, sizeof(cmdline));
+				free(wcmdline);
+			}
+
+			// If we couldn't get the full commandline, try to get the executable path
+			if (!bGotCmdLine)
+				bGotCmdLine = (GetModuleFileNameExU(processHandle, 0, cmdline, MAX_PATH - 1) != 0);
+
+			// The above may not work on all Windows version, so fall back to QueryFullProcessImageName
+			if (!bGotCmdLine) {
+				bGotCmdLine = (QueryFullProcessImageNameW(processHandle, 0, wexe_path, &size) != FALSE);
+				if (bGotCmdLine)
+					wchar_to_utf8_no_alloc(wexe_path, cmdline, sizeof(cmdline));
+			}
+
+			// Still nothing? Try GetProcessImageFileName. Note that GetProcessImageFileName uses
+			// '\Device\Harddisk#\Partition#\' instead drive letters
+			if (!bGotCmdLine) {
+				bGotCmdLine = (GetProcessImageFileNameW(processHandle, wexe_path, MAX_PATH) != 0);
+				if (bGotCmdLine)
+					wchar_to_utf8_no_alloc(wexe_path, cmdline, sizeof(cmdline));
+			}
+
+			// Complete failure => Just craft a default process name that includes the PID
+			if (!bGotCmdLine) {
+				static_sprintf(cmdline, "Unknown_Process_%" PRIu64,
+					(ULONGLONG)handleInfo->UniqueProcessId);
+			}
 		}
-
-		// Don't bother comparing if we are looking for full match and the length is different
-		if ((!_bPartialMatch) && (wHandleNameLen != buffer->Name.Length))
-			continue;
-
-		// Likewise, if we are looking for a partial match and the current length is smaller
-		if ((_bPartialMatch) && (wHandleNameLen > buffer->Name.Length))
-			continue;
-
-		// Match against our target string
-		if (wcsncmp(_wHandleName, buffer->Name.Buffer, wHandleNameLen) != 0)
-			continue;
-
-		// If we are here, we have a process accessing our target!
-		bFound = TRUE;
-
-		// Keep a mask of all the access rights being used
-		access_rights |= handleInfo->GrantedAccess;
-		// The Executable bit is in a place we don't like => reposition it
-		if (access_rights & 0x20)
-			access_rights = (access_rights & 0x03) | 0x04;
-		access_mask |= (BYTE) (access_rights & 0x7) + 0x80;	// Bit 7 is always set if a process was found
-
-		// If this is the very first process we find, print a header
-		if (cmdline[0] == 0)
-			vuprintf("WARNING: The following process(es) or service(s) are accessing %S:", _wHandleName);
-
-		// Where possible, try to get the full command line
-		bGotCmdLine = FALSE;
-		size = MAX_PATH;
-		wcmdline = GetProcessCommandLine(processHandle);
-		if (wcmdline != NULL) {
-			bGotCmdLine = TRUE;
-			wchar_to_utf8_no_alloc(wcmdline, cmdline, sizeof(cmdline));
-			free(wcmdline);
-		}
-
-		// If we couldn't get the full commandline, try to get the executable path
-		if (!bGotCmdLine)
-			bGotCmdLine = (GetModuleFileNameExU(processHandle, 0, cmdline, MAX_PATH - 1) != 0);
-
-		// The above may not work on all Windows version, so fall back to QueryFullProcessImageName
-		if (!bGotCmdLine) {
-			bGotCmdLine = (QueryFullProcessImageNameW(processHandle, 0, wexe_path, &size) != FALSE);
-			if (bGotCmdLine)
-				wchar_to_utf8_no_alloc(wexe_path, cmdline, sizeof(cmdline));
-		}
-
-		// Still nothing? Try GetProcessImageFileName. Note that GetProcessImageFileName uses
-		// '\Device\Harddisk#\Partition#\' instead drive letters
-		if (!bGotCmdLine) {
-			bGotCmdLine = (GetProcessImageFileNameW(processHandle, wexe_path, MAX_PATH) != 0);
-			if (bGotCmdLine)
-				wchar_to_utf8_no_alloc(wexe_path, cmdline, sizeof(cmdline));
-		}
-
-		// Complete failure => Just craft a default process name that includes the PID
-		if (!bGotCmdLine) {
-			static_sprintf(cmdline, "Unknown_Process_%" PRIu64,
-				(ULONGLONG)handleInfo->UniqueProcessId);
-		}
+		PhFree(buffer);
+		PhFree(handles);
+		// We are the only ones updating the counter so no need for lock
+		blocking_process.nPass++;
+		// In extended debug mode, notify how much time our search took to the debug facility
+		static_sprintf(tmp, "Process search run #%d completed in %llu ms\n",
+			blocking_process.nPass, GetTickCount64() - start_time);
+		if (usb_debug)
+			OutputDebugStringA(tmp);
+		Sleep(1000);
 	}
 
 out:
-	if (cmdline[0] != 0)
-		vuprintf("You should close these applications before attempting to reformat the drive.");
-	else
-		vuprintf("NOTE: Could not identify the process(es) or service(s) accessing %S", _wHandleName);
+	if (!bInitSuccess)
+		uprintf("Warning: Could not start process handle enumerator!");
 
-	PhFree(buffer);
-	PhFree(handles);
+	if (wHandleName != NULL) {
+		for (i = 0; i < nHandles; i++)
+			free(wHandleName[i]);
+		free(wHandleName);
+	}
+	safe_free(wHandleNameLen);
+
 	PhDestroyHeap();
+	if ((hLock != NULL) && (hLock != INVALID_HANDLE_VALUE) &&
+		(WaitForSingleObject(hLock, 1000) == WAIT_OBJECT_0)) {
+		blocking_process.hLock = NULL;
+		blocking_process.bActive = FALSE;
+		for (i = 0; i < blocking_process.nHandles; i++)
+			free(blocking_process.wHandleName[i]);
+		safe_free(blocking_process.wHandleName);
+		safe_closehandle(blocking_process.hStart);
+		ReleaseMutex(hLock);
+	}
+	safe_closehandle(hLock);
+
 	ExitThread(0);
 }
 
 /**
- * Search all the processes and list the ones that have a specific handle open.
+ * Start the process search thread.
  *
- * \param HandleName The name of the handle to look for.
- * \param dwTimeOut The maximum amounf of time (ms) that may be spent searching
- * \param bPartialMatch Whether partial matches should be allowed.
- * \param bIgnoreSelf Whether the current process should be listed.
- * \param bQuiet Prints minimal output.
+ * \return TRUE on success, FALSE otherwise.
  *
- * \return a byte containing the cumulated access rights (f----xwr) from all the handles found
- *         with bit 7 ('f') also set if at least one process was found.
  */
-BYTE SearchProcess(char* HandleName, DWORD dwTimeOut, BOOL bPartialMatch, BOOL bIgnoreSelf, BOOL bQuiet)
+BOOL StartProcessSearch(void)
 {
-	HANDLE handle;
-	DWORD res = 0;
+	int i;
 
-	_wHandleName = utf8_to_wchar(HandleName);
-	_bPartialMatch = bPartialMatch;
-	_bIgnoreSelf = bIgnoreSelf;
-	_bQuiet = bQuiet;
-	access_mask = 0x00;
+	if (hSearchProcessThread != NULL)
+		return TRUE;
 
-	assert(_wHandleName != NULL);
-
-	handle = CreateThread(NULL, 0, SearchProcessThread, NULL, 0, NULL);
-	if (handle == NULL) {
-		uprintf("Warning: Unable to create conflicting process search thread");
-		goto out;
+	hSearchProcessThread = CreateThread(NULL, 0, SearchProcessThread, NULL, 0, NULL);
+	if (hSearchProcessThread == NULL) {
+		uprintf("Failed to start process search thread: %s", WindowsErrorString());
+		return FALSE;
 	}
-	res = WaitForSingleObjectWithMessages(handle, dwTimeOut);
-	if (res == WAIT_TIMEOUT) {
-		// Timeout - kill the thread
-		TerminateThread(handle, 0);
-		uprintf("Search for conflicting processes was interrupted due to timeout");
-	} else if (res != WAIT_OBJECT_0) {
-		TerminateThread(handle, 0);
-		uprintf("Warning: Failed to wait for conflicting process search thread %s", WindowsErrorString());
+	SetThreadPriority(SearchProcessThread, THREAD_PRIORITY_LOWEST);
+
+	// Wait until we have hLock
+	for (i = 0; (i < 50) && (blocking_process.hLock == NULL); i++)
+		Sleep(100);
+	if (i >= 50) {
+		uprintf("Failed to start process search thread: hLock init failure!");
+		TerminateThread(hSearchProcessThread, 0);
+		CloseHandle(hSearchProcessThread);
+		hSearchProcessThread = NULL;
+		return FALSE;
 	}
+
+	return TRUE;
+}
+
+/**
+ * Stop the process search thread..
+ *
+ */
+void StopProcessSearch(void)
+{
+	if (hSearchProcessThread == NULL)
+		return;
+
+	// No need for a lock on this one
+	blocking_process.bActive = FALSE;
+	if (WaitForSingleObject(hSearchProcessThread, SEARCH_PROCESS_LOCK_TIMEOUT) != WAIT_OBJECT_0) {
+		uprintf("Process search thread did not exit within timeout - forcefully terminating it!");
+		TerminateThread(hSearchProcessThread, 0);
+		CloseHandle(hSearchProcessThread);
+	}
+	hSearchProcessThread = NULL;
+}
+
+/**
+ * Set up the handles that the process search will run against.
+ *
+ * \param DeviceNum The device number for the currently selected drive.
+ *
+ * \return TRUE on success, FALSE otherwise.
+ *
+ */
+BOOL SetProcessSearch(DWORD DeviceNum)
+{
+	char* PhysicalPath = NULL, DevPath[MAX_PATH];
+	char drive_letter[27], drive_name[] = "?:";
+	uint32_t i, nHandles = 0;
+	wchar_t** wHandleName = NULL;
+
+	if (hSearchProcessThread == NULL) {
+		uprintf("Process search thread is not started!");
+		return FALSE;
+	}
+
+	assert(blocking_process.hLock != NULL);
+
+	// Populate the handle names
+	wHandleName = calloc(MAX_NUM_HANDLES, sizeof(wchar_t*));
+	if (wHandleName == NULL)
+		return FALSE;
+	// Physical drive handle name
+	PhysicalPath = GetPhysicalName(DeviceNum);
+	if (QueryDosDeviceA(&PhysicalPath[4], DevPath, sizeof(DevPath)) != 0)
+		wHandleName[nHandles++] = utf8_to_wchar(DevPath);
+	free(PhysicalPath);
+	// Logical drive(s) handle name(s)
+	GetDriveLetters(DeviceNum, drive_letter);
+	for (i = 0; nHandles < MAX_NUM_HANDLES && drive_letter[i]; i++) {
+		drive_name[0] = drive_letter[i];
+		if (QueryDosDeviceA(drive_name, DevPath, sizeof(DevPath)) != 0)
+			wHandleName[nHandles++] = utf8_to_wchar(DevPath);
+	}
+	if (WaitForSingleObject(blocking_process.hLock, SEARCH_PROCESS_LOCK_TIMEOUT) != WAIT_OBJECT_0) {
+		uprintf("Could not obtain process search lock");
+		free(wHandleName);
+		nHandles = 0;
+		return FALSE;
+	}
+
+	if (blocking_process.wHandleName != NULL)
+		for (i = 0; i < blocking_process.nHandles; i++)
+			free(blocking_process.wHandleName[i]);
+	free(blocking_process.wHandleName);
+	blocking_process.wHandleName = wHandleName;
+	blocking_process.nHandles = nHandles;
+	blocking_process.nVersion[0]++;
+	blocking_process.bActive = TRUE;
+	if (!SetEvent(blocking_process.hStart))
+		uprintf("Could not send start event to process search: %s", WindowsErrorString);
+	return ReleaseMutex(blocking_process.hLock);
+}
+
+/**
+ * Check whether the corresponding PID is that of a running process.
+ *
+ * \param pid The PID of the process to check.
+ *
+ * \return TRUE if the process is detected as currently running, FALSE otherwise.
+ *
+ */
+static BOOL IsProcessRunning(uint64_t pid)
+{
+	HANDLE hProcess = NULL;
+	DWORD dwExitCode;
+	BOOL ret = FALSE;
+	NTSTATUS status;
+
+	PF_INIT_OR_OUT(NtClose, NtDll);
+
+	status = PhOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, (HANDLE)pid);
+	if (!NT_SUCCESS(status) || (hProcess == NULL))
+		return FALSE;
+	if (GetExitCodeProcess(hProcess, &dwExitCode))
+		ret = (dwExitCode == STILL_ACTIVE);
+	pfNtClose(hProcess);
 out:
-	free(_wHandleName);
-	return access_mask;
+	return ret;
+}
+
+/**
+ * Report the result of the process search.
+ *
+ * \param timeout Maximum time that should be spend in this function before aborting (in ms).
+ * \param access_mask Desired access mask (x = 0x4, w = 0x2, r = 0x1).
+ * \param bIgnoreStaleProcesses Whether to ignore processes that are no longer active.
+ *
+ * \return The combined access mask of all the matching processes found.
+ *         The BlockingProcessList string array is also updated with the results.
+ *
+ */
+BYTE GetProcessSearch(uint32_t timeout, uint8_t access_mask, BOOL bIgnoreStaleProcesses)
+{
+	const char* access_rights_str[8] = { "n", "r", "w", "rw", "x", "rx", "wx", "rwx" };
+	char tmp[MAX_PATH];
+	int i, j;
+	uint32_t elapsed = 0;
+	BYTE returned_mask = 0;
+
+	StrArrayClear(&BlockingProcessList);
+	if (hSearchProcessThread == NULL) {
+		uprintf("Process search thread is not started!");
+		return 0;
+	}
+
+	assert(blocking_process.hLock != NULL);
+	if (blocking_process.hLock == NULL)
+		return 0;
+
+retry:
+	if (WaitForSingleObject(blocking_process.hLock, SEARCH_PROCESS_LOCK_TIMEOUT) != WAIT_OBJECT_0)
+		return 0;
+
+	// Make sure we have at least one pass with the current handles in order to report them.
+	// If we have a timeout, wait until timeout has elapsed to give up.
+	if ((blocking_process.nVersion[0] != blocking_process.nVersion[1]) ||
+		(blocking_process.nPass < 1)) {
+		ReleaseMutex(blocking_process.hLock);
+		if (elapsed < timeout) {
+			Sleep(100);
+			elapsed += 100;
+			goto retry;
+		}
+		if (timeout != 0)
+			uprintf("Timeout while retrieving conflicting process list");
+		return 0;
+	}
+
+	for (i = 0, j = 0; i < MAX_BLOCKING_PROCESSES; i++) {
+		if (blocking_process.Process[i].pid == 0)
+			continue;
+		if ((blocking_process.Process[i].access_rights & access_mask) == 0)
+			continue;
+		if (bIgnoreStaleProcesses && !IsProcessRunning(blocking_process.Process[i].pid))
+			continue;
+		returned_mask |= blocking_process.Process[i].access_rights;
+		static_sprintf(tmp, "● [%llu] %s (%s)", blocking_process.Process[i].pid, blocking_process.Process[i].cmdline,
+			access_rights_str[blocking_process.Process[i].access_rights & 0x7]);
+		StrArrayAdd(&BlockingProcessList, tmp, TRUE);
+		if (j++ == 0)
+			uprintf("WARNING: The following application(s) or service(s) are accessing the drive:");
+		// tmp may contain a '%' so don't feed it as a naked format string
+		uprintf("%s", tmp);
+	}
+	if (j != 0)
+		uprintf("You should close these applications before retrying the operation.");
+	ReleaseMutex(blocking_process.hLock);
+
+	return returned_mask & access_mask;
 }
 
 /**

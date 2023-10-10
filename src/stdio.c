@@ -562,8 +562,8 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 			break;
 		if (nTry < nNumRetries) {
 			uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
-			// Don't sit idly but use the downtime to check for conflicting processes...
-			Sleep(CheckDriveAccess(WRITE_TIMEOUT, FALSE));
+			// TODO: Call GetProcessSearch() here?
+			Sleep(WRITE_TIMEOUT);
 		}
 	}
 	if (SCODE_CODE(GetLastError()) == ERROR_SUCCESS)

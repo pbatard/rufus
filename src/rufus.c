@@ -141,7 +141,7 @@ char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
 char *archive_path = NULL, image_option_txt[128], *fido_url = NULL, *save_image_type = NULL;
-StrArray BlockingProcess, ImageList;
+StrArray BlockingProcessList, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
@@ -2105,7 +2105,7 @@ static void InitDialog(HWND hDlg)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
 
 	// Create the string arrays
-	StrArrayCreate(&BlockingProcess, 16);
+	StrArrayCreate(&BlockingProcessList, 16);
 	StrArrayCreate(&ImageList, 16);
 	// Set various checkboxes
 	CheckDlgButton(hDlg, IDC_QUICK_FORMAT, BST_CHECKED);
@@ -2167,85 +2167,6 @@ static void InitDialog(HWND hDlg)
 static void PrintStatusTimeout(const char* str, BOOL val)
 {
 	PrintStatus(STATUS_MSG_TIMEOUT, (val)?MSG_250:MSG_251, str);
-}
-
-// Check for conflicting processes accessing the drive.
-// If bPrompt is true, ask the user whether they want to proceed.
-// dwTimeOut is the maximum amount of time we allow for this call to execute (in ms)
-// If bPrompt is false, the return value is the amount of time remaining before
-// dwTimeOut would expire (or zero if we spent more than dwTimeout in this procedure).
-// If bPrompt is true, the return value is 0 on error, dwTimeOut on success.
-DWORD CheckDriveAccess(DWORD dwTimeOut, BOOL bPrompt)
-{
-	uint32_t i, j;
-	DWORD ret = 0, proceed = TRUE;
-	BYTE access_mask;
-	char *PhysicalPath = NULL, DevPath[MAX_PATH];
-	char drive_letter[27], drive_name[] = "?:";
-	char title[128];
-	uint64_t start_time = GetTickCount64(), cur_time, end_time = start_time + dwTimeOut;
-
-	// Get the current selected device
-	DWORD DeviceNum = (DWORD)ComboBox_GetCurItemData(hDeviceList);
-	if ((DeviceNum < 0x80) || (DeviceNum == (DWORD)-1))
-		return FALSE;
-
-	// "Checking for conflicting processes..."
-	if (bPrompt)
-		PrintInfo(0, MSG_278);
-
-	// Search for any blocking processes against the physical drive
-	PhysicalPath = GetPhysicalName(DeviceNum);
-	if (QueryDosDeviceA(&PhysicalPath[4], DevPath, sizeof(DevPath)) != 0) {
-		access_mask = SearchProcess(DevPath, dwTimeOut, TRUE, TRUE, TRUE);
-		CHECK_FOR_USER_CANCEL;
-		if (access_mask != 0) {
-			proceed = FALSE;
-			uprintf("Found potentially blocking process(es) against %s:", &PhysicalPath[4]);
-			for (j = 0; j < BlockingProcess.Index; j++)
-				// BlockingProcess.String[j] may contain a '%' so don't feed it as a naked format string
-				uprintf("%s", BlockingProcess.String[j]);
-		}
-	}
-
-	// Search for any blocking processes against the logical volume(s)
-	GetDriveLetters(DeviceNum, drive_letter);
-	for (i = 0; drive_letter[i]; i++) {
-		drive_name[0] = drive_letter[i];
-		if (QueryDosDeviceA(drive_name, DevPath, sizeof(DevPath)) != 0) {
-			StrArrayClear(&BlockingProcess);
-			cur_time = GetTickCount64();
-			if (cur_time >= end_time)
-				break;
-			access_mask = SearchProcess(DevPath, (DWORD)(end_time - cur_time), TRUE, TRUE, TRUE);
-			CHECK_FOR_USER_CANCEL;
-			// Ignore if all we have is read-only
-			if ((access_mask & 0x06) || (access_mask == 0x80)) {
-				proceed = FALSE;
-				uprintf("Found potentially blocking process(es) against %s", drive_name);
-				for (j = 0; j < BlockingProcess.Index; j++)
-					// BlockingProcess.String[j] may contain a '%' so don't feed it as a naked format string
-					uprintf("%s", BlockingProcess.String[j]);
-			}
-		}
-	}
-
-	// Prompt the user if we detected blocking processes
-	if (bPrompt && !proceed) {
-		ComboBox_GetTextU(hDeviceList, title, sizeof(title));
-		proceed = Notification(MSG_WARNING_QUESTION, NULL, NULL, title, lmprintf(MSG_132));
-	}
-	if (bPrompt) {
-		ret = proceed ? dwTimeOut : 0;
-	} else {
-		ret = (DWORD)(GetTickCount64() - start_time);
-		ret = (dwTimeOut > ret) ? (dwTimeOut - ret) : 0;
-	}
-
-out:
-	PrintInfo(0, MSG_210);
-	free(PhysicalPath);
-	return ret;
 }
 
 /*
@@ -2358,7 +2279,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				SHChangeNotifyDeregister(ulRegister);
 			PostQuitMessage(0);
 			ClearDrives();
-			StrArrayDestroy(&BlockingProcess);
+			StopProcessSearch();
+			StrArrayDestroy(&BlockingProcessList);
 			StrArrayDestroy(&ImageList);
 			DestroyAllTooltips();
 			DestroyWindow(hLogDialog);
@@ -2447,12 +2369,19 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			nb_devices = ComboBox_GetCount(hDeviceList);
-			PrintStatusDebug(0, (nb_devices==1)?MSG_208:MSG_209, nb_devices);
+			PrintStatusDebug(0, (nb_devices == 1) ? MSG_208 : MSG_209, nb_devices);
 			PopulateProperties();
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 			DeviceNum = (nDeviceIndex == CB_ERR) ? 0 : (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL << 16) | IDC_FILE_SYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
+			if (nb_devices == 0) {
+				// No need to run the process search if no device is selected
+				StopProcessSearch();
+			} else if (!StartProcessSearch() || !SetProcessSearch(DeviceNum)) {
+				uprintf("Failed to start conflicting process search");
+				StopProcessSearch();
+			}
 			break;
 		case IDC_IMAGE_OPTION:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -2654,7 +2583,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			EnableControls(FALSE, FALSE);
 			FormatStatus = 0;
 			LastWriteError = 0;
-			StrArrayClear(&BlockingProcess);
+			StrArrayClear(&BlockingProcessList);
 			no_confirmation_on_cancel = FALSE;
 			SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
 			selection_default = (int)ComboBox_GetCurItemData(hBootType);
@@ -3049,8 +2978,15 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 		}
 
-		if (!CheckDriveAccess(SEARCH_PROCESS_TIMEOUT, TRUE))
-			goto aborted_start;
+		// Detect processes that have write (0x2) or exec (0x4) permissions against our drive.
+		// Ideally, exec should be no big deal, but Windows complains on USB ejection if a
+		// process such as cmd.exe holds exec rights, so we follow suit.
+		if (GetProcessSearch(SEARCH_PROCESS_TIMEOUT, 0x06, TRUE)) {
+			char title[128];
+			ComboBox_GetTextU(hDeviceList, title, sizeof(title));
+			if (!Notification(MSG_WARNING_QUESTION, NULL, NULL, title, lmprintf(MSG_132)))
+				goto aborted_start;
+		}
 
 		GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
 		if (MessageBoxExU(hMainDialog, lmprintf(MSG_003, tmp),
@@ -3132,8 +3068,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PrintInfo(0, MSG_212);
 			MessageBeep(MB_ICONERROR);
 			FlashTaskbar(dialog_handle);
-			if (BlockingProcess.Index > 0) {
-				ListDialog(lmprintf(MSG_042), lmprintf(MSG_055), BlockingProcess.String, BlockingProcess.Index);
+			GetProcessSearch(0, 0x07, FALSE);
+			if (BlockingProcessList.Index > 0) {
+				ListDialog(lmprintf(MSG_042), lmprintf(MSG_055), BlockingProcessList.String, BlockingProcessList.Index);
 			} else {
 				if (WindowsVersion.Version >= WINDOWS_10) {
 					// Try to detect if 'Controlled Folder Access' is enabled on Windows 10 or later. See also:
@@ -3831,18 +3768,7 @@ extern int TestHashes(void);
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-//			TestHashes();
-			dll_resolver_t resolver = { 0 };
-			resolver.path = "C:\\Windows\\System32\\Dism\\FfuProvider.dll";
-			resolver.count = 3;
-			resolver.name = calloc(resolver.count, sizeof(char*));
-			resolver.address = calloc(resolver.count, sizeof(uint32_t));
-			resolver.name[0] = "FfuCaptureImage";
-			resolver.name[1] = "FfuApplyImage";
-			resolver.name[2] = "FfuMountImage";
-			uprintf("Got %d resolved addresses", ResolveDllAddress(&resolver));
-			free(resolver.name);
-			free(resolver.address);
+			TestHashes();
 			continue;
 		}
 #endif

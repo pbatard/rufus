@@ -2,9 +2,9 @@
  * Rufus: The Reliable USB Formatting Utility
  * Process search functionality
  *
- * Modified from Process Hacker:
- *   https://github.com/processhacker2/processhacker2/
- * Copyright © 2017-2019 Pete Batard <pete@akeo.ie>
+ * Modified from System Informer (a.k.a. Process Hacker):
+ *   https://github.com/winsiderss/systeminformer
+ * Copyright © 2017-2023 Pete Batard <pete@akeo.ie>
  * Copyright © 2017 dmex
  * Copyright © 2009-2016 wj32
  *
@@ -25,6 +25,7 @@
 #include <windows.h>
 #include <winnt.h>
 #include <winternl.h>
+#include <stdint.h>
 
 #pragma once
 
@@ -294,3 +295,25 @@ typedef struct _RTL_HEAP_PARAMETERS
 #define SE_TIME_ZONE_PRIVILEGE (34L)
 #define SE_CREATE_SYMBOLIC_LINK_PRIVILEGE (35L)
 #define SE_MAX_WELL_KNOWN_PRIVILEGE SE_CREATE_SYMBOLIC_LINK_PRIVILEGE
+
+#define MAX_NUM_HANDLES             16
+#define MAX_BLOCKING_PROCESSES      16
+#define SEARCH_PROCESS_LOCK_TIMEOUT 2000
+
+typedef struct {
+	uint64_t pid;			// PID of the process
+	uint8_t access_rights;	// rwx access rights
+	uint32_t seen_on_pass;	// nPass value of when this process was last detected
+	char cmdline[MAX_PATH];	// Command line for the process
+} ProcessEntry;
+
+typedef struct {
+	BOOL bActive;			// Indicates whether the search for processes is currently active
+	uint32_t nVersion[2];	// Version indicator for the handle name list.
+	uint32_t nHandles;		// Number of handle names in the list below
+	wchar_t** wHandleName;	// Handle names we search against
+	HANDLE hLock;			// Global lock to request for modifying this structure
+	HANDLE hStart;			// Event indicating that the search for processes can be started
+	ProcessEntry Process[MAX_BLOCKING_PROCESSES];	// Fixed size process list
+	uint32_t nPass;			// Incremental counter of how many passes we ran
+} BlockingProcess;
