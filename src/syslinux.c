@@ -2,7 +2,7 @@
  *
  *   Copyright 2003 Lars Munch Christensen - All Rights Reserved
  *   Copyright 1998-2008 H. Peter Anvin - All Rights Reserved
- *   Copyright 2012-2021 Pete Batard
+ *   Copyright 2012-2023 Pete Batard
  *
  *   Based on the Linux installer program for SYSLINUX by H. Peter Anvin
  *
@@ -111,10 +111,10 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	libfat_sector_t *sectors = NULL;
 	int ldlinux_sectors;
 	uint32_t ldlinux_cluster;
-	int i, nsectors, sl_fs_stype;
+	int i, w, nsectors, sl_fs_stype;
 	BOOL use_v5 = (boot_type == BT_SYSLINUX_V6) || ((boot_type == BT_IMAGE) && (SL_MAJOR(img_report.sl_version) >= 5));
 
-	PrintInfoDebug(0, MSG_234, (boot_type == BT_IMAGE)?img_report.sl_version_str:embedded_sl_version_str[use_v5?1:0]);
+	PrintInfoDebug(0, MSG_234, (boot_type == BT_IMAGE) ? img_report.sl_version_str : embedded_sl_version_str[use_v5?1:0]);
 
 	/* 4K sector size workaround */
 	SECTOR_SHIFT = 0;
@@ -287,8 +287,14 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 		goto out;
 	}
 
-	/* Patch ldlinux.sys and the boot sector */
-	if (syslinux_patch(sectors, nsectors, 0, 0, NULL, NULL) < 0) {
+	/* Set the base directory and patch ldlinux.sys and the boot sector */
+	for (i = (int)strlen(img_report.cfg_path); (i > 0) && (img_report.cfg_path[i] != '/'); i--);
+	if (i > 0)
+		img_report.cfg_path[i] = 0;
+	w = syslinux_patch(sectors, nsectors, 0, 0, img_report.cfg_path, NULL);
+	if (i > 0)
+		img_report.cfg_path[i] = '/';
+	if (w < 0) {
 		uprintf("Could not patch Syslinux files.");
 		uprintf("WARNING: This could be caused by your firewall having modified downloaded content, such as 'ldlinux.sys'...");
 		goto out;

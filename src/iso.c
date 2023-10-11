@@ -1096,7 +1096,7 @@ out:
 		if ((iso9660_ifs_read_pvd(p_iso, &pvd)) && (_stat64U(src_iso, &stat) == 0))
 			img_report.mismatch_size = (int64_t)(iso9660_get_pvd_space_size(&pvd)) * ISO_BLOCKSIZE - stat.st_size;
 		// Remove trailing spaces from the label
-		for (k=(int)safe_strlen(img_report.label)-1; ((k>0)&&(isspaceU(img_report.label[k]))); k--)
+		for (k = (int)safe_strlen(img_report.label) - 1; ((k > 0) && (isspaceU(img_report.label[k]))); k--)
 			img_report.label[k] = 0;
 		// We use the fact that UDF_BLOCKSIZE and ISO_BLOCKSIZE are the same here
 		img_report.projected_size = total_blocks * ISO_BLOCKSIZE;
@@ -1106,9 +1106,9 @@ out:
 		if (!IsStrArrayEmpty(config_path)) {
 			// Set the img_report.cfg_path string to maximum length, so that we don't have to
 			// do a special case for StrArray entry 0.
-			memset(img_report.cfg_path, '_', sizeof(img_report.cfg_path)-1);
-			img_report.cfg_path[sizeof(img_report.cfg_path)-1] = 0;
-			for (i=0; i<config_path.Index; i++) {
+			memset(img_report.cfg_path, '_', sizeof(img_report.cfg_path) - 1);
+			img_report.cfg_path[sizeof(img_report.cfg_path) - 1] = 0;
+			for (i = 0; i < config_path.Index; i++) {
 				// OpenSuse based Live image have a /syslinux.cfg that doesn't work, so we enforce
 				// the use of the one in '/boot/[i386|x86_64]/loader/isolinux.cfg' if present.
 				// Note that, because the openSuse live script are not designed to handle anything but
@@ -1130,7 +1130,7 @@ out:
 			}
 			uprintf("  Will use '%s' for Syslinux", img_report.cfg_path);
 			// Extract all of the isolinux.bin files we found to identify their versions
-			for (i=0; i<isolinux_path.Index; i++) {
+			for (i = 0; i < isolinux_path.Index; i++) {
 				char isolinux_tmp[MAX_PATH];
 				static_sprintf(isolinux_tmp, "%sisolinux.tmp", temp_dir);
 				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], isolinux_tmp, FILE_ATTRIBUTE_NORMAL);
@@ -1157,7 +1157,7 @@ out:
 							img_report.sl_version_ext, isolinux_path.String[i], SL_MAJOR(sl_version), SL_MINOR(sl_version), ext);
 						// Workaround for Antergos and other ISOs, that have multiple Syslinux versions.
 						// Where possible, prefer to the one that resides in the same directory as the config file.
-						for (j=safe_strlen(img_report.cfg_path); (j>0) && (img_report.cfg_path[j]!='/'); j--);
+						for (j=safe_strlen(img_report.cfg_path); (j > 0) && (img_report.cfg_path[j] != '/'); j--);
 						if (safe_strnicmp(img_report.cfg_path, isolinux_path.String[i], j) == 0) {
 							static_strcpy(img_report.sl_version_ext, ext);
 							img_report.sl_version = sl_version;
@@ -1197,7 +1197,7 @@ out:
 			ExtractISOFile(src_iso, path, tmp_sif, FILE_ATTRIBUTE_NORMAL);
 			tmp = get_token_data_file("OsLoadOptions", tmp_sif);
 			if (tmp != NULL) {
-				for (i=0; i<strlen(tmp); i++)
+				for (i = 0; i < strlen(tmp); i++)
 					tmp[i] = (char)tolower(tmp[i]);
 				uprintf("  Checking txtsetup.sif:\n  OsLoadOptions = %s", tmp);
 				img_report.uses_minint = (strstr(tmp, "/minint") != NULL);
@@ -1307,6 +1307,19 @@ out:
 		} else if (HAS_BOOTMGR(img_report) && enable_ntfs_compression) {
 			// bootmgr might need to be uncompressed: https://github.com/pbatard/rufus/issues/1381
 			RunCommand("compact /u bootmgr* efi/boot/*.efi", dest_dir, TRUE);
+		}
+		// Exception for Slax Syslinux UEFI bootloaders...
+		// ...that don't appear to work anyway as of slax-64bit-slackware-15.0.3.iso
+		static_sprintf(path, "%s\\slax\\boot\\EFI", dest_dir);
+		if (PathFileExistsA(path)) {
+			char dst_path[16];
+			static_sprintf(dst_path, "%s\\EFI", dest_dir);
+			if (!PathFileExistsA(dst_path)) {
+				if (MoveFileA(path, dst_path))
+					uprintf("Moved: %s → %s", path, dst_path);
+				else
+					uprintf("Could not move %s → %s", path, dst_path, WindowsErrorString());
+			}
 		}
 		update_md5sum();
 		if (archive_path != NULL) {

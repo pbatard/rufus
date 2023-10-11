@@ -126,10 +126,10 @@ static DWORD NtfsSectGetVolumeHandle(
         M_ERR("Unable to open volume handle!");
         goto err_handle;
       }
+    CloseHandle(VolumeInfo->Handle);
 
     return ERROR_SUCCESS;
 
-    CloseHandle(VolumeInfo->Handle);
     err_handle:
 
     return rc;
