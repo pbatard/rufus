@@ -1,3 +1,13 @@
+o Version 4.3 (2023.10.??)
+    Add support for Rock Ridge symlink preservation when NTFS is used
+    Add an exception to enforce NTFS for Linux Mint's LMDE
+    Add an expert feature to restrict a Windows installation to S Mode
+    Fix persistence support for Debian 12 when booted in BIOS mode
+    Fix a regression that prevented the opening of .vhd images
+    Update UEFI:NTFS to report a more explicit error on bootmgr security issues
+    Improve the search for conflicting processes by running it in a background thread
+    Improve support for Slax Linux
+
 o Version 4.2 (2023.07.26)
     Add detection and warning for UEFI revoked bootloaders (including ones revoked through SkuSiPolicy.p7b)
     Add ZIP64 support, to extract .zip images that are larger than 4 GB

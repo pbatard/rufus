@@ -975,6 +975,10 @@ retry:
  * be convenient for our usage (since we might be looking for processes preventing
  * us to open said target in exclusive mode).
  *
+ * At least on Windows 11, this no longer seems to work as querying a logical or
+ * physical volume seems to return almost ALL the processes that are running,
+ * including the ones that are not actually accessing the handle.
+ *
  * \param HandleName The name of the handle to look for.
  *
  * \return TRUE if processes were found, FALSE otherwise.
@@ -992,7 +996,7 @@ BOOL SearchProcessAlt(char* HandleName)
 		goto out;
 
 	// Note that the access rights being used with CreateFile() might matter...
-	searchHandle = CreateFileA(HandleName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+	searchHandle = CreateFileA(HandleName, FILE_READ_ATTRIBUTES | SYNCHRONIZE, FILE_SHARE_READ,
 		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	
 	status = PhQueryProcessesUsingVolumeOrFile(searchHandle, &info);

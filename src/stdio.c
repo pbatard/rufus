@@ -83,7 +83,6 @@ void uprintf(const char *format, ...)
 	*p++ = '\n';
 	*p   = '\0';
 
-	// Yay, Windows 10 *FINALLY* added actual Unicode support for OutputDebugStringW()!
 	wbuf = utf8_to_wchar(buf);
 	// Send output to Windows debug facility
 	OutputDebugStringW(wbuf);
@@ -92,7 +91,6 @@ void uprintf(const char *format, ...)
 		Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
 		Edit_ReplaceSel(hLog, wbuf);
 		// Make sure the message scrolls into view
-		// (Or see code commented in LogProc:WM_SHOWWINDOW for a less forceful scroll)
 		Edit_Scroll(hLog, Edit_GetLineCount(hLog), 0);
 	}
 	free(wbuf);
@@ -608,7 +606,7 @@ DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds)
 }
 
 #define STATUS_SUCCESS					((NTSTATUS)0x00000000L)
-#define STATUS_NOT_IMPLEMENTED			((NTSTATUS)0xC0000002L)
+#define STATUS_PROCEDURE_NOT_FOUND		((NTSTATUS)0xC000007AL)
 #define FILE_ATTRIBUTE_VALID_FLAGS		0x00007FB7
 #define NtCurrentPeb()					(NtCurrentTeb()->ProcessEnvironmentBlock)
 #define RtlGetProcessHeap()				(NtCurrentPeb()->Reserved4[1]) // NtCurrentPeb()->ProcessHeap, mangled due to deficiencies in winternl.h

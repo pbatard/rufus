@@ -534,7 +534,7 @@ void StrArrayCreate(StrArray* arr, uint32_t initial_size)
 	arr->Max = initial_size; arr->Index = 0;
 	arr->String = (char**)calloc(arr->Max, sizeof(char*));
 	if (arr->String == NULL)
-		uprintf("Could not allocate string array\n");
+		uprintf("Could not allocate string array");
 }
 
 int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL duplicate)
@@ -548,13 +548,13 @@ int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL duplicate)
 		arr->String = (char**)realloc(arr->String, arr->Max*sizeof(char*));
 		if (arr->String == NULL) {
 			free(old_table);
-			uprintf("Could not reallocate string array\n");
+			uprintf("Could not reallocate string array");
 			return -1;
 		}
 	}
 	arr->String[arr->Index] = (duplicate)?safe_strdup(str):(char*)str;
 	if (arr->String[arr->Index] == NULL) {
-		uprintf("Could not store string in array\n");
+		uprintf("Could not store string in array");
 		return -1;
 	}
 	return arr->Index++;
@@ -577,7 +577,7 @@ void StrArrayClear(StrArray* arr)
 	uint32_t i;
 	if ((arr == NULL) || (arr->String == NULL))
 		return;
-	for (i=0; i<arr->Index; i++) {
+	for (i = 0; i < arr->Index; i++) {
 		safe_free(arr->String[i]);
 	}
 	arr->Index = 0;
@@ -601,13 +601,13 @@ static PSID GetSID(void) {
 	char* psid_string = NULL;
 
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
-		uprintf("OpenProcessToken failed: %s\n", WindowsErrorString());
+		uprintf("OpenProcessToken failed: %s", WindowsErrorString());
 		return NULL;
 	}
 
 	if (!GetTokenInformation(token, TokenUser, tu, 0, &len)) {
 		if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-			uprintf("GetTokenInformation (pre) failed: %s\n", WindowsErrorString());
+			uprintf("GetTokenInformation (pre) failed: %s", WindowsErrorString());
 			return NULL;
 		}
 		tu = (TOKEN_USER*)calloc(1, len);
@@ -623,11 +623,11 @@ static PSID GetSID(void) {
 		 * The workaround? Convert to string then back to PSID
 		 */
 		if (!ConvertSidToStringSidA(tu->User.Sid, &psid_string)) {
-			uprintf("Unable to convert SID to string: %s\n", WindowsErrorString());
+			uprintf("Unable to convert SID to string: %s", WindowsErrorString());
 			ret = NULL;
 		} else {
 			if (!ConvertStringSidToSidA(psid_string, &ret)) {
-				uprintf("Unable to convert string back to SID: %s\n", WindowsErrorString());
+				uprintf("Unable to convert string back to SID: %s", WindowsErrorString());
 				ret = NULL;
 			}
 			// MUST use LocalFree()
@@ -635,7 +635,7 @@ static PSID GetSID(void) {
 		}
 	} else {
 		ret = NULL;
-		uprintf("GetTokenInformation (real) failed: %s\n", WindowsErrorString());
+		uprintf("GetTokenInformation (real) failed: %s", WindowsErrorString());
 	}
 	free(tu);
 	return ret;
@@ -662,7 +662,7 @@ BOOL FileIO(enum file_io_type io_type, char* path, char** buffer, DWORD* size)
 		s_attr.lpSecurityDescriptor = &s_desc;
 		sa = &s_attr;
 	} else {
-		uprintf("Could not set security descriptor: %s\n", WindowsErrorString());
+		uprintf("Could not set security descriptor: %s", WindowsErrorString());
 	}
 
 	switch (io_type) {
@@ -696,7 +696,7 @@ BOOL FileIO(enum file_io_type io_type, char* path, char** buffer, DWORD* size)
 		*size = GetFileSize(handle, NULL);
 		*buffer = (char*)malloc(*size);
 		if (*buffer == NULL) {
-			uprintf("Could not allocate buffer for reading file\n");
+			uprintf("Could not allocate buffer for reading file");
 			goto out;
 		}
 		r = ReadFile(handle, *buffer, *size, size, NULL);
@@ -742,12 +742,12 @@ unsigned char* GetResource(HMODULE module, char* name, char* type, const char* d
 
 	res = FindResourceA(module, name, type);
 	if (res == NULL) {
-		uprintf("Could not locate resource '%s': %s\n", desc, WindowsErrorString());
+		uprintf("Could not locate resource '%s': %s", desc, WindowsErrorString());
 		goto out;
 	}
 	res_handle = LoadResource(module, res);
 	if (res_handle == NULL) {
-		uprintf("Could not load resource '%s': %s\n", desc, WindowsErrorString());
+		uprintf("Could not load resource '%s': %s", desc, WindowsErrorString());
 		goto out;
 	}
 	res_len = SizeofResource(module, res);
@@ -757,12 +757,12 @@ unsigned char* GetResource(HMODULE module, char* name, char* type, const char* d
 			*len = res_len;
 		p = (unsigned char*)calloc(*len, 1);
 		if (p == NULL) {
-			uprintf("Could not allocate resource '%s'\n", desc);
+			uprintf("Could not allocate resource '%s'", desc);
 			goto out;
 		}
 		memcpy(p, LockResource(res_handle), min(res_len, *len));
 		if (res_len > *len)
-			uprintf("WARNING: Resource '%s' was truncated by %d bytes!\n", desc, res_len - *len);
+			uprintf("WARNING: Resource '%s' was truncated by %d bytes!", desc, res_len - *len);
 	} else {
 		p = (unsigned char*)LockResource(res_handle);
 	}
