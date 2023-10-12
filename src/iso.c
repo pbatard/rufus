@@ -464,6 +464,62 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 	free(src);
 }
 
+// This updates the MD5SUMS/md5sum.txt file that some distros (Ubuntu, Mint...)
+// use to validate the media. Because we may alter some of the validated files
+// to add persistence and whatnot, we need to alter the MD5 list as a result.
+// The format of the file is expected to always be "<MD5SUM> <FILE_PATH>" on
+// individual lines.
+static void update_md5sum(void)
+{
+	BOOL display_header = TRUE;
+	intptr_t pos;
+	uint32_t i, j, size, md5_size;
+	uint8_t* buf = NULL, sum[16];
+	char md5_path[64], * md5_data = NULL, * str_pos;
+
+	if (!img_report.has_md5sum)
+		goto out;
+
+	assert(img_report.has_md5sum <= ARRAYSIZE(md5sum_name));
+	if (img_report.has_md5sum > ARRAYSIZE(md5sum_name))
+		goto out;
+
+	static_sprintf(md5_path, "%s\\%s", psz_extract_dir, md5sum_name[img_report.has_md5sum - 1]);
+	md5_size = read_file(md5_path, (uint8_t**)&md5_data);
+	if (md5_size == 0)
+		goto out;
+
+	for (i = 0; i < modified_path.Index; i++) {
+		str_pos = strstr(md5_data, &modified_path.String[i][2]);
+		if (str_pos == NULL)
+			// File is not listed in md5 sums
+			continue;
+		if (display_header) {
+			uprintf("Updating %s:", md5_path);
+			display_header = FALSE;
+		}
+		uprintf("● %s", &modified_path.String[i][2]);
+		pos = str_pos - md5_data;
+		size = read_file(modified_path.String[i], &buf);
+		if (size == 0)
+			continue;
+		HashBuffer(HASH_MD5, buf, size, sum);
+		free(buf);
+		while ((pos > 0) && (md5_data[pos - 1] != '\n'))
+			pos--;
+		for (j = 0; j < 16; j++) {
+			md5_data[pos + 2 * j] = ((sum[j] >> 4) < 10) ? ('0' + (sum[j] >> 4)) : ('a' - 0xa + (sum[j] >> 4));
+			md5_data[pos + 2 * j + 1] = ((sum[j] & 15) < 10) ? ('0' + (sum[j] & 15)) : ('a' - 0xa + (sum[j] & 15));
+		}
+	}
+
+	write_file(md5_path, md5_data, md5_size);
+	free(md5_data);
+
+out:
+	StrArrayDestroy(&modified_path);
+}
+
 static void print_extracted_file(char* psz_fullpath, uint64_t file_length)
 {
 	size_t nul_pos;
@@ -644,62 +700,6 @@ out:
 	return 1;
 }
 
-// This updates the MD5SUMS/md5sum.txt file that some distros (Ubuntu, Mint...)
-// use to validate the media. Because we may alter some of the validated files
-// to add persistence and whatnot, we need to alter the MD5 list as a result.
-// The format of the file is expected to always be "<MD5SUM> <FILE_PATH>" on
-// individual lines.
-static void update_md5sum(void)
-{
-	BOOL display_header = TRUE;
-	intptr_t pos;
-	uint32_t i, j, size, md5_size;
-	uint8_t *buf = NULL, sum[16];
-	char md5_path[64], *md5_data = NULL, *str_pos;
-
-	if (!img_report.has_md5sum)
-		goto out;
-
-	assert(img_report.has_md5sum <= ARRAYSIZE(md5sum_name));
-	if (img_report.has_md5sum > ARRAYSIZE(md5sum_name))
-		goto out;
-
-	static_sprintf(md5_path, "%s\\%s", psz_extract_dir, md5sum_name[img_report.has_md5sum - 1]);
-	md5_size = read_file(md5_path, (uint8_t**)&md5_data);
-	if (md5_size == 0)
-		goto out;
-
-	for (i = 0; i < modified_path.Index; i++) {
-		str_pos = strstr(md5_data, &modified_path.String[i][2]);
-		if (str_pos == NULL)
-			// File is not listed in md5 sums
-			continue;
-		if (display_header) {
-			uprintf("Updating %s:", md5_path);
-			display_header = FALSE;
-		}
-		uprintf("● %s", &modified_path.String[i][2]);
-		pos = str_pos - md5_data;
-		size = read_file(modified_path.String[i], &buf);
-		if (size == 0)
-			continue;
-		HashBuffer(HASH_MD5, buf, size, sum);
-		free(buf);
-		while ((pos > 0) && (md5_data[pos - 1] != '\n'))
-			pos--;
-		for (j = 0; j < 16; j++) {
-			md5_data[pos + 2 * j] =     ((sum[j] >> 4) < 10) ? ('0' + (sum[j] >> 4)) : ('a' - 0xa + (sum[j] >> 4));
-			md5_data[pos + 2 * j + 1] = ((sum[j] & 15) < 10) ? ('0' + (sum[j] & 15)) : ('a' - 0xa + (sum[j] & 15));
-		}
-	}
-
-	write_file(md5_path, md5_data, md5_size);
-	free(md5_data);
-
-out:
-	StrArrayDestroy(&modified_path);
-}
-
 // Returns 0 on success, >0 on error, <0 to ignore current dir
 static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 {
@@ -793,13 +793,19 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 		} else {
 			file_length = p_statbuf->total_size;
 			if (check_iso_props(psz_path, file_length, psz_basename, psz_fullpath, &props)) {
-				// Add symlink duplicated files to total_size at scantime
-				if (is_symlink && (file_length == 0) && (strcmp(psz_path, "/firmware") == 0)) {
-					static_sprintf(target_path, "%s/%s", psz_path, p_statbuf->rr.psz_symlink);
-					iso9660_stat_t *p_statbuf2 = iso9660_ifs_stat_translate(p_iso, target_path);
-					if (p_statbuf2 != NULL) {
-						extra_blocks += (p_statbuf2->total_size + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE;
-						iso9660_stat_free(p_statbuf2);
+				if (is_symlink && (file_length == 0)) {
+					// Add symlink duplicated files to total_size at scantime
+					if ((strcmp(psz_path, "/firmware") == 0)) {
+						static_sprintf(target_path, "%s/%s", psz_path, p_statbuf->rr.psz_symlink);
+						iso9660_stat_t* p_statbuf2 = iso9660_ifs_stat_translate(p_iso, target_path);
+						if (p_statbuf2 != NULL) {
+							extra_blocks += (p_statbuf2->total_size + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE;
+							iso9660_stat_free(p_statbuf2);
+						}
+					} else if ((strcmp(p_statbuf->filename, "live") == 0) &&
+						(strcmp(p_statbuf->rr.psz_symlink, "casper") == 0)) {
+						// Mint LMDE requires working symbolic links and therefore requires the use of NTFS
+						img_report.needs_ntfs = TRUE;
 					}
 				}
 				continue;

@@ -184,8 +184,8 @@ static void SetAllowedFileSystems(void)
 		break;
 	case BT_IMAGE:
 		allowed_filesystem[FS_NTFS] = TRUE;
-		// Don't allow anything besides NTFS if the image has a >4GB file
-		if ((image_path != NULL) && (img_report.has_4GB_file))
+		// Don't allow anything besides NTFS if the image has a >4GB file or explicitly requires NTFS
+		if ((image_path != NULL) && (img_report.has_4GB_file || img_report.needs_ntfs))
 			break;
 		if (!HAS_WINDOWS(img_report) || (target_type != TT_BIOS) || allow_dual_uefi_bios) {
 			if (!HAS_WINTOGO(img_report) || (ComboBox_GetCurItemData(hImageOption) != IMOP_WIN_TO_GO)) {
@@ -1134,13 +1134,18 @@ static void DisplayISOProps(void)
 			(img_report.wininst_version >> 16) & 0xff, (img_report.wininst_version >> 8) & 0xff,
 			(img_report.wininst_version >= SPECIAL_WIM_VERSION) ? "+": "");
 	}
-	PRINT_ISO_PROP(img_report.has_symlinks,
-		"  Note: This ISO uses symbolic links, which will not be replicated due to file system");
-	PRINT_ISO_PROP((img_report.has_symlinks == SYMLINKS_RR),
-		"  limitations. Because of this, some features from this image may not work...");
-	PRINT_ISO_PROP((img_report.has_symlinks == SYMLINKS_UDF),
-		"  limitations. Because of this, the size required for the target media may be much\r\n"
-		"  larger than size of the ISO...");
+	if (img_report.needs_ntfs) {
+		uprintf("  Note: This ISO uses symbolic links and was not designed to work without them.\r\n"
+			"  Because of this, only NTFS will be allowed as the target file system.");
+	} else {
+		PRINT_ISO_PROP(img_report.has_symlinks,
+			"  Note: This ISO uses symbolic links, which may not be replicated due to file system");
+		PRINT_ISO_PROP((img_report.has_symlinks == SYMLINKS_RR),
+			"  limitations. Because of this, some features from this image may not work...");
+		PRINT_ISO_PROP((img_report.has_symlinks == SYMLINKS_UDF),
+			"  limitations. Because of this, the size required for the target media may be much\r\n"
+			"  larger than size of the ISO...");
+	}
 }
 
 // Insert the image name into the Boot selection dropdown and (re)populate the Image option dropdown

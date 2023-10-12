@@ -412,11 +412,12 @@ typedef struct {
 	BOOLEAN has_old_c32[NB_OLD_C32];
 	BOOLEAN has_old_vesamenu;
 	BOOLEAN has_efi_syslinux;
-	BOOLEAN needs_syslinux_overwrite;
 	BOOLEAN has_grub4dos;
 	uint8_t has_grub2;
 	BOOLEAN has_compatresources_dll;
 	BOOLEAN has_kolibrios;
+	BOOLEAN needs_syslinux_overwrite;
+	BOOLEAN needs_ntfs;
 	BOOLEAN uses_casper;
 	BOOLEAN uses_minint;
 	uint8_t compression_type;
