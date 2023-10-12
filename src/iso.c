@@ -122,7 +122,7 @@ static const char* stupid_antivirus = "  NOTE: This is usually caused by a poorl
 const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
 static uint8_t joliet_level = 0;
-static uint64_t total_blocks, nb_blocks;
+static uint64_t total_blocks, extra_blocks, nb_blocks;
 static BOOL scan_only = FALSE;
 static StrArray config_path, isolinux_path, modified_path;
 static char symlinked_syslinux[MAX_PATH];
@@ -311,20 +311,20 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		}
 
 		// Check for PE (XP) specific files in "/i386", "/amd64" or "/minint"
-		for (i=0; i<ARRAYSIZE(pe_dirname); i++)
+		for (i = 0; i < ARRAYSIZE(pe_dirname); i++)
 			if (safe_stricmp(psz_dirname, pe_dirname[i]) == 0)
 				for (j=0; j<ARRAYSIZE(pe_file); j++)
 					if (safe_stricmp(psz_basename, pe_file[j]) == 0)
 						img_report.winpe |= (1<<j)<<(ARRAYSIZE(pe_dirname)*i);
 
-		for (i=0; i<ARRAYSIZE(isolinux_bin); i++) {
+		for (i = 0; i < ARRAYSIZE(isolinux_bin); i++) {
 			if (safe_stricmp(psz_basename, isolinux_bin[i]) == 0) {
 				// Maintain a list of all the isolinux.bin files found
 				StrArrayAdd(&isolinux_path, psz_fullpath, TRUE);
 			}
 		}
 
-		for (i=0; i<NB_OLD_C32; i++) {
+		for (i = 0; i < NB_OLD_C32; i++) {
 			if (props->is_old_c32[i])
 				img_report.has_old_c32[i] = TRUE;
 		}
@@ -706,7 +706,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size, err;
 	EXTRACT_PROPS props;
-	BOOL is_symlink, is_identical, free_p_statbuf = FALSE;
+	BOOL is_symlink, is_identical, create_file, free_p_statbuf = FALSE;
 	int length, r = 1;
 	char psz_fullpath[MAX_PATH], *psz_basename = NULL, *psz_sanpath = NULL;
 	char tmp[128], target_path[256];
@@ -798,7 +798,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					static_sprintf(target_path, "%s/%s", psz_path, p_statbuf->rr.psz_symlink);
 					iso9660_stat_t *p_statbuf2 = iso9660_ifs_stat_translate(p_iso, target_path);
 					if (p_statbuf2 != NULL) {
-						total_blocks += (p_statbuf2->total_size + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE;
+						extra_blocks += (p_statbuf2->total_size + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE;
 						iso9660_stat_free(p_statbuf2);
 					}
 				}
@@ -821,8 +821,26 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			psz_sanpath = sanitize_filename(psz_fullpath, &is_identical);
 			if (!is_identical)
 				uprintf("  File name sanitized to '%s'", psz_sanpath);
+			create_file = TRUE;
 			if (is_symlink) {
-				if (file_length == 0) {
+				if (fs_type == FS_NTFS) {
+					// Replicate symlinks if NTFS is being used
+					static_sprintf(target_path, "%s/%s", psz_path, p_statbuf->rr.psz_symlink);
+					iso9660_stat_t* p_statbuf2 = iso9660_ifs_stat_translate(p_iso, target_path);
+					if (p_statbuf2 != NULL) {
+						to_windows_path(psz_fullpath);
+						to_windows_path(p_statbuf->rr.psz_symlink);
+						uprintf("Symlinking: %s%s ➔ %s", psz_fullpath,
+							(p_statbuf2->type == _STAT_DIR) ? "\\" : "", p_statbuf->rr.psz_symlink);
+						if (!CreateSymbolicLinkU(psz_fullpath, p_statbuf->rr.psz_symlink,
+							(p_statbuf2->type == _STAT_DIR) ? SYMBOLIC_LINK_FLAG_DIRECTORY : 0))
+							uprintf("  Could not create symlink: %s", WindowsErrorString());
+						to_unix_path(p_statbuf->rr.psz_symlink);
+						to_unix_path(psz_fullpath);
+						iso9660_stat_free(p_statbuf2);
+						create_file = FALSE;
+					}
+				} else if (file_length == 0) {
 					if ((safe_stricmp(p_statbuf->filename, "syslinux") == 0) &&
 						// Special handling for ISOs that have a syslinux → isolinux symbolic link (e.g. Knoppix)
 						(safe_stricmp(p_statbuf->rr.psz_symlink, "isolinux") == 0)) {
@@ -846,45 +864,58 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 							goto out;
 						}
 					} else {
-						// TODO: Ideally, we'd want to create a text file that contains the target link
-						print_extracted_file(psz_fullpath, file_length);
+						print_extracted_file(psz_fullpath, safe_strlen(p_statbuf->rr.psz_symlink));
 						uprintf("  Ignoring Rock Ridge symbolic link to '%s'", p_statbuf->rr.psz_symlink);
 					}
+				} else {
+					uuprintf("Unexpected symlink length: %d", file_length);
+					create_file = FALSE;
 				}
 			}
-			file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
-			if (file_handle == INVALID_HANDLE_VALUE) {
-				err = GetLastError();
-				uprintf("  Unable to create file: %s", WindowsErrorString());
-				if (((err == ERROR_ACCESS_DENIED) || (err == ERROR_INVALID_HANDLE)) &&
-					(safe_strcmp(&psz_sanpath[3], autorun_name) == 0))
-					uprintf(stupid_antivirus);
-				else
-					goto out;
-			} else for (i = 0; file_length > 0; i++) {
-				if (FormatStatus) goto out;
-				memset(buf, 0, ISO_BLOCKSIZE);
-				lsn = p_statbuf->lsn + (lsn_t)i;
-				if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
-					uprintf("  Error reading ISO9660 file %s at LSN %lu",
-						psz_iso_name, (long unsigned int)lsn);
-					goto out;
+			if (create_file) {
+				file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
+					FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
+				if (file_handle == INVALID_HANDLE_VALUE) {
+					err = GetLastError();
+					uprintf("  Unable to create file: %s", WindowsErrorString());
+					if (((err == ERROR_ACCESS_DENIED) || (err == ERROR_INVALID_HANDLE)) &&
+						(safe_strcmp(&psz_sanpath[3], autorun_name) == 0))
+						uprintf(stupid_antivirus);
+					else
+						goto out;
+				} else if (is_symlink) {
+					// Create a text file that contains the target link
+					ISO_BLOCKING(r = WriteFileWithRetry(file_handle, p_statbuf->rr.psz_symlink,
+						(DWORD)safe_strlen(p_statbuf->rr.psz_symlink), &wr_size, WRITE_RETRIES));
+					if (!r) {
+						uprintf("  Error writing file: %s", WindowsErrorString());
+						goto out;
+					}
+				} else for (i = 0; file_length > 0; i++) {
+					if (FormatStatus) goto out;
+					memset(buf, 0, ISO_BLOCKSIZE);
+					lsn = p_statbuf->lsn + (lsn_t)i;
+					if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
+						uprintf("  Error reading ISO9660 file %s at LSN %lu",
+							psz_iso_name, (long unsigned int)lsn);
+						goto out;
+					}
+					buf_size = (DWORD)MIN(file_length, ISO_BLOCKSIZE);
+					ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
+					if (!r) {
+						uprintf("  Error writing file: %s", WindowsErrorString());
+						goto out;
+					}
+					file_length -= ISO_BLOCKSIZE;
+					if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
+						UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks +
+							((fs_type != FS_NTFS) ? extra_blocks : 0));
 				}
-				buf_size = (DWORD)MIN(file_length, ISO_BLOCKSIZE);
-				ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
-				if (!r) {
-					uprintf("  Error writing file: %s", WindowsErrorString());
-					goto out;
+				if (preserve_timestamps) {
+					LPFILETIME ft = to_filetime(mktime(&p_statbuf->tm));
+					if (!SetFileTime(file_handle, ft, ft, ft))
+						uprintf("  Could not set timestamp: %s", WindowsErrorString());
 				}
-				file_length -= ISO_BLOCKSIZE;
-				if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
-					UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks);
-			}
-			if (preserve_timestamps) {
-				LPFILETIME ft = to_filetime(mktime(&p_statbuf->tm));
-				if (!SetFileTime(file_handle, ft, ft, ft))
-					uprintf("  Could not set timestamp: %s", WindowsErrorString());
 			}
 			if (free_p_statbuf)
 				iso9660_stat_free(p_statbuf);
@@ -1014,6 +1045,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		uprintf("ISO analysis:");
 		SendMessage(hMainDialog, UM_PROGRESS_INIT, PBS_MARQUEE, 0);
 		total_blocks = 0;
+		extra_blocks = 0;
 		has_ldlinux_c32 = FALSE;
 		// String array of all isolinux/syslinux locations
 		StrArrayCreate(&config_path, 8);

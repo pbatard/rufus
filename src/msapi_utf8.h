@@ -1233,6 +1233,16 @@ static __inline BOOL MoveFileExU(const char* lpExistingFileName, const char* lpN
 	return ret;
 }
 
+static __inline BOOL CreateSymbolicLinkU(const char* lpSymlinkFileName, const char* lpTargetFileName, DWORD dwFlags)
+{
+	wconvert(lpSymlinkFileName);
+	wconvert(lpTargetFileName);
+	BOOL ret = CreateSymbolicLinkW(wlpSymlinkFileName, wlpTargetFileName, dwFlags);
+	wfree(lpTargetFileName);
+	wfree(lpSymlinkFileName);
+	return ret;
+}
+
 // The following expects PropertyBuffer to contain a single Unicode string
 static __inline BOOL SetupDiGetDeviceRegistryPropertyU(HDEVINFO DeviceInfoSet, PSP_DEVINFO_DATA DeviceInfoData,
 	DWORD Property, PDWORD PropertyRegDataType, PBYTE PropertyBuffer, DWORD PropertyBufferSize, PDWORD RequiredSize)
