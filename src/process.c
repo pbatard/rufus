@@ -867,7 +867,7 @@ BOOL SetProcessSearch(DWORD DeviceNum)
 	blocking_process.nVersion[0]++;
 	blocking_process.bActive = TRUE;
 	if (!SetEvent(blocking_process.hStart))
-		uprintf("Could not send start event to process search: %s", WindowsErrorString);
+		uprintf("Could not signal start event to process search: %s", WindowsErrorString());
 	return ReleaseMutex(blocking_process.hLock);
 }
 

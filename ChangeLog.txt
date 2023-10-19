@@ -1,5 +1,5 @@
-o Version 4.3 (2023.10.??)
-    Add support for Rock Ridge symlink preservation when NTFS is used
+o Version 4.3 (2023.10.19)
+    Add support for Rock Ridge symbolic links preservation when NTFS is used
     Add an exception to enforce NTFS for Linux Mint's LMDE
     Add an expert feature to restrict a Windows installation to S Mode
     Fix persistence support for Debian 12 when booted in BIOS mode

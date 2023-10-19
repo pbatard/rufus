@@ -114,14 +114,14 @@
 • Trang web chính thức: https://rufus.ie
 • Mã nguồn: https://github.com/pbatard/rufus
 • Nhật ký thay đổi: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt"
-"ReleaseNotes","3","Text","• Add detection and warning for UEFI revoked bootloaders (including ones revoked through SkuSiPolicy.p7b)
-• Add ZIP64 support, to extract .zip images that are larger than 4 GB
-• Add saving and restoring current drive to/from compressed VHDX image
-• Add saving and restoring current drive to/from compressed FFU (Full Flash Update) image [EXPERIMENTAL]
-• Fix a crash when trying to open Windows ISOs, with the MinGW compiled x86 32-bit version
-• Fix an issue where ISOs that contain a boot image with an 'EFI' label are not be detected bootable
-• Increase the ISO → ESP limit for Debian 12 netinst images
-• Ensure that the main partition size is aligned to the cluster size",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"ReleaseNotes","3","Text","• Add support for Rock Ridge symbolic links preservation when NTFS is used
+• Add an exception to enforce NTFS for Linux Mint's LMDE
+• Add an expert feature to restrict a Windows installation to S Mode
+• Fix persistence support for Debian 12 when booted in BIOS mode
+• Fix a regression that prevented the opening of .vhd images
+• Update UEFI:NTFS to report a more explicit error on bootmgr security issues
+• Improve the search for conflicting processes by running it in a background thread
+• Improve support for Slax Linux",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "Title","4","Text","Rufus",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "ShortTitle","5","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "SortTitle","6","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
