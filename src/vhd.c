@@ -1085,9 +1085,9 @@ static DWORD WINAPI FfuSaveImageThread(void* param)
 {
 	DWORD r;
 	IMG_SAVE* img_save = (IMG_SAVE*)param;
-	char cmd[MAX_PATH + 128], *letter = "", *label;
+	char cmd[MAX_PATH + 128], letters[27], *label;
 
-	GetDriveLabel(SelectedDrive.DeviceNumber, letter, &label, TRUE);
+	GetDriveLabel(SelectedDrive.DeviceNumber, letters, &label, TRUE);
 	static_sprintf(cmd, "dism /Capture-Ffu /CaptureDrive:%s /ImageFile:\"%s\" "
 		"/Name:\"%s\" /Description:\"Created by %s (%s)\"",
 		img_save->DevicePath, img_save->ImagePath, label, APPLICATION_NAME, RUFUS_URL);
