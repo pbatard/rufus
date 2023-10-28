@@ -1839,7 +1839,7 @@ msgstr "Ikke gi Windows To Go tilgang til interne harddisker"
 
 #. • MSG_333
 msgid "Create a local account with username:"
-msgstr "Lag en lokal brukerkongot med med brukernavnet:"
+msgstr "Lag en lokal brukerkonto med brukernavnet:"
 
 #. • MSG_334
 msgid "Set regional options to the same values as this user's"
