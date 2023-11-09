@@ -3364,8 +3364,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// and the automated VS2019 package building process doesn't like renaming the .exe
 	// right under its nose (else we would use the same trick as for portable vs regular)
 	// we use yet another workaround to detect if we are running the AppStore version...
-	static_sprintf(ini_path, "%srufus.app", app_dir);
-	if (PathFileExistsU(ini_path)) {
+	static_sprintf(tmp_path, "%srufus.app", app_dir);
+	if (PathFileExistsU(tmp_path)) {
 		appstore_version = TRUE;
 		goto skip_args_processing;
 	}
@@ -3507,7 +3507,7 @@ skip_args_processing:
 		static_strcpy(app_data_dir, app_dir);
 		fclose(fd);
 	}
-	uprintf("Will use settings from %s", (ini_file != NULL)?"INI file":"registry");
+	uprintf("Will use settings from %s", (ini_file != NULL) ? "INI file" : "registry");
 
 	// Use the locale specified by the settings, if any
 	tmp = ReadSettingStr(SETTING_LOCALE);
@@ -3629,7 +3629,7 @@ skip_args_processing:
 
 	// Prevent 2 applications from running at the same time, unless "/W" is passed as an option
 	// in which case we wait for the mutex to be relinquished
-	if ((safe_strlen(lpCmdLine)==2) && (lpCmdLine[0] == '/') && (lpCmdLine[1] == 'W'))
+	if ((safe_strlen(lpCmdLine) == 2) && (lpCmdLine[0] == '/') && (lpCmdLine[1] == 'W'))
 		wait_for_mutex = 150;		// Try to acquire the mutex for 15 seconds
 	mutex = CreateMutexA(NULL, TRUE, "Global/" APPLICATION_NAME);
 	for (;(wait_for_mutex>0) && (mutex != NULL) && (GetLastError() == ERROR_ALREADY_EXISTS); wait_for_mutex--) {
@@ -3653,9 +3653,8 @@ skip_args_processing:
 	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
 
 	// Some dialogs have Rich Edit controls and won't display without this
-	if (GetLibraryHandle("Riched20") == NULL) {
-		uprintf("Could not load RichEdit library - some dialogs may not display: %s\n", WindowsErrorString());
-	}
+	if (GetLibraryHandle("Riched20") == NULL)
+		uprintf("Could not load RichEdit library - some dialogs may not display: %s", WindowsErrorString());
 
 	// Increase the application privileges (SE_DEBUG_PRIVILEGE), so that we can report
 	// the Windows Services preventing access to the disk or volume we want to format.
@@ -4101,10 +4100,14 @@ extern int TestHashes(void);
 	}
 
 out:
+	_chdirU(app_dir);
 	// Destroy the hogger mutex first, so that the cmdline app can exit and we can delete it
-	if (attached_console && !disable_hogger) {
+	if (hogmutex != NULL) {
 		ReleaseMutex(hogmutex);
 		safe_closehandle(hogmutex);
+		// Unconditional delete with retry, just in case...
+		for (i = 0; (!DeleteFileA(cmdline_hogger)) && (i <= 10); i++)
+			Sleep(200);
 	}
 	// Kill the update check thread if running
 	if (update_check_thread != NULL)
@@ -4126,7 +4129,8 @@ out:
 	safe_free(fido_script);
 	safe_free(pe256ssp);
 	if (argv != NULL) {
-		for (i=0; i<argc; i++) safe_free(argv[i]);
+		for (i = 0; i < argc; i++)
+			safe_free(argv[i]);
 		safe_free(argv);
 	}
 	if (lgp_set)
@@ -4134,17 +4138,13 @@ out:
 	if ((!automount) && (!SetAutoMount(FALSE)))
 		uprintf("Failed to restore AutoMount to disabled");
 	ubflush();
-	_chdirU(app_dir);
-	// Unconditional delete with retry, just in case...
-	for (i = 0; (!DeleteFileA(cmdline_hogger)) && (i <= 10); i++)
-		Sleep(200);
-	CloseHandle(mutex);
-	CoUninitialize();
-	CLOSE_OPENED_LIBRARIES;
 	if (attached_console) {
 		SetWindowPos(GetConsoleWindow(), HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 		FreeConsole();
 	}
+	CoUninitialize();
+	CLOSE_OPENED_LIBRARIES;
+	safe_closehandle(mutex);
 	uprintf("*** " APPLICATION_NAME " exit ***\n");
 #ifdef _CRTDBG_MAP_ALLOC
 	_CrtDumpMemoryLeaks();
