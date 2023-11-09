@@ -394,9 +394,10 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 		//'linux' but '$linux'... and we have to add a workaround for that.
 		// Then, newer Arch and derivatives added an extra "search --label ..." command
 		// in their GRUB conf, which we need to cater for in supplement of the kernel line.
+		// Then Artix called in and decided they would use a "for kopt ..." loop.
 		// Finally, we're just shoving the known isolinux/syslinux tokens in there to process
 		// all config files equally.
-		static const char* cfg_token[] = { "options", "append", "linux", "linuxefi", "$linux", "search" };
+		static const char* cfg_token[] = { "options", "append", "linux", "linuxefi", "$linux", "search", "for"};
 		iso_label = replace_char(img_report.label, ' ', "\\x20");
 		usb_label = replace_char(img_report.usb_label, ' ', "\\x20");
 		if ((iso_label != NULL) && (usb_label != NULL)) {
