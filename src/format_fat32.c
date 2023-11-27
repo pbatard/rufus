@@ -42,6 +42,8 @@
 	FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|err; \
 	goto out; } while(0)
 
+#define USER_AREA_ALIGN_BYTES (1 * 1024 * 1024)
+
 extern BOOL write_as_esp;
 
 /* Large FAT32 */
@@ -175,6 +177,7 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	DWORD BytesPerSect = 0;
 	DWORD SectorsPerCluster = 0;
 	DWORD TotalSectors = 0;
+	DWORD AlignSectors = 0;
 	DWORD SystemAreaSize = 0;
 	DWORD UserAreaSize = 0;
 	ULONGLONG qTotalSectors = 0;
@@ -295,7 +298,6 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	SectorsPerCluster = ClusterSize / BytesPerSect;
 
 	pFAT32BootSect->bSecPerClus = (BYTE)SectorsPerCluster;
-	pFAT32BootSect->wRsvdSecCnt = (WORD)ReservedSectCount;
 	pFAT32BootSect->bNumFATs = (BYTE)NumFATs;
 	pFAT32BootSect->wRootEntCnt = 0;
 	pFAT32BootSect->wTotSec16 = 0;
@@ -310,6 +312,13 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	FatSize = GetFATSizeSectors(pFAT32BootSect->dTotSec32, pFAT32BootSect->wRsvdSecCnt,
 		pFAT32BootSect->bSecPerClus, pFAT32BootSect->bNumFATs, BytesPerSect);
 
+	// Recalculate reserved sector count after FAT size is known
+	SystemAreaSize = ReservedSectCount + NumFATs * FatSize; // We round up from here to integral MiB
+	AlignSectors = USER_AREA_ALIGN_BYTES / BytesPerSect;
+	SystemAreaSize = (SystemAreaSize + AlignSectors - 1) / AlignSectors * AlignSectors;
+	ReservedSectCount = SystemAreaSize - NumFATs * FatSize;
+
+	pFAT32BootSect->wRsvdSecCnt = (WORD)ReservedSectCount;
 	pFAT32BootSect->dFATSz32 = FatSize;
 	pFAT32BootSect->wExtFlags = 0;
 	pFAT32BootSect->wFSVer = 0;
