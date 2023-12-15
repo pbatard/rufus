@@ -92,7 +92,7 @@ jobs:
 
     - name: Upload artifacts
       if: ${{ github.event_name == 'push' }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: MinGW
         path: ./*.exe
