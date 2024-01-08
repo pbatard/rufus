@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2644,4 +2644,43 @@ const char* GetGPTPartitionType(const GUID* guid)
 	int i;
 	for (i = 0; (i < ARRAYSIZE(gpt_type)) && !CompareGUID(guid, gpt_type[i].guid); i++);
 	return (i < ARRAYSIZE(gpt_type)) ? gpt_type[i].name : GuidToString(guid, TRUE);
+}
+
+/*
+ * Detect Microsoft Dev Drives, which are VHDs consisting of a small MSR followed by a large
+ * (50 GB or more) ReFS partition. See https://learn.microsoft.com/en-us/windows/dev-drive/.
+ * NB: Despite the option being proposed, I have *NOT* been able to create MBR-based Dev Drives.
+ */
+BOOL IsMsDevDrive(DWORD DriveIndex)
+{
+	BOOL r, ret = FALSE;
+	DWORD size = 0;
+	HANDLE hPhysical = INVALID_HANDLE_VALUE;
+	BYTE layout[4096] = { 0 };
+	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
+
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE, TRUE);
+	if (hPhysical == INVALID_HANDLE_VALUE)
+		goto out;
+
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX,
+		NULL, 0, layout, sizeof(layout), &size, NULL);
+	if (!r || size <= 0)
+		goto out;
+
+	if (DriveLayout->PartitionStyle != PARTITION_STYLE_GPT)
+		goto out;
+	if (DriveLayout->PartitionCount != 2)
+		goto out;
+	if (!CompareGUID(&DriveLayout->PartitionEntry[0].Gpt.PartitionType, &PARTITION_MICROSOFT_RESERVED))
+		goto out;
+	if (!CompareGUID(&DriveLayout->PartitionEntry[1].Gpt.PartitionType, &PARTITION_MICROSOFT_DATA))
+		goto out;
+	if (DriveLayout->PartitionEntry[1].PartitionLength.QuadPart < 20 * GB)
+		goto out;
+	ret = (strcmp(GetFsName(hPhysical, DriveLayout->PartitionEntry[1].StartingOffset), "ReFS") == 0);
+
+out:
+	safe_closehandle(hPhysical);
+	return ret;
 }

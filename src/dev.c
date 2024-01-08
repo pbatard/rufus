@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device detection and enumeration
- * Copyright © 2014-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -931,6 +931,10 @@ BOOL GetDevices(DWORD devnum)
 				} else if ((!enable_HDDs) && (props.is_CARD) && (drive_size > MAX_DEFAULT_LIST_CARD_SIZE * GB)) {
 					uprintf("Device eliminated because it was detected as a card larger than %d GB", MAX_DEFAULT_LIST_CARD_SIZE);
 					uprintf("To use such a card, check 'List USB Hard Drives' under 'advanced drive properties'");
+					safe_free(devint_detail_data);
+					break;
+				} else if (props.is_VHD && IsMsDevDrive(drive_index)) {
+					uprintf("Device eliminated because it was detected as a Microsoft Dev Drive");
 					safe_free(devint_detail_data);
 					break;
 				}

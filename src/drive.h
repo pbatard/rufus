@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -421,3 +421,4 @@ BOOL RefreshLayout(DWORD DriveIndex);
 BOOL GetOpticalMedia(IMG_SAVE* img_save);
 uint64_t GetEspOffset(DWORD DriveIndex);
 BOOL ToggleEsp(DWORD DriveIndex, uint64_t PartitionOffset);
+BOOL IsMsDevDrive(DWORD DriveIndex);
