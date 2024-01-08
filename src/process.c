@@ -4,7 +4,7 @@
  *
  * Modified from System Informer (a.k.a. Process Hacker):
  *   https://github.com/winsiderss/systeminformer
- * Copyright © 2017-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2017-2024 Pete Batard <pete@akeo.ie>
  * Copyright © 2017 dmex
  * Copyright © 2009-2016 wj32
  *
@@ -589,6 +589,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 							pe[j].seen_on_pass = blocking_process.nPass;
 							static_strcpy(pe[j].cmdline, cmdline);
 						} else if (usb_debug) {
+							// coverity[dont_call]
 							OutputDebugStringA("SearchProcessThread: No empty slot!\n");
 						}
 						ReleaseMutex(hLock);
@@ -726,10 +727,12 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 		// We are the only ones updating the counter so no need for lock
 		blocking_process.nPass++;
 		// In extended debug mode, notify how much time our search took to the debug facility
-		static_sprintf(tmp, "Process search run #%d completed in %llu ms\n",
-			blocking_process.nPass, GetTickCount64() - start_time);
-		if (usb_debug)
+		if (usb_debug) {
+			static_sprintf(tmp, "Process search run #%d completed in %llu ms\n",
+				blocking_process.nPass, GetTickCount64() - start_time);
+			// coverity[dont_call]
 			OutputDebugStringA(tmp);
+		}
 		Sleep(1000);
 	}
 

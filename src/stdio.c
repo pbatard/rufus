@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard User I/O Routines (logging, status, error, etc.)
- * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
  * Copyright © 2020 Mattiwatti <mattiwatti@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -85,6 +85,7 @@ void uprintf(const char *format, ...)
 
 	wbuf = utf8_to_wchar(buf);
 	// Send output to Windows debug facility
+	// coverity[dont_call]
 	OutputDebugStringW(wbuf);
 	if ((hLog != NULL) && (hLog != INVALID_HANDLE_VALUE)) {
 		// Send output to our log Window
@@ -100,6 +101,7 @@ void uprintfs(const char* str)
 {
 	wchar_t* wstr;
 	wstr = utf8_to_wchar(str);
+	// coverity[dont_call]
 	OutputDebugStringW(wstr);
 	if ((hLog != NULL) && (hLog != INVALID_HANDLE_VALUE)) {
 		Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
@@ -257,11 +259,20 @@ const char *WindowsErrorString(void)
 		&err_string[presize], (DWORD)(sizeof(err_string)-strlen(err_string)), NULL);
 	if (size == 0) {
 		format_error = GetLastError();
-		if ((format_error) && (format_error != ERROR_MR_MID_NOT_FOUND) && (format_error != ERROR_MUI_FILE_NOT_LOADED))
+		switch (format_error) {
+		case ERROR_SUCCESS:
+			static_sprintf(err_string, "[0x%08lX] (No Windows Error String)", error_code);
+			break;
+		case ERROR_MR_MID_NOT_FOUND:
+		case ERROR_MUI_FILE_NOT_FOUND:
+		case ERROR_MUI_FILE_NOT_LOADED:
+			static_sprintf(err_string, "[0x%08lX] (NB: This system was unable to provide an English error message)", error_code);
+			break;
+		default:
 			static_sprintf(err_string, "[0x%08lX] (FormatMessage error code 0x%08lX)",
 				error_code, format_error);
-		else
-			static_sprintf(err_string, "[0x%08lX] (No Windows Error String)", error_code);
+			break;
+		}
 	} else {
 		// Microsoft may suffix CRLF to error messages, which we need to remove...
 		assert(presize > 2);
