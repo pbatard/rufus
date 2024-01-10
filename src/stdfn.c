@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Windows function calls
- * Copyright © 2013-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -302,10 +302,18 @@ static const char* GetEdition(DWORD ProductType)
 	case 0x000000A5: return "Pro for Education N";
 	case 0x000000AB: return "Enterprise G";	// I swear Microsoft are just making up editions...
 	case 0x000000AC: return "Enterprise G N";
+	case 0x000000B2: return "Cloud";
+	case 0x000000B3: return "Cloud N";
 	case 0x000000B6: return "Home OS";
-	case 0x000000B7: return "Cloud E";
-	case 0x000000B8: return "Cloud E N";
+	case 0x000000B7: case 0x000000CB: return "Cloud E";
+	case 0x000000B9: return "IoT OS";
+	case 0x000000BA: case 0x000000CA: return "Cloud E N";
+	case 0x000000BB: return "IoT Edge OS";
+	case 0x000000BC: return "IoT Enterprise";
 	case 0x000000BD: return "Lite";
+	case 0x000000BF: return "IoT Enterprise S";
+	case 0x000000C0: case 0x000000C2: case 0x000000C3: case 0x000000C4: case 0x000000C5: case 0x000000C6: return "XBox";
+	case 0x000000C7: case 0x000000C8: case 0x00000196: case 0x00000197: case 0x00000198: return "Azure Server";
 	case 0xABCDABCD: return "(Unlicensed)";
 	default:
 		static_sprintf(unknown_edition_str, "(Unknown Edition 0x%02X)", (uint32_t)ProductType);

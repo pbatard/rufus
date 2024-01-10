@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2023-04-17 13:44+0100\n"
-"PO-Revision-Date: 2023-04-17 13:46+0100\n"
+"PO-Revision-Date: 2024-01-10 12:20+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: nb_NO\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Norwegian (Norsk)\n"
 "X-Rufus-LCID: 0x0414\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -803,7 +803,7 @@ msgstr ""
 
 #. • MSG_117
 msgid "Standard Windows installation"
-msgstr "Standard Windows instalasjon"
+msgstr "Standard Windows installasjon"
 
 #. • MSG_118
 #.
