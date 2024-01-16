@@ -59,6 +59,8 @@
 #include "_cdio_stdio.h"
 #include "cdio_private.h"
 
+#define MAX_BOOT_IMAGES     8
+
 /** Implementation of iso9660_t type */
 struct _iso9660_s {
   cdio_header_t header;     /**< Internal header - MUST come first. */
@@ -83,6 +85,10 @@ struct _iso9660_s {
 			        be CDIO_CD_FRAMESIZE_RAW (2352) or
 			        M2RAW_SECTOR_SIZE (2336).
                             */
+  struct {
+    uint32_t lsn;	    /**< Start LSN of an El-Torito bootable image */
+    uint32_t num_sectors;   /**< Number of sectors of a bootable image */
+  } boot_img[MAX_BOOT_IMAGES];
   int i_fuzzy_offset;       /**< Adjustment in bytes to make ISO_STANDARD_ID
 			         ("CD001") come out as ISO_PVD_SECTOR
 			         (frame 16).  Normally this should be 0
@@ -505,7 +511,8 @@ iso9660_ifs_read_superblock (iso9660_t *p_iso,
 			     iso_extension_mask_t iso_extension_mask)
 {
   iso9660_svd_t p_svd;  /* Secondary volume descriptor. */
-  int i;
+  iso9660_brvd_t* p_brvd = (iso9660_brvd_t*)&p_svd;  /* Boot record volume descriptor. */
+  int i, j, k;
 
   if (!p_iso || !iso9660_ifs_read_pvd(p_iso, &(p_iso->pvd)))
     return false;
@@ -516,6 +523,24 @@ iso9660_ifs_read_superblock (iso9660_t *p_iso,
   for (i=1; (0 != iso9660_iso_seek_read (p_iso, &p_svd, ISO_PVD_SECTOR+i, 1)); i++) {
     if (ISO_VD_END == from_711(p_svd.type) ) /* Last SVD */
       break;
+    if (iso_extension_mask & ISO_EXTENSION_EL_TORITO) {
+      /* Check for an El-Torito boot volume descriptor */
+      if (ISO_VD_BOOT_RECORD == from_711(p_svd.type) &&
+	  (memcmp(p_brvd->system_id, EL_TORITO_ID, ISO_MAX_SYSTEM_ID) == 0)) {
+	/* Perform very basic parsing of boot entries to fill an image table */
+	iso9660_br_t br[ISO_BLOCKSIZE / sizeof(iso9660_br_t)];
+	if (iso9660_iso_seek_read(p_iso, &br, p_brvd->boot_catalog_sector, 1) == ISO_BLOCKSIZE) {
+	  for (j = 0, k = 0;
+	       j < (ISO_BLOCKSIZE / sizeof(iso9660_br_t)) && k < MAX_BOOT_IMAGES;
+	       j++) {
+	    if (br[j].boot_id == 0x88 && br[j].media_type == 0) {
+	      p_iso->boot_img[k].lsn = br[j].image_lsn;
+	      p_iso->boot_img[k++].num_sectors = br[j].num_sectors;
+	    }
+	  }
+	}
+      }
+    }
     if ( ISO_VD_SUPPLEMENTARY == from_711(p_svd.type) ) {
       /* We're only interested in Joliet => make sure the SVD isn't overwritten */
       if (p_iso->u_joliet_level == 0)
@@ -1441,6 +1466,28 @@ iso9660_fs_stat_translate (CdIo_t *p_cdio, const char psz_path[])
 iso9660_stat_t *
 iso9660_ifs_stat_translate (iso9660_t *p_iso, const char psz_path[])
 {
+  /* Special case for virtual El-Torito boot images ('[BOOT]/#.img') */
+  if (psz_path && (strncmp(psz_path, "[BOOT]/", 7) == 0)) {
+    int index = psz_path[7] - '0';
+    iso9660_stat_t* p_stat;
+    if (strlen(psz_path) < 8)
+      return NULL;
+    if ((psz_path[7] < '0') || (psz_path[7] > '0' + MAX_BOOT_IMAGES - 1))
+      return NULL;
+    if (p_iso->boot_img[index].lsn == 0 || p_iso->boot_img[index].num_sectors == 0)
+      return NULL;
+    p_stat = calloc(1, sizeof(iso9660_stat_t) + strlen(psz_path));
+    if (!p_stat) {
+      cdio_warn("Couldn't calloc(1, %d)", (int)sizeof(iso9660_stat_t));
+      return NULL;
+    }
+    p_stat->lsn = p_iso->boot_img[index].lsn;
+    p_stat->total_size = p_iso->boot_img[index].num_sectors * ISO_BLOCKSIZE;
+    p_stat->type = _STAT_FILE;
+    strcpy(p_stat->filename, psz_path);
+    return p_stat;
+  }
+
   return fs_stat_translate(p_iso, (stat_root_t *) _ifs_stat_root,
 			   (stat_traverse_t *) _fs_iso_stat_traverse,
 			   psz_path);

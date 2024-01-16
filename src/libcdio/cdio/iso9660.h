@@ -162,6 +162,7 @@ extern enum iso_vd_enum_s {
 extern const char ISO_STANDARD_ID[sizeof("CD001")-1];
 
 #define ISO_STANDARD_ID      "CD001"
+#define EL_TORITO_ID         "EL TORITO SPECIFICATION\0\0\0\0\0\0\0\0\0"
 
 #define CDIO_EXTENT_BLOCKS(size) ((size + (ISO_BLOCKSIZE - 1)) / ISO_BLOCKSIZE)
 
@@ -506,6 +507,37 @@ struct iso9660_svd_s {
 
 typedef struct iso9660_svd_s  iso9660_svd_t;
 
+/*!
+  \brief ISO-9660 Boot Record Volume Descriptor.
+ */
+struct iso9660_brvd_s {
+    uint8_t          type;                         /**< ISO_VD_BOOT_RECORD - 0 */
+    char             id[5];                        /**< ISO_STANDARD_ID "CD001" */
+    uint8_t          version;                      /**< value 1 for El Torito */
+    char             system_id[ISO_MAX_SYSTEM_ID]; /**< Boot system ID */
+    uint8_t          unused1[32];                  /**< unused - value 0 */
+    uint32_t         boot_catalog_sector;          /**< first sector of boot catalog */
+    uint8_t          unused2[1973];                /**< Unused - value 0 */
+} GNUC_PACKED;
+
+typedef struct iso9660_brvd_s  iso9660_brvd_t;
+
+/*!
+  \brief ISO-9660 Boot Record Volume Descriptor.
+ */
+struct iso9660_br_s {
+    uint8_t          boot_id;                      /**< Boot indicator - 0x88 */
+    uint8_t          media_type;                   /**< Boot media type - 0 for no emul. */
+    uint16_t         load_seg;                     /**< Load segment for x86 */
+    uint8_t          system_type;                  /**< System type - 0 for x86 */
+    uint8_t          unused1;
+    uint16_t         num_sectors;                  /**< Sector count of the image */
+    uint32_t         image_lsn;                    /**< Start address of the image */
+    uint8_t          unused2[20];
+} GNUC_PACKED;
+
+typedef struct iso9660_br_s  iso9660_br_t;
+
 PRAGMA_END_PACKED
 
 /*! \brief A data type for a list of ISO9660
@@ -582,7 +614,8 @@ extern enum iso_extension_enum_s {
   ISO_EXTENSION_JOLIET_LEVEL2 = 0x02,
   ISO_EXTENSION_JOLIET_LEVEL3 = 0x04,
   ISO_EXTENSION_ROCK_RIDGE    = 0x08,
-  ISO_EXTENSION_HIGH_SIERRA   = 0x10
+  ISO_EXTENSION_HIGH_SIERRA   = 0x10,
+  ISO_EXTENSION_EL_TORITO     = 0x20
 } iso_extension_enums;
 
 
