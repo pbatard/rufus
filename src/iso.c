@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
- * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
  * Based on libcdio's iso & udf samples:
  * Copyright © 2003-2014 Rocky Bernstein <rocky@gnu.org>
  *
@@ -291,6 +291,16 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 						}
 					}
 				}
+			}
+			// Linux Mint Edge 21.2/Mint 21.3 have an invalid /EFI/boot/bootx64.efi
+			// because it's a symbolic link to a file that does not exist on the media.
+			// This is originally due to a Debian bug that was fixed in:
+			// https://salsa.debian.org/live-team/live-build/-/commit/5bff71fea2dd54adcd6c428d3f1981734079a2f7
+			// Because of this, if we detect a small bootx64.efi file, we assert that it's a
+			// broken link and try to extract a "good" version from the El-Torito image.
+			if ((safe_stricmp(psz_basename, efi_bootname[2]) == 0) && (file_length < 100)) {
+				img_report.has_efi |= 0x4000;
+				static_strcpy(img_report.efi_img_path, "[BOOT]/1-Boot-NoEmul.img");
 			}
 		}
 
@@ -1277,8 +1287,16 @@ out:
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 	} else {
 		// Solus and other ISOs only provide EFI boot files in a FAT efi.img
-		if (img_report.has_efi == 0x8000)
+		// Also work around ISOs that have a borked symbolic link for bootx64.efi.
+		// See https://github.com/linuxmint/linuxmint/issues/622.
+		if (img_report.has_efi & 0xc000) {
+			if (img_report.has_efi & 0x4000) {
+				uprintf("Broken UEFI bootloader detected - Applying workaround:");
+				static_sprintf(path, "%s\\EFI\\boot\\bootx64.efi", dest_dir);
+				DeleteFileU(path);
+			}
 			DumpFatDir(dest_dir, 0);
+		}
 		if (HAS_SYSLINUX(img_report)) {
 			static_sprintf(path, "%s\\syslinux.cfg", dest_dir);
 			// Create a /syslinux.cfg (if none exists) that points to the existing isolinux cfg
@@ -1463,6 +1481,8 @@ try_iso:
 
 out:
 	safe_closehandle(file_handle);
+	if (r == 0)
+		DeleteFileU(dest_file);
 	iso9660_stat_free(p_statbuf);
 	udf_dirent_free(p_udf_root);
 	udf_dirent_free(p_udf_file);
@@ -1727,7 +1747,7 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 				}
 				if (!DumpFatDir(target, dirpos.cluster))
 					goto out;
-			} else {
+			} else if (!PathFileExistsU(target)) {
 				// Need to figure out if it's a .conf file (Damn you Solus!!)
 				EXTRACT_PROPS props = { 0 };
 				size_t len = strlen(name);
