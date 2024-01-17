@@ -298,7 +298,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			// https://salsa.debian.org/live-team/live-build/-/commit/5bff71fea2dd54adcd6c428d3f1981734079a2f7
 			// Because of this, if we detect a small bootx64.efi file, we assert that it's a
 			// broken link and try to extract a "good" version from the El-Torito image.
-			if ((safe_stricmp(psz_basename, efi_bootname[2]) == 0) && (file_length < 100)) {
+			if ((safe_stricmp(psz_basename, efi_bootname[2]) == 0) && (file_length < 256)) {
 				img_report.has_efi |= 0x4000;
 				static_strcpy(img_report.efi_img_path, "[BOOT]/1-Boot-NoEmul.img");
 			}

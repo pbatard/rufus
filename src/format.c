@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
- * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1463,7 +1463,8 @@ DWORD WINAPI FormatThread(void* param)
 		extra_partitions = XP_ESP | XP_MSR;
 	else if ( ((fs_type == FS_NTFS) || (fs_type == FS_EXFAT)) &&
 			  ((boot_type == BT_UEFI_NTFS) || ((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) &&
-			   ((target_type == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios) || (img_report.has_4GB_file)))) )
+			   ((target_type == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios) ||
+			   (img_report.has_4GB_file) || (img_report.needs_ntfs)))) )
 		extra_partitions = XP_UEFI_NTFS;
 	else if ((boot_type == BT_IMAGE) && !write_as_image && HAS_PERSISTENCE(img_report) && persistence_size)
 		extra_partitions = XP_CASPER;
