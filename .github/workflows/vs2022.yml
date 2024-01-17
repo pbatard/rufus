@@ -54,14 +54,18 @@ jobs:
       shell: bash
       if: ${{ !startsWith(github.ref, 'refs/tags/') }}
       # This ONLY works if the shell is bash or if using $env:GITHUB_OUTPUT
-      run: echo "option=/DALPHA" >> $GITHUB_OUTPUT
+      run: |
+        echo "option=/DALPHA" >> $GITHUB_OUTPUT
+        sed -b -i 's/VALUE "InternalName", "Rufus"/VALUE "InternalName", "Rufus (ALPHA)"/' ./src/rufus.rc
 
     - name: Set BETA
       id: set_beta
       shell: bash
       if: ${{ startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'BETA') }}
       # This ONLY works if the shell is bash or if using $env:GITHUB_OUTPUT
-      run: echo "option=/DBETA" >> $GITHUB_OUTPUT
+      run: |
+        echo "option=/DBETA" >> $GITHUB_OUTPUT
+        sed -b -i 's/VALUE "InternalName", "Rufus"/VALUE "InternalName", "Rufus (BETA)"/' ./src/rufus.rc
 
     - name: Build
       shell: cmd

@@ -3,6 +3,9 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
 
+rem if set, this will override the version for the package
+rem set VERSION_OVERRIDE=4.4.2104.0
+
 goto main
 
 :ReplaceTokenInFile
@@ -66,13 +69,33 @@ for %%a in (%ARCHS%) do (
   )
 )
 
+rem exiftool.exe can't be installed in the Windows system directories...
+if not exist exiftool.exe (
+  echo exiftool.exe must exist in this directory
+  goto out
+)
+
+rem Make sure we're not trying to create a package from an ALPHA or BETA version!
+exiftool -s3 -*InternalName* rufus_x64.exe | findstr /C:"ALPHA" 1>nul && (
+  echo Alpha version detected - ABORTED
+  goto out
+)
+exiftool -s3 -*InternalName* rufus_x64.exe | findstr /C:"BETA" 1>nul && (
+  echo Beta version detected - ABORTED
+  goto out
+)
+
 rem Populate the version from the executable
-set target=%~dp0rufus_x64.exe
-set target=%target:\=\\%
-wmic datafile where "name='%target%'" get version | find /v "Version" > version.txt
-set /p VERSION=<version.txt
-set VERSION=%VERSION: =%
-del version.txt
+setlocal EnableDelayedExpansion
+if "%VERSION_OVERRIDE%"=="" (
+  exiftool -s3 -*FileVersionNumber* rufus_x64.exe > version.txt
+  set /p VERSION=<version.txt
+  del version.txt
+)else (
+  echo WARNING: Forcing version to %VERSION_OVERRIDE%
+  set VERSION=%VERSION_OVERRIDE%
+)
+setlocal DisableDelayedExpansion
 
 echo Will create %VERSION% AppStore Bundle
 pause
