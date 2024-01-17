@@ -114,21 +114,20 @@
 • Trang web chính thức: https://rufus.ie
 • Mã nguồn: https://github.com/pbatard/rufus
 • Nhật ký thay đổi: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt"
-"ReleaseNotes","3","Text","• Add support for Rock Ridge symbolic links preservation when NTFS is used
-• Add an exception to enforce NTFS for Linux Mint's LMDE
-• Add an expert feature to restrict a Windows installation to S Mode
-• Fix persistence support for Debian 12 when booted in BIOS mode
-• Fix a regression that prevented the opening of .vhd images
-• Update UEFI:NTFS to report a more explicit error on bootmgr security issues
-• Improve the search for conflicting processes by running it in a background thread
-• Improve support for Slax Linux",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"ReleaseNotes","3","Text","• Add workaround for distros that use broken symbolic links as their UEFI bootloaders (such as Mint 21.3)
+• Add support for GRUB 2.12
+• Fix a crash when saving .ffu images
+• Fix UEFI:NTFS partition not being added, in MBR mode, for some Linux ISOs
+• Prevent Microsoft Dev Drives from being listed
+• Improve support for SDXC card readers
+• Improve Large FAT32 formatting by aligning start of data regions to 1 MB (courtesy of Fred)",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "Title","4","Text","Rufus",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "ShortTitle","5","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "SortTitle","6","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "VoiceTitle","7","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "ShortDescription","8","Text","","Rufus - The Reliable USB Formatting Utility","Rufus - أداة فرمتة الـ USB جديرة بالثقة","Rufus - Надеждната USB форматираща програма","Rufus - 可靠的 USB 格式化工具","Rufus - 快速可靠的 USB 格式化工具","Rufus - Pouzdan alat za formatiranje USB-a","Rufus - Spolehlivý program pro formátování USB","Rufus - Det pålidelige USB-formateringsværktøj","Rufus - de betrouwbare USB-formatteertool","Rufus - Luotettava USB-alustusohjelma","Rufus - L'utilitaire de formatage USB fiable","Rufus - Das zuverlässige USB-Formatierungstool","Rufus - Μία αξιόπιστη εφαρμογή διαμόρφωσης USB","Rufus - הכלי לאתחול USB האמין ביותר","Rufus - A megbízható USB-formázó segédprogram","Rufus - Utilitas Pemformatan USB yang Handal","Rufus - Utility affidabile per la formattazione di unità USB","Rufus - 信頼性の高い USB フォーマット ユーティリティ","Rufus - 신뢰할 수 있는 USB 포맷 유틸리티","Rufus - uzticama un vienkārša USB formatēšanas utilīta","Rufus - patikima USB formatavimo priemonė","Rufus - Utiliti pemformatan USB yang dipercayai","Rufus - Det pålitelige USB-formateringsprogrammet","Rufus، ابزاری کاربردی و قابل‌اطمینان برای فرمت کردن درایوهای USB","Rufus - niezawodne narzędzie do formatowania USB","Rufus - O Utilitário de Formatação USB Confiável","Rufus - O utilitário de confiança para formatação USB","Rufus - Instrumentul de încredere pentru formatări USB","Rufus - Надежная утилита для форматирования USB","Rufus - Pouzdan Alat Za Formatiranje USB diska","Rufus - Spoľahlivý program pre formátovanie USB","Rufus - zanesljivi pripomoček za USB formatiranje","Rufus, la herramienta de formateo de USBs en la que puedes confiar","Rufus - Det pålitliga verktyget för USB-formatering","Rufus - ยูทิลิตี้การฟอร์แมต USB ที่ไว้ใจได้","Rufus - Güvenilir USB Biçimlendirme Programı","Rufus - надійна утиліта для форматування USB-накопичувачів","Rufus - Tiện ích Định dạng USB Đáng tin cậy"
 "DevStudio","9","Text","Pete Batard",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-"CopyrightTrademarkInformation","12","Text","© 2011-2023 Pete Batard",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"CopyrightTrademarkInformation","12","Text","© 2011-2024 Pete Batard",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "AdditionalLicenseTerms","13","Text","https://www.gnu.org/licenses/gpl-3.0.html","This application is licensed under the terms of the GNU Public License (GPL) version 3.
 See https://www.gnu.org/licenses/gpl-3.0.en.html for details.","هذا التطبيق مُرخص بموجب شروط رخصة جنو (GNU) العمومية (GPL) الإصدار 3.
 راجع https://www.gnu.org/licenses/gpl-3.0.ar.html لمزيد من التفاصيل.","Тази програма е лицензирана според условията на GNU Public License (GPL) версия 3.

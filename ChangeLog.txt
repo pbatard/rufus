@@ -1,3 +1,12 @@
+o Version 4.4 (2024.01.17)
+    Add workaround for distros that use broken symbolic links as their UEFI bootloaders (such as Mint 21.3)
+    Add support for GRUB 2.12
+    Fix a crash when saving .ffu images
+    Fix UEFI:NTFS partition not being added, in MBR mode, for some Linux ISOs
+    Prevent Microsoft Dev Drives from being listed
+    Improve support for SDXC card readers
+    Improve Large FAT32 formatting by aligning start of data regions to 1 MB (courtesy of Fred)
+
 o Version 4.3 (2023.10.19)
     Add support for Rock Ridge symbolic links preservation when NTFS is used
     Add an exception to enforce NTFS for Linux Mint's LMDE
