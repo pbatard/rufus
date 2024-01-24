@@ -142,6 +142,35 @@ _cdio_strdup_upper (const char str[])
   return new_str;
 }
 
+int
+_cdio_stricmp (const char str1[], const char str2[])
+{
+  if (str1 && str2) {
+    int c1, c2;
+    do {
+      c1 = tolower((unsigned char)*str1++);
+      c2 = tolower((unsigned char)*str2++);
+    } while (c1 == c2 && c1 != '\0');
+    return c1 - c2;
+  } else return (str1 != str2);
+}
+
+int
+_cdio_strnicmp(const char str1[], const char str2[], size_t count)
+{
+    if (str1 && str2) {
+      int c1 = 0, c2 = 0;
+      size_t i;
+      for (i = 0; i < count; i++) {
+        c1 = tolower((unsigned char)*str1++);
+        c2 = tolower((unsigned char)*str2++);
+        if (c1 != c2 || c1 == '\0')
+          break;
+      }
+      return c1 - c2;
+    } else return (str1 != str2);
+}
+
 /* Convert MinGW/MSYS paths that start in "/c/..." to "c:/..."
    so that they can be used with fopen(), stat(), etc.
    Returned string must be freed by the caller using cdio_free().*/

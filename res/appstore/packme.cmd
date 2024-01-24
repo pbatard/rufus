@@ -86,16 +86,14 @@ exiftool -s3 -*InternalName* rufus_x64.exe | findstr /C:"BETA" 1>nul && (
 )
 
 rem Populate the version from the executable
-setlocal EnableDelayedExpansion
 if "%VERSION_OVERRIDE%"=="" (
   exiftool -s3 -*FileVersionNumber* rufus_x64.exe > version.txt
   set /p VERSION=<version.txt
   del version.txt
-)else (
+) else (
   echo WARNING: Forcing version to %VERSION_OVERRIDE%
   set VERSION=%VERSION_OVERRIDE%
 )
-setlocal DisableDelayedExpansion
 
 echo Will create %VERSION% AppStore Bundle
 pause
