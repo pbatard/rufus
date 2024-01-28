@@ -1262,6 +1262,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		"^AlmaLinux-[8-9].*",		// AlmaLinux 8.x and 9.x
 		"^Fedora.*-3[3-9].*",		// Fedora 33-39
 		"^CentOS.*-[8-9].*",		// CentOS and CentOS Stream 8.and 9.x
+		"^Circle.*-[8-9].*",		// Circle Linux 8.and 9.x
 		"^OL-[8-9].*",				// Oracle Linux 8.x and 9.x
 		"^RHEL-[8-9].*",			// Red Hat 8.x and 9.x
 		"^Rocky-[8-9].*",			// Rocky Linux 8.x and 9.x
