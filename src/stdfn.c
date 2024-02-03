@@ -80,8 +80,9 @@ BOOL htab_create(uint32_t nel, htab_table* htab)
 	if (htab == NULL) {
 		return FALSE;
 	}
+	assert(htab->table == NULL);
 	if (htab->table != NULL) {
-		uprintf("warning: htab_create() was called with a non empty table");
+		uprintf("Warning: htab_create() was called with a non empty table");
 		return FALSE;
 	}
 
@@ -96,7 +97,7 @@ BOOL htab_create(uint32_t nel, htab_table* htab)
 	// allocate memory and zero out.
 	htab->table = (htab_entry*)calloc(htab->size + 1, sizeof(htab_entry));
 	if (htab->table == NULL) {
-		uprintf("could not allocate space for hash table\n");
+		uprintf("Could not allocate space for hash table");
 		return FALSE;
 	}
 
@@ -166,7 +167,7 @@ uint32_t htab_hash(char* str, htab_table* htab)
 			// existing hash
 			return idx;
 		}
-		// uprintf("hash collision ('%s' vs '%s')\n", str, htab->table[idx].str);
+		// uprintf("Hash collision ('%s' vs '%s')", str, htab->table[idx].str);
 
 		// Second hash function, as suggested in [Knuth]
 		hval2 = 1 + hval % (htab->size - 2);
@@ -196,19 +197,20 @@ uint32_t htab_hash(char* str, htab_table* htab)
 	// Not found => New entry
 
 	// If the table is full return an error
+	assert(htab->filled < htab->size);
 	if (htab->filled >= htab->size) {
-		uprintf("hash table is full (%d entries)", htab->size);
+		uprintf("Hash table is full (%d entries)", htab->size);
 		return 0;
 	}
 
 	safe_free(htab->table[idx].str);
 	htab->table[idx].used = hval;
-	htab->table[idx].str = (char*) malloc(safe_strlen(str)+1);
+	htab->table[idx].str = (char*) malloc(safe_strlen(str) + 1);
 	if (htab->table[idx].str == NULL) {
-		uprintf("could not duplicate string for hash table\n");
+		uprintf("Could not duplicate string for hash table");
 		return 0;
 	}
-	memcpy(htab->table[idx].str, str, safe_strlen(str)+1);
+	memcpy(htab->table[idx].str, str, safe_strlen(str) + 1);
 	++htab->filled;
 
 	return idx;

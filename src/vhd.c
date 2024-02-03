@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Virtual Disk Handling functions
- * Copyright © 2013-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1111,6 +1111,7 @@ void VhdSaveImage(void)
 	char filename[128];
 	char path[MAX_PATH];
 	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
+	enum { image_type_vhd = 1, image_type_vhdx = 2, image_type_ffu = 3 };
 	static EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhd", "*.vhdx", "*.ffu"),
 		__VA_GROUP__(lmprintf(MSG_343), lmprintf(MSG_342), lmprintf(MSG_344)));
 	ULARGE_INTEGER free_space;
@@ -1123,20 +1124,26 @@ void VhdSaveImage(void)
 	img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
 	img_save.DevicePath = GetPhysicalName(img_save.DeviceNum);
 	// FFU support requires GPT
-	if (!has_ffu_support || SelectedDrive.PartitionStyle != PARTITION_STYLE_GPT)
-		img_ext.count = 2;
-	for (i = 1; i <= (UINT)img_ext.count && (safe_strcmp(&_img_ext_x[i - 1][2], save_image_type) != 0); i++);
+	img_ext.count = (!has_ffu_support || SelectedDrive.PartitionStyle != PARTITION_STYLE_GPT) ? 2 : 3;
+	for (i = 1; i <= (UINT)img_ext.count && (safe_strcmp(save_image_type , &_img_ext_x[i - 1][2]) != 0); i++);
 	if (i > (UINT)img_ext.count)
-		i = 2;
+		i = image_type_vhdx;
 	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, &i);
-	assert(i > 0 && i <= (UINT)img_ext.count);
-	save_image_type = (char*) &_img_ext_x[i - 1][2];
-	WriteSettingStr(SETTING_PREFERRED_SAVE_IMAGE_TYPE, save_image_type);
+	if (img_save.ImagePath == NULL)
+		goto out;
+	for (i = 1; i <= (UINT)img_ext.count && (strstr(img_save.ImagePath, &_img_ext_x[i - 1][1]) == NULL); i++);
+	if (i > (UINT)img_ext.count) {
+		uprintf("Warning: Can not determine image type from extension - Saving to uncompressed VHD.");
+		i = image_type_vhd;
+	} else {
+		save_image_type = (char*)&_img_ext_x[i - 1][2];
+		WriteSettingStr(SETTING_PREFERRED_SAVE_IMAGE_TYPE, save_image_type);
+	}
 	switch (i) {
-	case 1:
+	case image_type_vhd:
 		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
 		break;
-	case 3:
+	case image_type_ffu:
 		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_FFU;
 		break;
 	default:

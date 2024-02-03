@@ -60,7 +60,7 @@
 #include "_cdio_stdio.h"
 #include "cdio_private.h"
 
-/* Maximum number of El-Torito boot images we keep an index for */ 
+/* Maximum number of El-Torito boot images we keep an index for */
 #define MAX_BOOT_IMAGES     8
 
 /** Implementation of iso9660_t type */
@@ -532,13 +532,39 @@ iso9660_ifs_read_superblock (iso9660_t *p_iso,
 	  (memcmp(p_brvd->system_id, EL_TORITO_ID, ISO_MAX_SYSTEM_ID) == 0)) {
 	/* Perform basic parsing of boot entries to fill an image table */
 	iso9660_br_t br[ISO_BLOCKSIZE / sizeof(iso9660_br_t)];
-	if (iso9660_iso_seek_read(p_iso, &br, p_brvd->boot_catalog_sector, 1) == ISO_BLOCKSIZE) {
+	if (iso9660_iso_seek_read(p_iso, &br, p_brvd->boot_catalog_sector, 1) ==
+	    ISO_BLOCKSIZE) {
 	  for (j = 0, k = 0;
 	       j < (ISO_BLOCKSIZE / sizeof(iso9660_br_t)) && k < MAX_BOOT_IMAGES;
 	       j++) {
 	    if (br[j].boot_id == 0x88 && br[j].media_type == 0) {
-	      p_iso->boot_img[k].lsn = br[j].image_lsn;
-	      p_iso->boot_img[k++].num_sectors = br[j].num_sectors;
+	      p_iso->boot_img[k].lsn = uint32_from_le(br[j].image_lsn);
+	      p_iso->boot_img[k++].num_sectors = uint16_from_le(br[j].num_sectors);
+	    }
+	  }
+	  /* Special case for non specs-compliant images that do follow the UEFI  */
+	  /* specs and that use size 0 or 1 for images larger than 0xffff virtual */
+	  /* sectors, in which case the image runs to the end of the volume (per  */
+	  /* UEFI specs) or to the next LSN (as seen with some software).         */
+	  cdio_assert(ISO_BLOCKSIZE / VIRTUAL_SECTORSIZE == 4);
+	  for (j = 0; j < MAX_BOOT_IMAGES; j++) {
+	    uint32_t next_lsn = from_733(p_iso->pvd.volume_space_size);
+	    if (p_iso->boot_img[j].lsn == 0)
+	      continue;
+	    /* Find the closest LSN after the one from this image */
+	    cdio_assert(p_iso->boot_img[j].lsn < next_lsn);
+	    for (k = 0; k < MAX_BOOT_IMAGES; k++) {
+	      if (p_iso->boot_img[k].lsn > p_iso->boot_img[j].lsn &&
+		  p_iso->boot_img[k].lsn < next_lsn)
+		next_lsn = p_iso->boot_img[k].lsn;
+	    }
+	    /* If the image has a sector size of 0 or 1 and theres' more than      */
+	    /* 0xffff sectors to the next LSN, assume it needs expansion.          */
+	    if (p_iso->boot_img[j].num_sectors <= 1 &&
+		(next_lsn - p_iso->boot_img[j].lsn) >= 0x4000) {
+		p_iso->boot_img[j].num_sectors =
+		    (next_lsn - p_iso->boot_img[j].lsn) * 4;
+		cdio_warn("Auto-expanding the size of %d-Boot-NoEmul.img", j);
 	    }
 	  }
 	}
