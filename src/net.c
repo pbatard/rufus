@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright © 2012-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -848,6 +848,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	uprintf("Script signature is valid ✓");
 #endif
 
+	FormatStatus = 0;
 	dwExitCode = RunCommand(cmdline, app_data_dir, TRUE);
 	uprintf("Exited download script with code: %d", dwExitCode);
 	if ((dwExitCode == 0) && PeekNamedPipe(hPipe, NULL, dwPipeSize, NULL, &dwAvail, NULL) && (dwAvail != 0)) {
