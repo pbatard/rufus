@@ -96,7 +96,18 @@ jobs:
 
     - name: Upload artifacts
       if: ${{ github.event_name == 'push' }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: MinGW
+        name: ${{ matrix.sys }}
         path: ./*.exe
+
+  Extra-Step-To-Merge-Artifacts-Thanks-To-Upload-Artifact-v4-Breaking-Backwards-Compatibility:
+    runs-on: windows-latest
+    needs: MinGW-Build
+    steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        if: ${{ github.event_name == 'push' }}
+        with:
+          name: MinGW
+          delete-merged: true

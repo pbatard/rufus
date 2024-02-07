@@ -86,10 +86,21 @@ jobs:
         curl --request POST --url https://www.virustotal.com/api/v3/monitor/items --header 'x-apikey: ${{ secrets.VIRUSTOTAL_API_KEY }}' --form path='/rufus_${{ matrix.TARGET_PLATFORM }}.exe' --form file=@./rufus_${{ matrix.TARGET_PLATFORM }}.exe
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: ${{ github.event_name == 'push' }}
       with:
-        name: VS2022
+        name: ${{ matrix.TARGET_PLATFORM }}
         path: |
           ./*.exe
           ./*.pdb
+
+  Extra-Step-To-Merge-Artifacts-Thanks-To-Upload-Artifact-v4-Breaking-Backwards-Compatibility:
+    runs-on: windows-latest
+    needs: VS2022-Build
+    steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        if: ${{ github.event_name == 'push' }}
+        with:
+          name: VS2022
+          delete-merged: true
