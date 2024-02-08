@@ -36,12 +36,13 @@
 #define XP_ESP                              0x02
 #define XP_UEFI_NTFS                        0x04
 #define XP_COMPAT                           0x08
-#define XP_CASPER                           0x10
+#define XP_PERSISTENCE                      0x10
 
 #define PI_MAIN                             0
 #define PI_ESP                              1
 #define PI_CASPER                           2
-#define PI_MAX                              3
+#define PI_UEFI_NTFS                        3
+#define PI_MAX                              4
 
 // The following should match VDS_FSOF_FLAGS as much as possible
 #define FP_FORCE                            0x00000001
@@ -362,8 +363,11 @@ typedef struct {
 	MEDIA_TYPE MediaType;
 	int PartitionStyle;
 	int nPartitions;	// number of partitions we actually care about
-	uint64_t PartitionOffset[MAX_PARTITIONS];
-	uint64_t PartitionSize[MAX_PARTITIONS];
+	struct {
+		wchar_t Name[36];
+		uint64_t Offset;
+		uint64_t Size;
+	} Partition[MAX_PARTITIONS];
 	int FSType;
 	char proposed_label[16];
 	BOOL has_protective_mbr;
@@ -374,7 +378,7 @@ typedef struct {
 	} ClusterSize[FS_MAX];
 } RUFUS_DRIVE_INFO;
 extern RUFUS_DRIVE_INFO SelectedDrive;
-extern uint64_t partition_offset[PI_MAX];
+extern int partition_index[PI_MAX];
 
 BOOL SetAutoMount(BOOL enable);
 BOOL GetAutoMount(BOOL* enabled);

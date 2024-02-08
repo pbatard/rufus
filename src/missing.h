@@ -1,7 +1,7 @@
 /*
 * Rufus: The Reliable USB Formatting Utility
 * Constants and defines missing from various toolchains
-* Copyright © 2016-2022 Pete Batard <pete@akeo.ie>
+* Copyright © 2016-2024 Pete Batard <pete@akeo.ie>
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,9 @@
 #ifndef MIN
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
+
+#define LO_ALIGN_X_TO_Y(x, y) (((x) / (y)) * (y))
+#define HI_ALIGN_X_TO_Y(x, y) ((((x) + (y) - 1) / (y)) * (y))
 
 #if defined(__GNUC__)
 #define ALIGNED(m) __attribute__ ((__aligned__(m)))

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Windows User Experience
- * Copyright © 2022-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2022-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -690,14 +690,14 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		// VDS cannot list ESP volumes (talk about allegedly improving on the old disk and volume APIs, only to
 		// completely neuter it) and IVdsDiskPartitionMF::FormatPartitionEx(), which is what you are supposed to
 		// use for ESPs, explicitly states: "This method cannot be used to format removable media."
-		if (!FormatPartition(DriveIndex, partition_offset[PI_ESP], cluster_size, FS_FAT32, "",
+		if (!FormatPartition(DriveIndex, SelectedDrive.Partition[partition_index[PI_ESP]].Offset, cluster_size, FS_FAT32, "",
 			FP_QUICK | FP_FORCE | FP_LARGE_FAT32 | FP_NO_BOOT)) {
 			uprintf("Could not format EFI System Partition");
 			return FALSE;
 		}
 		Sleep(200);
 		// Need to have the ESP mounted to invoke bcdboot
-		ms_efi = AltMountVolume(DriveIndex, partition_offset[PI_ESP], FALSE);
+		ms_efi = AltMountVolume(DriveIndex, SelectedDrive.Partition[partition_index[PI_ESP]].Offset, FALSE);
 		if (ms_efi == NULL) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_ASSIGN_LETTER);
 			return FALSE;

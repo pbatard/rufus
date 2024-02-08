@@ -972,7 +972,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 	}
 
 	// Ensure that we have sufficient space for the SBR
-	max_size = (DWORD)SelectedDrive.PartitionOffset[0];
+	max_size = (DWORD)SelectedDrive.Partition[0].Offset;
 	if (br_size + size > max_size) {
 		uprintf("  SBR size is too large - You may need to uncheck 'Add fixes for old BIOSes'.");
 		if (sub_type == BT_MAX)
@@ -1456,23 +1456,32 @@ DWORD WINAPI FormatThread(void* param)
 	large_drive = (SelectedDrive.DiskSize > (1*TB));
 	if (large_drive)
 		uprintf("Notice: Large drive detected (may produce short writes)");
+
 	// Find out if we need to add any extra partitions
+	extra_partitions = 0;
+	if ((boot_type == BT_IMAGE) && !write_as_image && HAS_PERSISTENCE(img_report) && persistence_size)
+		extra_partitions |= XP_PERSISTENCE;
+	// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
+	// https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-and-gpt-faq#disks-that-require-an-msr
 	if ((windows_to_go) && (target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT))
-		// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
-		// https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-and-gpt-faq#disks-that-require-an-msr
-		extra_partitions = XP_ESP | XP_MSR;
-	else if ( ((fs_type == FS_NTFS) || (fs_type == FS_EXFAT)) &&
-			  ((boot_type == BT_UEFI_NTFS) || ((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report) &&
-			   ((target_type == TT_UEFI) || (windows_to_go) || (allow_dual_uefi_bios) ||
-			   (img_report.has_4GB_file) || (img_report.needs_ntfs)))) )
-		extra_partitions = XP_UEFI_NTFS;
-	else if ((boot_type == BT_IMAGE) && !write_as_image && HAS_PERSISTENCE(img_report) && persistence_size)
-		extra_partitions = XP_CASPER;
-	else if (IsChecked(IDC_OLD_BIOS_FIXES))
-		extra_partitions = XP_COMPAT;
+		extra_partitions |= XP_ESP | XP_MSR;
+	// If we have a bootable image with UEFI bootloaders and the target file system is NTFS or exFAT
+	// or the UEFI:NTFS option is selected, we add the UEFI:NTFS partition...
+	else if (((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report)) && ((fs_type == FS_NTFS) || (fs_type == FS_EXFAT)) ||
+			 (boot_type == BT_UEFI_NTFS)) {
+		extra_partitions |= XP_UEFI_NTFS;
+		// ...but only if we're not dealing with a Windows image in installer mode with target
+		//  system set to BIOS and without dual BIOS+UEFI boot enabled.
+		if ((boot_type == BT_IMAGE) && HAS_BOOTMGR_BIOS(img_report) && (!windows_to_go) &&
+			(target_type == TT_BIOS) && (!allow_dual_uefi_bios))
+			extra_partitions &= ~XP_UEFI_NTFS;
+	}
+	if (IsChecked(IDC_OLD_BIOS_FIXES))
+		extra_partitions |= XP_COMPAT;
+
 	// On pre 1703 platforms (and even on later ones), anything with ext2/ext3 doesn't sit
 	// too well with Windows. Same with ESPs. Relaxing our locking rules seems to help...
-	if ((extra_partitions & (XP_ESP | XP_CASPER)) || IS_EXT(fs_type))
+	if ((extra_partitions & (XP_ESP | XP_PERSISTENCE)) || IS_EXT(fs_type))
 		actual_lock_drive = FALSE;
 	// Windows 11 is a lot more proactive in locking ESPs and MSRs than previous versions
 	// were, meaning that we also can't lock the drive without incurring errors...
@@ -1710,13 +1719,13 @@ DWORD WINAPI FormatThread(void* param)
 	Sleep(200);
 	if (write_as_esp || write_as_ext) {
 		// Can't format ESPs or ext2/ext3 partitions unless we mount them ourselves
-		volume_name = AltMountVolume(DriveIndex, partition_offset[PI_MAIN], FALSE);
+		volume_name = AltMountVolume(DriveIndex, SelectedDrive.Partition[partition_index[PI_MAIN]].Offset, FALSE);
 		if (volume_name == NULL) {
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_ASSIGN_LETTER);
 			goto out;
 		}
 	} else {
-		if (!WaitForLogical(DriveIndex, partition_offset[PI_MAIN])) {
+		if (!WaitForLogical(DriveIndex, SelectedDrive.Partition[partition_index[PI_MAIN]].Offset)) {
 			uprintf("Logical drive was not found - aborting");
 			if (!IS_ERROR(FormatStatus))
 				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_TIMEOUT;
@@ -1727,12 +1736,12 @@ DWORD WINAPI FormatThread(void* param)
 
 	// Format Casper partition if required. Do it before we format anything with
 	// a file system that Windows will recognize, to avoid concurrent access.
-	if (extra_partitions & XP_CASPER) {
+	if (extra_partitions & XP_PERSISTENCE) {
 		uint32_t ext_version = ReadSetting32(SETTING_USE_EXT_VERSION);
 		if ((ext_version < 2) || (ext_version > 4))
 			ext_version = 3;
 		uprintf("Using %s-like method to enable persistence", img_report.uses_casper ? "Ubuntu" : "Debian");
-		if (!FormatPartition(DriveIndex, partition_offset[PI_CASPER], 0, FS_EXT2 + (ext_version - 2),
+		if (!FormatPartition(DriveIndex, SelectedDrive.Partition[partition_index[PI_CASPER]].Offset, 0, FS_EXT2 + (ext_version - 2),
 			img_report.uses_casper ? "casper-rw" : "persistence",
 			(img_report.uses_casper ? 0 : FP_CREATE_PERSISTENCE_CONF) |
 			(IsChecked(IDC_QUICK_FORMAT) ? FP_QUICK : 0))) {
@@ -1757,7 +1766,7 @@ DWORD WINAPI FormatThread(void* param)
 	if (write_as_esp)
 		Flags |= FP_LARGE_FAT32;
 
-	ret = FormatPartition(DriveIndex, partition_offset[PI_MAIN], ClusterSize, fs_type, label, Flags);
+	ret = FormatPartition(DriveIndex, SelectedDrive.Partition[partition_index[PI_MAIN]].Offset, ClusterSize, fs_type, label, Flags);
 	if (!ret) {
 		// Error will be set by FormatPartition() in FormatStatus
 		uprintf("Format error: %s", StrError(FormatStatus, TRUE));
@@ -1790,7 +1799,7 @@ DWORD WINAPI FormatThread(void* param)
 		// Try to continue
 		CHECK_FOR_USER_CANCEL;
 
-		volume_name = GetLogicalName(DriveIndex, partition_offset[PI_MAIN], TRUE, TRUE);
+		volume_name = GetLogicalName(DriveIndex, SelectedDrive.Partition[partition_index[PI_MAIN]].Offset, TRUE, TRUE);
 		if (volume_name == NULL) {
 			uprintf("Could not get volume name");
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NO_VOLUME_ID;
@@ -1848,7 +1857,7 @@ DWORD WINAPI FormatThread(void* param)
 		} else {
 			// We still have a lock, which we need to modify the volume boot record
 			// => no need to reacquire the lock...
-			hLogicalVolume = GetLogicalHandle(DriveIndex, partition_offset[PI_MAIN], FALSE, TRUE, FALSE);
+			hLogicalVolume = GetLogicalHandle(DriveIndex, SelectedDrive.Partition[partition_index[PI_MAIN]].Offset, FALSE, TRUE, FALSE);
 			if ((hLogicalVolume == INVALID_HANDLE_VALUE) || (hLogicalVolume == NULL)) {
 				uprintf("Could not re-mount volume for partition boot record access");
 				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OPEN_FAILED;
@@ -1999,7 +2008,7 @@ out:
 		}
 	}
 	if (IS_ERROR(FormatStatus)) {
-		volume_name = GetLogicalName(DriveIndex, partition_offset[PI_MAIN], TRUE, TRUE);
+		volume_name = GetLogicalName(DriveIndex, SelectedDrive.Partition[partition_index[PI_MAIN]].Offset, TRUE, TRUE);
 		if (volume_name != NULL) {
 			if (MountVolume(drive_name, volume_name))
 				uprintf("Re-mounted volume as %c: after error", toupper(drive_name[0]));
