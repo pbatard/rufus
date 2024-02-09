@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * DOS keyboard locale setup
- * Copyright © 2011-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -197,8 +197,8 @@ static kb_list fd_kb_list[] = {
 static int ms_get_kbdrv(const char* kb)
 {
 	unsigned int i, j;
-	for (i=0; i<ARRAYSIZE(ms_kb_list); i++) {
-		for (j=0; j<ms_kb_list[i].size; j++) {
+	for (i = 0; i<ARRAYSIZE(ms_kb_list); i++) {
+		for (j = 0; j < ms_kb_list[i].size; j++) {
 			if (safe_strcmp(ms_kb_list[i].list[j], kb) == 0) {
 				return i;
 			}
@@ -210,8 +210,8 @@ static int ms_get_kbdrv(const char* kb)
 static int fd_get_kbdrv(const char* kb)
 {
 	unsigned int i, j;
-	for (i=0; i<ARRAYSIZE(fd_kb_list); i++) {
-		for (j=0; j<fd_kb_list[i].size; j++) {
+	for (i = 0; i < ARRAYSIZE(fd_kb_list); i++) {
+		for (j = 0; j < fd_kb_list[i].size; j++) {
 			if (safe_strcmp(fd_kb_list[i].list[j], kb) == 0) {
 				return i;
 			}
@@ -250,7 +250,7 @@ static const char* kb_hr_list[][2] = {
 	{"is", "Icelandic"},
 	{"it", "Italian"},
 	{"jp", "Japanese"},
-//	{"ko", "Korean"},			// Unsupported by FreeDOS?
+//	{"ko", "Korean"},			// Unsupported by FreeDOS
 	{"nl", "Dutch"},
 	{"no", "Norwegian"},
 	{"pl", "Polish"},
@@ -270,7 +270,7 @@ static const char* kb_hr_list[][2] = {
 	{"lv", "Latvian"},
 	{"lt", "Lithuanian"},
 	{"tj", "Tajik"},
-//	{"fa", "Persian"};			// Unsupported by FreeDOS?
+//	{"fa", "Persian"};			// Unsupported by FreeDOS
 	{"vi", "Vietnamese"},
 	{"hy", "Armenian"},
 	{"az", "Azeri"},
@@ -288,7 +288,7 @@ static const char* kb_hr_list[][2] = {
 static const char* kb_to_hr(const char* kb)
 {
 	int i;
-	for (i=0; i<ARRAYSIZE(kb_hr_list); i++) {
+	for (i = 0; i < ARRAYSIZE(kb_hr_list); i++) {
 		if (safe_strcmp(kb, kb_hr_list[i][0]) == 0) {
 			return kb_hr_list[i][1];
 		}
@@ -426,7 +426,7 @@ static cp_list cp_hr_list[] = {
 static const char* cp_to_hr(ULONG cp)
 {
 	int i;
-	for (i=0; i<ARRAYSIZE(cp_hr_list); i++) {
+	for (i = 0; i < ARRAYSIZE(cp_hr_list); i++) {
 		if (cp_hr_list[i].cp == cp) {
 			return cp_hr_list[i].name;
 		}
@@ -449,13 +449,13 @@ static const char* get_kb(void)
 	// need an KLID which GetKeyboardLayoutNameA() does return ...but only as a
 	// string of an hex value...
 	GetKeyboardLayoutNameA(kbid_str);
-	if (sscanf(kbid_str, "%x", &kbid) == 0) {
-		uprintf("Could not scan keyboard layout name - falling back to US as default\n");
+	if (sscanf(kbid_str, "%x", &kbid) <= 0) {
+		uprintf("Could not scan keyboard layout name - defaulting to US");
 		kbid = 0x00000409;
 	}
 	uprintf("Windows KBID 0x%08x\n", kbid);
 
-	for (pass=0; pass<3; pass++) {
+	for (pass = 0; pass < 3; pass++) {
 		// Some of these return values are defined in
 		// HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layout\DosKeybCodes
 		// Others are picked up in FreeDOS official keyboard layouts, v3.0
@@ -748,12 +748,12 @@ static const char* get_kb(void)
 			} else if (pass == 1) {
 				// If we still didn't get a match, use the system's primary language
 				kbid = PRIMARYLANGID(GetSystemDefaultLangID());
-				uprintf("Unable to match KBID, trying LangID 0x%04x\n", kbid);
+				uprintf("Unable to match KBID, trying LangID 0x%04x", kbid);
 			}
 			break;
 		}
 	}
-	uprintf("Unable to match KBID and LangID - defaulting to US\n");
+	uprintf("Unable to match KBID and LangID - defaulting to US");
 	return "us";
 }
 
@@ -976,14 +976,14 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 	// First handle the codepage
 	kb = get_kb();
 	// We have a keyboard ID, but that doesn't mean it's supported
-	kbdrv = bFreeDOS?fd_get_kbdrv(kb):ms_get_kbdrv(kb);
+	kbdrv = bFreeDOS ? fd_get_kbdrv(kb) : ms_get_kbdrv(kb);
 	if (kbdrv < 0) {
-		uprintf("Keyboard id '%s' is not supported - falling back to 'us'\n", kb);
+		uprintf("Keyboard id '%s' is not supported - falling back to 'us'", kb);
 		kb = "us";
-		kbdrv = bFreeDOS?fd_get_kbdrv(kb):ms_get_kbdrv(kb);	// Always succeeds
+		kbdrv = bFreeDOS ? fd_get_kbdrv(kb) : ms_get_kbdrv(kb);	// Always succeeds
 	}
 	assert(kbdrv >= 0);
-	uprintf("Will use DOS keyboard '%s' [%s]\n", kb, kb_to_hr(kb));
+	uprintf("Will use DOS keyboard '%s' [%s]", kb, kb_to_hr(kb));
 
 	// Now get a codepage
 	cp = GetOEMCP();
@@ -994,16 +994,16 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 			(char*)&actual_cp, sizeof(actual_cp)))
 			cp = actual_cp;
 	}
-	egadrv = bFreeDOS?fd_get_ega(cp):ms_get_ega(cp);
+	egadrv = bFreeDOS ? fd_get_ega(cp) : ms_get_ega(cp);
 	if (egadrv == NULL) {
 		// We need to use the fallback CP from the keyboard we got above, as 437 is not always available
-		uprintf("Unable to find an EGA file with codepage %d [%s]\n", cp, cp_to_hr(cp));
+		uprintf("Unable to find an EGA file with codepage %d [%s]", cp, cp_to_hr(cp));
 		cp = kbdrv_data[kbdrv].default_cp;
-		egadrv =  bFreeDOS?"ega.cpx":"ega.cpi";
+		egadrv =  bFreeDOS ? "ega.cpx" : "ega.cpi";
 	} else if (bFreeDOS) {
 		cp = fd_upgrade_cp(cp);
 	}
-	uprintf("Will use codepage %d [%s]\n", cp, cp_to_hr(cp));
+	uprintf("Will use codepage %d [%s]", cp, cp_to_hr(cp));
 
 	if ((cp == 437) && (strcmp(kb, "us") == 0)) {
 		// Nothing much to do if US/US - just notify in autoexec.bat
@@ -1011,14 +1011,14 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 		static_strcat(filename, "\\AUTOEXEC.BAT");
 		fd = fopen(filename, "w+");
 		if (fd == NULL) {
-			uprintf("Unable to create 'AUTOEXEC.BAT': %s.\n", WindowsErrorString());
+			uprintf("Unable to create 'AUTOEXEC.BAT': %s", WindowsErrorString());
 			return FALSE;
 		}
 		fprintf(fd, "@echo off\n");
 		fprintf(fd, "set PATH=.;\\;\\LOCALE\n");
 		fprintf(fd, "echo Using %s keyboard with %s codepage [%d]\n", kb_to_hr("us"), cp_to_hr(437), 437);
 		fclose(fd);
-		uprintf("Successfully wrote 'AUTOEXEC.BAT'\n");
+		uprintf("Successfully wrote 'AUTOEXEC.BAT'");
 		return TRUE;
 	}
 
@@ -1027,7 +1027,7 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 	static_strcat(filename, "\\CONFIG.SYS");
 	fd = fopen(filename, "w+");
 	if (fd == NULL) {
-		uprintf("Unable to create 'CONFIG.SYS': %s.\n", WindowsErrorString());
+		uprintf("Unable to create 'CONFIG.SYS': %s.", WindowsErrorString());
 		return FALSE;
 	}
 	if (bFreeDOS) {
@@ -1045,14 +1045,14 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 		bFreeDOS?"MENU ":"MENUITEM=", bFreeDOS?')':',', kb_to_hr("us"), cp_to_hr(437), 437);
 	fprintf(fd, "%s", bFreeDOS?"MENU\n12?\n":"[1]\ndevice=\\locale\\display.sys con=(ega,,1)\n[2]\n");
 	fclose(fd);
-	uprintf("Successfully wrote 'CONFIG.SYS'\n");
+	uprintf("Successfully wrote 'CONFIG.SYS'");
 
 	// AUTOEXEC.BAT
 	static_strcpy(filename, path);
 	static_strcat(filename, "\\AUTOEXEC.BAT");
 	fd = fopen(filename, "w+");
 	if (fd == NULL) {
-		uprintf("Unable to create 'AUTOEXEC.BAT': %s.\n", WindowsErrorString());
+		uprintf("Unable to create 'AUTOEXEC.BAT': %s", WindowsErrorString());
 		return FALSE;
 	}
 	fprintf(fd, "@echo off\n");
@@ -1066,7 +1066,7 @@ BOOL SetDOSLocale(const char* path, BOOL bFreeDOS)
 	fprintf(fd, "keyb %s,,\\locale\\%s\n", kb, kbdrv_data[kbdrv].name);
 	fprintf(fd, ":2\n");
 	fclose(fd);
-	uprintf("Successfully wrote 'AUTOEXEC.BAT'\n");
+	uprintf("Successfully wrote 'AUTOEXEC.BAT'");
 
 	return TRUE;
 }
