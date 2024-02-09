@@ -381,6 +381,11 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 				uprintf("  Added 'persistent' kernel option");
 				modified = TRUE;
 			} else if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
+				"boot=casper", "boot=casper persistent", TRUE) != NULL) {
+				// Linux Mint uses boot=casper.
+				uprintf("  Added 'persistent' kernel option");
+				modified = TRUE;
+			} else if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
 				"boot=live", "boot=live persistence", TRUE) != NULL) {
 				// Debian & derivatives are assumed to use 'boot=live' in
 				// their kernel options and use 'persistence' as keyword.

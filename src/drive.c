@@ -2383,7 +2383,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	// Compute the offsets of the extra partitions (which we always align to a track)
 	last_offset = SelectedDrive.DiskSize;
 	if (partition_style == PARTITION_STYLE_GPT)
-		last_offset -= 33 * SelectedDrive.SectorSize;
+		last_offset -= 33ULL * SelectedDrive.SectorSize;
 	for (i = pi - 1; i > mi; i--) {
 		assert(SelectedDrive.Partition[i].Size < last_offset);
 		SelectedDrive.Partition[i].Offset = LO_ALIGN_X_TO_Y(last_offset - SelectedDrive.Partition[i].Size, bytes_per_track);
