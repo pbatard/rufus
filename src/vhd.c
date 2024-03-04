@@ -908,18 +908,19 @@ PF_TYPE_DECL(WINAPI, DWORD, AttachVirtualDisk, (HANDLE, PSECURITY_DESCRIPTOR,
 	ATTACH_VIRTUAL_DISK_FLAG, ULONG, PATTACH_VIRTUAL_DISK_PARAMETERS, LPOVERLAPPED));
 PF_TYPE_DECL(WINAPI, DWORD, DetachVirtualDisk, (HANDLE, DETACH_VIRTUAL_DISK_FLAG, ULONG));
 PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskPhysicalPath, (HANDLE, PULONG, PWSTR));
-PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskOperationProgress, (HANDLE, LPOVERLAPPED,
-	PVIRTUAL_DISK_PROGRESS));
+PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskOperationProgress, (HANDLE, LPOVERLAPPED, PVIRTUAL_DISK_PROGRESS));
+PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskInformation, (HANDLE, PULONG, PGET_VIRTUAL_DISK_INFO, PULONG));
 
 static char physical_path[128] = "";
 static HANDLE mounted_handle = INVALID_HANDLE_VALUE;
 
-// Mount an ISO or a VHD/VHDX image
+// Mount an ISO or a VHD/VHDX image and provide its size
 // Returns the physical path of the mounted image or NULL on error.
-char* VhdMountImage(const char* path)
+char* VhdMountImageAndGetSize(const char* path, uint64_t* disk_size)
 {
 	VIRTUAL_STORAGE_TYPE vtype = { VIRTUAL_STORAGE_TYPE_DEVICE_ISO, VIRTUAL_STORAGE_TYPE_VENDOR_MICROSOFT };
 	ATTACH_VIRTUAL_DISK_PARAMETERS vparams = { 0 };
+	GET_VIRTUAL_DISK_INFO disk_info = { 0 };
 	DWORD r;
 	wchar_t wtmp[128];
 	ULONG size = ARRAYSIZE(wtmp);
@@ -929,6 +930,8 @@ char* VhdMountImage(const char* path)
 	PF_INIT_OR_OUT(OpenVirtualDisk, VirtDisk);
 	PF_INIT_OR_OUT(AttachVirtualDisk, VirtDisk);
 	PF_INIT_OR_OUT(GetVirtualDiskPhysicalPath, VirtDisk);
+	if (disk_size != NULL)
+		PF_INIT_OR_OUT(GetVirtualDiskInformation, VirtDisk);
 
 	if (wpath == NULL)
 		return NULL;
@@ -967,6 +970,20 @@ char* VhdMountImage(const char* path)
 		goto out;
 	}
 	wchar_to_utf8_no_alloc(wtmp, physical_path, sizeof(physical_path));
+
+	if (disk_size != NULL) {
+		*disk_size = 0;
+		disk_info.Version = GET_VIRTUAL_DISK_INFO_SIZE;
+		size = sizeof(disk_info);
+		r = pfGetVirtualDiskInformation(mounted_handle, &size, &disk_info, NULL);
+		if (r != ERROR_SUCCESS) {
+			SetLastError(r);
+			uprintf("Could not obtain virtual size of mounted image '%s': %s", path, WindowsErrorString());
+			goto out;
+		}
+		*disk_size = disk_info.Size.VirtualSize;
+	}
+
 	ret = physical_path;
 
 out:

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Virtual Disk Handling definitions and prototypes
- * Copyright © 2022 Pete Batard <pete@akeo.ie>
+ * Copyright © 2022-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -135,7 +135,8 @@ extern BOOL WimUnmountImage(const char* image, int index, BOOL commit);
 extern char* WimGetExistingMountPoint(const char* image, int index);
 extern BOOL WimIsValidIndex(const char* image, int index);
 extern int8_t IsBootableImage(const char* path);
-extern char* VhdMountImage(const char* path);
+extern char* VhdMountImageAndGetSize(const char* path, uint64_t* disksize);
+#define VhdMountImage(path) VhdMountImageAndGetSize(path, NULL)
 extern void VhdUnmountImage(void);
 extern void VhdSaveImage(void);
 extern void IsoSaveImage(void);

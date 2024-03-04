@@ -1151,7 +1151,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 	HANDLE hSourceImage = INVALID_HANDLE_VALUE;
 	DWORD i, read_size[NUM_BUFFERS], write_size, comp_size, buf_size;
 	uint64_t wb, target_size = bZeroDrive ? SelectedDrive.DiskSize : img_report.image_size;
-	uint64_t cur_value, last_value = UINT64_MAX;
+	uint64_t cur_value, last_value = 0;
 	int64_t bled_ret;
 	uint8_t* buffer = NULL;
 	uint32_t zero_data, *cmp_buffer = NULL;
@@ -1197,11 +1197,9 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 		read_size[0] = buf_size;
 		for (wb = 0, write_size = 0; wb < target_size; wb += write_size) {
 			UpdateProgressWithInfo(OP_FORMAT, fast_zeroing ? MSG_306 : MSG_286, wb, target_size);
-			cur_value = (wb * min(80, target_size)) / target_size;
-			if (cur_value != last_value) {
-				last_value = cur_value;
+			cur_value = (wb * 80) / target_size;
+			for (; cur_value > last_value && last_value < 80; last_value++)
 				uprintfs("+");
-			}
 			// Don't overflow our projected size (mostly for VHDs)
 			if (wb + read_size[0] > target_size)
 				read_size[0] = (DWORD)(target_size - wb);
@@ -1275,6 +1273,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 			if (i > WRITE_RETRIES)
 				goto out;
 		}
+		uprintfs("\r\n");
 	} else if (img_report.compression_type != BLED_COMPRESSION_NONE && img_report.compression_type < BLED_COMPRESSION_MAX) {
 		uprintf("Writing compressed image:");
 		hSourceImage = CreateFileU(image_path, GENERIC_READ, FILE_SHARE_READ, NULL,
@@ -1316,8 +1315,9 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 		// VHD/VHDX require mounting the image first
 		if (img_report.compression_type == IMG_COMPRESSION_VHD ||
 			img_report.compression_type == IMG_COMPRESSION_VHDX) {
-			vhd_path = VhdMountImage(image_path);
-			if (vhd_path == NULL)
+			// Since VHDX images are compressed, we need to obtain the actual size
+			vhd_path = VhdMountImageAndGetSize(image_path, &target_size);
+			if (vhd_path == NULL || target_size == 0)
 				goto out;
 		}
 
@@ -1346,11 +1346,12 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 		for (wb = 0; read_size[proc_bufnum] != 0; wb += read_size[proc_bufnum]) {
 			// 0. Update the progress
 			UpdateProgressWithInfo(OP_FORMAT, MSG_261, wb, target_size);
-			cur_value = (wb * min(80, target_size)) / target_size;
-			if (cur_value != last_value) {
-				last_value = cur_value;
+			cur_value = (wb * 80) / target_size;
+			for ( ; cur_value > last_value && last_value < 80; last_value++)
 				uprintfs("+");
-			}
+
+			if (wb >= target_size)
+				break;
 
 			// 1. Wait for the current read operation to complete (and update the read size)
 			if ((!WaitFileAsync(hSourceImage, DRIVE_ACCESS_TIMEOUT)) ||
@@ -1467,7 +1468,7 @@ DWORD WINAPI FormatThread(void* param)
 		extra_partitions |= XP_ESP | XP_MSR;
 	// If we have a bootable image with UEFI bootloaders and the target file system is NTFS or exFAT
 	// or the UEFI:NTFS option is selected, we add the UEFI:NTFS partition...
-	else if (((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report)) && ((fs_type == FS_NTFS) || (fs_type == FS_EXFAT)) ||
+	else if ((((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report)) && ((fs_type == FS_NTFS) || (fs_type == FS_EXFAT))) ||
 			 (boot_type == BT_UEFI_NTFS)) {
 		extra_partitions |= XP_UEFI_NTFS;
 		// ...but only if we're not dealing with a Windows image in installer mode with target
