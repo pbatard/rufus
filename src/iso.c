@@ -83,7 +83,6 @@ typedef struct {
 RUFUS_IMG_REPORT img_report;
 int64_t iso_blocking_status = -1;
 extern BOOL preserve_timestamps, enable_ntfs_compression;
-extern char* archive_path;
 extern HANDLE format_thread;
 BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
@@ -425,7 +424,7 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 				}
 			}
 			if (patched)
-				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
+				uprintf("  Patched %s: '%s' ➔ '%s'", src, iso_label, usb_label);
 			// Since version 8.2, and https://github.com/rhinstaller/anaconda/commit/a7661019546ec1d8b0935f9cb0f151015f2e1d95,
 			// Red Hat derivatives have changed their CD-ROM detection policy which leads to the installation source
 			// not being found. So we need to use 'inst.repo' instead of 'inst.stage2' in the kernel options.
@@ -442,7 +441,7 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 					}
 				}
 				if (patched)
-					uprintf("  Patched %s: '%s' ➔ '%s'\n", src, "inst.stage2", "inst.repo");
+					uprintf("  Patched %s: '%s' ➔ '%s'", src, "inst.stage2", "inst.repo");
 			}
 		}
 		safe_free(iso_label);
@@ -455,7 +454,7 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 		 (!img_report.has_efi_syslinux) && (dst = safe_strdup(src)) ) {
 		dst[nul_pos-12] = 's'; dst[nul_pos-11] = 'y'; dst[nul_pos-10] = 's';
 		CopyFileA(src, dst, TRUE);
-		uprintf("Duplicated %s to %s\n", src, dst);
+		uprintf("Duplicated %s to %s", src, dst);
 		free(dst);
 	}
 
@@ -467,7 +466,7 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 			safe_sprintf(iso_label, MAX_PATH, "cd9660:/dev/iso9660/%s", img_report.label);
 			safe_sprintf(usb_label, MAX_PATH, "msdosfs:/dev/msdosfs/%s", img_report.usb_label);
 			if (replace_in_token_data(src, "set", iso_label, usb_label, TRUE) != NULL) {
-				uprintf("  Patched %s: '%s' ➔ '%s'\n", src, iso_label, usb_label);
+				uprintf("  Patched %s: '%s' ➔ '%s'", src, iso_label, usb_label);
 				modified = TRUE;
 			}
 		}
@@ -547,19 +546,13 @@ static void print_extracted_file(char* psz_fullpath, uint64_t file_length)
 	to_windows_path(psz_fullpath);
 	nul_pos = strlen(psz_fullpath);
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, TRUE, FALSE));
-	uprintf("Extracting: %s\n", psz_fullpath);
+	uprintf("Extracting: %s", psz_fullpath);
 	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, FALSE, FALSE));
 	PrintStatus(0, MSG_000, psz_fullpath);	// MSG_000 is "%s"
 	// Remove the appended size for extraction
 	psz_fullpath[nul_pos] = 0;
 	// ISO9660 cannot handle backslashes
 	to_unix_path(psz_fullpath);
-}
-
-static void alt_print_extracted_file(const char* psz_fullpath, uint64_t file_length)
-{
-	uprintf("Extracting: %s (%s)", psz_fullpath, SizeToHumanReadable(file_length, FALSE, FALSE));
-	PrintStatus(0, MSG_000, psz_fullpath);
 }
 
 // Convert from time_t to FILETIME
@@ -604,8 +597,10 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	uint8_t* buf = malloc(ISO_BUFFER_SIZE);
 	int64_t read, file_length;
 
-	if ((p_udf_dirent == NULL) || (psz_path == NULL) || (buf == NULL))
+	if ((p_udf_dirent == NULL) || (psz_path == NULL) || (buf == NULL)) {
+		safe_free(buf);
 		return 1;
+	}
 
 	if (psz_path[0] == 0)
 		UpdateProgressWithInfoInit(NULL, TRUE);
@@ -746,8 +741,10 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	lsn_t lsn;
 	int64_t file_length;
 
-	if ((p_iso == NULL) || (psz_path == NULL) || (buf == NULL))
+	if ((p_iso == NULL) || (psz_path == NULL) || (buf == NULL)) {
+		safe_free(buf);
 		return 1;
+	}
 
 	length = _snprintf(psz_fullpath, sizeof(psz_fullpath), "%s%s/", psz_extract_dir, psz_path);
 	if (length < 0)
@@ -1090,10 +1087,10 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		StrArrayCreate(&isolinux_path, 8);
 		PrintInfo(0, MSG_202);
 	} else {
-		uprintf("Extracting files...\n");
+		uprintf("Extracting files...");
 		IGNORE_RETVAL(_chdirU(app_data_dir));
 		if (total_blocks == 0) {
-			uprintf("Error: ISO has not been properly scanned.\n");
+			uprintf("Error: ISO has not been properly scanned.");
 			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_SCAN);
 			goto out;
 		}
@@ -1223,7 +1220,7 @@ out:
 						img_report.sl_version = sl_version;
 						sl_index = i;
 					} else if ((img_report.sl_version != sl_version) || (safe_strcmp(img_report.sl_version_ext, ext) != 0)) {
-						uprintf("  Found conflicting isolinux versions:\n  '%s' (%d.%02d%s) vs '%s' (%d.%02d%s)",
+						uprintf("  Found conflicting isolinux versions:\r\n  '%s' (%d.%02d%s) vs '%s' (%d.%02d%s)",
 							isolinux_path.String[sl_index], SL_MAJOR(img_report.sl_version), SL_MINOR(img_report.sl_version),
 							img_report.sl_version_ext, isolinux_path.String[i], SL_MAJOR(sl_version), SL_MINOR(sl_version), ext);
 						// Workaround for Antergos and other ISOs, that have multiple Syslinux versions.
@@ -1270,7 +1267,7 @@ out:
 			if (tmp != NULL) {
 				for (i = 0; i < strlen(tmp); i++)
 					tmp[i] = (char)tolower(tmp[i]);
-				uprintf("  Checking txtsetup.sif:\n  OsLoadOptions = %s", tmp);
+				uprintf("  Checking txtsetup.sif:\r\n  OsLoadOptions = %s", tmp);
 				img_report.uses_minint = (strstr(tmp, "/minint") != NULL);
 			}
 			DeleteFileU(tmp_sif);
@@ -1401,12 +1398,6 @@ out:
 			}
 		}
 		update_md5sum();
-		if (archive_path != NULL) {
-			uprintf("● Adding files from %s", archive_path);
-			bled_init(256 * KB, NULL, NULL, NULL, NULL, alt_print_extracted_file, NULL);
-			bled_uncompress_to_dir(archive_path, dest_dir, BLED_COMPRESSION_ZIP);
-			bled_exit();
-		}
 	}
 	iso9660_close(p_iso);
 	udf_close(p_udf);
@@ -1606,7 +1597,7 @@ int iso9660_readfat(intptr_t pp, void *buf, size_t secsize, libfat_sector_t sec)
 		if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf,
 			p_private->lsn + (lsn_t)((p_private->sec_start * secsize) / ISO_BLOCKSIZE), ISO_NB_BLOCKS)
 			!= ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
-			uprintf("Error reading ISO-9660 file %s at LSN %lu\n", img_report.efi_img_path,
+			uprintf("Error reading ISO-9660 file %s at LSN %lu", img_report.efi_img_path,
 				(long unsigned int)(p_private->lsn + (p_private->sec_start * secsize) / ISO_BLOCKSIZE));
 			return 0;
 		}
@@ -1640,7 +1631,7 @@ BOOL HasEfiImgBootLoaders(void)
 	}
 	p_statbuf = iso9660_ifs_stat_translate(p_iso, img_report.efi_img_path);
 	if (p_statbuf == NULL) {
-		uprintf("Could not get ISO-9660 file information for file %s\n", img_report.efi_img_path);
+		uprintf("Could not get ISO-9660 file information for file %s", img_report.efi_img_path);
 		goto out;
 	}
 	p_private = malloc(sizeof(iso9660_readfat_private));
@@ -1651,7 +1642,7 @@ BOOL HasEfiImgBootLoaders(void)
 	p_private->sec_start = 0;
 	// Populate our initial buffer
 	if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf, p_private->lsn, ISO_NB_BLOCKS) != ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
-		uprintf("Error reading ISO-9660 file %s at LSN %lu\n", img_report.efi_img_path, (long unsigned int)p_private->lsn);
+		uprintf("Error reading ISO-9660 file %s at LSN %lu", img_report.efi_img_path, (long unsigned int)p_private->lsn);
 		goto out;
 	}
 	lf_fs = libfat_open(iso9660_readfat, (intptr_t)p_private);
@@ -1728,7 +1719,7 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 		}
 		p_statbuf = iso9660_ifs_stat_translate(p_iso, img_report.efi_img_path);
 		if (p_statbuf == NULL) {
-			uprintf("Could not get ISO-9660 file information for file %s\n", img_report.efi_img_path);
+			uprintf("Could not get ISO-9660 file information for file %s", img_report.efi_img_path);
 			goto out;
 		}
 		p_private = malloc(sizeof(iso9660_readfat_private));
@@ -1739,7 +1730,7 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 		p_private->sec_start = 0;
 		// Populate our initial buffer
 		if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf, p_private->lsn, ISO_NB_BLOCKS) != ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
-			uprintf("Error reading ISO-9660 file %s at LSN %lu\n", img_report.efi_img_path, (long unsigned int)p_private->lsn);
+			uprintf("Error reading ISO-9660 file %s at LSN %lu", img_report.efi_img_path, (long unsigned int)p_private->lsn);
 			goto out;
 		}
 		lf_fs = libfat_open(iso9660_readfat, (intptr_t)p_private);
@@ -1764,7 +1755,7 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 			if (diritem.attributes & 0x10) {
 				// Directory => Create directory
 				if (!CreateDirectoryU(target, 0) && (GetLastError() != ERROR_ALREADY_EXISTS)) {
-					uprintf("Could not create directory '%s': %s\n", target, WindowsErrorString());
+					uprintf("Could not create directory '%s': %s", target, WindowsErrorString());
 					continue;
 				}
 				if (!DumpFatDir(target, dirpos.cluster))

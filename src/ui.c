@@ -46,7 +46,7 @@ UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 HIMAGELIST hUpImageList, hDownImageList;
 extern BOOL use_vds, appstore_version;
 extern int imop_win_sel;
-extern char* unattend_xml_path;
+extern char *unattend_xml_path, *archive_path;
 int update_progress_type = UPT_PERCENT;
 int advanced_device_section_height, advanced_format_section_height;
 // (empty) check box width, (empty) drop down width, button height (for and without dropdown match)
@@ -1204,6 +1204,9 @@ void InitProgress(BOOL bOnlyFormat)
 			}
 			nb_slots[OP_FINALIZE] = ((selection_default == BT_IMAGE) && (fs_type == FS_NTFS)) ? 3 : 2;
 		}
+	}
+	if (archive_path != NULL) {
+		nb_slots[OP_EXTRACT_ZIP] = -1;
 	}
 
 	for (i = 0; i < OP_MAX; i++) {

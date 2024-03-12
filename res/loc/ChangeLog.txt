@@ -15,6 +15,9 @@ o v4.?? (202?.??.??)
   - *NEW*      MSG_343 "Uncompressed VHD Image"
   - *NEW*      MSG_344 "Full Flash Update Image"
   - *NEW*      MSG_345 "Some additional data must be downloaded from Microsoft to use this functionality (...)"
+  - *NEW*      MSG_346 "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+  - *NEW*      MSG_347 "Expert Mode"
+  - *NEW*      MSG_348 "Extracting archive files: %s"
 
 o v3.22 (2023.??.??)
   // MSG_144 is aimed the the ISO download feature

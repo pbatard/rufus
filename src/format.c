@@ -75,6 +75,7 @@ extern uint32_t dur_mins, dur_secs;
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing;
 extern BOOL write_as_image, use_vds, write_as_esp, is_vds_available, has_ffu_support;
+extern char* archive_path;
 uint8_t *grub2_buf = NULL, *sec_buf = NULL;
 long grub2_len;
 
@@ -707,7 +708,7 @@ static BOOL CheckDisk(char DriveLetter)
 
 	pfChkdsk(wDriveRoot, wFSType, FALSE, FALSE, FALSE, FALSE, NULL, NULL, ChkdskCallback);
 	if (!IS_ERROR(FormatStatus)) {
-		uprintf("NTFS Fixup completed.\n");
+		uprintf("NTFS Fixup completed.");
 		r = TRUE;
 	}
 
@@ -797,7 +798,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	}
 
 	if (!read_sectors(hPhysicalDrive, SelectedDrive.SectorSize, 0, 1, buffer)) {
-		uprintf("Could not read MBR\n");
+		uprintf("Could not read MBR");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_READ_FAULT;
 		goto out;
 	}
@@ -805,17 +806,17 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 	switch (ComboBox_GetCurItemData(hFileSystem)) {
 	case FS_FAT16:
 		if (buffer[0x1c2] == 0x0e) {
-			uprintf("Partition is already FAT16 LBA...\n");
+			uprintf("Partition is already FAT16 LBA...");
 		} else if ((buffer[0x1c2] != 0x04) && (buffer[0x1c2] != 0x06)) {
-			uprintf("Warning: converting a non FAT16 partition to FAT16 LBA: FS type=0x%02x\n", buffer[0x1c2]);
+			uprintf("Warning: converting a non FAT16 partition to FAT16 LBA: FS type=0x%02x", buffer[0x1c2]);
 		}
 		buffer[0x1c2] = 0x0e;
 		break;
 	case FS_FAT32:
 		if (buffer[0x1c2] == 0x0c) {
-			uprintf("Partition is already FAT32 LBA...\n");
+			uprintf("Partition is already FAT32 LBA...");
 		} else if (buffer[0x1c2] != 0x0b) {
-			uprintf("Warning: converting a non FAT32 partition to FAT32 LBA: FS type=0x%02x\n", buffer[0x1c2]);
+			uprintf("Warning: converting a non FAT32 partition to FAT32 LBA: FS type=0x%02x", buffer[0x1c2]);
 		}
 		buffer[0x1c2] = 0x0c;
 		break;
@@ -824,11 +825,11 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		// Set first partition bootable - masquerade as per the DiskID selected
 		buffer[0x1be] = IsChecked(IDC_RUFUS_MBR) ?
 			(BYTE)ComboBox_GetCurItemData(hDiskID):0x80;
-		uprintf("Set bootable USB partition as 0x%02X\n", buffer[0x1be]);
+		uprintf("Set bootable USB partition as 0x%02X", buffer[0x1be]);
 	}
 
 	if (!write_sectors(hPhysicalDrive, SelectedDrive.SectorSize, 0, 1, buffer)) {
-		uprintf("Could not write MBR\n");
+		uprintf("Could not write MBR");
 		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
 		goto out;
 	}
@@ -897,7 +898,7 @@ windows_mbr:
 notify:
 	// Tell the system we've updated the disk properties
 	if (!DeviceIoControl(hPhysicalDrive, IOCTL_DISK_UPDATE_PROPERTIES, NULL, 0, NULL, 0, &size, NULL))
-		uprintf("Failed to notify system about disk properties update: %s\n", WindowsErrorString());
+		uprintf("Failed to notify system about disk properties update: %s", WindowsErrorString());
 
 out:
 	safe_mm_free(buffer);
@@ -1022,7 +1023,7 @@ BOOL WritePBR(HANDLE hLogicalVolume)
 		} else if (boot_type == BT_REACTOS) {
 			if (!write_fat_16_ros_br(fp, 0)) break;
 		} else if ((boot_type == BT_IMAGE) && HAS_KOLIBRIOS(img_report)) {
-			uprintf("FAT16 is not supported for KolibriOS\n"); break;
+			uprintf("FAT16 is not supported for KolibriOS"); break;
 		} else {
 			if (!write_fat_16_br(fp, 0)) break;
 		}
@@ -1034,11 +1035,11 @@ BOOL WritePBR(HANDLE hLogicalVolume)
 		uprintf(using_msg, bt_to_name(), "FAT32");
 		for (i = 0; i < 2; i++) {
 			if (!is_fat_32_fs(fp)) {
-				uprintf("New volume does not have a %s FAT32 boot sector - aborting\n", i?"secondary":"primary");
+				uprintf("New volume does not have a %s FAT32 boot sector - aborting", i?"secondary":"primary");
 				break;
 			}
-			uprintf("Confirmed new volume has a %s FAT32 boot sector\n", i?"secondary":"primary");
-			uprintf("Setting %s FAT32 boot sector for boot...\n", i?"secondary":"primary");
+			uprintf("Confirmed new volume has a %s FAT32 boot sector", i?"secondary":"primary");
+			uprintf("Setting %s FAT32 boot sector for boot...", i?"secondary":"primary");
 			if (boot_type == BT_FREEDOS) {
 				if (!write_fat_32_fd_br(fp, 0)) break;
 			} else if (boot_type == BT_REACTOS) {
@@ -1061,10 +1062,10 @@ BOOL WritePBR(HANDLE hLogicalVolume)
 	case FS_NTFS:
 		uprintf(using_msg, bt_to_name(), "NTFS");
 		if (!is_ntfs_fs(fp)) {
-			uprintf("New volume does not have an NTFS boot sector - aborting\n");
+			uprintf("New volume does not have an NTFS boot sector - aborting");
 			break;
 		}
-		uprintf("Confirmed new volume has an NTFS boot sector\n");
+		uprintf("Confirmed new volume has an NTFS boot sector");
 		if (!write_ntfs_br(fp)) break;
 		// Note: NTFS requires a full remount after writing the PBR. We dismount when we lock
 		// and also go through a forced remount, so that shouldn't be an issue.
@@ -1075,7 +1076,7 @@ BOOL WritePBR(HANDLE hLogicalVolume)
 	case FS_EXT4:
 		return TRUE;
 	default:
-		uprintf("Unsupported FS for FS BR processing - aborting\n");
+		uprintf("Unsupported FS for FS BR processing - aborting");
 		break;
 	}
 	FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
@@ -1813,7 +1814,7 @@ DWORD WINAPI FormatThread(void* param)
 		// we forcibly removed them, so add yet another explicit call to RemoveDriveLetters()
 		RemoveDriveLetters(DriveIndex, FALSE, TRUE);
 		if (!MountVolume(drive_name, volume_name)) {
-			uprintf("Could not remount %s as %c: %s\n", volume_name, toupper(drive_name[0]), WindowsErrorString());
+			uprintf("Could not remount %s as %c: %s", volume_name, toupper(drive_name[0]), WindowsErrorString());
 			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_MOUNT_VOLUME);
 			goto out;
 		}
@@ -1980,6 +1981,14 @@ DWORD WINAPI FormatThread(void* param)
 			CheckDisk(drive_name[0]);
 			UpdateProgress(OP_FINALIZE, -1.0f);
 		}
+	}
+
+	// Copy any additonal files from an optional zip archive selected by the user
+	if (!IS_ERROR(FormatStatus)) {
+		UpdateProgress(OP_EXTRACT_ZIP, 0.0f);
+		drive_name[2] = 0;
+		if (fs_type < FS_EXT2 && !ExtractZip(archive_path, drive_name) && !IS_ERROR(FormatStatus))
+			uprintf("Warning: Could not copy additional files");
 	}
 
 out:

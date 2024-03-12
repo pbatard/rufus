@@ -40,6 +40,7 @@
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
+#include "bled/bled.h"
 
 #define FACILITY_WIM            322
 #define DEFAULT_BASE_ADDRESS    0x100000000ULL
@@ -52,6 +53,7 @@ const HANDLE hRufus = (HANDLE)0x0000005275667573ULL;	// "\0\0\0Rufus"
 HWND hStatus;
 size_t ubuffer_pos = 0;
 char ubuffer[UBUFFER_SIZE];	// Buffer for ubpushf() messages we don't log right away
+static uint64_t archive_size;
 
 #pragma pack(push, 1)
 typedef struct {
@@ -334,28 +336,28 @@ char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units)
 	double hr_size = (double)size;
 	double t;
 	uint16_t i_size;
-	char **_msg_table = copy_to_log?default_msg_table:msg_table;
-	const double divider = fake_units?1000.0:1024.0;
+	char **_msg_table = copy_to_log ? default_msg_table : msg_table;
+	const double divider = fake_units ? 1000.0 : 1024.0;
 
-	for (suffix=0; suffix<MAX_SIZE_SUFFIXES-1; suffix++) {
+	for (suffix = 0; suffix < MAX_SIZE_SUFFIXES - 1; suffix++) {
 		if (hr_size < divider)
 			break;
 		hr_size /= divider;
 	}
 	if (suffix == 0) {
-		static_sprintf(str_size, "%s%d%s %s", dir, (int)hr_size, dir, _msg_table[MSG_020-MSG_000]);
+		static_sprintf(str_size, "%s%d%s %s", dir, (int)hr_size, dir, _msg_table[MSG_020 - MSG_000]);
 	} else if (fake_units) {
 		if (hr_size < 8) {
-			static_sprintf(str_size, (fabs((hr_size*10.0)-(floor(hr_size + 0.5)*10.0)) < 0.5)?"%0.0f%s":"%0.1f%s",
-				hr_size, _msg_table[MSG_020+suffix-MSG_000]);
+			static_sprintf(str_size, (fabs((hr_size * 10.0) - (floor(hr_size + 0.5) * 10.0)) < 0.5) ?
+				"%0.0f%s":"%0.1f%s", hr_size, _msg_table[MSG_020 + suffix - MSG_000]);
 		} else {
 			t = (double)upo2((uint16_t)hr_size);
-			i_size = (uint16_t)((fabs(1.0f-(hr_size / t)) < 0.05f)?t:hr_size);
-			static_sprintf(str_size, "%s%d%s %s", dir, i_size, dir, _msg_table[MSG_020+suffix-MSG_000]);
+			i_size = (uint16_t)((fabs(1.0f - (hr_size / t)) < 0.05f) ? t : hr_size);
+			static_sprintf(str_size, "%s%d%s %s", dir, i_size, dir, _msg_table[MSG_020 + suffix - MSG_000]);
 		}
 	} else {
 		static_sprintf(str_size, (hr_size * 10.0 - (floor(hr_size) * 10.0)) < 0.5?
-			"%s%0.0f%s %s":"%s%0.1f%s %s", dir, hr_size, dir, _msg_table[MSG_020+suffix-MSG_000]);
+			"%s%0.0f%s %s":"%s%0.1f%s %s", dir, hr_size, dir, _msg_table[MSG_020 + suffix - MSG_000]);
 	}
 	return str_size;
 }
@@ -881,4 +883,36 @@ out:
 		pfSymUnloadModule64(hRufus, base_address);
 	pfSymCleanup(hRufus);
 	return r;
+}
+
+static void print_extracted_file(const char* file_path, uint64_t file_length)
+{
+	char str[MAX_PATH];
+
+	if (file_path == NULL)
+		return;
+	static_sprintf(str, "%s (%s)", file_path, SizeToHumanReadable(file_length, TRUE, FALSE));
+	uprintf("Extracting: %s", str);
+	PrintStatus(0, MSG_000, str);	// MSG_000 is "%s"
+}
+
+static void update_progress(const uint64_t processed_bytes)
+{
+	UpdateProgressWithInfo(OP_EXTRACT_ZIP, MSG_348, processed_bytes, archive_size);
+}
+
+// Extract content from a zip archive onto the designated directory or drive
+BOOL ExtractZip(const char* src_zip, const char* dest_dir)
+{
+	int64_t extracted_bytes = 0;
+
+	if (src_zip == NULL)
+		return FALSE;
+	archive_size = _filesizeU(src_zip);
+	if (bled_init(256 * KB, NULL, NULL, NULL, update_progress, print_extracted_file, &FormatStatus) != 0)
+		return FALSE;
+	uprintf("● Copying files from '%s'", src_zip);
+	extracted_bytes = bled_uncompress_to_dir(src_zip, dest_dir, BLED_COMPRESSION_ZIP);
+	bled_exit();
+	return (extracted_bytes > 0);
 }

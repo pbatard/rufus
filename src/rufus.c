@@ -2512,17 +2512,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			// For now only zip archives are supported.
 			if (GetKeyState(VK_CONTROL) & 0x8000) {
 				EXT_DECL(arch_ext, NULL, __VA_GROUP__("*.zip"), __VA_GROUP__(lmprintf(MSG_309)));
-				if (image_path == NULL)
-					break;
 				archive_path = FileDialog(FALSE, NULL, &arch_ext, NULL);
 				if (archive_path != NULL) {
-					struct __stat64 stat64 = { 0 };
-					_stat64U(archive_path, &stat64);
-					img_report.projected_size -= img_report.archive_size;
-					img_report.archive_size = stat64.st_size;
-					img_report.projected_size += img_report.archive_size;
 					uprintf("Using archive: %s (%s)", _filenameU(archive_path),
-						SizeToHumanReadable(img_report.archive_size, FALSE, FALSE));
+						SizeToHumanReadable(_filesizeU(archive_path), FALSE, FALSE));
 				}
 				break;
 			}

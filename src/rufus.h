@@ -25,6 +25,8 @@
 #pragma warning(disable: 6258)		// I know what I'm using TerminateThread for
 #pragma warning(disable: 26451)		// Stop bugging me with casts already!
 #pragma warning(disable: 28159)		// I'll keep using GetVersionEx(), thank you very much...
+// Enable C11's _Static_assert (requires VS2015 or later)
+#define _Static_assert static_assert
 #endif
 
 #pragma once
@@ -142,12 +144,6 @@
 // Bit masks used for the display of additional image options in the UI
 #define IMOP_WINTOGO                0x01
 #define IMOP_PERSISTENCE            0x02
-
-#if (_MSC_VER >= 1900)
-#define _Static_assert static_assert
-#else
-#define _Static_assert(...)
-#endif
 
 #define ComboBox_GetCurItemData(hCtrl) ComboBox_GetItemData(hCtrl, ComboBox_GetCurSel(hCtrl))
 
@@ -267,6 +263,7 @@ enum action_type {
 	OP_FILE_COPY,
 	OP_PATCH,
 	OP_FINALIZE,
+	OP_EXTRACT_ZIP,
 	OP_MAX
 };
 
@@ -395,7 +392,6 @@ typedef struct {
 	char efi_boot_path[ARCH_MAX][30];	// paths of detected UEFI bootloaders
 	char efi_img_path[128];				// path to an efi.img file
 	uint64_t image_size;
-	uint64_t archive_size;
 	uint64_t projected_size;
 	int64_t mismatch_size;
 	uint32_t wininst_version;
@@ -665,6 +661,7 @@ extern SIZE GetTextSize(HWND hCtrl, char* txt);
 extern BOOL ExtractAppIcon(const char* filename, BOOL bSilent);
 extern BOOL ExtractDOS(const char* path);
 extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
+extern BOOL ExtractZip(const char* src_zip, const char* dest_dir);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
 extern BOOL CopySKUSiPolicy(const char* drive_name);
 extern BOOL HasEfiImgBootLoaders(void);

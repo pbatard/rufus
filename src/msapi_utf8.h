@@ -1146,6 +1146,13 @@ static __inline const char* _filenameU(const char* path)
 	return path;
 }
 
+static __inline uint64_t _filesizeU(const char* path)
+{
+	struct __stat64 stat64 = { 0 };
+	_stat64U(path, &stat64);
+	return stat64.st_size;
+}
+
 // returned UTF-8 string must be freed
 static __inline char* getenvU(const char* varname)
 {
