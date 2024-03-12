@@ -52,9 +52,10 @@
 #include "localization.h"
 #include "bled/bled.h"
 
-// How often should we update the progress bar (in 2K blocks) as updating
-// the progress bar for every block will bring extraction to a crawl
-#define PROGRESS_THRESHOLD        128
+// How often should we update the progress bar, as updating the
+// progress bar too frequently will bring extraction to a crawl
+_Static_assert(256 * KB >= ISO_BLOCKSIZE, "Can't set PROGRESS_THRESHOLD");
+#define PROGRESS_THRESHOLD        ((256 * KB) / ISO_BLOCKSIZE)
 
 // Needed for UDF symbolic link testing
 #define S_IFLNK                   0xA000
@@ -122,7 +123,7 @@ static const char* stupid_antivirus = "  NOTE: This is usually caused by a poorl
 const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
 static uint8_t joliet_level = 0;
-static uint64_t total_blocks, extra_blocks, nb_blocks;
+static uint64_t total_blocks, extra_blocks, nb_blocks, last_nb_blocks;
 static BOOL scan_only = FALSE;
 static StrArray config_path, isolinux_path, modified_path;
 static char symlinked_syslinux[MAX_PATH];
@@ -594,14 +595,16 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	EXTRACT_PROPS props;
 	BOOL r, is_identical;
 	int length;
-	size_t i;
+	size_t i, nb;
 	char tmp[128], *psz_fullpath = NULL, *psz_sanpath = NULL;
 	const char* psz_basename;
 	udf_dirent_t *p_udf_dirent2;
-	uint8_t buf[UDF_BLOCKSIZE];
+	_Static_assert(ISO_BUFFER_SIZE % UDF_BLOCKSIZE == 0,
+		"ISO_BUFFER_SIZE is not a multiple of UDF_BLOCKSIZE");
+	uint8_t* buf = malloc(ISO_BUFFER_SIZE);
 	int64_t read, file_length;
 
-	if ((p_udf_dirent == NULL) || (psz_path == NULL))
+	if ((p_udf_dirent == NULL) || (psz_path == NULL) || (buf == NULL))
 		return 1;
 
 	if (psz_path[0] == 0)
@@ -672,22 +675,26 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 					goto out;
 			} else {
 				while (file_length > 0) {
-					if (FormatStatus) goto out;
-					memset(buf, 0, UDF_BLOCKSIZE);
-					read = udf_read_block(p_udf_dirent, buf, 1);
+					if (FormatStatus)
+						goto out;
+					nb = MIN(ISO_BUFFER_SIZE / UDF_BLOCKSIZE, (file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
+					read = udf_read_block(p_udf_dirent, buf, nb);
 					if (read < 0) {
 						uprintf("  Error reading UDF file %s", &psz_fullpath[strlen(psz_extract_dir)]);
 						goto out;
 					}
 					buf_size = (DWORD)MIN(file_length, read);
 					ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
-					if (!r) {
-						uprintf("  Error writing file: %s", WindowsErrorString());
+					if (!r || (wr_size != buf_size)) {
+						uprintf("  Error writing file: %s", r ? "Short write detected" : WindowsErrorString());
 						goto out;
 					}
-					file_length -= read;
-					if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
+					file_length -= wr_size;
+					nb_blocks += nb;
+					if (nb_blocks - last_nb_blocks >= PROGRESS_THRESHOLD) {
 						UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks);
+						last_nb_blocks = nb_blocks;
+					}
 				}
 			}
 			if ((preserve_timestamps) && (!SetFileTime(file_handle, to_filetime(udf_get_attribute_time(p_udf_dirent)),
@@ -706,6 +713,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 		}
 		safe_free(psz_fullpath);
 	}
+	safe_free(buf);
 	return 0;
 
 out:
@@ -713,6 +721,7 @@ out:
 	ISO_BLOCKING(safe_closehandle(file_handle));
 	safe_free(psz_sanpath);
 	safe_free(psz_fullpath);
+	safe_free(buf);
 	return 1;
 }
 
@@ -727,26 +736,28 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	char psz_fullpath[MAX_PATH], *psz_basename = NULL, *psz_sanpath = NULL;
 	char tmp[128], target_path[256];
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
-	unsigned char buf[ISO_BLOCKSIZE];
+	_Static_assert(ISO_BUFFER_SIZE % ISO_BLOCKSIZE == 0,
+		"ISO_BUFFER_SIZE is not a multiple of ISO_BLOCKSIZE");
+	uint8_t* buf = malloc(ISO_BUFFER_SIZE);
 	CdioListNode_t* p_entnode;
 	iso9660_stat_t *p_statbuf;
-	CdioISO9660FileList_t* p_entlist;
-	size_t i;
+	CdioISO9660FileList_t* p_entlist = NULL;
+	size_t i, nb;
 	lsn_t lsn;
 	int64_t file_length;
 
-	if ((p_iso == NULL) || (psz_path == NULL))
+	if ((p_iso == NULL) || (psz_path == NULL) || (buf == NULL))
 		return 1;
 
 	length = _snprintf(psz_fullpath, sizeof(psz_fullpath), "%s%s/", psz_extract_dir, psz_path);
 	if (length < 0)
-		return 1;
+		goto out;
 	psz_basename = &psz_fullpath[length];
 
 	p_entlist = iso9660_ifs_readdir(p_iso, psz_path);
 	if (!p_entlist) {
 		uprintf("Could not access directory %s", psz_path);
-		return 1;
+		goto out;
 	}
 
 	if (psz_path[0] == 0)
@@ -913,25 +924,29 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 						uprintf("  Error writing file: %s", WindowsErrorString());
 						goto out;
 					}
-				} else for (i = 0; file_length > 0; i++) {
-					if (FormatStatus) goto out;
-					memset(buf, 0, ISO_BLOCKSIZE);
+				} else for (i = 0; file_length > 0; i += nb) {
+					if (FormatStatus)
+						goto out;
 					lsn = p_statbuf->lsn + (lsn_t)i;
-					if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
+					nb = MIN(ISO_BUFFER_SIZE / ISO_BLOCKSIZE, (file_length + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE);
+					if (iso9660_iso_seek_read(p_iso, buf, lsn, (long)nb) != (nb * ISO_BLOCKSIZE)) {
 						uprintf("  Error reading ISO9660 file %s at LSN %lu",
 							psz_iso_name, (long unsigned int)lsn);
 						goto out;
 					}
-					buf_size = (DWORD)MIN(file_length, ISO_BLOCKSIZE);
+					buf_size = (DWORD)MIN(file_length, ISO_BUFFER_SIZE);
 					ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
-					if (!r) {
-						uprintf("  Error writing file: %s", WindowsErrorString());
+					if (!r || wr_size != buf_size) {
+						uprintf("  Error writing file: %s", r ? "Short write detected" : WindowsErrorString());
 						goto out;
 					}
-					file_length -= ISO_BLOCKSIZE;
-					if (nb_blocks++ % PROGRESS_THRESHOLD == 0)
+					file_length -= wr_size;
+					nb_blocks += nb;
+					if (nb_blocks - last_nb_blocks >= PROGRESS_THRESHOLD) {
 						UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks +
 							((fs_type != FS_NTFS) ? extra_blocks : 0));
+						last_nb_blocks = nb_blocks;
+					}
 				}
 				if (preserve_timestamps) {
 					LPFILETIME ft = to_filetime(mktime(&p_statbuf->tm));
@@ -951,8 +966,10 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 
 out:
 	ISO_BLOCKING(safe_closehandle(file_handle));
-	iso9660_filelist_free(p_entlist);
+	if (p_entlist != NULL)
+		iso9660_filelist_free(p_entlist);
 	safe_free(psz_sanpath);
+	safe_free(buf);
 	return r;
 }
 
@@ -1039,20 +1056,19 @@ void GetGrubVersion(char* buf, size_t buf_size)
 
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 {
-	size_t i, j, size, sl_index = 0;
-	uint16_t sl_version;
-	FILE* fd;
+	const char* basedir[] = { "i386", "amd64", "minint" };
+	const char* tmp_sif = ".\\txtsetup.sif~";
 	int k, r = 1;
+	char* tmp, * buf, * ext, * spacing = "  ";
+	char path[MAX_PATH], path2[16];
+	uint16_t sl_version;
+	size_t i, j, size, sl_index = 0;
+	FILE* fd;
 	iso9660_t* p_iso = NULL;
 	iso9660_pvd_t pvd;
 	udf_t* p_udf = NULL;
 	udf_dirent_t* p_udf_root;
-	char *tmp, *buf, *ext;
-	char path[MAX_PATH], path2[16];
-	const char* basedir[] = { "i386", "amd64", "minint" };
-	const char* tmp_sif = ".\\txtsetup.sif~";
 	iso_extension_mask_t iso_extension_mask = ISO_EXTENSION_ALL;
-	char* spacing = "  ";
 
 	if ((!enable_iso) || (src_iso == NULL) || (dest_dir == NULL))
 		return FALSE;
@@ -1082,6 +1098,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 			goto out;
 		}
 		nb_blocks = 0;
+		last_nb_blocks = 0;
 		iso_blocking_status = 0;
 		symlinked_syslinux[0] = 0;
 		StrArrayCreate(&modified_path, 8);
