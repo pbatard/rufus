@@ -1987,7 +1987,7 @@ DWORD WINAPI FormatThread(void* param)
 	if (!IS_ERROR(FormatStatus)) {
 		UpdateProgress(OP_EXTRACT_ZIP, 0.0f);
 		drive_name[2] = 0;
-		if (fs_type < FS_EXT2 && !ExtractZip(archive_path, drive_name) && !IS_ERROR(FormatStatus))
+		if (archive_path != NULL && fs_type < FS_EXT2 && !ExtractZip(archive_path, drive_name) && !IS_ERROR(FormatStatus))
 			uprintf("Warning: Could not copy additional files");
 	}
 

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2023-03-10 13:36+0000\n"
-"PO-Revision-Date: 2023-03-10 13:40+0000\n"
+"PO-Revision-Date: 2024-03-25 17:47+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ko_KR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Korean (한국어)\n"
 "X-Rufus-LCID: 0x0412\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -237,7 +237,7 @@ msgstr ""
 "검사 완료: %d개의 불량 블록을 찾았습니다\n"
 "  %d개 읽기 오류\n"
 "  %d개 쓰기 오류\n"
-"  %d개  손상 오류"
+"  %d개 손상 오류"
 
 #. • MSG_012
 #.
@@ -1095,7 +1095,7 @@ msgstr "버전 %d.%d (빌드 %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "한국어 번역:\\line• Uk-Jin Jang <mailto:doublestat@gmail.com>\\line• 비너스걸-VᴇɴᴜsGɪʀʟ♥ <mailto:venusgirl@outlook.com>"
+msgstr "한국어 번역:\\line• 세상사는이야기-나두 <mailto:ho82.kr@gmail.com>\\line• Uk-Jin Jang <mailto:doublestat@gmail.com>\\line• 비너스걸-VᴇɴᴜsGɪʀʟ♥ <mailto:venusgirl@outlook.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
