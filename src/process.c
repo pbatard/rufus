@@ -499,8 +499,8 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 				goto out;
 			}
 			if (wHandleName != NULL) {
-				for (i = 0; i < nHandles; i++)
-					free(wHandleName[i]);
+				for (j = 0; j < nHandles; j++)
+					free(wHandleName[j]);
 				free(wHandleName);
 			}
 			safe_free(wHandleNameLen);
@@ -515,10 +515,10 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 				ReleaseMutex(hLock);
 				goto out;
 			}
-			for (i = 0; i < nHandles; i++) {
-				wHandleName[i] = wcsdup(blocking_process.wHandleName[i]);
-				wHandleNameLen[i] = (USHORT)wcslen(blocking_process.wHandleName[i]);
-				if (wHandleName[i] == NULL) {
+			for (j = 0; j < nHandles; j++) {
+				wHandleName[j] = wcsdup(blocking_process.wHandleName[j]);
+				wHandleNameLen[j] = (USHORT)wcslen(blocking_process.wHandleName[j]);
+				if (wHandleName[j] == NULL) {
 					ReleaseMutex(hLock);
 					goto out;
 				}
@@ -741,8 +741,8 @@ out:
 		uprintf("Warning: Could not start process handle enumerator!");
 
 	if (wHandleName != NULL) {
-		for (i = 0; i < nHandles; i++)
-			free(wHandleName[i]);
+		for (j = 0; j < nHandles; j++)
+			free(wHandleName[j]);
 		free(wHandleName);
 	}
 	safe_free(wHandleNameLen);

@@ -125,7 +125,8 @@ uint32_t read_file(const char* path, uint8_t** buf)
 	uint32_t size = (uint32_t)ftell(fd);
 	fseek(fd, 0L, SEEK_SET);
 
-	*buf = malloc(size);
+	// +1 so we can add an extra NUL
+	*buf = malloc(size + 1);
 	if (*buf == NULL) {
 		uprintf("Error: Can't allocate %d bytes buffer for file '%s'", size, path);
 		size = 0;
@@ -135,6 +136,8 @@ uint32_t read_file(const char* path, uint8_t** buf)
 		uprintf("Error: Can't read '%s'", path);
 		size = 0;
 	}
+	// Always NUL terminate the file
+	(*buf)[size] = 0;
 
 out:
 	fclose(fd);

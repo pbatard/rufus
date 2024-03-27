@@ -31,14 +31,14 @@
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
+#ifndef MAX
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#endif
+
 #define LO_ALIGN_X_TO_Y(x, y) (((x) / (y)) * (y))
 #define HI_ALIGN_X_TO_Y(x, y) ((((x) + (y) - 1) / (y)) * (y))
 
-#if defined(__GNUC__)
-#define ALIGNED(m) __attribute__ ((__aligned__(m)))
-#elif defined(_MSC_VER)
-#define ALIGNED(m) __declspec(align(m))
-#endif
+#define IS_HEXASCII(c) (((c) >= '0' && (c) <= '9') || ((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
 
 /*
  * Prefetch 64 bytes at address m, for read-only operation

@@ -97,20 +97,6 @@
 #define BUFFER_SIZE         (64*KB)
 #define WAIT_TIME           5000
 
-/* Blocksize for each algorithm - Must be a power of 2 */
-#define MD5_BLOCKSIZE       64
-#define SHA1_BLOCKSIZE      64
-#define SHA256_BLOCKSIZE    64
-#define SHA512_BLOCKSIZE    128
-#define MAX_BLOCKSIZE       SHA512_BLOCKSIZE
-
-/* Hashsize for each algorithm */
-#define MD5_HASHSIZE        16
-#define SHA1_HASHSIZE       20
-#define SHA256_HASHSIZE     32
-#define SHA512_HASHSIZE     64
-#define MAX_HASHSIZE        SHA512_HASHSIZE
-
 /* Number of buffers we work with */
 #define NUM_BUFFERS         3   // 2 + 1 as a mere double buffered async I/O
                                 // would modify the buffer being processed.
@@ -177,16 +163,6 @@ static const uint64_t K512[80] = {
 	0x28db77f523047d84ULL, 0x32caab7b40c72493ULL, 0x3c9ebe0a15c9bebcULL, 0x431d67c49c100d4cULL,
 	0x4cc5d4becb3e42b6ULL, 0x597f299cfc657e2aULL, 0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL
 };
-
-/*
- * For convenience, we use a common context for all the hash algorithms,
- * which means some elements may be unused...
- */
-typedef struct ALIGNED(64) {
-	uint8_t buf[MAX_BLOCKSIZE];
-	uint64_t state[8];
-	uint64_t bytecount;
-} HASH_CONTEXT;
 
 static void md5_init(HASH_CONTEXT *ctx)
 {
@@ -1467,9 +1443,6 @@ static void null_write(HASH_CONTEXT *ctx, const uint8_t *buf, size_t len) { }
 static void null_final(HASH_CONTEXT *ctx) { }
 #endif
 
-typedef void hash_init_t(HASH_CONTEXT *ctx);
-typedef void hash_write_t(HASH_CONTEXT *ctx, const uint8_t *buf, size_t len);
-typedef void hash_final_t(HASH_CONTEXT *ctx);
 hash_init_t *hash_init[HASH_MAX] = { md5_init, sha1_init , sha256_init, sha512_init };
 hash_write_t *hash_write[HASH_MAX] = { md5_write, sha1_write , sha256_write, sha512_write };
 hash_final_t *hash_final[HASH_MAX] = { md5_final, sha1_final , sha256_final, sha512_final };
