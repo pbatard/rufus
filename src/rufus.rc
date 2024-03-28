@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 4.5.2118"
+CAPTION "Rufus 4.5.2119"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
@@ -305,6 +305,11 @@ BEGIN
     "IDR_FD_EGA18_CPX        RCDATA                  ""../res/freedos/EGA18.CPX""\r\n"
     "IDR_XT_HOGGER           RCDATA                  ""../res/hogger/hogger.exe""\r\n"
     "IDR_UEFI_NTFS           RCDATA                  ""../res/uefi/uefi-ntfs.img""\r\n"
+    "IDR_MD5_BOOTIA32        RCDATA                  ""../res/md5/bootia32.efi""\r\n"
+    "IDR_MD5_BOOTX64         RCDATA                  ""../res/md5/bootx64.efi""\r\n"
+    "IDR_MD5_BOOTARM         RCDATA                  ""../res/md5/bootarm.efi""\r\n"
+    "IDR_MD5_BOOTAA64        RCDATA                  ""../res/md5/bootaa64.efi""\r\n"
+    "IDR_MD5_BOOTRISCV64     RCDATA                  ""../res/md5/bootriscv64.efi""\r\n"
     "IDI_LANG_16             RCDATA                  ""../res/icons/lang-16.png""\r\n"
     "IDI_INFO_16             RCDATA                  ""../res/icons/info-16.png""\r\n"
     "IDI_SETTINGS_16         RCDATA                  ""../res/icons/settings-16.png""\r\n"
@@ -392,8 +397,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,5,2118,0
- PRODUCTVERSION 4,5,2118,0
+ FILEVERSION 4,5,2119,0
+ PRODUCTVERSION 4,5,2119,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -411,13 +416,13 @@ BEGIN
             VALUE "Comments", "https://rufus.ie"
             VALUE "CompanyName", "Akeo Consulting"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "4.5.2118"
+            VALUE "FileVersion", "4.5.2119"
             VALUE "InternalName", "Rufus"
-            VALUE "LegalCopyright", "© 2011-2024 Pete Batard (GPL v3)"
+            VALUE "LegalCopyright", "ï¿½ 2011-2024 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "https://www.gnu.org/licenses/gpl-3.0.html"
             VALUE "OriginalFilename", "rufus-4.5.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "4.5.2118"
+            VALUE "ProductVersion", "4.5.2119"
         END
     END
     BLOCK "VarFileInfo"
@@ -485,6 +490,11 @@ IDR_FD_EGA17_CPX        RCDATA                  "../res/freedos/EGA17.CPX"
 IDR_FD_EGA18_CPX        RCDATA                  "../res/freedos/EGA18.CPX"
 IDR_XT_HOGGER           RCDATA                  "../res/hogger/hogger.exe"
 IDR_UEFI_NTFS           RCDATA                  "../res/uefi/uefi-ntfs.img"
+IDR_MD5_BOOTIA32        RCDATA                  "../res/md5/bootia32.efi"
+IDR_MD5_BOOTX64         RCDATA                  "../res/md5/bootx64.efi"
+IDR_MD5_BOOTARM         RCDATA                  "../res/md5/bootarm.efi"
+IDR_MD5_BOOTAA64        RCDATA                  "../res/md5/bootaa64.efi"
+IDR_MD5_BOOTRISCV64     RCDATA                  "../res/md5/bootriscv64.efi"
 IDI_LANG_16             RCDATA                  "../res/icons/lang-16.png"
 IDI_INFO_16             RCDATA                  "../res/icons/info-16.png"
 IDI_SETTINGS_16         RCDATA                  "../res/icons/settings-16.png"

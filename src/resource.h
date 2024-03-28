@@ -69,6 +69,13 @@
 #define IDR_LC_RUFUS_LOC                500
 #define IDR_XT_HOGGER                   501
 #define IDR_UEFI_NTFS                   502
+// The following should match the ArchType array values + 600
+#define IDR_MD5_BOOT                    600
+#define IDR_MD5_BOOTIA32                601
+#define IDR_MD5_BOOTX64                 602
+#define IDR_MD5_BOOTARM                 603
+#define IDR_MD5_BOOTAA64                604
+#define IDR_MD5_BOOTRISCV64             607
 #define IDM_SELECT                      901
 #define IDM_DOWNLOAD                    902
 #define IDC_DEVICE                      1001
