@@ -71,6 +71,7 @@ static float format_percent = 0.0f;
 static int task_number = 0, actual_fs_type;
 static unsigned int sec_buf_pos = 0;
 extern const int nb_steps[FS_MAX];
+extern const char* md5sum_name[2];
 extern uint32_t dur_mins, dur_secs;
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing;
@@ -1035,11 +1036,11 @@ BOOL WritePBR(HANDLE hLogicalVolume)
 		uprintf(using_msg, bt_to_name(), "FAT32");
 		for (i = 0; i < 2; i++) {
 			if (!is_fat_32_fs(fp)) {
-				uprintf("New volume does not have a %s FAT32 boot sector - aborting", i?"secondary":"primary");
+				uprintf("New volume does not have a %s FAT32 boot sector - aborting", i ? "secondary" : "primary");
 				break;
 			}
-			uprintf("Confirmed new volume has a %s FAT32 boot sector", i?"secondary":"primary");
-			uprintf("Setting %s FAT32 boot sector for boot...", i?"secondary":"primary");
+			uprintf("Confirmed new volume has a %s FAT32 boot sector", i ? "secondary" : "primary");
+			uprintf("Setting %s FAT32 boot sector for boot...", i ? "secondary" : "primary");
 			if (boot_type == BT_FREEDOS) {
 				if (!write_fat_32_fd_br(fp, 0)) break;
 			} else if (boot_type == BT_REACTOS) {
@@ -1964,8 +1965,11 @@ DWORD WINAPI FormatThread(void* param)
 				}
 			}
 		}
+
 		UpdateProgress(OP_FINALIZE, -1.0f);
 		PrintInfoDebug(0, MSG_233);
+		if ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso) && (!windows_to_go))
+			UpdateMD5Sum(drive_name, md5sum_name[img_report.has_md5sum ? img_report.has_md5sum - 1 : 0]);
 		if (IsChecked(IDC_EXTENDED_LABEL))
 			SetAutorun(drive_name);
 		// Issue another complete remount before we exit, to ensure we're clean

@@ -625,6 +625,35 @@ typedef struct {
 #define UNATTEND_OFFLINE_SERVICING_MASK     (UNATTEND_OFFLINE_INTERNAL_DRIVES | UNATTEND_FORCE_S_MODE)
 #define UNATTEND_DEFAULT_SELECTION_MASK     (UNATTEND_SECUREBOOT_TPM_MINRAM | UNATTEND_NO_ONLINE_ACCOUNT | UNATTEND_OFFLINE_INTERNAL_DRIVES)
 
+/* Hash tables */
+typedef struct htab_entry {
+	uint32_t used;
+	char* str;
+	void* data;
+} htab_entry;
+typedef struct htab_table {
+	htab_entry* table;
+	uint32_t size;
+	uint32_t filled;
+} htab_table;
+#define HTAB_EMPTY {NULL, 0, 0}
+extern BOOL htab_create(uint32_t nel, htab_table* htab);
+extern void htab_destroy(htab_table* htab);
+extern uint32_t htab_hash(char* str, htab_table* htab);
+
+/* Basic String Array */
+typedef struct {
+	char** String;
+	uint32_t Index;		// Current array size
+	uint32_t Max;		// Maximum array size
+} StrArray;
+extern void StrArrayCreate(StrArray* arr, uint32_t initial_size);
+extern int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL);
+extern int32_t StrArrayFind(StrArray* arr, const char* str);
+extern void StrArrayClear(StrArray* arr);
+extern void StrArrayDestroy(StrArray* arr);
+#define IsStrArrayEmpty(arr) (arr.Index == 0)
+
 /*
  * Globals
  */
@@ -758,6 +787,7 @@ extern HANDLE CreateFileWithTimeout(LPCSTR lpFileName, DWORD dwDesiredAccess, DW
 extern BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads);
 extern BOOL HashFile(const unsigned type, const char* path, uint8_t* sum);
 extern BOOL PE256File(const char* path, uint8_t* hash);
+extern void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name);
 extern BOOL HashBuffer(const unsigned type, const uint8_t* buf, const size_t len, uint8_t* sum);
 extern BOOL IsFileInDB(const char* path);
 extern int IsBootloaderRevoked(const char* path);
@@ -786,35 +816,6 @@ extern uint32_t ResolveDllAddress(dll_resolver_t* resolver);
 #define GetTextWidth(hDlg, id) GetTextSize(GetDlgItem(hDlg, id), NULL).cx
 
 DWORD WINAPI HashThread(void* param);
-
-/* Hash tables */
-typedef struct htab_entry {
-	uint32_t used;
-	char* str;
-	void* data;
-} htab_entry;
-typedef struct htab_table {
-	htab_entry *table;
-	uint32_t size;
-	uint32_t filled;
-} htab_table;
-#define HTAB_EMPTY {NULL, 0, 0}
-extern BOOL htab_create(uint32_t nel, htab_table* htab);
-extern void htab_destroy(htab_table* htab);
-extern uint32_t htab_hash(char* str, htab_table* htab);
-
-/* Basic String Array */
-typedef struct {
-	char**   String;
-	uint32_t Index;		// Current array size
-	uint32_t Max;		// Maximum array size
-} StrArray;
-extern void StrArrayCreate(StrArray* arr, uint32_t initial_size);
-extern int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL );
-extern int32_t StrArrayFind(StrArray* arr, const char* str);
-extern void StrArrayClear(StrArray* arr);
-extern void StrArrayDestroy(StrArray* arr);
-#define IsStrArrayEmpty(arr) (arr.Index == 0)
 
 /*
  * typedefs for the function prototypes. Use the something like:

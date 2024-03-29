@@ -82,8 +82,10 @@ typedef struct {
 
 RUFUS_IMG_REPORT img_report;
 int64_t iso_blocking_status = -1;
-extern BOOL preserve_timestamps, enable_ntfs_compression;
+extern uint64_t md5sum_totalbytes;
+extern BOOL preserve_timestamps, enable_ntfs_compression, validate_md5sum;
 extern HANDLE format_thread;
+extern StrArray modified_files;
 BOOL enable_iso = TRUE, enable_joliet = TRUE, enable_rockridge = TRUE, has_ldlinux_c32;
 #define ISO_BLOCKING(x) do {x; iso_blocking_status++; } while(0)
 static const char* psz_extract_dir;
@@ -92,7 +94,7 @@ const char* bootmgr_efi_name = "bootmgr.efi";
 static const char* grldr_name = "grldr";
 static const char* ldlinux_name = "ldlinux.sys";
 static const char* ldlinux_c32 = "ldlinux.c32";
-static const char* md5sum_name[] = { "MD5SUMS", "md5sum.txt" };
+const char* md5sum_name[2] = { "md5sum.txt", "MD5SUMS" };
 static const char* casper_dirname = "/casper";
 static const char* proxmox_dirname = "/proxmox";
 const char* efi_dirname = "/efi/boot";
@@ -124,7 +126,8 @@ static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
 static uint8_t joliet_level = 0;
 static uint64_t total_blocks, extra_blocks, nb_blocks, last_nb_blocks;
 static BOOL scan_only = FALSE;
-static StrArray config_path, isolinux_path, modified_path;
+static FILE* fd_md5sum = NULL;
+static StrArray config_path, isolinux_path;
 static char symlinked_syslinux[MAX_PATH];
 
 // Ensure filenames do not contain invalid FAT32 or NTFS characters
@@ -475,66 +478,11 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 	}
 
 	if (modified)
-		StrArrayAdd(&modified_path, psz_fullpath, TRUE);
+		StrArrayAdd(&modified_files, psz_fullpath, TRUE);
 
 	free(src);
 }
 
-// This updates the MD5SUMS/md5sum.txt file that some distros (Ubuntu, Mint...)
-// use to validate the media. Because we may alter some of the validated files
-// to add persistence and whatnot, we need to alter the MD5 list as a result.
-// The format of the file is expected to always be "<MD5SUM> <FILE_PATH>" on
-// individual lines.
-static void update_md5sum(void)
-{
-	BOOL display_header = TRUE;
-	intptr_t pos;
-	uint32_t i, j, size, md5_size;
-	uint8_t* buf = NULL, sum[16];
-	char md5_path[64], * md5_data = NULL, * str_pos;
-
-	if (!img_report.has_md5sum)
-		goto out;
-
-	assert(img_report.has_md5sum <= ARRAYSIZE(md5sum_name));
-	if (img_report.has_md5sum > ARRAYSIZE(md5sum_name))
-		goto out;
-
-	static_sprintf(md5_path, "%s\\%s", psz_extract_dir, md5sum_name[img_report.has_md5sum - 1]);
-	md5_size = read_file(md5_path, (uint8_t**)&md5_data);
-	if (md5_size == 0)
-		goto out;
-
-	for (i = 0; i < modified_path.Index; i++) {
-		str_pos = strstr(md5_data, &modified_path.String[i][2]);
-		if (str_pos == NULL)
-			// File is not listed in md5 sums
-			continue;
-		if (display_header) {
-			uprintf("Updating %s:", md5_path);
-			display_header = FALSE;
-		}
-		uprintf("● %s", &modified_path.String[i][2]);
-		pos = str_pos - md5_data;
-		size = read_file(modified_path.String[i], &buf);
-		if (size == 0)
-			continue;
-		HashBuffer(HASH_MD5, buf, size, sum);
-		free(buf);
-		while ((pos > 0) && (md5_data[pos - 1] != '\n'))
-			pos--;
-		for (j = 0; j < 16; j++) {
-			md5_data[pos + 2 * j] = ((sum[j] >> 4) < 10) ? ('0' + (sum[j] >> 4)) : ('a' - 0xa + (sum[j] >> 4));
-			md5_data[pos + 2 * j + 1] = ((sum[j] & 15) < 10) ? ('0' + (sum[j] & 15)) : ('a' - 0xa + (sum[j] & 15));
-		}
-	}
-
-	write_file(md5_path, md5_data, md5_size);
-	free(md5_data);
-
-out:
-	StrArrayDestroy(&modified_path);
-}
 
 static void print_extracted_file(char* psz_fullpath, uint64_t file_length)
 {
@@ -586,9 +534,10 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size, err;
 	EXTRACT_PROPS props;
+	HASH_CONTEXT ctx;
 	BOOL r, is_identical;
 	int length;
-	size_t i, nb;
+	size_t i, j, nb;
 	char tmp[128], *psz_fullpath = NULL, *psz_sanpath = NULL;
 	const char* psz_basename;
 	udf_dirent_t *p_udf_dirent2;
@@ -669,16 +618,22 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				else
 					goto out;
 			} else {
+				if (fd_md5sum != NULL)
+					hash_init[HASH_MD5](&ctx);
 				while (file_length > 0) {
 					if (FormatStatus)
 						goto out;
-					nb = MIN(ISO_BUFFER_SIZE / UDF_BLOCKSIZE, (file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
+					nb = (size_t)MIN(ISO_BUFFER_SIZE / UDF_BLOCKSIZE, (file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
 					read = udf_read_block(p_udf_dirent, buf, nb);
 					if (read < 0) {
 						uprintf("  Error reading UDF file %s", &psz_fullpath[strlen(psz_extract_dir)]);
 						goto out;
 					}
 					buf_size = (DWORD)MIN(file_length, read);
+					if (fd_md5sum != NULL) {
+						md5sum_totalbytes += buf_size;
+						hash_write[HASH_MD5](&ctx, buf, buf_size);
+					}
 					ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
 					if (!r || (wr_size != buf_size)) {
 						uprintf("  Error writing file: %s", r ? "Short write detected" : WindowsErrorString());
@@ -690,6 +645,12 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 						UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks);
 						last_nb_blocks = nb_blocks;
 					}
+				}
+				if (fd_md5sum != NULL) {
+					hash_final[HASH_MD5](&ctx);
+					for (j = 0; j < MD5_HASHSIZE; j++)
+						fprintf(fd_md5sum, "%02x", ctx.buf[j]);
+					fprintf(fd_md5sum, "  ./%s\n", &psz_fullpath[3]);
 				}
 			}
 			if ((preserve_timestamps) && (!SetFileTime(file_handle, to_filetime(udf_get_attribute_time(p_udf_dirent)),
@@ -726,6 +687,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	HANDLE file_handle = NULL;
 	DWORD buf_size, wr_size, err;
 	EXTRACT_PROPS props;
+	HASH_CONTEXT ctx;
 	BOOL is_symlink, is_identical, create_file, free_p_statbuf = FALSE;
 	int length, r = 1;
 	char psz_fullpath[MAX_PATH], *psz_basename = NULL, *psz_sanpath = NULL;
@@ -737,7 +699,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	CdioListNode_t* p_entnode;
 	iso9660_stat_t *p_statbuf;
 	CdioISO9660FileList_t* p_entlist = NULL;
-	size_t i, nb;
+	size_t i, j, nb;
 	lsn_t lsn;
 	int64_t file_length;
 
@@ -921,28 +883,42 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 						uprintf("  Error writing file: %s", WindowsErrorString());
 						goto out;
 					}
-				} else for (i = 0; file_length > 0; i += nb) {
-					if (FormatStatus)
-						goto out;
-					lsn = p_statbuf->lsn + (lsn_t)i;
-					nb = MIN(ISO_BUFFER_SIZE / ISO_BLOCKSIZE, (file_length + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE);
-					if (iso9660_iso_seek_read(p_iso, buf, lsn, (long)nb) != (nb * ISO_BLOCKSIZE)) {
-						uprintf("  Error reading ISO9660 file %s at LSN %lu",
-							psz_iso_name, (long unsigned int)lsn);
-						goto out;
+				} else {
+					if (fd_md5sum != NULL)
+						hash_init[HASH_MD5](&ctx);
+					for (i = 0; file_length > 0; i += nb) {
+						if (FormatStatus)
+							goto out;
+						lsn = p_statbuf->lsn + (lsn_t)i;
+						nb = (size_t)MIN(ISO_BUFFER_SIZE / ISO_BLOCKSIZE, (file_length + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE);
+						if (iso9660_iso_seek_read(p_iso, buf, lsn, (long)nb) != (nb * ISO_BLOCKSIZE)) {
+							uprintf("  Error reading ISO9660 file %s at LSN %lu",
+								psz_iso_name, (long unsigned int)lsn);
+							goto out;
+						}
+						buf_size = (DWORD)MIN(file_length, ISO_BUFFER_SIZE);
+						if (fd_md5sum != NULL) {
+							md5sum_totalbytes += buf_size;
+							hash_write[HASH_MD5](&ctx, buf, buf_size);
+						}
+						ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
+						if (!r || wr_size != buf_size) {
+							uprintf("  Error writing file: %s", r ? "Short write detected" : WindowsErrorString());
+							goto out;
+						}
+						file_length -= wr_size;
+						nb_blocks += nb;
+						if (nb_blocks - last_nb_blocks >= PROGRESS_THRESHOLD) {
+							UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks +
+								((fs_type != FS_NTFS) ? extra_blocks : 0));
+							last_nb_blocks = nb_blocks;
+						}
 					}
-					buf_size = (DWORD)MIN(file_length, ISO_BUFFER_SIZE);
-					ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
-					if (!r || wr_size != buf_size) {
-						uprintf("  Error writing file: %s", r ? "Short write detected" : WindowsErrorString());
-						goto out;
-					}
-					file_length -= wr_size;
-					nb_blocks += nb;
-					if (nb_blocks - last_nb_blocks >= PROGRESS_THRESHOLD) {
-						UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks +
-							((fs_type != FS_NTFS) ? extra_blocks : 0));
-						last_nb_blocks = nb_blocks;
+					if (fd_md5sum != NULL) {
+						hash_final[HASH_MD5](&ctx);
+						for (j = 0; j < MD5_HASHSIZE; j++)
+							fprintf(fd_md5sum, "%02x", ctx.buf[j]);
+						fprintf(fd_md5sum, "  ./%s\n", &psz_fullpath[3]);
 					}
 				}
 				if (preserve_timestamps) {
@@ -1098,7 +1074,17 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		last_nb_blocks = 0;
 		iso_blocking_status = 0;
 		symlinked_syslinux[0] = 0;
-		StrArrayCreate(&modified_path, 8);
+		StrArrayCreate(&modified_files, 8);
+		if (validate_md5sum) {
+			md5sum_totalbytes = 0;
+			// If there isn't an already existing md5sum.txt create one
+			if (img_report.has_md5sum != 1) {
+				static_sprintf(path, "%s\\%s", dest_dir, md5sum_name[0]);
+				fd_md5sum = fopenU(path, "wb");
+				if (fd_md5sum == NULL)
+					uprintf("WARNING: Could not create '%s'", md5sum_name[0]);
+			}
+		}
 	}
 
 	// First try to open as UDF - fallback to ISO if it failed
@@ -1397,7 +1383,8 @@ out:
 					uprintf("Could not move %s → %s", path, dst_path, WindowsErrorString());
 			}
 		}
-		update_md5sum();
+		if (fd_md5sum != NULL)
+			fclose(fd_md5sum);
 	}
 	iso9660_close(p_iso);
 	udf_close(p_udf);

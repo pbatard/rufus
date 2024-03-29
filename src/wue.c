@@ -47,6 +47,9 @@ char *unattend_xml_path = NULL, unattend_username[MAX_USERNAME_LENGTH];
 BOOL is_bootloader_revoked = FALSE;
 
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
+extern BOOL validate_md5sum;
+extern uint64_t md5sum_totalbytes;
+extern StrArray modified_files;
 
 /// <summary>
 /// Create an installation answer file containing the sections specified by the flags.
@@ -808,6 +811,10 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 				CloseHandle(CreateFileU(appraiserres_dll_src, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
 					NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL));
 				uprintf("Created '%s' placeholder", appraiserres_dll_src);
+				if (validate_md5sum) {
+					md5sum_totalbytes -= _filesizeU(appraiserres_dll_dst);
+					StrArrayAdd(&modified_files, appraiserres_dll_src, TRUE);
+				}
 			}
 		}
 
@@ -815,6 +822,8 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 		// We only need to mount boot.wim if we have windowsPE data to deal with. If
 		// not, we can just copy our unattend.xml in \sources\$OEM$\$$\Panther\.
 		if (flags & UNATTEND_WINPE_SETUP_MASK) {
+			if (validate_md5sum)
+				md5sum_totalbytes -= _filesizeU(boot_wim_path);
 			uprintf("Mounting '%s[%d]'...", boot_wim_path, wim_index);
 			// Some "unofficial" ISOs have a modified boot.wim that doesn't have Windows Setup at index 2...
 			if (!WimIsValidIndex(boot_wim_path, wim_index)) {
@@ -929,6 +938,10 @@ out:
 	if (mount_path) {
 		uprintf("Unmounting '%s[%d]'...", boot_wim_path, wim_index);
 		WimUnmountImage(boot_wim_path, wim_index, TRUE);
+		if (validate_md5sum) {
+			md5sum_totalbytes += _filesizeU(boot_wim_path);
+			StrArrayAdd(&modified_files, boot_wim_path, TRUE);
+		}
 		UpdateProgressWithInfo(OP_PATCH, MSG_325, PATCH_PROGRESS_TOTAL, PATCH_PROGRESS_TOTAL);
 	}
 	free(mount_path);

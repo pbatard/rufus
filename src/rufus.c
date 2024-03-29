@@ -94,6 +94,7 @@ static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], u
 
 extern HANDLE update_check_thread, wim_thread;
 extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes, is_bootloader_revoked;
+extern BOOL validate_md5sum;
 extern BYTE* fido_script;
 extern HWND hFidoDlg;
 extern uint8_t* grub2_buf;
@@ -1441,6 +1442,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	is_bootloader_revoked = FALSE;
+	validate_md5sum = FALSE;
 	safe_free(grub2_buf);
 
 	if (ComboBox_GetCurSel(hDeviceList) == CB_ERR)
@@ -1567,6 +1569,9 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				goto out;
 			}
+			// TODO: Move this option to a user selection
+			validate_md5sum = TRUE;
+			uprintf("Will add runtime UEFI media validation through 'md5sum.txt'");
 		} else if ( ((fs_type == FS_NTFS) && !HAS_WINDOWS(img_report) && !HAS_GRUB(img_report) && 
 					 (!HAS_SYSLINUX(img_report) || (SL_MAJOR(img_report.sl_version) <= 5)))
 				 || ((IS_FAT(fs_type)) && (!HAS_SYSLINUX(img_report)) && (!allow_dual_uefi_bios) && !IS_EFI_BOOTABLE(img_report) &&
