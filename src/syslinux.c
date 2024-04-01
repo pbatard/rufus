@@ -2,7 +2,7 @@
  *
  *   Copyright 2003 Lars Munch Christensen - All Rights Reserved
  *   Copyright 1998-2008 H. Peter Anvin - All Rights Reserved
- *   Copyright 2012-2023 Pete Batard
+ *   Copyright 2012-2024 Pete Batard
  *
  *   Based on the Linux installer program for SYSLINUX by H. Peter Anvin
  *
@@ -88,7 +88,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	const LARGE_INTEGER liZero = { {0, 0} };
 	HANDLE f_handle = INVALID_HANDLE_VALUE;
 	HANDLE d_handle = INVALID_HANDLE_VALUE;
-	DWORD bytes_read, bytes_written, err;
+	DWORD bytes_read, err;
 	S_NTFSSECT_VOLINFO vol_info = { 0 };
 	LARGE_INTEGER vcn, lba, len;
 	S_NTFSSECT_EXTENT extent;
@@ -208,12 +208,11 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 
 	/* Write ldlinux.sys file */
 	if (!WriteFileWithRetry(f_handle, (const char _force *)syslinux_ldlinux[0],
-		   syslinux_ldlinux_len[0], &bytes_written, WRITE_RETRIES)) {
+		   syslinux_ldlinux_len[0], NULL, WRITE_RETRIES)) {
 		uprintf("Could not write '%s': %s", &path[3], WindowsErrorString());
 		goto out;
 	}
-	if (!WriteFileWithRetry(f_handle, syslinux_adv, 2 * ADV_SIZE,
-		   &bytes_written, WRITE_RETRIES)) {
+	if (!WriteFileWithRetry(f_handle, syslinux_adv, 2 * ADV_SIZE, NULL, WRITE_RETRIES)) {
 		uprintf("Could not write ADV to '%s': %s", &path[3], WindowsErrorString());
 		goto out;
 	}
@@ -302,8 +301,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 
 	/* Rewrite the file */
 	if (!SetFilePointerEx(f_handle, liZero, NULL, FILE_BEGIN) ||
-		!WriteFileWithRetry(f_handle, syslinux_ldlinux[0], syslinux_ldlinux_len[0],
-			   &bytes_written, WRITE_RETRIES)) {
+		!WriteFileWithRetry(f_handle, syslinux_ldlinux[0], syslinux_ldlinux_len[0], NULL, WRITE_RETRIES)) {
 		uprintf("Could not rewrite '%s': %s\n", &path[3], WindowsErrorString());
 		goto out;
 	}
@@ -328,8 +326,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 
 	/* Write boot sector back */
 	if (!SetFilePointerEx(d_handle, liZero, NULL, FILE_BEGIN) ||
-		!WriteFileWithRetry(d_handle, sectbuf, SECTOR_SIZE,
-			   &bytes_written, WRITE_RETRIES)) {
+		!WriteFileWithRetry(d_handle, sectbuf, SECTOR_SIZE, NULL, WRITE_RETRIES)) {
 		uprintf("Could not write Syslinux boot record: %s", WindowsErrorString());
 		goto out;
 	}
@@ -368,8 +365,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 			uprintf("Unable to create '%s'\n", path);
 			goto out;
 		}
-		if (!WriteFileWithRetry(f_handle, syslinux_mboot, syslinux_mboot_len,
-			   &bytes_written, WRITE_RETRIES)) {
+		if (!WriteFileWithRetry(f_handle, syslinux_mboot, syslinux_mboot_len, NULL, WRITE_RETRIES)) {
 			uprintf("Could not write '%s'", path);
 			goto out;
 		}

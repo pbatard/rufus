@@ -121,7 +121,7 @@ char* FileDialog(BOOL save, char* path, const ext_t* ext, UINT* selected_ext)
 	hr = CoCreateInstance(save ? &CLSID_FileSaveDialog : &CLSID_FileOpenDialog, NULL, CLSCTX_INPROC,
 		&IID_IFileDialog, (LPVOID)&pfd);
 	if (SUCCEEDED(hr) && (pfd == NULL))	// Never trust Microsoft APIs to do the right thing
-		hr = ERROR_SEVERITY_ERROR | FAC(FACILITY_WINDOWS) | ERROR_API_UNAVAILABLE;
+		hr = RUFUS_ERROR(ERROR_API_UNAVAILABLE);
 
 	if (FAILED(hr)) {
 		SetLastError(hr);
@@ -1590,7 +1590,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		case IDC_DOWNLOAD:	// Also doubles as abort and launch function
 			switch(download_status) {
 			case 1:		// Abort
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+				ErrorStatus = RUFUS_ERROR(ERROR_CANCELLED);
 				download_status = 0;
 				hThread = NULL;
 				break;
@@ -1653,7 +1653,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	case UM_PROGRESS_INIT:
 		EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
 		SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_038));
-		FormatStatus = 0;
+		ErrorStatus = 0;
 		download_status = 1;
 		return (INT_PTR)TRUE;
 	case UM_PROGRESS_EXIT:
@@ -1665,7 +1665,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			SetWindowTextU(GetDlgItem(hDlg, IDC_DOWNLOAD), lmprintf(MSG_040));
 			// Disable the download button if we found an invalid signature
 			EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD),
-				FormatStatus != (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE)));
+				ErrorStatus != RUFUS_ERROR(APPERR(ERROR_BAD_SIGNATURE)));
 			download_status = 0;
 		}
 		return (INT_PTR)TRUE;

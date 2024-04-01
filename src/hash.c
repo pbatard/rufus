@@ -5,7 +5,7 @@
  * Copyright © 2004-2019 Tom St Denis
  * Copyright © 2004 g10 Code GmbH
  * Copyright © 2002-2015 Wei Dai & Igor Pavlov
- * Copyright © 2015-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2024 Pete Batard <pete@akeo.ie>
  * Copyright © 2022 Jeffrey Walton <noloader@gmail.com>
  * Copyright © 2016 Alexander Graf
  *
@@ -1468,7 +1468,7 @@ BOOL HashFile(const unsigned type, const char* path, uint8_t* hash)
 	h = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 	if (h == INVALID_HANDLE_VALUE) {
 		uprintf("Could not open file: %s", WindowsErrorString());
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
+		ErrorStatus = RUFUS_ERROR(ERROR_OPEN_FAILED);
 		goto out;
 	}
 
@@ -1476,7 +1476,7 @@ BOOL HashFile(const unsigned type, const char* path, uint8_t* hash)
 	for (rb = 0; ; rb += rs) {
 		CHECK_FOR_USER_CANCEL;
 		if (!ReadFile(h, buf, sizeof(buf), &rs, NULL)) {
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
+			ErrorStatus = RUFUS_ERROR(ERROR_READ_FAULT);
 			uprintf("  Read error: %s", WindowsErrorString());
 			goto out;
 		}
@@ -1983,7 +1983,7 @@ DWORD WINAPI HashThread(void* param)
 	fd = CreateFileAsync(image_path, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN);
 	if (fd == NULL) {
 		uprintf("Could not open file: %s", WindowsErrorString());
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
+		ErrorStatus = RUFUS_ERROR(ERROR_OPEN_FAILED);
 		goto out;
 	}
 
@@ -2004,7 +2004,7 @@ DWORD WINAPI HashThread(void* param)
 		if ((!WaitFileAsync(fd, DRIVE_ACCESS_TIMEOUT)) ||
 			(!GetSizeAsync(fd, &read_size[read_bufnum]))) {
 			uprintf("Read error: %s", WindowsErrorString());
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
+			ErrorStatus = RUFUS_ERROR(ERROR_READ_FAULT);
 			goto out;
 		}
 

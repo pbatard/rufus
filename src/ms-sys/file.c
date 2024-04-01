@@ -50,7 +50,7 @@ int64_t write_sectors(HANDLE hDrive, uint64_t SectorSize,
    LastWriteError = 0;
    if(!WriteFileWithRetry(hDrive, pBuf, Size, &Size, WRITE_RETRIES))
    {
-      LastWriteError = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|GetLastError();
+      LastWriteError = RUFUS_ERROR(GetLastError());
       uprintf("write_sectors: Write error %s\n", WindowsErrorString());
       uprintf("  StartSector: 0x%08" PRIx64 ", nSectors: 0x%" PRIx64 ", SectorSize: 0x%" PRIx64 "\n", StartSector, nSectors, SectorSize);
       return -1;
@@ -63,7 +63,7 @@ int64_t write_sectors(HANDLE hDrive, uint64_t SectorSize,
          return 0;
       }
       uprintf("write_sectors: Write error\n");
-      LastWriteError = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+      LastWriteError = RUFUS_ERROR(ERROR_WRITE_FAULT);
       uprintf("  Wrote: %d, Expected: %" PRIu64 "\n", Size, nSectors*SectorSize);
       uprintf("  StartSector: 0x%08" PRIx64 ", nSectors: 0x%" PRIx64 ", SectorSize: 0x%" PRIx64 "\n", StartSector, nSectors, SectorSize);
       return -1;

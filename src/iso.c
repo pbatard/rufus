@@ -554,7 +554,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	if (psz_path[0] == 0)
 		UpdateProgressWithInfoInit(NULL, TRUE);
 	while ((p_udf_dirent = udf_readdir(p_udf_dirent)) != NULL) {
-		if (FormatStatus) goto out;
+		if (ErrorStatus) goto out;
 		psz_basename = udf_get_filename(p_udf_dirent);
 		if (strlen(psz_basename) == 0)
 			continue;
@@ -621,7 +621,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 				if (fd_md5sum != NULL)
 					hash_init[HASH_MD5](&ctx);
 				while (file_length > 0) {
-					if (FormatStatus)
+					if (ErrorStatus)
 						goto out;
 					nb = (size_t)MIN(ISO_BUFFER_SIZE / UDF_BLOCKSIZE, (file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
 					read = udf_read_block(p_udf_dirent, buf, nb);
@@ -722,7 +722,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	if (psz_path[0] == 0)
 		UpdateProgressWithInfoInit(NULL, TRUE);
 	_CDIO_LIST_FOREACH(p_entnode, p_entlist) {
-		if (FormatStatus) goto out;
+		if (ErrorStatus) goto out;
 		p_statbuf = (iso9660_stat_t*) _cdio_list_node_data(p_entnode);
 		free_p_statbuf = FALSE;
 		if (scan_only && (p_statbuf->rr.b3_rock == yep) && enable_rockridge) {
@@ -887,7 +887,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					if (fd_md5sum != NULL)
 						hash_init[HASH_MD5](&ctx);
 					for (i = 0; file_length > 0; i += nb) {
-						if (FormatStatus)
+						if (ErrorStatus)
 							goto out;
 						lsn = p_statbuf->lsn + (lsn_t)i;
 						nb = (size_t)MIN(ISO_BUFFER_SIZE / ISO_BLOCKSIZE, (file_length + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE);
@@ -1067,7 +1067,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		IGNORE_RETVAL(_chdirU(app_data_dir));
 		if (total_blocks == 0) {
 			uprintf("Error: ISO has not been properly scanned.");
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_ISO_SCAN);
+			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_SCAN));
 			goto out;
 		}
 		nb_blocks = 0;
@@ -1388,8 +1388,8 @@ out:
 	}
 	iso9660_close(p_iso);
 	udf_close(p_udf);
-	if ((r != 0) && (FormatStatus == 0))
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR((scan_only?ERROR_ISO_SCAN:ERROR_ISO_EXTRACT));
+	if ((r != 0) && (ErrorStatus == 0))
+		ErrorStatus = RUFUS_ERROR(APPERR(scan_only ? ERROR_ISO_SCAN : ERROR_ISO_EXTRACT));
 	return (r == 0);
 }
 
@@ -1766,8 +1766,8 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 				while ((s != 0) && (s < 0xFFFFFFFFULL) && (written < diritem.size)) {
 					buf = libfat_get_sector(lf_fs, s);
 					if (buf == NULL)
-						FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_SECTOR_NOT_FOUND;
-					if (IS_ERROR(FormatStatus))
+						ErrorStatus = RUFUS_ERROR(ERROR_SECTOR_NOT_FOUND);
+					if (IS_ERROR(ErrorStatus))
 						goto out;
 					size = MIN(LIBFAT_SECTOR_SIZE, diritem.size - written);
 					if (!WriteFileWithRetry(handle, buf, size, &size, WRITE_RETRIES) ||
@@ -1826,7 +1826,7 @@ static DWORD WINAPI IsoSaveImageThread(void* param)
 	hPhysicalDrive = CreateFileA(img_save->DevicePath, GENERIC_READ, FILE_SHARE_READ,
 		NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 	if (hPhysicalDrive == INVALID_HANDLE_VALUE) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
+		ErrorStatus = RUFUS_ERROR(ERROR_OPEN_FAILED);
 		goto out;
 	}
 
@@ -1838,13 +1838,13 @@ static DWORD WINAPI IsoSaveImageThread(void* param)
 		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDestImage == INVALID_HANDLE_VALUE) {
 		uprintf("Could not open image '%s': %s", img_save->ImagePath, WindowsErrorString());
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_OPEN_FAILED;
+		ErrorStatus = RUFUS_ERROR(ERROR_OPEN_FAILED);
 		goto out;
 	}
 
 	buffer = (uint8_t*)_mm_malloc(img_save->BufSize, 16);
 	if (buffer == NULL) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_ENOUGH_MEMORY;
+		ErrorStatus = RUFUS_ERROR(ERROR_NOT_ENOUGH_MEMORY);
 		uprintf("Could not allocate buffer");
 		goto out;
 	}
@@ -1864,7 +1864,7 @@ static DWORD WINAPI IsoSaveImageThread(void* param)
 		s = ReadFile(hPhysicalDrive, buffer,
 			(DWORD)MIN(img_save->BufSize, img_save->DeviceSize - wb), &rSize, NULL);
 		if (!s) {
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_READ_FAULT;
+			ErrorStatus = RUFUS_ERROR(ERROR_READ_FAULT);
 			uprintf("Read error: %s", WindowsErrorString());
 			goto out;
 		}
@@ -1889,7 +1889,7 @@ static DWORD WINAPI IsoSaveImageThread(void* param)
 					goto out;
 				}
 			} else {
-				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+				ErrorStatus = RUFUS_ERROR(ERROR_WRITE_FAULT);
 				goto out;
 			}
 			Sleep(200);
@@ -1900,7 +1900,7 @@ static DWORD WINAPI IsoSaveImageThread(void* param)
 	if (wb != img_save->DeviceSize) {
 		uprintf("Error: wrote %s, expected %s", SizeToHumanReadable(wb, FALSE, FALSE),
 			SizeToHumanReadable(img_save->DeviceSize, FALSE, FALSE));
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_WRITE_FAULT;
+		ErrorStatus = RUFUS_ERROR(ERROR_WRITE_FAULT);
 		goto out;
 	}
 	uprintf("Operation complete (Wrote %s).", SizeToHumanReadable(wb, FALSE, FALSE));
@@ -1941,7 +1941,7 @@ void IsoSaveImage(void)
 
 	uprintf("ISO media size %s", SizeToHumanReadable(img_save.DeviceSize, FALSE, FALSE));
 	SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
-	FormatStatus = 0;
+	ErrorStatus = 0;
 	// Disable all controls except cancel
 	EnableControls(FALSE, FALSE);
 	InitProgress(TRUE);
@@ -1952,7 +1952,7 @@ void IsoSaveImage(void)
 		SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 	} else {
 		uprintf("Unable to start ISO save thread");
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+		ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
 		safe_free(img_save.ImagePath);
 		PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 	}

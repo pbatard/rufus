@@ -120,9 +120,9 @@ static int8_t IsCompressedBootableImage(const char* path)
 			buf = malloc(MBR_SIZE);
 			if (buf == NULL)
 				return 0;
-			FormatStatus = 0;
+			ErrorStatus = 0;
 			if (img_report.compression_type < BLED_COMPRESSION_MAX) {
-				bled_init(0, uprintf, NULL, NULL, NULL, NULL, &FormatStatus);
+				bled_init(0, uprintf, NULL, NULL, NULL, NULL, &ErrorStatus);
 				dc = bled_uncompress_to_buffer(path, (char*)buf, MBR_SIZE, file_assoc[i].type);
 				bled_exit();
 			} else if (img_report.compression_type == BLED_COMPRESSION_MAX) {
@@ -258,7 +258,7 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 			UpdateProgressWithInfo(progress_op, progress_msg, wim_proc_files, wim_nb_files);
 		}
 		// Halt on error
-		if (IS_ERROR(FormatStatus)) {
+		if (IS_ERROR(ErrorStatus)) {
 			pbCancel = (PBOOL)lParam;
 			*pbCancel = TRUE;
 			break;
@@ -291,7 +291,7 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 		break;
 	}
 
-	return IS_ERROR(FormatStatus) ? WIM_MSG_ABORT_IMAGE : WIM_MSG_SUCCESS;
+	return IS_ERROR(ErrorStatus) ? WIM_MSG_ABORT_IMAGE : WIM_MSG_SUCCESS;
 }
 
 // Find out if we have any way to extract/apply WIM files on this platform
@@ -1062,7 +1062,7 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 
 	if (r == ERROR_IO_PENDING) {
 		while ((r = WaitForSingleObject(overlapped.hEvent, 100)) == WAIT_TIMEOUT) {
-			if (IS_ERROR(FormatStatus) && (SCODE_CODE(FormatStatus) == ERROR_CANCELLED)) {
+			if (IS_ERROR(ErrorStatus) && (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED)) {
 				CancelIoEx(handle, &overlapped);
 				goto out;
 			}
@@ -1110,10 +1110,10 @@ static DWORD WINAPI FfuSaveImageThread(void* param)
 		img_save->DevicePath, img_save->ImagePath, label, APPLICATION_NAME, RUFUS_URL);
 	uprintf("Running command: '%s", cmd);
 	r = RunCommandWithProgress(cmd, sysnative_dir, TRUE, MSG_261);
-	if (r != 0 && !IS_ERROR(FormatStatus)) {
+	if (r != 0 && !IS_ERROR(ErrorStatus)) {
 		SetLastError(r);
 		uprintf("Failed to capture FFU image: %s", WindowsErrorString());
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_WINDOWS) | SCODE_CODE(r);
+		ErrorStatus = RUFUS_ERROR(SCODE_CODE(r));
 	}
 	safe_free(img_save->DevicePath);
 	safe_free(img_save->ImagePath);
@@ -1172,21 +1172,21 @@ void VhdSaveImage(void)
 	if (img_save.DevicePath != NULL && img_save.ImagePath != NULL) {
 		// Reset all progress bars
 		SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
-		FormatStatus = 0;
+		ErrorStatus = 0;
 		if (img_save.Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD) {
 			free_space.QuadPart = 0;
 			if ((GetVolumePathNameA(img_save.ImagePath, path, sizeof(path)))
 				&& (GetDiskFreeSpaceExA(path, &free_space, NULL, NULL))
 				&& ((LONGLONG)free_space.QuadPart < (SelectedDrive.DiskSize + 512))) {
 				uprintf("The VHD size is too large for the target drive");
-				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_FILE_TOO_LARGE;
+				ErrorStatus = RUFUS_ERROR(ERROR_FILE_TOO_LARGE);
 				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 				goto out;
 			}
 		}
 		// Disable all controls except Cancel
 		EnableControls(FALSE, FALSE);
-		FormatStatus = 0;
+		ErrorStatus = 0;
 		InitProgress(TRUE);
 		format_thread = CreateThread(NULL, 0, img_save.Type == VIRTUAL_STORAGE_TYPE_DEVICE_FFU ?
 			FfuSaveImageThread : VhdSaveImageThread, &img_save, 0, NULL);
@@ -1196,7 +1196,7 @@ void VhdSaveImage(void)
 			SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 		} else {
 			uprintf("Unable to start VHD save thread");
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
 			PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 		}
 	}

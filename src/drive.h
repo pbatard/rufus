@@ -58,7 +58,7 @@
 #define VDS_RESCAN_REFRESH                  0x00000001
 #define VDS_RESCAN_REENUMERATE              0x00000002
 
-#define VDS_SET_ERROR(hr) do { if (hr != S_OK) { SetLastError((DWORD)hr); FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_GEN_FAILURE; } } while(0)
+#define VDS_SET_ERROR(hr) do { if (hr != S_OK) { SetLastError((DWORD)hr); ErrorStatus = RUFUS_ERROR(ERROR_GEN_FAILURE); } } while(0)
 
 #if !defined(__MINGW32__)
 typedef enum _FSINFOCLASS {

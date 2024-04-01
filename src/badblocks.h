@@ -7,7 +7,7 @@
  *
  * Copyright 1995, 1996, 1997, 1998, 1999 by Theodore Ts'o
  * Copyright 1999 by David Beattie
- * Copyright 2011-2018 by Pete Batard
+ * Copyright 2011-2024 by Pete Batard
  *
  * This file is based on the minix file system programs fsck and mkfs
  * written and copyrighted by Linus Torvalds <Linus.Torvalds@cs.helsinki.fi>
@@ -28,12 +28,11 @@ typedef struct bb_struct_u64_iterate      *bb_badblocks_iterate;
 typedef struct bb_struct_u64_list         *bb_u64_list;
 typedef struct bb_struct_u64_iterate      *bb_u64_iterate;
 
-#define BB_ET_NO_MEMORY                   (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_NOT_ENOUGH_MEMORY)
-#define BB_ET_MAGIC_BADBLOCKS_LIST        (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_OBJECT_IN_LIST)
-#define BB_ET_MAGIC_BADBLOCKS_ITERATE     (ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_INVALID_BLOCK)
+#define BB_ET_NO_MEMORY                   RUFUS_ERROR(ERROR_NOT_ENOUGH_MEMORY)
+#define BB_ET_MAGIC_BADBLOCKS_LIST        RUFUS_ERROR(ERROR_OBJECT_IN_LIST)
+#define BB_ET_MAGIC_BADBLOCKS_ITERATE     RUFUS_ERROR(ERROR_INVALID_BLOCK)
 
-#define BB_CHECK_MAGIC(struct, code) \
-	if ((struct)->magic != (code)) return (code)
+#define BB_CHECK_MAGIC(struct, code)      if ((struct)->magic != (code)) return (code)
 #define BB_BAD_BLOCKS_THRESHOLD           256
 #define BB_BLOCKS_AT_ONCE                 64
 #define BB_SYS_PAGE_SIZE                  4096

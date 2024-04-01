@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * PKI functions (code signing, etc.)
- * Copyright © 2015-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -652,7 +652,7 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	trust_file.pcwszFilePath = utf8_to_wchar(path);
 	if (trust_file.pcwszFilePath == NULL) {
 		uprintf("PKI: Unable to convert '%s' to UTF16", path);
-		return ERROR_SEVERITY_ERROR | FAC(FACILITY_CERT) | ERROR_NOT_ENOUGH_MEMORY;
+		return RUFUS_ERROR(ERROR_NOT_ENOUGH_MEMORY);
 	}
 
 	trust_data.cbStruct = sizeof(trust_data);

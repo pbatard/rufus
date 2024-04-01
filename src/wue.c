@@ -263,7 +263,7 @@ BOOL SetupWinPE(char drive_letter)
 	const LARGE_INTEGER liZero = { {0, 0} };
 	char setupsrcdev[64];
 	HANDLE handle = INVALID_HANDLE_VALUE;
-	DWORD i, j, size, rw_size, index = 0;
+	DWORD i, j, size, read_size, index = 0;
 	BOOL r = FALSE;
 	char* buffer = NULL;
 
@@ -325,7 +325,7 @@ BOOL SetupWinPE(char drive_letter)
 	buffer = (char*)malloc(size);
 	if (buffer == NULL)
 		goto out;
-	if ((!ReadFile(handle, buffer, size, &rw_size, NULL)) || (size != rw_size)) {
+	if ((!ReadFile(handle, buffer, size, &read_size, NULL)) || (size != read_size)) {
 		uprintf("Could not read file %s: %s\n", dst, WindowsErrorString());
 		goto out;
 	}
@@ -373,7 +373,7 @@ BOOL SetupWinPE(char drive_letter)
 		}
 	}
 
-	if (!WriteFileWithRetry(handle, buffer, size, &rw_size, WRITE_RETRIES)) {
+	if (!WriteFileWithRetry(handle, buffer, size, NULL, WRITE_RETRIES)) {
 		uprintf("Could not write patched file: %s\n", WindowsErrorString());
 		goto out;
 	}
@@ -650,7 +650,7 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	uprintf("Windows To Go mode selected");
 	// Additional sanity checks
 	if ((use_esp) && (SelectedDrive.MediaType != FixedMedia) && (WindowsVersion.BuildNumber < 15000)) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_NOT_SUPPORTED;
+		ErrorStatus = RUFUS_ERROR(ERROR_NOT_SUPPORTED);
 		return FALSE;
 	}
 
@@ -658,7 +658,7 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		mounted_iso = VhdMountImage(image_path);
 		if (mounted_iso == NULL) {
 			uprintf("Could not mount ISO for Windows To Go installation");
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_ISO_EXTRACT);
+			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_EXTRACT));
 			return FALSE;
 		}
 		static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[wininst_index][2]);
@@ -668,8 +668,8 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	// Now we use the WIM API to apply that image
 	if (!WimApplyImage(img_report.is_windows_img ? image_path : mounted_image_path, wintogo_index, drive_name)) {
 		uprintf("Failed to apply Windows To Go image");
-		if (!IS_ERROR(FormatStatus))
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_ISO_EXTRACT);
+		if (!IS_ERROR(ErrorStatus))
+			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_EXTRACT));
 		if (!img_report.is_windows_img)
 			VhdUnmountImage();
 		return FALSE;
@@ -702,7 +702,7 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		// Need to have the ESP mounted to invoke bcdboot
 		ms_efi = AltMountVolume(DriveIndex, SelectedDrive.Partition[partition_index[PI_ESP]].Offset, FALSE);
 		if (ms_efi == NULL) {
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_ASSIGN_LETTER);
+			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_ASSIGN_LETTER));
 			return FALSE;
 		}
 	}
@@ -722,7 +722,7 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	if (RunCommand(cmd, sysnative_dir, usb_debug) != 0) {
 		// Try to continue... but report a failure
 		uprintf("Failed to enable boot");
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_ISO_EXTRACT);
+		ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_EXTRACT));
 	}
 
 	CopySKUSiPolicy((use_esp) ? ms_efi : drive_name);

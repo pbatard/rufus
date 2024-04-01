@@ -830,7 +830,7 @@ DWORD RunCommandWithProgress(const char* cmd, const char* dir, BOOL log, int msg
 			UpdateProgressWithInfoInit(NULL, FALSE);
 		while (1) {
 			// Check for user cancel
-			if (IS_ERROR(FormatStatus) && (SCODE_CODE(FormatStatus) == ERROR_CANCELLED)) {
+			if (IS_ERROR(ErrorStatus) && (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED)) {
 				if (!TerminateProcess(pi.hProcess, ERROR_CANCELLED)) {
 					uprintf("Could not terminate command: %s", WindowsErrorString());
 				} else switch (WaitForSingleObject(pi.hProcess, 5000)) {

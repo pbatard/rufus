@@ -140,7 +140,7 @@
 #define PERCENTAGE(percent, value)  ((1ULL * (percent) * (value)) / 100ULL)
 #define IsChecked(CheckBox_ID)      (IsDlgButtonChecked(hMainDialog, CheckBox_ID) == BST_CHECKED)
 #define MB_IS_RTL                   (right_to_left_mode?MB_RTLREADING|MB_RIGHT:0)
-#define CHECK_FOR_USER_CANCEL       if (IS_ERROR(FormatStatus) && (SCODE_CODE(FormatStatus) == ERROR_CANCELLED)) goto out
+#define CHECK_FOR_USER_CANCEL       if (IS_ERROR(ErrorStatus) && (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED)) goto out
 // Bit masks used for the display of additional image options in the UI
 #define IMOP_WINTOGO                0x01
 #define IMOP_PERSISTENCE            0x02
@@ -664,7 +664,7 @@ extern HWND hMainDialog, hLogDialog, hStatus, hDeviceList, hCapacity, hImageOpti
 extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType;
 extern HWND hNBPasses, hLog, hInfo, hProgress, hDiskID;
 extern WORD selected_langid;
-extern DWORD FormatStatus, DownloadStatus, MainThreadId, LastWriteError;
+extern DWORD ErrorStatus, DownloadStatus, MainThreadId, LastWriteError;
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, op_in_progress, right_to_left_mode;
 extern BOOL allow_dual_uefi_bios, large_drive, usb_debug;
 extern uint8_t image_options, *pe256ssp;
@@ -896,3 +896,5 @@ out:
 #define ERROR_CANT_MOUNT_VOLUME        0x120C
 #define ERROR_BAD_SIGNATURE            0x120D
 #define ERROR_CANT_DOWNLOAD            0x120E
+
+#define RUFUS_ERROR(err)               (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | (err))

@@ -1290,8 +1290,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 	ComboBox_ResetContent(hImageOption);
 	imop_win_sel = 0;
 
-	if ((FormatStatus == (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_CANCELLED)) ||
-		(img_report.image_size == 0) ||
+	if ((ErrorStatus == RUFUS_ERROR(ERROR_CANCELLED)) || (img_report.image_size == 0) ||
 		(!img_report.is_iso && (img_report.is_bootable_img <= 0) && !img_report.is_windows_img)) {
 		// Failed to scan image
 		if (img_report.is_bootable_img < 0)
@@ -2246,7 +2245,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					MB_YESNO|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDYES)) {
 					// Operation may have completed in the meantime
 					if (format_thread != NULL) {
-						FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+						ErrorStatus = RUFUS_ERROR(ERROR_CANCELLED);
 						PrintInfo(0, MSG_201);
 						uprintf("Cancelling");
 						//  Start a timer to detect blocking operations during ISO file extraction
@@ -2262,7 +2261,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				return (INT_PTR)TRUE;
 			} else if (op_in_progress) {
 				// User might be trying to cancel during preliminary checks
-				FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_CANCELLED;
+				ErrorStatus = RUFUS_ERROR(ERROR_CANCELLED);
 				PrintInfo(0, MSG_201);
 				EnableWindow(GetDlgItem(hDlg, IDCANCEL), TRUE);
 				return (INT_PTR)TRUE;
@@ -2554,10 +2553,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						free(old_image_path);
 					}
 				}
-				FormatStatus = 0;
+				ErrorStatus = 0;
 				if (CreateThread(NULL, 0, ImageScanThread, NULL, 0, NULL) == NULL) {
 					uprintf("Unable to start ISO scanning thread");
-					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+					ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
 				}
 			}
 			break;
@@ -2585,7 +2584,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			unattend_xml_flags = 0;
 			// Disable all controls except Cancel
 			EnableControls(FALSE, FALSE);
-			FormatStatus = 0;
+			ErrorStatus = 0;
 			LastWriteError = 0;
 			StrArrayClear(&BlockingProcessList);
 			no_confirmation_on_cancel = FALSE;
@@ -2595,7 +2594,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			// On exit, this thread sends message UM_FORMAT_START back to this dialog.
 			if (CreateThread(NULL, 0, BootCheckThread, NULL, 0, NULL) == NULL) {
 				uprintf("Unable to start boot check thread");
-				FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+				ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
 				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 			}
 			break;
@@ -2612,7 +2611,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_HASH:
 			// TODO: Move this as a fn call in hash.c?
 			if ((format_thread == NULL) && (image_path != NULL)) {
-				FormatStatus = 0;
+				ErrorStatus = 0;
 				no_confirmation_on_cancel = TRUE;
 				SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
 				// Disable all controls except cancel
@@ -2626,7 +2625,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 				} else {
 					uprintf("Unable to start hash thread");
-					FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+					ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
 					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 				}
 			}
@@ -2650,9 +2649,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 	case UM_ENABLE_CONTROLS:
 		KillTimer(hMainDialog, TID_APP_TIMER);
-		if (!IS_ERROR(FormatStatus))
+		if (!IS_ERROR(ErrorStatus))
 			PrintInfo(0, MSG_210);
-		else switch (SCODE_CODE(FormatStatus)) {
+		else switch (SCODE_CODE(ErrorStatus)) {
 		case ERROR_CANCELLED:
 			PrintInfo(0, MSG_211);
 			break;
@@ -2935,9 +2934,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if (isMarquee) {
 			SendMessage(hProgress, PBM_SETMARQUEE, FALSE, 0);
 			SetTaskbarProgressValue(0, MAX_PROGRESS);
-		} else if (!IS_ERROR(FormatStatus)) {
+		} else if (!IS_ERROR(ErrorStatus)) {
 			SetTaskbarProgressValue(MAX_PROGRESS, MAX_PROGRESS);
-		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
+		} else if (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
 			tb_state = PBST_PAUSED;
 			tb_flags = TASKBAR_PAUSED;
 		} else {
@@ -3010,7 +3009,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		format_thread = CreateThread(NULL, 0, FormatThread, (LPVOID)(uintptr_t)DeviceNum, 0, NULL);
 		if (format_thread == NULL) {
 			uprintf("Unable to start formatting thread");
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
 			PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 		} else {
 			SetThreadPriority(format_thread, default_thread_priority);
@@ -3033,8 +3032,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			EnableControls(TRUE, FALSE);
 			break;
 		}
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) |
-			((wParam == BOOTCHECK_DOWNLOAD_ERROR) ? APPERR(ERROR_CANT_DOWNLOAD) : ERROR_GEN_FAILURE);
+		ErrorStatus = RUFUS_ERROR((wParam == BOOTCHECK_DOWNLOAD_ERROR) ? APPERR(ERROR_CANT_DOWNLOAD) : ERROR_GEN_FAILURE);
 		// Fall through
 
 	case UM_FORMAT_COMPLETED:
@@ -3055,13 +3053,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			uprintf("\r\n");
 			GetDevices(DeviceNum);
 		}
-		if (!IS_ERROR(FormatStatus)) {
+		if (!IS_ERROR(ErrorStatus)) {
 			SendMessage(hProgress, PBM_SETPOS, MAX_PROGRESS, 0);
 			SetTaskbarProgressState(TASKBAR_NOPROGRESS);
 			PrintInfo(0, MSG_210);
 			MessageBeep(MB_OK);
 			FlashTaskbar(dialog_handle);
-		} else if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
+		} else if (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
 			PrintInfo(0, MSG_211);
@@ -3085,7 +3083,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						"If (Get-Command -Commandtype Function Get-MpPreference -ErrorAction SilentlyContinue) { Exit 1 } Else { Exit 0 }",
 						// Return 1 if Controlled Folder Access is enabled
 						"Exit (Get-MpPreference).EnableControlledFolderAccess" };
-					switch (SCODE_CODE(FormatStatus)) {
+					switch (SCODE_CODE(ErrorStatus)) {
 					case ERROR_PARTITION_FAILURE:
 					case ERROR_WRITE_FAULT:
 						// Find if PowerShell is available at its expected location
@@ -3105,7 +3103,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						break;
 					}
 				}
-				if (SCODE_CODE(FormatStatus) == ERROR_NOT_READY) {
+				if (SCODE_CODE(ErrorStatus) == ERROR_NOT_READY) {
 					// A port cycle usually helps with a device not ready
 					int index = ComboBox_GetCurSel(hDeviceList);
 					if (index >= 0) {
@@ -3113,10 +3111,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						CyclePort(index);
 					}
 				}
-				Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(FormatStatus, FALSE)));
+				Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(ErrorStatus, FALSE)));
 			}
 		}
-		FormatStatus = 0;
+		ErrorStatus = 0;
 		LastWriteError = 0;
 		return (INT_PTR)TRUE;
 

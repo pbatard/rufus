@@ -204,7 +204,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	PF_INIT_OR_OUT(HttpSendRequestA, WinInet);
 	PF_INIT_OR_OUT(HttpQueryInfoA, WinInet);
 
-	FormatStatus = 0;
+	ErrorStatus = 0;
 	DownloadStatus = 404;
 	if (hProgressDialog != NULL)
 		UpdateProgressWithInfoInit(hProgressDialog, FALSE);
@@ -258,7 +258,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	pfHttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
 	if (DownloadStatus != 200) {
 		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
-		SetLastError(ERROR_SEVERITY_ERROR | FAC(FACILITY_HTTP) | error_code);
+		SetLastError(RUFUS_ERROR(error_code));
 		uprintf("%s: %d", (DownloadStatus == 404) ? "File not found" : "Unable to access file", DownloadStatus);
 		goto out;
 	}
@@ -300,7 +300,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	// Keep checking for data until there is nothing left.
 	while (1) {
 		// User may have cancelled the download
-		if (IS_ERROR(FormatStatus))
+		if (IS_ERROR(ErrorStatus))
 			goto out;
 		if (!pfInternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded) || (dwDownloaded == 0))
 			break;
@@ -322,7 +322,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 
 	if (size != total_size) {
 		uprintf("Could not download complete file - read: %lld bytes, expected: %lld bytes", size, total_size);
-		FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT;
+		ErrorStatus = RUFUS_ERROR(ERROR_WRITE_FAULT);
 		goto out;
 	} else {
 		DownloadStatus = 200;
@@ -383,7 +383,7 @@ DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog
 	if ((sig_len != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(buf, buf_len, sig, sig_len))) {
 		uprintf("FATAL: Download signature is invalid ✗");
 		DownloadStatus = 403;	// Forbidden
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE);
+		ErrorStatus = RUFUS_ERROR(APPERR(ERROR_BAD_SIGNATURE));
 		SendMessage(GetDlgItem(hProgressDialog, IDC_PROGRESS), PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 		SetTaskbarProgressState(TASKBAR_ERROR);
 		goto out;
@@ -413,7 +413,7 @@ out:
 	if ((bPromptOnError) && (DownloadStatus != 200)) {
 		PrintInfo(0, MSG_242);
 		SetLastError(error_code);
-		MessageBoxExU(hMainDialog, IS_ERROR(FormatStatus) ? StrError(FormatStatus, FALSE) : WindowsErrorString(),
+		MessageBoxExU(hMainDialog, IS_ERROR(ErrorStatus) ? StrError(ErrorStatus, FALSE) : WindowsErrorString(),
 			lmprintf(MSG_044), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 	}
 	safe_closehandle(hFile);
@@ -768,7 +768,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		dwSize = (DWORD)DownloadToFileOrBuffer(sig_url, NULL, &sig, NULL, FALSE);
 		if ((dwSize != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(compressed, dwCompressedSize, sig, dwSize))) {
 			uprintf("FATAL: Download signature is invalid ✗");
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE);
+			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_BAD_SIGNATURE));
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			safe_free(compressed);
@@ -778,7 +778,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		free(sig);
 		uprintf("Download signature is valid ✓");
 		uncompressed_size = *((uint64_t*)&compressed[5]);
-		if ((uncompressed_size < 1 * MB) && (bled_init(0, uprintf, NULL, NULL, NULL, NULL, &FormatStatus) >= 0)) {
+		if ((uncompressed_size < 1 * MB) && (bled_init(0, uprintf, NULL, NULL, NULL, NULL, &ErrorStatus) >= 0)) {
 			fido_script = malloc((size_t)uncompressed_size);
 			size = bled_uncompress_from_buffer_to_buffer(compressed, dwCompressedSize, fido_script, (size_t)uncompressed_size, BLED_COMPRESSION_LZMA);
 			bled_exit();
@@ -787,7 +787,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		if (size != uncompressed_size) {
 			uprintf("FATAL: Could not uncompressed download script");
 			safe_free(fido_script);
-			FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_DATA;
+			ErrorStatus = RUFUS_ERROR(ERROR_INVALID_DATA);
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			goto out;
@@ -840,7 +840,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	// signed, we also validate the Authenticode signature of the local script.
 	if (ValidateSignature(INVALID_HANDLE_VALUE, script_path) != NO_ERROR) {
 		uprintf("FATAL: Script signature is invalid ✗");
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_BAD_SIGNATURE);
+		ErrorStatus = RUFUS_ERROR(APPERR(ERROR_BAD_SIGNATURE));
 		SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 		SetTaskbarProgressState(TASKBAR_ERROR);
 		goto out;
@@ -848,7 +848,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	uprintf("Script signature is valid ✓");
 #endif
 
-	FormatStatus = 0;
+	ErrorStatus = 0;
 	dwExitCode = RunCommand(cmdline, app_data_dir, TRUE);
 	uprintf("Exited download script with code: %d", dwExitCode);
 	if ((dwExitCode == 0) && PeekNamedPipe(hPipe, NULL, dwPipeSize, NULL, &dwAvail, NULL) && (dwAvail != 0)) {
@@ -876,11 +876,11 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 			}
 			// Download the ISO and report errors if any
 			SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
-			FormatStatus = 0;
+			ErrorStatus = 0;
 			SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 			if (DownloadToFileOrBuffer(url, img_save.ImagePath, NULL, hMainDialog, TRUE) == 0) {
 				SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
-				if (SCODE_CODE(FormatStatus) == ERROR_CANCELLED) {
+				if (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
 					uprintf("Download cancelled by user");
 					Notification(MSG_INFO, NULL, NULL, lmprintf(MSG_211), lmprintf(MSG_041));
 					PrintInfo(0, MSG_211);
@@ -917,7 +917,7 @@ BOOL DownloadISO()
 {
 	if (CreateThread(NULL, 0, DownloadISOThread, NULL, 0, NULL) == NULL) {
 		uprintf("Unable to start Windows ISO download thread");
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | APPERR(ERROR_CANT_START_THREAD);
+		ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
 		SendMessage(hMainDialog, UM_ENABLE_CONTROLS, 0, 0);
 		return FALSE;
 	}
@@ -949,7 +949,7 @@ BOOL IsDownloadable(const char* url)
 	if (url == NULL)
 		return FALSE;
 
-	FormatStatus = 0;
+	ErrorStatus = 0;
 	DownloadStatus = 404;
 
 	if ((!pfInternetCrackUrlA(url, (DWORD)safe_strlen(url), 0, &UrlParts))

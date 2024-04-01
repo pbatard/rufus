@@ -194,14 +194,14 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 		do {
 			if (DeviceIoControl(hDrive, FSCTL_LOCK_VOLUME, NULL, 0, NULL, 0, &size, NULL))
 				goto out;
-			if (IS_ERROR(FormatStatus))	// User cancel
+			if (IS_ERROR(ErrorStatus))	// User cancel
 				break;
 			Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
 		} while (GetTickCount64() < EndTime);
 		// If we reached this section, either we didn't manage to get a lock or the user cancelled
 		uprintf("Could not lock access to %s: %s", Path, WindowsErrorString());
 		// See if we can report the processes are accessing the drive
-		if (!IS_ERROR(FormatStatus) && (access_mask == 0))
+		if (!IS_ERROR(ErrorStatus) && (access_mask == 0))
 			access_mask = GetProcessSearch(SEARCH_PROCESS_TIMEOUT, 0x07, FALSE);
 		// Try to continue if the only access rights we saw were for read-only
 		if ((access_mask & 0x07) != 0x01)
@@ -1006,7 +1006,7 @@ BOOL WaitForLogical(DWORD DriveIndex, uint64_t PartitionOffset)
 			return TRUE;
 		}
 		free(LogicalPath);
-		if (IS_ERROR(FormatStatus))	// User cancel
+		if (IS_ERROR(ErrorStatus))	// User cancel
 			return FALSE;
 		Sleep(DRIVE_ACCESS_TIMEOUT / DRIVE_ACCESS_RETRIES);
 	} while (GetTickCount64() < EndTime);
@@ -2219,7 +2219,7 @@ BOOL RemountVolume(char* drive_name, BOOL bSilent)
 		} else {
 			suprintf("Could not remount %s as %c: %s", volume_name, toupper(drive_name[0]), WindowsErrorString());
 			// This will leave the drive inaccessible and must be flagged as an error
-			FormatStatus = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|APPERR(ERROR_CANT_REMOUNT_VOLUME);
+			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_REMOUNT_VOLUME));
 			return FALSE;
 		}
 	}
@@ -2493,7 +2493,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			uprintf("  Could not access source image");
 			return FALSE;
 		}
-		if(!WriteFileWithRetry(hDrive, buffer, bufsize, &size, WRITE_RETRIES)) {
+		if(!WriteFileWithRetry(hDrive, buffer, bufsize, NULL, WRITE_RETRIES)) {
 			uprintf("  Write error: %s", WindowsErrorString());
 			return FALSE;
 		}

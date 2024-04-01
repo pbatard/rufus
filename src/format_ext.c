@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * extfs formatting
- * Copyright © 2019-2021 Pete Batard <pete@akeo.ie>
+ * Copyright © 2019-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -178,7 +178,7 @@ const char* error_message(errcode_t error_code)
 		if ((error_code > EXT2_ET_BASE) && error_code < (EXT2_ET_BASE + 1000)) {
 			static_sprintf(error_string, "Unknown ext2fs error %ld (EXT2_ET_BASE + %ld)", error_code, error_code - EXT2_ET_BASE);
 		} else {
-			SetLastError((FormatStatus == 0) ? (ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | (error_code & 0xFFFF)) : FormatStatus);
+			SetLastError((ErrorStatus == 0) ? RUFUS_ERROR(error_code & 0xFFFF) : ErrorStatus);
 			static_sprintf(error_string, "%s", WindowsErrorString());
 		}
 		return error_string;
@@ -196,7 +196,7 @@ errcode_t ext2fs_print_progress(int64_t cur_value, int64_t max_value)
 		last_value = cur_value;
 		uprintfs("+");
 	}
-	return IS_ERROR(FormatStatus) ? EXT2_ET_CANCEL_REQUESTED : 0;
+	return IS_ERROR(ErrorStatus) ? EXT2_ET_CANCEL_REQUESTED : 0;
 }
 
 const char* GetExtFsLabel(DWORD DriveIndex, uint64_t PartitionOffset)
@@ -223,7 +223,7 @@ const char* GetExtFsLabel(DWORD DriveIndex, uint64_t PartitionOffset)
 
 #define TEST_IMG_PATH               "\\??\\C:\\tmp\\disk.img"
 #define TEST_IMG_SIZE               4000		// Size in MB
-#define SET_EXT2_FORMAT_ERROR(x)    if (!IS_ERROR(FormatStatus)) FormatStatus = ext2_last_winerror(x)
+#define SET_EXT2_FORMAT_ERROR(x)    if (!IS_ERROR(ErrorStatus)) ErrorStatus = ext2_last_winerror(x)
 
 BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LPCSTR FSName, LPCSTR Label, DWORD Flags)
 {
@@ -273,7 +273,7 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 	volume_name = GetExtPartitionName(DriveIndex, PartitionOffset);
 #endif
 	if ((volume_name == NULL) | (strlen(FSName) != 4) || (strncmp(FSName, "ext", 3) != 0)) {
-		FormatStatus = ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | ERROR_INVALID_PARAMETER;
+		ErrorStatus = RUFUS_ERROR(ERROR_INVALID_PARAMETER);
 		goto out;
 	}
 	if (strchr(volume_name, ' ') != NULL)

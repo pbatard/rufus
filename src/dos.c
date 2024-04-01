@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * DOS boot file extraction, from the FAT12 floppy image in diskcopy.dll
  * (MS WinME DOS) or from the embedded FreeDOS resource files
- * Copyright © 2011-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -352,7 +352,7 @@ BOOL ExtractFreeDOS(const char* path)
 		IDR_FD_EGA17_CPX, IDR_FD_EGA18_CPX };
 	char filename[MAX_PATH], locale_path[MAX_PATH];
 	BYTE* res_data;
-	DWORD res_size, Size;
+	DWORD res_size;
 	HANDLE hFile;
 	int i;
 
@@ -366,10 +366,10 @@ BOOL ExtractFreeDOS(const char* path)
 	static_strcat(locale_path, "LOCALE\\");
 	CreateDirectoryA(locale_path, NULL);
 
-	for (i=0; i<ARRAYSIZE(res_name); i++) {
+	for (i = 0; i < ARRAYSIZE(res_name); i++) {
 		res_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(res_id[i]), _RT_RCDATA, res_name[i], &res_size, FALSE);
 
-		static_strcpy(filename, ((i<2)?path:locale_path));
+		static_strcpy(filename, ((i<2) ? path : locale_path));
 		static_strcat(filename, res_name[i]);
 
 		hFile = CreateFileA(filename, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ, NULL,
@@ -379,7 +379,7 @@ BOOL ExtractFreeDOS(const char* path)
 			return FALSE;
 		}
 
-		if (!WriteFileWithRetry(hFile, res_data, res_size, &Size, WRITE_RETRIES)) {
+		if (!WriteFileWithRetry(hFile, res_data, res_size, NULL, WRITE_RETRIES)) {
 			uprintf("Could not write file '%s': %s.", filename, WindowsErrorString());
 			safe_closehandle(hFile);
 			return FALSE;

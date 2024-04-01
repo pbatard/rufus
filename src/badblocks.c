@@ -4,7 +4,7 @@
  * Copyright 1992-1994 Remy Card <card@masi.ibp.fr>
  * Copyright 1995-1999 Theodore Ts'o
  * Copyright 1999 David Beattie
- * Copyright 2011-2023 Pete Batard <pete@akeo.ie>
+ * Copyright 2011-2024 Pete Batard <pete@akeo.ie>
  *
  * This file is based on the minix file system programs fsck and mkfs
  * written and copyrighted by Linus Torvalds <Linus.Torvalds@cs.helsinki.fi>
@@ -318,7 +318,7 @@ static void CALLBACK alarm_intr(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dw
 {
 	if (!num_blocks)
 		return;
-	if (FormatStatus) {
+	if (ErrorStatus) {
 		uprintf("%sInterrupting at block %" PRIu64 "\n", bb_prefix,
 			(unsigned long long) currently_testing);
 		cancel_ops = -1;

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1993, 1994, 1995 Theodore Ts'o.
  * Copyright (C) 1998 Andrey Shedel <andreys@ns.cr.cyco.com>
- * Copyright (C) 2018-2019 Pete Batard <pete@akeo.ie>
+ * Copyright (C) 2018-2024 Pete Batard <pete@akeo.ie>
  *
  * %Begin-Header%
  * This file may be redistributed under the terms of the GNU Library
@@ -180,7 +180,7 @@ static __inline unsigned _MapNtStatus(IN NTSTATUS Status)
 // Return the last Windows Error
 DWORD ext2_last_winerror(DWORD default_error)
 {
-	return ERROR_SEVERITY_ERROR | FAC(FACILITY_STORAGE) | (LastWinError ? LastWinError : default_error);
+	return RUFUS_ERROR(LastWinError ? LastWinError : default_error);
 }
 
 //

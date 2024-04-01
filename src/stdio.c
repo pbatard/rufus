@@ -569,7 +569,7 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 			uprintf("Wrote %d bytes but requested %d", *lpNumberOfBytesWritten, nNumberOfBytesToWrite);
 		} else {
 			uprintf("Write error %s", WindowsErrorString());
-			LastWriteError = ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|GetLastError();
+			LastWriteError = RUFUS_ERROR(GetLastError());
 		}
 		// If we can't reposition for the next run, just abort
 		if (!readFilePointer)
@@ -581,7 +581,7 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 		}
 	}
 	if (SCODE_CODE(GetLastError()) == ERROR_SUCCESS)
-		SetLastError(ERROR_SEVERITY_ERROR|FAC(FACILITY_STORAGE)|ERROR_WRITE_FAULT);
+		SetLastError(RUFUS_ERROR(ERROR_WRITE_FAULT));
 	return FALSE;
 }
 
@@ -912,7 +912,7 @@ BOOL ExtractZip(const char* src_zip, const char* dest_dir)
 	if (src_zip == NULL)
 		return FALSE;
 	archive_size = _filesizeU(src_zip);
-	if (bled_init(256 * KB, NULL, NULL, NULL, update_progress, print_extracted_file, &FormatStatus) != 0)
+	if (bled_init(256 * KB, NULL, NULL, NULL, update_progress, print_extracted_file, &ErrorStatus) != 0)
 		return FALSE;
 	uprintf("● Copying files from '%s'", src_zip);
 	extracted_bytes = bled_uncompress_to_dir(src_zip, dest_dir, BLED_COMPRESSION_ZIP);
