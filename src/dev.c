@@ -384,8 +384,7 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 				FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
 			if (hDrive == INVALID_HANDLE_VALUE)
 				continue;
-			if (!DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
-				NULL, 0, geometry, sizeof(geometry), &size, NULL))
+			if (!DeviceIoControl(hDrive, IOCTL_DISK_GET_DRIVE_GEOMETRY_EX, NULL, 0, geometry, sizeof(geometry), &size, NULL))
 				continue;
 			// Rewritable media usually has a one sector
 			if (DiskGeometry->DiskSize.QuadPart <= 4096)
