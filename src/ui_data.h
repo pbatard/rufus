@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * UI element lists
- * Copyright © 2018-2020 Pete Batard <pete@akeo.ie>
+ * Copyright © 2018-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,8 +49,7 @@ static int image_option_move_ids[] = {
 	IDC_ADVANCED_DEVICE_TOOLBAR,
 	IDC_LIST_USB_HDD,
 	IDC_OLD_BIOS_FIXES,
-	IDC_RUFUS_MBR,
-	IDC_DISK_ID,
+	IDC_UEFI_MEDIA_VALIDATION,
 	IDS_FORMAT_OPTIONS_TXT,
 	IDS_LABEL_TXT,
 	IDC_LABEL,
@@ -86,7 +85,7 @@ static int image_option_toggle_ids[][2] = {
 static int advanced_device_move_ids[] = {
 	IDC_LIST_USB_HDD,
 	IDC_OLD_BIOS_FIXES,
-	IDC_RUFUS_MBR,
+	IDC_UEFI_MEDIA_VALIDATION,
 	IDS_FORMAT_OPTIONS_TXT,
 	IDS_LABEL_TXT,
 	IDC_LABEL,
@@ -115,8 +114,7 @@ static int advanced_device_toggle_ids[] = {
 	IDC_SAVE_TOOLBAR,
 	IDC_LIST_USB_HDD,
 	IDC_OLD_BIOS_FIXES,
-	IDC_RUFUS_MBR,
-	IDC_DISK_ID,
+	IDC_UEFI_MEDIA_VALIDATION,
 };
 
 static int advanced_format_move_ids[] = {
@@ -155,6 +153,7 @@ static int full_width_controls[] = {
 	IDC_ADVANCED_DRIVE_PROPERTIES,
 	IDC_LIST_USB_HDD,
 	IDC_OLD_BIOS_FIXES,
+	IDC_UEFI_MEDIA_VALIDATION,
 	IDC_ADVANCED_FORMAT_OPTIONS,
 	IDC_QUICK_FORMAT,
 	IDC_EXTENDED_LABEL,
@@ -164,19 +163,18 @@ static int full_width_controls[] = {
 static int full_width_checkboxes[] = {
 	IDC_LIST_USB_HDD,
 	IDC_OLD_BIOS_FIXES,
+	IDC_UEFI_MEDIA_VALIDATION,
 	IDC_QUICK_FORMAT,
 	IDC_EXTENDED_LABEL,
 };
 
 static int half_width_ids[] = {
 	IDC_BAD_BLOCKS,
-	IDC_RUFUS_MBR,
 	IDS_PARTITION_TYPE_TXT,
 	IDC_PARTITION_TYPE,
 	IDC_FILE_SYSTEM,
 	IDS_TARGET_SYSTEM_TXT,
 	IDC_TARGET_SYSTEM,
-	IDC_DISK_ID,
 	IDS_CLUSTER_SIZE_TXT,
 	IDC_CLUSTER_SIZE,
 	IDC_NB_PASSES,
@@ -190,7 +188,7 @@ static int adjust_dpi_ids[][5] = {
 	{ IDC_ADVANCED_DEVICE_TOOLBAR, 0, 0, 0, 0 },
 	{ IDC_LIST_USB_HDD, 0, 0, 0, 0 },
 	{ IDC_OLD_BIOS_FIXES, 0, 0, 0, 0 },
-	{ IDC_RUFUS_MBR, IDC_DISK_ID, 0, 0, 0 },
+	{ IDC_UEFI_MEDIA_VALIDATION, 0, 0, 0, 0 },
 	{ IDS_FORMAT_OPTIONS_TXT, 0, 0, 0, 0 },
 	{ IDS_LABEL_TXT, IDC_LABEL, 0, 0, 0 },
 	{ IDS_FILE_SYSTEM_TXT, IDC_FILE_SYSTEM, IDS_CLUSTER_SIZE_TXT, IDC_CLUSTER_SIZE, 0 },

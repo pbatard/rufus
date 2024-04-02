@@ -86,7 +86,6 @@ static int64_t last_iso_blocking_status;
 static int selected_pt = -1, selected_fs = FS_UNKNOWN, preselected_fs = FS_UNKNOWN;
 static int image_index = 0, select_index = 0;
 static RECT relaunch_rc = { -65536, -65536, 0, 0};
-static UINT uMBRChecked = BST_UNCHECKED;
 static HWND hSelectImage = NULL, hStart = NULL;
 static char szTimer[12] = "00:00:00";
 static unsigned int timer;
@@ -120,7 +119,7 @@ loc_cmd* selected_locale = NULL;
 WORD selected_langid = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 DWORD MainThreadId;
 HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
-HWND hImageOption, hLogDialog = NULL, hProgress = NULL, hDiskID;
+HWND hImageOption, hLogDialog = NULL, hProgress = NULL;
 HANDLE dialog_handle = NULL, format_thread = NULL;
 BOOL is_x86_64, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user = FALSE, lock_drive = TRUE;
 BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, its_a_me_mario = FALSE;
@@ -130,7 +129,7 @@ BOOL usb_debug, use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALS
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
 BOOL write_as_image = FALSE, write_as_esp = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
 BOOL appstore_version = FALSE, is_vds_available = TRUE, persistent_log = FALSE, has_ffu_support = FALSE;
-BOOL expert_mode = FALSE;
+BOOL expert_mode = FALSE, use_rufus_mbr = TRUE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1, imop_win_sel = 0;
 int default_fs, fs_type, boot_type, partition_type, target_type;
@@ -214,11 +213,6 @@ static void SetAllowedFileSystems(void)
 		allowed_filesystem[FS_EXFAT] = TRUE;
 		break;
 	}
-
-	// Reset disk ID to 0x80 if Rufus MBR is used
-	if (selection_default != BT_IMAGE) {
-		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
-	}
 }
 
 // Populate the Boot selection dropdown
@@ -246,10 +240,8 @@ static void SetBootOptions(void)
 			"Grub4DOS " GRUB4DOS_VERSION), BT_GRUB4DOS));
 		IGNORE_RETVAL(ComboBox_SetItemData(hBootType, ComboBox_AddStringU(hBootType, "UEFI:NTFS"), BT_UEFI_NTFS));
 	}
-	if ((!advanced_mode_device) && (selection_default >= BT_SYSLINUX_V4)) {
+	if ((!advanced_mode_device) && (selection_default >= BT_SYSLINUX_V4))
 		selection_default = BT_IMAGE;
-		CheckDlgButton(hMainDialog, IDC_DISK_ID, BST_UNCHECKED);
-	}
 	SetComboEntry(hBootType, selection_default);
 }
 
@@ -681,24 +673,6 @@ static void SetFSFromISO(void)
 		ComboBox_GetCurSel(hFileSystem));
 }
 
-static void SetMBRProps(void)
-{
-	BOOL needs_masquerading = HAS_WINPE(img_report) && (!img_report.uses_minint);
-	fs_type = (int)ComboBox_GetCurItemData(hFileSystem);
-
-	if ((!mbr_selected_by_user) && ((image_path == NULL) || (boot_type != BT_IMAGE) || (fs_type != FS_NTFS) || HAS_GRUB(img_report) ||
-		((image_options & IMOP_WINTOGO) && (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO)) )) {
-		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
-		IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
-		return;
-	}
-
-	uMBRChecked = (needs_masquerading || HAS_BOOTMGR(img_report) || mbr_selected_by_user)?BST_CHECKED:BST_UNCHECKED;
-	if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)))
-		CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, uMBRChecked);
-	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, needs_masquerading?1:0));
-}
-
 static void SetProposedLabel(int ComboIndex)
 {
 	const char no_label[] = STR_NO_LABEL, empty[] = "";
@@ -730,45 +704,49 @@ static void SetProposedLabel(int ComboIndex)
 	}
 }
 
-// This handles the enabling/disabling of the "Add fixes for old BIOSes" and "Use Rufus MBR" controls
-static void EnableMBRBootOptions(BOOL enable, BOOL remove_checkboxes)
+static void EnableOldBiosFixes(BOOL enable, BOOL remove_checkboxes)
 {
-	BOOL actual_enable_mbr = (boot_type > BT_IMAGE) ? FALSE: enable;
-	BOOL actual_enable_fix = enable;
-	static UINT uXPartChecked = BST_UNCHECKED;
+	static UINT checked, state = 0;
+	HWND hCtrl = GetDlgItem(hMainDialog, IDC_OLD_BIOS_FIXES);
 
+	// The fix for old BIOSes option cannot apply if we aren't targetting BIOS, or are using an image that isn't BIOS bootable
 	if ((partition_type != PARTITION_STYLE_MBR) || (target_type != TT_BIOS) || (boot_type == BT_NON_BOOTABLE) ||
 		((boot_type == BT_IMAGE) && (!IS_BIOS_BOOTABLE(img_report) || IS_DD_ONLY(img_report)))) {
-		// These options cannot apply if we aren't using MBR+BIOS, or are using an image that isn't BIOS bootable
-		actual_enable_mbr = FALSE;
-		actual_enable_fix = FALSE;
-	} else {
-		// If we are using an image, the Rufus MBR only applies if it's for Windows
-		if ((boot_type == BT_IMAGE) && !HAS_WINPE(img_report) && !HAS_BOOTMGR(img_report)) {
-			actual_enable_mbr = FALSE;
-			mbr_selected_by_user = FALSE;
-		}
+		enable = FALSE;
 	}
 
 	if (remove_checkboxes) {
-		// Store/Restore the checkbox states
-		if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && !actual_enable_mbr) {
-			uMBRChecked = IsChecked(IDC_RUFUS_MBR);
-			CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, BST_UNCHECKED);
-		} else if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_RUFUS_MBR)) && actual_enable_mbr) {
-			CheckDlgButton(hMainDialog, IDC_RUFUS_MBR, uMBRChecked);
-		}
-		if (IsWindowEnabled(GetDlgItem(hMainDialog, IDC_OLD_BIOS_FIXES)) && !actual_enable_fix) {
-			uXPartChecked = IsChecked(IDC_OLD_BIOS_FIXES);
+		if (!enable && (state != 1)) {
+			checked = IsChecked(IDC_OLD_BIOS_FIXES);
 			CheckDlgButton(hMainDialog, IDC_OLD_BIOS_FIXES, BST_UNCHECKED);
-		} else if (!IsWindowEnabled(GetDlgItem(hMainDialog, IDC_OLD_BIOS_FIXES)) && actual_enable_fix) {
-			CheckDlgButton(hMainDialog, IDC_OLD_BIOS_FIXES, uXPartChecked);
+			state = 1;
+		} else if (enable && !IsWindowEnabled(hCtrl) && (state != 2)) {
+			if (state != 0)
+				CheckDlgButton(hMainDialog, IDC_OLD_BIOS_FIXES, checked);
+			state = 2;
 		}
 	}
+	EnableWindow(hCtrl, enable);
+}
 
-	EnableWindow(GetDlgItem(hMainDialog, IDC_OLD_BIOS_FIXES), actual_enable_fix);
-	EnableWindow(GetDlgItem(hMainDialog, IDC_RUFUS_MBR), actual_enable_mbr);
-	EnableWindow(hDiskID, actual_enable_mbr);
+static void EnableUefiValidation(BOOL enable, BOOL remove_checkboxes)
+{
+	UINT checked = validate_md5sum ? BST_CHECKED : BST_UNCHECKED;
+	HWND hCtrl = GetDlgItem(hMainDialog, IDC_UEFI_MEDIA_VALIDATION);
+
+	// The UEFI validation bootloader cannot apply if we don't write an ISO, or if the ISO is not UEFI bootable
+	// or if it's a Windows To Go installation or if DD or BIOS/CSM only are enforced.
+	if ((boot_type != BT_IMAGE) || (!IS_EFI_BOOTABLE(img_report)) || IS_DD_ONLY(img_report) ||
+		((image_options & IMOP_WINTOGO) && (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO)) ||
+		((target_type == TT_BIOS) && HAS_WINDOWS(img_report) && (!allow_dual_uefi_bios))) {
+		enable = FALSE;
+	}
+
+	if (!enable && remove_checkboxes)
+		CheckDlgButton(hMainDialog, IDC_UEFI_MEDIA_VALIDATION, BST_UNCHECKED);
+	else
+		CheckDlgButton(hMainDialog, IDC_UEFI_MEDIA_VALIDATION, checked);
+	EnableWindow(hCtrl, enable);
 }
 
 static void EnableExtendedLabel(BOOL enable, BOOL remove_checkboxes)
@@ -847,7 +825,8 @@ static void EnableBootOptions(BOOL enable, BOOL remove_checkboxes)
 		SetPersistenceSize();
 	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_SIZE), (persistence_size != 0) && actual_enable);
 	EnableWindow(GetDlgItem(hMainDialog, IDC_PERSISTENCE_UNITS), (persistence_size != 0) && actual_enable);
-	EnableMBRBootOptions(actual_enable, remove_checkboxes);
+	EnableOldBiosFixes(actual_enable, remove_checkboxes);
+	EnableUefiValidation(actual_enable, remove_checkboxes);
 
 	EnableWindow(GetDlgItem(hMainDialog, IDC_LABEL), actual_enable);
 	if (boot_type == BT_IMAGE) {
@@ -1302,7 +1281,6 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		safe_free(image_path);
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		UpdateImage(FALSE);
-		SetMBRProps();
 		PopulateProperties();
 		PrintInfoDebug(0, MSG_203);
 		PrintStatus(0, MSG_203);
@@ -1376,7 +1354,6 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		MessageBoxExU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
 		PrintStatus(0, MSG_086);
 		EnableControls(TRUE, FALSE);
-		SetMBRProps();
 	} else {
 		if (!dont_display_image_name) {
 			for (i = (int)safe_strlen(image_path); (i > 0) && (image_path[i] != '\\'); i--);
@@ -1395,7 +1372,6 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 			SetPartitionSchemeAndTargetSystem(FALSE);
 			SetFileSystemAndClusterSize(NULL);
 			SetFSFromISO();
-			SetMBRProps();
 			user_changed_label = FALSE;
 			SetProposedLabel(ComboBox_GetCurSel(hDeviceList));
 		} else {
@@ -1441,7 +1417,6 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	is_bootloader_revoked = FALSE;
-	validate_md5sum = FALSE;
 	safe_free(grub2_buf);
 
 	if (ComboBox_GetCurSel(hDeviceList) == CB_ERR)
@@ -1568,9 +1543,6 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				goto out;
 			}
-			// TODO: Move this option to a user selection
-			validate_md5sum = TRUE;
-			uprintf("Will add runtime UEFI media validation through 'md5sum.txt'");
 		} else if ( ((fs_type == FS_NTFS) && !HAS_WINDOWS(img_report) && !HAS_GRUB(img_report) && 
 					 (!HAS_SYSLINUX(img_report) || (SL_MAJOR(img_report.sl_version) <= 5)))
 				 || ((IS_FAT(fs_type)) && (!HAS_SYSLINUX(img_report)) && (!allow_dual_uefi_bios) && !IS_EFI_BOOTABLE(img_report) &&
@@ -1980,7 +1952,6 @@ static void InitDialog(HWND hDlg)
 	hImageOption = GetDlgItem(hDlg, IDC_IMAGE_OPTION);
 	hSelectImage = GetDlgItem(hDlg, IDC_SELECT);
 	hNBPasses = GetDlgItem(hDlg, IDC_NB_PASSES);
-	hDiskID = GetDlgItem(hDlg, IDC_DISK_ID);
 	hStart = GetDlgItem(hDlg, IDC_START);
 
 	// Convert the main button labels to uppercase
@@ -2009,7 +1980,6 @@ static void InitDialog(HWND hDlg)
 
 	// Set some missing labels
 	SetAccessibleName(hNBPasses, lmprintf(MSG_316));
-	SetAccessibleName(hDiskID, lmprintf(MSG_317));
 
 	// Create the font and brush for the progress messages
 	hInfoFont = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
@@ -2107,13 +2077,6 @@ static void InitDialog(HWND hDlg)
 	// Fill up the boot options dropdown
 	SetBootOptions();
 
-	// Fill up the MBR masqueraded disk IDs ("8 disks should be enough for anybody")
-	IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, lmprintf(MSG_030, LEFT_TO_RIGHT_EMBEDDING "0x80" POP_DIRECTIONAL_FORMATTING)), 0x80));
-	for (i=1; i<=7; i++) {
-		IGNORE_RETVAL(ComboBox_SetItemData(hDiskID, ComboBox_AddStringU(hDiskID, lmprintf(MSG_109, 0x80+i, i+1)), 0x80+i));
-	}
-	IGNORE_RETVAL(ComboBox_SetCurSel(hDiskID, 0));
-
 	// Create the string arrays
 	StrArrayCreate(&BlockingProcessList, 16);
 	StrArrayCreate(&ImageList, 16);
@@ -2143,8 +2106,7 @@ static void InitDialog(HWND hDlg)
 	CreateTooltip(hBootType, lmprintf(MSG_164), -1);
 	CreateTooltip(hSelectImage, lmprintf(MSG_165), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_EXTENDED_LABEL), lmprintf(MSG_166), 10000);
-	CreateTooltip(GetDlgItem(hDlg, IDC_RUFUS_MBR), lmprintf(MSG_167), 10000);
-	CreateTooltip(hDiskID, lmprintf(MSG_168), 10000);
+	CreateTooltip(GetDlgItem(hDlg, IDC_UEFI_MEDIA_VALIDATION), lmprintf(MSG_167), 10000);
 	CreateTooltip(GetDlgItem(hDlg, IDC_OLD_BIOS_FIXES), lmprintf(MSG_169), -1);
 	CreateTooltip(GetDlgItem(hDlg, IDC_LIST_USB_HDD), lmprintf(MSG_170), -1);
 	CreateTooltip(hStart, lmprintf(MSG_171), -1);
@@ -2398,6 +2360,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			SetFileSystemAndClusterSize(NULL);
 			imop_win_sel = ComboBox_GetCurSel(hImageOption);
+			EnableUefiValidation((imop_win_sel == 0), TRUE);
 			break;
 		case IDC_PERSISTENCE_SIZE:
 			if (HIWORD(wParam) == EN_CHANGE) {
@@ -2467,6 +2430,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			target_type = (int)ComboBox_GetCurItemData(hTargetSystem);
 			SendMessage(hMainDialog, UM_UPDATE_CSM_TOOLTIP, 0, 0);
 			SetFileSystemAndClusterSize(NULL);
+			EnableUefiValidation(TRUE, TRUE);
 			break;
 		case IDC_PARTITION_TYPE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
@@ -2474,8 +2438,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			partition_type = (int)ComboBox_GetCurItemData(hPartitionScheme);
 			SetPartitionSchemeAndTargetSystem(TRUE);
 			SetFileSystemAndClusterSize(NULL);
-			SetMBRProps();
-			EnableMBRBootOptions(TRUE, TRUE);
+			EnableOldBiosFixes(TRUE, TRUE);
+			EnableUefiValidation(TRUE, TRUE);
 			selected_pt = partition_type;
 			break;
 		case IDC_FILE_SYSTEM:
@@ -2488,8 +2452,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				selected_fs = fs_type;
 			// Some FS's (such as ReFS or Large FAT32) only have QuickFormat so make sure we reflect that
 			EnableQuickFormat(TRUE, TRUE);
-			EnableMBRBootOptions(TRUE, TRUE);
-			SetMBRProps();
+			EnableOldBiosFixes(TRUE, TRUE);
 			EnableExtendedLabel(TRUE, TRUE);
 			break;
 		case IDC_BOOT_SELECTION:
@@ -2560,9 +2523,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 			}
 			break;
-		case IDC_RUFUS_MBR:
-			if ((HIWORD(wParam)) == BN_CLICKED)
-				mbr_selected_by_user = IsChecked(IDC_RUFUS_MBR);
+		case IDC_UEFI_MEDIA_VALIDATION:
+			if ((HIWORD(wParam)) == BN_CLICKED) {
+				validate_md5sum = IsChecked(IDC_UEFI_MEDIA_VALIDATION);
+				WriteSettingBool(SETTING_ENABLE_RUNTIME_VALIDATION, validate_md5sum);
+			}
 			break;
 		case IDC_LIST_USB_HDD:
 			if ((HIWORD(wParam)) == BN_CLICKED) {
@@ -3522,6 +3487,8 @@ skip_args_processing:
 	use_vds = ReadSettingBool(SETTING_USE_VDS) && is_vds_available;
 	usb_debug = ReadSettingBool(SETTING_ENABLE_USB_DEBUG);
 	cdio_loglevel_default = usb_debug ? CDIO_LOG_DEBUG : CDIO_LOG_WARN;
+	use_rufus_mbr = !ReadSettingBool(SETTING_DISABLE_RUFUS_MBR);
+	validate_md5sum = ReadSettingBool(SETTING_ENABLE_RUNTIME_VALIDATION);
 	detect_fakes = !ReadSettingBool(SETTING_DISABLE_FAKE_DRIVES_CHECK);
 	allow_dual_uefi_bios = ReadSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS);
 	force_large_fat32 = ReadSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT);
@@ -3730,7 +3697,7 @@ relaunch:
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		static BOOL ctrl_without_focus = FALSE;
 		BOOL no_focus = (msg.message == WM_SYSKEYDOWN) && !(msg.lParam & 0x20000000);
-		// ** ***************************
+		// ******************************
 		// .,ABCDEFGHIJKLMNOPQRSTUVWXYZ+-
 
 		// Sigh... The things one need to do to detect standalone use of the 'Alt' key.
@@ -3820,6 +3787,13 @@ extern int TestHashes(void);
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == VK_OEM_COMMA)) {
 				lock_drive = !lock_drive;
 				PrintStatusTimeout(lmprintf(MSG_282), lock_drive);
+				continue;
+			}
+			// Alt-A => Toggle use of Rufus MBR for Windows boot
+			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'A')) {
+				use_rufus_mbr = !use_rufus_mbr;
+				WriteSettingBool(SETTING_DISABLE_RUFUS_MBR, !use_rufus_mbr);
+				PrintStatusTimeout(lmprintf(MSG_349), use_rufus_mbr);
 				continue;
 			}
 			// Alt-B => Toggle fake drive detection during bad blocks check

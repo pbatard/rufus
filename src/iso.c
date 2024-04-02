@@ -1383,8 +1383,10 @@ out:
 					uprintf("Could not move %s → %s", path, dst_path, WindowsErrorString());
 			}
 		}
-		if (fd_md5sum != NULL)
+		if (fd_md5sum != NULL) {
+			uprintf("Created: %s\\%s (%s)", dest_dir, md5sum_name[0], SizeToHumanReadable(ftell(fd_md5sum), FALSE, FALSE));
 			fclose(fd_md5sum);
+		}
 	}
 	iso9660_close(p_iso);
 	udf_close(p_udf);

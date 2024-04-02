@@ -258,10 +258,10 @@ BOOL SetupWinPE(char drive_letter)
 	const char* patch_str_org[2] = { "\\minint\\txtsetup.sif", "\\minint\\system32\\" };
 	const char* patch_str_rep[2][2] = { { "\\i386\\txtsetup.sif", "\\i386\\system32\\" } ,
 										{ "\\amd64\\txtsetup.sif", "\\amd64\\system32\\" } };
+	const char* setupsrcdev = "SetupSourceDevice = \"\\device\\harddisk1\\partition1\"";
 	const char* win_nt_bt_org = "$win_nt$.~bt";
 	const char* rdisk_zero = "rdisk(0)";
 	const LARGE_INTEGER liZero = { {0, 0} };
-	char setupsrcdev[64];
 	HANDLE handle = INVALID_HANDLE_VALUE;
 	DWORD i, j, size, read_size, index = 0;
 	BOOL r = FALSE;
@@ -271,9 +271,6 @@ BOOL SetupWinPE(char drive_letter)
 		index = 1;
 	else if ((img_report.winpe & WINPE_MININT) == WINPE_MININT)
 		index = 2;
-	// Allow other values than harddisk 1, as per user choice for disk ID
-	static_sprintf(setupsrcdev, "SetupSourceDevice = \"\\device\\harddisk%d\\partition1\"",
-		ComboBox_GetCurSel(hDiskID));
 	// Copy of ntdetect.com in root
 	static_sprintf(src, "%c:\\%s\\ntdetect.com", toupper(drive_letter), basedir[2 * (index / 2)]);
 	static_sprintf(dst, "%c:\\ntdetect.com", toupper(drive_letter));
@@ -359,7 +356,7 @@ BOOL SetupWinPE(char drive_letter)
 			// rdisk(0) -> rdisk(#) disk masquerading
 			// NB: only the first one seems to be needed
 			if (safe_strnicmp(&buffer[i], rdisk_zero, strlen(rdisk_zero) - 1) == 0) {
-				buffer[i + 6] = 0x30 + ComboBox_GetCurSel(hDiskID);
+				buffer[i + 6] = 0x31;
 				uprintf("  0x%08X: '%s' -> 'rdisk(%c)'\n", i, rdisk_zero, buffer[i + 6]);
 			}
 			// $WIN_NT$_~BT -> i386/amd64

@@ -662,7 +662,7 @@ extern RUFUS_IMG_REPORT img_report;
 extern HINSTANCE hMainInstance;
 extern HWND hMainDialog, hLogDialog, hStatus, hDeviceList, hCapacity, hImageOption;
 extern HWND hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType;
-extern HWND hNBPasses, hLog, hInfo, hProgress, hDiskID;
+extern HWND hNBPasses, hLog, hInfo, hProgress;
 extern WORD selected_langid;
 extern DWORD ErrorStatus, DownloadStatus, MainThreadId, LastWriteError;
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, op_in_progress, right_to_left_mode;

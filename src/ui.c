@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * UI-related function calls
- * Copyright © 2018-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2018-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -223,9 +223,8 @@ void GetHalfDropwdownWidth(HWND hDlg)
 		hw = max(hw, GetTextSize(GetDlgItem(hDlg, IDC_TARGET_SYSTEM), msg).cx);
 	}
 
-	// Finally, we must ensure that we'll have enough space for the 2 checkbox controls
+	// Finally, we must ensure that we'll have enough space for the checkbox controls
 	// that end up with a half dropdown
-	hw = max(hw, GetTextWidth(hDlg, IDC_RUFUS_MBR) - sw);
 	hw = max(hw, GetTextWidth(hDlg, IDC_BAD_BLOCKS) - sw);
 
 	// Add the width of a blank dropdown
@@ -351,7 +350,7 @@ void PositionMainControls(HWND hDlg)
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	advanced_device_section_height = rc.top;
-	hCtrl = GetDlgItem(hDlg, IDC_RUFUS_MBR);
+	hCtrl = GetDlgItem(hDlg, IDC_UEFI_MEDIA_VALIDATION);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	advanced_device_section_height = rc.bottom - advanced_device_section_height;
@@ -474,10 +473,10 @@ void PositionMainControls(HWND hDlg)
 		hCtrl = GetDlgItem(hDlg, half_width_ids[i]);
 		GetWindowRect(hCtrl, &rc);
 		MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
-		// First 5 controls are on the left handside
+		// First 4 controls are on the left handside
 		// First 2 controls may overflow into separator
 		hPrevCtrl = GetNextWindow(hCtrl, GW_HWNDPREV);
-		SetWindowPos(hCtrl, hPrevCtrl, (i < 5) ? rc.left : mw + hw + sw, rc.top,
+		SetWindowPos(hCtrl, hPrevCtrl, (i < 4) ? rc.left : mw + hw + sw, rc.top,
 			(i <2) ? hw + sw : hw, rc.bottom - rc.top, 0);
 	}
 
