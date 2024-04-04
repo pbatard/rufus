@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2023-04-17 13:44+0100\n"
-"PO-Revision-Date: 2024-01-10 12:20+0000\n"
+"PO-Revision-Date: 2024-04-04 17:38+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: nb_NO\n"
@@ -1843,7 +1843,7 @@ msgstr "Lag en lokal brukerkonto med brukernavnet:"
 
 #. • MSG_334
 msgid "Set regional options to the same values as this user's"
-msgstr "Sett regionale instillinger til det samme som den aktive brukerkontoen"
+msgstr "Sett regionale innstillinger til det samme som den aktive brukerkontoen"
 
 #. • MSG_335
 msgid "Disable BitLocker automatic device encryption"

@@ -556,7 +556,11 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 			);
 
 			if ((dupHandle != NULL) && (processHandle != NtCurrentProcess())) {
-				pfNtClose(dupHandle);
+				TRY_AND_HANDLE(
+					EXCEPTION_ACCESS_VIOLATION,
+					{ pfNtClose(dupHandle); },
+					{ continue; }
+				);
 				dupHandle = NULL;
 			}
 
