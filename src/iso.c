@@ -124,11 +124,12 @@ static const char* stupid_antivirus = "  NOTE: This is usually caused by a poorl
 const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
 static uint8_t joliet_level = 0;
+static uint32_t md5sum_size = 0;
 static uint64_t total_blocks, extra_blocks, nb_blocks, last_nb_blocks;
 static BOOL scan_only = FALSE;
 static FILE* fd_md5sum = NULL;
 static StrArray config_path, isolinux_path;
-static char symlinked_syslinux[MAX_PATH];
+static char symlinked_syslinux[MAX_PATH], *md5sum_data = NULL, *md5sum_pos = NULL;
 
 // Ensure filenames do not contain invalid FAT32 or NTFS characters
 static __inline char* sanitize_filename(char* filename, BOOL* is_identical)
@@ -483,6 +484,48 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 	free(src);
 }
 
+// Returns TRUE if a path appears in md5sum.txt
+static BOOL is_in_md5sum(char* path)
+{
+	BOOL found = FALSE;
+	char c[3], *p;
+
+	// If we are creating the md5sum file from scratch, every file is in it.
+	if (fd_md5sum != NULL)
+		return TRUE;
+
+	// If we don't have an existing file at this stage, then no file is in it.
+	if (md5sum_size == 0 || md5sum_data == NULL)
+		return FALSE;
+
+	// We should have a "X:/xyz" path
+	assert(path[1] == ':' && path[2] == '/');
+
+	// Modify the path to have " ./xyz"
+	c[0] = path[0];
+	c[1] = path[1];
+	path[0] = ' ';
+	path[1] = '.';
+
+	// Search for the string in the remainder of the md5sum.txt
+	// NB: md5sum_data is always NUL terminated.
+	p = strstr(md5sum_pos, path);
+	found = (p != NULL);
+	// If not found in remainder and we have a remainder, loop to search from beginning
+	if (!found && md5sum_pos != md5sum_data) {
+		c[2] = *md5sum_pos;
+		*md5sum_pos = 0;
+		p = strstr(md5sum_data, path);
+		*md5sum_pos = c[2];
+		found = (p != NULL);
+	}
+
+	path[0] = c[0];
+	path[1] = c[1];
+	if (found)
+		md5sum_pos = p + strlen(path);
+	return found;
+}
 
 static void print_extracted_file(char* psz_fullpath, uint64_t file_length)
 {
@@ -501,6 +544,9 @@ static void print_extracted_file(char* psz_fullpath, uint64_t file_length)
 	psz_fullpath[nul_pos] = 0;
 	// ISO9660 cannot handle backslashes
 	to_unix_path(psz_fullpath);
+	// Update md5sum_totalbytes as needed
+	if (is_in_md5sum(psz_fullpath))
+		md5sum_totalbytes += file_length;
 }
 
 // Convert from time_t to FILETIME
@@ -630,10 +676,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 						goto out;
 					}
 					buf_size = (DWORD)MIN(file_length, read);
-					if (fd_md5sum != NULL) {
-						md5sum_totalbytes += buf_size;
+					if (fd_md5sum != NULL)
 						hash_write[HASH_MD5](&ctx, buf, buf_size);
-					}
 					ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
 					if (!r || (wr_size != buf_size)) {
 						uprintf("  Error writing file: %s", r ? "Short write detected" : WindowsErrorString());
@@ -897,10 +941,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 							goto out;
 						}
 						buf_size = (DWORD)MIN(file_length, ISO_BUFFER_SIZE);
-						if (fd_md5sum != NULL) {
-							md5sum_totalbytes += buf_size;
+						if (fd_md5sum != NULL)
 							hash_write[HASH_MD5](&ctx, buf, buf_size);
-						}
 						ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
 						if (!r || wr_size != buf_size) {
 							uprintf("  Error writing file: %s", r ? "Short write detected" : WindowsErrorString());
@@ -1083,6 +1125,9 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 				fd_md5sum = fopenU(path, "wb");
 				if (fd_md5sum == NULL)
 					uprintf("WARNING: Could not create '%s'", md5sum_name[0]);
+			} else {
+				md5sum_size = ReadISOFileToBuffer(src_iso, md5sum_name[0], &md5sum_data);
+				md5sum_pos = md5sum_data;
 			}
 		}
 	}
@@ -1386,6 +1431,9 @@ out:
 		if (fd_md5sum != NULL) {
 			uprintf("Created: %s\\%s (%s)", dest_dir, md5sum_name[0], SizeToHumanReadable(ftell(fd_md5sum), FALSE, FALSE));
 			fclose(fd_md5sum);
+		} else if (md5sum_data != NULL) {
+			safe_free(md5sum_data);
+			md5sum_size = 0;
 		}
 	}
 	iso9660_close(p_iso);
@@ -1491,6 +1539,97 @@ out:
 	iso9660_close(p_iso);
 	udf_close(p_udf);
 	return r;
+}
+
+/*
+ * Extract a file to a buffer. Buffer must be freed by the caller.
+ */
+uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** buf)
+{
+	ssize_t read_size;
+	int64_t file_length;
+	uint32_t ret = 0, nb_blocks;
+	iso9660_t* p_iso = NULL;
+	udf_t* p_udf = NULL;
+	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;
+	iso9660_stat_t* p_statbuf = NULL;
+
+	*buf = NULL;
+
+	// First try to open as UDF - fallback to ISO if it failed
+	p_udf = udf_open(iso);
+	if (p_udf == NULL)
+		goto try_iso;
+	p_udf_root = udf_get_root(p_udf, true, 0);
+	if (p_udf_root == NULL) {
+		uprintf("Could not locate UDF root directory");
+		goto out;
+	}
+	p_udf_file = udf_fopen(p_udf_root, iso_file);
+	if (!p_udf_file) {
+		uprintf("Could not locate file %s in ISO image", iso_file);
+		goto out;
+	}
+	file_length = udf_get_file_length(p_udf_file);
+	if (file_length > UINT32_MAX) {
+		uprintf("Only files smaller than 4 GB are supported");
+		goto out;
+	}
+	nb_blocks = (uint32_t)((file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
+	*buf = malloc(nb_blocks * UDF_BLOCKSIZE + 1);
+	if (*buf == NULL) {
+		uprintf("Could not allocate buffer for file %s", iso_file);
+		goto out;
+	}
+	read_size = udf_read_block(p_udf_file, *buf, nb_blocks);
+	if (read_size < 0 || read_size != file_length) {
+		uprintf("Error reading UDF file %s", iso_file);
+		goto out;
+	}
+	ret = (uint32_t)file_length;
+	(*buf)[ret] = 0;
+	goto out;
+
+try_iso:
+	// Make sure to enable extensions, else we may not match the name of the file we are looking
+	// for since Rock Ridge may be needed to translate something like 'I386_PC' into 'i386-pc'...
+	p_iso = iso9660_open_ext(iso, ISO_EXTENSION_MASK);
+	if (p_iso == NULL) {
+		uprintf("Unable to open image '%s'", iso);
+		goto out;
+	}
+	p_statbuf = iso9660_ifs_stat_translate(p_iso, iso_file);
+	if (p_statbuf == NULL) {
+		uprintf("Could not get ISO-9660 file information for file %s", iso_file);
+		goto out;
+	}
+	file_length = p_statbuf->total_size;
+	if (file_length > UINT32_MAX) {
+		uprintf("Only files smaller than 4 GB are supported");
+		goto out;
+	}
+	nb_blocks = (uint32_t)((file_length + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE);
+	*buf = malloc(nb_blocks * ISO_BLOCKSIZE + 1);
+	if (*buf == NULL) {
+		uprintf("Could not allocate buffer for file %s", iso_file);
+		goto out;
+	}
+	if (iso9660_iso_seek_read(p_iso, *buf, p_statbuf->lsn, nb_blocks) != nb_blocks * ISO_BLOCKSIZE) {
+		uprintf("Error reading ISO file %s", iso_file);
+		goto out;
+	}
+	ret = (uint32_t)file_length;
+	(*buf)[ret] = 0;
+
+out:
+	iso9660_stat_free(p_statbuf);
+	udf_dirent_free(p_udf_root);
+	udf_dirent_free(p_udf_file);
+	iso9660_close(p_iso);
+	udf_close(p_udf);
+	if (ret == 0)
+		safe_free(*buf);
+	return ret;
 }
 
 uint32_t GetInstallWimVersion(const char* iso)
