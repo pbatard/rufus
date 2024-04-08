@@ -865,8 +865,11 @@ _iso9660_recname_to_cstring(const char *src, size_t src_len,
     cdio_utf8_t *p_psz_out = NULL;
 
     if (cdio_charset_to_utf8(src, i_inlen, &p_psz_out, "UCS-2BE")) {
-      if (cpy_result != NULL)
-        strcpy(cpy_result, p_psz_out);
+      if (cpy_result != NULL) {
+        strncpy(cpy_result, p_psz_out, i_inlen);
+	if (strlen(p_psz_out) > i_inlen)
+	  cdio_warn("file name '%s' will be truncated", p_psz_out);
+      }
       if (alloc_result != NULL)
         *alloc_result = p_psz_out;
       else
