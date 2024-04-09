@@ -777,6 +777,13 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 	DWORD dwDisp, dwVal = 1;
 
 	assert(unattend_xml_path != NULL);
+	
+	static_sprintf(path, "%c:\\sources\\$OEM$\\$$\\Panther\\unattend.xml", drive_letter);
+	if (PathFileExistsA(path)) {
+		uprintf("'%s' already exists. Skipping copy operation.", path);
+		return TRUE; // File already exists, no need to copy
+	}
+
 	uprintf("Applying Windows customization:");
 	PrintStatus(0, MSG_326);
 	if (flags & UNATTEND_WINDOWS_TO_GO) {
