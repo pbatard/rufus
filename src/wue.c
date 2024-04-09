@@ -780,7 +780,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 	
 	static_sprintf(path, "%c:\\sources\\$OEM$\\$$\\Panther\\unattend.xml", drive_letter);
 	if (PathFileExistsA(path)) {
-		uprintf("'%s' already exists. Skipping copy operation.", path);
+		uprintf("'%s' already exists. Skipping Windows Customization.", path);
 		return TRUE; // File already exists, no need to copy
 	}
 
