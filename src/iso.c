@@ -1233,18 +1233,9 @@ out:
 				char isolinux_tmp[MAX_PATH];
 				static_sprintf(isolinux_tmp, "%sisolinux.tmp", temp_dir);
 				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], isolinux_tmp, FILE_ATTRIBUTE_NORMAL);
-				if (size == 0) {
+				if ((size == 0) || (read_file(isolinux_tmp, &buf) != size)) {
 					uprintf("  Could not access %s", isolinux_path.String[i]);
 				} else {
-					buf = (char*)calloc(size, 1);
-					if (buf == NULL) break;
-					fd = fopen(isolinux_tmp, "rb");
-					if (fd == NULL) {
-						free(buf);
-						continue;
-					}
-					fread(buf, 1, size, fd);
-					fclose(fd);
 					sl_version = GetSyslinuxVersion(buf, size, &ext);
 					if (img_report.sl_version == 0) {
 						static_strcpy(img_report.sl_version_ext, ext);
@@ -1315,15 +1306,10 @@ out:
 			// coverity[swapped_arguments]
 			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, path) != 0) {
 				size = (size_t)ExtractISOFile(src_iso, grub_path, path, FILE_ATTRIBUTE_NORMAL);
-				buf = (char*)calloc(size, 1);
-				fd = fopen(path, "rb");
-				if ((size == 0) || (buf == NULL) || (fd == NULL)) {
+				if ((size == 0) || (read_file(path, &buf) != size))
 					uprintf("  Could not read Grub version from '%s'", grub_path);
-				} else {
-					fread(buf, 1, size, fd);
-					fclose(fd);
+				else
 					GetGrubVersion(buf, size);
-				}
 				free(buf);
 				DeleteFileU(path);
 			}

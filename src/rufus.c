@@ -2032,7 +2032,7 @@ static void InitDialog(HWND hDlg)
 		len = 0;
 		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, TRUE);
 		if (buf == NULL) {
-			uprintf("Warning: could not read embedded Syslinux v%d version", i+4);
+			uprintf("Warning: could not read embedded Syslinux v%d version", i + 4);
 		} else {
 			embedded_sl_version[i] = GetSyslinuxVersion(buf, len, &ext);
 			static_sprintf(embedded_sl_version_str[i], "%d.%02d", SL_MAJOR(embedded_sl_version[i]), SL_MINOR(embedded_sl_version[i]));

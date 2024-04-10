@@ -411,28 +411,30 @@ uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext)
 		return 0;
 
 	// Start at 64 to avoid the short incomplete version at the beginning of ldlinux.sys
-	for (i=64; i<buf_size-64; i++) {
+	for (i = 64; i < buf_size - 64; i++) {
 		if (memcmp(&buf[i], LINUX, sizeof(LINUX)) == 0) {
 			// Check for ISO or SYS prefix
-			if (!( ((buf[i-3] == 'I') && (buf[i-2] == 'S') && (buf[i-1] == 'O'))
-			    || ((buf[i-3] == 'S') && (buf[i-2] == 'Y') && (buf[i-1] == 'S')) ))
+			if (!( ((buf[i - 3] == 'I') && (buf[i - 2] == 'S') && (buf[i - 1] == 'O'))
+			    || ((buf[i - 3] == 'S') && (buf[i - 2] == 'Y') && (buf[i - 1] == 'S')) ))
 			  continue;
 			i += sizeof(LINUX);
-			version = (((uint8_t)strtoul(&buf[i], &p, 10))<<8) + (uint8_t)strtoul(&p[1], &p, 10);
+			version = (((uint8_t)strtoul(&buf[i], &p, 10)) << 8) + (uint8_t)strtoul(&p[1], &p, 10);
+			// Our buffer is either from our internal legit syslinux (i.e. with a NUL terminated
+			// version string) or from a buffer that has been NUL-terminated through read_file(),
+			// so the string we work with in p is always NUL terminated at this stage.
 			if (version == 0)
 				continue;
-			p[safe_strlen(p)] = 0;
 			// Ensure that our extra version string starts with a slash
 			*p = '/';
 			// Remove the x.yz- duplicate if present
-			for (j=0; (buf[i+j] == p[1+j]) && (buf[i+j] != ' '); j++);
-			if (p[j+1] == '-')
+			for (j = 0; (buf[i + j] == p[1 + j]) && (buf[i + j] != ' '); j++);
+			if (p[j + 1] == '-')
 				j++;
 			if (j >= 4) {
 				p[j] = '/';
 				p = &p[j];
 			}
-			for (j=safe_strlen(p)-1; j>0; j--) {
+			for (j = safe_strlen(p) - 1; j > 0; j--) {
 				// Arch Linux affixes a star for their version - who knows what else is out there...
 				if ((p[j] == ' ') || (p[j] == '*'))
 					p[j] = 0;
@@ -440,15 +442,15 @@ uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext)
 					break;
 			}
 			// Sanitize the string
-			for (j=1; j<safe_strlen(p); j++) {
+			for (j = 1; j < safe_strlen(p); j++) {
 				// Some people are bound to have invalid chars in their date strings
-				for (k=0; k<sizeof(unauthorized); k++) {
+				for (k = 0; k < sizeof(unauthorized); k++) {
 					if (p[j] == unauthorized[k])
 						p[j] = '_';
 				}
 			}
 			// If all we have is a slash, return the empty string for the extra version
-			*ext = (p[1] == 0)?nullstr:p;
+			*ext = (p[1] == 0) ? nullstr : p;
 			return version;
 		}
 	}
