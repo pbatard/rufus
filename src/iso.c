@@ -324,6 +324,11 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			}
 		}
 
+		// Check for "\sources\\$OEM$\\$$\\Panther\\unattend.xml"
+		if ((safe_stricmp(psz_dirname, "/sources/$OEM$/$$/Panther") == 0) &&
+			(safe_stricmp(psz_basename, "unattend.xml") == 0))
+			img_report.has_panther_unattend = TRUE;
+
 		// Check for PE (XP) specific files in "/i386", "/amd64" or "/minint"
 		for (i = 0; i < ARRAYSIZE(pe_dirname); i++)
 			if (safe_stricmp(psz_dirname, pe_dirname[i]) == 0)

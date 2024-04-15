@@ -1562,42 +1562,47 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			goto out;
 		}
 		if ((WindowsVersion.Version >= WINDOWS_8) && IS_WINDOWS_1X(img_report) && (!is_windows_to_go)) {
-			StrArray options;
-			int arch = _log2(img_report.has_efi >> 1);
-			uint16_t map[16] = { 0 }, b = 1;
-			StrArrayCreate(&options, 10);
-			if (IS_WINDOWS_11(img_report)) {
-				StrArrayAdd(&options, lmprintf(MSG_329), TRUE);
-				MAP_BIT(UNATTEND_SECUREBOOT_TPM_MINRAM);
+			if (img_report.has_panther_unattend) {
+				uprintf("NOTICE: A '/sources/$OEM$/$$/Panther/unattend.xml' was detected on the ISO.");
+				uprintf("As a result, the 'Windows User Experience dialog' will not be displayed.");
+			} else {
+				StrArray options;
+				int arch = _log2(img_report.has_efi >> 1);
+				uint16_t map[16] = { 0 }, b = 1;
+				StrArrayCreate(&options, 10);
+				if (IS_WINDOWS_11(img_report)) {
+					StrArrayAdd(&options, lmprintf(MSG_329), TRUE);
+					MAP_BIT(UNATTEND_SECUREBOOT_TPM_MINRAM);
+				}
+				if (img_report.win_version.build >= 22500) {
+					StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
+					MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
+				}
+				StrArrayAdd(&options, lmprintf(MSG_333), TRUE);
+				username_index = _log2(b);
+				MAP_BIT(UNATTEND_SET_USER);
+				StrArrayAdd(&options, lmprintf(MSG_334), TRUE);
+				MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
+				StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
+				MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
+				StrArrayAdd(&options, lmprintf(MSG_335), TRUE);
+				MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
+				if (expert_mode) {
+					StrArrayAdd(&options, lmprintf(MSG_346), TRUE);
+					MAP_BIT(UNATTEND_FORCE_S_MODE);
+				}
+				i = CustomSelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
+					options.String, options.Index, remap16(unattend_xml_mask, map, FALSE), username_index);
+				StrArrayDestroy(&options);
+				if (i < 0)
+					goto out;
+				i = remap16(i, map, TRUE);
+				unattend_xml_path = CreateUnattendXml(arch, i);
+				// Remember the user preferences for the current session.
+				unattend_xml_mask &= ~(remap16(0x1ff, map, TRUE));
+				unattend_xml_mask |= i;
+				WriteSetting32(SETTING_WUE_OPTIONS, (UNATTEND_DEFAULT_MASK << 16) | unattend_xml_mask);
 			}
-			if (img_report.win_version.build >= 22500) {
-				StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
-				MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
-			}
-			StrArrayAdd(&options, lmprintf(MSG_333), TRUE);
-			username_index = _log2(b);
-			MAP_BIT(UNATTEND_SET_USER);
-			StrArrayAdd(&options, lmprintf(MSG_334), TRUE);
-			MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
-			StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
-			MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
-			StrArrayAdd(&options, lmprintf(MSG_335), TRUE);
-			MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
-			if (expert_mode) {
-				StrArrayAdd(&options, lmprintf(MSG_346), TRUE);
-				MAP_BIT(UNATTEND_FORCE_S_MODE);
-			}
-			i = CustomSelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
-				options.String, options.Index, remap16(unattend_xml_mask, map, FALSE), username_index);
-			StrArrayDestroy(&options);
-			if (i < 0)
-				goto out;
-			i = remap16(i, map, TRUE);
-			unattend_xml_path = CreateUnattendXml(arch, i);
-			// Remember the user preferences for the current session.
-			unattend_xml_mask &= ~(remap16(0x1ff, map, TRUE));
-			unattend_xml_mask |= i;
-			WriteSetting32(SETTING_WUE_OPTIONS, (UNATTEND_DEFAULT_MASK << 16) | unattend_xml_mask);
 		}
 
 		if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&

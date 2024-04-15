@@ -410,6 +410,7 @@ typedef struct {
 	BOOLEAN has_grub4dos;
 	uint8_t has_grub2;
 	BOOLEAN has_compatresources_dll;
+	BOOLEAN has_panther_unattend;
 	BOOLEAN has_kolibrios;
 	BOOLEAN needs_syslinux_overwrite;
 	BOOLEAN needs_ntfs;
