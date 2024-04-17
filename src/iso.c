@@ -615,10 +615,9 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			uprintf("Error allocating file name");
 			goto out;
 		}
-		length = _snprintf(psz_fullpath, length, "%s%s/%s", psz_extract_dir, psz_path, psz_basename);
-		if (length < 0) {
+		length = _snprintf_s(psz_fullpath, length, _TRUNCATE, "%s%s/%s", psz_extract_dir, psz_path, psz_basename);
+		if (length < 0)
 			goto out;
-		}
 		if (S_ISLNK(udf_get_posix_filemode(p_udf_dirent)))
 			img_report.has_symlinks = SYMLINKS_UDF;
 		if (udf_is_dir(p_udf_dirent)) {
@@ -757,7 +756,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 		return 1;
 	}
 
-	length = _snprintf(psz_fullpath, sizeof(psz_fullpath), "%s%s/", psz_extract_dir, psz_path);
+	length = _snprintf_s(psz_fullpath, sizeof(psz_fullpath), _TRUNCATE, "%s%s/", psz_extract_dir, psz_path);
 	if (length < 0)
 		goto out;
 	psz_basename = &psz_fullpath[length];
@@ -1079,7 +1078,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	const char* basedir[] = { "i386", "amd64", "minint" };
 	const char* tmp_sif = ".\\txtsetup.sif~";
 	int k, r = 1;
-	char* tmp, * buf, * ext, * spacing = "  ";
+	char *tmp, *buf = NULL, *ext, *spacing = "  ";
 	char path[MAX_PATH], path2[16];
 	uint16_t sl_version;
 	size_t i, j, size, sl_index = 0;
@@ -1131,7 +1130,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 				if (fd_md5sum == NULL)
 					uprintf("WARNING: Could not create '%s'", md5sum_name[0]);
 			} else {
-				md5sum_size = ReadISOFileToBuffer(src_iso, md5sum_name[0], &md5sum_data);
+				md5sum_size = ReadISOFileToBuffer(src_iso, md5sum_name[0], (uint8_t**)&md5sum_data);
 				md5sum_pos = md5sum_data;
 			}
 		}
@@ -1238,7 +1237,7 @@ out:
 				char isolinux_tmp[MAX_PATH];
 				static_sprintf(isolinux_tmp, "%sisolinux.tmp", temp_dir);
 				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], isolinux_tmp, FILE_ATTRIBUTE_NORMAL);
-				if ((size == 0) || (read_file(isolinux_tmp, &buf) != size)) {
+				if ((size == 0) || (read_file(isolinux_tmp, (uint8_t**)&buf) != size)) {
 					uprintf("  Could not access %s", isolinux_path.String[i]);
 				} else {
 					sl_version = GetSyslinuxVersion(buf, size, &ext);
@@ -1311,11 +1310,11 @@ out:
 			// coverity[swapped_arguments]
 			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, path) != 0) {
 				size = (size_t)ExtractISOFile(src_iso, grub_path, path, FILE_ATTRIBUTE_NORMAL);
-				if ((size == 0) || (read_file(path, &buf) != size))
+				if ((size == 0) || (read_file(path, (uint8_t**)&buf) != size))
 					uprintf("  Could not read Grub version from '%s'", grub_path);
 				else
 					GetGrubVersion(buf, size);
-				free(buf);
+				safe_free(buf);
 				DeleteFileU(path);
 			}
 			if (img_report.grub2_version[0] == 0) {
@@ -1539,7 +1538,7 @@ uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** bu
 {
 	ssize_t read_size;
 	int64_t file_length;
-	uint32_t ret = 0, nb_blocks;
+	uint32_t ret = 0, nblocks;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL;
 	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;
@@ -1566,13 +1565,13 @@ uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** bu
 		uprintf("Only files smaller than 4 GB are supported");
 		goto out;
 	}
-	nb_blocks = (uint32_t)((file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
-	*buf = malloc(nb_blocks * UDF_BLOCKSIZE + 1);
+	nblocks = (uint32_t)((file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
+	*buf = malloc(nblocks * UDF_BLOCKSIZE + 1);
 	if (*buf == NULL) {
 		uprintf("Could not allocate buffer for file %s", iso_file);
 		goto out;
 	}
-	read_size = udf_read_block(p_udf_file, *buf, nb_blocks);
+	read_size = udf_read_block(p_udf_file, *buf, nblocks);
 	if (read_size < 0 || read_size != file_length) {
 		uprintf("Error reading UDF file %s", iso_file);
 		goto out;
@@ -1599,13 +1598,13 @@ try_iso:
 		uprintf("Only files smaller than 4 GB are supported");
 		goto out;
 	}
-	nb_blocks = (uint32_t)((file_length + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE);
-	*buf = malloc(nb_blocks * ISO_BLOCKSIZE + 1);
+	nblocks = (uint32_t)((file_length + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE);
+	*buf = malloc(nblocks * ISO_BLOCKSIZE + 1);
 	if (*buf == NULL) {
 		uprintf("Could not allocate buffer for file %s", iso_file);
 		goto out;
 	}
-	if (iso9660_iso_seek_read(p_iso, *buf, p_statbuf->lsn, nb_blocks) != nb_blocks * ISO_BLOCKSIZE) {
+	if (iso9660_iso_seek_read(p_iso, *buf, p_statbuf->lsn, nblocks) != nblocks * ISO_BLOCKSIZE) {
 		uprintf("Error reading ISO file %s", iso_file);
 		goto out;
 	}

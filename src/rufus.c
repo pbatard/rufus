@@ -3258,7 +3258,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		static_strcpy(cur_dir, ".\\");
 	} else {
 		// Need to remove the '\\?\' prefix and reappend the trailing '\'
-		strcpy(cur_dir, &cur_dir[4]);
+		static_strcpy(cur_dir, &cur_dir[4]);
 		static_strcat(cur_dir, "\\");
 	}
 	safe_closehandle(hFile);
@@ -3283,7 +3283,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			static_strcpy(temp_dir, cur_dir);
 		} else {
 			// Need to remove the '\\?\' prefix or else we'll get issues with the Fido icon
-			strcpy(temp_dir, &temp_dir[4]);
+			static_strcpy(temp_dir, &temp_dir[4]);
 			// And me must re-append the '\' that gets removed by GetFinalPathNameByHandle()
 			static_strcat(temp_dir, "\\");
 		}

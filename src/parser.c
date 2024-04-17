@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Elementary Unicode compliant find/replace parser
- * Copyright © 2012-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ static loc_cmd* get_loc_cmd(char c, char* line) {
 			// locate ending quote
 			while ((line[i] != 0) && ((line[i] != '"') || ((line[i] == '"') && (line[i-1] == '\\')))) {
 				if ((line[i] == '"') && (line[i-1] == '\\')) {
-					strcpy(&line[i-1], &line[i]);
+					memmove(&line[i-1], &line[i], strlen(&line[i]) + 1);
 				} else {
 					i++;
 				}
