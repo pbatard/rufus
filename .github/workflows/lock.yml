@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: dessant/lock-threads@v5
         with:
-          github-token: ${{ github.token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           issue-inactive-days: '90'
           issue-comment: >
             This thread has been automatically locked since there has not been

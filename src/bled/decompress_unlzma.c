@@ -255,6 +255,11 @@ unpack_lzma_stream(transformer_state_t *xstate)
 	header.dict_size = SWAP_LE32(header.dict_size);
 	header.dst_size = SWAP_LE64(header.dst_size);
 
+	if (header.dict_size > 1024 * 1024 * 1024) {
+		bb_simple_error_msg("lzma dictionary size too large");
+		return -1;
+	}
+
 	if (header.dict_size == 0)
 		header.dict_size++;
 
