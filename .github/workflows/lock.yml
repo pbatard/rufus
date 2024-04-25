@@ -3,7 +3,7 @@ name: '[cron] Lock stale issues'
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '33 22 * * *'
 
 jobs:
   lock:

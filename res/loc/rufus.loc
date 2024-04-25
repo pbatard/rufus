@@ -3,7 +3,7 @@
 #########################################################################
 
 # List of all languages included in this file (with version)
-# • v3.22 "en-US" "English (English)"
+# • v4.5 "en-US" "English (English)"
 # • v3.22 "ar-SA" "Arabic (العربية)"
 # • v3.22 "bg-BG" "Bulgarian (Български)"
 # • v3.22 "zh-CN" "Chinese Simplified (简体中文)"
@@ -44,7 +44,7 @@
 
 #########################################################################
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
-v 3.22
+v 4.5
 
 g IDD_DIALOG
 t IDS_DRIVE_PROPERTIES_TXT "Drive Properties"
@@ -58,9 +58,7 @@ t IDC_LIST_USB_HDD "List USB Hard Drives"
 # It is acceptable to drop the parenthesis () if you are running out of space
 # as there is a tooltip (MSG_169) providing these details.
 t IDC_OLD_BIOS_FIXES "Add fixes for old BIOSes (extra partition, align, etc.)"
-# 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-# Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-# specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
+# It is acceptable to drop the "runtime" if you are running out of space
 t IDC_UEFI_MEDIA_VALIDATION "Enable runtime UEFI media validation"
 t IDS_FORMAT_OPTIONS_TXT "Format Options"
 t IDS_FILE_SYSTEM_TXT "File system"
@@ -572,7 +570,6 @@ t MSG_313 "Save to VHD"
 t MSG_314 "Compute image checksums"
 t MSG_315 "Multiple buttons"
 t MSG_316 "Number of passes"
-# TODO: Use this with 168 for UEFI validation label and tooltip
 t MSG_317 "Disk ID" 
 t MSG_318 "Default thread priority: %d"
 t MSG_319 "Ignore Boot Marker"
@@ -4316,7 +4313,7 @@ t MSG_922 "Lataa UEFI Shell ISO-levykuvia"
 
 #########################################################################
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
-v 3.22
+v 4.5
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -4333,7 +4330,7 @@ t IDS_PARTITION_TYPE_TXT "Schéma de partition"
 t IDS_TARGET_SYSTEM_TXT "Système de destination"
 t IDC_LIST_USB_HDD "Lister les disques durs USB"
 t IDC_OLD_BIOS_FIXES "Ajouter les options de compatibilité pour vieux BIOS"
-t IDC_RUFUS_MBR "Utiliser le MBR Rufus avec ID"
+t IDC_UEFI_MEDIA_VALIDATION "Activer la validation des média sous UEFI"
 t IDS_FORMAT_OPTIONS_TXT "Options de Formatage"
 t IDS_FILE_SYSTEM_TXT "Système de fichiers"
 t IDS_CLUSTER_SIZE_TXT "Taille d'unité d'allocation"
@@ -4534,8 +4531,7 @@ t MSG_163 "Methode qui sera utilisée pour créer les partitions"
 t MSG_164 "Méthode à utiliser pour rendre le périphérique démarrable"
 t MSG_165 "Cliquez ici pour sélectionner ou télécharger une image..."
 t MSG_166 "Cochez cette case pour permettre l’affichage des caractères étendus/internationaux et ajouter une icône (ceci crée un fichier autorun.inf)"
-t MSG_167 "Installe un MBR permettant la sélection du périphérique de démarrage. Peut aussi camoufler l’ID de disque pour le BIOS"
-t MSG_168 "Camoufle le premier disque USB démarrable (généralement 0x80) sous une ID différente.\nChangez cette option si vous installez Windows XP avec plus d’un disque dur."
+t MSG_167 "Installe un fichier de démarrage UEFI, qui effectue une validation MD5Sum du média"
 t MSG_169 "Créé une petite partition supplémentaire et aligner les partitions.\nPeut améliorer la détection du périphérique pour les vieux BIOS."
 t MSG_170 "Liste les disques durs externes USB. UTILISEZ A VOS PROPRES RISQUES !!!"
 t MSG_171 "Lance le formatage. Cette opération DETRUIT toutes les données sur le périphérique sélectionné !"
@@ -4693,7 +4689,7 @@ t MSG_326 "Application des options utilisateur..."
 t MSG_327 "Expérience de l'utilisateur Windows"
 t MSG_328 "Personnaliser l'installation de Windows ?"
 t MSG_329 "Supprimer la nécessité d'avoir 4Go+ de RAM, Secure Boot et TPM 2.0"
-t MSG_330 "Supprimer la nécessité d'utiliser un compte Microsoft en ligne"
+t MSG_330 "Supprimer la nécessité d'utiliser un compte utilisateur Microsoft en ligne"
 t MSG_331 "Désactiver la collecte de données (Supprime les questions de confidentialité)"
 t MSG_332 "Empêcher Windows To Go d'accéder aux disques internes"
 t MSG_333 "Créer un compte local sous le nom de :"
@@ -4709,6 +4705,10 @@ t MSG_342 "Image VHDX compressée"
 t MSG_343 "Image VHD non compressée"
 t MSG_344 "Image 'Full Flash Update'"
 t MSG_345 "Des données complémentaires doivent être téléchargées à partir du site Microsoft avant d'utiliser cette fonctionnalité :\n- Sélectionnez 'Oui' pour vous connecter à Internet et le télécharger ces données\n- Sélectionnez 'Non' pour annuler l’opération"
+t MSG_346 "Restreint Windows au mode \"S\" (INCOMPATIBLE avec l'option de désactivation d'un compte utilisateur Microsoft en ligne)"
+t MSG_347 "Mode expert"
+t MSG_348 "Extraction d'archive : %s"
+t MSG_349 "Utilisation du MBR Rufus"
 t MSG_900 "Rufus est un utilitaire permettant de formater et de créer des média USB amorçables, tels que clés USB, mémoire flash, etc."
 t MSG_901 "Site officiel : %s"
 t MSG_902 "Code source: %s"

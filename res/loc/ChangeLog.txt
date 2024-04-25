@@ -5,7 +5,7 @@ To edit a translation, please make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translation
 Or simply download https://files.akeo.ie/pollock/pollock-1.5.exe and follow its directions.
 
-o v4.5 (202?.??.??)
+o v4.5 (2024.05.??)
   - *UPDATED*  IDC_RUFUS_MBR -> IDC_UEFI_MEDIA_VALIDATION "Enable runtime UEFI media validation"
   - *UPDATED*  MSG_167 "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
   - *NEW*      MSG_337 "An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS (...)"
@@ -22,7 +22,7 @@ o v4.5 (202?.??.??)
   - *NEW*      MSG_348 "Extracting archive files: %s"
   - *NEW*      MSG_349 "Use Rufus MBR"
 
-o v3.22 (2023.??.??)
+o v3.22 (2023.03.25)
   // MSG_144 is aimed the the ISO download feature
   - *UPDATED*  MSG_144 "Temporarily banned by Microsoft for requesting too many downloads (...)" -> "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
   // MSG_199 will appear for the ISO download feature if running on Windows 7 
