@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-16 20:14+0100\n"
-"PO-Revision-Date: 2023-02-17 12:30+0000\n"
+"POT-Creation-Date: 2024-04-25 20:58+0200\n"
+"PO-Revision-Date: 2024-04-25 21:23+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: cs_CZ\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Czech (Čeština)\n"
 "X-Rufus-LCID: 0x0405\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Seznam USB disků"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Přidat opravu pro starší BIOSy (extra partition, align, etc.)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Použijte Rufus MBR s ID BIOS"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Povolit ověřování médií UEFI za běhu"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -105,7 +103,7 @@ msgstr "Zavřít"
 
 #. • IDD_DIALOG → IDC_START
 msgid "Start"
-msgstr ""
+msgstr "Spustit"
 
 #. • IDD_ABOUTBOX → IDD_ABOUTBOX
 msgid "About Rufus"
@@ -397,7 +395,7 @@ msgstr "Zařízení USB (Obecné)"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
-msgstr ""
+msgstr "%s (Disk %d) [%s]"
 
 #. • MSG_047
 #.
@@ -770,7 +768,7 @@ msgid ""
 msgstr ""
 "Tento obraz používá Syslinux %s%s, tato aplikace však obsahuje pouze instalační soubory pro Syslinux %s%s.\n"
 "\n"
-"Jelikož nové verze Syslinux nejsou vzájemně kompatibilní a není možné v programu Rufus zahrnout všechny verze, je nutné z Internetu stáhnout dodatečné dva soubory  (ldlinux.sys a ldlinux.bss):\n"
+"Jelikož nové verze Syslinux nejsou vzájemně kompatibilní a není možné v programu Rufus zahrnout všechny verze, je nutné z Internetu stáhnout dodatečné dva soubory (ldlinux.sys a ldlinux.bss):\n"
 "- Zvolte 'Ano' pro stažení souborů z Internetu\n"
 "- Zvolte 'Ne' pro zrušení operace\n"
 "\n"
@@ -1047,16 +1045,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Povolíte v názvu disku zobrazení mezinárodních znaků a vytvoření ikony zařízení (vytvořením souboru autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Instalovat MBR, který umožní výběr při zavádění systému a zamaskování BIOS ID disku USB"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Pokusit se o zamaskování boot USB jednotky (většinou 0x80) jako jiného disku.\n"
-"Obvykle nutné pouze pokud chcete instalovat Windows XP a máte více jak jeden disk."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Nainstalujte zavaděč UEFI, který provede ověření souboru MD5Sum na médiu"
 
 #. • MSG_169
 msgid ""
@@ -1410,7 +1400,7 @@ msgid ""
 "\n"
 "The download will be deleted. Please check the log for more details."
 msgstr ""
-"Podpis stažené aktualizace nelze ověřit. To může znamenat, že systém je nesprávně nakonfigurován pro ověření podpisu nebo označil stažený soubor  jako škodlivý.\n"
+"Podpis stažené aktualizace nelze ověřit. To může znamenat, že systém je nesprávně nakonfigurován pro ověření podpisu nebo označil stažený soubor jako škodlivý.\n"
 "\n"
 "Stahování bude smazáno. Zkontrolujte podrobnosti v protokolu."
 
@@ -1856,6 +1846,82 @@ msgstr "Zakázání automatického šifrování zařízení nástrojem BitLocker
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Trvalý protokol"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Pro instalaci systému MS-DOS je nutné stáhnout další soubor ('diskcopy.dll') od společnosti Microsoft:\n"
+"- Vyberte 'Ano' pro připojení k internetu a stažení\n"
+"- Výběrem možnosti \"Ne\" operaci zrušíte\n"
+"\n"
+"Poznámka: Soubor bude stažen do adresáře aplikace a bude automaticky znovu použit, pokud je přítomen."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Byl zjištěn odvolaný zavaděč UEFI"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus zjistil, že vámi vybraný ISO obsahuje zavaděč UEFI, který byl odvolán a který vytvoří %s, když je v plně aktuálním systému UEFI povoleno Secure Boot.\n"
+"\n"
+"- Pokud jste tento obraz ISO získali z nerenomovaného zdroje, měli byste zvážit možnost, že by mohl obsahovat malware UEFI a vyhnout se bootování z něj.\n"
+"- Pokud jste jej získali z důvěryhodného zdroje, měli byste se pokusit najít aktuálnější verzi, která toto varování nevyvolá."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "obrazovka \"Porušení zabezpečení\""
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "a Obrazovka zotavení systému Windows (BSOD) s '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Komprimovaný obraz VHDX"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Nekomprimovaný obraz VHD"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Úplná aktualizace Flash Image"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"K použití této funkce je třeba stáhnout některá další data od společnosti Microsoft:\n"
+"- Vyberte 'Ano' pro připojení k internetu a stažení\n"
+"- Výběrem možnosti \"Ne\" operaci zrušíte"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Omezit Windows na S-Mode (NEKOMPATIBILNÍ s online vynecháním účtu)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Expertní režim"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Rozbalení archivních souborů: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Použijte Rufus MBR"
 
 #. • MSG_900
 #.
