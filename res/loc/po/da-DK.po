@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-04-05 13.03+0200\n"
-"PO-Revision-Date: 2023-04-25 13:46+0100\n"
+"POT-Creation-Date: 2024-04-25 13:41-0700\n"
+"PO-Revision-Date: 2024-04-25 14:34-0700\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: da_DK\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Danish (Dansk)\n"
 "X-Rufus-LCID: 0x0406\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Vis USB-harddiske"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Tilføj rettelser for ældre BIOS'er"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Brug Rufus MBR med BIOS ID"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Slå runtime UEFI medie validering til"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -1044,16 +1042,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Vælg denne mulighed for at tillade visning af internationale etiketter og skabe et enheds-ikon (opretter en autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Installer en MBR, der tillader boot valg og kan maskere et BIOS USB-drev ID"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Forsøg at maskere det først fundne USB boot-drev (normalt 0x80) som en anden disk.\n"
-"Dette burde kun være nødvendigt hvis du installerer Windows XP og ejer mere end én disk."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Installer en UEFI bootloader, der vil udføre en MD5Sum fil validering af mediet"
 
 #. • MSG_169
 msgid ""
@@ -1855,6 +1845,82 @@ msgstr "Deaktiver Bitlockers automatiske apparat kryptering"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Vedvarende log"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"En ekstra fil ('diskcopy.dll') skal hentes fra Microsoft for at installere MS-DOS:\n"
+"- Vælg 'Ja' for at tilslutte til internettet og hente den\n"
+"- Vælg 'Nej' for at afbryde operationen\n"
+"\n"
+"Note: Filen vil blive hentet i programmets mappe og vil blive genbrugt automatisk hvis tilstede."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Tilbagekaldt UEFI Bootloader opdaget"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus har opdaget at ISO filen du har valgt indeholder en UEFI bootloader der er blevet tilbagekaldt og vil producere %s, når Secure Boot er slået til på et fuldt opdateret UEFI system.\n"
+"\n"
+"- Hvis du har hentet dette ISO billed fra en upålidelig kilde, bør du overveje muligheden for at den muligvis indeholder UEFI malware og undgå at boote fra den.\n"
+"- Hvis du har hentet den fra en pålidelig kilde, bør du kigge efter en nyere version, som ikke vil producere denne advarsel."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "en \"Sikkerhedsbrud\" skærm"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "en Windows Gendannelsesskærm (BSOD) med '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Komprimeret VHDX Afbildning"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Ukomprimeret VHD Afbildning"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Full Flash Update Afbildning"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Noget ekstra data skal hentes fra Microsoft for at udnytte denne funktionalitet:\n"
+"- Vælg 'Ja' for at tilslutte til internettet og hente det\n"
+"- Vælg 'Nej' for at afbryde operationen"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Begræns Windows til S-Mode (Inkompatibel med Online bruger bypass)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Ekspert Tilstand"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Udpakker arkiv filer: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Brug Rufus MBR"
 
 #. • MSG_900
 #.
