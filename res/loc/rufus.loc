@@ -13,7 +13,7 @@
 # • v4.5  "da-DK" "Danish (Dansk)"
 # • v4.5  "nl-NL" "Dutch (Nederlands)"
 # • v3.22 "fi-FI" "Finnish (Suomi)"
-# • v3.22 "fr-FR" "French (Français)"
+# • v4.5  "fr-FR" "French (Français)"
 # • v4.5  "de-DE" "German (Deutsch)"
 # • v3.22 "el-GR" "Greek (Ελληνικά)"
 # • v4.5  "he-IL" "Hebrew (עברית)"
@@ -31,7 +31,7 @@
 # • v3.22 "pt-BR" "Portuguese Brazilian (Português do Brasil)"
 # • v3.22 "pt-PT" "Portuguese Standard (Português)"
 # • v4.5  "ro-RO" "Romanian (Română)"
-# • v3.22 "ru-RU" "Russian (Русский)"
+# • v4.5  "ru-RU" "Russian (Русский)"
 # • v3.22 "sr-RS" "Serbian (Srpski)"
 # • v3.22 "sk-SK" "Slovak (Slovensky)"
 # • v3.22 "sl-SI" "Slovenian (Slovenščina)"
@@ -11714,7 +11714,7 @@ t MSG_922 "Descarcă UEFI Shell ISO-uri"
 
 #########################################################################
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
-v 3.22
+v 4.5
 b "en-US"
 
 g IDD_ABOUTBOX

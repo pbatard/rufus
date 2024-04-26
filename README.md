@@ -26,6 +26,7 @@ Features
 * Create VHD/DD, VHDX and FFU images of an existing drive
 * Create persistent Linux partitions
 * Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image
+* Perform runtime validation of UEFI bootable media
 * Improve Windows installation experience by automatically setting up OOBE parameters (local account, privacy options, etc.)
 * Perform bad blocks checks, including detection of "fake" flash drives
 * Download official Microsoft Windows 8, Windows 10 or Windows 11 retail ISOs
