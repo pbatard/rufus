@@ -2,10 +2,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 3.22\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-03-10 17:19+0000\n"
-"PO-Revision-Date: 2023-03-10 17:23+0000\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"POT-Creation-Date: 2023-10-19 09:51+0300\n"
+"PO-Revision-Date: 2024-04-26 02:06+0300\n"
+"Last-Translator: Dmitry Yerokhin <erodim@mail.ru>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Russian (Русский)\n"
 "X-Rufus-LCID: 0x0419, 0x0819\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 1.5.7\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -45,7 +45,7 @@ msgstr "Целевая система"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
-msgstr "Список USB дисков"
+msgstr "Список USB-дисков"
 
 #. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
 #.
@@ -54,13 +54,13 @@ msgstr "Список USB дисков"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Добавить исправления для старых BIOS"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
 #. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
 #. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
 #. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Использовать MBR с BIOS ID"
+msgid "Enable runtime UEFI media validation"
+msgstr "Проверка носителя UEFI во время выполнения"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -125,7 +125,7 @@ msgstr "Лицензия Rufus"
 
 #. • IDD_NOTIFICATION → IDC_MORE_INFO
 msgid "More information"
-msgstr "Больше информации"
+msgstr "Ещё"
 
 #. • IDD_NOTIFICATION → IDYES
 #. • MSG_008
@@ -175,15 +175,15 @@ msgstr "Проверка наличия обновлений - Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
 msgid "A newer version is available. Please download the latest version!"
-msgstr "Доступна новая версия. Пожалуйста, скачайте последнюю версию!"
+msgstr "Доступна новая версия. Скачайте её!"
 
 #. • IDD_NEW_VERSION → IDC_WEBSITE
 msgid "Click here to go to the website"
-msgstr "Щелкните здесь, чтобы перейти на домашнюю страницу"
+msgstr "Щёлкните здесь, чтобы перейти на сайт"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
 msgid "Release Notes"
-msgstr "Заметки о выпуске"
+msgstr "Примечания к версии"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_DOWNLOAD_GRP
 #. • IDD_NEW_VERSION → IDC_DOWNLOAD
@@ -193,15 +193,15 @@ msgstr "Скачать"
 
 #. • MSG_001
 msgid "Other instance detected"
-msgstr "Запущено другое приложение Rufus"
+msgstr "Запущена другая копия Rufus"
 
 #. • MSG_002
 msgid ""
 "Another Rufus application is running.\n"
 "Please close the first application before running another one."
 msgstr ""
-"Запущено другое приложение Rufus.\n"
-"Закройте первое приложение перед запуском еще одного."
+"Запущена другая копия программы.\n"
+"Закройте первую копию перед запуском ещё одной."
 
 #. • MSG_003
 msgid ""
@@ -209,7 +209,7 @@ msgid ""
 "To continue with this operation, click OK. To quit click CANCEL."
 msgstr ""
 "ВНИМАНИЕ: ВСЕ ДАННЫЕ НА ДИСКЕ '%s' БУДУТ УНИЧТОЖЕНЫ.\n"
-"Чтобы продолжить, нажмите ОК. Для выхода нажмите Отмена."
+"Чтобы продолжить, нажмите ОК. Для выхода нажмите 'Отмена'."
 
 #. • MSG_004
 msgid "Rufus update policy"
@@ -217,7 +217,7 @@ msgstr "Политика обновления Rufus"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
-msgstr "Вы хотите, чтобы Rufus проверял обновления автоматически?"
+msgstr "Хотите, чтобы Rufus проверял обновления автоматически?"
 
 #. • MSG_007
 msgid "Cancel"
@@ -234,10 +234,10 @@ msgid ""
 "  %d write error(s)\n"
 "  %d corruption error(s)"
 msgstr ""
-"Проверка закончена: %d плохих блоков найдено\n"
-"  %d ошибок чтения\n"
-"  %d ошибок записи\n"
-"  %d поврежденных блоков"
+"Проверка закончена. Плохих блоков: %d\n"
+"  Ошибок чтения: %d\n"
+"  Ошибок записи: %d\n"
+"  Повреждённых блоков: %d"
 
 #. • MSG_012
 #.
@@ -248,7 +248,7 @@ msgid ""
 "%s"
 msgstr ""
 "%s\n"
-"Более подробный отчет можно найти в:\n"
+"Подробный отчёт см. тут:\n"
 "%s"
 
 #. • MSG_013
@@ -273,11 +273,11 @@ msgstr "По выбору"
 
 #. • MSG_018
 msgid "Your version: %d.%d (Build %d)"
-msgstr "Ваша версия: %d.%d (Build %d)"
+msgstr "Ваша версия: %d.%d (сборка %d)"
 
 #. • MSG_019
 msgid "Latest version: %d.%d (Build %d)"
-msgstr "Последняя версия: %d.%d (Build %d)"
+msgstr "Новейшая версия: %d.%d (сборка %d)"
 
 #. • MSG_020
 #. • MSG_026
@@ -338,7 +338,7 @@ msgstr "BIOS (или UEFI-CSM)"
 
 #. • MSG_032
 msgid "UEFI (non CSM)"
-msgstr "UEFI (non-CSM)"
+msgstr "UEFI (не-CSM)"
 
 #. • MSG_033
 msgid "BIOS or UEFI"
@@ -359,7 +359,7 @@ msgstr "%d прохода %s"
 
 #. • MSG_036
 msgid "ISO Image"
-msgstr "ISO-образ"
+msgstr "Образ ISO"
 
 #. • MSG_037
 msgid "Application"
@@ -391,7 +391,7 @@ msgstr "Скачивание файла"
 
 #. • MSG_045
 msgid "USB Storage Device (Generic)"
-msgstr "USB устройство хранения данных"
+msgstr "USB-устройство хранения данных"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
@@ -405,7 +405,7 @@ msgstr "Несколько разделов"
 
 #. • MSG_048
 msgid "Rufus - Flushing buffers"
-msgstr "Буфер"
+msgstr "Очистка буферов"
 
 #. • MSG_049
 msgid "Rufus - Cancellation"
@@ -417,31 +417,35 @@ msgstr "Успешно."
 
 #. • MSG_051
 msgid "Undetermined error while formatting."
-msgstr "Неизвестные ошибки при форматировании."
+msgstr "Неизвестная ошибка при форматировании."
 
 #. • MSG_052
 msgid "Cannot use the selected file system for this media."
-msgstr "Невозможно использовать выбранную файловую систему для выбранного устройства."
+msgstr ""
+"Для этого устройства невозможно использовать выбранную файловую систему."
 
 #. • MSG_053
 msgid "Access to the device is denied."
-msgstr "Доступ к устройству запрещен."
+msgstr "Нет доступа к устройству."
 
 #. • MSG_054
 msgid "Media is write protected."
-msgstr "Выбранное устройство защищено от записи."
+msgstr "Носитель данных защищён от записи."
 
 #. • MSG_055
-msgid "The device is in use by another process. Please close any other process that may be accessing the device."
-msgstr "Выбранное устройство используется другим процессом. Пожалуйста, завершите процесс перед использованием выбранного устройства."
+msgid ""
+"The device is in use by another process. Please close any other process that "
+"may be accessing the device."
+msgstr ""
+"Это устройство используется другим процессом. Сначала завершите процесс."
 
 #. • MSG_056
 msgid "Quick format is not available for this device."
-msgstr "Быстрый формат не доступен для выбранного устройства."
+msgstr "Для этого устройства быстрый формат недоступен."
 
 #. • MSG_057
 msgid "The volume label is invalid."
-msgstr "Недопустимая метка устройства."
+msgstr "Недопустимая метка тома."
 
 #. • MSG_058
 msgid "The device handle is invalid."
@@ -449,19 +453,19 @@ msgstr "Недопустимый дескриптор устройства."
 
 #. • MSG_059
 msgid "The selected cluster size is not valid for this device."
-msgstr "Выбранный размер кластера не является допустимым для выбранного устройства."
+msgstr "Недопустимый размер кластера для этого устройства."
 
 #. • MSG_060
 msgid "The volume size is invalid."
-msgstr "Неправильный размер тома."
+msgstr "Недопустимый размер тома."
 
 #. • MSG_061
 msgid "Please insert a removable media in drive."
-msgstr "Вставьте носитель информации в устройство."
+msgstr "Вставьте сменный носитель информации в устройство."
 
 #. • MSG_062
 msgid "An unsupported command was received."
-msgstr "Была получена неподдерживаемая команда."
+msgstr "Получена неподдерживаемая команда."
 
 #. • MSG_063
 msgid "Memory allocation error."
@@ -480,16 +484,20 @@ msgid "Installation failure"
 msgstr "Ошибка установки"
 
 #. • MSG_067
-msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
-msgstr "Невозможно считать носитель информации. Возможно он используется другим процессом. Пожалуйта, извлеките носитель информации и вставьте его вновь."
+msgid ""
+"Could not open media. It may be in use by another process. Please re-plug "
+"the media and try again."
+msgstr ""
+"Невозможно открыть носитель информации. Возможно, он используется другим "
+"процессом. Извлеките носитель информации и вставьте его вновь."
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "Ошибка при создании раздела."
+msgstr "Не удалось создать раздел на диске."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
-msgstr "Невозможно скопировать файлы на выбранное устройство."
+msgstr "Не удалось скопировать файлы на целевое устройство."
 
 #. • MSG_070
 msgid "Cancelled by user."
@@ -499,7 +507,7 @@ msgstr "Отменено пользователем."
 #.
 #. See http://en.wikipedia.org/wiki/Thread_%28computing%29
 msgid "Unable to start thread."
-msgstr "Невозможно запустить поток выполнения."
+msgstr "Невозможно запустить поток."
 
 #. • MSG_072
 msgid "Bad blocks check didn't complete."
@@ -507,19 +515,19 @@ msgstr "Проверка на плохие блоки не завершена."
 
 #. • MSG_073
 msgid "ISO image scan failure."
-msgstr "Ошибка проверки ISO-образа."
+msgstr "Ошибка сканирования образа ISO."
 
 #. • MSG_074
 msgid "ISO image extraction failure."
-msgstr "Ошибка извлечения ISO-образа."
+msgstr "Ошибка извлечения образа ISO."
 
 #. • MSG_075
 msgid "Unable to remount volume."
-msgstr "Невозможно смонтировать том."
+msgstr "Невозможно перемонтировать том."
 
 #. • MSG_076
 msgid "Unable to patch/setup files for boot."
-msgstr "Невозможно пропатчить установочные файлы для загрузки."
+msgstr "Невозможно исправить/настроить файлы для загрузки."
 
 #. • MSG_077
 msgid "Unable to assign a drive letter."
@@ -527,7 +535,7 @@ msgstr "Невозможно назначить букву диска."
 
 #. • MSG_078
 msgid "Can't mount GUID volume."
-msgstr "Невозможно смонтировать GUID-том."
+msgstr "Невозможно смонтировать том GUID."
 
 #. • MSG_079
 msgid "The device is not ready."
@@ -535,29 +543,39 @@ msgstr "Устройство не готово."
 
 #. • MSG_080
 msgid ""
-"Rufus detected that Windows is still flushing its internal buffers onto the USB device.\n"
+"Rufus detected that Windows is still flushing its internal buffers onto the "
+"USB device.\n"
 "\n"
-"Depending on the speed of your USB device, this operation may take a long time to complete, especially for large files.\n"
+"Depending on the speed of your USB device, this operation may take a long "
+"time to complete, especially for large files.\n"
 "\n"
-"We recommend that you let Windows finish, to avoid corruption. But if you grow tired of waiting, you can just unplug the device..."
+"We recommend that you let Windows finish, to avoid corruption. But if you "
+"grow tired of waiting, you can just unplug the device..."
 msgstr ""
-"Rufus обнаружил, что все еще Windows очищает внутренний буфер USB устройства.\n"
+"Rufus обнаружил, что Windows всё ещё очищает внутренний буфер USB-"
+"устройства.\n"
 "\n"
-"В зависимости от скорости вашего USB устройства, эта операция может занять много времени, особенно для больших файлов.\n"
+"В зависимости от скорости USB-устройства, эта операция может занять много "
+"времени, особенно для больших файлов.\n"
 "\n"
-"Дождитесь пока Windows закончит, чтобы избежать повреждения устройства. Но если вы устали от ожидания, можете просто отключить устройство..."
+"Чтобы избежать повреждения устройства, дождитесь, пока Windows закончит. Но "
+"если вам надоест ждать, можете просто отключить устройство..."
 
 #. • MSG_081
 msgid "Unsupported image"
 msgstr "Неподдерживаемый образ"
 
 #. • MSG_082
-msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "Выбранный образ либо незагрузочный, либо использует метод загрузки или сжатия, который не поддерживается Rufus..."
+msgid ""
+"This image is either non-bootable, or it uses a boot or compression method "
+"that is not supported by Rufus..."
+msgstr ""
+"Образ либо незагрузочный, либо использует метод загрузки или сжатия, не "
+"поддерживаемый Rufus."
 
 #. • MSG_083
 msgid "Replace %s?"
-msgstr "Переместить %s?"
+msgstr "Заменить %s?"
 
 #. • MSG_084
 msgid ""
@@ -569,21 +587,23 @@ msgid ""
 "- Choose 'No' to leave the existing ISO file unmodified\n"
 "If you don't know what to do, you should select 'Yes'.\n"
 "\n"
-"Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+"Note: The new file will be downloaded in the current directory and once a "
+"'%s' exists there, it will be reused automatically."
 msgstr ""
-"Выбранный ISO-образ использует устаревшие '%s'.\n"
-"Из-за этого загрузочного меню может отображаться неправильно.\n"
+"Образ ISO использует устаревшую версию '%s'.\n"
+"Загрузочные меню могут отображаться неправильно.\n"
 "\n"
-"Новые версии можно скачать с помощью Rufus:\n"
-"- Выберите 'Да', чтобы скачать файл из интернета\n"
-"- Выберите 'Нет', чтобы не модифицировать ISO-образ\n"
-"Если вы не знаете что делать, то выберите 'Да'.\n"
+"Новую версию можно скачать с помощью Rufus:\n"
+"- Выберите 'Да', чтобы скачать файл из Интернета\n"
+"- Выберите 'Нет', чтобы не изменять образ ISO\n"
+"Если вы не знаете, что делать, то выберите 'Да'.\n"
 "\n"
-"Файл будет загружен в текущую директорию, а в случае наличия '%s' - заменен автоматически."
+"Файл загрузится в текущую папку, а если в ней есть '%s', то он будет "
+"автоматически заменён."
 
 #. • MSG_085
 msgid "Downloading %s"
-msgstr "Загружено %s"
+msgstr "Загрузка %s"
 
 #. • MSG_086
 msgid "No image selected"
@@ -602,7 +622,7 @@ msgstr "для %s NAND"
 
 #. • MSG_088
 msgid "Image is too big"
-msgstr "Образ слишком большой"
+msgstr "Слишком большой образ"
 
 #. • MSG_089
 msgid "The image is too big for the selected target."
@@ -610,11 +630,15 @@ msgstr "Образ слишком большой для выбранного у�
 
 #. • MSG_090
 msgid "Unsupported ISO"
-msgstr "Неподдерживаемый ISO-образ"
+msgstr "Неподдерживаемый образ ISO"
 
 #. • MSG_091
-msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "При использовании системного интерфейса UEFI поддерживаются только загрузочные EFI ISO-образы. Пожалуйста, выберите загрузочный EFI ISO-образ или измените системный интерфейс на BIOS."
+msgid ""
+"When using UEFI Target Type, only EFI bootable ISO images are supported. "
+"Please select an EFI bootable ISO or set the Target Type to BIOS."
+msgstr ""
+"При использовании целевого типа UEFI поддерживаются только загрузочные "
+"образы ISO. Выберите загрузочный образ EFI или измените целевой тип BIOS."
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -624,11 +648,15 @@ msgstr "Неподдерживаемая файловая система"
 msgid ""
 "IMPORTANT: THIS DRIVE CONTAINS MULTIPLE PARTITIONS!!\n"
 "\n"
-"This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
+"This may include partitions/volumes that aren't listed or even visible from "
+"Windows. Should you wish to proceed, you are responsible for any data loss "
+"on these partitions."
 msgstr ""
-"ВАЖНО: ДАННЫЙ ДИСК СОДЕРЖИТ НЕСКОЛЬКО РАЗДЕЛОВ!!\n"
+"ВАЖНО: НА ЭТОМ ДИСКЕ НЕСКОЛЬКО РАЗДЕЛОВ!!\n"
 "\n"
-"Данный диск может включать разделы/тома, которые не перечислены или даже видны в Windows.Если вы хотите продолжить, то вы несете ответственность за потерю данных на этих разделах."
+"Этот диск может содержать разделы/тома, которые отсутствуют в списке или "
+"даже не видны в Windows. В случае продолжения вы несёте ответственность за "
+"любую потерю данных на этих разделах."
 
 #. • MSG_094
 msgid "Multiple partitions detected"
@@ -639,8 +667,12 @@ msgid "DD Image"
 msgstr "DD-образ"
 
 #. • MSG_096
-msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
-msgstr "Выбранная файловая система не может использоваться с этим типом ISO-образа. Пожалуйста, выберите другую файловую систему или другой ISO-образ."
+msgid ""
+"The file system currently selected can not be used with this type of ISO. "
+"Please select a different file system or use a different ISO."
+msgstr ""
+"Выбранная файловая система не может использоваться с этим типом образа ISO. "
+"Выберите другую файловую систему или другой образ ISO."
 
 #. • MSG_097
 msgid "'%s' can only be applied if the file system is NTFS."
@@ -648,25 +680,39 @@ msgstr "'%s' может использоваться только с файло�
 
 #. • MSG_098
 msgid ""
-"IMPORTANT: You are trying to install 'Windows To Go', but your target drive doesn't have the 'FIXED' attribute. Because of this Windows will most likely freeze during boot, as Microsoft hasn't designed it to work with drives that instead have the 'REMOVABLE' attribute.\n"
+"IMPORTANT: You are trying to install 'Windows To Go', but your target drive "
+"doesn't have the 'FIXED' attribute. Because of this Windows will most likely "
+"freeze during boot, as Microsoft hasn't designed it to work with drives that "
+"instead have the 'REMOVABLE' attribute.\n"
 "\n"
 "Do you still want to proceed?\n"
 "\n"
-"Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
+"Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only "
+"be changed using custom tools from the drive manufacturer. However those "
+"tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"ВАЖНО: Вы пытаетесь установить 'Windows To Go', но ваш диск назначения не должен быть 'ФИКСИРОВАННЫМ'. Из-за этого Windows, скорее всего, зависнет во время загрузки, так как Microsoft не предназначал данную функцию для работы с 'ФИКСИРОВАННЫМИ' дисками, а только со 'СЪЕМНЫМИ'.\n"
+"ВАЖНО: Вы пытаетесь установить Windows To Go, но у целевого диска нет "
+"атрибута 'FIXED' (несъёмный). Из-за этого Windows, скорее всего, зависнет "
+"при загрузке, так как Windows To Go предназначена для работы только с "
+"дисками с атрибутом 'REMOVABLE' (съёмный).\n"
 "\n"
-"Вы все еще хотите продолжить?\n"
+"Всё равно хотите продолжить?\n"
 "\n"
-"Примечание: Атрибуты 'ФИКСИРОВАННЫЙ/СЪЕМНЫЙ' являются аппаратными свойствами, которые могут быть изменены только с помощью инструментов от производителя. Однако эти инструменты ПОЧТИ НИКОГДА не предоставляются общественности..."
+"* Атрибут 'FIXED/REMOVABLE' - это свойство оборудования. Его можно изменить "
+"только с помощью специальных инструментов от производителя, которые ПОЧТИ "
+"НИКОГДА не предоставляются общественности..."
 
 #. • MSG_099
 msgid "Filesystem limitation"
 msgstr "Ограничения файловой системы"
 
 #. • MSG_100
-msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Этот ISO-образ содержит файл размером более 4 ГБ, что недопустимо для файловой системы FAT или FAT32."
+msgid ""
+"This ISO image contains a file larger than 4 GB, which is more than the "
+"maximum size allowed for a FAT or FAT32 file system."
+msgstr ""
+"Этот образ ISO содержит файл размером более 4 ГБ, что превосходит "
+"максимальный размер для файловой системы FAT или FAT32."
 
 #. • MSG_101
 msgid "Missing WIM support"
@@ -674,11 +720,16 @@ msgstr "Отсутствует поддержка WIM"
 
 #. • MSG_102
 msgid ""
-"Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
+"Your platform cannot extract files from WIM archives. WIM extraction is "
+"required to create EFI bootable Windows 7 and Windows Vista USB drives. You "
+"can fix that by installing a recent version of 7-Zip.\n"
 "Do you want to visit the 7-zip download page?"
 msgstr ""
-"Ваша система не может извлекать файлы из WIM-архивов, но это необходимо для создания загрузочного USB диска с Windows 7 или Windows Vista.Вы можете исправить это установив последнюю версию 7-Zip\"\n"
-"Хотите посетить страницу загрузки 7-zip?"
+"Ваша система не может извлекать файлы из архивов WIM. Распаковка таких "
+"архивов необходима для создания загрузочных USB-накопителей EFI для Windows "
+"7 и Windows Vista. Чтобы решить эту проблему, установите новейшую версию 7-"
+"Zip.\n"
+"Открыть страницу загрузки 7-Zip?"
 
 #. • MSG_103
 msgid "Download %s?"
@@ -690,34 +741,39 @@ msgstr "Загрузить %s?"
 #. file is more than 100 KB in size, and always present on Grub4DOS ISO images (...)"
 msgid ""
 "%s or later requires a '%s' file to be installed.\n"
-"Because this file is more than 100 KB in size, and always present on %s ISO images, it is not embedded in Rufus.\n"
+"Because this file is more than 100 KB in size, and always present on %s ISO "
+"images, it is not embedded in Rufus.\n"
 "\n"
 "Rufus can download the missing file for you:\n"
 "- Select 'Yes' to connect to the internet and download the file\n"
 "- Select 'No' if you want to manually copy this file on the drive later\n"
 "\n"
-"Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
+"Note: The file will be downloaded in the current directory and once a '%s' "
+"exists there, it will be reused automatically."
 msgstr ""
-"%s или поздней версии требует наличия '%s'.\n"
-"Поскольку этот файл >100 Кб, и всегда присутствует в %s ISO-образах, он не был встроен в Rufus.\n"
+"%s или новее требует наличия файла '%s'.\n"
+"Поскольку размер этого файла больше 100 КБ, и он всегда присутствует в ISO-"
+"образах %s, он не встроен в Rufus.\n"
 "\n"
 "Rufus может скачать недостающий файл:\n"
 "- Выберите 'Да', если хотите скачать этот файл\n"
 "- Выберите 'Нет', если хотите скачать его вручную позже\n"
 "\n"
-"Примечание: Файл будет скачан в текущую директорию. При наличии '%s', он будет перезаписан автоматически."
+"* Файл будет скачан в текущую папку. Если в ней есть '%s', он будет "
+"автоматически перезаписан."
 
 #. • MSG_105
 msgid ""
 "Cancelling may leave the device in an UNUSABLE state.\n"
 "If you are sure you want to cancel, click YES. Otherwise, click NO."
 msgstr ""
-"Отмена может оставить устройство в НЕРАБОЧЕМ состоянии.\n"
-"Если вы уверены, что хотите отменить, нажмите кнопку Да. В противном случае нажмите кнопку Нет."
+"При отмене устройство может оказаться в НЕРАБОЧЕМ состоянии.\n"
+"Если вы уверены, что хотите отменить операцию, нажмите 'Да'. Иначе - нажмите "
+"'Нет'."
 
 #. • MSG_106
 msgid "Please select folder"
-msgstr "Пожалуйста, выберите папку"
+msgstr "Выберите папку"
 
 #. • MSG_107
 msgid "All files"
@@ -738,66 +794,94 @@ msgstr "0x%02X (Диск %d)"
 msgid ""
 "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
 "Please change the Cluster size or use FreeDOS."
-msgstr "MS-DOS не может загрузиться, при использовании размера кластера 64 Кб..."
+msgstr ""
+"MS-DOS не может загрузиться с диска с кластерами размером 64 КБ.\n"
+"Измените размер кластера или используйте FreeDOS."
 
 #. • MSG_111
 msgid "Incompatible Cluster size"
-msgstr "Несовместимый размер кластера"
+msgstr "Несовместимый размер кластеров"
 
 #. • MSG_112
 #.
 #. "%d:%02d" is a duration (mins:secs)
-msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "Форматирование больших томов UDF может занять много времени. При скоростях USB 2.0 расчетная продолжительность форматирования составляет %d:%02d, в течение которой индикатор выполнения будет заморожен. Пожалуйста, будьте терпеливы!"
+msgid ""
+"Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, "
+"the estimated formatting duration is %d:%02d, during which the progress bar "
+"will appear frozen. Please be patient!"
+msgstr ""
+"Форматирование больших томов UDF может занять много времени. При скоростях "
+"USB 2.0 форматирование продлится примерно %d:%02d, в течение этого времени "
+"индикатор хода операции будет казаться неработающим. Проявите терпение, "
+"пожалуйста!"
 
 #. • MSG_113
 msgid "Large UDF volume"
-msgstr "Large UDF-том"
+msgstr "Большой UDF-том"
 
 #. • MSG_114
 msgid ""
-"This image uses Syslinux %s%s but this application only includes the installation files for Syslinux %s%s.\n"
+"This image uses Syslinux %s%s but this application only includes the "
+"installation files for Syslinux %s%s.\n"
 "\n"
-"As new versions of Syslinux are not compatible with one another, and it wouldn't be possible for Rufus to include them all, two additional files must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n"
+"As new versions of Syslinux are not compatible with one another, and it "
+"wouldn't be possible for Rufus to include them all, two additional files "
+"must be downloaded from the Internet ('ldlinux.sys' and 'ldlinux.bss'):\n"
 "- Select 'Yes' to connect to the Internet and download these files\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
-"Note: The files will be downloaded in the current application directory and will be reused automatically if present."
+"Note: The files will be downloaded in the current application directory and "
+"will be reused automatically if present."
 msgstr ""
-"Данный образ использует Syslinux %s%s, но данное приложение включает в себя только установочные файлы для Syslinux %s%s.\n"
+"Этот образ использует Syslinux %s%s, но в данном приложении есть только "
+"установочные файлы для Syslinux %s%s.\n"
 "\n"
-"Так как новые версии Syslinux не совместимы друг с другом, необходимо, чтобы дополнительныефайлы ('ldlinux.sys' and 'ldlinux.bss') были загружены из интернета:\n"
-"- Выберите 'Да', чтобы скачать файлы из интернета\n"
+"Так как версии Syslinux несовместимы друг с другом, дополнительные файлы "
+"(ldlinux.sys and ldlinux.bss) нужно загрузить из Интернета:\n"
+"- Выберите 'Да', чтобы скачать файлы из Интернета\n"
 "- Выберите 'Нет', чтобы отменить операцию\n"
 "\n"
-"Примечание: Файлы будут загружены в текущий каталог приложения и будут использоваться повторно при необходимости."
+"* Файлы загрузятся в текущую папку приложения, имеющиеся там одноимённые "
+"файлы будут перезаписаны."
 
 #. • MSG_115
 msgid "Download required"
-msgstr "Необходимо скачать"
+msgstr "Требуется загрузка из Интернета"
 
 #. • MSG_116
 #.
 #. You should be able to test this message with Super Grub2 Disk ISO:
 #. https://sourceforge.net/projects/supergrub2/files/2.00s2/super_grub2_disk_hybrid_2.00s2.iso/download (11.9 MB)
 msgid ""
-"This image uses Grub %s but the application only includes the installation files for Grub %s.\n"
+"This image uses Grub %s but the application only includes the installation "
+"files for Grub %s.\n"
 "\n"
-"As different versions of Grub may not be compatible with one another, and it is not possible to include them all, Rufus will attempt to locate a version of the Grub installation file ('core.img') that matches the one from your image:\n"
+"As different versions of Grub may not be compatible with one another, and it "
+"is not possible to include them all, Rufus will attempt to locate a version "
+"of the Grub installation file ('core.img') that matches the one from your "
+"image:\n"
 "- Select 'Yes' to connect to the Internet and attempt to download it\n"
 "- Select 'No' to use the default version from Rufus\n"
 "- Select 'Cancel' to abort the operation\n"
 "\n"
-"Note: The file will be downloaded in the current application directory and will be reused automatically if present. If no match can be found online, then the default version will be used."
+"Note: The file will be downloaded in the current application directory and "
+"will be reused automatically if present. If no match can be found online, "
+"then the default version will be used."
 msgstr ""
-"Данный образ использует загрузчик Grub %s, но приложение включает только установочные файлы для загрузчика Grub %s.\n"
+"Этот образ использует загрузчик GRUB %s, но приложение включает только "
+"установочные файлы для GRUB %s.\n"
 "\n"
-"Различные версии загрузчика Grub могуг быть несовместимыми друг с другом и включение их всех не является возможным. Rufus попытается найти нужную версию установочного файла загрузчика Grub ('core.img'), соответствующую версии загрузчика вашего образа:\n"
+"Различные версии GRUB могут быть несовместимы друг с другом. Rufus "
+"попытается найти нужную версию установочного файла GRUB (core.img), "
+"соответствующую версии загрузчика вашего образа:\n"
 "- Выберите 'Да', чтобы скачать установочный файл из Интернета\n"
 "- Выберите 'Нет', чтобы использовать версию по умолчанию из Rufus\n"
 "- Выберите 'Отмена', чтобы отменить операцию\n"
 "\n"
-"Примечание: Файл будет загружен в текущий каталог приложения и будет использоваться повторно в следующий раз. Если нужная версия установочного файла не будет найдена в Интернете, то будет использоваться версия по умолчанию."
+"* Файл загрузится в текущую папку приложения, если в ней уже есть "
+"одноимённый файл, он будет автоматически перезаписан. Если нужную версию "
+"установщика не удастся найти в Интернете, будет использоваться версия по "
+"умолчанию."
 
 #. • MSG_117
 msgid "Standard Windows installation"
@@ -809,7 +893,7 @@ msgstr "Стандартная установка Windows"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr ""
+msgstr "Windows To Go"
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -847,8 +931,12 @@ msgstr "Без раздела"
 #. • MSG_125
 #.
 #. Tooltips used for the peristence size slider and edit control
-msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "Установите размер Persistent-раздела для Live USB-носителя. Установка размера 0 отключает Persistent-раздел."
+msgid ""
+"Set the size of the persistent partition for live USB media. Setting the "
+"size to 0 disables the persistent partition."
+msgstr ""
+"Установите размер постоянного раздела для live-носителя USB. 0 - отключить "
+"постоянный раздел."
 
 #. • MSG_126
 msgid "Set the partition size units."
@@ -856,7 +944,7 @@ msgstr "Установите единицы размера раздела."
 
 #. • MSG_127
 msgid "Do not show this message again"
-msgstr "Не показывать больше это сообщение"
+msgstr "Больше это не показывать"
 
 #. • MSG_128
 msgid "Important notice about %s"
@@ -864,11 +952,14 @@ msgstr "Важное примечание о %s"
 
 #. • MSG_129
 msgid ""
-"You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
-"For details on why this is necessary, see the 'More Information' button below."
+"You have just created a media that uses the UEFI:NTFS bootloader. Please "
+"remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
+"For details on why this is necessary, see the 'More Information' button "
+"below."
 msgstr ""
-"Вы только что создали носитель с загрузчиком UEFI:NTFS. Пожалуйста, помните, что для загрузки этого носителя ВЫ ДОЛЖНЫ ОТКЛЮЧИТЬ БЕЗОПАСНУЮ ЗАГРУЗКУ.\n"
-"Подробнее о том, почему это необходимо, см. кнопка «Дополнительная информация» ниже."
+"Вы только что создали носитель с загрузчиком UEFI:NTFS. Учтите, что для "
+"загрузки этого носителя НУЖНО ОТКЛЮЧИТЬ БЕЗОПАСНУЮ ЗАГРУЗКУ.\n"
+"Чтобы узнать, почему это необходимо, нажмите кнопку 'Ещё'."
 
 #. • MSG_130
 msgid "Windows image selection"
@@ -879,36 +970,54 @@ msgid ""
 "This ISO contains multiple Windows images.\n"
 "Please select the image you wish to use for this installation:"
 msgstr ""
-"Этот ISO-образ содержит несколько образов Windows.\n"
-"Пожалуйста, выберите образ, который вы хотите использовать для этой установки:"
+"Этот файл ISO содержит несколько образов Windows.\n"
+"Выберите образ, который вы хотите использовать для этой установки:"
 
 #. • MSG_132
-msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
-msgstr "Другая программа или процесс обращается к этому диску. Вы все равно хотите отформатировать?"
+msgid ""
+"Another program or process is accessing this drive. Do you want to format it "
+"anyway?"
+msgstr ""
+"К этому диску обращается другая программа или процесс. Всё равно настаиваете "
+"на форматировании?"
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a Windows To Go media "
+"based on a 1809 ISO.\n"
 "\n"
-"Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
+"Because of a *MICROSOFT BUG*, this media will crash during Windows boot "
+"(Blue Screen Of Death), unless you manually replace the file 'WppRecorder."
+"sys' with a 1803 version.\n"
 "\n"
-"Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
+"Also note that the reason Rufus cannot automatically fix this for you is "
+"that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally "
+"embed a copy of the file in the application..."
 msgstr ""
-"Rufus обнаружил, что вы пытаетесь создать носитель Windows To Go на основе ISO 1809.\n"
+"Rufus обнаружил, что вы пытаетесь создать носитель Windows To Go на основе "
+"ISO 1809.\n"
 "\n"
-"Из-за *MICROSOFT BUG* этот носитель будет зависать при загрузке Windows (Синий экран), если вы вручную не замените файл 'WppRecorder.sys' версией 1803.\n"
+"Из-за *ОШИБКИ MICROSOFT* этот носитель будет давать сбой при загрузке "
+"Windows (BSOD), если вы вручную не замените файл WppRecorder.sys версией "
+"1803.\n"
 "\n"
-"Также обратите внимание, что причина, по которой Rufus не может автоматически исправить это за вас, заключается в том, что 'WppRecorder.sys' является файлом, защищенным авторским правом Microsoft, поэтому мы не можем легально встраивать копию файла в приложение ..."
+"Rufus не может это исправить автоматически, так как WppRecorder.sys - это "
+"файл Microsoft, защищённый авторскими правами, поэтому мы не можем легально "
+"встраивать в приложение его копию."
 
 #. • MSG_134
 msgid ""
-"Because MBR has been selected for the partition scheme, Rufus can only create a partition up to 2 TB on this media, which will leave %s of disk space unavailable.\n"
+"Because MBR has been selected for the partition scheme, Rufus can only "
+"create a partition up to 2 TB on this media, which will leave %s of disk "
+"space unavailable.\n"
 "\n"
 "Are you sure you want to continue?"
 msgstr ""
-"Поскольку для схемы разделов была выбрана MBR, Rufus может создать на этом носителе только раздел размером до 2 ТБ, что приведет к недоступности %s дискового пространства.\n"
+"Поскольку для схемы разделов выбрана MBR, на этом носителе Rufus может "
+"создать только раздел размером до 2 ТБ, а %s дискового пространства "
+"останутся недоступными.\n"
 "\n"
-"Вы уверены что хотите продолжить?"
+"Вы действительно хотите продолжить?"
 
 #. • MSG_135
 msgid "Version"
@@ -916,11 +1025,11 @@ msgstr "Версия"
 
 #. • MSG_136
 msgid "Release"
-msgstr "Релиз"
+msgstr "Выпуск"
 
 #. • MSG_137
 msgid "Edition"
-msgstr "Издание"
+msgstr "Редакция"
 
 #. • MSG_138
 msgid "Language"
@@ -940,23 +1049,27 @@ msgstr "Назад"
 
 #. • MSG_142
 msgid "Please wait..."
-msgstr "Пожалуйста, подождите..."
+msgstr "Подождите..."
 
 #. • MSG_143
 msgid "Download using a browser"
-msgstr "Скачать с помощью браузера"
+msgstr "Скачать в браузере"
 
 #. • MSG_144
-msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
-msgstr "Microsoft временно заблокировала загрузку ISO-образов Windows из-за большого количества загрузок."
+msgid ""
+"Download of Windows ISOs is unavailable due to Microsoft having altered "
+"their website to prevent it."
+msgstr ""
+"Microsoft временно заблокировала скачивание образов Windows из-за большого "
+"количества загрузок."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
-msgstr "PowerShell 3.0 или более поздняя версия требуется для запуска этого сценария."
+msgstr "Для запуска этого скрипта требуется PowerShell версии 3.0 или новее."
 
 #. • MSG_146
 msgid "Do you want to go online and download it?"
-msgstr "Хотите зайти в интернет и скачать его?"
+msgstr "Хотите скачать из Интернета?"
 
 #. • MSG_148
 msgid "Running download script..."
@@ -964,45 +1077,59 @@ msgstr "Запуск загрузки скрипта..."
 
 #. • MSG_149
 msgid "Download ISO Image"
-msgstr "Загрузить ISO-образ"
+msgstr "Загрузить образ ISO"
 
 #. • MSG_150
-msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
-msgstr "Тип компьютера, с которым вы планируете использовать этот загрузочный диск. Прежде чем создавать диск, вы должны определить, что используется в вашей системе: BIOS или UEFI, поскольку в противном случае диск может не загрузиться."
+msgid ""
+"Type of computer you plan to use this bootable drive with. It is your "
+"responsibility to determine whether your target is of BIOS or UEFI type "
+"before you start creating the drive, as it may fail to boot otherwise."
+msgstr ""
+"Тип компьютера, с которым вы планируете использовать этот загрузочный диск. "
+"Прежде чем создавать диск, вы должны определить, что используется в вашей "
+"системе: BIOS или UEFI, иначе диск может не загрузиться."
 
 #. • MSG_151
 #.
 #. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
-msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
-msgstr "'UEFI-CSM' означает, что устройство будет загружаться только в режиме эмуляции BIOS (также называемом 'Legacy Mode') под UEFI, а не в режиме UEFI."
+msgid ""
+"'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also "
+"known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
+msgstr ""
+"'UEFI-CSM' означает, что устройство будет загружаться только в режиме "
+"эмуляции BIOS (также называемом 'Legacy Mode') под UEFI, а не в режиме UEFI."
 
 #. • MSG_152
-msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-msgstr "'non-CSM' означает, что устройство будет загружаться только в исходном режиме UEFI, а не в режиме эмуляции BIOS (также известный как 'Legacy Mode')."
+msgid ""
+"'non CSM' means that the device will only boot in native UEFI mode, and not "
+"in BIOS emulation mode (also known as 'Legacy Mode')."
+msgstr ""
+"'non-CSM' означает, что устройство будет загружаться только в режиме UEFI, а "
+"не в режиме эмуляции BIOS (также известном как 'Legacy Mode')."
 
 #. • MSG_153
 msgid "Test pattern: 0x%02X"
-msgstr "Тестовая таблица: 0x%02X"
+msgstr "Тестовый образец: 0x%02X"
 
 #. • MSG_154
 msgid "Test pattern: 0x%02X, 0x%02X"
-msgstr "Тестовая таблица: 0x%02X, 0x%02X"
+msgstr "Тестовый образец: 0x%02X, 0x%02X"
 
 #. • MSG_155
 msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X"
-msgstr "Тестовая таблица: 0x%02X, 0x%02X, 0x%02X"
+msgstr "Тестовый образец: 0x%02X, 0x%02X, 0x%02X"
 
 #. • MSG_156
 msgid "Test pattern: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
-msgstr "Тестовая таблица: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
+msgstr "Тестовый образец: 0x%02X, 0x%02X, 0x%02X, 0x%02X"
 
 #. • MSG_157
 msgid "Sets the target filesystem"
-msgstr "Выбор необходимой файловой системы"
+msgstr "Выбор целевой файловой системы"
 
 #. • MSG_158
 msgid "Minimum size that a block of data will occupy in the filesystem"
-msgstr "Выбор минимального размера кластера, который занимает каждый блок данных"
+msgstr "Выбор минимального размера блока данных в файловой системе"
 
 #. • MSG_159
 msgid ""
@@ -1018,7 +1145,7 @@ msgstr "Развернуть дополнительные параметры"
 
 #. • MSG_161
 msgid "Check the device for bad blocks using a test pattern"
-msgstr "Проверка устройства на наличие плохих блоков с помощью таблицы байтов"
+msgstr "Проверка устройства на плохие блоки с помощью тестового образца"
 
 #. • MSG_162
 msgid "Uncheck this box to use the \"slow\" format method"
@@ -1037,52 +1164,62 @@ msgid "Click to select or download an image..."
 msgstr "Нажмите, чтобы выбрать или загрузить образ..."
 
 #. • MSG_166
-msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
+msgid ""
+"Check this box to allow the display of international labels and set a device "
+"icon (creates an autorun.inf)"
 msgstr ""
-"Разрешить отображение меток с международными символами и задать значок устройства\n"
-"(Создается autorun.inf)"
+"Разрешить отображение меток с международными символами и задать значок "
+"устройства\n"
+"(создаётся файл autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Использовать MBR, который разрешает выбор загрузчика и может маскироваться под идентификатором устройства в BIOS"
+msgid ""
+"Install a UEFI bootloader, that will perform MD5Sum file validation of the "
+"media"
+msgstr "Установить загрузчик UEFI, который проверит файл MD5Sum на носителе"
 
 #. • MSG_168
 msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
+"Try to masquerade first bootable USB drive (usually 0x80) as a different "
+"disk.\n"
+"This should only be necessary if you install Windows XP and have more than "
+"one disk."
 msgstr ""
 "Попробуйте замаскировать первый загрузочный \n"
-"USB диск (обычно 0x80) как другой диск.\n"
-"Это необходимо для установки только Windows XP."
+"USB-диск (обычно 0x80) как другой диск.\n"
+"Это необходимо только для установки Windows XP,\n"
+"если у вас несколько дисков."
 
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
 "This can improve boot detection for older BIOSes."
 msgstr ""
-"Добавить дополнительный скрытый раздел и выравнить границы разделов.\n"
-"Это поможет улучшить обнаружение загрузчика в старых версия BIOS."
+"Создать дополнительный скрытый раздел и попробовать выровнять границы "
+"разделов.\n"
+"Это может улучшить обнаружение загрузчика в старых BIOS."
 
 #. • MSG_170
-msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
+msgid ""
+"Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
 msgstr ""
-"Показывать внешние USB накопители, подключенные к компьютеру.\n"
-"ИСПОЛЬЗУЙТЕ НА СВОЙ СТРАХ И РИСК!!!"
+"Отображать внешние жёсткие диски USB.\n"
+"ИСПОЛЬЗУЙТЕ НА СВОЙ СТРАХ И РИСК!"
 
 #. • MSG_171
 msgid ""
 "Start the formatting operation.\n"
 "This will DESTROY any data on the target!"
 msgstr ""
-"Начать форматирование устройства.\n"
-"Все данные на диске будут уничтожены!"
+"Начать форматирование.\n"
+"Все данные на диске будут УНИЧТОЖЕНЫ!"
 
 #. • MSG_172
 #.
 #. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
 #. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
 msgid "Invalid download signature"
-msgstr "Недопустимая подпись обновления"
+msgstr "Неверная подпись обновления"
 
 #. • MSG_173
 msgid "Click to select..."
@@ -1090,19 +1227,19 @@ msgstr "Нажмите для выбора..."
 
 #. • MSG_174
 msgid "Rufus - The Reliable USB Formatting Utility"
-msgstr "Rufus - Надежная утилита для форматирования USB"
+msgstr "Rufus - Надёжная утилита для форматирования USB-дисков"
 
 #. • MSG_175
 msgid "Version %d.%d (Build %d)"
-msgstr "Версия %d.%d (Build %d)"
+msgstr "Версия %d.%d (сборка %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Русский перевод:\\line• Кирилл Иванов <mailto:tchack@rambler.ru>\\line• Дмитрий Ерохин <mailto:erodim@mail.ru>"
+msgstr "Русский перевод: Дмитрий Ерохин <mailto:erodim@mail.ru>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
-msgstr "Сообщить об ошибке или предложить улучшение на веб-сайте:"
+msgstr "Сообщить об ошибке или предложить улучшение:"
 
 #. • MSG_178
 msgid "Additional Copyrights:"
@@ -1113,12 +1250,16 @@ msgid "Update Policy:"
 msgstr "Политика обновления:"
 
 #. • MSG_180
-msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
-msgstr "Если вы разрешите этой программе проверять наличие обновлений приложения, то вы соглашаетесь, что следующая информация может собираться на наших серверах:"
+msgid ""
+"If you choose to allow this program to check for application updates, you "
+"agree that the following information may be collected on our server(s):"
+msgstr ""
+"Разрешая проверку обновлений, вы соглашаетесь, что на наших серверах может "
+"собираться следующая информация:"
 
 #. • MSG_181
 msgid "Your operating system's architecture and version"
-msgstr "Версия вашей операционной системы и архитектура"
+msgstr "Версия и архитектура вашей операционной системы"
 
 #. • MSG_182
 msgid "The version of the application you use"
@@ -1129,32 +1270,45 @@ msgid "Your IP address"
 msgstr "Ваш IP-адрес"
 
 #. • MSG_184
-msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
-msgstr "Для получения статистики использования программы, мы можем хранить собранную информацию\\b до одного года\\b0 . Однако мы не будем раскрывать любые личные данные третьим сторонам."
+msgid ""
+"For the purpose of generating private usage statistics, we may keep the "
+"information collected, \\b for at most a year\\b0 . However, we will not "
+"willingly disclose any of this individual data to third parties."
+msgstr ""
+"Для получения статистики использования программы мы можем хранить собранную "
+"информацию \\b не более года\\b0 . Однако мы не будем добровольно раскрывать "
+"какие-либо из этих персональных данных сторонним лицам."
 
 #. • MSG_185
 msgid "Update Process:"
-msgstr "Процесс обновления:"
+msgstr "Обновление:"
 
 #. • MSG_186
 msgid ""
-"Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
+"Rufus does not install or run background services, therefore update checks "
+"are performed only when the main application is running.\\line\n"
 "Internet access is of course required when checking for updates."
 msgstr ""
-"Приложение Rufus не устанавливает и не запускает фоновые службы, поэтому проверка наличия обновлений выполняется только тогда, когда запущено основное приложение.\\line\n"
-"Для проверки наличия обновлений требуется доступ к Интернету."
+"Rufus не устанавливает и не запускает фоновые службы, поэтому проверка "
+"наличия обновлений выполняется, только когда запущено основное приложение."
+"\\line\n"
+"Для проверки обновлений требуется доступ к Интернету."
 
 #. • MSG_187
 msgid "Invalid image for selected boot option"
 msgstr "Неверный образ для выбранного варианта загрузки"
 
 #. • MSG_188
-msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
-msgstr "Выбран неверный образ для выбранного варианта загрузки. Пожалуйста, выберите другой образ или выберите другой вариант загрузки."
+msgid ""
+"The current image doesn't match the boot option selected. Please use a "
+"different image or choose a different boot option."
+msgstr ""
+"Текущий образ не соответствует выбранному варианту загрузки. Выберите другой "
+"образ или другой вариант загрузки."
 
 #. • MSG_189
 msgid "This ISO image is not compatible with the selected filesystem"
-msgstr "Данный ISO-образ не совместим с выбранной файловой системой"
+msgstr "Этот образ ISO не совместим с выбранной файловой системой"
 
 #. • MSG_190
 msgid "Incompatible drive detected"
@@ -1178,7 +1332,7 @@ msgstr "Загружено %s"
 
 #. • MSG_194
 msgid "Could not download %s"
-msgstr "Невозможно загрузить %s"
+msgstr "Не удалось загрузить %s"
 
 #. • MSG_195
 #.
@@ -1190,21 +1344,32 @@ msgstr "Использовать встроенную версию %s файло
 msgid ""
 "IMPORTANT: THIS DRIVE USES A NONSTANDARD SECTOR SIZE!\n"
 "\n"
-"Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
-"Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
+"Conventional drives use a 512-byte sector size but this drive uses a %d-byte "
+"one. In many cases, this means that you will NOT be able to boot from this "
+"drive.\n"
+"Rufus can try to create a bootable drive, but there is NO WARRANTY that it "
+"will work."
 msgstr ""
-"ВАЖНО: ЭТОТ ДИСК ИСПОЛЬЗУЕТ НЕСТАНДАРТНЫЙ РАЗМЕР СЕКТОРА!\n"
+"ВАЖНО: НА ЭТОМ ДИСКЕ СЕКТОРЫ НЕСТАНДАРТНОГО РАЗМЕРА!\n"
 "\n"
-"Обычно диски используют 512 байт размер сектора, но этот диск использует %d-байт. В большинстве случаев это означает, что вы НЕ СМОЖЕТЕ загрузиться с этого диска.\n"
-"Rufus попытается создать загрузочный диск, но НЕ ГАРАНТИРУЕТСЯ, что он будет работать."
+"Обычные накопители используют секторы размером 512 байт, а на этом диске они "
+"%d-байтовые. Во многих случаях это означает, что вы НЕ СМОЖЕТЕ загрузиться с "
+"этого диска.\n"
+"Rufus попытается создать загрузочный диск, но БЕЗ ГАРАНТИИ, что он будет "
+"работать."
 
 #. • MSG_197
 msgid "Nonstandard sector size detected"
-msgstr "Обнаружен нестандартный размер сектора"
+msgstr "Обнаружен нестандартный размер секторов"
 
 #. • MSG_198
-msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
-msgstr "'Windows To Go' может использоваться только с GPT разделом диска и если диск является ФИКСИРОВАННЫМ. Выбранный диск не является ФИКСИРОВАННЫМ."
+msgid ""
+"'Windows To Go' can only be installed on a GPT partitioned drive if it has "
+"the FIXED attribute set. The current drive was not detected as FIXED."
+msgstr ""
+"Windows To Go может быть установлена на диск с разделом GPT только в том "
+"случае, если у диска есть атрибут FIXED (несъёмный). У выбранного диск "
+"такого атрибута не обнаружено."
 
 #. • MSG_199
 msgid "This feature is not available on this platform."
@@ -1212,7 +1377,7 @@ msgstr "Эта функция недоступна на данной платф�
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
-msgstr "Отмена - Пожалуйста, ждите..."
+msgstr "Отмена, подождите..."
 
 #. • MSG_202
 msgid "Scanning image..."
@@ -1220,7 +1385,7 @@ msgstr "Сканирование образа..."
 
 #. • MSG_203
 msgid "Failed to scan image"
-msgstr "Не удалось отсканировать образ"
+msgstr "Не удалось просканировать образ"
 
 #. • MSG_204
 #.
@@ -1232,13 +1397,13 @@ msgstr "Обнаружен устаревший %s"
 #.
 #. Display the name of the image selected. eg: "Using image: en_win7_x64_sp1.iso"
 msgid "Using image: %s"
-msgstr "Использование образа: %s"
+msgstr "Используется образ: %s"
 
 #. • MSG_206
 #.
 #. Example: "Missing ldlinux.c32 file"
 msgid "Missing %s file"
-msgstr "Отсутствует %s"
+msgstr "Отсутствует файл %s"
 
 #. • MSG_207
 #.
@@ -1269,17 +1434,17 @@ msgstr "Отменено"
 
 #. • MSG_212
 msgid "Failed"
-msgstr "Неудачно"
+msgstr "Ошибка"
 
 #. • MSG_213
 #.
 #. Used when a new update has been downloaded and launched
 msgid "Launching new application..."
-msgstr "Запуск новой версии..."
+msgstr "Запуск нового приложения..."
 
 #. • MSG_214
 msgid "Failed to launch new application"
-msgstr "Не удалось запустить новую версию"
+msgstr "Не удалось запустить новое приложение"
 
 #. • MSG_215
 #.
@@ -1291,7 +1456,7 @@ msgstr "Открыт %s"
 #.
 #. Example: "Saved rufus.log"
 msgid "Saved %s"
-msgstr "Сохранен %s"
+msgstr "Сохранён %s"
 
 #. • MSG_217
 #.
@@ -1305,7 +1470,7 @@ msgstr "Создание файловой системы: %d/%d выполнен
 
 #. • MSG_219
 msgid "NTFS Fixup: %d%% completed"
-msgstr "Создание NTFS области Fixup: %d%% выполнено"
+msgstr "NTFS Fixup: %d%% выполнено"
 
 #. • MSG_220
 #.
@@ -1313,7 +1478,7 @@ msgstr "Создание NTFS области Fixup: %d%% выполнено"
 #. Example: "Formatting (UDF) - Estimated duration 3:21..."
 #. If "estimated duration" is too long, just use "estimated" or an abbreviation
 msgid "Formatting (%s) - estimated duration %d:%02d..."
-msgstr "Форматирование (%s) - Окончание через %d:%02d..."
+msgstr "Форматирование (%s), примерно %d:%02d..."
 
 #. • MSG_221
 msgid "Setting label (%s)..."
@@ -1327,11 +1492,11 @@ msgstr "Форматирование (%s)..."
 
 #. • MSG_223
 msgid "NTFS Fixup (Checkdisk)..."
-msgstr "Проверка NTFS области Fixup..."
+msgstr "Проверка NTFS-области Fixup..."
 
 #. • MSG_224
 msgid "Clearing MBR/PBR/GPT structures..."
-msgstr "Очистка структуры MBR/PBR/GPT..."
+msgstr "Очистка структур MBR/PBR/GPT..."
 
 #. • MSG_225
 msgid "Requesting disk access..."
@@ -1343,15 +1508,15 @@ msgstr "Анализ загрузочных записей..."
 
 #. • MSG_227
 msgid "Closing existing volume..."
-msgstr "Закрытие существующего раздела..."
+msgstr "Закрытие существующего тома..."
 
 #. • MSG_228
 msgid "Writing Master Boot Record..."
-msgstr "Создание главной загрузочной записи..."
+msgstr "Запись главной загрузочной записи..."
 
 #. • MSG_229
 msgid "Writing Partition Boot Record..."
-msgstr "Создание загрузочной записи раздела..."
+msgstr "Запись загрузочной записи раздела..."
 
 #. • MSG_230
 msgid "Copying DOS files..."
@@ -1367,7 +1532,7 @@ msgstr "Настройка EFI-загрузки Win7 (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
-msgstr "Завершение, пожалуйста, ждите..."
+msgstr "Завершение, подождите..."
 
 #. • MSG_234
 #.
@@ -1381,15 +1546,15 @@ msgstr "Установка Syslinux %s..."
 #. Bad blocks status. Example: "Bad Blocks: Write pass 1/2 - 12.34% (0/0/1 errors)"
 #. See MSG_191 & MSG_192 for "Write pass"/"Read pass" translation.
 msgid "Bad Blocks: %s %d/%d - %0.2f%% (%d/%d/%d errors)"
-msgstr "Плохие блоки: %s %d/%d - %0.2f%% (%d/%d/%d ошибок)"
+msgstr "Плохие блоки: %s %d/%d - %0.2f%% (ошибки: %d/%d/%d)"
 
 #. • MSG_236
 msgid "Bad Blocks: Testing with random pattern"
-msgstr "Плохие блоки: Тестирование случайным образом"
+msgstr "Плохие блоки: Тестирование со случайным шаблоном"
 
 #. • MSG_237
 msgid "Bad Blocks: Testing with pattern 0x%02X"
-msgstr "Плохие блоки: Тестирование 0x%02X"
+msgstr "Плохие блоки: Тестирование с шаблоном 0x%02X"
 
 #. • MSG_238
 #.
@@ -1405,17 +1570,21 @@ msgstr "Удаление разделов (%s)..."
 #.
 #. This message has to do with the signature validation that Rufus uses when downloading an update.
 msgid ""
-"The signature for the downloaded update can not be validated. This could mean that your system is improperly configured for signature validation or indicate a malicious download.\n"
+"The signature for the downloaded update can not be validated. This could "
+"mean that your system is improperly configured for signature validation or "
+"indicate a malicious download.\n"
 "\n"
 "The download will be deleted. Please check the log for more details."
 msgstr ""
-"Подпись для загруженного обновления не может быть проверена. Это может означать, что ваша система неправильно настроена для проверки подписи или указывает на вредоносную загрузку.\n"
+"Невозможно проверить подпись загруженного обновления. Это может означать, "
+"что ваша система неправильно настроена для проверки подписей, либо что было "
+"загружено вредоносное ПО.\n"
 "\n"
-"Обновление будет удалено. Пожалуйста, проверьте журнал для получения более подробной информации."
+"Обновление будет удалено. См. подробности в файле-журнале."
 
 #. • MSG_241
 msgid "Downloading: %s"
-msgstr "Загружено: %s"
+msgstr "Загрузка: %s"
 
 #. • MSG_242
 msgid "Failed to download file."
@@ -1427,11 +1596,11 @@ msgstr "Проверка наличия обновлений..."
 
 #. • MSG_244
 msgid "Updates: Unable to connect to the internet"
-msgstr "Ошибка: Необходим доступ к Интернету"
+msgstr "Обновления: Нет доступа в Интернет"
 
 #. • MSG_245
 msgid "Updates: Unable to access version data"
-msgstr "Обновление: Невозможно получить доступ к данным о версии"
+msgstr "Обновления: Нет доступа к данным о версии"
 
 #. • MSG_246
 msgid "A new version of Rufus is available!"
@@ -1453,11 +1622,11 @@ msgstr "Не удалось удалить ключи приложения в р
 #.
 #. Example: "Fixed disk detection enabled", "ISO size check disabled", etc.
 msgid "%s enabled"
-msgstr "%s включено"
+msgstr "%s - вкл."
 
 #. • MSG_251
 msgid "%s disabled"
-msgstr "%s выключено"
+msgstr "%s - откл."
 
 #. • MSG_252
 msgid "Size checks"
@@ -1469,23 +1638,23 @@ msgstr "Определение накопителей"
 
 #. • MSG_254
 msgid "Force large FAT32 formatting"
-msgstr "Форматирование в расширенный FAT32"
+msgstr "Форматирование в Large FAT32"
 
 #. • MSG_255
 msgid "NoDriveTypeAutorun will be deleted on exit"
-msgstr "NoDriveTypeAutorun будет удален при выходе"
+msgstr "Параметр NoDriveTypeAutorun будет удалён при выходе"
 
 #. • MSG_256
 msgid "Fake drive detection"
-msgstr "Обнаружен фальшивый диск"
+msgstr "Обнаружение поддельных дисков"
 
 #. • MSG_257
 msgid "Joliet support"
-msgstr "Joliet поддержка"
+msgstr "Поддержка Joliet"
 
 #. • MSG_258
 msgid "Rock Ridge support"
-msgstr "Rock Ridge поддержка"
+msgstr "Поддержка Rock Ridge"
 
 #. • MSG_259
 msgid "Force update"
@@ -1493,7 +1662,7 @@ msgstr "Принудительное обновление"
 
 #. • MSG_260
 msgid "NTFS compression"
-msgstr "NTFS-компрессия"
+msgstr "NTFS-сжатие"
 
 #. • MSG_261
 msgid "Writing image: %s"
@@ -1503,41 +1672,41 @@ msgstr "Запись образа: %s"
 #.
 #. Cheat mode message to disable ISO Support, so that only DD images can be opened
 msgid "ISO Support"
-msgstr "Отключение поддержки ISO"
+msgstr "Поддержка ISO"
 
 #. • MSG_263
 #.
 #. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
 msgid "Use PROPER size units"
-msgstr "Использование правильного размера"
+msgstr "Использовать правильные размеры"
 
 #. • MSG_264
 msgid "Deleting directory '%s'"
-msgstr "Удаление директории '%s'"
+msgstr "Удаление папки '%s'"
 
 #. • MSG_265
 msgid "VMWare disk detection"
-msgstr "Определение VMWare диска"
+msgstr "Обнаружение дисков VMWare"
 
 #. • MSG_266
 msgid "Dual UEFI/BIOS mode"
-msgstr "Двойной UEFI/BIOS режим"
+msgstr "Двойной режим UEFI/BIOS"
 
 #. • MSG_267
 msgid "Applying Windows image: %s"
-msgstr "Применение Windows-образа: %s"
+msgstr "Применение образа Windows: %s"
 
 #. • MSG_268
 msgid "Applying Windows image..."
-msgstr "Использование Windows-образа..."
+msgstr "Применение образа Windows..."
 
 #. • MSG_269
 msgid "Preserve timestamps"
-msgstr "Сохранять метки"
+msgstr "Сохранять даты"
 
 #. • MSG_270
 msgid "USB debug"
-msgstr "Режим USB отладки"
+msgstr "USB-отладка"
 
 #. • MSG_271
 msgid "Computing image checksums: %s"
@@ -1559,23 +1728,29 @@ msgstr "Обнаружен образ %s"
 #.
 #. '%s' will be replaced with your translations for MSG_036 ("ISO Image") and MSG_095 ("DD Image")
 msgid ""
-"The image you have selected is an 'ISOHybrid' image. This means it can be written either in %s (file copy) mode or %s (disk image) mode.\n"
-"Rufus recommends using %s mode, so that you always have full access to the drive after writing it.\n"
-"However, if you encounter issues during boot, you can try writing this image again in %s mode.\n"
+"The image you have selected is an 'ISOHybrid' image. This means it can be "
+"written either in %s (file copy) mode or %s (disk image) mode.\n"
+"Rufus recommends using %s mode, so that you always have full access to the "
+"drive after writing it.\n"
+"However, if you encounter issues during boot, you can try writing this image "
+"again in %s mode.\n"
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"Выбранный образ является 'ISOHybrid' образом. Это означает, что образ можно записать либо в %s режиме копирования, либо в %s режиме образа диска.\n"
-"Рекомендуется использовать %s режим для полного доступа к диску после записи.\n"
-"Однако, при возникновении проблем во время загрузки вы можете еще раз попробовать записать образ в %s режиме.\n"
+"Выбран образ ISOHybrid. Это означает, что его можно записать либо в %s "
+"режиме копирования файлов, либо в %s режиме образа диска.\n"
+"Для полного доступа к диску после записи рекомендуется использовать режим "
+"%s.\n"
+"Если возникают проблемы при загрузке, ещё раз попробуйте записать образ в "
+"режиме %s.\n"
 "\n"
-"Пожалуйста, выберите режим, который вы хотите использовать для записи выбранного образа:"
+"Выберите режим записи этого образа:"
 
 #. • MSG_276
 #.
 #. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
 msgid "Write in %s mode (Recommended)"
-msgstr "Записать в %s режиме (Рекомендуется)"
+msgstr "Запись в режиме %s (рекомендуется)"
 
 #. • MSG_277
 #.
@@ -1585,23 +1760,23 @@ msgstr "Запись в режиме %s"
 
 #. • MSG_278
 msgid "Checking for conflicting processes..."
-msgstr "Проверка конфликтных процессов..."
+msgstr "Проверка конфликтующих процессов..."
 
 #. • MSG_279
 msgid "Non bootable"
-msgstr "Незагрузочный образ"
+msgstr "Незагрузочный"
 
 #. • MSG_280
 msgid "Disk or ISO image"
-msgstr "Диск или ISO-образ"
+msgstr "Диск или образ ISO"
 
 #. • MSG_281
 msgid "%s (Please select)"
-msgstr "%s (Выберите образ)"
+msgstr "%s (выберите)"
 
 #. • MSG_282
 msgid "Exclusive USB drive locking"
-msgstr "Особая блокировка USB диска"
+msgstr "Эксклюзивная блокировка USB-диска"
 
 #. • MSG_283
 msgid "Invalid signature"
@@ -1614,12 +1789,13 @@ msgstr "У загруженного файла отсутствует цифро
 #. • MSG_285
 msgid ""
 "The downloaded executable is signed by '%s'.\n"
-"This is not a signature we recognize and could indicate some form of malicious activity...\n"
+"This is not a signature we recognize and could indicate some form of "
+"malicious activity...\n"
 "Are you sure you want to run this file?"
 msgstr ""
 "Загруженный файл подписан '%s'.\n"
-"Это не та подпись, которая признается, что указывает на некоторые формы вредоносных действий...\n"
-"Вы уверены, что хотите запустить этот файл?"
+"Это не наша подпись, возможно, похозяйничало вредоносное ПО...\n"
+"Вы действительно хотите запустить этот файл?"
 
 #. • MSG_286
 msgid "Zeroing drive: %s"
@@ -1627,15 +1803,15 @@ msgstr "Обнуление диска: %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
-msgstr "Выявление не-USB съемных дисков"
+msgstr "Обнаружение съёмных дисков не-USB"
 
 #. • MSG_288
 msgid "Missing elevated privileges"
-msgstr "Отсутствуют необходимые привилегии"
+msgstr "Отсутствуют повышенные привилегии"
 
 #. • MSG_289
 msgid "This application can only run with elevated privileges"
-msgstr "Это приложение может работать только с высокими привилегиями"
+msgstr "Эта программа может работать только с повышенными правами"
 
 #. • MSG_290
 msgid "File Indexing"
@@ -1647,7 +1823,7 @@ msgstr "Выбор версии"
 
 #. • MSG_292
 msgid "Please select the version of Windows you want to install:"
-msgstr "Пожалуйста, выберите версию Windows, которую вы хотите установить:"
+msgstr "Выберите версию Windows для установки:"
 
 #. • MSG_293
 msgid "Unsupported Windows version"
@@ -1659,11 +1835,11 @@ msgid ""
 "The last version of Rufus compatible with this platform is v%d.%d."
 msgstr ""
 "Эта версия Windows больше не поддерживается Rufus.\n"
-"Последняя версия Rufus, совместимая с этой платформой - %d.%d."
+"Последняя версия Rufus, совместимая с этой платформой - v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
-msgstr "Предупреждение: Неофициальная версия"
+msgstr "ВНИМАНИЕ: Неофициальная версия"
 
 #. • MSG_296
 msgid ""
@@ -1673,25 +1849,29 @@ msgid ""
 msgstr ""
 "Эта версия Rufus не была выпущена официальным разработчиком.\n"
 "\n"
-"Вы действительно хотите запустить ее?"
+"Вы действительно хотите её запустить?"
 
 #. • MSG_297
 msgid "Truncated ISO detected"
-msgstr "Обнаружен обрезанный ISO-образ"
+msgstr "Обнаружен усечённый образ ISO"
 
 #. • MSG_298
 msgid ""
-"The ISO file you have selected does not match its declared size: %s of data is missing!\n"
+"The ISO file you have selected does not match its declared size: %s of data "
+"is missing!\n"
 "\n"
-"If you obtained this file from the Internet, you should try to download a new copy and verify that the MD5 or SHA checksums match the official ones.\n"
+"If you obtained this file from the Internet, you should try to download a "
+"new copy and verify that the MD5 or SHA checksums match the official ones.\n"
 "\n"
 "Note that you can compute the MD5 or SHA in Rufus by clicking the (✓) button."
 msgstr ""
-"Выбранный ISO-образ не соответствует заявленному размеру: %s данных отсутствует!\n"
+"Выбранный образ ISO не соответствует заявленному размеру: %s данных "
+"отсутствует!\n"
 "\n"
-"Если вы скачали этот файл из интернета, вы должны попытаться загрузить его снова и убедиться, что контрольные суммы MD5 или SHA совпадают.\n"
+"Если вы скачали этот файл из Интернета, загрузите его снова и проверьте, "
+"совпадают ли контрольные суммы MD5 или SHA.\n"
 "\n"
-"Обратите внимание, что вы можете вычислить MD5 или SHA в Rufus, нажав кнопку (✓)."
+"Чтобы вычислить MD5 или SHA в Rufus, нажмите кнопку (✓)."
 
 #. • MSG_299
 msgid "Timestamp validation error"
@@ -1699,13 +1879,18 @@ msgstr "Ошибка проверки временной метки"
 
 #. • MSG_300
 msgid ""
-"Rufus could not validate that the timestamp of the downloaded update is more recent than the one for the current executable.\n"
+"Rufus could not validate that the timestamp of the downloaded update is more "
+"recent than the one for the current executable.\n"
 "\n"
-"In order to prevent potential attack scenarios, the update process has been aborted and the download will be deleted. Please check the log for more details."
+"In order to prevent potential attack scenarios, the update process has been "
+"aborted and the download will be deleted. Please check the log for more "
+"details."
 msgstr ""
-"Rufus не смог подтвердить, что временная метка загруженного обновления более поздняя, ​​чем дата текущего исполняемого файла.\n"
+"Rufus не смог подтвердить, что временная метка загруженного обновления более "
+"поздняя, ​​чем дата текущего исполняемого файла.\n"
 "\n"
-"Чтобы предотвратить возможный сценарий атаки, процесс обновления был прерван, а загрузка будет удалена. Пожалуйста, проверьте журнал для получения более подробной информации."
+"Чтобы предотвратить возможную атаку, обновление было прервано, а загруженный "
+"файл - удалён. См. подробности в файле-журнале."
 
 #. • MSG_301
 msgid "Show application settings"
@@ -1721,11 +1906,15 @@ msgstr "Показать журнал"
 
 #. • MSG_304
 msgid "Create a disk image of the selected device"
-msgstr "Создание образа диска выбранного устройства"
+msgstr "Создать образ диска выбранного устройства"
 
 #. • MSG_305
-msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "Используйте эту опцию, если вы хотите установить Windows на другой диск или запускать Windows прямо с этого диска (Windows To Go)."
+msgid ""
+"Use this option to indicate if you plan to install Windows to a different "
+"disk, or if you want to run Windows directly from this drive (Windows To Go)."
+msgstr ""
+"Используйте эту опцию, если вы хотите установить Windows на другой диск или "
+"запускать Windows прямо с этого диска (Windows To Go)."
 
 #. • MSG_306
 #.
@@ -1748,11 +1937,17 @@ msgstr "Сжатый архив"
 
 #. • MSG_310
 msgid ""
-"The ISO you have selected uses UEFI and is small enough to be written as an EFI System Partition (ESP). Writing to an ESP, instead of writing to a generic data partition occupying the whole disk, can be preferable for some types of installations.\n"
+"The ISO you have selected uses UEFI and is small enough to be written as an "
+"EFI System Partition (ESP). Writing to an ESP, instead of writing to a "
+"generic data partition occupying the whole disk, can be preferable for some "
+"types of installations.\n"
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"Выбранный ISO-образ использует UEFI и достаточно мал, чтобы его можно было записать как системный раздел EFI (ESP). Запись в ESP вместо записи в общий раздел данных, занимающий весь диск, может быть предпочтительнее для некоторых типов установок.\n"
+"Выбранный образ ISO использует UEFI и достаточно мал, чтобы его можно было "
+"записать как системный раздел EFI (ESP). Запись в ESP вместо записи в общий "
+"раздел данных, занимающий весь диск, может быть предпочтительнее для "
+"некоторых типов установок.\n"
 "\n"
 "Выберите режим записи этого образа:"
 
@@ -1794,14 +1989,16 @@ msgstr "Игнорировать загрузочный маркер"
 
 #. • MSG_320
 msgid "Refreshing partition layout (%s)..."
-msgstr "Обновление макета раздела (%s)..."
+msgstr "Обновление макета разделов (%s)..."
 
 #. • MSG_321
 msgid ""
-"The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
+"The image you have selected is an ISOHybrid, but its creators have not made "
+"it compatible with ISO/File copy mode.\n"
 "As a result, DD image writing mode will be enforced."
 msgstr ""
-"Выбранный образ - ISOHybrid, но создатели не сделали его совместимым с режимом копирования ISO/файла.\n"
+"Выбранный образ - ISOHybrid, но создатели не сделали его совместимым с "
+"режимом копирования ISO/файла.\n"
 "Из-за этого будет применён режим записи образа DD."
 
 #. • MSG_322
@@ -1826,7 +2023,7 @@ msgstr "Настроить установку Windows?"
 
 #. • MSG_329
 msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
-msgstr "Удалить требования 4 ГБ ОЗУ, безопасной загрузки и TPM 2.0"
+msgstr "Удалить требования 4+ ГБ ОЗУ, безопасной загрузки и TPM 2.0"
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
@@ -1856,11 +2053,105 @@ msgstr "Отключить автоматическое шифрование у�
 msgid "Persistent log"
 msgstr "Постоянный журнал"
 
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to "
+"install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be "
+"reused automatically if present."
+msgstr ""
+"Для установки MS-DOS необходимо загрузить дополнительный файл (diskcopy.dll) "
+"с сайта Microsoft:\n"
+" 'Да' - загрузить его из Интернета\n"
+" 'Нет' - отменить операцию\n"
+"\n"
+"* Файл загрузится в папку приложения, если там есть одноимённый файл, он "
+"будет автоматически перезаписан."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Обнаружен отозванный загрузчик UEFI"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader "
+"that has been revoked and that will produce %s, when Secure Boot is enabled "
+"on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should "
+"consider the possibility that it might contain UEFI malware and avoid "
+"booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more "
+"up to date version, that will not produce this warning."
+msgstr ""
+"Выбранный образ ISO содержит отозванный загрузчик UEFI, который выдаёт %s, "
+"когда безопасная загрузка включена в полностью обновленной системе UEFI.\n"
+"\n"
+"- Если вы получили этот образ ISO из ненадёжного источника, учтите, что он "
+"может содержать вредоносное ПО UEFI, и не загружайтесь с него.\n"
+"- Если вы получили его из надёжного источника, попробуйте найти более новую "
+"версию, которая не будет выдавать это предупреждение."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "экран нарушения безопасности"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "экран восстановления Windows (BSOD) с '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Сжатый образ VHDX"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Несжатый образ VHD"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Образ Full Flash Update (FFU)"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this "
+"functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Для этой функции необходимо загрузить дополнительные данные с сайта "
+"Microsoft:\n"
+" 'Да' - загрузить их из Интернета\n"
+" 'Нет' - отменить операцию"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Ограничить Windows S-режимом (НЕСОВМЕСТИМО с обходом онлайн-аккаунта)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Экспертный режим"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Распаковка архивов: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Использовать MBR Rufus"
+
 #. • MSG_900
 #.
 #. The following messages are for the Windows Store listing only and are not used by the application
-msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
-msgstr "Rufus - это утилита для форматирования и создания загрузочных флеш-накопителей USB."
+msgid ""
+"Rufus is a utility that helps format and create bootable USB flash drives, "
+"such as USB keys/pendrives, memory sticks, etc."
+msgstr ""
+"Rufus - это утилита для форматирования и создания загрузочных флеш-"
+"накопителей USB."
 
 #. • MSG_901
 msgid "Official site: %s"
@@ -1879,10 +2170,12 @@ msgstr "Изменения: %s"
 #. The gnu.org website has many translations of the GPL (such as https://www.gnu.org/licenses/gpl-3.0.zh-cn.html, https://www.gnu.org/licenses/gpl-3.0.fr.html)
 #. Please make sure you try to locate the relevant https://www.gnu.org/licenses/gpl-3.0.<LANG-ID>.html for your language and use it here.
 msgid ""
-"This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
+"This application is licensed under the terms of the GNU Public License (GPL) "
+"version 3.\n"
 "See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
 msgstr ""
-"Это приложение - под лицензией GNU Public License (GPL) версии 3.\n"
+"Это приложение распространяется по лицензии GNU Public License (GPL) версии "
+"3.\n"
 "Подробнее см. https://www.gnu.org/licenses/gpl-3.0.ru.html."
 
 #. • MSG_905
@@ -1894,53 +2187,67 @@ msgstr "Загрузочный"
 #. • MSG_910
 #.
 #. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
-msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
-msgstr "Форматировать USB, флешки и виртуальные диски в FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgid ""
+"Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/"
+"ext2/ext3"
+msgstr ""
+"Форматирование USB, флешек и виртуальных дисков в FAT/FAT32/NTFS/UDF/exFAT/"
+"ReFS/ext2/ext3"
 
 #. • MSG_911
 msgid "Create FreeDOS bootable USB drives"
-msgstr "Создать загрузочные USB-диски FreeDOS"
+msgstr "Создание загрузочных USB-дисков FreeDOS"
 
 #. • MSG_912
 msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
-msgstr "Создать загрузочные диски из загрузочных ISO-образов (Windows, Linux и т.д.)"
+msgstr ""
+"Создание загрузочных дисков из загрузочных образов ISO (Windows, Linux и т."
+"д.)"
 
 #. • MSG_913
-msgid "Create bootable drives from bootable disk images, including compressed ones"
-msgstr "Создать загрузочные диски из образов загрузочных дисков, в том числе сжатых"
+msgid ""
+"Create bootable drives from bootable disk images, including compressed ones"
+msgstr ""
+"Создание загрузочных дисков из образов загрузочных дисков, в том числе сжатых"
 
 #. • MSG_914
 msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
-msgstr "Создать загрузочные диски BIOS или UEFI, включая загрузочный UEFI NTFS"
+msgstr ""
+"Создание загрузочных дисков BIOS или UEFI, включая загрузочный UEFI NTFS"
 
 #. • MSG_915
 msgid "Create 'Windows To Go' drives"
 msgstr "Создание дисков Windows To Go"
 
 #. • MSG_916
-msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
-msgstr "Создать установочные диски Windows 11 для компьютеров без TPM или безопасной загрузки"
+msgid ""
+"Create Windows 11 installation drives for PCs that don't have TPM or Secure "
+"Boot"
+msgstr ""
+"Создание установочных дисков Windows 11 для компьютеров без TPM или "
+"безопасной загрузки"
 
 #. • MSG_917
 msgid "Create persistent Linux partitions"
-msgstr "Создать постоянные разделы Linux"
+msgstr "Создание постоянных разделов Linux"
 
 #. • MSG_918
 msgid "Create VHD/DD images of the selected drive"
-msgstr "Создать образы VHD/DD выбранного диска"
+msgstr "Создание образов VHD/DD выбранного диска"
 
 #. • MSG_919
 msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
-msgstr "Вычислить контрольные суммы MD5, SHA-1, SHA-256 и SHA-512 выбранного образа"
+msgstr ""
+"Вычисление контрольных сумм MD5, SHA-1, SHA-256 и SHA-512 выбранного образа"
 
 #. • MSG_920
 msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
-msgstr "Проверить наличие плохих блоков, обнаружить \"поддельные\" флешки"
+msgstr "Проверка на плохие блоки, обнаружение \"поддельных\" флешек"
 
 #. • MSG_921
 msgid "Download official Microsoft Windows retail ISOs"
-msgstr "Загрузить официальные ISO-образы Windows"
+msgstr "Загрузка официальных ISO-образов Windows"
 
 #. • MSG_922
 msgid "Download UEFI Shell ISOs"
-msgstr "Загрузить ISO-образы оболочки UEFI"
+msgstr "Загрузка ISO-образов оболочки UEFI"
