@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-03-20 12:57+0000\n"
-"PO-Revision-Date: 2023-03-20 12:57+0000\n"
+"POT-Creation-Date: 2024-04-25 21:23+0300\n"
+"PO-Revision-Date: 2024-04-25 22:00+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ro_RO\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Romanian (Română)\n"
 "X-Rufus-LCID: 0x0418, 0x0818\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Afișare unități conectate prin USB"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Adăugare remedieri pentru BIOS-uri vechi (partiție extra, aliniere, etc.)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Utilizare MBR Rufus cu ID BIOS"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Activați validarea mediilor UEFI în timpul execuției"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -338,7 +336,7 @@ msgstr "BIOS (sau UEFI-CSM)"
 
 #. • MSG_032
 msgid "UEFI (non CSM)"
-msgstr ""
+msgstr "UEFI (fără CSM)"
 
 #. • MSG_033
 msgid "BIOS or UEFI"
@@ -1043,16 +1041,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Bifați această casetă pentru a permite afișarea etichetelor internaționale și pentru a seta o pictogramă pentru dispozitiv (se va crea un fișier autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Instalează un MBR care permite pornirea și selecția dispozitivului USB din BIOS"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Se va încerca mascarea primei unități USB (de obicei 0x80) ca fiind un alt disc.\n"
-"Acest lucru este necesar numai dacă instalați Windows XP și aveți mai mult decât un singur disc."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Instalează un bootloader UEFI care poate performa validări MD5sum a fișierelor media"
 
 #. • MSG_169
 msgid ""
@@ -1852,6 +1842,82 @@ msgstr "Blochează BitLocker de la encriptarea automată a dispozitivului"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Logare persistentă"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Un fișier adițional ('diskcopy.dll') trebuie să fie descărcat de la Microsoft pentru  a instala MS-DOS:\n"
+"- Selectează 'Da' ca să te conectezi la Internet și să le descarci\n"
+"- Selectează 'Nu' pentru a anula operațiunea\n"
+"\n"
+"Notiță: Acest fișier va fi descărcat in aceeași locație cu aplicația și va fi reutilizat automat dacă este prezent."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Bootloader UEFI nepermis detectat"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus a detectat că fișierul ISO care lai selectat conține un bootloader UEFI care nu este permis si ar produce %s, cand Secure Boot este activat pe un system UEFI actualizat.\n"
+"\n"
+"- Dacă ai făcut rost de aceasta imagine ISO de la o sursă de neîncredere, este recomandat să consideri posibilitatea că ar putea conține malware UEFI ce nu ar permite pornirea de la aceasta.\n"
+"- Dacă ai făcut rost de aceasta de la o sursă de încredere, ar putea fi necesară căutarea unei versiuni mai noi, care nu ar produce acest avertisment."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "un ecran de \"Încălcare de Securitate\""
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "un ecran de Recuperare Windows (BSOD) cu '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Imagine VHDX comprimată"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Imagine VHD necomprimată"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Flash complet de imagine de actualizare"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Niște date adiționale trebuie descărcate de la Microsoft pentru a folosii această funție:\n"
+"- Selectează 'Da' ca să te conectezi la Internet și să le descarci\n"
+"- Selectează 'Nu' pentru a anula operațiunea"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Restricționează Windows la S-Mode (INCOMPATIBIL cu bypass-ul pentru un cont online)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Mod expert"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Extractând fișiere arhivate: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Folosește Rufus MBR"
 
 #. • MSG_900
 #.
