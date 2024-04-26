@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-16 22:57+0200\n"
-"PO-Revision-Date: 2023-02-24 13:13+0000\n"
+"POT-Creation-Date: 2024-04-25 21:07+0300\n"
+"PO-Revision-Date: 2024-04-26 01:31+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: he_IL\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Hebrew (עברית)\n"
 "X-Rufus-LCID: 0x040d\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "הצגת רשימה של כונני USB קשיחים"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "הוספת תיקונים ל־BIOS־ים ישנים (מחיצה נוספת, יישור...)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "שימוש ב־MBR של Rufus עם מזהה BIOS"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "הפעלת אימות מדיה של UEFI בזמן ריצה"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -481,7 +479,7 @@ msgstr "שגיאת התקנה"
 
 #. • MSG_067
 msgid "Could not open media. It may be in use by another process. Please re-plug the media and try again."
-msgstr "לא ניתן לפתוח את המדיה. יתכן שהיא בשימוש על־ידי תהליך אחר. נא לחבר מחדש את המדיה ולנסות שוב."
+msgstr "לא ניתן לפתוח את המדיה. ייתכן שהיא בשימוש על־ידי תהליך אחר. נא לחבר מחדש את המדיה ולנסות שוב."
 
 #. • MSG_068
 msgid "Could not partition drive."
@@ -572,7 +570,7 @@ msgid ""
 "Note: The new file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
 "נראה שקובץ ה־ISO הזה משתמש בגרסה מיושנת של '%s'.\n"
-"לפיכך, יתכן שתפריטי האתחול לא יוצגו כראוי.\n"
+"לפיכך, ייתכן שתפריטי האתחול לא יוצגו כראוי.\n"
 "\n"
 "Rufus יכול להוריד גרסה חדשה יותר כדי לתקן בעיה זו:\n"
 "- יש לבחור 'כן' כדי להתחבר לאינטרנט ולהוריד את הקובץ\n"
@@ -1043,16 +1041,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "יש לסמן תיבה זו כדי לאפשר הצגה של תוויות שם בינלאומיות וכדי להגדיר סמל להתקן (יוצר קובץ autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "מתקין MBR שמאפשר בחירת אתחול ויכול לגרום למזהה כונן ה־USB ב־BIOS להזדהות כמזהה אחר"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"מנסה לגרום לכונן ה־USB בר־האתחול הראשון (בדרך כלל 0x80) להזדהות כדיסק אחר.\n"
-"זה אמור להיות נחוץ רק אם ברצונך להתקין Windows XP ויש לך יותר מדיסק אחד."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "מתקין מנהל אתחול UEFI שיבצע אימות קבצים שעל המדיה בשיטת MD5Sum"
 
 #. • MSG_169
 msgid ""
@@ -1127,7 +1117,7 @@ msgstr "כתובת ה־IP שלך"
 
 #. • MSG_184
 msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
-msgstr "לצורך יצירת סטטיסטיקת שימוש פרטית, יתכן שנשמור את המידע שייאסף \\b לשנה לכל היותר\\b0 . עם זאת, אנחנו לא נמסור מרצוננו החופשי את הנתונים האלה לשום גורם צד שלישי."
+msgstr "לצורך יצירת סטטיסטיקת שימוש פרטית, ייתכן שנשמור את המידע שייאסף \\b לשנה לכל היותר\\b0 . עם זאת, אנחנו לא נמסור מרצוננו החופשי את הנתונים האלה לשום גורם צד שלישי."
 
 #. • MSG_185
 msgid "Update Process:"
@@ -1665,7 +1655,7 @@ msgid ""
 "The last version of Rufus compatible with this platform is v%d.%d."
 msgstr ""
 "גרסה זו של Windows אינה נתמכת יותר על־ידי Rufus.\n"
-"הגרסה האחרונה של Rufus הנתמכת בפלטפורמה זו היא %d.%d."
+"הגרסה האחרונה של Rufus הנתמכת בפלטפורמה זו היא v%d.%d."
 
 #. • MSG_295
 msgid "Warning: Unofficial version"
@@ -1861,6 +1851,82 @@ msgstr "השבתת הצפנת מכשיר אוטומטית של BitLocker"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "יומן קבוע"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"יש להוריד קובץ נוסף ('diskcopy.dll') מ־Microsoft על מנת להתקין MS-DOS:\n"
+"- יש לבחור 'כן' כדי להתחבר לאינטרנט ולהוריד אותו\n"
+"- יש לבחור 'לא' כדי לבטל את הפעולה\n"
+"\n"
+"הערה: הקובץ יירד לספרייה בה ממוקם היישום וכל עוד הקובץ יהיה שם, Rufus ישתמש בו באופן אוטומטי במידת הצורך."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "אותר מנהל אתחול UEFI שנאסר לשימוש"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus איתר שקובץ ה־ISO שבחרת מכיל מנהל אתחול UEFI שנאסר לשימוש ושיציג %s, כאשר Secure Boot מופעל על מערכת UEFI מעודכנת לחלוטין.\n"
+"\n"
+"- אם השגת את קובץ תמונת ISO זה ממקור מפוקפק, כדאי לשקול את האפשרות שייתכן שהוא מכיל נוזקת UEFI, ולהימנע מלאתחל ממנו.\n"
+"- אם השגת אותה ממקור מהימן, כדאי לנסות לאתר גרסה יותר עדכנית, שלא תציג אזהרה זו."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "מסך \"הפרת אבטחה\""
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "מסך שחזור של Windows ‏(BSOD) עם '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "קובץ תמונה VHDX מכווץ"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "קובץ תמונה VHD שאינו מכווץ"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "קובץ תמונה של Full Flash Update"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"יש להוריד נתונים נוספים מ־Microsoft על מנת להשתמש באפשרות זו:\n"
+"- יש לבחור 'כן' כדי להתחבר לאינטרנט ולהוריד אותם\n"
+"- יש לבחור 'לא' כדי לבטל את הפעולה"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "הגבלת ההתקנה של Windows למצב S-Mode (אינו נתמך עם האפשרות לעקיפת חשבון מקוון)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "מצב מומחה"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "מחלץ קובצי ארכיון: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "שימוש ב־MBR של Rufus"
 
 #. • MSG_900
 #.
