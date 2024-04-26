@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-17 09:03+0100\n"
-"PO-Revision-Date: 2023-02-17 17:02+0000\n"
+"POT-Creation-Date: 2024-04-26 11:15+0200\n"
+"PO-Revision-Date: 2024-04-26 11:44+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: nl_NL\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Dutch (Nederlands)\n"
 "X-Rufus-LCID: 0x0413, 0x0813\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "USB-harde schijven weergeven"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Oplossingen voor oude BIOS'en toevoegen (extra partitie, uitlijnen, etc.)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Rufus MBR met BIOS ID gebruiken"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Media-validatie via UEFI inschakelen"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -92,7 +90,7 @@ msgstr "Uitgebreid label en pictogrambestanden aanmaken"
 
 #. • IDD_DIALOG → IDS_STATUS_TXT
 msgid "Status"
-msgstr "Status"
+msgstr ""
 
 #. • IDD_DIALOG → IDCANCEL
 #. • IDD_LICENSE → IDCANCEL
@@ -139,7 +137,7 @@ msgstr "Nee"
 
 #. • IDD_LOG → IDD_LOG
 msgid "Log"
-msgstr "Log"
+msgstr ""
 
 #. • IDD_LOG → IDC_LOG_CLEAR
 msgid "Clear"
@@ -282,7 +280,7 @@ msgstr "Laatste versie: %d.%d (Build %d)"
 #. • MSG_020
 #. • MSG_026
 msgid "bytes"
-msgstr "bytes"
+msgstr ""
 
 #. • MSG_021
 #.
@@ -294,19 +292,19 @@ msgstr "kB"
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr "MB"
+msgstr ""
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr "GB"
+msgstr ""
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr "TB"
+msgstr ""
 
 #. • MSG_025
 #.
@@ -811,7 +809,7 @@ msgstr "Standaard Windows-installatie"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr "Windows To Go"
+msgstr ""
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -918,7 +916,7 @@ msgstr "Versie"
 
 #. • MSG_136
 msgid "Release"
-msgstr "Release"
+msgstr ""
 
 #. • MSG_137
 msgid "Edition"
@@ -1043,16 +1041,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Aanvinken om weergave van internationale labels toe te laten en een apparaat-pictogram in te stellen (maakt een autorun.inf aan)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Installeert een MBR die een opstartselectie toestaat en de BIOS USB-drive ID kan verbergen"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Probeert de eerste opstartbare USB drive (gewoonlijk 0x80) voor te laten doen als een andere schijf.\n"
-"Dit is alleen nodig als u Windows XP installeert en meer dan één schijf heeft."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Installeert een UEFI-bootloader die bij elke opstart vanaf het medium een MD5Sum-bestandsvalidatie uitvoert op het medium zelf"
 
 #. • MSG_169
 msgid ""
@@ -1759,7 +1749,7 @@ msgstr "Gebruik %s (in het hoofdvenster) om in te schakelen."
 
 #. • MSG_312
 msgid "Extra hashes (SHA512)"
-msgstr "Extra hashes (SHA512)"
+msgstr ""
 
 #. • MSG_313
 msgid "Save to VHD"
@@ -1851,7 +1841,83 @@ msgstr "Automatische Bitlocker-apparaatversleuteling uitschakelen"
 
 #. • MSG_336
 msgid "Persistent log"
-msgstr "Persistent log"
+msgstr ""
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Er moet een extra bestand ('diskcopy.dll') worden gedownload van Microsoft om MS-DOS te installeren:\n"
+"- Selecteer 'Ja' om verbinding te maken met internet en het bestand te downloaden\n"
+"- Selecteer 'Nee' om de bewerking te annuleren\n"
+"\n"
+"Opmerking: het bestand wordt gedownload in de map van de toepassing en wordt automatisch opnieuw gebruikt als het aanwezig is."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Ingetrokken UEFI-bootloader gedetecteerd"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus heeft gedetecteerd dat de ISO die u hebt geselecteerd een UEFI-bootloader bevat die is ingetrokken en %s zal produceren wanneer Secure Boot is ingeschakeld op een volledig bijgewerkt UEFI-systeem.\n"
+"\n"
+"- Als u deze ISO-image hebt verkregen van een niet-vertrouwde bron, houdt u best rekening met de mogelijkheid dat het UEFI-malware bevat en vermijdt u om ervan op te starten.\n"
+"- Als u het van een betrouwbare bron hebt verkregen, moet u proberen een meer up-to-date versie te vinden die deze waarschuwing niet produceert."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "een \"Security Violation\"-scherm"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "een Windows-herstelscherm (BSOD) met '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Gecomprimeerde VHDX-image"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Niet-gecomprimeerde VHD-image"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Full Flash Update image"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Om deze functionaliteit te kunnen gebruiken, moeten enkele extra gegevens worden gedownload van Microsoft:\n"
+"- Selecteer 'Ja' om verbinding te maken met internet en ze te downloaden\n"
+"- Selecteer 'Nee' om de bewerking te annuleren"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Windows beperken tot S-Modus (NIET COMPATIBEL met omzeiling voor online account)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Expert-modus"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Archiefbestanden uitpakken: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Rufus MBR gebruiken"
 
 #. • MSG_900
 #.
@@ -1886,7 +1952,7 @@ msgstr ""
 #.
 #. Keyword for "boot" will be used for search in the Windows Store
 msgid "Boot"
-msgstr "Boot"
+msgstr "Opstarten"
 
 #. • MSG_910
 #.
