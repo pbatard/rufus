@@ -1482,8 +1482,8 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 			uprintf("  Error writing file %s: %s", dest_file, WindowsErrorString());
 			goto out;
 		}
-		file_length -= read_size;
-		r += read_size;
+		file_length -= buf_size;
+		r += buf_size;
 	}
 	goto out;
 
@@ -1515,8 +1515,8 @@ try_iso:
 			uprintf("  Error writing file %s: %s", dest_file, WindowsErrorString());
 			goto out;
 		}
-		file_length -= ISO_BLOCKSIZE;
-		r += ISO_BLOCKSIZE;
+		file_length -= buf_size;
+		r += buf_size;
 	}
 
 out:
