@@ -593,7 +593,7 @@ BOOL GetDevices(DWORD devnum)
 			uprintf("Could not allocate Device ID list");
 			goto out;
 		}
-		for (s=0, i=0; s<ARRAYSIZE(usbstor_name); s++) {
+		for (s = 0, i = 0; s < ARRAYSIZE(usbstor_name); s++) {
 			list_start[s] = i;
 			if (list_size[s] > 1) {
 				if (CM_Get_Device_ID_ListA(usbstor_name[s], &devid_list[i], list_size[s], ulFlags) != CR_SUCCESS)
@@ -985,8 +985,8 @@ BOOL GetDevices(DWORD devnum)
 						safe_free(devint_detail_data);
 						break;
 					}
-					safe_sprintf(&display_msg[strlen(display_msg)], sizeof(display_msg) - strlen(display_msg),
-						"%s [%s]", (right_to_left_mode)?RIGHT_TO_LEFT_MARK:"",
+					safe_sprintf(&display_msg[strlen(display_msg)], sizeof(display_msg) - strlen(display_msg) - 1,
+						"%s [%s]", (right_to_left_mode) ? RIGHT_TO_LEFT_MARK : "",
 						SizeToHumanReadable(drive_size, FALSE, use_fake_units));
 					display_name = display_msg;
 				}
