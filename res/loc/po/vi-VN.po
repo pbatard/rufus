@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-04-16 06:07+0700\n"
-"PO-Revision-Date: 2023-04-17 13:37+0100\n"
+"POT-Creation-Date: 2024-04-26 02:45+0900\n"
+"PO-Revision-Date: 2024-04-26 03:13+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: vi_VN\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Vietnamese (Tiếng Việt)\n"
 "X-Rufus-LCID: 0x042A\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Danh sách ổ cứng USB"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Thêm khắc phục cho BIOS cũ (phân vùng, sắp xếp...khác)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Dùng MBR của Rufus với ID BIOS"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Bật xác thực phương tiện UEFI tại thời điểm chạy"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -1043,16 +1041,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Chọn mục này để cho phép hiện tên ổ đĩa toàn hệ thống và đặt biểu tượng thiết bị (khởi tạo autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Cài đặt một MBR cho phép lựa chọn khởi động và có thể giả ID ổ đĩa USB BIOS"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Thử giả ổ đĩa USB khởi động đầu tiên (thường là 0x80) như một đĩa khác.\n"
-"Điều này chỉ cần thiết nếu bạn cài đặt Windows XP và có nhiều hơn một đĩa."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Cài đặt bộ khởi động UEFI, cùng với việc tiến trình xác thực MD5Sum của phương tiện"
 
 #. • MSG_169
 msgid ""
@@ -1852,6 +1842,82 @@ msgstr "Vô hiệu tự động mã hoá thiết bị BitLocker"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Nhật ký"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Một tệp tin bổ sung ('diskcopy.dll') phải được tải về từ Microsoft để cài đặt MS-DOS:\n"
+"- Chọn 'Có' để kết nối tới Internet và tải nó xuống\n"
+"- Chọn 'Không' để huỷ tiến trình\n"
+"\n"
+"Ghi chú: Tệp tin sẽ được tải xuống tại đường dẫn của phần mềm và sẽ được tự động tái sử dụng nếu có sẵn."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Đã phát hiện bộ khởi động UEFI bị thu hồi"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus đã phát hiện ra rằng tệp ISO bạn đã chọn có chứa một bộ khởi động UEFI đã bị thu hồi và nó sẽ tạo ra %s, khi Secure Boot được kích hoạt trên một hệ thống UEFI được cập nhật đầy đủ và mới nhất.\n"
+"\n"
+"- Nếu bạn sở hữu tệp ISO này từ một nguồn không đáng tin cậy, bạn nên cân nhắc khả năng có thể chứa mã độc UEFI và tránh khởi động từ nó.\n"
+"- Nếu bạn sở hữu từ một nguồn uy tín, bạn nên thử tìm một bản mới hơn, theo đó cảnh báo này sẽ không hiện ra."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "một màn hình \"Vi phạm Bảo mật\""
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "một Màn hình Khôi phục Windows (BSOD) với '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Tệp VHDX đã nén"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Tệp VHD chưa nén"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Ghi Đầy đủ Tệp Cập nhật"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Một vài dữ lieu phải được tải xuống từ Microsoft để sử dụng tính năng này:\n"
+"- Chọn 'Có' để kết nối tới Internet và tải xuống nó\n"
+"- Chọn 'Không' để huỷ tiến trình"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Giới hạn Windows vào S-Mode (KHÔNG TƯƠNG THÍCH với việc bỏ qua tài khoản trực tuyến)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Chế độ Chuyên nghiệp"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Đang giải nén tệp lưu trữ: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Sử dụng Rufus MBR"
 
 #. • MSG_900
 #.

@@ -40,7 +40,7 @@
 # • v3.22 "th-TH" "Thai (ไทย)"
 # • v3.22 "tr-TR" "Turkish (Türkçe)"
 # • v3.22 "uk-UA" "Ukrainian (Українська)"
-# • v3.22 "vi-VN" "Vietnamese (Tiếng Việt)"
+# • v4.5  "vi-VN" "Vietnamese (Tiếng Việt)"
 
 #########################################################################
 l "en-US" "English (English)" 0x0409, 0x0809, 0x0c09, 0x1009, 0x1409, 0x1809, 0x1c09, 0x2009, 0x2409, 0x2809, 0x2c09, 0x3009, 0x3409, 0x3809, 0x3c09, 0x4009, 0x4409, 0x4809
@@ -15312,7 +15312,7 @@ t MSG_922 "Завантаження командної оболонки UEFI ISO
 
 #########################################################################
 l "vi-VN" "Vietnamese (Tiếng Việt)" 0x042A
-v 3.22
+v 4.5
 b "en-US"
 
 g IDD_ABOUTBOX
@@ -15329,7 +15329,7 @@ t IDS_PARTITION_TYPE_TXT "Định dạng phân vùng"
 t IDS_TARGET_SYSTEM_TXT "Hệ thống áp dụng"
 t IDC_LIST_USB_HDD "Danh sách ổ cứng USB"
 t IDC_OLD_BIOS_FIXES "Thêm khắc phục cho BIOS cũ (phân vùng, sắp xếp...khác)"
-t IDC_RUFUS_MBR "Dùng MBR của Rufus với ID BIOS"
+t IDC_UEFI_MEDIA_VALIDATION "Bật xác thực phương tiện UEFI tại thời điểm chạy"
 t IDS_FORMAT_OPTIONS_TXT "Tùy chọn định dạng"
 t IDS_FILE_SYSTEM_TXT "Hệ thống tập tin"
 t IDS_CLUSTER_SIZE_TXT "Kích thước liên cung"
@@ -15528,8 +15528,7 @@ t MSG_163 "Cách thức để tạo phân vùng"
 t MSG_164 "Cách thức để tạo ổ đĩa có thể khởi động"
 t MSG_165 "Nhấn để chọn hoặc tải file ảnh..."
 t MSG_166 "Chọn mục này để cho phép hiện tên ổ đĩa toàn hệ thống và đặt biểu tượng thiết bị (khởi tạo autorun.inf)"
-t MSG_167 "Cài đặt một MBR cho phép lựa chọn khởi động và có thể giả ID ổ đĩa USB BIOS"
-t MSG_168 "Thử giả ổ đĩa USB khởi động đầu tiên (thường là 0x80) như một đĩa khác.\nĐiều này chỉ cần thiết nếu bạn cài đặt Windows XP và có nhiều hơn một đĩa."
+t MSG_167 "Cài đặt bộ khởi động UEFI, cùng với việc tiến trình xác thực MD5Sum của phương tiện"
 t MSG_169 "Tạo một phân vùng ẩn khác và thử sắp xếp ranh giới phân vùng.\nĐiều này có thể cải thiện khả năng phát hiện khởi động cho BIOS cũ."
 t MSG_170 "Kích hoạt liệt kê ổ cứng USB trong máy. DÙNG CẨN TRỌNG!!!"
 t MSG_171 "Bắt đầu hoạt động định dạng.\nViệc này sẽ TIÊU HUỶ mọi dữ liệu trên đĩa đã chọn!"
@@ -15695,6 +15694,19 @@ t MSG_333 "Tạo tài khoản nội bộ với tên:"
 t MSG_334 "Đặt các cài đặt địa phương cùng giá trị với người dùng hiện tại"
 t MSG_335 "Vô hiệu tự động mã hoá thiết bị BitLocker"
 t MSG_336 "Nhật ký"
+t MSG_337 "Một tệp tin bổ sung ('diskcopy.dll') phải được tải về từ Microsoft để cài đặt MS-DOS:\n- Chọn 'Có' để kết nối tới Internet và tải nó xuống\n- Chọn 'Không' để huỷ tiến trình\n\nGhi chú: Tệp tin sẽ được tải xuống tại đường dẫn của phần mềm và sẽ được tự động tái sử dụng nếu có sẵn."
+t MSG_338 "Đã phát hiện bộ khởi động UEFI bị thu hồi"
+t MSG_339 "Rufus đã phát hiện ra rằng tệp ISO bạn đã chọn có chứa một bộ khởi động UEFI đã bị thu hồi và nó sẽ tạo ra %s, khi Secure Boot được kích hoạt trên một hệ thống UEFI được cập nhật đầy đủ và mới nhất.\n\n- Nếu bạn sở hữu tệp ISO này từ một nguồn không đáng tin cậy, bạn nên cân nhắc khả năng có thể chứa mã độc UEFI và tránh khởi động từ nó.\n- Nếu bạn sở hữu từ một nguồn uy tín, bạn nên thử tìm một bản mới hơn, theo đó cảnh báo này sẽ không hiện ra."
+t MSG_340 "một màn hình \"Vi phạm Bảo mật\""
+t MSG_341 "một Màn hình Khôi phục Windows (BSOD) với '%s'"
+t MSG_342 "Tệp VHDX đã nén"
+t MSG_343 "Tệp VHD chưa nén"
+t MSG_344 "Ghi Đầy đủ Tệp Cập nhật"
+t MSG_345 "Một vài dữ lieu phải được tải xuống từ Microsoft để sử dụng tính năng này:\n- Chọn 'Có' để kết nối tới Internet và tải xuống nó\n- Chọn 'Không' để huỷ tiến trình"
+t MSG_346 "Giới hạn Windows vào S-Mode (KHÔNG TƯƠNG THÍCH với việc bỏ qua tài khoản trực tuyến)"
+t MSG_347 "Chế độ Chuyên nghiệp"
+t MSG_348 "Đang giải nén tệp lưu trữ: %s"
+t MSG_349 "Sử dụng Rufus MBR"
 t MSG_900 "Rufus là một tiện ích giúp định dạng và tạo khả năng khởi động cho USB, chẳng hạn như thẻ USB/đĩa di động, thẻ nhớ, vv."
 t MSG_901 "Trang web chính thức: %s"
 t MSG_902 "Mã nguồn: %s"
