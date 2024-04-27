@@ -2196,48 +2196,51 @@ void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name)
 			d = new_data;
 		}
 		s = md5_data;
+		// Extract the MD5Sum bootloader(s)
+		for (i = 1; i < ARRAYSIZE(efi_bootname); i++) {
+			static_sprintf(path1, "%s\\efi\\boot\\%s", dest_dir, efi_bootname[i]);
+			if (!PathFileExistsA(path1))
+				continue;
+			res_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_MD5_BOOT + i),
+				_RT_RCDATA, efi_bootname[i], &res_size, FALSE);
+			static_strcpy(path2, path1);
+			path2[strlen(path2) - 4] = 0;
+			static_strcat(path2, "_original.efi");
+			if (res_data == NULL || !MoveFileU(path1, path2)) {
+				uprintf("Could not rename: %s → %s", path1, path2);
+				continue;
+			}
+			uprintf("Renamed: %s → %s", path1, path2);
+			hFile = CreateFileA(path1, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL,
+				CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			if ((hFile == NULL) || (hFile == INVALID_HANDLE_VALUE)) {
+				uprintf("Could not create '%s': %s.", path1, WindowsErrorString());
+				MoveFileU(path2, path1);
+				continue;
+			}
+			if (!WriteFileWithRetry(hFile, res_data, res_size, NULL, WRITE_RETRIES)) {
+				uprintf("Could not write '%s': %s.", path1, WindowsErrorString());
+				safe_closehandle(hFile);
+				MoveFileU(path2, path1);
+				continue;
+			}
+			safe_closehandle(hFile);
+			uprintf("Created: %s (%s)", path1, SizeToHumanReadable(res_size, FALSE, FALSE));
+		}
+		// Rename the original bootloaders if present in md5sum.txt
 		for (p = md5_data; (p = StrStrIA(p, " ./efi/boot/boot")) != NULL; ) {
 			for (i = 1; i < ARRAYSIZE(efi_bootname); i++) {
 				if (p[12 + strlen(efi_bootname[i])] != 0x0a)
 					continue;
 				p[12 + strlen(efi_bootname[i])] = 0;
 				if (lstrcmpiA(&p[12], efi_bootname[i]) == 0) {
-					res_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_MD5_BOOT + i),
-						_RT_RCDATA, efi_bootname[i], &res_size, FALSE);
-					static_sprintf(path1, "%s\\%s", dest_dir, &p[3]);
-					for (j = 0; j < strlen(path1); j++)
-						if (path1[j] == '/') path1[j] = '\\';
-					static_strcpy(path2, path1);
-					path2[strlen(path2) - 4] = 0;
-					static_strcat(path2, "_original.efi");
-					if (res_data != NULL && MoveFileU(path1, path2)) {
-						uprintf("Renamed: %s → %s", path1, path2);
-						hFile = CreateFileA(path1, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL,
-							CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-						if ((hFile == NULL) || (hFile == INVALID_HANDLE_VALUE)) {
-							uprintf("Could not create '%s': %s.", path1, WindowsErrorString());
-							MoveFileU(path2, path1);
-							continue;
-						}
-						if (!WriteFileWithRetry(hFile, res_data, res_size, NULL, WRITE_RETRIES)) {
-							uprintf("Could not write '%s': %s.", path1, WindowsErrorString());
-							safe_closehandle(hFile);
-							MoveFileU(path2, path1);
-							continue;
-						}
-						safe_closehandle(hFile);
-						uprintf("Created: %s (%s)", path1, SizeToHumanReadable(res_size, FALSE, FALSE));
-						size = (uint32_t)(p - s) + 12 + (uint32_t)strlen(efi_bootname[i]) - 4;
-						memcpy(d, s, size);
-						d = &d[size];
-						strcpy(d, "_original.efi\n");
-						new_size += 9;
-						d = &d[14];
-						s = &p[12 + strlen(efi_bootname[i]) + 1];
-						// TODO: Update sources/boot.wim if we modified it
-						// Also, we'll need to keep a copy of the size of boot.wim BEFORE we alter it
-						// so we can adjust md5sum_totalbytes
-					}
+					size = (uint32_t)(p - s) + 12 + (uint32_t)strlen(efi_bootname[i]) - 4;
+					memcpy(d, s, size);
+					d = &d[size];
+					strcpy(d, "_original.efi\n");
+					new_size += 9;
+					d = &d[14];
+					s = &p[12 + strlen(efi_bootname[i]) + 1];
 				}
 				p[12 + strlen(efi_bootname[i])] = 0x0a;
 			}
