@@ -493,7 +493,7 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 static BOOL is_in_md5sum(char* path)
 {
 	BOOL found = FALSE;
-	char c[3], *p;
+	char c[3], *p, *pos = md5sum_pos, *nul_pos;
 
 	// If we are creating the md5sum file from scratch, every file is in it.
 	if (fd_md5sum != NULL)
@@ -514,14 +514,24 @@ static BOOL is_in_md5sum(char* path)
 
 	// Search for the string in the remainder of the md5sum.txt
 	// NB: md5sum_data is always NUL terminated.
-	p = strstr(md5sum_pos, path);
+	p = strstr(pos, path);
+	// Cater for the case where we matched a partial string and look for the full one
+	while (p != NULL && p[strlen(path)] != '\n' && p[strlen(path)] != '\r' && p[strlen(path)] != '\0') {
+		pos = p + strlen(path);
+		p = strstr(pos, path);
+	}
 	found = (p != NULL);
 	// If not found in remainder and we have a remainder, loop to search from beginning
-	if (!found && md5sum_pos != md5sum_data) {
-		c[2] = *md5sum_pos;
-		*md5sum_pos = 0;
+	if (!found && pos != md5sum_data) {
+		nul_pos = pos;
+		c[2] = *nul_pos;
+		*nul_pos = 0;
 		p = strstr(md5sum_data, path);
-		*md5sum_pos = c[2];
+		while (p != NULL && p[strlen(path)] != '\n' && p[strlen(path)] != '\r' && p[strlen(path)] != '\0') {
+			pos = p + strlen(path);
+			p = strstr(pos, path);
+		}
+		*nul_pos = c[2];
 		found = (p != NULL);
 	}
 
