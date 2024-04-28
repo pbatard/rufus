@@ -491,7 +491,10 @@ BOOL FormatExtFs(DWORD DriveIndex, uint64_t PartitionOffset, DWORD BlockSize, LP
 
 	// Finally we can call close() to get the file system gets created
 	r = ext2fs_close(ext2fs);
-	if (r != 0) {
+	if (r == 0) {
+		// Make sure ext2fs isn't freed twice
+		ext2fs = NULL;
+	} else {
 		SET_EXT2_FORMAT_ERROR(ERROR_WRITE_FAULT);
 		uprintf("Could not create %s volume: %s", FSName, error_message(r));
 		goto out;

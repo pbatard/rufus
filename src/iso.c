@@ -384,9 +384,9 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 				if ((props->is_grub_cfg) && replace_in_token_data(src, "linux",
 					"maybe-ubiquity", "", TRUE))
 					uprintf("  Removed 'maybe-ubiquity' kernel option");
-			} else if (replace_in_token_data(src, "linux", "layerfs-path=minimal.standard.live.squashfs",
-				"persistent layerfs-path=minimal.standard.live.squashfs", TRUE) != NULL) {
-				// Ubuntu 23.04 uses GRUB only with the above and does not use "maybe-ubiquity"
+			} else if (replace_in_token_data(src, "linux", "/casper/vmlinuz",
+				"/casper/vmlinuz persistent", TRUE) != NULL) {
+				// Ubuntu 23.04 and 24.04 use GRUB only with the above and don't use "maybe-ubiquity"
 				uprintf("  Added 'persistent' kernel option");
 				modified = TRUE;
 			} else if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
