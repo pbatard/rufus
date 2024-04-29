@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-19 23:07+0800\n"
-"PO-Revision-Date: 2023-02-20 13:37+0000\n"
+"POT-Creation-Date: 2024-04-28 10:38+0800\n"
+"PO-Revision-Date: 2024-04-28 10:59+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Chinese Simplified (简体中文)\n"
 "X-Rufus-LCID: 0x0804, 0x1004\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "显示 USB 外置硬盘"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "添加对旧 BIOS 修正(额外的分区，校准等)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "使用 Rufus MBR 配合 BIOS ID"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "启用运行时 UEFI 介质验证"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -1047,16 +1045,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "勾选本框允许国际卷标的显示并设置一个设备图标(创建一个 autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "安装一个可以引导选择内容并可以伪装 BIOS USB 盘 ID 的 MBR"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"尝试将首个可引导的 USB 驱动器 (通常为 0x80) 伪装为不同的磁盘。\n"
-"只有当您安装 Windows XP，并拥有多个磁盘时才需要此选项。"
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "安装 UEFI 引导加载器，该加载器将对介质进行 MD5 校验"
 
 #. • MSG_169
 msgid ""
@@ -1859,6 +1849,82 @@ msgstr "禁用 BitLocker 自动设备加密"
 msgid "Persistent log"
 msgstr "持久化日志"
 
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"必须从微软下载额外的文件（\"diskcopy.dll\"），以安装 MS-DOS：\n"
+"- 选择 '是' 连接网络并下载这些文件\n"
+"- 选择 '否' 取消此项操作\n"
+"\n"
+"注意：文件将会被下载到当前应用程序目录，如果存在则会自动选用。"
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "检测到被吊销的 UEFI 引导加载器"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus 检测到您选择的 ISO 包含一个已被吊销的 UEFI 引导加载器，当在最新的 UEFI 系统上启用安全启动时，将产生%s。\n"
+"\n"
+"- 如果您从非可信来源获取此 ISO 镜像，则应考虑其中可能包含 UEFI 恶意软件，应当避免启动此镜像。\n"
+"- 如果是从可信来源获取的，则应尝试查找不会产生此警告的最新版本。"
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "一个“安全违规”界面"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "一个包含 '%s' 的蓝屏界面"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "压缩的 VHDX 镜像"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "未压缩的 VHD 镜像"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "完整闪存更新镜像"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"使用此功能需要从微软下载一些额外数据:\n"
+"- 选择 '是' 连接网络并下载这些文件\n"
+"- 选择 '否' 取消此项操作"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "将 Windows 限制为 S 模式（与绕过在线账户功能不兼容）"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "专家模式"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "正在解压文件: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "使用 Rufus MBR"
+
 #. • MSG_900
 #.
 #. The following messages are for the Windows Store listing only and are not used by the application
@@ -1902,7 +1968,7 @@ msgstr "将 U 盘、存储卡或虚拟驱动器格式化为 FAT/FAT32/NTFS/UDF/e
 
 #. • MSG_911
 msgid "Create FreeDOS bootable USB drives"
-msgstr "创建 FreeDOS  可启动驱动器"
+msgstr "创建 FreeDOS 可启动驱动器"
 
 #. • MSG_912
 msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
