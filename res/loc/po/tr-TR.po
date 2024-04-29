@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-23 15:14+0300\n"
-"PO-Revision-Date: 2023-04-05 12:42+0200\n"
+"POT-Creation-Date: 2024-04-28 09:05+0300\n"
+"PO-Revision-Date: 2024-04-28 09:32+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: tr_TR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Turkish (Türkçe)\n"
 "X-Rufus-LCID: 0x041F\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "USB Sabit Sürücüleri Listele"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Eski BIOSlar için düzeltme ekle (ekstra bölüm, hizalama vs.)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Rufus MBR kullan. BIOS Kimliği Seçin"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Çalışma zamanı UEFI ortam doğrulamasını etkinleştir"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -1043,16 +1041,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Uluslararası etiketleri görüntülemek için bu onay kutusunu seçin ve aygıt simgesini belirleyin (autorun.inf oluşturur)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Açılış seçimine izin veren ve BIOS USB Sürücü kimliğini taklit edebilen bir MBR yükler"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"İlk açılabilir USB sürücüsünü farklı bir disk olarak taklit etmeye çalış (genellikle 0x80).\n"
-"Bu sadece Windows XP yüklemesinde ve birden fazla diske varsa gerekebilir."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Medyanın MD5Sum dosya doğrulamasını gerçekleştirecek bir UEFI önyükleyici yükleyin"
 
 #. • MSG_169
 msgid ""
@@ -1798,7 +1788,7 @@ msgid ""
 "The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
 "As a result, DD image writing mode will be enforced."
 msgstr ""
-"Seçtiğiniz yansı bir ISOHybrid, ancak yansı ISO/Dosya kopyalama modu ile uyumlu hale  olrak oluşturulmamış.\n"
+"Seçtiğiniz yansı bir ISOHybrid, ancak yansı ISO/Dosya kopyalama modu ile uyumlu hale olrak oluşturulmamış.\n"
 "Sonuç olarak, DD yansısı yazma modu uygulanacaktır."
 
 #. • MSG_322
@@ -1852,6 +1842,82 @@ msgstr "BitLocker otomatik cihaz şifrelemesini devre dışı bırakın"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Kalıcı günlük"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"MS-DOS'u yüklemek için Microsoft'tan ek bir dosyanın ('diskcopy.dll') indirilmesi gerekir:\n"
+"- İnternete bağlanıp indirmek için 'Evet'i seçin\n"
+"- İşlemden vazgeçmek için 'Hayır'ı seçin\n"
+"\n"
+"Not: Dosya uygulamanın dizinine indirilecek ve varsa otomatik olarak yeniden kullanılacaktır."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "İptal edilen UEFI önyükleyici algılandı"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus, seçtiğiniz ISO'nun iptal edilmiş bir UEFI önyükleyici içerdiğini ve tamamen güncel bir UEFI sisteminde Güvenli Önyükleme etkinleştirildiğinde %s oluşturacağını algıladı.\n"
+"\n"
+"- Bu ISO görüntüsünü saygın olmayan bir kaynaktan aldıysanız, bunun UEFI kötü amaçlı yazılım içerme olasılığını göz önünde bulundurmalı ve bu görüntüden önyükleme yapmaktan kaçınmalısınız.\n"
+"- Eğer güvenilir bir kaynaktan aldıysanız bu uyarıyı vermeyecek daha güncel bir versiyon bulmaya çalışmalısınız."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "\"Güvenlik İhlali\" ekranı"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "'%s' içeren bir Windows Kurtarma Ekranı (BSOD)"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Sıkıştırılmış VHDX Yansısı"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Sıkıştırılmamış VHD Yansısı"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Full Flash Update Yansısı"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Bu işlevselliği kullanmak için Microsoft'tan bazı ek verilerin indirilmesi gerekir:\n"
+"- İnternete bağlanıp indirmek için 'Evet'i seçin\n"
+"- İşlemden vazgeçmek için 'Hayır'ı seçin"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Windows'u S-Mode ile Kısıtlayın (çevrimiçi hesap atlamayla UYUMSUZ)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Uzman Modu"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Arşiv dosyaları çıkarılıyor: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Rufus MBR'yi kullanın"
 
 #. • MSG_900
 #.
