@@ -4,4 +4,4 @@
  */
 #pragma once
 
-#define GRUB2_PACKAGE_VERSION "2.06"
+#define GRUB2_PACKAGE_VERSION "2.12"
