@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-03-13 17:25+0000\n"
-"PO-Revision-Date: 2023-03-13 17:25+0000\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2024-04-29 19:24+0300\n"
+"PO-Revision-Date: 2024-04-29 20:25+0330\n"
+"Last-Translator: MasterVito <mv@mvaop.ir>\n"
 "Language-Team: \n"
 "Language: fa_IR\n"
 "MIME-Version: 1.0\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Persian (پارسی)\n"
 "X-Rufus-LCID: 0x0429\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "نمایش هارد دیسک‌های اکسترنال در فهرست �
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "بهسازی و اصلاح تنظیمات برای شناسایی بهتر درایو در BIOSهای قدیمی"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "استفاده از Rufus MBR با BIOS ID برابر با"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "فغال سازی زمان اجرا UEFI media  تایید"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -349,7 +347,7 @@ msgstr "BIOS (یا UEFI-CSM)"
 
 #. • MSG_032
 msgid "UEFI (non CSM)"
-msgstr ""
+msgstr "UEFI (بجز CSM)"
 
 #. • MSG_033
 msgid "BIOS or UEFI"
@@ -406,7 +404,7 @@ msgstr ""
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
-msgstr ""
+msgstr "%s (هارد %d) [%s]"
 
 #. • MSG_047
 #.
@@ -1054,16 +1052,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "اگر نامی که برای درایو موردنظر انتخاب کرده‌اید طولانی و یا دارای حروف غیر انگلیسی است و یا اگر می‌خواهید درایو موردنظر آیکون داشته باشد؛ این گزینه را انتخاب کنید."
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "نصبِ MBR سفارشیِ نرم‌افزارِ Rufus که با استفاده از آن می‌توان نحوه راه‌اندازی را انتخاب و شناسه (ID) درایو USB بایوس را جعل کرد"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"با انتخاب یکی از این گزینه‌ها می‌توانید به‌صورت ساختگی و جعلی، اولین درایو USB با قابلیت راه‌اندازی (معمولاً 0x80) را به‌عنوان هارددیسک جداگانه معرفی کنید.\n"
-"انتخاب این گزینه فقط زمانی ضروری است که بیش از یک هارددیسک دارید و می‌خواهید ویندوز XP نصب کنید."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "نصب یک UEFI bootloader این کار باعث اعتبارسنجی نوع md5sUM برای رسانه میشود"
 
 #. • MSG_169
 msgid ""
@@ -1252,7 +1242,7 @@ msgstr "فایل %s موجود نیست"
 #. The name proposed by Windows' Computer Management → Disk Management when you try to format
 #. a drive with an empty label. For an example, see https://rufus.ie/pics/default_name.png.
 msgid "New Volume"
-msgstr ""
+msgstr "بخش جدید"
 
 #. • MSG_208
 #.
@@ -1856,7 +1846,81 @@ msgstr "رمزگذاری خودکار دستگاه BitLocker را غیرفعال
 
 #. • MSG_336
 msgid "Persistent log"
+msgstr "لیست مداوم"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
+"فایل دیگری ('diskcopy.dll:) نیاز است دانلود شود از مایکروسافت برای نصب MS-DOS:\n"
+"- انتخاب :'بله' برای وصل شدن به اینترنت و دانلود آن\n"
+"- انتخاب 'نه' برای کنسل کردن این کار\n"
+"\n"
+"نکته: فایل در مکان نرم افزار دانلود میشود و دوباره استفاده میشود درصورت انجام مجدد این کار."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "بوت لودر UEFI کنسل شده شناسایی شد"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus متوجه شده که فایل ISO که انتخاب کردید دارای UEFI بوت لودری است که لفو شده و باعث %s, درصورتی که بوت امن فعال شده بر روی سیستم کاملا اپدیت شده UEFI\v\v- اگه شما این فایل ISO رو از یک جای غیر قابل اعتماد دریافت کردید ممکن است این فایل دارای ویروس UEFI باشد و نباید آنرا بوت کرد \n"
+"\v- اگه شما شما از جای مورد اغفماد دریافت کردیدش, میتونید تلاش کنید برای پیدا کردن نسخه جدیدتر, با اینکار دیگر این هشتار را دریافت نمیکنید."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "یک  صفحه  \"مشکلی امنیتی\""
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "یک صفخه ریکاوری ویندوز (BSOD) با '%S\""
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "فایل VHDX  فشرده شده"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "فایل VHD  فشرده نشده"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr ""
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"دیتا های دیگری نیاز به دانلود از مایکروسافت برای انجام دادن این کار نیاز است:\n"
+"- انتخاب 'بله' برای وصل شدن به اینترنت و دانلود آنها\n"
+"- انتخاب 'نه' برای لغو کردن این کار"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "مجبور کردن ویندوز به S-Mode ( دارای مشکلات با حذفز استفاده  اکانت آنلاین )"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "بخش حرفه ای"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "استراج کردن فایل های آرشیو: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "استفاده از Rufus MBR"
 
 #. • MSG_900
 #.
