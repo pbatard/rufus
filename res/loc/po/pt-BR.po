@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2022-06-07 16:25+0100\n"
-"PO-Revision-Date: 2023-03-17 14:32+0000\n"
+"POT-Creation-Date: 2024-05-01 14:24-0300\n"
+"PO-Revision-Date: 2024-05-01 16:45-0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Portuguese Brazilian (Português do Brasil)\n"
 "X-Rufus-LCID: 0x0416\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Listar Discos Rígidos USB"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Opções de compatibilidade para BIOSs antigos"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Usar MBR do Rufus com ID de BIOS"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Habilitar validação de mídia UEFI"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -655,7 +653,7 @@ msgid ""
 "\n"
 "Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"IMPORTANTE: Você está tentando instalar 'Windows Para Levar', porém o drive de destino não tem o atributo 'FIXED'. Portanto, é possível que o Windows trave durante a inicialização, pois a Microsoft não o desenvolveu para funcionar em drives que, em lugar daquele, tenham o atributo 'REMOVABLE'. \n"
+"IMPORTANTE: Você está tentando instalar 'Windows To Go', porém o drive de destino não tem o atributo 'FIXED'. Portanto, é possível que o Windows trave durante a inicialização, pois a Microsoft não o desenvolveu para funcionar em drives que, em lugar daquele, tenham o atributo 'REMOVABLE'. \n"
 "\n"
 "Você ainda deseja continuar?\n"
 "\n"
@@ -1044,16 +1042,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Selecione esta opção para permitir a exibição de caracteres acentuados e atribuir um ícone para a unidade (cria um arquivo autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Instalar um MBR que permita a seleção de inicialização e possa mascarar o ID de identificação do drive USB do BIOS"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Tenta mascarar o primeiro drive USB inicializável (geralmente 0x80) como um disco diferente.\n"
-"Isso só deve ser necessário se você instalar o Windows XP e tiver mais de um disco."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Instalar um carregador de inicialização que realizará validação da mídia usando MD5Sum"
 
 #. • MSG_169
 msgid ""
@@ -1202,7 +1192,7 @@ msgstr "Detectado tamanho de setor fora do padrão"
 
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
-msgstr "'Windows Para Levar' só pode ser instalado em um drive particionado como GPT se ele tiver o atributo FIXO ativo. O drive atual não apresenta o atributo FIXO."
+msgstr "'Windows To Go' só pode ser instalado em um drive particionado como GPT se ele tiver o atributo FIXO ativo. O drive atual não apresenta o atributo FIXO."
 
 #. • MSG_199
 msgid "This feature is not available on this platform."
@@ -1722,9 +1712,7 @@ msgid "Create a disk image of the selected device"
 msgstr "Criar uma imagem do dispositivo selecionado"
 
 #. • MSG_305
-msgid ""
-"Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go).\r\n"
-"In 'Extended Windows 11 Installation' mode, Rufus will patch the media so that Windows 11 can be installed on platforms that don't meet the TPM 2.0 or Secure Boot requirements."
+msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
 msgstr "Use esta opção caso queira instalar o Windows neste dispositivo ou em outro, ou se deseja rodar o Windows direto deste dispositivo (Windows To Go)."
 
 #. • MSG_306
@@ -1855,6 +1843,82 @@ msgstr "Desativar a encriptação automática BitLocker"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Registo persistente"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Um arquivo adicional ('diskcopy.dll') precisa ser baixado da Microsoft para instalar o MS-DOS:\n"
+"- Selecione 'Sim\" para se conectar à Internet e baixá-lo\n"
+"- Selecione 'Não' para cancelar a operação\n"
+"\n"
+"Nota: O arquivo será baixado no diretório da aplicação e será reutilizado automaticamente caso presente."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Detectado carregador de inicialização UEFI revogado"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus detectou que o ISO selecionado contém um carregador de inicialização UEFI que foi revogado e produzirá %s quando Secure Boot estiver habilitado em um sistema UEFI atualizado.\n"
+"\n"
+"- Se você obteve essa imagem ISO de uma fonte não confiável, você deve considerar a possibilidade da mesma conter malware UEFI e evitar inicializar através dela.\n"
+"- Se você a obteve de uma fonte confiável, você deve tentar achar uma versão mais recente, que não produza este aviso."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "uma tela \"Security Violation\""
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "uma tela de Reparo do Windows (BSOD) com '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Imagem VHDX comprimida"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Imagem VHD não comprimida"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Imagem Full Flash Update"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Alguns dados adicionais precisam ser baixados da Microsoft para usar essa funcionalidade:\n"
+"- Selecione 'Sim\" para se conectar à Internet e baixá-los\n"
+"- Selecione 'Não' para cancelar a operação"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Restringir Windows ao modo S (INCOMPATÍVEL com remoção de exigência de conta online)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Modo Especialista"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Extraindo arquivos: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Usar MBR do Rufus"
 
 #. • MSG_900
 #.
