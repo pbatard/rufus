@@ -1605,18 +1605,6 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			}
 		}
 
-		if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
-			(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type) && !esp_already_asked) {
-			// The ISO is small enough to be written as an ESP and we are using GPT
-			// so ask the users if they want to write it as an ESP.
-			char* iso_image = lmprintf(MSG_036);
-			char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP") };
-			i = SelectionDialog(lmprintf(MSG_274, "ESP"), lmprintf(MSG_310), choices, 2);
-			if (i < 0)	// Cancel
-				goto out;
-			write_as_esp = (i & 2);
-		}
-
 		// Check UEFI bootloaders for revocation
 		if (IS_EFI_BOOTABLE(img_report)) {
 			// coverity[swapped_arguments]
@@ -1640,6 +1628,18 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				}
 				DeleteFileU(tmp);
 			}
+		}
+
+		if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
+			(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type) && !esp_already_asked) {
+			// The ISO is small enough to be written as an ESP and we are using GPT
+			// so ask the users if they want to write it as an ESP.
+			char* iso_image = lmprintf(MSG_036);
+			char* choices[2] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP") };
+			i = SelectionDialog(lmprintf(MSG_274, "ESP"), lmprintf(MSG_310), choices, 2);
+			if (i < 0)	// Cancel
+				goto out;
+			write_as_esp = (i & 2);
 		}
 
 		// If the selected target doesn't include BIOS, skip file downloads for GRUB/Syslinux
@@ -3823,7 +3823,7 @@ extern int TestHashes(void);
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'D')) {
 				static_sprintf(tmp_path, "%s\\%s", app_data_dir, FILES_DIR);
 				PrintStatusDebug(STATUS_MSG_TIMEOUT, MSG_264, tmp_path);
-				SHDeleteDirectoryExU(NULL, tmp_path, FOF_SILENT | FOF_NOERRORUI | FOF_NOCONFIRMATION);
+				SHDeleteDirectoryExU(NULL, tmp_path, FOF_NO_UI);
 				user_deleted_rufus_dir = TRUE;
 				continue;
 			}
