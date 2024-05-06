@@ -552,7 +552,7 @@ iso9660_ifs_read_superblock (iso9660_t *p_iso,
 	    if (p_iso->boot_img[j].lsn == 0)
 	      continue;
 	    /* Find the closest LSN after the one from this image */
-	    cdio_assert(p_iso->boot_img[j].lsn < next_lsn);
+	    cdio_assert(p_iso->boot_img[j].lsn <= next_lsn);
 	    for (k = 0; k < MAX_BOOT_IMAGES; k++) {
 	      if (p_iso->boot_img[k].lsn > p_iso->boot_img[j].lsn &&
 		  p_iso->boot_img[k].lsn < next_lsn)
