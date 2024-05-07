@@ -21,12 +21,6 @@
 
 #pragma once
 
-/* Convenient to have around */
-#define KB                   1024LL
-#define MB                1048576LL
-#define GB             1073741824LL
-#define TB          1099511627776LL
-
 #ifndef MIN
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif

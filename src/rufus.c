@@ -378,7 +378,7 @@ static BOOL SetClusterSizes(int FSType)
 		return FALSE;
 	}
 
-	for (i = 0, j = 0x100, k = 0; j<0x10000000; i++, j <<= 1) {
+	for (i = 0, j = 0x100, k = 0; j < 0x10000000; i++, j <<= 1) {
 		if (j & SelectedDrive.ClusterSize[FSType].Allowed) {
 			if (j == SelectedDrive.ClusterSize[FSType].Default) {
 				szClustSize = lmprintf(MSG_030, ClusterSizeLabel[i]);
@@ -476,11 +476,11 @@ static BOOL SetFileSystemAndClusterSize(char* fs_name)
  */
 
 	// FAT 16
-	if (SelectedDrive.DiskSize < 4*GB) {
+	if (SelectedDrive.DiskSize < 4 * GB) {
 		SelectedDrive.ClusterSize[FS_FAT16].Allowed = 0x00001E00;
 		for (i = 32; i <= 4096; i <<= 1) {			// 8 MB -> 4 GB
-			if (SelectedDrive.DiskSize < i*MB) {
-				SelectedDrive.ClusterSize[FS_FAT16].Default = 16*(ULONG)i;
+			if (SelectedDrive.DiskSize < i * MB) {
+				SelectedDrive.ClusterSize[FS_FAT16].Default = 16 * (ULONG)i;
 				break;
 			}
 			SelectedDrive.ClusterSize[FS_FAT16].Allowed <<= 1;
@@ -490,12 +490,12 @@ static BOOL SetFileSystemAndClusterSize(char* fs_name)
 
 	// FAT 32
 	// > 32GB FAT32 is not supported by MS and FormatEx but is achieved using fat32format
-	// See: http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
+	// See: http://ridgecrop.co.uk/index.htm?fat32format.htm
 	// < 32 MB FAT32 is not allowed by FormatEx, so we don't bother
-	if ((SelectedDrive.DiskSize >= 32*MB) && (1.0f*SelectedDrive.DiskSize < 1.0f*MAX_FAT32_SIZE*TB)) {
+	if ((SelectedDrive.DiskSize >= 32 * MB) && (SelectedDrive.DiskSize < MAX_FAT32_SIZE)) {
 		SelectedDrive.ClusterSize[FS_FAT32].Allowed = 0x000001F8;
-		for (i=32; i<=(32*1024); i<<=1) {			// 32 MB -> 32 GB
-			if (SelectedDrive.DiskSize*1.0f < i*MB*FAT32_CLUSTER_THRESHOLD) {	// MS
+		for (i = 32; i <= (32 * 1024); i <<= 1) {			// 32 MB -> 32 GB
+			if (SelectedDrive.DiskSize*1.0f < i * MB * FAT32_CLUSTER_THRESHOLD) {	// MS
 				SelectedDrive.ClusterSize[FS_FAT32].Default = 8*(ULONG)i;
 				break;
 			}
@@ -504,39 +504,39 @@ static BOOL SetFileSystemAndClusterSize(char* fs_name)
 		SelectedDrive.ClusterSize[FS_FAT32].Allowed &= 0x0001FE00;
 
 		// Default cluster sizes in the 256MB to 32 GB range do not follow the rule above
-		if ((SelectedDrive.DiskSize >= 256*MB) && (SelectedDrive.DiskSize < 32*GB)) {
-			for (i=8; i<=32; i<<=1) {				// 256 MB -> 32 GB
-				if (SelectedDrive.DiskSize*1.0f < i*GB*FAT32_CLUSTER_THRESHOLD) {
-					SelectedDrive.ClusterSize[FS_FAT32].Default = ((ULONG)i/2)*KB;
+		if ((SelectedDrive.DiskSize >= 256 * MB) && (SelectedDrive.DiskSize < 32 * GB)) {
+			for (i = 8; i <= 32; i <<= 1) {			// 256 MB -> 32 GB
+				if (SelectedDrive.DiskSize * 1.0f < i * GB * FAT32_CLUSTER_THRESHOLD) {
+					SelectedDrive.ClusterSize[FS_FAT32].Default = ((ULONG)i / 2) * KB;
 					break;
 				}
 			}
 		}
 		// More adjustments for large drives
-		if (SelectedDrive.DiskSize >= 32*GB) {
+		if (SelectedDrive.DiskSize >= 32 * GB) {
 			SelectedDrive.ClusterSize[FS_FAT32].Allowed &= 0x0001C000;
 			SelectedDrive.ClusterSize[FS_FAT32].Default = 0x00008000;
 		}
 	}
 
-	if (SelectedDrive.DiskSize < 256*TB) {
+	if (SelectedDrive.DiskSize < 256 * TB) {
 		// NTFS
 		SelectedDrive.ClusterSize[FS_NTFS].Allowed = 0x0001FE00;
-		for (i=16; i<=256; i<<=1) {				// 7 MB -> 256 TB
-			if (SelectedDrive.DiskSize < i*TB) {
-				SelectedDrive.ClusterSize[FS_NTFS].Default = ((ULONG)i/4)*KB;
+		for (i = 16; i <= 256; i <<= 1) {			// 7 MB -> 256 TB
+			if (SelectedDrive.DiskSize < i * TB) {
+				SelectedDrive.ClusterSize[FS_NTFS].Default = ((ULONG)i / 4) * KB;
 				break;
 			}
 		}
 
 		// exFAT
 		SelectedDrive.ClusterSize[FS_EXFAT].Allowed = 0x03FFFE00;
-		if (SelectedDrive.DiskSize < 256*MB)	// < 256 MB
-			SelectedDrive.ClusterSize[FS_EXFAT].Default = 4*KB;
-		else if (SelectedDrive.DiskSize < 32*GB)	// < 32 GB
-			SelectedDrive.ClusterSize[FS_EXFAT].Default = 32*KB;
+		if (SelectedDrive.DiskSize < 256 * MB)	// < 256 MB
+			SelectedDrive.ClusterSize[FS_EXFAT].Default = 4 * KB;
+		else if (SelectedDrive.DiskSize < 32 * GB)	// < 32 GB
+			SelectedDrive.ClusterSize[FS_EXFAT].Default = 32 * KB;
 		else
-			SelectedDrive.ClusterSize[FS_EXFAT].Default = 128*KB;
+			SelectedDrive.ClusterSize[FS_EXFAT].Default = 128 * KB;
 
 		// UDF
 		SelectedDrive.ClusterSize[FS_UDF].Allowed = SINGLE_CLUSTERSIZE_DEFAULT;
@@ -1447,7 +1447,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				char* iso_image = lmprintf(MSG_036);
 				char* dd_image = lmprintf(MSG_095);
 				// If the ISO is small enough to be written as an ESP and we are using GPT add the ISO → ESP option
-				if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
+				if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE) && HAS_REGULAR_EFI(img_report) &&
 					(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type)) {
 					char* choices[3] = { lmprintf(MSG_276, iso_image), lmprintf(MSG_277, "ISO → ESP"), lmprintf(MSG_277, dd_image) };
 					i = SelectionDialog(lmprintf(MSG_274, "ISOHybrid"), lmprintf(MSG_275, iso_image, dd_image, iso_image, dd_image), choices, 3);
@@ -1630,7 +1630,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			}
 		}
 
-		if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE * MB) && HAS_REGULAR_EFI(img_report) &&
+		if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE) && HAS_REGULAR_EFI(img_report) &&
 			(partition_type == PARTITION_STYLE_GPT) && IS_FAT(fs_type) && !esp_already_asked) {
 			// The ISO is small enough to be written as an ESP and we are using GPT
 			// so ask the users if they want to write it as an ESP.
@@ -2954,6 +2954,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// Detect processes that have write (0x2) or exec (0x4) permissions against our drive.
 		// Ideally, exec should be no big deal, but Windows complains on USB ejection if a
 		// process such as cmd.exe holds exec rights, so we follow suit.
+		PrintStatus(0, MSG_278);
 		if (GetProcessSearch(SEARCH_PROCESS_TIMEOUT, 0x06, TRUE)) {
 			char title[128];
 			ComboBox_GetTextU(hDeviceList, title, sizeof(title));

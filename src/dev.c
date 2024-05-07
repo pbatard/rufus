@@ -890,8 +890,8 @@ BOOL GetDevices(DWORD devnum)
 				break;
 			}
 			drive_size = GetDriveSize(drive_index);
-			if (drive_size < (MIN_DRIVE_SIZE * MB)) {
-				uprintf("Device eliminated because it is smaller than %d MB", MIN_DRIVE_SIZE);
+			if (drive_size < MIN_DRIVE_SIZE) {
+				uprintf("Device eliminated because it is smaller than %s", SizeToHumanReadable(MIN_DRIVE_SIZE, FALSE, FALSE));
 				safe_free(devint_detail_data);
 				break;
 			}
@@ -927,8 +927,9 @@ BOOL GetDevices(DWORD devnum)
 					uprintf("NOTE: You can enable the listing of Hard Drives under 'advanced drive properties'");
 					safe_free(devint_detail_data);
 					break;
-				} else if ((!enable_HDDs) && (props.is_CARD) && (drive_size > MAX_DEFAULT_LIST_CARD_SIZE * GB)) {
-					uprintf("Device eliminated because it was detected as a card larger than %d GB", MAX_DEFAULT_LIST_CARD_SIZE);
+				} else if ((!enable_HDDs) && (props.is_CARD) && (drive_size > MAX_DEFAULT_LIST_CARD_SIZE)) {
+					uprintf("Device eliminated because it was detected as a card larger than %s",
+						SizeToHumanReadable(MAX_DEFAULT_LIST_CARD_SIZE, FALSE, FALSE));
 					uprintf("To use such a card, check 'List USB Hard Drives' under 'advanced drive properties'");
 					safe_free(devint_detail_data);
 					break;

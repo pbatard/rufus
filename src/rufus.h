@@ -31,6 +31,12 @@
 
 #pragma once
 
+/* Convenient to have around */
+#define KB                          1024LL
+#define MB                          1048576LL
+#define GB                          1073741824LL
+#define TB                          1099511627776LL
+
 /*
  * Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS!
  */
@@ -62,9 +68,9 @@
 #define DRIVE_ACCESS_RETRIES        150			// How many times we should retry
 #define DRIVE_INDEX_MIN             0x00000080
 #define DRIVE_INDEX_MAX             0x000000C0
-#define MIN_DRIVE_SIZE              8			// Minimum size a drive must have, to be formattable (in MB)
-#define MIN_EXTRA_PART_SIZE         (1024*1024)	// Minimum size of the extra partition, in bytes
-#define MIN_EXT_SIZE                (256*1024*1024)	// Minimum size we allow for ext formatting
+#define MIN_DRIVE_SIZE              (8 * MB)	// Minimum size a drive must have, to be formattable
+#define MIN_EXTRA_PART_SIZE         (1 * MB)	// Minimum size of the extra partition, in bytes
+#define MIN_EXT_SIZE                (256 * MB)	// Minimum size we allow for ext formatting
 #define MAX_DRIVES                  (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN)
 #define MAX_TOOLTIPS                128
 #define MAX_SIZE_SUFFIXES           6			// bytes, KB, MB, GB, TB, PB
@@ -78,8 +84,8 @@
 #define MAX_PARTITIONS              16			// Maximum number of partitions we handle
 #define MAX_ESP_TOGGLE              8			// Maximum number of entries we record to toggle GPT ESP back and forth
 #define MAX_IGNORE_USB              8			// Maximum number of USB drives we want to ignore
-#define MAX_ISO_TO_ESP_SIZE         1024		// Maximum size we allow for the ISO → ESP option (in MB)
-#define MAX_DEFAULT_LIST_CARD_SIZE  200			// Size above which we don't list a card without enable HDD or Alt-F (in GB)
+#define MAX_ISO_TO_ESP_SIZE         (1 * GB)	// Maximum size we allow for the ISO → ESP option
+#define MAX_DEFAULT_LIST_CARD_SIZE  (500 * GB)	// Size above which we don't list a card without enable HDD or Alt-F
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
 #define MAX_USERNAME_LENGTH         128			// Maximum size we'll accept for a WUE specified username
 #define MAX_WININST                 4			// Max number of install[.wim|.esd] we can handle on an image
@@ -100,13 +106,13 @@
 #define BADBLOCK_PATTERN_SLC        {0x00, 0xff, 0x55, 0xaa}
 #define BADCLOCK_PATTERN_MLC        {0x00, 0xff, 0x33, 0xcc}
 #define BADBLOCK_PATTERN_TLC        {0x00, 0xff, 0x1c71c7, 0xe38e38}
-#define BADBLOCK_BLOCK_SIZE         (512 * 1024)
-#define LARGE_FAT32_SIZE            (32 * 1073741824LL)	// Size at which we need to use fat32format
+#define BADBLOCK_BLOCK_SIZE         (512 * KB)
+#define LARGE_FAT32_SIZE            (32 * GB)	// Size at which we need to use fat32format
 #define UDF_FORMAT_SPEED            3.1f		// Speed estimate at which we expect UDF drives to be formatted (GB/s)
 #define UDF_FORMAT_WARN             20			// Duration (in seconds) above which we warn about long UDF formatting times
-#define MAX_FAT32_SIZE              2.0f		// Threshold above which we disable FAT32 formatting (in TB)
+#define MAX_FAT32_SIZE              (2 * TB)	// Threshold above which we disable FAT32 formatting
 #define FAT32_CLUSTER_THRESHOLD     1.011f		// For FAT32, cluster size changes don't occur at power of 2 boundaries but slightly above
-#define DD_BUFFER_SIZE              (32 * 1024 * 1024)	// Minimum size of buffer to use for DD operations
+#define DD_BUFFER_SIZE              (32 * MB)	// Minimum size of buffer to use for DD operations
 #define UBUFFER_SIZE                4096
 #define ISO_BUFFER_SIZE             (64 * KB)	// Buffer size used for ISO data extraction
 #define RSA_SIGNATURE_SIZE          256
