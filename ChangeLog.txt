@@ -1,3 +1,15 @@
+o Version 4.5 (2024.05.??)
+    Add a new advanced option, that adds runtime UEFI media validation to suitable images (Windows, most Linux)
+    Move the 'Use Rufus MBR' advanced option to a cheat mode (Alt-A)
+    Fix truncation of VHDX images, as well as a benign error message when writing VHD/VHDX
+    Fix support for Linux persistence in some configurations (Mint, Ubuntu 24.04)
+    Fix multiple potential vulnerabilities (with thanks to Mansour Gashasbi)
+    Update internal GRUB to version 2.12
+    Update UEFI:NTFS to latest (now always uses the ntfs-3g driver, rather than the buggy AMI NTFS one)
+    Increase buffer size when copying ISO files, in an attempt to minimize the AMI NTFS UEFI driver bug
+    Improve partition creation handling
+    Don't display the WUE dialog when a conflicting 'unattend.xml' already exists
+
 o Version 4.4 (2024.01.17)
     Add workaround for distros that use broken symbolic links as their UEFI bootloaders (such as Mint 21.3)
     Add support for GRUB 2.12

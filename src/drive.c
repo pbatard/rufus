@@ -1065,7 +1065,7 @@ int GetDriveNumber(HANDLE hDrive, char* path)
 		// DiskExtents are NO_GO (which is the case for external USB HDDs...)
 		s = DeviceIoControl(hDrive, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0, &DeviceNumber, sizeof(DeviceNumber), &size, NULL);
 		if ((!s) || (size == 0)) {
-			uprintf("Could not get device number for device %s %s", path, s ? "(empty data)" : WindowsErrorString());
+			uuprintf("Could not get device number for device %s %s", path, s ? "(empty data)" : WindowsErrorString());
 			return -1;
 		}
 		r = (int)DeviceNumber.DeviceNumber;
