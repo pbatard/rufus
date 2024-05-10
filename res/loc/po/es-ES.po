@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-03-15 23:07+0000\n"
-"PO-Revision-Date: 2023-03-15 23:15+0000\n"
+"POT-Creation-Date: 2024-05-09 12:54-0300\n"
+"PO-Revision-Date: 2024-05-09 12:58-0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es_ES\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Spanish (Español)\n"
 "X-Rufus-LCID: 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Listar los discos duros USB"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Agrega correcciones para BIOS viejos (partición extra, alineación, etc.)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Usar MBR de Rufus con ID de BIOS"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Habilitar la validación de medios UEFI en tiempo de ejecución"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -911,7 +909,7 @@ msgid ""
 "\n"
 "Are you sure you want to continue?"
 msgstr ""
-"Debido a que has seleccionado MBR  para el sistema de particiones, Rufus sólo puede crear una partición de hasta 2TB en este dispositivo, lo que dejará %s del disco no disponibles.\n"
+"Debido a que has seleccionado MBR para el sistema de particiones, Rufus sólo puede crear una partición de hasta 2TB en este dispositivo, lo que dejará %s del disco no disponibles.\n"
 "\n"
 "¿Estas seguro de que deseas continuar?"
 
@@ -1046,16 +1044,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Seleccione esta opción para permitir que se muestren caracteres internacionales y establecer un icono para la unidad (crea un archivo autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Instala un MBR que permite seleccionar el dispositivo de arranque y puede enmascarar el ID de identificación del dispositivo USB del BIOS"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Trata de enmascarar el primer dispositivo USB de arranque (normalmente 0x80) como un disco diferente.\n"
-"Sólo debiera ser necesario si instala Windows XP y tiene más de un disco duro."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Instale un gestor de arranque UEFI, que realizará la validación del archivo MD5Sum del medio"
 
 #. • MSG_169
 msgid ""
@@ -1855,6 +1845,82 @@ msgstr "Deshabilitar el cifrado automático de dispositivos BitLocker"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Registro persistente"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Se debe descargar un archivo adicional ('diskcopy.dll') de Microsoft para instalar MS-DOS:\n"
+"- Seleccione 'Sí' para conectarse a Internet y descargarlo\n"
+"- Seleccione 'No' para cancelar la operación.\n"
+"\n"
+"Nota: El archivo se descargará en el directorio de la aplicación y se reutilizará automáticamente si está presente."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Se detectó un gestor de arranque UEFI revocado"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus detectó que el ISO que seleccionó contiene un gestor de arranque UEFI que ha sido revocado y que producirá %s, cuando el arranque seguro esté habilitado en un sistema UEFI completamente actualizado.\n"
+"\n"
+"- Si obtuvo esta imagen ISO de una fuente no confiable, debe considerar la posibilidad de que contenga malware UEFI y evitar arrancar desde allí.\n"
+"- Si lo obtuvo de una fuente confiable, debe intentar localizar una versión más actualizada, que no producirá esta advertencia."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "una pantalla de \"violación de seguridad\""
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "una pantalla de recuperación de Windows (BSOD) con '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Imagen VHDX comprimida"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Imagen VHD sin comprimir"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Imagen de actualización completa de Flash"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Se deben descargar algunos datos adicionales de Microsoft para utilizar esta funcionalidad:\n"
+"- Seleccione 'Sí' para conectarse a Internet y descargarlo\n"
+"- Seleccione 'No' para cancelar la operación."
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Restringir Windows al Modo S (INCOMPATIBLE con la omisión de cuenta en línea)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Modo experto"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Extrayendo archivos comprimidos: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Utilice Rufus MBR"
 
 #. • MSG_900
 #.
