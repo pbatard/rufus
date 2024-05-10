@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-04-06 11:46+0900\n"
-"PO-Revision-Date: 2023-04-06 18:36+0200\n"
+"POT-Creation-Date: 2024-05-09 21:04+0900\n"
+"PO-Revision-Date: 2024-05-09 22:07+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ja_JP\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Japanese (日本語)\n"
 "X-Rufus-LCID: 0x0411\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "USB 接続の HDD を一覧表示"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "古い BIOS のために修正を追加 (パーティションの拡張、並び替え、その他)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "BIOS ID で Rufus の MBR を作成"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "ランタイムUEFIメディア検証を有効化"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -1046,16 +1044,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "機能拡張されたラベルの表示とデバイス アイコンの設定を有効するにはこのチェック ボックスをオンにします。“autorun.inf” を作成します。"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "ブート選択が可能で BIOS の USB ドライブ ID に見えるよう偽装された MBR をインストールします。"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"最優先でブートする USB ドライブ (通常は 0x80) を別のディスクとして偽装します。\n"
-"Windows XP をインストールして複数のディスクを使用する場合にのみ必要です。"
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "MD5チェックサム検証を行うUEFIブートローダーをインストールします。"
 
 #. • MSG_169
 msgid ""
@@ -1856,6 +1846,82 @@ msgstr "BitLocker 自動デバイス暗号化を無効化します。"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "永続ログ"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"MS-DOSをインストールするにはMicrosoftから追加のファイル(diskcopy.dll)をダウンロードする必要があります。\n"
+"- はいを選択すると、インターネットに接続しダウンロードします。\n"
+"- いいえを選択すると、キャンセルします\n"
+"\n"
+"注意:ファイルはアプリケーションのディレクトリへダウンロードされ、今後自動的に再利用されます。"
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "無効なUEFIブートローダーが検出されました。"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufusは選択されたISOイメージが無効なUEFIブートローダーを含み、最新のUEFIでセキュアブートが有効である場合%sを引き起こすことを検出しました。\n"
+"\n"
+"- このファイルが信頼できないソースから入手されたものであれば、マルウェア混入の可能性があるため起動しないことをお勧めします。\n"
+"- このファイルが信頼できるソースから取得したものであれば、警告が発生しない新しいバージョンを探すことをお勧めします。"
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "セキュリティ侵害表示"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "\"%s\"によるWindowsのブルースクリーン"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "圧縮されたVHDXイメージ"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "圧縮されていないVHDイメージ"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Full Flash Updateイメージ"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"この機能を使用するにはMicrosoftから追加のファイルをいくつかダウンロードする必要があります。\n"
+"- はいを選択すると、インターネットに接続しダウンロードします。\n"
+"- いいえを選択すると、キャンセルします"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "WindowsのSモードを強制する(オンラインアカウント要件の削除と同時に使用できません)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "エキスパートモード"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "ファイルを展開中: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Rufus MBRを使用する"
 
 #. • MSG_900
 #.
