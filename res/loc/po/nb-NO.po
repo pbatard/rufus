@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-04-17 13:44+0100\n"
-"PO-Revision-Date: 2024-04-04 17:38+0100\n"
+"POT-Creation-Date: 2024-05-09 19:38+0100\n"
+"PO-Revision-Date: 2024-05-09 19:44+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: nb_NO\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Norwegian (Norsk)\n"
 "X-Rufus-LCID: 0x0414\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Før opp USB harddisker"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Legger til fiks for gamle BIOSer (ekstra partisjon, etc.)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Bruk Rufus MBR med BIOS ID"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Aktiver runtime UEFI-medievalidering"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -1043,16 +1041,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Merk denne boksen for å tillate visning av internasjonal merkelapp og lage et stasjonsikon (lager en autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Installerer en MBR som tillater oppstartsvalg og kan maskere BIOS USB-stasjons ID"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Forsøk å maskere første oppstartbare USB-stasjon (vanligvis 0x80) som en annen stasjon.\n"
-"Dette er kun nødvendig hvis du installerer Windows XP og har mer enn en stasjon."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Installer en UEFI bootloader, som vil utføre MD5Sum-filvalidering av media"
 
 #. • MSG_169
 msgid ""
@@ -1095,7 +1085,7 @@ msgstr "Versjon %d.%d (Utgave %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Norsk oversettelse:\\line• JED <mailto:translator744@outlook.com>\\line• Thorbjørn Bruarøy <mailto:problemkontroll@gmail.com>\\line• Jakub Zieciak <mailto:jakub.zieciak@gmail.com>"
+msgstr "Norsk oversettelse:\\line• JED <mailto:translator744@outlook.com>\\line• Thorbjørn Bruarøy <mailto:problemkontroll@gmail.com>\\line• Jakub Zieciak"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1852,6 +1842,82 @@ msgstr "Deaktiver BitLocker kryptering av enheten"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Behold log"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"En ekstra fil ('diskcopy.dll') må lastes ned fra Microsoft for å installere MS-DOS:\n"
+"- Velg \"Ja\" for å koble til Internett og laste den ned\n"
+"- Velg 'Nei' for å avbryte operasjonen\n"
+"\n"
+"Merk: Filen vil bli lastet ned i programmets katalog og vil automatisk bli gjenbrukt hvis den er tilstede."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Opphevet UEFI bootloader oppdaget"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus oppdaget at ISO-en du har valgt inneholder en UEFI-oppstartslaster som har blitt tilbakekalt og som vil produsere %s, når sikker oppstart er aktivert på et fullstendig oppdatert UEFI-system.\n"
+"\n"
+"- Hvis du har fått dette ISO-bildet fra en ikke-anerkjent kilde, bør du vurdere muligheten for at det kan inneholde UEFI-malware og unngå å starte opp fra det.\n"
+"- Hvis du har fått det fra en pålitelig kilde, bør du prøve å finne en mer oppdatert versjon, som ikke vil gi denne advarselen."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "en \"Sikkerhetsbrudd\"-skjerm"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "en Windows-gjenopprettingsskjerm (BSOD) med '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Komprimert VHDX-imaget"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Ukomprimert VHD-imaget"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Full Flash Update Image"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Noen tilleggsdata må lastes ned fra Microsoft for å bruke denne funksjonaliteten:\n"
+"- Velg \"Ja\" for å koble til Internett og laste den ned\n"
+"- Velg 'Nei' for å avbryte operasjonen"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Begrens Windows til S-modus (INKOMPATIBEL med online kontoomgåelse)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Ekspert modus"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Pakker ut arkivfiler: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Bruk Rufus MBR"
 
 #. • MSG_900
 #.
