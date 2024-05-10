@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-03-12 13:52+0000\n"
-"PO-Revision-Date: 2023-03-12 13:52+0000\n"
+"POT-Creation-Date: 2024-05-09 13:01+0200\n"
+"PO-Revision-Date: 2024-05-10 10:46+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: hu_HU\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Hungarian (Magyar)\n"
 "X-Rufus-LCID: 0x040e\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "USB merevlemezek listázása"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Javítások hozzáadása régi BIOS-okhoz (extra partíció, igazítás, stb.)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Rufus MBR használata BIOS azonosítóval"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Futásidejű UEFI adathordozó érvényesítés"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -1044,16 +1042,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Pipáld be a nemzetközi címkék megjelenítésének engedélyezéséhez, és az eszköz ikon beállításához (egy autorun.inf fájlt készít)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Olyan MBR telepítése, ami engedélyezi a boot meghajtó kiválasztását, és képes a BIOS USB eszköz azonosítóját maszkolni"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Próbáld meg az első bootolható USB eszközt (általában: 0x80) egy másik lemezként mutatni.\n"
-"Ez csak akkor lehet szükséges, ha Windows XP-t telepítesz, és egynél több lemezed van."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Olyan UEFI rendszerbetöltő telepítése, ami elvégzi az adathordozón található fájlok MD5Sum érvényesítését"
 
 #. • MSG_169
 msgid ""
@@ -1854,6 +1844,82 @@ msgstr "BitLocker automatikus eszköz titkosítás letiltása"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Tartós naplózás"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Az MS-DOS telepítéséhez egy további fájlt ('diskcopy.dll') kell letölteni a Microsofttól:\n"
+"- Válaszd az 'Igen' gombot az internethez történő kapcsolódáshoz, és a fájl letöltéséhez\n"
+"- Válaszd a 'Nem' gombot a művelet megszakításához\n"
+"\n"
+"Megjegyzés: A fájl a program mappájába lesz letöltve, és automatikusan újra lesz használva, ha létezik."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Visszavont UEFI rendszerbetöltő detektálva"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"A Rufus észlelte, hogy a kiválasztott ISO egy olyan UEFI rendszerbetöltőt tartalmaz, amelyet visszavontak, és ha a Secure Boot engedélyezve van egy teljesen naprakész UEFI rendszeren, akkor ehhez vezet: %s.\n"
+"\n"
+"- Ha ezt az ISO képet nem megbízható forrásból szerezted be, akkor számolnod kell azzal a lehetőséggel, hogy UEFI kártevőt tartalmazhat, és elkerülendő az erről történő rendszerindítás.\n"
+"- Ha megbízható forrásból szerezted be, akkor próbálj meg egy naprakészebb verziót találni, amelyre ez a figyelmeztetés nem jelenik meg."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "\"Security Violation\" képernyő"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "Windows helyreállítási képernyő (BSOD / kék halál) ezzel: '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Tömörített VHDX képfájl"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Nem tömörített VHD képfájl"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Full Flash Update (FFU) képfájl"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"E funkcionalitás használatához néhány további adat letöltése szükséges a Microsofttól:\n"
+"- Válaszd az 'Igen' gombot az internethez történő csatlakozáshoz, és az adatok letöltéséhez\n"
+"- Válaszd a 'Nem' gombot a művelet megszakításához"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Windows korlátozása S módra (NEM KOMPATIBILIS az online Microsoft-fiók követelmény eltávolításával)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Szakértő mód"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Archív fájlok kibontása: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Rufus MBR használata"
 
 #. • MSG_900
 #.
