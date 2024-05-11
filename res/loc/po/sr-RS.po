@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-17 17:21+0000\n"
-"PO-Revision-Date: 2023-02-17 17:22+0000\n"
+"POT-Creation-Date: 2024-05-10 22:14+0200\n"
+"PO-Revision-Date: 2024-05-10 22:25+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sr_RS\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Serbian (Srpski)\n"
 "X-Rufus-LCID: 0x241a, 0x081a, 0x181a, 0x2c1a, 0x701a, 0x7c1a\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Pokaži USB čvrste diskove"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Dodaj ispravke za stare BIOS-e (dodatne particije, svrstanje, itd.)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Koristi Rufus MBR sa BIOS ID-em"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Омогућите проверу UEFI медија током извршавања"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -545,7 +543,7 @@ msgstr ""
 "\n"
 "Zavsino od brzine vašeg USB uređaja, ova operacija može potrajati dugo, naročito za velike datoteke.\n"
 "\n"
-"Preporučujemo da dozvolite Windows-u  da završi, kako bi izbjegli korupciju. Ukoliko ne želite čekati, samo izvadite USB uređaj..."
+"Preporučujemo da dozvolite Windows-u da završi, kako bi izbjegli korupciju. Ukoliko ne želite čekati, samo izvadite USB uređaj..."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -850,7 +848,7 @@ msgstr "Bez stalne veličine"
 #.
 #. Tooltips used for the peristence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "Izaberite veličinu stalne particije za live USB datoteku.  Podešavanjem na 0 onemogućava stalnu particiju."
+msgstr "Izaberite veličinu stalne particije za live USB datoteku. Podešavanjem na 0 onemogućava stalnu particiju."
 
 #. • MSG_126
 msgid "Set the partition size units."
@@ -1043,16 +1041,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Označite ovo polje kako biste dozvolili prikaz internacionalnih oznaka i napravite ikonicu uređaja (izrađuje autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Instaliraj MBR koji omogućava odabir pri podizanju sistema i može pretvoriti ID BIOS-a USB uređaja"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Pokušaj maskirati prvi USB uređaj za podizanje sistema (uobičajeno 0x80) kao drugačiji disk.\n"
-"Ovo je samo potrebno ako instalirate Windows XP i imate više od jednog diska."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Инсталирајте UEFI боотлоадер, који ће извршити проверу МД5Сум-y датотеке медија"
 
 #. • MSG_169
 msgid ""
@@ -1852,6 +1842,82 @@ msgstr "Onemogući BitLocker automatsku enkripciju uređaja"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Trajna evidencija"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Додатна датотека ('diskcopy.dll') мора да се преузме са Microsoft-a да би се инсталирао MS-DOS:\n"
+"- Изаберите „Да“ да бисте се повезали на Интернет и преузели га\n"
+"- Изаберите „Не“ да бисте отказали операцију\n"
+"\n"
+"Напомена: Датотека ће бити преузета у директоријум апликације и аутоматски ће се поново користити ако постоји."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Откривен је опозвани UEFI покретач"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Руфус је открио да ISO који сте изабрали садржи UEFI покретач који је опозван и који ће произвести %s када је безбедно покретање омогућено на потпуно ажурираном UEFI систему.\n"
+"\n"
+"- Ако сте ову ISO слику добили од неугледног извора, требало би да размотрите могућност да садржи UEIFI малвер и избегавајте покретање са њега.\n"
+"- Ако сте га добили од поузданог извора, покушајте да пронађете новију верзију, која неће произвести ово упозорење."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "екран „Нарушавање безбедности“"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "Windows Рековери Екран (BSOD) са „%s“"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Компресована VHDX слика"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Некомпримована VHD слика"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Фулл Фласх Упдате Имаге"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Неки додатни подаци морају се преузети од Microsoft-a да бисте користили ову функцију:\n"
+"- Изаберите „Да“ да бисте се повезали на Интернет и преузели га\n"
+"- Изаберите „Не“ да бисте отказали операцију"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Ограничите Виндовс на С-Моде (НИЈЕ КОМПАТИБИЛАН са заобилажењем налога на мрежи)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Ekspertni Rezim"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Распакивање архивских датотека: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Koritsti Rufus MBR"
 
 #. • MSG_900
 #.
