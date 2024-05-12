@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-26 22:16+0000\n"
-"PO-Revision-Date: 2023-02-26 22:16+0000\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2024-05-12 10:18+0200\n"
+"PO-Revision-Date: 2024-05-12 10:38+0200\n"
+"Last-Translator: martinco78\n"
 "Language-Team: \n"
 "Language: sk_SK\n"
 "MIME-Version: 1.0\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Slovak (Slovensky)\n"
 "X-Rufus-LCID: 0x041B\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Zobraziť zoznam USB pevných diskov (USB HDD)"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Pridať úpravy pre staré BIOSy (extra partície, ...)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Použiť Rufus MBR s BIOS ID"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Povoliť overenie médií UEFI v runtime režime"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -117,7 +115,7 @@ msgstr "Licencia"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
@@ -290,31 +288,31 @@ msgstr "bajtov"
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr ""
+msgstr "KB"
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 #. • MSG_025
 #.
 #. *Short* version of the pentabyte size suffix
 msgid "PB"
-msgstr ""
+msgstr "PB"
 
 #. • MSG_027
 msgid "kilobytes"
@@ -397,7 +395,7 @@ msgstr "Úložné zariadenie USB (všeobecné)"
 
 #. • MSG_046
 msgid "%s (Disk %d) [%s]"
-msgstr ""
+msgstr "%s (Disk %d) [%s]"
 
 #. • MSG_047
 #.
@@ -491,7 +489,7 @@ msgstr "Nie je možné vytvoriť oddiely."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
-msgstr "Nie je možné  kopírovať súbory do cieľovej jednotky."
+msgstr "Nie je možné kopírovať súbory do cieľovej jednotky."
 
 #. • MSG_070
 msgid "Cancelled by user."
@@ -735,7 +733,7 @@ msgstr "Záznam programu Rufus"
 
 #. • MSG_109
 msgid "0x%02X (Disk %d)"
-msgstr ""
+msgstr "0x%02X (Disk %d)"
 
 #. • MSG_110
 #.
@@ -745,7 +743,7 @@ msgid ""
 "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
 "Please change the Cluster size or use FreeDOS."
 msgstr ""
-"MS-DOS nemôže byť bootovaný z jednotky používajúcich klastre s veľkosťou 64kb.\n"
+"Systém MS-DOS nemôže byť spustený z jednotky používajúcej klastre s veľkosťou 64kb.\n"
 "Zmeňte veľkosť klastra alebo použite FreeDOS."
 
 #. • MSG_111
@@ -774,7 +772,7 @@ msgid ""
 msgstr ""
 "Tento obraz používa Syslinux %s%s ale tento program obsahuje inštaláciu pre Syslinux %s%s.\n"
 "\n"
-"Ak nová verzia Syslinuxu nie je kompaktibilná s ďalším obrazom,  je možné, že program Rufus neobsahuje dva doplnkové súbory, ktoré budú musieť byť stiahnuté z internetu (ldlinux.sys a ldlinux.bss):\n"
+"Ak nová verzia Syslinuxu nie je kompaktibilná s ďalším obrazom, je možné, že program Rufus neobsahuje dva doplnkové súbory, ktoré budú musieť byť stiahnuté z internetu (ldlinux.sys a ldlinux.bss):\n"
 "- Stlačte „Áno\" pre stiahnutie týchto súborov z internetu\n"
 "- Stlačte „Nie\" pre zrušenie operácie\n"
 "\n"
@@ -1051,16 +1049,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Označením tohto políčka povolíte v názve disku zobrazenie medzinárodných znakov a vytvorenie ikony zariadenia (vytvorením súboru autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Inštalovaním MBR programu povolíte výber pri bootovaní a možnosť maskovania použitím BIOS USB drive ID"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Vyskúšajte maskovanie prvej bootovacej USB jednotky (zvyčajne 0x80) ako odlišného disku.\n"
-"Toto je nevyhnutné, ak chcete inštalovať Windows XP a máte viac ako jeden disk."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Nainštalovať zavádzač UEFI, ktorý vykoná overenie média prostredníctvom MD5Sum súboru"
 
 #. • MSG_169
 msgid ""
@@ -1861,6 +1851,82 @@ msgstr "Vypnutie automatického šifrovania zariadenia BitLocker"
 msgid "Persistent log"
 msgstr "Trvalý záznam činností"
 
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Pre inštaláciu systému MS-DOS je potrebné prevziať od spoločnosti Microsoft ďalší súbor („diskcopy.dll\"):\n"
+"- Výberom možnosti „Áno\" ho stiahnete z internetu\n"
+"- Výberom možnosti „Nie\" zrušíte operáciu\n"
+"\n"
+"Poznámka: Súbor sa stiahne do adresára aplikácie a automaticky sa znova použije, ak je k dispozícii."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Bol zistený zrušený zavádzač UEFI"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Program Rufus zistil, že ISO, ktoré ste vybrali, obsahuje zavádzač UEFI, ktorý bol zrušený a ktorý bude produkovať %s, keď je povolené zabezpečené spustenie na plne aktuálnom systéme UEFI.\n"
+"\n"
+"- Ak ste tento obraz ISO získali z neseriózneho zdroja, mali by ste zvážiť možnosť, že by mohol obsahovať malvér UEFI a vyhnúť sa bootovaniu z neho.\n"
+"- Ak ste ho získali z dôveryhodného zdroja, mali by ste sa pokúsiť nájsť aktuálnejšiu verziu, ktorá toto upozornenie nespustí."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "obrazovka „Narušenie bezpečnosti\""
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "a Obrazovka obnovenia systému Windows (BSOD) s %s"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Komprimovaný obraz VHDX"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Nekomprimovaný obraz VHD"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Obraz úplnej flash aktualizácie"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Ak chcete používať túto funkciu, musíte si od spoločnosti Microsoft stiahnuť niektoré ďalšie dáta:\n"
+"- Výberom možnosti „Áno\" ich stiahnete z internetu\n"
+"- Výberom možnosti „Nie\" zrušíte túto operáciu"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Obmedziť systém Windows s režimom S (NEKOMPATIBILNÝ s obídením konta online)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Expertný režim"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Extrahovanie archívnych súborov: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Použiť Rufus MBR"
+
 #. • MSG_900
 #.
 #. The following messages are for the Windows Store listing only and are not used by the application
@@ -1894,7 +1960,7 @@ msgstr ""
 #.
 #. Keyword for "boot" will be used for search in the Windows Store
 msgid "Boot"
-msgstr ""
+msgstr "boot"
 
 #. • MSG_910
 #.
