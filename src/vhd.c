@@ -1148,8 +1148,9 @@ void VhdSaveImage(void)
 	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, &i);
 	if (img_save.ImagePath == NULL)
 		goto out;
-	for (i = 1; i <= (UINT)img_ext.count && (strstr(img_save.ImagePath, &_img_ext_x[i - 1][1]) == NULL); i++);
-	if (i > (UINT)img_ext.count) {
+	// Start from the end of our extension array, since '.vhd' would match for '.vhdx' otherwise
+	for (i = (UINT)img_ext.count; (i > 0) && (strstr(img_save.ImagePath, &_img_ext_x[i - 1][1]) == NULL); i--);
+	if (i == 0) {
 		uprintf("Warning: Can not determine image type from extension - Saving to uncompressed VHD.");
 		i = image_type_vhd;
 	} else {

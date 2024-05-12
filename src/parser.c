@@ -1514,7 +1514,7 @@ int sanitize_label(char* label)
 	// Remove all leading '-'
 	for (i = 0; i < len && label[i] == '-'; i++);
 	if (i != 0)
-		memcpy(label, &label[i], len - i);
+		memmove(label, &label[i], len - i);
 	len = strlen(label);
 	if (len <= 1)
 		return -1;
@@ -1529,7 +1529,7 @@ int sanitize_label(char* label)
 	// Remove all duplicate '-' (non-optimized!)
 	for (i = 0; len >= 2 && i < len - 2; i++) {
 		if (label[i] == '-' && label[i + 1] == '-') {
-			memcpy(&label[i + 1], &label[i + 2], len - i - 1);
+			memmove(&label[i + 1], &label[i + 2], len - i - 1);
 			len--;
 			i--;
 		}
