@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-17 10:50+0100\n"
-"PO-Revision-Date: 2023-02-21 19:52+0000\n"
+"POT-Creation-Date: 2024-05-12 12:06+0100\n"
+"PO-Revision-Date: 2024-05-12 12:12+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: it_IT\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Italian (Italiano)\n"
 "X-Rufus-LCID: 0x0410, 0x0810\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -25,7 +25,7 @@ msgstr "Dispositivo/unità"
 
 #. • IDD_DIALOG → IDS_BOOT_SELECTION_TXT
 msgid "Boot selection"
-msgstr "Selezione boot"
+msgstr "Tipo boot sistema"
 
 #. • IDD_DIALOG → IDC_SELECT
 msgid "Select"
@@ -37,11 +37,11 @@ msgstr "Opzioni immagine"
 
 #. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
 msgid "Partition scheme"
-msgstr "Schema partizione"
+msgstr "Tipo schema partizione"
 
 #. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
 msgid "Target system"
-msgstr "Sistema destinazione"
+msgstr "Tipo sistema destinazione"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
@@ -54,13 +54,11 @@ msgstr "Elenco unità disco USB"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Aggiungi correzioni per vecchi BIOS (partizioni extra, allineamento, etc)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Usa MBR Rufus con ID BIOS"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Abilita convalida multimediale UEFI in runtime"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -208,7 +206,7 @@ msgid ""
 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
 "To continue with this operation, click OK. To quit click CANCEL."
 msgstr ""
-"ATTENZIONE: TUTTI I DATI SULL'UNITÀ '%s' SARANNO CANCELLATI.\n"
+"ATTENZIONE: TUTTI I DATI NELL'UNITÀ '%s' SARANNO CANCELLATI.\n"
 "Per continuare seleziona 'OK'. Per annullare seleziona 'ANNULLA'."
 
 #. • MSG_004
@@ -677,7 +675,7 @@ msgid ""
 "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
 "Do you want to visit the 7-zip download page?"
 msgstr ""
-"Il tuo sistema operativo non può estrarre file dall'archivio WIM. L'estrazione WIM è necessaria per creare una unità USB avviabile EFI Windows 7 e Windows Vista. Puoi correggere ciò installando una versione recente di 7-Zip.\n"
+"Il sistema operativo non può estrarre file dall'archivio WIM. L'estrazione WIM è necessaria per creare una unità USB avviabile EFI Windows 7 e Windows Vista. Puoi correggere ciò installando una versione recente di 7-Zip.\n"
 "Vuoi visitare la pagina web da cui scaricare 7-zip?"
 
 #. • MSG_103
@@ -1048,16 +1046,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Abilita questa opzione per permettere la visualizzazione delle etichette internazionali e impostare una icona dispositivo (creerà un file autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
 msgstr "Installa un MBR che permette la selezione all'avvio e maschera l'ID unità USB del BIOS"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Prova prima a mascherare l'unità avviabile USB (normalmente 0x80) come un disco differente.\n"
-"Questo potrebbe essere necessario solo se installi Windows XP e hai più di un disco."
 
 #. • MSG_169
 msgid ""
@@ -1100,7 +1090,7 @@ msgstr "Versione %d.%d (build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Traduzione italiana a cura di bovirus"
+msgstr "Traduzione italiana a cura di R.B."
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1116,11 +1106,11 @@ msgstr "Policy aggiornamenti:"
 
 #. • MSG_180
 msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
-msgstr "Se scegli di permettere a questo programma di controllare automaticamente gli aggiornamenti, accetti che le seguenti informazioni saranno catalogate nei nostri server:"
+msgstr "Se permetti a questo programma di controllare automaticamente gli aggiornamenti, accetti che le seguenti informazioni saranno catalogate nei nostri server:"
 
 #. • MSG_181
 msgid "Your operating system's architecture and version"
-msgstr "L'architettura del tuo sistema operativo e la versione"
+msgstr "L'architettura del sistema operativo e la versione"
 
 #. • MSG_182
 msgid "The version of the application you use"
@@ -1128,7 +1118,7 @@ msgstr "La versione dell'applicazione in uso"
 
 #. • MSG_183
 msgid "Your IP address"
-msgstr "Il tuo indirizzo IP"
+msgstr "Indirizzo IP"
 
 #. • MSG_184
 msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
@@ -1595,7 +1585,7 @@ msgstr "Non avviabile"
 
 #. • MSG_280
 msgid "Disk or ISO image"
-msgstr "Immagine disco o ISO"
+msgstr "File immagine disco o file ISO"
 
 #. • MSG_281
 msgid "%s (Please select)"
@@ -1820,7 +1810,7 @@ msgstr "Applicando opzioni utente..."
 
 #. • MSG_327
 msgid "Windows User Experience"
-msgstr "Windows User Experience"
+msgstr "Esperienza utente Windows"
 
 #. • MSG_328
 msgid "Customize Windows installation?"
@@ -1858,6 +1848,82 @@ msgstr "Disabilita la crittografia automatica dei dispositivi BitLocker"
 msgid "Persistent log"
 msgstr "Log persistente"
 
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Per installare MS-DOS è necessario scaricare da Microsoft un file aggiuntivo (\"diskcopy.dll\"):\n"
+"- Seleziona 'Sì' per connettersi ad internet e scaricarlo\n"
+"- Seleziona 'No' per annullare l'operazione\n"
+"\n"
+"Nota: il file verrà scaricato nella cartella dell'applicazione e se presente verrà riutilizzato automaticamente."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Rilevato bootloader UEFI revocato"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus ha rilevato che l'ISO selezionata contiene un bootloader UEFI che è stato revocato e che quando Secure Boot è abilitato su un sistema UEFI completamente aggiornato produrrà %s. \n"
+"\n"
+"- Se hai ottenuto questa immagine ISO da una so0egente non affidabile, dovresti considerare la possibilità che possa contenere malware UEFI ed evitare di eseguire l'avvio da esso.\n"
+"- Se l'hai ottenuto da una sorgente attendibile, dovresti provare a cercare una versione più aggiornata, che non genererà questo avviso."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "una schermata \"Violazione sicurezza\""
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "una schermata di ripristino Windows (BSOD) con '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Immagine VHDX compressa"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Immagine VHD non compressa"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Immagine aggiornamento flash completa"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Per usare questa funzionalità è necessario scaricare da Microsoft alcuni dati aggiuntivi:\n"
+"- Seleziona 'Sì' per connettersi ad internet e scaricarli\n"
+"- Seleziona 'No' per annullare l'operazione"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Limita Windows alla modalità S (INCOMPATIBILE con il bypass dell'account online)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Modalità esperto"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Estrazione file archivio: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Usa MBR Rufus"
+
 #. • MSG_900
 #.
 #. The following messages are for the Windows Store listing only and are not used by the application
@@ -1874,7 +1940,7 @@ msgstr "Codice sorgente: %s"
 
 #. • MSG_903
 msgid "ChangeLog: %s"
-msgstr "ChangeLog: %s"
+msgstr "Novità: %s"
 
 #. • MSG_904
 #.
