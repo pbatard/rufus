@@ -1,7 +1,7 @@
 ﻿/*
  * Rufus: The Reliable USB Formatting Utility
  * Poedit <-> rufus.loc conversion utility
- * Copyright © 2018-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2018-2024 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,9 +41,9 @@ using System.Windows.Forms;
 [assembly: AssemblyDescription("Poedit ↔ Rufus loc conversion utility")]
 [assembly: AssemblyCompany("Akeo Consulting")]
 [assembly: AssemblyProduct("Pollock")]
-[assembly: AssemblyCopyright("Copyright © 2018-2023 Pete Batard <pete@akeo.ie>")]
+[assembly: AssemblyCopyright("Copyright © 2018-2024 Pete Batard <pete@akeo.ie>")]
 [assembly: AssemblyTrademark("GNU GPLv3")]
-[assembly: AssemblyVersion("1.5.*")]
+[assembly: AssemblyVersion("1.6.*")]
 
 namespace pollock
 {
@@ -1244,9 +1244,9 @@ Retry:
 
             if ((list.Count >= 2) && (index >= 0))
             {
-                Process.Start($"mailto:pete@akeo.ie?subject=Rufus {list[index][0]} translation v{list[0][2]} update" +
-                    $"&body=Hi Pete,%0D%0A%0D%0APlease find attached the latest {list[index][0]} translation." +
-                    $"%0D%0A%0D%0A<PLEASE ATTACH '{app_dir}{po_file}' AND REMOVE THIS LINE>" +
+                Process.Start($"mailto:pete@akeo.ie?subject=Rufus%20{list[index][0]}%20translation%20v{list[0][2]}%20update" +
+                    $"&body=Hi%20Pete,%0D%0A%0D%0APlease%20find%20attached%20the%20latest%20{list[index][0]}%20translation." +
+                    $"%0D%0A%0D%0A<PLEASE%20ATTACH%20'{app_dir}{po_file}'%20AND%20REMOVE%20THIS%20LINE>" +
                     $"%0D%0A%0D%0ARegards,");
             }
             return;
