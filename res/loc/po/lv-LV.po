@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-24 15:38+0200\n"
-"PO-Revision-Date: 2023-02-26 22:12+0000\n"
+"POT-Creation-Date: 2024-05-14 16:22+0100\n"
+"PO-Revision-Date: 2024-05-14 16:22+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: lv_LV\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Latvian (Latviešu)\n"
 "X-Rufus-LCID: 0x0426\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "USB disku saraksts"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Pievienot vecāku BIOSu labojumus (partīcijām, dalījumam, u.c.)"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Izmantot MBR ar BIOS ID"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Ieslēgt UEFI nesēja pārbaudi izpildīšanas laikā"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -117,7 +115,7 @@ msgstr "Licence"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
-msgstr "Aprstiprināt"
+msgstr "Apstiprināt"
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
@@ -273,11 +271,11 @@ msgstr "Citādi"
 
 #. • MSG_018
 msgid "Your version: %d.%d (Build %d)"
-msgstr "Jūsu versija: %d.%d (Build %d)"
+msgstr "Jūsu versija: %d.%d (Būvējums %d)"
 
 #. • MSG_019
 msgid "Latest version: %d.%d (Build %d)"
-msgstr "Pēdējā versija: %d.%d (Build %d)"
+msgstr "Pēdējā versija: %d.%d (Būvējums %d)"
 
 #. • MSG_020
 #. • MSG_026
@@ -768,7 +766,7 @@ msgid ""
 msgstr ""
 "Šis virtuālais attēls izmanto Syslinux %s%s, bet programma satur instalācijas failus Syslinux %s%s.\n"
 "\n"
-"Tā kā jaunās Syslinux versijas nav savstarpēji atbalstāmas, nepieciešams ielādēt no interneta  vajadzīgos failus ('ldlinux.sys' un 'ldlinux.bss'):\n"
+"Tā kā jaunās Syslinux versijas nav savstarpēji atbalstāmas, nepieciešams ielādēt no interneta vajadzīgos failus ('ldlinux.sys' un 'ldlinux.bss'):\n"
 "- Izvēlieties 'Jā' lai pieslēgtos pie interneta un mēģināt ielādētu šos failus\n"
 "- Izvēlieties 'Nē' lai atceltu šo darbību\n"
 "\n"
@@ -914,7 +912,7 @@ msgstr ""
 
 #. • MSG_135
 msgid "Version"
-msgstr "Vesija"
+msgstr "Versija"
 
 #. • MSG_136
 msgid "Release"
@@ -1043,23 +1041,15 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Atzīmējiet starptautisko simbolu atbalstam un ierīces ikonas izveidei (tiek izveidots fails autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
 msgstr "Instalēt MBR, kur var izvēlēties ielādi un kurš var maskēties BIOS'ā ar ierīces identifikatoru"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Mēģināt maskēt pirmo USB ielādes ierīci (parasti 0x80) kā citu disku.\n"
-"Tas nepieciešams, kad instalējat Windows XP un izmantojat vairāk nekā vienu dieskus."
 
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
 "This can improve boot detection for older BIOSes."
 msgstr ""
-"IZveidot papildus slēpto partīciju un izlīdzināt partīciju robežas.\n"
+"Izveidot papildus slēpto partīciju un izlīdzināt partīciju robežas.\n"
 "Šī opcija var atvieglot ielādes noteikšanu vecākās BIOS versijās."
 
 #. • MSG_170
@@ -1734,7 +1724,7 @@ msgstr "Ātrā diska nullēšana: %s"
 
 #. • MSG_307
 msgid "this may take a while"
-msgstr "Šī darbība var aizņemt laiku"
+msgstr "šī darbība var aizņemt laiku"
 
 #. • MSG_308
 msgid "VHD detection"
@@ -1750,7 +1740,7 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"Izvēlētais  ISO-fails izmanto UEFI un ir pietiekoši mazs, lai varētu tikt ierakstīts, kā EFI (ESP) sistēmas sadaļa. Ieraksts iekš ESP, nevis kopējā datu sadaļā, kas aizņem visu disku, var būt ieteicamāks dažu ielāžu tipiem.\n"
+"Izvēlētais ISO-fails izmanto UEFI un ir pietiekoši mazs, lai varētu tikt ierakstīts, kā EFI (ESP) sistēmas sadaļa. Ieraksts iekš ESP, nevis kopējā datu sadaļā, kas aizņem visu disku, var būt ieteicamāks dažu ielāžu tipiem.\n"
 "\n"
 "Izvēlieties to režīmu, kuru nepieciešams izmantot lai ierakstīt šo virtuālo attēlu:"
 
@@ -1816,7 +1806,7 @@ msgstr "Lietotāja opciju pielietošana..."
 
 #. • MSG_327
 msgid "Windows User Experience"
-msgstr "Windows User Experience"
+msgstr "Windows lietotāju pieredze"
 
 #. • MSG_328
 msgid "Customize Windows installation?"
@@ -1854,6 +1844,82 @@ msgstr "Atslēgt automātisko šifrēšanu ar BitLocker"
 msgid "Persistent log"
 msgstr "Pastāvīgs žurnāls"
 
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Lai instalēt MS-DOS no Microsoft vietnes nepieciešams lejuplādēt papildus failu («diskcopy.dll»):\n"
+"- Izvēlieties «Jā», lai pieslēgties pie Interneta un failu lejuplādēt.\n"
+"- Izvēlieties «Nē», lai atcelt darbību.\n"
+"\n"
+"Piezīme. Fails tiks lejuplādēts programmas mapē, ja tas jau eksistē, tiks izmantots atkārtoti."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Pamanīts atceltais UEFI ielādes ieraksts"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus konstatēja Jūsu izvēlētais ISO-fails satur atceltu UEFI ielādes ierakstu, kurš izdos %s, ja būs ieslēgta drošā ielāde pilnīgi jauninātajā UEFI sistēmā.\n"
+"\n"
+"- Ja šis ISO fails ir iegūts no nedrošiem avotiem, vajag ņemt vērā, ka tas var saturēt UEFI ļaunatūru un censties no tā nestartēt.\n"
+"- Ja fails iegūts no droša avota, būtu jāatrod jaunāka versija, kurai nerādīs šādu brīdinājumu."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "a \"Drošības pārkāpuma\" ekrāns"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "a Windows atkopšanas ekrāns (BSOD) ar '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Saspiests VHDX attēls"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Nesaspiests VHDX attēls"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Full Flash atjauninājuma attēls"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Lai izmantotu šo funkcionalitāti, no Microsoft ir jālejupielādē daži papildus dati:\n"
+"- Izvēlieties 'Jā', lai izveidotu savienojumu ar Internetu un lejupielādētu tos\n"
+"- Izvēlieties \"Nē\", lai atceltu darbību"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Ierobežot Windows tikai S režīmā (NESADERĪGS ar tiešsaistes konta apiešanu)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Eksperta režīms"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Atpakot arhīva failus: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Izmantot Rufus MBR"
+
 #. • MSG_900
 #.
 #. The following messages are for the Windows Store listing only and are not used by the application
@@ -1887,7 +1953,7 @@ msgstr ""
 #.
 #. Keyword for "boot" will be used for search in the Windows Store
 msgid "Boot"
-msgstr ""
+msgstr "Ielāde"
 
 #. • MSG_910
 #.
