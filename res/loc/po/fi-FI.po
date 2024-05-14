@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-03-03 15:43+0200\n"
-"PO-Revision-Date: 2023-03-03 16:58+0200\n"
+"POT-Creation-Date: 2024-05-14 12:47+0300\n"
+"PO-Revision-Date: 2024-05-14 14:07+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Finnish (Suomi)\n"
 "X-Rufus-LCID: 0x040B\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Näytä USB-kiintolevyt"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Lisää korjauksia vanhoja BIOS-versioita varten"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Käytä Rufus-MBR:ää, BIOS ID:llä"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Ota käyttöön ajonaikainen UEFI-tietovälineen tarkistus"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -579,7 +577,7 @@ msgstr ""
 "- Valitse 'Ei' jättääksesi ISO-levykuvan alkuperäiseen muotoonsa\n"
 "Jos et ole varma, sinun kannattaa valita 'Kyllä'.\n"
 "\n"
-"Huomio: Uusi tiedosto ladataan nykyiseen sijaintiin ja kun  '%s' löytyy sijainnista, sitä käytetään automaattisesti."
+"Huomio: Uusi tiedosto ladataan nykyiseen sijaintiin ja kun '%s' löytyy sijainnista, sitä käytetään automaattisesti."
 
 #. • MSG_085
 msgid "Downloading %s"
@@ -768,11 +766,11 @@ msgid ""
 msgstr ""
 "Tämä kuva käyttää Syslinuxia %s%s, mutta tämä sovellus sisältää asennustiedostot vain Syslinuxille %s%s.\n"
 "\n"
-"Koska Syslinuxin uudet versiot eivät ole keskenään yhteensopivia, eikä Rufus  voisi sisältää niitä kaikkia, on kaksi lisätiedostoa ladattava internetistä ('ldlinux.sys' ja 'ldlinux.bss'):\n"
+"Koska Syslinuxin uudet versiot eivät ole keskenään yhteensopivia, eikä Rufus voisi sisältää niitä kaikkia, on kaksi lisätiedostoa ladattava internetistä ('ldlinux.sys' ja 'ldlinux.bss'):\n"
 "- Valitse 'Kyllä' yhdistääksesi internetiin ja ladataksesi nämä tiedostot\n"
 "- Valitse 'Ei' peruaksesi toiminnon\n"
 "\n"
-"Huomio: Tiedosto ladataan nykyiseen sovelluskansioon ja niitä käytetäänautomaattisesti uudelleen niiden löytyessä."
+"Huomio: Tiedostot ladataan nykyiseen sovelluskansioon ja niitä uudelleenkäytetään automaattisesti, jos se ovat jo olemassa."
 
 #. • MSG_115
 msgid "Download required"
@@ -1043,16 +1041,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Valitse valintaruutu salliaksesi kansainvälisten merkkien näyttämisen ja asettaaksesi laitekuvakkeen (luo autorun.inf-tiedoston)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Asenna MBR, joka sallii käynnistysvalinnan ja voi naamioida USB-aseman BIOS ID:n"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Yritä naamioida ensimmäinen boottaava USB-asema (yleensä 0x80) eri asemaksi.\n"
-"Tämän tulisi olla tarpeellista vain asennettaessa Windows XP:tä, kun levyjä on useampia."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Asenna UEFI-käynnistyslataaja, joka tulee suorittamaan tietovälineelle MD5Sum-tiedostotarkistuksen"
 
 #. • MSG_169
 msgid ""
@@ -1733,7 +1723,7 @@ msgstr "Pikanollataan asemaa: %s"
 
 #. • MSG_307
 msgid "this may take a while"
-msgstr "Tämä voi viedä hetken"
+msgstr "tämä voi viedä hetken"
 
 #. • MSG_308
 msgid "VHD detection"
@@ -1843,7 +1833,7 @@ msgstr "Luo paikallinen käyttäjätili käyttäjänimellä:"
 
 #. • MSG_334
 msgid "Set regional options to the same values as this user's"
-msgstr "Aseta alueelliset vaihtoehdot samoihin asetuksiin kuin tällä käyttäjällä"
+msgstr "Aseta alueelliset vaihtoehdot samoihin asetuksiin kuin nykyisellä käyttäjällä"
 
 #. • MSG_335
 msgid "Disable BitLocker automatic device encryption"
@@ -1852,6 +1842,82 @@ msgstr "Poista käytöstä automaattinen laitteen BitLocker-salaus"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Pysyvä lokitiedosto"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Uusi tiedosto ('diskcopy.dll') on ladattava Microsoftilta MS-DOSin asennusta varten:\n"
+"- Valitse 'Kyllä' yhdistääksesi internetiin ja ladataksesi sen\n"
+"- Valitse 'Ei' peruuttaaksesi toiminnon\n"
+"\n"
+"Huomio: Tiedosto ladataan sovelluksen kansioon ja sitä uudelleenkäytetään automaattisesti, jos se on jo olemassa."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Mitätöity UEFI-käynnistyslataaja havaittu"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus havaitsi, että käyttämäsi ISO-levykuva sisältää UEFI-käynnistyslataajan, joka on mitätöity ja tulee aiheuttamaan %s Secure Bootin ollessa päällä ajantasaisessa UEFI-kokoonpanossa.\n"
+"\n"
+"- Jos olet hankkinut tämän ISO-levykuvan ei-luotettavasta lähteestä, huomioi UEFI-haittaohjelmien mahdollisuus ja vältä siltä käynnistämistä.\n"
+"- Jos olet hankkinut sen luotettavasta lähteestä, sinun tulisi yrittää etsiä uudempi versio, joka ei aiheuta tätä varoitusta."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "\"Turvallisuusrikkomus\"-näkymän"
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "Windowsin palautusnäkymän (BSOD) viestillä '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Pakattu VHDX-levykuva"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Pakkaamaton VHD-levykuva"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Full Flash Update -levykuva"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Tämän toiminnon käyttäminen vaatii lisätiedostojen lataamista Microsoftilta:\n"
+"- Valitse 'Kyllä' yhdistääksesi internetiin ja ladataksesi ne\n"
+"- Valitse 'Ei' peruuttaaksesi toiminnon"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Rajoita Windows S Mode-tilaan (EI YHTEENSOPIVA verkkotilin ohituksen kanssa)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Asiantuntijatila"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "Puretaan tiedostoarkistoja: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Rufusin MBR:n käyttö"
 
 #. • MSG_900
 #.
