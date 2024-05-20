@@ -1,11 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-02-22 14:51+0000\n"
-"PO-Revision-Date: 2023-02-24 13:17+0000\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"POT-Creation-Date: 2024-05-20 22:00+0100\n"
+"PO-Revision-Date: 2024-05-20 22:37+0100\n"
+"Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
+"Language-Team: Portuguese <hugokarvalho@hotmail.com>\n"
 "Language: pt_PT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Portuguese Standard (Português)\n"
 "X-Rufus-LCID: 0x0816\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Mostrar unidades USB"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Opções de compatibilidade para BIOS antigas"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Usar MBR do Rufus, ID de BIOS"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Ativar a validação do suporte UEFI"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -175,7 +173,7 @@ msgstr "Procurar atualizações de Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
 msgid "A newer version is available. Please download the latest version!"
-msgstr "Nova versão disponível. Por favor, faça a transferência da última versão!"
+msgstr "Nova versão disponível. Por favor, descarregue a última versão!"
 
 #. • IDD_NEW_VERSION → IDC_WEBSITE
 msgid "Click here to go to the website"
@@ -189,7 +187,7 @@ msgstr "Notas relativas a esta versão"
 #. • IDD_NEW_VERSION → IDC_DOWNLOAD
 #. • MSG_040
 msgid "Download"
-msgstr "Transferência"
+msgstr "Transferir"
 
 #. • MSG_001
 msgid "Other instance detected"
@@ -574,7 +572,7 @@ msgstr ""
 "Esta imagem ISO usa uma versão obsoleta do ficheiro '%s'.\n"
 "Isto pode fazer com que o menu de arranque não seja exibido corretamente.\n"
 "\n"
-"Rufus pode transferir uma versão mais recente para resolver este problema:\n"
+"O Rufus pode transferir uma versão mais recente para resolver este problema:\n"
 "- Selecione 'Sim' para ligar-se à Internet e transferir o ficheiro\n"
 "- Selecione 'Não' para deixar o ficheiro ISO tal como está\n"
 "Se não sabe o que fazer, é recomendado selecionar 'Sim'.\n"
@@ -703,7 +701,7 @@ msgstr ""
 "Dado que este ficheiro tem mais de 100 KB e está sempre presente nas \n"
 "imagens ISO %s, Rufus não o inclui na sua distribuição.\n"
 "\n"
-"Rufus pode transferir o ficheiro em falta:\n"
+"O Rufus pode transferir o ficheiro em falta:\n"
 "- Selecione 'Sim' transferir o ficheiro\n"
 "- Selecione 'Não' se deseja mais tarde copiar manualmente este ficheiro para a unidade\n"
 "\n"
@@ -1046,16 +1044,8 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "Selecione esta opção para permitir a exibição de caracteres acentuados e atribuir um ícone para a unidade (cria um ficheiro autorun.inf)"
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
-msgstr "Instalar um MBR que permita selecionar o dispositivo de arranque e pode mascarar o ID de identificação do dispositivo USB na BIOS"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Tente disfarçar o dispositivo USB de arranque (normalmente 0x80) como um disco diferente.\n"
-"Só deverá ser necessário se instalar o Windows XP e tenha mais do que um disco rígido."
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
+msgstr "Instalar um carregador de arranque UEFI, que irá efetuar a validação do ficheiro MD5Sum do suporte de dados"
 
 #. • MSG_169
 msgid ""
@@ -1824,7 +1814,7 @@ msgstr "Personalizar instalação do Windows?"
 
 #. • MSG_329
 msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
-msgstr "Remover o requisito de 4 GB ou mais de RAM, Secure Boot e TPM 2.0"
+msgstr "Remover o requisito de 4 GB ou mais de RAM, Arranque Seguro e TPM 2.0"
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
@@ -1853,6 +1843,82 @@ msgstr "Desativar a encriptação automática BitLocker"
 #. • MSG_336
 msgid "Persistent log"
 msgstr "Registo permanente (log)"
+
+#. • MSG_337
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Um ficheiro adicional ('diskcopy.dll') deve ser transferido da Microsoft para instalar o MS-DOS:\n"
+"- Selecione 'Sim' para se ligar à Internet e descarregá-lo\n"
+"- Selecione 'Não' para cancelar a operação\n"
+"\n"
+"Nota: O ficheiro será transferido para a pasta da aplicação e será reutilizado automaticamente se estiver presente."
+
+#. • MSG_338
+msgid "Revoked UEFI bootloader detected"
+msgstr "Detetado carregador de arranque UEFI revogado"
+
+#. • MSG_339
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"O Rufus detetou que a ISO que selecionou contém um carregador de arranque UEFI que foi revogado e que produzirá %s, quando o Arranque Seguro está ativado num sistema UEFI totalmente atualizado.\n"
+"\n"
+"- Se obteve esta imagem ISO de uma fonte não segura, deve considerar a possibilidade de que a mesma possa conter malware UEFI e evitar arrancar a partir dela.\n"
+"- Se a obteve de uma fonte segura, deve tentar localizar uma versão mais atualizada, que não produza este aviso."
+
+#. • MSG_340
+msgid "a \"Security Violation\" screen"
+msgstr "um ecrã de \"Violação de Segurança\""
+
+#. • MSG_341
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "um ecrã de recuperação do Windows (BSOD) com '%s'"
+
+#. • MSG_342
+msgid "Compressed VHDX Image"
+msgstr "Imagem VHDX comprimida"
+
+#. • MSG_343
+msgid "Uncompressed VHD Image"
+msgstr "Imagem VHD não comprimida"
+
+#. • MSG_344
+msgid "Full Flash Update Image"
+msgstr "Imagem de atualização completa"
+
+#. • MSG_345
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"É necessário transferir alguns dados adicionais da Microsoft para usar esta funcionalidade:\n"
+"- Selecione 'Sim' para se ligar à Internet e descarregá-los\n"
+"- Selecione 'Não' para cancelar a operação"
+
+#. • MSG_346
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Restringir o Windows ao modo S (INCOMPATÍVEL com o ignorar da conta online)"
+
+#. • MSG_347
+msgid "Expert Mode"
+msgstr "Modo avançado"
+
+#. • MSG_348
+msgid "Extracting archive files: %s"
+msgstr "A extrair ficheiros de arquivo: %s"
+
+#. • MSG_349
+msgid "Use Rufus MBR"
+msgstr "Usar o MBR do Rufus"
 
 #. • MSG_900
 #.
@@ -1917,7 +1983,7 @@ msgstr "Criar discos 'Windows To Go'"
 
 #. • MSG_916
 msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
-msgstr "Criar discos de instalação do Windows 11 para PCs que não possuem TPM ou Secure Boot"
+msgstr "Criar discos de instalação do Windows 11 para PCs que não possuem TPM ou Arranque Seguro"
 
 #. • MSG_917
 msgid "Create persistent Linux partitions"
@@ -1933,7 +1999,7 @@ msgstr "Calcular checksums MD5, SHA-1, SHA-256 e SHA-512 da imagem selecionada"
 
 #. • MSG_920
 msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
-msgstr "Executar verificações de blocos inválidos, incluindo a detecção de unidades flash \"falsas\""
+msgstr "Executar verificações de blocos inválidos, incluindo a deteção de unidades flash \"falsas\""
 
 #. • MSG_921
 msgid "Download official Microsoft Windows retail ISOs"
