@@ -2531,7 +2531,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_UEFI_MEDIA_VALIDATION:
 			if ((HIWORD(wParam)) == BN_CLICKED) {
 				validate_md5sum = IsChecked(IDC_UEFI_MEDIA_VALIDATION);
-				WriteSettingBool(SETTING_ENABLE_RUNTIME_VALIDATION, validate_md5sum);
+//				WriteSettingBool(SETTING_ENABLE_RUNTIME_VALIDATION, validate_md5sum);
 			}
 			break;
 		case IDC_LIST_USB_HDD:
@@ -3494,7 +3494,7 @@ skip_args_processing:
 	usb_debug = ReadSettingBool(SETTING_ENABLE_USB_DEBUG);
 	cdio_loglevel_default = usb_debug ? CDIO_LOG_DEBUG : CDIO_LOG_WARN;
 	use_rufus_mbr = !ReadSettingBool(SETTING_DISABLE_RUFUS_MBR);
-	validate_md5sum = ReadSettingBool(SETTING_ENABLE_RUNTIME_VALIDATION);
+//	validate_md5sum = ReadSettingBool(SETTING_ENABLE_RUNTIME_VALIDATION);
 	detect_fakes = !ReadSettingBool(SETTING_DISABLE_FAKE_DRIVES_CHECK);
 	allow_dual_uefi_bios = ReadSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS);
 	force_large_fat32 = ReadSettingBool(SETTING_FORCE_LARGE_FAT32_FORMAT);
