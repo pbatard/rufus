@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2023-04-25 13:34+0100\n"
-"PO-Revision-Date: 2023-04-25 13:36+0100\n"
+"POT-Creation-Date: 2024-05-12 20:45+0300\n"
+"PO-Revision-Date: 2024-05-20 10:37+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sl_SI\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Slovenian (Slovenščina)\n"
 "X-Rufus-LCID: 0x0424\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -54,13 +54,11 @@ msgstr "Naštej USB trde diske"
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
 msgstr "Dodaj popravke za stare BIOSe"
 
-#. • IDD_DIALOG → IDC_RUFUS_MBR
+#. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
-#. 'MBR': See http://en.wikipedia.org/wiki/Master_boot_record
-#. Rufus can install it's own custom MBR (the Rufus MBR), which also allows users to
-#. specify a custom disk ID for the BIOS. The tooltip for this control is MSG_167.
-msgid "Use Rufus MBR with BIOS ID"
-msgstr "Rufusov MBR z BIOS ID"
+#. It is acceptable to drop the "runtime" if you are running out of space
+msgid "Enable runtime UEFI media validation"
+msgstr "Med zagonom omogoči UEFI preverjanje integritete medija"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -1043,16 +1041,9 @@ msgid "Check this box to allow the display of international labels and set a dev
 msgstr "To možnost izberite, če želite omogočiti prikaz \"mednarodnih\" oznak nosilca in nastaviti ikono za napravo (to ustvari datoteko autorun.inf)."
 
 #. • MSG_167
-msgid "Install an MBR that allows boot selection and can masquerade the BIOS USB drive ID"
+#, fuzzy
+msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
 msgstr "Ta možnost namesti zagonski sektor, ki omogoča izbiro pri zagonu in lahko \"zamaskira\" BIOS ID pogona USB"
-
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different disk.\n"
-"This should only be necessary if you install Windows XP and have more than one disk."
-msgstr ""
-"Poskuša \"zamaskirati\" prvi zagonski pogon USB (navadno 0x80) kot drug disk.\n"
-"Navadno je to potrebno samo, če nameščate Windows XP in imate več kot en disk."
 
 #. • MSG_169
 msgid ""
@@ -1853,6 +1844,95 @@ msgstr "Onemogoči samodejno šifriranje naprave BitLocker"
 msgid "Persistent log"
 msgstr "Trajni dnevnik"
 
+#. • MSG_337
+#, fuzzy
+msgid ""
+"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The file will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Za namestitev MS-DOS je treba od Microsofta prenesti dodatno datoteko ('diskcopy.dll'):\n"
+"- Izberite 'Da', da se povežete z internetom in jo prenesete\n"
+"- Izberite 'Ne', da prekličete operacijo\n"
+"\n"
+"Opomba: datoteka bo prenesena v imenik aplikacije in samodejno ponovno uporabljena, če je prisotna."
+
+#. • MSG_338
+#, fuzzy
+msgid "Revoked UEFI bootloader detected"
+msgstr "Zaznan preklican zagonski nalagalnik UEFI"
+
+#. • MSG_339
+#, fuzzy
+msgid ""
+"Rufus detected that the ISO you have selected contains a UEFI bootloader that has been revoked and that will produce %s, when Secure Boot is enabled on a fully up to date UEFI system.\n"
+"\n"
+"- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
+"- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
+msgstr ""
+"Rufus je zaznal, da ISO, ki ste ga izbrali, vsebuje zagonski nalagalnik UEFI, ki je bil preklican in bo ustvaril %s, ko je varen zagon omogočen v popolnoma posodobljenem sistemu UEFI.\n"
+"\n"
+"- Če ste to ISO sliko pridobili iz neuglednega vira, razmislite o možnosti, da morda vsebuje zlonamerno programsko opremo UEFI, in se izogibajte zagonu iz nje.\n"
+"- Če ste jo pridobili iz zaupanja vrednega vira, poskusite poiskati posodobljenejšo različico, ki tega ne bo povzročila tega opozorila."
+
+#. • MSG_340
+#, fuzzy
+msgid "a \"Security Violation\" screen"
+msgstr "zaslon \"Kršitev varnosti\"."
+
+#. • MSG_341
+#, fuzzy
+msgid "a Windows Recovery Screen (BSOD) with '%s'"
+msgstr "zaslon za obnovitev sistema Windows (BSOD) z '%s'"
+
+#. • MSG_342
+#, fuzzy
+msgid "Compressed VHDX Image"
+msgstr "Stisnjena VHDX slika"
+
+#. • MSG_343
+#, fuzzy
+msgid "Uncompressed VHD Image"
+msgstr "Nestisnjena VHD Slika"
+
+#. • MSG_344
+#, fuzzy
+msgid "Full Flash Update Image"
+msgstr "Slika celotne posodobitve Flash"
+
+#. • MSG_345
+#, fuzzy
+msgid ""
+"Some additional data must be downloaded from Microsoft to use this functionality:\n"
+"- Select 'Yes' to connect to the Internet and download it\n"
+"- Select 'No' to cancel the operation"
+msgstr ""
+"Za uporabo te funkcije je treba od Microsofta prenesti nekaj dodatnih podatkov:\n"
+"- Izberite 'Da', da se povežete z internetom in jih prenesete\n"
+"- Izberite 'Ne0, da prekličete operacijo"
+
+#. • MSG_346
+#, fuzzy
+msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
+msgstr "Omejite Windows na S-način (NEZDRUŽLJIVO z obvodom spletnega računa)"
+
+#. • MSG_347
+#, fuzzy
+msgid "Expert Mode"
+msgstr "Strokovni način"
+
+#. • MSG_348
+#, fuzzy
+msgid "Extracting archive files: %s"
+msgstr "Ekstrahiranje arhivskih datotek: %s"
+
+#. • MSG_349
+#, fuzzy
+msgid "Use Rufus MBR"
+msgstr "Uporabite Rufus MBR"
+
 #. • MSG_900
 #.
 #. The following messages are for the Windows Store listing only and are not used by the application
@@ -1869,7 +1949,7 @@ msgstr "Šifra vira: %s"
 
 #. • MSG_903
 msgid "ChangeLog: %s"
-msgstr ""
+msgstr "Spremenitve: %s"
 
 #. • MSG_904
 #.
@@ -1886,13 +1966,13 @@ msgstr ""
 #.
 #. Keyword for "boot" will be used for search in the Windows Store
 msgid "Boot"
-msgstr "Zagonska"
+msgstr "Zagon"
 
 #. • MSG_910
 #.
 #. This and subsequent messages will be listed in the 'Features' section of the Windows Store page
 msgid "Format USB, flash card and virtual drives to FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
-msgstr "FormatIRANJE USB, bliskavice in virtualnih pogonov na FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
+msgstr "Formatiranje USB, bliskavice in virtualnih pogonov na FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
 
 #. • MSG_911
 msgid "Create FreeDOS bootable USB drives"
