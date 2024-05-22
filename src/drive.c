@@ -2439,6 +2439,8 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			// May override the the type of main partition if write_as_esp is active
 			if ((wcscmp(SelectedDrive.Partition[i].Name, L"EFI System Partition") == 0) ||
 				(wcscmp(SelectedDrive.Partition[i].Name, L"UEFI:NTFS") == 0))
+				// UEFI:NTFS as an MBR ESP somehow seems to be okay, but we may want
+				// to switch to type 0x01 (FAT21) if people report issues.
 				DriveLayoutEx.PartitionEntry[i].Mbr.PartitionType = 0xef;
 			else if (wcscmp(SelectedDrive.Partition[i].Name, L"Linux Persistence") == 0)
 				DriveLayoutEx.PartitionEntry[i].Mbr.PartitionType = 0x83;
@@ -2447,7 +2449,10 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		} else {
 			assert(partition_style == PARTITION_STYLE_GPT);
 			if (wcscmp(SelectedDrive.Partition[i].Name, L"UEFI:NTFS") == 0) {
-				DriveLayoutEx.PartitionEntry[i].Gpt.PartitionType = PARTITION_GENERIC_ESP;
+				// Boy do you *NOT* want the ESP of a GPT bootable drive to be declared as ESP,
+				// lest the Microsoft Windows installer errors out at "Copying Windows Files"
+				// because it just can't handle 2 ESPs on one system. The horror! The horror!
+				DriveLayoutEx.PartitionEntry[i].Gpt.PartitionType = PARTITION_MICROSOFT_DATA;
 				// Prevent a drive letter from being assigned to the UEFI:NTFS partition
 				DriveLayoutEx.PartitionEntry[i].Gpt.Attributes = GPT_BASIC_DATA_ATTRIBUTE_NO_DRIVE_LETTER;
 #if !defined(_DEBUG)
