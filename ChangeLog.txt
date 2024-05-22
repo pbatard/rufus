@@ -1,5 +1,5 @@
-o Version 4.5 (2024.05.??)
-    Add a new advanced option, that adds runtime UEFI media validation to suitable images (Windows, most Linux)
+o Version 4.5 (2024.05.22)
+    Add new advanced option to perform runtime UEFI media validation of suitable images (Windows, most Linux)
     Move the 'Use Rufus MBR' advanced option to a cheat mode (Alt-A)
     Fix truncation of VHDX images, as well as a benign error message when writing VHD/VHDX
     Fix support for Linux persistence in some configurations (Mint, Ubuntu 24.04)
