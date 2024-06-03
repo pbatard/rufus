@@ -1150,8 +1150,8 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 	BOOL s, ret = FALSE;
 	LARGE_INTEGER li;
 	HANDLE hSourceImage = INVALID_HANDLE_VALUE;
-	DWORD i, read_size[NUM_BUFFERS], write_size, comp_size, buf_size;
-	uint64_t wb, target_size = bZeroDrive ? SelectedDrive.DiskSize : img_report.image_size;
+	DWORD i, read_size[NUM_BUFFERS] = { 0 }, write_size, comp_size, buf_size;
+	uint64_t wb, target_size = bZeroDrive ? SelectedDrive.DiskSize : MIN((uint64_t)SelectedDrive.DiskSize, img_report.image_size);
 	uint64_t cur_value, last_value = 0;
 	int64_t bled_ret;
 	uint8_t* buffer = NULL;
@@ -1341,7 +1341,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 		assert((uintptr_t)buffer % SelectedDrive.SectorSize == 0);
 
 		// Start the initial read
-		ReadFileAsync(hSourceImage, &buffer[read_bufnum * buf_size], buf_size);
+		ReadFileAsync(hSourceImage, &buffer[read_bufnum * buf_size], (DWORD)MIN(buf_size, target_size));
 
 		read_size[proc_bufnum] = 1;	// To avoid early loop exit
 		for (wb = 0; read_size[proc_bufnum] != 0; wb += read_size[proc_bufnum]) {
@@ -1362,21 +1362,25 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 				goto out;
 			}
 
-			// 2. Update the read size
-			// 2a) Don't overflow our projected size (mostly for VHDs)
-			if (wb + read_size[read_bufnum] > target_size)
-				read_size[read_bufnum] = (DWORD)(target_size - wb);
-			// 2b) WriteFile fails unless the size is a multiple of sector size
-			if (read_size[read_bufnum] % SelectedDrive.SectorSize != 0)
-				read_size[read_bufnum] = ((read_size[read_bufnum] + SelectedDrive.SectorSize - 1) /
-					SelectedDrive.SectorSize) * SelectedDrive.SectorSize;
+
+			// 2. WriteFile fails unless the size is a multiple of sector size
+			if (read_size[read_bufnum] % SelectedDrive.SectorSize != 0) {
+				assert(HI_ALIGN_X_TO_Y(read_size[read_bufnum], SelectedDrive.SectorSize) <= buf_size);
+				read_size[read_bufnum] = HI_ALIGN_X_TO_Y(read_size[read_bufnum], SelectedDrive.SectorSize);
+			}
 
 			// 3. Switch to the next reading buffer
 			proc_bufnum = read_bufnum;
 			read_bufnum = (read_bufnum + 1) % NUM_BUFFERS;
 
 			// 3. Launch the next asynchronous read operation
-			ReadFileAsync(hSourceImage, &buffer[read_bufnum * buf_size], buf_size);
+			// It is VERY IMPORTANT here that we don't attempt to read past the source
+			// or target sizes, as mounted VHDs will SCREW YOU if you attempt to do so
+			// and will even start returning ERRONEOUS DATA for sectors before the end
+			// of the disk... So we make sure to adjust the size not to ever overflow.
+			// Also we need to make sure we add read_size[proc_bufnum] to wb since we
+			// have already read the data and are about to write it.
+			ReadFileAsync(hSourceImage, &buffer[read_bufnum * buf_size], (DWORD)MIN(buf_size, target_size - (wb + read_size[proc_bufnum])));
 
 			// 4. Synchronously write the current data buffer
 			for (i = 1; i <= WRITE_RETRIES; i++) {
