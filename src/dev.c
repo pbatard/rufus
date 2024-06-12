@@ -287,6 +287,7 @@ static __inline BOOL IsVHD(const char* buffer)
 		"Arsenal_________Virtual_",
 		"KernSafeVirtual_________",
 		"Msft____Virtual_Disk____",
+		"BHYVE__________SATA_DISK",
 		"VMware__VMware_Virtual_S"	// Enabled through a cheat mode, as this lists primary disks on VMWare instances
 	};
 
