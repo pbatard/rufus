@@ -1,0 +1,5 @@
+set(target_name ms-sys)
+file(GLOB source_files *.c *.h)
+add_library(${target_name} STATIC ${source_files})
+target_include_directories(${target_name} PRIVATE inc)
+target_compile_definitions(${target_name} PRIVATE _CRTDBG_MAP_ALLOC)

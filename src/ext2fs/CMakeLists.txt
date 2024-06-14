@@ -1,0 +1,5 @@
+set(target_name ext2fs)
+file(GLOB source_files *.c *.h)
+add_library(${target_name} STATIC ${source_files})
+target_include_directories(${target_name} PRIVATE .. ../msvc-missing)
+target_compile_definitions(${target_name} PRIVATE _CRT_SECURE_NO_WARNINGS _CRTDBG_MAP_ALLOC)
