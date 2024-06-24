@@ -202,6 +202,17 @@ static __inline BOOL WriteRegistryKey32(HKEY root, const char* key, int32_t val)
 	DWORD tmp = (DWORD)val;
 	return SetRegistryKey32(root, key, tmp);
 }
+static __inline BOOL  IsAppsUseDarkMode() {
+	char buffer [4] ;
+	DWORD cbData = (DWORD)(sizeof(buffer));
+	LSTATUS res = RegGetValue(REGKEY_HKCU, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", L"AppsUseLightTheme", RRF_RT_REG_DWORD, NULL, buffer, &cbData);
+	if (res == ERROR_SUCCESS)
+	{
+		int i = (int)(buffer[3] << 24 | buffer[2] << 16 | buffer[1] << 8 | buffer[0]);
+		return i == 0;
+	}
+	return FALSE;
+}
 
 /* Helpers for boolean registry operations */
 #define ReadRegistryKeyBool(root, key) (ReadRegistryKey32(root, key) != 0)

@@ -38,7 +38,7 @@
 #include <getopt.h>
 #include <assert.h>
 #include <delayimp.h>
-
+#include"ui_data.h"
 #include "rufus.h"
 #include "format.h"
 #include "missing.h"
@@ -57,7 +57,10 @@
 #include "cdio/logging.h"
 #include "../res/grub/grub_version.h"
 #include "../res/grub2/grub2_version.h"
-
+#include<dwmapi.h>
+#include <Richedit.h>
+#pragma comment(lib,"UxTheme.lib")
+#pragma comment(lib,"DwmApi.lib")
 enum bootcheck_return {
 	BOOTCHECK_PROCEED = 0,
 	BOOTCHECK_CANCEL = -1,
@@ -146,6 +149,28 @@ StrArray BlockingProcessList, ImageList;
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
 RUFUS_DRIVE rufus_drive[MAX_DRIVES] = { 0 };
+
+// hdc is a memory DC with a 32bpp bitmap selected into it.
+// This function sets the alpha channel to 255 without
+// affecting any of the color channels.
+
+void MakeBitmapOpaque(
+	HDC hdc, int x, int y, int cx, int cy)
+{
+	BITMAPINFO bi = {0};
+	bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bi.bmiHeader.biWidth = 1;
+	bi.bmiHeader.biHeight = 1;
+	bi.bmiHeader.biPlanes = 1;
+	bi.bmiHeader.biBitCount = 32;
+	bi.bmiHeader.biCompression = BI_RGB;
+
+	RGBQUAD bitmapBits = { 0x00, 0x00, 0x00, 0xFF };
+
+	StretchDIBits(hdc, x, y, cx, cy,
+		0, 0, 1, 1, &bitmapBits, &bi,
+		DIB_RGB_COLORS, SRCPAINT);
+}
 
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
 // localization_data.sh and the .rc when the year changes!
@@ -934,10 +959,283 @@ out:
 	SetProposedLabel(device_index);
 	return TRUE;
 }
+/*
+ * DarkMode CheckBox Subclass Proc
+ */
 
+static LRESULT CALLBACK ButtonSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam,
+	LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
+	if (!IsAppsUseDarkMode)
+	{
+		return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+	}
+
+	switch (uMsg)
+	{
+
+	case WM_PAINT:
+	{
+		DefSubclassProc(hWnd, uMsg, wParam, lParam);
+		if (!IsWindowEnabled(hWnd))
+		{
+
+			return true;
+		}
+		HDC hDc = GetDC(hWnd);
+		RECT rc1;
+		GetClientRect(hWnd, &rc1);
+		SetBkMode(hDc, TRANSPARENT);
+		SetTextColor(hDc, RGB(255, 255, 255));
+		HTHEME btnTheme = OpenThemeData(hWnd, L"Button");
+		SIZE siz;
+		GetThemePartSize(btnTheme, hDc, 3, 1, NULL, TS_DRAW, &siz);
+		rc1.left += siz.cx + 2;
+		FillRect(hDc, &rc1, CreateSolidBrush(ColorControlDark));
+		rc1.top += GetSystemMetrics(SM_CXPADDEDBORDER);
+		LPCWSTR* staticText[99] = {0};
+		GetWindowText(hWnd, staticText, ARRAYSIZE(staticText));
+		DTTOPTS opts;
+		opts.dwSize = sizeof(DTTOPTS);
+		opts.dwFlags = DTT_TEXTCOLOR;
+		opts.crText = RGB(255, 255, 255);
+		HFONT font = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
+		SelectObject(hDc, font);
+		DrawThemeTextEx(btnTheme, hDc, 3, 0, &staticText, -1, DT_SINGLELINE | DT_LEFT, &rc1, &opts);
+		ReleaseDC(hWnd, hDc);
+		return true;
+	}
+	}
+	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+}
+/*
+ * Set DarkMode to all Child Windows
+ */
+static BOOL CALLBACK ThemeCallback(HWND hWnd, LPARAM lParam)
+{
+	const char* str[255] = {0};
+	GetClassName(hWnd, &str, 255);
+	bool isDarkmode = IsAppsUseDarkMode();
+	if (strcmp(str, L"Button") == 0)
+	{
+		LONG_PTR style = GetWindowLongPtr(hWnd, GWL_STYLE);
+		if ((style & BS_AUTOCHECKBOX) == BS_AUTOCHECKBOX)
+		{
+			if (!isDarkmode)
+			{
+				RemoveWindowSubclass(hWnd, ButtonSubclassProc, uIdSubclass);
+				return true;
+			}
+			else
+				SetWindowSubclass(hWnd, ButtonSubclassProc, uIdSubclass, 0);
+		}
+
+		else
+			SetWindowTheme(hWnd, isDarkmode ? L"DarkMode_Explorer" : L"Explorer", NULL);
+	}
+	else if (strcmp(str, L"ComboBox") == 0)
+	{
+		SetWindowTheme(hWnd, isDarkmode ? L"DarkMode_CFD" : L"Explorer", NULL);
+	}
+	else if (strcmp(str, L"ToolBar") == 0)
+	{
+		wchar_t toolbarText[50];
+		wchar_t multiToolbarText[50] ;
+		utf8_to_wchar_no_alloc(lmprintf(MSG_315), multiToolbarText, ARRAYSIZE(multiToolbarText));
+		GetWindowText(hWnd, &toolbarText, 16);
+		if (strcmp(toolbarText, multiToolbarText) != 0)
+			SetWindowTheme(hWnd, isDarkmode ? L"DarkMode" : L"Explorer", NULL);
+	}
+	else if (strcmp(str, L"EDIT") == 0)
+	{
+		LONG_PTR style = GetWindowLongPtr(hWnd, GWL_STYLE);
+		if (((style & WS_VSCROLL) == WS_VSCROLL) || ((style & WS_HSCROLL) == WS_HSCROLL))
+			SetWindowTheme(hWnd, isDarkmode ? L"DarkMode_Explorer" : L"Explorer", NULL);
+		else
+			SetWindowTheme(hWnd, isDarkmode ? L"DarkMode_CFD" : L"Explorer", NULL);
+		
+			
+
+	}
+	
+	return TRUE;
+}
+
+/*
+ * DarkMod Dialog Subclass Proc
+ */
+
+static LRESULT CALLBACK DlgSubclassProc(HWND hDlg, UINT message, WPARAM wParam,
+	LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
+	RECT rcDlg;
+	GetClientRect(hDlg, &rcDlg);
+	HDC dc;
+	switch (message)
+	{
+	case WM_NCPAINT:
+	{
+		LRESULT result = DefSubclassProc(hDlg, message, wParam, lParam);
+		HDC windowDC = GetWindowDC(hDlg);
+		RECT rcWin, rcClient;
+		GetWindowRect(hDlg, &rcWin);
+		GetClientRect(hDlg, &rcClient);
+		MapWindowPoints(hDlg, NULL, (LPPOINT)&rcWin, 2);
+		int rcWinWidth = rcWin.right - rcWin.left;
+		int rcWinHieght = rcWin.bottom - rcWin.top;
+		int rcrcClientWidth = rcClient.right - rcClient.left;
+		int rcrcClientHieght = rcClient.bottom - rcClient.top;
+		int borderWidth = (rcWinWidth - rcrcClientWidth) / 2;
+		int captionHight = rcWinHieght - rcrcClientHieght - borderWidth;
+		OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
+		OffsetRect(&rcClient, borderWidth, captionHight);
+		HRGN updateRgn = wParam != 1 ?(HRGN)wParam : CreateRectRgnIndirect(&rcWin);
+		HRGN clipRgn = CreateRectRgn(0, 0, 0, 0);
+		HRGN ncRgn = CreateRectRgn(0, 0, 0, 0);
+
+		if (wParam == 1)
+			clipRgn = CreateRectRgnIndirect(&rcClient);
+		else
+			GetClipRgn(windowDC, clipRgn);
+		CombineRgn(ncRgn, updateRgn, clipRgn, RGN_DIFF);
+		SelectClipRgn(windowDC, ncRgn);
+		FillRect(windowDC, &rcWin, CreateSolidBrush(RGB(63, 63, 63)));
+		HRGN hRgn= CreateRectRgnIndirect(&rcWin);
+		SelectClipRgn(windowDC, hRgn);
+		MakeBitmapOpaque(windowDC, 0, 0, rcWinWidth, rcWinHieght);
+		safe_release_dc(hDlg, windowDC);
+		return result;
+	}
+	case WM_NCCALCSIZE:
+	{
+		//TODO: get real caption Size
+
+		if (wParam)
+		{
+			NCCALCSIZE_PARAMS* ncParma = (NCCALCSIZE_PARAMS*)(lParam);
+			ncParma->rgrc[0].left += 1;//pr++;
+			ncParma->rgrc[0].top += 31;
+			ncParma->rgrc[0].right -= 1;
+			ncParma->rgrc[0].bottom -= 1;
+			return 0;
+		}
+		else
+		{
+			RECT* rect = (RECT*)lParam;
+			rect->top += 31;
+			rect->left += 1;
+			rect->right -= 1;
+			rect->bottom -= 1;
+			return 0;
+		}
+	}
+
+	case WM_SHOWWINDOW:
+	{
+		if (wParam)
+		{
+			EnumChildWindows(hDlg, ThemeCallback, lParam);
+			BOOL allowncpaint = TRUE;
+			COLORREF caption = RGB(0x0,0x0,0x0);
+			DwmSetWindowAttribute(hDlg, DWMWA_CAPTION_COLOR, &caption, sizeof caption);
+			DwmSetWindowAttribute(hDlg, DWMWA_BORDER_COLOR, &caption, sizeof caption);
+			DwmSetWindowAttribute(hDlg, DWMWA_ALLOW_NCPAINT, &allowncpaint, sizeof(int));
+			RECT rcDlg;
+			GetWindowRect(hDlg, &rcDlg);
+			SetWindowPos(hDlg, 0, 0, 0, rcDlg.right-rcDlg.left, rcDlg.bottom-rcDlg.top, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE);
+			
+			if (hLog)
+			{
+				RECT rcLog;
+				GetWindowRect(hLog, &rcLog);
+				GetClientRect(hDlg, &rcDlg);
+				rcLog.left = rcDlg.left + 1;
+				rcLog.right = rcDlg.right - 1;
+				SetWindowPos(hLog, NULL, 0, 0, rcLog.right - rcLog.left, rcLog.bottom - rcLog.top, SWP_NOMOVE | SWP_NOZORDER);
+			}
+			RedrawWindow(hDlg, NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_INVALIDATE | RDW_FRAME | RDW_ERASENOW);
+		}
+
+		return DefSubclassProc(hDlg, message, wParam, lParam);
+	
+	}
+		
+	case WM_CTLCOLORLISTBOX:
+		SetBkColor((HDC)wParam, RGB(25, 25, 25));
+		SetTextColor((HDC)wParam, RGB(255, 255, 255));
+		return (INT_PTR)CreateSolidBrush(RGB(25, 25, 25));
+	case WM_CTLCOLOREDIT:
+	{
+		HDC hdc = (HDC)wParam;
+		SetBkColor((HDC)wParam, RGB(25, 25, 25));
+		HBRUSH sysbrash = GetSysColorBrush(COLOR_WINDOWFRAME);
+		SetTextColor(hdc, RGB(255, 255, 255));
+		return (INT_PTR)CreateSolidBrush(RGB(25, 25, 25));
+	}
+	case WM_CTLCOLORBTN:
+	case WM_CTLCOLORDLG:
+		return (INT_PTR)CreateSolidBrush(ColorControlDark);
+	case WM_CTLCOLORSTATIC:
+		 dc = GetDC((HWND)lParam);
+		RECT rcDlg;
+		GetClientRect((HWND)lParam, &rcDlg);
+		safe_release_dc((HWND)lParam, dc);
+		if ((HWND)lParam == GetDlgItem(hDlg, IDC_LABEL))
+		{
+			
+			SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOWFRAME));
+
+			
+			return (INT_PTR)CreateSolidBrush(RGB(25, 25, 25));
+		}
+		if ((HWND)lParam != GetDlgItem(hDlg, IDS_CSM_HELP_TXT))
+		{
+			
+			SetBkMode((HDC)wParam, TRANSPARENT);
+			SetTextColor((HDC)wParam, TOOLBAR_ICON_COLOR);
+			//MakeBitmapOpaque((HDC)wParam, 0, 0, rcDlg.right - rcDlg.left, rcDlg.bottom - rcDlg.top);
+
+			return (INT_PTR)CreateSolidBrush(ColorControlDark);
+		}
+		SetBkMode((HDC)wParam, TRANSPARENT);
+		SetTextColor((HDC)wParam, TOOLBAR_ICON_COLOR);
+		
+		return (INT_PTR)CreateSolidBrush(ColorControlDark);
+	case WM_SETTINGCHANGE:
+	{
+		if (IsAppsUseDarkMode())
+		{
+			BOOL allowncpaint = TRUE;
+			COLORREF caption = RGB(0x0,0x0,0x0);
+			DWM_WINDOW_CORNER_PREFERENCE f = DWMWCP_DONOTROUND;
+			DwmSetWindowAttribute(hDlg, DWMWA_CAPTION_COLOR, &caption, sizeof caption);
+			DwmSetWindowAttribute(hDlg, DWMWA_BORDER_COLOR, &caption, sizeof caption);
+			DwmSetWindowAttribute(hDlg, DWMWA_WINDOW_CORNER_PREFERENCE, &f, sizeof(f));
+			DwmSetWindowAttribute(hDlg, DWMWA_ALLOW_NCPAINT, &allowncpaint, sizeof(int));
+			if (hLog)
+			{
+				RECT rcLog, rcDlg;
+				GetWindowRect(hLog, &rcLog);
+				GetClientRect(hDlg, &rcDlg);
+				rcLog.left = rcDlg.left + 1;
+				rcLog.right = rcDlg.right - 1;
+				SetWindowPos(hLog, NULL, 0, 0, rcLog.right - rcLog.left, rcLog.bottom - rcLog.top, SWP_NOMOVE | SWP_NOZORDER);
+			}
+		}
+		return DefSubclassProc(hDlg, message, wParam, lParam);
+	}
+
+	default:
+		return DefSubclassProc(hDlg, message, wParam, lParam);
+		break;
+	}
+}
 // Callback for the log window
+
 BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	BOOL resized_already = FALSE;
+	REQRESIZE* rsz;
 	HDC hDC;
 	HFONT hf;
 	LONG lfHeight;
@@ -948,10 +1246,14 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message) {
 	case WM_INITDIALOG:
 		apply_localization(IDD_LOG, hDlg);
+		
 		hLog = GetDlgItem(hDlg, IDC_LOG_EDIT);
-
 		// Increase the size of our log textbox to MAX_LOG_SIZE (unsigned word)
 		PostMessage(hLog, EM_LIMITTEXT, MAX_LOG_SIZE , 0);
+		if (IsAppsUseDarkMode())
+		{
+			SetWindowSubclass(hDlg, DlgSubclassProc, uIdSubclass, 0);
+		}
 		// Set the font to Unicode so that we can display anything
 		hDC = GetDC(NULL);
 		lfHeight = -MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72);
@@ -973,6 +1275,7 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		style &= ~(ES_RIGHT);
 		SetWindowLongPtr(hLog, GWL_STYLE, style);
 		break;
+
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDCANCEL:
@@ -1018,7 +1321,34 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		ResizeButtonHeight(hDlg, IDC_LOG_SAVE);
 		ResizeButtonHeight(hDlg, IDC_LOG_CLEAR);
 		return TRUE;
+	case WM_SETTINGCHANGE:
+		if (!IsAppsUseDarkMode())
+		{
+			BOOL allowncpaint = FALSE;
+			COLORREF caption = DWMWA_COLOR_DEFAULT;
+			DWM_WINDOW_CORNER_PREFERENCE f = DWMWCP_DONOTROUND;
+			DwmSetWindowAttribute(hDlg, DWMWA_CAPTION_COLOR, &caption, sizeof caption);
+			DwmSetWindowAttribute(hDlg, DWMWA_ALLOW_NCPAINT, &allowncpaint, sizeof(int));
+			DwmSetWindowAttribute(hDlg, DWMWA_BORDER_COLOR, &caption, sizeof caption);
+			DwmSetWindowAttribute(hDlg, DWMWA_WINDOW_CORNER_PREFERENCE, &f, sizeof(f));
+			if (hLog)
+			{
+				RECT rcLog, rcDlg;
+				GetWindowRect(hLog, &rcLog);
+				GetClientRect(hDlg, &rcDlg);
+				rcLog.left = rcDlg.left + 1;
+				rcLog.right = rcDlg.right - 1;
+				SetWindowPos(hLog, NULL, 0, 0, rcLog.right - rcLog.left, rcLog.bottom - rcLog.top, SWP_NOMOVE | SWP_NOZORDER);
+			}
+			RemoveWindowSubclass(hDlg, DlgSubclassProc, uIdSubclass);
+		}
+			
+		else
+	    SetWindowSubclass(hDlg, DlgSubclassProc, uIdSubclass, 0);
+		EnumChildWindows(hDlg, ThemeCallback, lParam);
+		return TRUE;
 	}
+
 	return FALSE;
 }
 
@@ -1231,6 +1561,7 @@ out:
 	assert(ret < ARCH_MAX);
 	return ret;
 }
+
 
 // The scanning process can be blocking for message processing => use a thread
 DWORD WINAPI ImageScanThread(LPVOID param)
@@ -2149,6 +2480,8 @@ static void PrintStatusTimeout(const char* str, BOOL val)
 /*
  * Main dialog callback
  */
+
+
 static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static DWORD DeviceNum = 0;
@@ -2178,7 +2511,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	loc_cmd* lcmd = NULL;
 
 	switch (message) {
-
+	
 	case WM_COMMAND:
 #ifdef RUFUS_TEST
 		if (LOWORD(wParam) == IDC_TEST) {
@@ -2704,6 +3037,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
 		safe_release_dc(hDlg, hDC);
 		apply_localization(IDD_DIALOG, hDlg);
+		if (IsAppsUseDarkMode())
+			SetWindowSubclass(hDlg, DlgSubclassProc, uIdSubclass, 0);
 		// The AppStore version always enables Fido
 		if (appstore_version)
 			SetFidoCheck();
@@ -2713,6 +3048,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		log_displayed = FALSE;
 		hLogDialog = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogCallback);
 		InitDialog(hDlg);
+		
 		GetDevices(0);
 		EnableControls(TRUE, FALSE);
 		UpdateImage(FALSE);
@@ -2735,7 +3071,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 
 		// Set 'START' as the selected button if it's enabled, otherwise use 'SELECT', instead
 		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)(IsWindowEnabled(hStart) ? hStart : hSelectImage), TRUE);
-
+		
+		
 #if defined(ALPHA)
 		// Add a VERY ANNOYING popup for Alpha releases, so that people don't start redistributing them
 		MessageBoxA(NULL, "This is an Alpha version of " APPLICATION_NAME " - It is meant to be used for "
@@ -2746,11 +3083,13 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			"testing ONLY and should NOT be distributed as a release.", "TEST VERSION", MSG_INFO);
 #endif
 		// Let's not take any risk: Ask Windows to redraw the whole dialog before we exit init
+		
 		RedrawWindow(hMainDialog, NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW);
 		InvalidateRect(hMainDialog, NULL, TRUE);
-
+		
+	
 		return (INT_PTR)FALSE;
-
+	
 	case WM_DRAWITEM:
 		// The things one must do to get an ellipsis and text alignment on the status bar...
 		if (wParam == IDC_STATUS) {
@@ -2773,22 +3112,34 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				return (INT_PTR)TRUE;
 			}
 		}
+		
 		break;
-
+	case WM_SETTINGCHANGE:
+		if (!IsAppsUseDarkMode())
+		{
+			BOOL allowncpaint = FALSE;
+			COLORREF caption = DWMWA_COLOR_DEFAULT;
+			DWM_WINDOW_CORNER_PREFERENCE f = DWMWCP_ROUND;
+			DwmSetWindowAttribute(hDlg, DWMWA_CAPTION_COLOR, &caption, sizeof caption);
+			DwmSetWindowAttribute(hDlg, DWMWA_BORDER_COLOR, &caption, sizeof caption);
+			DwmSetWindowAttribute(hDlg, DWMWA_WINDOW_CORNER_PREFERENCE, &f, sizeof(f));
+			DwmSetWindowAttribute(hDlg, DWMWA_ALLOW_NCPAINT, &allowncpaint, sizeof(int));
+			RemoveWindowSubclass(hDlg, DlgSubclassProc, uIdSubclass);
+		}
+		else
+		{
+			SetWindowSubclass(hDlg, DlgSubclassProc, uIdSubclass, 0);
+		}
+			
+		EnumChildWindows(hDlg, ThemeCallback, lParam);
+		RedrawWindow(hMainDialog, NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_ERASENOW);
+		return DefWindowProc(hDlg, message, wParam, lParam);
 	case WM_PAINT:
 		hDC = BeginPaint(hDlg, &ps);
 		OnPaint(hDC);
 		EndPaint(hDlg, &ps);
 		break;
 
-	case WM_CTLCOLORSTATIC:
-		if ((HWND)lParam != GetDlgItem(hDlg, IDS_CSM_HELP_TXT))
-			return FALSE;
-		SetBkMode((HDC)wParam, TRANSPARENT);
-		CreateStaticFont((HDC)wParam, &hyperlink_font, FALSE);
-		SelectObject((HDC)wParam, hyperlink_font);
-		SetTextColor((HDC)wParam, TOOLBAR_ICON_COLOR);
-		return (INT_PTR)CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
