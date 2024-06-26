@@ -59,8 +59,9 @@
 #include "../res/grub2/grub2_version.h"
 #include<dwmapi.h>
 #include <Richedit.h>
-#pragma comment(lib,"UxTheme.lib")
-#pragma comment(lib,"DwmApi.lib")
+#include <uxtheme.h>
+
+
 enum bootcheck_return {
 	BOOTCHECK_PROCEED = 0,
 	BOOTCHECK_CANCEL = -1,
@@ -106,7 +107,7 @@ extern const char* old_c32_name[NB_OLD_C32];
 extern const char* cert_name[3];
 extern const char* FileSystemLabel[FS_MAX];
 extern const char *bootmgr_efi_name, *efi_dirname, *efi_bootname[ARCH_MAX];
-
+static UINT_PTR uIdSubclass = 1;
 /*
  * Globals
  */
@@ -154,8 +155,7 @@ RUFUS_DRIVE rufus_drive[MAX_DRIVES] = { 0 };
 // This function sets the alpha channel to 255 without
 // affecting any of the color channels.
 
-void MakeBitmapOpaque(
-	HDC hdc, int x, int y, int cx, int cy)
+void MakeBitmapOpaque( HDC hdc, int x, int y, int cx, int cy)
 {
 	BITMAPINFO bi = {0};
 	bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -164,12 +164,8 @@ void MakeBitmapOpaque(
 	bi.bmiHeader.biPlanes = 1;
 	bi.bmiHeader.biBitCount = 32;
 	bi.bmiHeader.biCompression = BI_RGB;
-
 	RGBQUAD bitmapBits = { 0x00, 0x00, 0x00, 0xFF };
-
-	StretchDIBits(hdc, x, y, cx, cy,
-		0, 0, 1, 1, &bitmapBits, &bi,
-		DIB_RGB_COLORS, SRCPAINT);
+	StretchDIBits(hdc, x, y, cx, cy, 0, 0, 1, 1, &bitmapBits, &bi,DIB_RGB_COLORS, SRCPAINT);
 }
 
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
@@ -963,10 +959,9 @@ out:
  * DarkMode CheckBox Subclass Proc
  */
 
-static LRESULT CALLBACK ButtonSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam,
-	LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+static LRESULT CALLBACK ButtonSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam,LPARAM lParam, UINT_PTR idSubclass, DWORD_PTR dwRefData)
 {
-	if (!IsAppsUseDarkMode)
+	if (!IsAppsUseDarkMode())
 	{
 		return DefSubclassProc(hWnd, uMsg, wParam, lParam);
 	}
@@ -993,15 +988,15 @@ static LRESULT CALLBACK ButtonSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 		rc1.left += siz.cx + 2;
 		FillRect(hDc, &rc1, CreateSolidBrush(ColorControlDark));
 		rc1.top += GetSystemMetrics(SM_CXPADDEDBORDER);
-		LPCWSTR* staticText[99] = {0};
-		GetWindowText(hWnd, staticText, ARRAYSIZE(staticText));
+		WCHAR szCaption[60];
+		GetWindowText(hWnd, szCaption, ARRAYSIZE(szCaption));
 		DTTOPTS opts;
 		opts.dwSize = sizeof(DTTOPTS);
 		opts.dwFlags = DTT_TEXTCOLOR;
 		opts.crText = RGB(255, 255, 255);
 		HFONT font = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
 		SelectObject(hDc, font);
-		DrawThemeTextEx(btnTheme, hDc, 3, 0, &staticText, -1, DT_SINGLELINE | DT_LEFT, &rc1, &opts);
+		DrawThemeTextEx(btnTheme, hDc, 3, 0, szCaption, -1, DT_SINGLELINE | DT_LEFT, &rc1, &opts);
 		ReleaseDC(hWnd, hDc);
 		return true;
 	}
@@ -1013,10 +1008,10 @@ static LRESULT CALLBACK ButtonSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam,
  */
 static BOOL CALLBACK ThemeCallback(HWND hWnd, LPARAM lParam)
 {
-	const char* str[255] = {0};
-	GetClassName(hWnd, &str, 255);
+	WCHAR str[20] = {0};
+	GetClassName(hWnd, str, 20);
 	bool isDarkmode = IsAppsUseDarkMode();
-	if (strcmp(str, L"Button") == 0)
+	if (_wcsicmp(str, L"Button") == 0)
 	{
 		LONG_PTR style = GetWindowLongPtr(hWnd, GWL_STYLE);
 		if ((style & BS_AUTOCHECKBOX) == BS_AUTOCHECKBOX)
@@ -1033,20 +1028,20 @@ static BOOL CALLBACK ThemeCallback(HWND hWnd, LPARAM lParam)
 		else
 			SetWindowTheme(hWnd, isDarkmode ? L"DarkMode_Explorer" : L"Explorer", NULL);
 	}
-	else if (strcmp(str, L"ComboBox") == 0)
+	else if (_wcsicmp(str, L"ComboBox") == 0)
 	{
 		SetWindowTheme(hWnd, isDarkmode ? L"DarkMode_CFD" : L"Explorer", NULL);
 	}
-	else if (strcmp(str, L"ToolBar") == 0)
+	else if (_wcsicmp(str, L"ToolbarWindow32") == 0)
 	{
 		wchar_t toolbarText[50];
 		wchar_t multiToolbarText[50] ;
 		utf8_to_wchar_no_alloc(lmprintf(MSG_315), multiToolbarText, ARRAYSIZE(multiToolbarText));
 		GetWindowText(hWnd, &toolbarText, 16);
-		if (strcmp(toolbarText, multiToolbarText) != 0)
+		 if (_wcsicmp(toolbarText, multiToolbarText) != 0)
 			SetWindowTheme(hWnd, isDarkmode ? L"DarkMode" : L"Explorer", NULL);
 	}
-	else if (strcmp(str, L"EDIT") == 0)
+	else if (_wcsicmp(str, L"EDIT") == 0)
 	{
 		LONG_PTR style = GetWindowLongPtr(hWnd, GWL_STYLE);
 		if (((style & WS_VSCROLL) == WS_VSCROLL) || ((style & WS_HSCROLL) == WS_HSCROLL))
@@ -1065,11 +1060,9 @@ static BOOL CALLBACK ThemeCallback(HWND hWnd, LPARAM lParam)
  * DarkMod Dialog Subclass Proc
  */
 
-static LRESULT CALLBACK DlgSubclassProc(HWND hDlg, UINT message, WPARAM wParam,
-	LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+static LRESULT CALLBACK DlgSubclassProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR idSubclass, DWORD_PTR dwRefData)
 {
-	RECT rcDlg;
-	GetClientRect(hDlg, &rcDlg);
+	
 	HDC dc;
 	switch (message)
 	{
@@ -1088,16 +1081,17 @@ static LRESULT CALLBACK DlgSubclassProc(HWND hDlg, UINT message, WPARAM wParam,
 		int borderWidth = (rcWinWidth - rcrcClientWidth) / 2;
 		int captionHight = rcWinHieght - rcrcClientHieght - borderWidth;
 		OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
-		OffsetRect(&rcClient, borderWidth, captionHight);
-		HRGN updateRgn = wParam != 1 ?(HRGN)wParam : CreateRectRgnIndirect(&rcWin);
+		OffsetRect(&rcClient, -rcWin.left, -rcWin.top);
+		HRGN copy =CreateRectRgn(0, 0, 0, 0);
+		HRGN updateRgn = wParam != 1 ? copy : CreateRectRgnIndirect(&rcWin);
 		HRGN clipRgn = CreateRectRgn(0, 0, 0, 0);
 		HRGN ncRgn = CreateRectRgn(0, 0, 0, 0);
-
+		CombineRgn(copy, copy, (HRGN)wParam, RGN_COPY);
 		if (wParam == 1)
 			clipRgn = CreateRectRgnIndirect(&rcClient);
 		else
 			GetClipRgn(windowDC, clipRgn);
-		CombineRgn(ncRgn, updateRgn, clipRgn, RGN_DIFF);
+		CombineRgn(ncRgn, updateRgn, clipRgn, RGN_OR);
 		SelectClipRgn(windowDC, ncRgn);
 		FillRect(windowDC, &rcWin, CreateSolidBrush(RGB(63, 63, 63)));
 		HRGN hRgn= CreateRectRgnIndirect(&rcWin);
@@ -1177,8 +1171,6 @@ static LRESULT CALLBACK DlgSubclassProc(HWND hDlg, UINT message, WPARAM wParam,
 		return (INT_PTR)CreateSolidBrush(ColorControlDark);
 	case WM_CTLCOLORSTATIC:
 		 dc = GetDC((HWND)lParam);
-		RECT rcDlg;
-		GetClientRect((HWND)lParam, &rcDlg);
 		safe_release_dc((HWND)lParam, dc);
 		if ((HWND)lParam == GetDlgItem(hDlg, IDC_LABEL))
 		{

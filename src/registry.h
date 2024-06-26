@@ -26,9 +26,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+	  
+// disable all warnings until fix theme 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif 
 
 #define REGKEY_HKCU                 HKEY_CURRENT_USER
 #define REGKEY_HKLM                 HKEY_LOCAL_MACHINE
+
 
 /* Delete a registry key from <key_root>\Software and all its values
    If the key has subkeys, this call will fail. */

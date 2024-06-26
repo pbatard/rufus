@@ -116,4 +116,4 @@ extern void ShowLanguageMenu(RECT rcExclude);
 extern void SetPassesTooltip(void);
 extern void SetBootTypeDropdownWidth(void);
 extern void OnPaint(HDC hdc);
-static UINT_PTR uIdSubclass = 1;
+extern void MakeBitmapOpaque(HDC hdc, int x, int y, int cx, int cy);

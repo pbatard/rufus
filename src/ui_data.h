@@ -20,6 +20,10 @@
 #include <windows.h>
 #include "resource.h"
 
+ // disable all warnings about unused variable
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif 
 #pragma once
 
 // GUIDs needed to set a control's accessibility props
