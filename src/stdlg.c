@@ -43,6 +43,8 @@
 #include "registry.h"
 #include "settings.h"
 #include "license.h"
+#include <Uxtheme.h>
+#include <dwmapi.h>
 
 /* Globals */
 extern BOOL is_x86_64, appstore_version;
@@ -60,6 +62,7 @@ static const char* notification_dont_display_setting;
 static WNDPROC update_original_proc = NULL;
 static HWINEVENTHOOK ap_weh = NULL;
 static char title_str[2][128], button_str[128];
+static UINT_PTR uIdSubclass = 1;
 HWND hFidoDlg = NULL;
 
 static int update_settings_reposition_ids[] = {
@@ -75,6 +78,8 @@ static int update_settings_reposition_ids[] = {
 	IDCANCEL,
 };
 
+
+
 /*
  * https://blogs.msdn.microsoft.com/oldnewthing/20040802-00/?p=38283/
  */
@@ -83,6 +88,246 @@ void SetDialogFocus(HWND hDlg, HWND hCtrl)
 	SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)hCtrl, TRUE);
 }
 
+/*
+ * DarkMode CheckBox Subclass Proc
+ */
+
+static LRESULT CALLBACK ButtonSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR idSubclass, DWORD_PTR dwRefData)
+{
+	if (!IsAppsUseDarkMode())
+	{
+		return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+	}
+
+	switch (uMsg)
+	{
+	
+	case WM_PAINT:
+	{
+	DefSubclassProc(hWnd, uMsg, wParam, lParam);
+		if (!IsWindowEnabled(hWnd))
+		{
+
+			return TRUE;
+		}
+		HDC hDc = GetDC(hWnd);
+		RECT rc1;
+		GetClientRect(hWnd, &rc1);
+		SetBkMode(hDc, TRANSPARENT);
+		SetTextColor(hDc, RGB(255, 255, 255));
+		HTHEME btnTheme = OpenThemeData(hWnd, L"Button");
+		SIZE siz;
+		GetThemePartSize(btnTheme, hDc, 3, 1, NULL, TS_DRAW, &siz);
+		rc1.left += siz.cx + 2;
+		FillRect(hDc, &rc1, CreateSolidBrush(ColorControlDark));
+		rc1.top += GetSystemMetrics(SM_CXPADDEDBORDER);
+		WCHAR szCaption[60];
+		GetWindowText(hWnd, szCaption, ARRAYSIZE(szCaption));
+		DTTOPTS opts;
+		opts.dwSize = sizeof(DTTOPTS);
+		opts.dwFlags = DTT_TEXTCOLOR;
+		opts.crText = RGB(255, 255, 255);
+		HFONT font = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
+		SelectObject(hDc, font);
+		DrawThemeTextEx(btnTheme, hDc, 3, 0, szCaption, -1, DT_SINGLELINE | DT_LEFT, &rc1, &opts);
+		ReleaseDC(hWnd, hDc);
+		return TRUE;
+	}
+	}
+	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+}
+
+/*
+ * Set DarkMode to all Child Windows
+ */
+
+static BOOL CALLBACK ThemeCallback(HWND hWnd, LPARAM lParam)
+{
+	WCHAR str[30] = { 0 };
+	GetClassName(hWnd, str, ARRAYSIZE(str));
+	BOOL isDarkMode = IsAppsUseDarkMode();
+
+	if (_wcsicmp(str, L"Button") == 0)
+	{
+		LONG_PTR style = GetWindowLongPtr(hWnd, GWL_STYLE);
+		if ((style & BS_AUTOCHECKBOX) == BS_AUTOCHECKBOX)
+		{
+			if (!isDarkMode)
+			{
+				RemoveWindowSubclass(hWnd, ButtonSubclassProc, uIdSubclass);
+				return TRUE;
+			}
+			else
+				SetWindowSubclass(hWnd, ButtonSubclassProc, uIdSubclass, 0);
+		}
+
+		else
+			SetWindowTheme(hWnd, isDarkMode ? L"DarkMode_Explorer" : L"Explorer", NULL);
+	}
+	else if (_wcsicmp(str, L"ComboBox") == 0)
+	{
+		SetWindowTheme(hWnd, isDarkMode ? L"DarkMode_CFD" : L"Explorer", NULL);
+	}
+	else if (_wcsicmp(str, L"ToolBar") == 0)
+	{
+		WCHAR title[30] = {0};
+		GetWindowText(hWnd, title, ARRAYSIZE(title));
+		if (_wcsicmp(title, L"Multiple buttons") != 0)
+			SetWindowTheme(hWnd, isDarkMode ? L"DarkMode" : L"Explorer", NULL);
+	}
+	else if (_wcsicmp(str, L"EDIT") == 0)
+	{
+		LONG_PTR style = GetWindowLongPtr(hWnd, GWL_STYLE);
+		if(((style & WS_VSCROLL) == WS_VSCROLL) || ((style & WS_HSCROLL) == WS_HSCROLL))
+		SetWindowTheme(hWnd, isDarkMode ? L"DarkMode_Explorer" : L"Explorer", NULL);
+		else
+		SetWindowTheme(hWnd, isDarkMode ? L"DarkMode_CFD" : L"Explorer", NULL);
+
+		
+	}
+	else if (_wcsicmp(str, L"RichEdit20W") == 0)
+	{
+		SendMessage(hWnd, EM_SETBKGNDCOLOR, 0, isDarkMode ? (LPARAM)ColorControlDark : (LPARAM)GetSysColor(COLOR_BTNFACE));
+		CHARFORMAT cf;
+		cf.cbSize = sizeof(cf);
+		cf.dwMask = CFM_COLOR;
+		cf.crTextColor = isDarkMode ?  RGB(255, 255, 255): RGB(0, 0, 0);
+		cf.dwEffects = 0;
+		SendMessage(hWnd, EM_SETCHARFORMAT, SCF_DEFAULT, (LPARAM)&cf);
+		//SetWindowTheme(hEdit[i], L"DarkMode_Explorer", NULL);
+		SetWindowTheme(hWnd, NULL, isDarkMode ? L"DarkMode_Explorer::ScrollBar" : L"Explorer::ScrollBar");
+
+
+	}
+	
+	return TRUE;
+}
+
+/*
+ * DarkMod Dialog Subclass Proc
+ */
+
+static LRESULT CALLBACK DlgSubclassProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR idSubclass, DWORD_PTR dwRefData)
+{
+	if (!IsAppsUseDarkMode())
+	{
+		return DefSubclassProc(hDlg, message, wParam, lParam);
+	}
+	switch (message)
+	{
+	case WM_NCPAINT:
+	{
+		LRESULT result = DefSubclassProc(hDlg, message, wParam, lParam);
+		HDC windowDC = GetWindowDC(hDlg);
+		RECT rcWin, rcClient;
+		GetWindowRect(hDlg, &rcWin);
+		GetClientRect(hDlg, &rcClient);
+		MapWindowPoints(hDlg, NULL, (LPPOINT)&rcWin, 2);
+		int rcWinWidth = rcWin.right - rcWin.left;
+		int rcWinHieght = rcWin.bottom - rcWin.top;
+		int rcrcClientWidth = rcClient.right - rcClient.left;
+		int rcrcClientHieght = rcClient.bottom - rcClient.top;
+		int borderWidth = (rcWinWidth - rcrcClientWidth) / 2;
+		int captionHight = rcWinHieght - rcrcClientHieght - borderWidth;
+		OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
+		OffsetRect(&rcClient, -rcWin.left, -rcWin.top);
+		HRGN copy = CreateRectRgn(0, 0, 0, 0);
+		HRGN updateRgn = wParam != 1 ? copy : CreateRectRgnIndirect(&rcWin);
+		HRGN clipRgn = CreateRectRgn(0, 0, 0, 0);
+		HRGN ncRgn = CreateRectRgn(0, 0, 0, 0);
+		CombineRgn(copy, copy, (HRGN)wParam, RGN_COPY);
+		if (wParam == 1)
+			clipRgn = CreateRectRgnIndirect(&rcClient);
+		else
+			GetClipRgn(windowDC, clipRgn);
+		CombineRgn(ncRgn, updateRgn, clipRgn, RGN_OR);
+		SelectClipRgn(windowDC, ncRgn);
+		FillRect(windowDC, &rcWin, CreateSolidBrush(RGB(63, 63, 63)));
+		HRGN hRgn = CreateRectRgnIndirect(&rcWin);
+		SelectClipRgn(windowDC, hRgn);
+		MakeBitmapOpaque(windowDC, 0, 0, rcWinWidth, rcWinHieght);
+		safe_release_dc(hDlg, windowDC);
+		return result;
+	}
+	case WM_NCCALCSIZE:
+	{
+		//TODO: get real caption Size
+
+		if (wParam)
+		{
+			NCCALCSIZE_PARAMS* ncParma = (NCCALCSIZE_PARAMS*)(lParam);
+			ncParma->rgrc[0].left += 1;//pr++;
+			ncParma->rgrc[0].top += 31;
+			ncParma->rgrc[0].right -= 1;
+			ncParma->rgrc[0].bottom -= 1;
+			return 0;
+		}
+		else
+		{
+			RECT* rect = (RECT*)lParam;
+			rect->top += 31;
+			rect->left += 1;
+			rect->right -= 1;
+			rect->bottom -= 1;
+			return 0;
+		}
+	}
+
+	case WM_SHOWWINDOW:
+	{
+		if (wParam)
+		{
+			EnumChildWindows(hDlg, ThemeCallback, lParam);
+			BOOL allowncpaint = TRUE;
+			COLORREF caption = RGB(0x0, 0x0, 0x0);
+			DwmSetWindowAttribute(hDlg, DWMWA_CAPTION_COLOR, &caption, sizeof caption);
+			DwmSetWindowAttribute(hDlg, DWMWA_BORDER_COLOR, &caption, sizeof caption);
+			DwmSetWindowAttribute(hDlg, DWMWA_ALLOW_NCPAINT, &allowncpaint, sizeof(int));
+			RECT rcDlg;
+			GetWindowRect(hDlg, &rcDlg);
+			SetWindowPos(hDlg, 0, 0, 0, rcDlg.right - rcDlg.left, rcDlg.bottom - rcDlg.top, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE);
+
+			if (hLog)
+			{
+				RECT rcLog;
+				GetWindowRect(hLog, &rcLog);
+				GetClientRect(hDlg, &rcDlg);
+				rcLog.left = rcDlg.left + 1;
+				rcLog.right = rcDlg.right - 1;
+				SetWindowPos(hLog, NULL, 0, 0, rcLog.right - rcLog.left, rcLog.bottom - rcLog.top, SWP_NOMOVE | SWP_NOZORDER);
+			}
+			RedrawWindow(hDlg, NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_INVALIDATE | RDW_FRAME | RDW_ERASENOW);
+		}
+
+		return DefSubclassProc(hDlg, message, wParam, lParam);
+
+	}
+
+	case WM_CTLCOLORLISTBOX:
+		SetBkColor((HDC)wParam, RGB(25, 25, 25));
+		SetTextColor((HDC)wParam, RGB(255, 255, 255));
+		return (INT_PTR)CreateSolidBrush(RGB(25, 25, 25));
+	case WM_CTLCOLOREDIT:
+	{
+		HDC hdc = (HDC)wParam;
+		SetBkColor((HDC)wParam, RGB(25, 25, 25));
+		SetTextColor(hdc, RGB(255, 255, 255));
+		return (INT_PTR)CreateSolidBrush(RGB(25, 25, 25));
+
+	}
+
+	case WM_CTLCOLORBTN:
+	case WM_CTLCOLORDLG:
+		return (INT_PTR)CreateSolidBrush(ColorControlDark);
+	case WM_CTLCOLORSTATIC:
+			SetBkMode((HDC)wParam, TRANSPARENT);
+			SetTextColor((HDC)wParam, TOOLBAR_ICON_COLOR);
+			return (INT_PTR)CreateSolidBrush(ColorControlDark);
+	default:
+		return DefSubclassProc(hDlg, message, wParam, lParam);
+		break;
+	}
+}
 /*
  * Return the UTF8 path of a file selected through a load or save dialog
  * All string parameters are UTF-8
@@ -216,7 +461,6 @@ out:
 void CreateStatusBar(void)
 {
 	RECT rect;
-	int edge[2];
 	HFONT hFont;
 
 	// Create the status bar
@@ -226,10 +470,10 @@ void CreateStatusBar(void)
 
 	// Create 2 status areas
 	GetClientRect(hMainDialog, &rect);
-	edge[0] = rect.right - (int)(SB_TIMER_SECTION_SIZE * fScale);
-	edge[1] = rect.right;
-	SendMessage(hStatus, SB_SETPARTS, (WPARAM)ARRAYSIZE(edge), (LPARAM)&edge);
+	int edge[] = { rect.right - (int)(SB_TIMER_SECTION_SIZE * fScale) , rect.right,-1};
 
+	SendMessage(hStatus, SB_SETPARTS, (WPARAM)ARRAYSIZE(edge), (LPARAM)&edge);
+	//SendMessage(hStatus, WM_SIZE, 0, 0);
 	// Set the font
 	hFont = CreateFontA(-MulDiv(9, GetDeviceCaps(GetDC(hMainDialog), LOGPIXELSY), 72),
 		0, 0, 0, FW_MEDIUM, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
@@ -337,6 +581,7 @@ INT_PTR CALLBACK LicenseCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		style &= ~(ES_RIGHT);
 		SetWindowLongPtr(hLicense, GWL_STYLE, style);
 		SetDlgItemTextA(hDlg, IDC_LICENSE_TEXT, gplv3);
+		SetWindowSubclass(hDlg, DlgSubclassProc, uIdSubclass, 0);
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
@@ -403,6 +648,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		// Need to send an explicit SetSel to avoid being positioned at the end of richedit control when tabstop is used
 		SendMessage(hEdit[1], EM_SETSEL, 0, 0);
 		SendMessage(hEdit[0], EM_REQUESTRESIZE, 0, 0);
+		SetWindowSubclass(hDlg, DlgSubclassProc, uIdSubclass, 0);
 		break;
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
@@ -555,6 +801,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDYES), 0, dh -cbh, 0, 0, 1.0f);
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDNO), 0, dh -cbh, 0, 0, 1.0f);
 		}
+		SetWindowSubclass(hDlg, DlgSubclassProc, uIdSubclass, 0);
 		return (INT_PTR)TRUE;
 	case WM_CTLCOLORSTATIC:
 		// Change the background colour for static text and icon
@@ -988,6 +1235,9 @@ INT_PTR CALLBACK TooltipCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		return (INT_PTR)FALSE;
 
 	switch (message) {
+	case WM_NCPAINT:
+		SendMessageW(ttlist[i].hTip, TTM_SETWINDOWTHEME, 0, IsAppsUseDarkMode() ? ((LPARAM)&L"DarkMode_Explorer") : ((LPARAM)&L"Explorer"));
+		return CallWindowProc(ttlist[i].original_proc, hDlg, message, wParam, lParam);
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
 		case TTN_GETDISPINFOW:
@@ -1318,6 +1568,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		SendMessage(hPolicy, EM_SETEVENTMASK, 0, ENM_LINK|ENM_REQUESTRESIZE);
 		SendMessageA(hPolicy, EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
 		SendMessage(hPolicy, EM_REQUESTRESIZE, 0, 0);
+		SetWindowSubclass(hDlg, DlgSubclassProc, uIdSubclass, 0);
 		break;
 	case WM_NOTIFY:
 		if ((((LPNMHDR)lParam)->code == EN_REQUESTRESIZE) && (!resized_already)) {
@@ -1568,6 +1819,9 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	case WM_CTLCOLORSTATIC:
 		if ((HWND)lParam != GetDlgItem(hDlg, IDC_WEBSITE))
 			return FALSE;
+		HDC hdcCtrl = GET_WM_CTLCOLOR_HDC(wParam, lParam, message);
+		HWND hWndCtrl = GET_WM_CTLCOLOR_HWND(wParam, lParam, message);
+		WORD cc = GET_WM_CTLCOLOR_TYPE(wParam, lParam, message);
 		// Change the font for the hyperlink
 		SetBkMode((HDC)wParam, TRANSPARENT);
 		CreateStaticFont((HDC)wParam, &hyperlink_font, TRUE);

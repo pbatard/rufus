@@ -38,10 +38,10 @@
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
-
+#include "WinUser.h"
 #include "ui.h"
 #include "ui_data.h"
-
+#include "registry.h"
 UINT_PTR UM_LANGUAGE_MENU_MAX = UM_LANGUAGE_MENU;
 HIMAGELIST hUpImageList, hDownImageList;
 extern BOOL use_vds, appstore_version;
@@ -350,11 +350,18 @@ void PositionMainControls(HWND hDlg)
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	advanced_device_section_height = rc.top;
+	LONG_PTR style = GetWindowLongPtrW(hCtrl, GWL_STYLE);
+	/*if ((style & SS_OWNERDRAW) != SS_OWNERDRAW)
+	{
+		style |= SS_OWNERDRAW;
+		style |= ~BS_AUTOCHECKBOX;
+		SetWindowLongPtrW(hCtrl, GWL_STYLE, style);
+	}*/
 	hCtrl = GetDlgItem(hDlg, IDC_UEFI_MEDIA_VALIDATION);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 	advanced_device_section_height = rc.bottom - advanced_device_section_height;
-
+	
 	hCtrl = GetDlgItem(hDlg, IDC_QUICK_FORMAT);
 	GetWindowRect(hCtrl, &rc);
 	MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
@@ -893,14 +900,20 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 	wchar_t winfo[128];
 	static BOOL marquee_mode = FALSE;
 	static uint32_t pos = 0, min = 0, max = 0xFFFF;
-	static COLORREF color = PROGRESS_BAR_NORMAL_COLOR;
+	BOOL isDark = IsAppsUseDarkMode();
+	COLORREF normalColor = isDark ? PROGRESS_BAR_DARK_NORMAL_COLOR : PROGRESS_BAR_NORMAL_COLOR;
+	COLORREF backgroundColor = isDark ? PROGRESS_BAR_DARK_BACKGROUND_COLOR : PROGRESS_BAR_BACKGROUND_COLOR;
+	COLORREF normalTextColor = isDark ? PROGRESS_BAR_DARK_NORMAL_TEXT_COLOR : PROGRESS_BAR_NORMAL_TEXT_COLOR;
+	COLORREF invertedlTextColor = isDark ? PROGRESS_BAR_DARK_INVERTED_TEXT_COLOR : PROGRESS_BAR_INVERTED_TEXT_COLOR;
+	COLORREF boxColor = isDark ? PROGRESS_BAR_DARK_BOX_COLOR : PROGRESS_BAR_BOX_COLOR;
+	COLORREF color = normalColor;
 
 	switch (message) {
 
 	case PBM_SETSTATE:
 		switch (wParam) {
 		case PBST_NORMAL:
-			color = PROGRESS_BAR_NORMAL_COLOR;
+			color = normalColor;
 			break;
 		case PBST_PAUSED:
 			color = PROGRESS_BAR_PAUSED_COLOR;
@@ -930,7 +943,7 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 		if ((wParam == TRUE) && (!marquee_mode)) {
 			marquee_mode = TRUE;
 			pos = min;
-			color = PROGRESS_BAR_NORMAL_COLOR;
+			color = normalColor;
 			SetTimer(hCtrl, TID_MARQUEE_TIMER, MARQUEE_TIMER_REFRESH, NULL);
 			InvalidateRect(hProgress, NULL, TRUE);
 		} else if ((wParam == FALSE) && (marquee_mode)) {
@@ -971,7 +984,7 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 			// Optional first segment
 			if (pos + ((max - min) / 5) > max) {
 				rc.right = MulDiv(pos + ((max - min) / 5) - max, rc.right, max - min);
-				SetTextColor(hDC, PROGRESS_BAR_INVERTED_TEXT_COLOR);
+				SetTextColor(hDC, invertedlTextColor);
 				SetBkColor(hDC, color);
 				ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
 					ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL, &rc, winfo, (int)wcslen(winfo), NULL);
@@ -981,8 +994,8 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 			// Optional second segment
 			if (pos > min) {
 				rc.right = MulDiv(pos - min, rc.right, max - min);
-				SetTextColor(hDC, PROGRESS_BAR_NORMAL_TEXT_COLOR);
-				SetBkColor(hDC, PROGRESS_BAR_BACKGROUND_COLOR);
+				SetTextColor(hDC, normalTextColor);
+				SetBkColor(hDC, backgroundColor);
 				ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
 					ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL, &rc, winfo, (int)wcslen(winfo), NULL);
 				rc.left = rc.right;
@@ -990,14 +1003,14 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 			}
 			// Second to last segment
 			rc.right = MulDiv(pos - min + ((max - min) / 5), rc.right, max - min);
-			SetTextColor(hDC, PROGRESS_BAR_INVERTED_TEXT_COLOR);
+			SetTextColor(hDC, invertedlTextColor);
 			SetBkColor(hDC, color);
 			ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
 				ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL, &rc, winfo, (int)wcslen(winfo), NULL);
 		} else {
 			// First segment
 			rc.right = (pos > min) ? MulDiv(pos - min, rc.right, max - min) : rc.left;
-			SetTextColor(hDC, PROGRESS_BAR_INVERTED_TEXT_COLOR);
+			SetTextColor(hDC, invertedlTextColor);
 			SetBkColor(hDC, color);
 			ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
 				ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL, &rc, winfo, (int)wcslen(winfo), NULL);
@@ -1005,12 +1018,12 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 		// Last segment
 		rc.left = rc.right;
 		rc.right = full_right;
-		SetTextColor(hDC, PROGRESS_BAR_NORMAL_TEXT_COLOR);
-		SetBkColor(hDC, PROGRESS_BAR_BACKGROUND_COLOR);
+		SetTextColor(hDC, normalTextColor);
+		SetBkColor(hDC, backgroundColor);
 		ExtTextOut(hDC, (full_right - size.cx) / 2, (rc.bottom - size.cy) / 2,
 			ETO_CLIPPED | ETO_OPAQUE | ETO_NUMERICSLOCAL, &rc, winfo, (int)wcslen(winfo), NULL);
 		// Bounding rectangle
-		SetDCPenColor(hDC, PROGRESS_BAR_BOX_COLOR);
+		SetDCPenColor(hDC, boxColor);
 		Rectangle(hDC, rc2.left, rc2.top, rc2.right, rc2.bottom);
 		EndPaint(hCtrl, &ps);
 		return (INT_PTR)TRUE;
@@ -1060,9 +1073,17 @@ void CreateAdditionalControls(HWND hDlg)
 		hIconDown = (HICON)LoadImage(hDll, MAKEINTRESOURCE(16750), IMAGE_ICON, s16, s16, LR_DEFAULTCOLOR | LR_SHARED);
 	hUpImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, 1, 0);
 	hDownImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE, 1, 0);
-	ImageList_AddIcon(hUpImageList, hIconUp);
-	ImageList_AddIcon(hDownImageList, hIconDown);
-
+	if (!IsAppsUseDarkMode())
+	{
+		ImageList_AddIcon(hUpImageList, hIconUp);
+		ImageList_AddIcon(hDownImageList, hIconDown);
+	}
+	else
+	{
+		ImageList_AddMasked(hUpImageList, LoadBitmap(0, MAKEINTRESOURCE(32753)), CLR_DEFAULT);
+		ImageList_AddMasked(hDownImageList, LoadBitmap(0, MAKEINTRESOURCE(32752)), CLR_DEFAULT);
+	}
+	
 	// Create the advanced options toolbars
 	memset(wtbtext, 0, sizeof(wtbtext));
 	utf8_to_wchar_no_alloc(lmprintf((advanced_mode_device) ? MSG_122 : MSG_121, lmprintf(MSG_119)), wtbtext[0], ARRAYSIZE(wtbtext[0]));
@@ -1585,10 +1606,12 @@ void SetBootTypeDropdownWidth(void)
 void OnPaint(HDC hdc)
 {
 	int i;
-	HPEN hp = CreatePen(0, (fScale < 1.5f) ? 2 : 3, RGB(0, 0, 0));
+	
+	HPEN hp = CreatePen(0, (fScale < 1.5f) ? 2 : 3, IsAppsUseDarkMode() ? RGB(255,255,255) : RGB(0, 0, 0));
 	SelectObject(hdc, hp);
 	for (i = 0; i < ARRAYSIZE(section_vpos); i++) {
 		MoveToEx(hdc, mw + 10, section_vpos[i], NULL);
 		LineTo(hdc, mw + fw, section_vpos[i]);
 	}
+	
 }
