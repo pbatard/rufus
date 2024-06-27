@@ -631,7 +631,7 @@ out:
 
 /// <summary>
 /// Setup a Windows To Go drive according to the official Microsoft instructions detailed at:
-/// https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-8.1-and-8/jj721578(v=ws.11).
+/// https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/deployment/windows-to-go/deploy-windows-to-go
 /// Note that as opposed to the technet guide above we use bcdedit rather than 'unattend.xml'
 /// to disable the recovery environment.
 /// </summary>
