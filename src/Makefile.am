@@ -5,7 +5,7 @@ NONVULNERABLE_LIBS = -lsetupapi -lole32 -lgdi32 -lshlwapi -lcrypt32 -lcomctl32 -
 # Ideally there would also be virtdisk and wininet as delaylib's below, but the MinGW folks haven't quite sorted out delay-loading
 # for x86_32 so as soon as you try to call APIs from these, the application will crash!
 # See https://github.com/pbatard/rufus/issues/1877#issuecomment-1109683039 as well as https://github.com/pbatard/rufus/issues/2272
-VULNERABLE_LIBS = -ldwmapi-delaylib -lversion-delaylib -lwintrust-delaylib
+VULNERABLE_LIBS = -ldwmapi-delaylib -lversion-delaylib -lwininet-delaylib -lwintrust-delaylib
 
 noinst_PROGRAMS = rufus
 

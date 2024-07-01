@@ -280,7 +280,7 @@ NONVULNERABLE_LIBS = -lsetupapi -lole32 -lgdi32 -lshlwapi -lcrypt32 -lcomctl32 -
 # Ideally there would also be virtdisk and wininet as delaylib's below, but the MinGW folks haven't quite sorted out delay-loading
 # for x86_32 so as soon as you try to call APIs from these, the application will crash!
 # See https://github.com/pbatard/rufus/issues/1877#issuecomment-1109683039 as well as https://github.com/pbatard/rufus/issues/2272
-VULNERABLE_LIBS = -ldwmapi-delaylib -lversion-delaylib -lwintrust-delaylib
+VULNERABLE_LIBS = -ldwmapi-delaylib -lversion-delaylib -lwininet-delaylib -lwintrust-delaylib
 AM_V_WINDRES_0 = @echo "  RC     $@";$(WINDRES)
 AM_V_WINDRES_1 = $(WINDRES)
 AM_V_WINDRES_ = $(AM_V_WINDRES_$(AM_DEFAULT_VERBOSITY))
@@ -428,10 +428,10 @@ rufus-localization.obj: localization.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-localization.obj `if test -f 'localization.c'; then $(CYGPATH_W) 'localization.c'; else $(CYGPATH_W) '$(srcdir)/localization.c'; fi`
 
 rufus-net.o: net.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-net.o `test -f 'net.c' || echo '$(srcdir)/'`net.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-net.o -isystem ../include `test -f 'net.c' || echo '$(srcdir)/'`net.c
 
 rufus-net.obj: net.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-net.obj `if test -f 'net.c'; then $(CYGPATH_W) 'net.c'; else $(CYGPATH_W) '$(srcdir)/net.c'; fi`
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-net.obj -isystem ../include `if test -f 'net.c'; then $(CYGPATH_W) 'net.c'; else $(CYGPATH_W) '$(srcdir)/net.c'; fi`
 
 rufus-parser.o: parser.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-parser.o `test -f 'parser.c' || echo '$(srcdir)/'`parser.c
