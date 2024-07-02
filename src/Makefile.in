@@ -428,10 +428,10 @@ rufus-localization.obj: localization.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-localization.obj `if test -f 'localization.c'; then $(CYGPATH_W) 'localization.c'; else $(CYGPATH_W) '$(srcdir)/localization.c'; fi`
 
 rufus-net.o: net.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-net.o -isystem ../include `test -f 'net.c' || echo '$(srcdir)/'`net.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-net.o `test -f 'net.c' || echo '$(srcdir)/'`net.c
 
 rufus-net.obj: net.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-net.obj -isystem ../include `if test -f 'net.c'; then $(CYGPATH_W) 'net.c'; else $(CYGPATH_W) '$(srcdir)/net.c'; fi`
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-net.obj `if test -f 'net.c'; then $(CYGPATH_W) 'net.c'; else $(CYGPATH_W) '$(srcdir)/net.c'; fi`
 
 rufus-parser.o: parser.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-parser.o `test -f 'parser.c' || echo '$(srcdir)/'`parser.c

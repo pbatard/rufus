@@ -24,7 +24,7 @@
 #endif
 
 #include <windows.h>
-#include <winnt.h>
+#include"fix_winnt.h"
 #include <wininet.h>
 #include <netlistmgr.h>
 #include <stdio.h>
@@ -33,14 +33,12 @@
 #include <inttypes.h>
 #include <assert.h>
 #include <virtdisk.h>
-
 #include "rufus.h"
 #include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
 #include "bled/bled.h"
-
 #include "settings.h"
 
 /* Maximum download chunk size, in bytes */

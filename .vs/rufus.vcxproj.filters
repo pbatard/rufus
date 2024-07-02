@@ -176,7 +176,10 @@
     <ClInclude Include="..\src\gpt_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\winio.h">
+	<ClInclude Include="..\src\winio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\fix_winnt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\re.h">
