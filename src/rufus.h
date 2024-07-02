@@ -29,6 +29,12 @@
 #define _Static_assert static_assert
 #endif
 
+// Disable some GCC Code warnings
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+#endif 
+
+
 #pragma once
 
 /* Convenient to have around */
