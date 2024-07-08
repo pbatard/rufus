@@ -21,7 +21,8 @@
 #include <stdint.h>
 #include "resource.h"
 #include "localization.h"
-
+//#include<vsstyle.h>
+//#include <vssym32.h>
 #pragma once
 
 // Progress bar colors
@@ -33,8 +34,17 @@
 #define PROGRESS_BAR_PAUSED_COLOR			RGB(0xDA, 0xCB, 0x26)
 #define PROGRESS_BAR_ERROR_COLOR			RGB(0xDA, 0x26, 0x26)
 
+#define PROGRESS_BAR_DARK_NORMAL_TEXT_COLOR		RGB(0xFF, 0xFF, 0xFF)
+#define PROGRESS_BAR_DARK_INVERTED_TEXT_COLOR	RGB(0x00, 0x00, 0x00)
+#define PROGRESS_BAR_DARK_BACKGROUND_COLOR		RGB(0x3F, 0x3F, 0x3F)
+#define PROGRESS_BAR_DARK_BOX_COLOR				RGB(192, 192,192)
+#define PROGRESS_BAR_DARK_NORMAL_COLOR			RGB(40,100,180)
+#define PROGRESS_BAR_DARK_PAUSED_COLOR			RGB(0xDA, 0xCB, 0x26)
+#define PROGRESS_BAR_DARK_ERROR_COLOR			RGB(0xDA, 0x26, 0x26)
+#define ColorControlDark                        RGB(32, 32, 32)
+
 // Toolbar icons main color
-#define TOOLBAR_ICON_COLOR					RGB(0x29, 0x80, 0xB9)
+#define TOOLBAR_ICON_COLOR				RGB(255, 255, 255)	//(0x29, 0x80, 0xB9)
 
 // Toolbar default style
 #define TOOLBAR_STYLE						( WS_CHILD | WS_TABSTOP | WS_VISIBLE | \
@@ -106,3 +116,4 @@ extern void ShowLanguageMenu(RECT rcExclude);
 extern void SetPassesTooltip(void);
 extern void SetBootTypeDropdownWidth(void);
 extern void OnPaint(HDC hdc);
+extern void MakeBitmapOpaque(HDC hdc, int x, int y, int cx, int cy);
