@@ -60,10 +60,11 @@ extern StrArray modified_files;
 /// <returns>The path of a newly created answer file on success or NULL on error.</returns>
 char* CreateUnattendXml(int arch, int flags)
 {
+	const static char* xml_arch_names[5] = { "x86", "amd64", "arm", "arm64" };
+	const static char* unallowed_account_names[] = { "Administrator", "Guest", "KRBTGT", "Local" };
 	static char path[MAX_PATH];
 	FILE* fd;
 	int i, order;
-	const char* xml_arch_names[5] = { "x86", "amd64", "arm", "arm64" };
 	unattend_xml_flags = flags;
 	if (arch < ARCH_X86_32 || arch > ARCH_ARM_64 || flags == 0) {
 		uprintf("Note: No Windows User Experience options selected");
@@ -150,10 +151,10 @@ char* CreateUnattendXml(int arch, int flags)
 				fprintf(fd, "      </OOBE>\n");
 			}
 			if (flags & UNATTEND_SET_USER) {
-				if ((unattend_username[0] == 0) || (stricmp(unattend_username, "Administrator") == 0) ||
-					(stricmp(unattend_username, "Guest") == 0)) {
+				for (i = 0; (i < ARRAYSIZE(unallowed_account_names)) && (stricmp(unattend_username, unallowed_account_names[i]) != 0); i++);
+				if (i < ARRAYSIZE(unallowed_account_names)) {
 					uprintf("WARNING: '%s' is not allowed as local account name - Option ignored", unattend_username);
-				} else {
+				} else if (unattend_username[0] != 0) {
 					uprintf("• Use '%s' for local account name", unattend_username);
 					// If we create a local account in unattend.xml, then we can get Windows 11
 					// 22H2 to skip MSA even if the network is connected during installation.
