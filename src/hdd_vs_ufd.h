@@ -91,6 +91,7 @@ static str_score_t str_adjust[] = {
 	{ "Gadget", -10 },
 	{ "Flash", -10 },
 	{ "SD-CARD", -10 },
+	{ "uSD Card", -10 },
 	{ "HDD", +20 },
 	{ "SATA", +20 },
 	{ "SCSI", +20 },
