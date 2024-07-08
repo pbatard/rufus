@@ -31,6 +31,7 @@
 #include "resource.h"
 #include "registry.h"
 #include "msapi_utf8.h"
+#include "timezoneapi.h"
 #include "localization.h"
 
  /* Memory leaks detection - define _CRTDBG_MAP_ALLOC as preprocessor macro */
@@ -64,6 +65,7 @@ char* CreateUnattendXml(int arch, int flags)
 	const static char* unallowed_account_names[] = { "Administrator", "Guest", "KRBTGT", "Local" };
 	static char path[MAX_PATH];
 	FILE* fd;
+	TIME_ZONE_INFORMATION tz_info;
 	int i, order;
 	unattend_xml_flags = flags;
 	if (arch < ARCH_X86_32 || arch > ARCH_ARM_64 || flags == 0) {
@@ -199,6 +201,10 @@ char* CreateUnattendXml(int arch, int flags)
 				ReadRegistryKeyStr(REGKEY_HKCU, "Keyboard Layout\\Preload\\1"));
 			fprintf(fd, "      <SystemLocale>%s</SystemLocale>\n", ToLocaleName(GetSystemDefaultLCID()));
 			fprintf(fd, "      <UserLocale>%s</UserLocale>\n", ToLocaleName(GetUserDefaultLCID()));
+			if (GetTimeZoneInformation(&tz_info) == TIME_ZONE_ID_INVALID)
+				uprintf("WARNING: Could not retrieve current timezone: %s", WindowsErrorString());
+			else
+				fprintf(fd, "      <TimeZone>%S</TimeZone>\n", tz_info.StandardName);
 			fprintf(fd, "      <UILanguage>%s</UILanguage>\n", ToLocaleName(GetUserDefaultUILanguage()));
 			fprintf(fd, "      <UILanguageFallback>%s</UILanguageFallback>\n",
 				// NB: Officially, this is a REG_MULTI_SZ string
