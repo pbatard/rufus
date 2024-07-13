@@ -1,0 +1,12 @@
+EXPORTS
+  HttpQueryInfoA@20
+  HttpOpenRequestA@32
+  HttpSendRequestA@20
+  InternetCloseHandle@4
+  InternetConnectA@32
+  InternetCrackUrlA@16
+  InternetGetConnectedState@8
+  InternetGetLastResponseInfoA@12
+  InternetOpenA@20
+  InternetReadFile@16
+  InternetSetOptionA@16

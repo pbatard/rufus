@@ -895,7 +895,7 @@ static BOOL IsProcessRunning(uint64_t pid)
 
 	PF_INIT_OR_OUT(NtClose, NtDll);
 
-	status = PhOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, (HANDLE)pid);
+	status = PhOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, (HANDLE)(uintptr_t)pid);
 	if (!NT_SUCCESS(status) || (hProcess == NULL))
 		return FALSE;
 	if (GetExitCodeProcess(hProcess, &dwExitCode))

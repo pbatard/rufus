@@ -1,0 +1,8 @@
+EXPORTS
+  AttachVirtualDisk@24
+  CreateVirtualDisk@36
+  DetachVirtualDisk@12
+  GetVirtualDiskInformation@16
+  GetVirtualDiskPhysicalPath@12
+  GetVirtualDiskOperationProgress@12
+  OpenVirtualDisk@24
