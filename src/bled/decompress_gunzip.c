@@ -280,6 +280,7 @@ static unsigned fill_bitbuffer(STATE_PARAM unsigned bitbuffer, unsigned *current
 		bytebuffer_offset++;
 		*current += 8;
 	}
+	// coverity[return_overflow]
 	return bitbuffer;
 }
 
@@ -661,7 +662,7 @@ static NOINLINE int inflate_codes(STATE_PARAM_ONLY)
 
 
 /* called once from inflate_block */
-static void inflate_stored_setup(STATE_PARAM int my_n, int my_b, int my_k)
+static void inflate_stored_setup(STATE_PARAM unsigned my_n, unsigned my_b, unsigned my_k)
 {
 	inflate_stored_n = my_n;
 	inflate_stored_b = my_b;
@@ -1043,7 +1044,15 @@ inflate_unzip_internal(STATE_PARAM transformer_state_t *xstate)
 			n = (nwrote <0)?nwrote:-1;
 			goto ret;
 		}
-		IF_DESKTOP(n += nwrote;)
+#if ENABLE_DESKTOP
+		long long int v = n + nwrote;
+		if (v < n) {
+			bb_simple_error_msg("overflow");
+			n = -1;
+			goto ret;
+		}
+		n = v;
+#endif
 		if (r == 0) break;
 	}
 
@@ -1054,6 +1063,7 @@ inflate_unzip_internal(STATE_PARAM transformer_state_t *xstate)
 		bytebuffer_offset--;
 		bytebuffer[bytebuffer_offset] = gunzip_bb & 0xff;
 		gunzip_bb >>= 8;
+		// coverity[overflow_const]
 		gunzip_bk -= 8;
 	}
  ret:

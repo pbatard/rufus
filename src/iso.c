@@ -1571,8 +1571,8 @@ uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** bu
 		goto out;
 	}
 	file_length = udf_get_file_length(p_udf_file);
-	if (file_length > UINT32_MAX) {
-		uprintf("Only files smaller than 4 GB are supported");
+	if (file_length > 1 * GB) {
+		uprintf("Only files smaller than 1 GB are supported");
 		goto out;
 	}
 	nblocks = (uint32_t)((file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
@@ -1604,10 +1604,11 @@ try_iso:
 		goto out;
 	}
 	file_length = p_statbuf->total_size;
-	if (file_length > UINT32_MAX) {
-		uprintf("Only files smaller than 4 GB are supported");
+	if (file_length > 1 * GB) {
+		uprintf("Only files smaller than 1 GB are supported");
 		goto out;
 	}
+	// coverity[cast_overflow]
 	nblocks = (uint32_t)((file_length + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE);
 	*buf = malloc(nblocks * ISO_BLOCKSIZE + 1);
 	if (*buf == NULL) {

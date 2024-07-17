@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <windows.h>
 #include <malloc.h>
 #include <inttypes.h>
@@ -36,6 +37,7 @@
 #define MB                          1048576LL
 #define GB                          1073741824LL
 #define TB                          1099511627776LL
+#define PB                          1125899906842624LL
 
 /*
  * Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS!
@@ -186,6 +188,7 @@ static __inline void static_repchr(char* p, char s, char r) {
 }
 #define to_unix_path(str) static_repchr(str, '\\', '/')
 #define to_windows_path(str) static_repchr(str, '/', '\\')
+#define if_not_assert(cond) assert(cond); if (!(cond))
 
 extern void uprintf(const char *format, ...);
 extern void uprintfs(const char *str);

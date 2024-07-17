@@ -1131,7 +1131,8 @@ static void DisplayISOProps(void)
 // Insert the image name into the Boot selection dropdown and (re)populate the Image option dropdown
 static void UpdateImage(BOOL update_image_option_only)
 {
-	assert(image_index != 0);
+	if_not_assert(image_index != 0)
+		return;
 
 	if (!update_image_option_only) {
 		if (ComboBox_GetItemData(hBootType, image_index) == BT_IMAGE)
@@ -1429,8 +1430,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	}
 
 	if (boot_type == BT_IMAGE) {
-		assert(image_path != NULL);
-		if (image_path == NULL)
+		if_not_assert(image_path != NULL)
 			goto out;
 		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 			// This ISO image is too big for the selected target

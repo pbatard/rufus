@@ -622,7 +622,7 @@ static void XZ_FUNC lzma_len(struct xz_dec_lzma2 *s, struct lzma_len_dec *l,
 		uint32_t pos_state)
 {
 	uint16_t *probs;
-	uint32_t limit;
+	uint32_t limit, v;
 
 	if (!rc_bit(&s->rc, &l->choice)) {
 		probs = l->low[pos_state];
@@ -641,7 +641,9 @@ static void XZ_FUNC lzma_len(struct xz_dec_lzma2 *s, struct lzma_len_dec *l,
 		}
 	}
 
-	s->lzma.len += rc_bittree(&s->rc, probs, limit) - limit;
+	v = s->lzma.len + rc_bittree(&s->rc, probs, limit) - limit;
+	assert(v >= s->lzma.len);
+	s->lzma.len = (v < s->lzma.len) ? 0 : v;
 }
 
 /* Decode a match. The distance will be stored in s->lzma.rep0. */
@@ -660,6 +662,7 @@ static void XZ_FUNC lzma_match(struct xz_dec_lzma2 *s, uint32_t pos_state)
 	lzma_len(s, &s->lzma.match_len_dec, pos_state);
 
 	probs = s->lzma.dist_slot[lzma_get_dist_state(s->lzma.len)];
+	// coverity[overflow_const]
 	dist_slot = rc_bittree(&s->rc, probs, DIST_SLOTS) - DIST_SLOTS;
 
 	if (dist_slot < DIST_MODEL_START) {

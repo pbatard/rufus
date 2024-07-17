@@ -18,6 +18,7 @@
 /* #define XZ_DEC_ARMTHUMB */
 /* #define XZ_DEC_SPARC */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>

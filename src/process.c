@@ -407,7 +407,8 @@ static PWSTR GetProcessCommandLine(HANDLE hProcess)
 
 		ucmdline = (UNICODE_STRING*)(pp + cmd_offset);
 		// In the absolute, someone could craft a process with dodgy attributes to try to cause an overflow
-		ucmdline->Length = min(ucmdline->Length, 512);
+		// coverity[cast_overflow]
+		ucmdline->Length = min(ucmdline->Length, (USHORT)512);
 		wcmdline = (PWSTR)calloc(ucmdline->Length + 1, sizeof(WCHAR));
 		if (!ReadProcessMemory(hProcess, ucmdline->Buffer, wcmdline, ucmdline->Length, NULL)) {
 			safe_free(wcmdline);
@@ -493,8 +494,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 		// Work on our own copy of the handle names so we don't have to hold the
 		// mutex for string comparison. Update only if the version has changed.
 		if (blocking_process.nVersion[0] != blocking_process.nVersion[1]) {
-			assert(blocking_process.wHandleName != NULL && blocking_process.nHandles != 0);
-			if (blocking_process.wHandleName == NULL || blocking_process.nHandles == 0) {
+			if_not_assert(blocking_process.wHandleName != NULL && blocking_process.nHandles != 0) {
 				ReleaseMutex(hLock);
 				goto out;
 			}
@@ -930,8 +930,7 @@ BYTE GetProcessSearch(uint32_t timeout, uint8_t access_mask, BOOL bIgnoreStalePr
 		return 0;
 	}
 
-	assert(blocking_process.hLock != NULL);
-	if (blocking_process.hLock == NULL)
+	if_not_assert(blocking_process.hLock != NULL)
 		return 0;
 
 retry:

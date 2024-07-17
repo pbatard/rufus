@@ -137,7 +137,8 @@ BOOL CyclePort(int index)
 	DWORD size;
 	USB_CYCLE_PORT_PARAMS cycle_port;
 
-	assert(index < MAX_DRIVES);
+	if_not_assert(index < MAX_DRIVES)
+		return -1;
 	// Wait at least 10 secs between resets
 	if (GetTickCount64() < LastReset + 10000ULL) {
 		uprintf("You must wait at least 10 seconds before trying to reset a device");
@@ -190,7 +191,8 @@ int CycleDevice(int index)
 	SP_DEVINFO_DATA dev_info_data;
 	SP_PROPCHANGE_PARAMS propchange_params;
 
-	assert(index < MAX_DRIVES);
+	if_not_assert(index < MAX_DRIVES)
+		return ERROR_INVALID_DRIVE;
 	if ((index < 0) || (safe_strlen(rufus_drive[index].id) < 8))
 		return ERROR_INVALID_PARAMETER;
 
@@ -583,8 +585,10 @@ BOOL GetDevices(DWORD devnum)
 
 	// Better safe than sorry. And yeah, we could have used arrays of
 	// arrays to avoid this, but it's more readable this way.
-	assert((uasp_start > 0) && (uasp_start < ARRAYSIZE(usbstor_name)));
-	assert((card_start > 0) && (card_start < ARRAYSIZE(genstor_name)));
+	if_not_assert((uasp_start > 0) && (uasp_start < ARRAYSIZE(usbstor_name)))
+		goto out;
+	if_not_assert((card_start > 0) && (card_start < ARRAYSIZE(genstor_name)))
+		goto out;
 
 	devid_list = NULL;
 	if (full_list_size != 0) {
@@ -671,7 +675,8 @@ BOOL GetDevices(DWORD devnum)
 				}
 				// Also test for "_SD&" instead of "_SD_" and so on to allow for devices like
 				// "SCSI\DiskRicoh_Storage_SD&REV_3.0" to be detected.
-				assert(strlen(scsi_card_name_copy) > 1);
+				if_not_assert(strlen(scsi_card_name_copy) > 1)
+					continue;
 				scsi_card_name_copy[strlen(scsi_card_name_copy) - 1] = '&';
 				if (safe_strstr(buffer, scsi_card_name_copy) != NULL) {
 					props.is_CARD = TRUE;
@@ -999,7 +1004,8 @@ BOOL GetDevices(DWORD devnum)
 				rufus_drive[num_drives].display_name = safe_strdup(display_name);
 				rufus_drive[num_drives].label = safe_strdup(label);
 				rufus_drive[num_drives].size = drive_size;
-				assert(rufus_drive[num_drives].size != 0);
+				if_not_assert(rufus_drive[num_drives].size != 0)
+					break;
 				if (hub_path != NULL) {
 					rufus_drive[num_drives].hub = safe_strdup(hub_path);
 					rufus_drive[num_drives].port = props.port;

@@ -23,6 +23,7 @@
 #include "platform.h"
 #include "msapi_utf8.h"
 
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>

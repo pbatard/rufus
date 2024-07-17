@@ -280,9 +280,12 @@ char* GetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrail
 
 		// Sanity checks
 		len = safe_strlen(volume_name);
-		assert(len > 4);
-		assert(safe_strnicmp(volume_name, volume_start, 4) == 0);
-		assert(volume_name[len - 1] == '\\');
+		if_not_assert(len > 4)
+			continue;
+		if_not_assert(safe_strnicmp(volume_name, volume_start, 4) == 0)
+			continue;
+		if_not_assert(volume_name[len - 1] == '\\')
+			continue;
 
 		drive_type = GetDriveTypeA(volume_name);
 		if ((drive_type != DRIVE_REMOVABLE) && (drive_type != DRIVE_FIXED))
@@ -1817,7 +1820,8 @@ const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 			}
 		}
 		assert(rev < ARRAYSIZE(ext_names));
-		ret = ext_names[rev];
+		if (rev < ARRAYSIZE(ext_names))
+			ret = ext_names[rev];
 		goto out;
 	}
 

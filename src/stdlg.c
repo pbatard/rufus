@@ -588,7 +588,8 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			return (INT_PTR)TRUE;
 		case IDC_MORE_INFO:
 			if (notification_more_info != NULL) {
-				assert(notification_more_info->callback != NULL);
+				if_not_assert(notification_more_info->callback != NULL)
+					return (INT_PTR)FALSE;
 				if (notification_more_info->id == MORE_INFO_URL) {
 					ShellExecuteA(hDlg, "open", notification_more_info->url, NULL, NULL, SW_SHOWNORMAL);
 				} else {

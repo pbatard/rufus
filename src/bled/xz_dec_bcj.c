@@ -109,6 +109,7 @@ static noinline_for_stack size_t XZ_FUNC bcj_x86(
 		if ((buf[i] & 0xFE) != 0xE8)
 			continue;
 
+		// coverity[overflow_const]
 		prev_pos = i - prev_pos;
 		if (prev_pos > 3) {
 			prev_mask = 0;

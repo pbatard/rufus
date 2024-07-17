@@ -905,7 +905,8 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			// If we have a windowsPE section, copy the answer files to the root of boot.wim as
 			// Autounattend.xml. This also results in that file being automatically copied over
 			// to %WINDIR%\Panther\unattend.xml for later passes processing.
-			assert(mount_path != NULL);
+			if_not_assert(mount_path != NULL)
+				goto out;
 			static_sprintf(path, "%s\\Autounattend.xml", mount_path);
 			if (!CopyFileU(unattend_xml_path, path, TRUE)) {
 				uprintf("Could not create boot.wim 'Autounattend.xml': %s", WindowsErrorString());

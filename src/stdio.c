@@ -857,7 +857,8 @@ uint32_t ResolveDllAddress(dll_resolver_t* resolver)
 
 	// NB: SymLoadModuleEx() does not load a PDB unless the file has an explicit '.pdb' extension
 	base_address = pfSymLoadModuleEx(hRufus, NULL, path, NULL, DEFAULT_BASE_ADDRESS, 0, NULL, 0);
-	assert(base_address == DEFAULT_BASE_ADDRESS);
+	if_not_assert(base_address == DEFAULT_BASE_ADDRESS)
+		goto out;
 	// On Windows 11 ARM64 the following call will return *TWO* different addresses for the same
 	// call, because most Windows DLL's are ARM64X, which means that they are an unholy union of
 	// both X64 and ARM64 code in the same binary...
