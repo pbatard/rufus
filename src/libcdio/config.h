@@ -39,8 +39,11 @@
 
 /* Define to 1 if you have the `fseeko64' function. */
 #define HAVE_FSEEKO64 1
+
+#if defined(_MSC_VER)
 /* The equivalent of fseeko64 for MSVC is _fseeki64 */
 #define fseeko64 _fseeki64
+#endif
 
 /* Define to 1 if you have the `ftruncate' function. */
 /* #undef HAVE_FTRUNCATE */
