@@ -151,22 +151,29 @@ boot_drive:
 
 # ---------------------------------------------------------------------------
 
-boot_usb_rem_rtc:		# Boot USB drive (0x80)
-	call restore_rtc_vect	# Remove our RTC override
-boot_usb:
-	call flush_keyboard	# Make sure the keyboard buffer is clear
-	mov  bx, offset partition_table
-	mov  dx, ds:[bx]
-	push dx
-	mov  dl, 0x80		# Override disk number, as we're not using our int yet
-	mov  cx, ds:[bx+2]
-	mov  ebx, ds:[bx+8]	# Must come last since it modifies BX
-	call read_sector
-	jnb  boot_drive
-	pop  es			# failed to read PBR from USB - exit back to BIOS
-	pop  ds
-	retf
 
+boot_usb_rem_rtc:
+    call restore_rtc_vect  
+
+boot_usb:
+    call flush_keyboard     
+
+    mov bx, offset partition_table
+    mov dx, [bx]
+    push dx
+
+    mov dl, 0x80
+
+    mov cx, [bx+2]
+    mov ebx, [bx+8]        
+
+    call read_sector
+
+    jnb boot_drive
+
+    pop es
+    pop ds
+    retf
 
 /********************************************************************************/
 /* Subroutines                                                                  */
