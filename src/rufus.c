@@ -65,7 +65,7 @@ enum bootcheck_return {
 	BOOTCHECK_GENERAL_ERROR = -3,
 };
 
-static const char* cmdline_hogger = "rufus.com";
+static const char* cmdline_hogger = ".\\rufus.com";
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
 static const char* vs_reg = "Software\\Microsoft\\VisualStudio";
 static const char* arch_name[ARCH_MAX] = {
@@ -3125,13 +3125,13 @@ static HANDLE SetHogger(void)
 	int i;
 
 	hog_data = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_XT_HOGGER),
-		_RT_RCDATA, cmdline_hogger, &hog_size, FALSE);
+		_RT_RCDATA, &cmdline_hogger[2], &hog_size, FALSE);
 	if (hog_data != NULL) {
 		// Create our synchronisation mutex
 		hogmutex = CreateMutexA(NULL, TRUE, "Global/Rufus_CmdLine");
 
 		// Extract the hogger resource
-		hFile = CreateFileA(cmdline_hogger, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ,
+		hFile = CreateFileA(&cmdline_hogger[2], GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
 			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hFile != INVALID_HANDLE_VALUE) {
 			// coverity[check_return]
@@ -3140,7 +3140,7 @@ static HANDLE SetHogger(void)
 		safe_closehandle(hFile);
 
 		// Now launch the file from the commandline, by simulating keypresses
-		input = (INPUT*)calloc(strlen(cmdline_hogger)+1, sizeof(INPUT));
+		input = (INPUT*)calloc(strlen(cmdline_hogger) + 1, sizeof(INPUT));
 		if (input != NULL) {
 			for (i = 0; i < (int)strlen(cmdline_hogger); i++) {
 				input[i].type = INPUT_KEYBOARD;
@@ -4083,7 +4083,7 @@ out:
 		ReleaseMutex(hogmutex);
 		safe_closehandle(hogmutex);
 		// Unconditional delete with retry, just in case...
-		for (i = 0; (!DeleteFileA(cmdline_hogger)) && (i <= 10); i++)
+		for (i = 0; (!DeleteFileA(&cmdline_hogger[2])) && (i <= 10); i++)
 			Sleep(200);
 	}
 	// Kill the update check thread if running
