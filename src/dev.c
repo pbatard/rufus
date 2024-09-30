@@ -877,8 +877,8 @@ BOOL GetDevices(DWORD devnum)
 				continue;
 			}
 
-			hDrive = CreateFileA(devint_detail_data->DevicePath, GENERIC_READ|GENERIC_WRITE,
-				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			hDrive = CreateFileWithTimeout(devint_detail_data->DevicePath, GENERIC_READ|GENERIC_WRITE,
+				FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL, 3000);
 			if(hDrive == INVALID_HANDLE_VALUE) {
 				uprintf("Could not open '%s': %s", devint_detail_data->DevicePath, WindowsErrorString());
 				continue;

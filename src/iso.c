@@ -1268,7 +1268,7 @@ out:
 							sl_index = i;
 						}
 					}
-					free(buf);
+					safe_free(buf);
 				}
 				DeleteFileU(isolinux_tmp);
 			}

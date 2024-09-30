@@ -1607,8 +1607,7 @@ static int cmp_pe_section(const void* arg1, const void* arg2)
  * @len:    Size of @efi
  * @regp:   Pointer to a list of regions
  *
- * Parse image binary in PE32(+) format, assuming that sanity of PE image
- * has been checked by a caller.
+ * Parse image binary in PE32(+) format.
  *
  * Return:  TRUE on success, FALSE on error
  */
@@ -1623,7 +1622,11 @@ BOOL efi_image_parse(uint8_t* efi, size_t len, struct efi_image_regions** regp)
 	uint32_t align, size, authsz;
 	size_t bytes_hashed;
 
+	if (len < 0x80)
+		return FALSE;
 	dos = (void*)efi;
+	if (dos->e_lfanew > len - 0x40)
+		return FALSE;
 	nt = (void*)(efi + dos->e_lfanew);
 	authsz = 0;
 

@@ -1894,10 +1894,12 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	SelectedDrive.SectorsPerTrack = DiskGeometry->Geometry.SectorsPerTrack;
 	SelectedDrive.MediaType = DiskGeometry->Geometry.MediaType;
 
-	suprintf("Disk type: %s, Disk size: %s, Sector size: %d bytes", (SelectedDrive.MediaType == FixedMedia)?"FIXED":"Removable",
+	suprintf("Disk type: %s, Disk size: %s, Sector size: %d bytes",
+		(SelectedDrive.MediaType == FixedMedia) ? "FIXED" : "Removable",
 		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, TRUE), SelectedDrive.SectorSize);
 	suprintf("Cylinders: %" PRIi64 ", Tracks per cylinder: %d, Sectors per track: %d",
 		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
+	assert(SelectedDrive.SectorSize != 0);
 
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL );
 	if (!r || size <= 0) {
@@ -1965,7 +1967,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 					SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
 					DriveLayout->PartitionEntry[i].PartitionLength.QuadPart,
 					DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize,
-					DriveLayout->PartitionEntry[i].Mbr.BootIndicator?"Yes":"No");
+					DriveLayout->PartitionEntry[i].Mbr.BootIndicator ? "Yes" : "No");
 				// suprintf("  GUID: %s", GuidToString(&DriveLayout->PartitionEntry[i].Mbr.PartitionId));
 				SelectedDrive.FirstDataSector = min(SelectedDrive.FirstDataSector,
 					(DWORD)(DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize));

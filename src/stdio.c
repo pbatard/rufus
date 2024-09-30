@@ -260,8 +260,8 @@ const char *WindowsErrorString(void)
 	// coverity[var_deref_model]
 	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS |
 		((hModule != NULL) ? FORMAT_MESSAGE_FROM_HMODULE : 0), hModule,
-		HRESULT_CODE(error_code), MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
-		&err_string[presize], (DWORD)(sizeof(err_string)-strlen(err_string)), NULL);
+		error_code, MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
+		&err_string[presize], (DWORD)(sizeof(err_string) - strlen(err_string)), NULL);
 	if (size == 0) {
 		format_error = GetLastError();
 		switch (format_error) {
@@ -519,7 +519,7 @@ HANDLE CreateFileWithTimeout(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwS
 	if (hThread != NULL) {
 		if (WaitForSingleObject(hThread, dwTimeOut) == WAIT_TIMEOUT) {
 			CancelSynchronousIo(hThread);
-			WaitForSingleObject(hThread, INFINITE);
+			WaitForSingleObject(hThread, 30000);
 			params.dwError = WAIT_TIMEOUT;
 		}
 		CloseHandle(hThread);
