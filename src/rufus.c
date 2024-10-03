@@ -69,7 +69,7 @@ static const char* cmdline_hogger = ".\\rufus.com";
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
 static const char* vs_reg = "Software\\Microsoft\\VisualStudio";
 static const char* arch_name[ARCH_MAX] = {
-	"unknown", "x86_32", "x86_64", "ARM", "ARM64", "Itanic", "RISC-V 32", "RISC-V 64", "RISC-V 128", "EBC" };
+	"unknown", "x86_32", "x86_64", "ARM", "ARM64", "Itanic", "RISC-V 64", "EBC" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL size_check = TRUE;
 static BOOL log_displayed = FALSE;
@@ -141,11 +141,13 @@ char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
 char *archive_path = NULL, image_option_txt[128], *fido_url = NULL, *save_image_type = NULL;
+char* sbat_level_txt = NULL;
 StrArray BlockingProcessList, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
 RUFUS_DRIVE rufus_drive[MAX_DRIVES] = { 0 };
+sbat_entry_t* sbat_entries = NULL;
 
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
 // localization_data.sh and the .rc when the year changes!
@@ -1210,14 +1212,8 @@ static uint8_t FindArch(const char* path)
 	case IMAGE_FILE_MACHINE_IA64:
 		ret = ARCH_IA_64;
 		break;
-	case IMAGE_FILE_MACHINE_RISCV32:
-		ret = ARCH_RISCV_32;
-		break;
 	case IMAGE_FILE_MACHINE_RISCV64:
 		ret = ARCH_RISCV_64;
-		break;
-	case IMAGE_FILE_MACHINE_RISCV128:
-		ret = ARCH_RISCV_128;
 		break;
 	case IMAGE_FILE_MACHINE_EBC:
 		ret = ARCH_EBC;
@@ -1298,7 +1294,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 				arch = FindArch(tmp_path);
 				if (arch != 0) {
 					uprintf("  Image contains a%s %s EFI boot manager",
-						(arch >= ARCH_RISCV_32 && arch <= ARCH_RISCV_128) ? "" : "n", arch_name[arch]);
+						(arch == ARCH_RISCV_64) ? "" : "n", arch_name[arch]);
 					img_report.has_efi = 1 | (1 << arch);
 					img_report.has_bootmgr_efi = TRUE;
 					img_report.wininst_index = 1;
@@ -1607,26 +1603,36 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 
 		// Check UEFI bootloaders for revocation
 		if (IS_EFI_BOOTABLE(img_report)) {
-			// coverity[swapped_arguments]
-			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, tmp) != 0) {
-				// ExtractISOFile() is case sensitive, so we must use 
-				for (i = 0; i < ARRAYSIZE(img_report.efi_boot_path) && img_report.efi_boot_path[i][0] != 0; i++) {
-					if (ExtractISOFile(image_path, img_report.efi_boot_path[i], tmp, FILE_ATTRIBUTE_NORMAL) == 0) {
-						uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", img_report.efi_boot_path[i]);
-						continue;
-					}
-					r = IsBootloaderRevoked(tmp);
-					if (r > 0) {
-						is_bootloader_revoked = TRUE;
-						r = MessageBoxExU(hMainDialog, lmprintf(MSG_339,
-							(r == 1) ? lmprintf(MSG_340) : lmprintf(MSG_341, "Error code: 0xc0000428")),
-							lmprintf(MSG_338), MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
-						if (r == IDCANCEL)
-							goto out;
+			uint8_t* buf = NULL;
+			uint32_t len;
+			const char* msg;
+
+			for (i = 0; i < ARRAYSIZE(img_report.efi_boot_path) && img_report.efi_boot_path[i][0] != 0; i++) {
+				len = ReadISOFileToBuffer(image_path, img_report.efi_boot_path[i], &buf);
+				if (len == 0) {
+					uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", img_report.efi_boot_path[i]);
+					continue;
+				}
+				r = IsBootloaderRevoked(buf, len);
+				safe_free(buf);
+				if (r > 0) {
+					uprintf("Warning: '%s' is revoked by %s", img_report.efi_boot_path[i],
+						(r == 1) ? "UEFI DBX" : ((r == 2) ? "Windows SSP" : "Linux SBAT"));
+					is_bootloader_revoked = TRUE;
+					switch (r) {
+					case 2:
+						msg = lmprintf(MSG_341, "Error code: 0xc0000428");
+						break;
+					default:
+						msg = lmprintf(MSG_340);
 						break;
 					}
+					r = MessageBoxExU(hMainDialog, lmprintf(MSG_339, msg), lmprintf(MSG_338),
+						MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+					if (r == IDCANCEL)
+						goto out;
+					break;
 				}
-				DeleteFileU(tmp);
 			}
 		}
 
@@ -4105,6 +4111,8 @@ out:
 	safe_free(fido_url);
 	safe_free(fido_script);
 	safe_free(pe256ssp);
+	safe_free(sbat_entries);
+	safe_free(sbat_level_txt);
 	if (argv != NULL) {
 		for (i = 0; i < argc; i++)
 			safe_free(argv[i]);

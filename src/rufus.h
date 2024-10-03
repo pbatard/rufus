@@ -378,9 +378,7 @@ enum ArchType {
 	ARCH_ARM_32,
 	ARCH_ARM_64,
 	ARCH_IA_64,
-	ARCH_RISCV_32,
 	ARCH_RISCV_64,
-	ARCH_RISCV_128,
 	ARCH_EBC,
 	ARCH_MAX
 };
@@ -391,7 +389,7 @@ typedef struct {
 	char cfg_path[128];					// path to the ISO's isolinux.cfg
 	char reactos_path[128];				// path to the ISO's freeldr.sys or setupldr.sys
 	char wininst_path[MAX_WININST][64];	// path to the Windows install image(s)
-	char efi_boot_path[ARCH_MAX][30];	// paths of detected UEFI bootloaders
+	char efi_boot_path[64][32];	// paths of detected UEFI bootloaders
 	char efi_img_path[128];				// path to an efi.img file
 	uint64_t image_size;
 	uint64_t projected_size;
@@ -486,6 +484,12 @@ typedef struct {
 	char** name;
 	uint32_t* address;	// 32-bit will do, as we're not dealing with >4GB DLLs...
 } dll_resolver_t;
+
+/* SBAT entry */
+typedef struct {
+	char* product;
+	uint32_t version;
+} sbat_entry_t;
 
 /* Alignment macro */
 #if defined(__GNUC__)
@@ -687,6 +691,7 @@ extern size_t ubuffer_pos;
 extern const int nb_steps[FS_MAX];
 extern float fScale;
 extern windows_version_t WindowsVersion;
+extern sbat_entry_t* sbat_entries;
 extern int dialog_showing, force_update, fs_type, boot_type, partition_type, target_type;
 extern unsigned long syslinux_ldlinux_len[2];
 extern char ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
@@ -798,11 +803,11 @@ extern HANDLE CreateFileWithTimeout(LPCSTR lpFileName, DWORD dwDesiredAccess, DW
 	HANDLE hTemplateFile, DWORD dwTimeOut);
 extern BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads);
 extern BOOL HashFile(const unsigned type, const char* path, uint8_t* sum);
-extern BOOL PE256File(const char* path, uint8_t* hash);
+extern BOOL PE256Buffer(uint8_t* buf, uint32_t len, uint8_t* hash);
 extern void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name);
 extern BOOL HashBuffer(const unsigned type, const uint8_t* buf, const size_t len, uint8_t* sum);
 extern BOOL IsFileInDB(const char* path);
-extern int IsBootloaderRevoked(const char* path);
+extern int IsBootloaderRevoked(uint8_t* buf, uint32_t len);
 extern void PrintRevokedBootloaderInfo(void);
 extern BOOL IsBufferInDB(const unsigned char* buf, const size_t len);
 #define printbits(x) _printbits(sizeof(x), &x, 0)
@@ -825,6 +830,7 @@ extern HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAcce
 	DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
 	DWORD dwFlagsAndAttributes, LONGLONG fileSize);
 extern uint32_t ResolveDllAddress(dll_resolver_t* resolver);
+extern sbat_entry_t* GetSbatEntries(char* sbatlevel);
 #define GetTextWidth(hDlg, id) GetTextSize(GetDlgItem(hDlg, id), NULL).cx
 
 DWORD WINAPI HashThread(void* param);

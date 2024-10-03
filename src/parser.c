@@ -1544,3 +1544,54 @@ int sanitize_label(char* label)
 
 	return 0;
 }
+
+/*
+ * Parse an sbat_level.txt file and returns an array of (product_name, min_version) tuples.
+ * Array must be freed by caller.
+ */
+sbat_entry_t* GetSbatEntries(char* sbatlevel)
+{
+	BOOL eol, eof;
+	char* version_str;
+	uint32_t i, num_entries;
+	sbat_entry_t* sbat_entries;
+
+	if (sbatlevel == NULL)
+		return FALSE;
+
+	num_entries = 0;
+	for (i = 0; sbatlevel[i] != '\0'; i++)
+		if (sbatlevel[i] == '\n')
+			num_entries++;
+
+	sbat_entries = calloc(num_entries + 2, sizeof(sbat_entry_t));
+	if (sbat_entries == NULL)
+		return NULL;
+
+	num_entries = 0;
+	for (i = 0; sbatlevel[i] != '\0'; ) {
+		while (sbatlevel[i] == '\n')
+			i++;
+		if (sbatlevel[i] == '\0')
+			break;
+		sbat_entries[num_entries].product = &sbatlevel[i];
+		for (; sbatlevel[i] != ',' && sbatlevel[i] != '\0' && sbatlevel[i] != '\n'; i++);
+		if (sbatlevel[i] == '\0' || sbatlevel[i] == '\n')
+			break;
+		sbatlevel[i++] = '\0';
+		version_str = &sbatlevel[i];
+		for (; sbatlevel[i] != ',' && sbatlevel[i] != '\0' && sbatlevel[i] != '\n'; i++);
+		eol = (sbatlevel[i] == '\0' || sbatlevel[i] == '\n');
+		eof = (sbatlevel[i] == '\0');
+		sbatlevel[i] = '\0';
+		if (!eof)
+			i++;
+		sbat_entries[num_entries].version = atoi(version_str);
+		if (!eol)
+			for (; sbatlevel[i] != '\0' && sbatlevel[i] != '\n'; i++);
+		if (sbat_entries[num_entries].version != 0)
+			num_entries++;
+	}
+
+	return sbat_entries;
+}

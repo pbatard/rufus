@@ -115,7 +115,7 @@ uint64_t md5sum_totalbytes;
 StrArray modified_files = { 0 };
 
 extern int default_thread_priority;
-extern const char* efi_bootname[ARCH_MAX];
+extern const char* efi_archname[ARCH_MAX];
 
 /*
  * Rotate 32 or 64 bit integers by n bytes.
@@ -1760,36 +1760,18 @@ err:
  * for some part of this but you'd be very, very wrong since the PE sections it
  * feeds to the hash function does include the PE header checksum field...
  */
-BOOL PE256File(const char* path, uint8_t* hash)
+BOOL PE256Buffer(uint8_t* buf, uint32_t len, uint8_t* hash)
 {
 	BOOL r = FALSE;
 	HASH_CONTEXT hash_ctx = { {0} };
 	int i;
-	uint32_t rb;
-	uint8_t* buf = NULL;
-	struct __stat64 stat64 = { 0 };
 	struct efi_image_regions* regs = NULL;
 
-	if ((path == NULL) || (hash == NULL))
-		goto out;
-
-	/* Filter anything that would be out of place as a EFI bootloader */
-	if (_stat64U(path, &stat64) != 0) {
-		uprintf("Could not open '%s", path);
-		goto out;
-	}
-	if ((stat64.st_size < 1 * KB) || (stat64.st_size > 64 * MB)) {
-		uprintf("'%s' is either too small or too large for PE-256", path);
-		goto out;
-	}
-
-	/* Read the executable into a memory buffer */
-	rb = read_file(path, &buf);
-	if (rb < 1 * KB)
+	if ((buf == NULL) || (len == 0) || (len < 1 * KB) || (len > 64 * MB) || (hash == NULL))
 		goto out;
 
 	/* Isolate the PE sections to hash */
-	if (!efi_image_parse(buf, rb, &regs))
+	if (!efi_image_parse(buf, len, &regs))
 		goto out;
 
 	/* Hash the relevant PE data */
@@ -1803,7 +1785,6 @@ BOOL PE256File(const char* path, uint8_t* hash)
 
 out:
 	free(regs);
-	free(buf);
 	return r;
 }
 
@@ -2098,36 +2079,82 @@ BOOL IsFileInDB(const char* path)
 	return FALSE;
 }
 
-int IsBootloaderRevoked(const char* path)
+BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 {
-	version_t* ver;
+	static const char section_name[IMAGE_SIZEOF_SHORT_NAME] = { '.', 's', 'b', 'a', 't', '\0', '\0', '\0' };
+	char* sbat = NULL, * version_str;
+	uint32_t i, j;
+	sbat_entry_t entry;
+	IMAGE_SECTION_HEADER* section_header;
+
+	if (buf == NULL || len < 0x100 || sbat_entries == NULL)
+		return FALSE;
+
+	for (i = 0x40; i < MIN(len, 0x800); i++) {
+		if (memcmp(section_name, &buf[i], sizeof(section_name)) == 0) {
+			section_header = (IMAGE_SECTION_HEADER*)&buf[i];
+			if (section_header->SizeOfRawData >= len || section_header->PointerToRawData >= len)
+				return TRUE;
+			sbat = (char*)&buf[section_header->PointerToRawData];
+			break;
+		}
+	}
+	if (sbat == NULL)
+		return FALSE;
+
+	for (i = 0; sbat[i] != '\0'; ) {
+		while (sbat[i] == '\n')
+			i++;
+		if (sbat[i] == '\0')
+			break;
+		entry.product = &sbat[i];
+		for (; sbat[i] != ',' && sbat[i] != '\0' && sbat[i] != '\n'; i++);
+		if (sbat[i] == '\0' || sbat[i] == '\n')
+			break;
+		sbat[i++] = '\0';
+		version_str = &sbat[i];
+		for (; sbat[i] != ',' && sbat[i] != '\0' && sbat[i] != '\n'; i++);
+		sbat[i++] = '\0';
+		entry.version = atoi(version_str);
+		for (; sbat[i] != '\0' && sbat[i] != '\n'; i++);
+		if (entry.version == 0)
+			continue;
+		for (j = 0; sbat_entries[j].product != NULL; j++) {
+			if (strcmp(entry.product, sbat_entries[j].product) == 0 && entry.version < sbat_entries[j].version)
+				return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
+{
 	uint32_t i;
 	uint8_t hash[SHA256_HASHSIZE];
 
-	if (!PE256File(path, hash))
+	if (!PE256Buffer(buf, len, hash))
 		return -1;
+	// Check for UEFI DBX revocation
 	for (i = 0; i < ARRAYSIZE(pe256dbx); i += SHA256_HASHSIZE)
 		if (memcmp(hash, &pe256dbx[i], SHA256_HASHSIZE) == 0)
 			return 1;
+	// Check for Microsoft SSP revocation
 	for (i = 0; i < pe256ssp_size * SHA256_HASHSIZE; i += SHA256_HASHSIZE)
 		if (memcmp(hash, &pe256ssp[i], SHA256_HASHSIZE) == 0)
 			return 2;
-	ver = GetExecutableVersion(path);
-	// Blanket filter for Windows 10 1607 (excluded) to Windows 10 20H1 (excluded)
-	// TODO: Revoke all bootloaders prior to 2023.05 once Microsoft does
-// 	uprintf("Found UEFI bootloader version: %d.%d.%d.%d", ver->Major, ver->Minor, ver->Micro, ver->Nano);
-	if (ver != NULL && ver->Major == 10 && ver->Minor == 0 && ver->Micro > 14393 && ver->Micro < 19041)
+	// Check for SBAT revocation
+	if (IsRevokedBySbat(buf, len))
 		return 3;
+
 	return 0;
 }
 
 void PrintRevokedBootloaderInfo(void)
 {
-	uprintf("Found %d officially revoked UEFI bootloaders from embedded list", sizeof(pe256dbx) / SHA256_HASHSIZE);
-	if (ParseSKUSiPolicy())
+	uprintf("Found %d revoked UEFI bootloaders from embedded list", sizeof(pe256dbx) / SHA256_HASHSIZE);
+	if (ParseSKUSiPolicy() && pe256ssp_size != 0)
 		uprintf("Found %d additional revoked UEFI bootloaders from this system's SKUSiPolicy.p7b", pe256ssp_size);
-	else
-		uprintf("WARNING: Could not parse this system's SkuSiPolicy.p7b for additional revoked UEFI bootloaders");
 }
 
 /*
@@ -2148,8 +2175,8 @@ void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name)
 	intptr_t pos;
 	uint32_t i, j, size, md5_size, new_size;
 	uint8_t sum[MD5_HASHSIZE];
-	char md5_path[64], path1[64], path2[64], *md5_data = NULL, *new_data = NULL, *str_pos;
-	char *d, *s, *p;
+	char md5_path[64], path1[64], path2[64], bootloader_name[32];
+	char *md5_data = NULL, *new_data = NULL, *str_pos, *d, *s, *p;
 
 	if (!img_report.has_md5sum && !validate_md5sum)
 		goto out;
@@ -2200,12 +2227,13 @@ void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name)
 		}
 		s = md5_data;
 		// Extract the MD5Sum bootloader(s)
-		for (i = 1; i < ARRAYSIZE(efi_bootname); i++) {
-			static_sprintf(path1, "%s\\efi\\boot\\%s", dest_dir, efi_bootname[i]);
+		for (i = 1; i < ARRAYSIZE(efi_archname); i++) {
+			static_sprintf(bootloader_name, "boot%s.efi", efi_archname[i]);
+			static_sprintf(path1, "%s\\efi\\boot\\boot%s.efi", dest_dir, efi_archname[i]);
 			if (!PathFileExistsA(path1))
 				continue;
 			res_data = (BYTE*)GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_MD5_BOOT + i),
-				_RT_RCDATA, efi_bootname[i], &res_size, FALSE);
+				_RT_RCDATA, bootloader_name, &res_size, FALSE);
 			static_strcpy(path2, path1);
 			path2[strlen(path2) - 4] = 0;
 			static_strcat(path2, "_original.efi");
@@ -2232,20 +2260,21 @@ void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name)
 		}
 		// Rename the original bootloaders if present in md5sum.txt
 		for (p = md5_data; (p = StrStrIA(p, " ./efi/boot/boot")) != NULL; ) {
-			for (i = 1; i < ARRAYSIZE(efi_bootname); i++) {
-				if (p[12 + strlen(efi_bootname[i])] != 0x0a)
+			for (i = 1; i < ARRAYSIZE(efi_archname); i++) {
+				static_sprintf(bootloader_name, "boot%s.efi", efi_archname[i]);
+				if (p[12 + strlen(bootloader_name)] != 0x0a)
 					continue;
-				p[12 + strlen(efi_bootname[i])] = 0;
-				if (lstrcmpiA(&p[12], efi_bootname[i]) == 0) {
-					size = (uint32_t)(p - s) + 12 + (uint32_t)strlen(efi_bootname[i]) - 4;
+				p[12 + strlen(bootloader_name)] = 0;
+				if (lstrcmpiA(&p[12], bootloader_name) == 0) {
+					size = (uint32_t)(p - s) + 12 + (uint32_t)strlen(bootloader_name) - 4;
 					memcpy(d, s, size);
 					d = &d[size];
 					strcpy(d, "_original.efi\n");
 					new_size += 9;
 					d = &d[14];
-					s = &p[12 + strlen(efi_bootname[i]) + 1];
+					s = &p[12 + strlen(bootloader_name) + 1];
 				}
-				p[12 + strlen(efi_bootname[i])] = 0x0a;
+				p[12 + strlen(bootloader_name)] = 0x0a;
 			}
 			p = &p[12];
 		}
