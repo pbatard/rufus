@@ -1393,7 +1393,7 @@ static DWORD WINAPI CheckForFidoThread(LPVOID param)
 		if (sbat_entries != 0) {
 			for (i = 0; sbat_entries[i].product != NULL; i++);
 			if (i > 0)
-				uprintf("Found %d additional revoked UEFI bootloader filters from remote SBAT", i);
+				uprintf("Found %d additional UEFI revocation filters from remote SBAT", i);
 		}
 	}
 

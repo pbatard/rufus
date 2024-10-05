@@ -240,7 +240,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	if (DownloadStatus != 200) {
 		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
 		SetLastError(RUFUS_ERROR(error_code));
-		uprintf("%s: %d", (DownloadStatus == 404) ? "File not found" : "Unable to access file", DownloadStatus);
+		uprintf("%s '%s': %d", (DownloadStatus == 404) ? "File not found" : "Unable to access file", url, DownloadStatus);
 		goto out;
 	}
 	dwSize = sizeof(strsize);

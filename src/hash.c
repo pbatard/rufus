@@ -116,6 +116,7 @@ StrArray modified_files = { 0 };
 
 extern int default_thread_priority;
 extern const char* efi_archname[ARCH_MAX];
+extern char* sbat_level_txt;
 
 /*
  * Rotate 32 or 64 bit integers by n bytes.
@@ -2081,25 +2082,16 @@ BOOL IsFileInDB(const char* path)
 
 BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 {
-	static const char section_name[IMAGE_SIZEOF_SHORT_NAME] = { '.', 's', 'b', 'a', 't', '\0', '\0', '\0' };
-	char* sbat = NULL, * version_str;
-	uint32_t i, j;
+	char* sbat = NULL, *version_str;
+	uint32_t i, j, sbat_len;
 	sbat_entry_t entry;
-	IMAGE_SECTION_HEADER* section_header;
 
-	if (buf == NULL || len < 0x100 || sbat_entries == NULL)
+	if (sbat_entries == NULL)
 		return FALSE;
 
-	for (i = 0x40; i < MIN(len, 0x800); i++) {
-		if (memcmp(section_name, &buf[i], sizeof(section_name)) == 0) {
-			section_header = (IMAGE_SECTION_HEADER*)&buf[i];
-			if (section_header->SizeOfRawData >= len || section_header->PointerToRawData >= len)
-				return TRUE;
-			sbat = (char*)&buf[section_header->PointerToRawData];
-			break;
-		}
-	}
-	if (sbat == NULL)
+	// Look for a .sbat section
+	sbat = GetPeSection(buf, &sbat_len, ".sbat");
+	if (sbat == NULL || sbat < buf || sbat >= buf + len)
 		return FALSE;
 
 	for (i = 0; sbat[i] != '\0'; ) {
@@ -2128,11 +2120,66 @@ BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 	return FALSE;
 }
 
+BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
+{
+	wchar_t* rsrc_name = NULL;
+	uint8_t *base;
+	uint32_t i, j, rsrc_rva, rsrc_len, *svn_ver;
+	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
+	IMAGE_NT_HEADERS* pe_header;
+	IMAGE_NT_HEADERS64* pe64_header;
+	IMAGE_DATA_DIRECTORY img_data_dir;
+
+	if (sbat_entries == NULL)
+		return FALSE;
+
+	for (i = 0; sbat_entries[i].product != NULL; i++) {
+		// SVN entries are expected to be uppercase
+		for (j = 0; j < strlen(sbat_entries[i].product) && isupper(sbat_entries[i].product[j]); j++);
+		if (j < strlen(sbat_entries[i].product))
+			continue;
+		rsrc_name = utf8_to_wchar(sbat_entries[i].product);
+		if (rsrc_name == NULL)
+			continue;
+
+		pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+		if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
+			img_data_dir = pe_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE];
+		} else {
+			pe64_header = (IMAGE_NT_HEADERS64*)pe_header;
+			img_data_dir = pe64_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE];
+		}
+
+		base = RvaToPhysical(buf, img_data_dir.VirtualAddress);
+		rsrc_rva = FindResourceRva(FALSE, base, base, rsrc_name, &rsrc_len);
+		safe_free(rsrc_name);
+		if (rsrc_rva != 0) {
+			if (rsrc_len == sizeof(uint32_t)) {
+				svn_ver = (uint32_t*)RvaToPhysical(buf, rsrc_rva);
+				if (svn_ver != NULL && *svn_ver < sbat_entries[i].version)
+					return TRUE;
+			} else {
+				uprintf("WARNING: Unexpected Microsoft SVN version size");
+			}
+		}
+	}
+	return FALSE;
+}
+
 int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 {
 	uint32_t i;
 	uint8_t hash[SHA256_HASHSIZE];
 
+	// Fall back to embedded sbat_level.txt if we couldn't access remote
+	if (sbat_entries == NULL) {
+		sbat_level_txt = safe_strdup(db_sbat_level_txt);
+		sbat_entries = GetSbatEntries(sbat_level_txt);
+	}
+
+	// TODO: More elaborate PE checks?
+	if (buf == NULL || len < 0x100 || buf[0] != 'M' || buf[1] != 'Z')
+		return -2;
 	if (!PE256Buffer(buf, len, hash))
 		return -1;
 	// Check for UEFI DBX revocation
@@ -2143,10 +2190,12 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 	for (i = 0; i < pe256ssp_size * SHA256_HASHSIZE; i += SHA256_HASHSIZE)
 		if (memcmp(hash, &pe256ssp[i], SHA256_HASHSIZE) == 0)
 			return 2;
-	// Check for SBAT revocation
+	// Check for Linux SBAT revocation
 	if (IsRevokedBySbat(buf, len))
 		return 3;
-
+	// Sheck for Microsoft SVN revocation
+	if (IsRevokedBySvn(buf, len))
+		return 4;
 	return 0;
 }
 

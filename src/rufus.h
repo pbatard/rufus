@@ -831,6 +831,9 @@ extern HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAcce
 	DWORD dwFlagsAndAttributes, LONGLONG fileSize);
 extern uint32_t ResolveDllAddress(dll_resolver_t* resolver);
 extern sbat_entry_t* GetSbatEntries(char* sbatlevel);
+extern uint8_t* GetPeSection(uint8_t* buf, uint32_t* sec_len, const char* name);
+extern uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva);
+extern uint32_t FindResourceRva(BOOL found, uint8_t* base, uint8_t* cur, const wchar_t* name, uint32_t* len);
 #define GetTextWidth(hDlg, id) GetTextSize(GetDlgItem(hDlg, id), NULL).cx
 
 DWORD WINAPI HashThread(void* param);

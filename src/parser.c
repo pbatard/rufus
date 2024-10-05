@@ -1570,10 +1570,17 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
 
 	num_entries = 0;
 	for (i = 0; sbatlevel[i] != '\0'; ) {
-		while (sbatlevel[i] == '\n')
+		// Eliminate blank lines
+		if (sbatlevel[i] == '\n') {
 			i++;
-		if (sbatlevel[i] == '\0')
-			break;
+			continue;
+		}
+		// Eliminate comments
+		if (sbatlevel[i] == '#') {
+			while (sbatlevel[i] != '\n' && sbatlevel[i] != '\0')
+				i++;
+			continue;
+		}
 		sbat_entries[num_entries].product = &sbatlevel[i];
 		for (; sbatlevel[i] != ',' && sbatlevel[i] != '\0' && sbatlevel[i] != '\n'; i++);
 		if (sbatlevel[i] == '\0' || sbatlevel[i] == '\n')
@@ -1586,7 +1593,11 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
 		sbatlevel[i] = '\0';
 		if (!eof)
 			i++;
-		sbat_entries[num_entries].version = atoi(version_str);
+		// Allow the provision of an hex version
+		if (version_str[0] == '0' && version_str[1] == 'x')
+			sbat_entries[num_entries].version = strtoul(version_str, NULL, 16);
+		else
+			sbat_entries[num_entries].version = strtoul(version_str, NULL, 10);
 		if (!eol)
 			for (; sbatlevel[i] != '\0' && sbatlevel[i] != '\n'; i++);
 		if (sbat_entries[num_entries].version != 0)
@@ -1594,4 +1605,108 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
 	}
 
 	return sbat_entries;
+}
+
+/*
+ * PE parsing functions
+ */
+
+// Return the address of a PE section from a PE buffer
+uint8_t* GetPeSection(uint8_t* buf, uint32_t* sec_len, const char* name)
+{
+	char section_name[IMAGE_SIZEOF_SHORT_NAME] = { 0 };
+	uint32_t i, nb_sections;
+	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
+	IMAGE_NT_HEADERS* pe_header;
+	IMAGE_NT_HEADERS64* pe64_header;
+	IMAGE_SECTION_HEADER* section_header;
+
+	static_strcpy(section_name, name);
+
+	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	if (pe_header == NULL)
+		return NULL;
+	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
+		section_header = (IMAGE_SECTION_HEADER*)(&pe_header[1]);
+		nb_sections = pe_header->FileHeader.NumberOfSections;
+	} else {
+		pe64_header = (IMAGE_NT_HEADERS64*)pe_header;
+		section_header = (IMAGE_SECTION_HEADER*)(&pe64_header[1]);
+		nb_sections = pe64_header->FileHeader.NumberOfSections;
+	}
+	for (i = 0; i < nb_sections; i++) {
+		if (memcmp(section_header[i].Name, section_name, sizeof(section_name)) == 0) {
+			*sec_len = section_header->SizeOfRawData;
+			return &buf[section_header[i].PointerToRawData];
+		}
+	}
+	return NULL;
+}
+
+// Convert an RVA address to a physical address from a PE buffer
+uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva)
+{
+	uint32_t i, nb_sections;
+	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
+	IMAGE_NT_HEADERS* pe_header;
+	IMAGE_NT_HEADERS64* pe64_header;
+	IMAGE_SECTION_HEADER* section_header;
+
+	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	if (pe_header == NULL)
+		return NULL;
+
+	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
+		section_header = (IMAGE_SECTION_HEADER*)(pe_header + 1);
+		nb_sections = pe_header->FileHeader.NumberOfSections;
+	} else {
+		pe64_header = (IMAGE_NT_HEADERS64*)pe_header;
+		section_header = (IMAGE_SECTION_HEADER*)(pe64_header + 1);
+		nb_sections = pe64_header->FileHeader.NumberOfSections;
+	}
+
+	for (i = 0; i < nb_sections; i++) {
+		if ((section_header[i].VirtualAddress <= rva && rva < (section_header[i].VirtualAddress + section_header[i].Misc.VirtualSize)))
+			break;
+	}
+	if (i >= nb_sections)
+		return NULL;
+
+	return &buf[section_header[i].PointerToRawData + (rva - section_header[i].VirtualAddress)];
+}
+
+// Using the MS APIs to poke the resources of the EFI bootloaders is simply TOO. DAMN. SLOW.
+// So, to QUICKLY access the resources we need, we reivent Microsoft's sub-optimal resource parser.
+uint32_t FindResourceRva(BOOL found, uint8_t* base, uint8_t* cur, const wchar_t* name, uint32_t* len)
+{
+	uint32_t rva;
+	WORD i;
+	IMAGE_RESOURCE_DIRECTORY* dir = (IMAGE_RESOURCE_DIRECTORY*)cur;
+	IMAGE_RESOURCE_DIRECTORY_ENTRY* dir_entry = (IMAGE_RESOURCE_DIRECTORY_ENTRY*)&dir[1];
+	IMAGE_RESOURCE_DIR_STRING_U* dir_string;
+	IMAGE_RESOURCE_DATA_ENTRY* data_entry;
+
+	if (base == NULL || cur == NULL || name == NULL)
+		return 0;
+
+	for (i = 0; i < dir->NumberOfNamedEntries + dir->NumberOfIdEntries; i++) {
+		if (!found && i < dir->NumberOfNamedEntries) {
+			dir_string = (IMAGE_RESOURCE_DIR_STRING_U*)(base + dir_entry[i].NameOffset);
+			if (dir_string->Length != wcslen(name) ||
+				memcmp(name, dir_string->NameString, wcslen(name)) != 0)
+				continue;
+			found = TRUE;
+		}
+		if (dir_entry[i].OffsetToData & IMAGE_RESOURCE_DATA_IS_DIRECTORY) {
+			rva = FindResourceRva(found, base, &base[dir_entry[i].OffsetToDirectory], name, len);
+			if (rva != 0)
+				return rva;
+		} else if (found) {
+			data_entry = (IMAGE_RESOURCE_DATA_ENTRY*)(base + dir_entry[i].OffsetToData);
+			if (len != NULL)
+				*len = data_entry->Size;
+			return data_entry->OffsetToData;
+		}
+	}
+	return 0;
 }

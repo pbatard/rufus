@@ -1608,6 +1608,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			const char* msg;
 
 			for (i = 0; i < ARRAYSIZE(img_report.efi_boot_path) && img_report.efi_boot_path[i][0] != 0; i++) {
+				static const char* revocation_type[] = { "UEFI DBX", "Windows SecuritySiPolicy", "Linux SBAT", "Windows SVN" };
 				len = ReadISOFileToBuffer(image_path, img_report.efi_boot_path[i], &buf);
 				if (len == 0) {
 					uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", img_report.efi_boot_path[i]);
@@ -1616,8 +1617,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				r = IsBootloaderRevoked(buf, len);
 				safe_free(buf);
 				if (r > 0) {
-					uprintf("Warning: '%s' is revoked by %s", img_report.efi_boot_path[i],
-						(r == 1) ? "UEFI DBX" : ((r == 2) ? "Windows SSP" : "Linux SBAT"));
+					assert(r <= ARRAYSIZE(revocation_type));
+					uprintf("Warning: '%s' has been revoked by %s", img_report.efi_boot_path[i], revocation_type[r - 1]);
 					is_bootloader_revoked = TRUE;
 					switch (r) {
 					case 2:
