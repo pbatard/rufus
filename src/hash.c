@@ -2090,7 +2090,7 @@ BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 		return FALSE;
 
 	// Look for a .sbat section
-	sbat = GetPeSection(buf, &sbat_len, ".sbat");
+	sbat = GetPeSection(buf, ".sbat", &sbat_len);
 	if (sbat == NULL || sbat < buf || sbat >= buf + len)
 		return FALSE;
 
@@ -2123,7 +2123,7 @@ BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 {
 	wchar_t* rsrc_name = NULL;
-	uint8_t *base;
+	uint8_t *root;
 	uint32_t i, j, rsrc_rva, rsrc_len, *svn_ver;
 	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
 	IMAGE_NT_HEADERS* pe_header;
@@ -2150,8 +2150,8 @@ BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 			img_data_dir = pe64_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE];
 		}
 
-		base = RvaToPhysical(buf, img_data_dir.VirtualAddress);
-		rsrc_rva = FindResourceRva(FALSE, base, base, rsrc_name, &rsrc_len);
+		root = RvaToPhysical(buf, img_data_dir.VirtualAddress);
+		rsrc_rva = FindResourceRva(rsrc_name, root, root, &rsrc_len);
 		safe_free(rsrc_name);
 		if (rsrc_rva != 0) {
 			if (rsrc_len == sizeof(uint32_t)) {
@@ -2159,7 +2159,7 @@ BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 				if (svn_ver != NULL && *svn_ver < sbat_entries[i].version)
 					return TRUE;
 			} else {
-				uprintf("WARNING: Unexpected Microsoft SVN version size");
+				uprintf("WARNING: Unexpected Secure Version Number size");
 			}
 		}
 	}

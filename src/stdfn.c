@@ -738,7 +738,7 @@ out:
 /*
  * Get a resource from the RC. If needed that resource can be duplicated.
  * If duplicate is true and len is non-zero, the a zeroed buffer of 'len'
- * size is allocated for the resource. Else the buffer is allocate for
+ * size is allocated for the resource. Else the buffer is allocated for
  * the resource size.
  */
 uint8_t* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate)

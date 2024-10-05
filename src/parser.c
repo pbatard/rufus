@@ -1611,8 +1611,8 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
  * PE parsing functions
  */
 
-// Return the address of a PE section from a PE buffer
-uint8_t* GetPeSection(uint8_t* buf, uint32_t* sec_len, const char* name)
+// Return the address and (optionally) the length of a PE section from a PE buffer
+uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len)
 {
 	char section_name[IMAGE_SIZEOF_SHORT_NAME] = { 0 };
 	uint32_t i, nb_sections;
@@ -1623,9 +1623,10 @@ uint8_t* GetPeSection(uint8_t* buf, uint32_t* sec_len, const char* name)
 
 	static_strcpy(section_name, name);
 
-	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
-	if (pe_header == NULL)
+	if (buf == NULL || name == NULL)
 		return NULL;
+
+	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
 	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
 		section_header = (IMAGE_SECTION_HEADER*)(&pe_header[1]);
 		nb_sections = pe_header->FileHeader.NumberOfSections;
@@ -1636,7 +1637,8 @@ uint8_t* GetPeSection(uint8_t* buf, uint32_t* sec_len, const char* name)
 	}
 	for (i = 0; i < nb_sections; i++) {
 		if (memcmp(section_header[i].Name, section_name, sizeof(section_name)) == 0) {
-			*sec_len = section_header->SizeOfRawData;
+			if (len != NULL)
+				*len = section_header->SizeOfRawData;
 			return &buf[section_header[i].PointerToRawData];
 		}
 	}
@@ -1652,10 +1654,10 @@ uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva)
 	IMAGE_NT_HEADERS64* pe64_header;
 	IMAGE_SECTION_HEADER* section_header;
 
-	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
-	if (pe_header == NULL)
+	if (buf == NULL)
 		return NULL;
 
+	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
 	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
 		section_header = (IMAGE_SECTION_HEADER*)(pe_header + 1);
 		nb_sections = pe_header->FileHeader.NumberOfSections;
@@ -1677,32 +1679,37 @@ uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva)
 
 // Using the MS APIs to poke the resources of the EFI bootloaders is simply TOO. DAMN. SLOW.
 // So, to QUICKLY access the resources we need, we reivent Microsoft's sub-optimal resource parser.
-uint32_t FindResourceRva(BOOL found, uint8_t* base, uint8_t* cur, const wchar_t* name, uint32_t* len)
+static BOOL FoundResourceRva = FALSE;
+uint32_t FindResourceRva(const wchar_t* name, uint8_t* root, uint8_t* dir, uint32_t* len)
 {
 	uint32_t rva;
 	WORD i;
-	IMAGE_RESOURCE_DIRECTORY* dir = (IMAGE_RESOURCE_DIRECTORY*)cur;
-	IMAGE_RESOURCE_DIRECTORY_ENTRY* dir_entry = (IMAGE_RESOURCE_DIRECTORY_ENTRY*)&dir[1];
+	IMAGE_RESOURCE_DIRECTORY* _dir = (IMAGE_RESOURCE_DIRECTORY*)dir;
+	IMAGE_RESOURCE_DIRECTORY_ENTRY* dir_entry = (IMAGE_RESOURCE_DIRECTORY_ENTRY*)&_dir[1];
 	IMAGE_RESOURCE_DIR_STRING_U* dir_string;
 	IMAGE_RESOURCE_DATA_ENTRY* data_entry;
 
-	if (base == NULL || cur == NULL || name == NULL)
+	if (root == NULL || dir == NULL || name == NULL)
 		return 0;
 
-	for (i = 0; i < dir->NumberOfNamedEntries + dir->NumberOfIdEntries; i++) {
-		if (!found && i < dir->NumberOfNamedEntries) {
-			dir_string = (IMAGE_RESOURCE_DIR_STRING_U*)(base + dir_entry[i].NameOffset);
+	// Initial invocation should always start at the root
+	if (root == dir)
+		FoundResourceRva = FALSE;
+
+	for (i = 0; i < _dir->NumberOfNamedEntries + _dir->NumberOfIdEntries; i++) {
+		if (!FoundResourceRva && i < _dir->NumberOfNamedEntries) {
+			dir_string = (IMAGE_RESOURCE_DIR_STRING_U*)(root + dir_entry[i].NameOffset);
 			if (dir_string->Length != wcslen(name) ||
 				memcmp(name, dir_string->NameString, wcslen(name)) != 0)
 				continue;
-			found = TRUE;
+			FoundResourceRva = TRUE;
 		}
 		if (dir_entry[i].OffsetToData & IMAGE_RESOURCE_DATA_IS_DIRECTORY) {
-			rva = FindResourceRva(found, base, &base[dir_entry[i].OffsetToDirectory], name, len);
+			rva = FindResourceRva(name, root, &root[dir_entry[i].OffsetToDirectory], len);
 			if (rva != 0)
 				return rva;
-		} else if (found) {
-			data_entry = (IMAGE_RESOURCE_DATA_ENTRY*)(base + dir_entry[i].OffsetToData);
+		} else if (FoundResourceRva) {
+			data_entry = (IMAGE_RESOURCE_DATA_ENTRY*)(root + dir_entry[i].OffsetToData);
 			if (len != NULL)
 				*len = data_entry->Size;
 			return data_entry->OffsetToData;

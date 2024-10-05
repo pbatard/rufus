@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Commandline hogger, C version
- * Copyright © 2014 Pete Batard <pete@akeo.ie>
+ * Copyright Â© 2014 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -194,6 +194,12 @@ char* CreateUnattendXml(int arch, int flags)
 					fprintf(fd, "          <Order>%d</Order>\n", order++);
 					fprintf(fd, "          <CommandLine>net user &quot;%s&quot; /logonpasswordchg:yes</CommandLine>\n", unattend_username);
 					fprintf(fd, "        </SynchronousCommand>\n");
+					// Some people report that using the `net user` command above might reset the password expiration to 90 days...
+					// To alleviate that, blanket set passwords on the target machine to never expire.
+					fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
+					fprintf(fd, "          <Order>%d</Order>\n", order++);
+					fprintf(fd, "          <CommandLine>net accounts /maxpwage:unlimited</CommandLine>\n");
+					fprintf(fd, "        </SynchronousCommand>\n");
 					fprintf(fd, "      </FirstLogonCommands>\n");
 				}
 			}

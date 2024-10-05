@@ -98,7 +98,7 @@ if "%VERSION_OVERRIDE%"=="" (
 echo Will create %VERSION% AppStore Bundle
 pause
 
-"%WDK_PATH%\signtool" sign /v /sha1 %SIGNATURE_SHA1% /fd SHA256 /tr http://timestamp.acs.microsoft.com /td SHA256 *.exe
+"%WDK_PATH%\signtool" sign /v /sha1 %SIGNATURE_SHA1% /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 *.exe
 if ERRORLEVEL 1 goto out
 
 echo [Files]> bundle.map
