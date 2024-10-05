@@ -1,0 +1,52 @@
+name: setup
+run-name: Windows setup wrapper build
+
+on: 
+  workflow_dispatch:
+    branches: [ master ]
+
+env:
+  SOLUTION_FILE_PATH: ./res/setup/setup.sln
+  BUILD_CONFIGURATION: Release
+
+jobs:
+  VS2022-Build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        TARGET_PLATFORM: [x64, arm64]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+      with:
+        msbuild-architecture: x64
+
+    - name: Build
+      shell: cmd
+      run: |
+        msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ matrix.TARGET_PLATFORM }}
+        move .\res\setup\${{ matrix.TARGET_PLATFORM }}\Release\setup.exe .\setup_${{ matrix.TARGET_PLATFORM }}.exe
+
+    - name: Display SHA-256
+      run: sha256sum ./setup_${{ matrix.TARGET_PLATFORM }}.exe
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.TARGET_PLATFORM }}
+        path: ./*.exe
+
+  Extra-Step-To-Merge-Artifacts-Thanks-To-Upload-Artifact-v4-Breaking-Backwards-Compatibility:
+    runs-on: windows-latest
+    needs: VS2022-Build
+    steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: setup
+          delete-merged: true
