@@ -1554,18 +1554,20 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
 	BOOL eol, eof;
 	char* version_str;
 	uint32_t i, num_entries;
-	sbat_entry_t* sbat_entries;
+	sbat_entry_t* _sbat_entries;
 
 	if (sbatlevel == NULL)
-		return FALSE;
+		return NULL;
 
 	num_entries = 0;
 	for (i = 0; sbatlevel[i] != '\0'; i++)
 		if (sbatlevel[i] == '\n')
 			num_entries++;
 
-	sbat_entries = calloc(num_entries + 2, sizeof(sbat_entry_t));
-	if (sbat_entries == NULL)
+	if (num_entries == 0)
+		return NULL;
+	_sbat_entries = calloc(num_entries + 2, sizeof(sbat_entry_t));
+	if (_sbat_entries == NULL)
 		return NULL;
 
 	num_entries = 0;
@@ -1581,7 +1583,7 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
 				i++;
 			continue;
 		}
-		sbat_entries[num_entries].product = &sbatlevel[i];
+		_sbat_entries[num_entries].product = &sbatlevel[i];
 		for (; sbatlevel[i] != ',' && sbatlevel[i] != '\0' && sbatlevel[i] != '\n'; i++);
 		if (sbatlevel[i] == '\0' || sbatlevel[i] == '\n')
 			break;
@@ -1595,21 +1597,34 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
 			i++;
 		// Allow the provision of an hex version
 		if (version_str[0] == '0' && version_str[1] == 'x')
-			sbat_entries[num_entries].version = strtoul(version_str, NULL, 16);
+			_sbat_entries[num_entries].version = strtoul(version_str, NULL, 16);
 		else
-			sbat_entries[num_entries].version = strtoul(version_str, NULL, 10);
+			_sbat_entries[num_entries].version = strtoul(version_str, NULL, 10);
 		if (!eol)
 			for (; sbatlevel[i] != '\0' && sbatlevel[i] != '\n'; i++);
-		if (sbat_entries[num_entries].version != 0)
+		if (_sbat_entries[num_entries].version != 0)
 			num_entries++;
 	}
 
-	return sbat_entries;
+	return _sbat_entries;
 }
 
 /*
  * PE parsing functions
  */
+
+// Return the arch of a PE executable buffer
+uint16_t GetPeArch(uint8_t* buf)
+{
+	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
+	IMAGE_NT_HEADERS* pe_header;
+
+	if (buf == NULL)
+		return IMAGE_FILE_MACHINE_UNKNOWN;
+
+	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	return pe_header->FileHeader.Machine;
+}
 
 // Return the address and (optionally) the length of a PE section from a PE buffer
 uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len)

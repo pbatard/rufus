@@ -84,7 +84,7 @@ static BOOL RegWriteKey(HKEY hKeyRoot, CHAR* lpKeyParent, CHAR* lpKeyName, DWORD
 
 	if (RegCreateKeyExA(hKeyRoot, lpKeyParent, 0, NULL, 0, KEY_SET_VALUE | KEY_QUERY_VALUE, NULL, &hKey, &dwDisp) != ERROR_SUCCESS)
 		return FALSE;
-	
+
 	r = (RegSetValueExA(hKey, lpKeyName, 0, dwType, lpData, dwDataSize) == ERROR_SUCCESS);
 	RegCloseKey(hKey);
 
@@ -104,7 +104,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (dwAttrib == INVALID_FILE_ATTRIBUTES || dwAttrib & FILE_ATTRIBUTE_DIRECTORY)
 		MessageBoxA(NULL, "ERROR: 'setup.dll' was not found", "Windows setup error", MB_OK | MB_ICONWARNING);
 
-	// Apply the registry bypasses to enable Windows 11 24H2 in-place upgrade
+	// Apply the registry bypasses to enable Windows 11 24H2 in-place upgrade. Credits to:
+	// https://forums.mydigitallife.net/threads/win-11-boot-and-upgrade-fix-kit-v5-0-released.83724/
 	RegDeleteNode(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\CompatMarkers");
 	RegDeleteNode(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Shared");
 	RegDeleteNode(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\TargetVersionUpgradeExperienceIndicators");

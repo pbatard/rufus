@@ -1401,10 +1401,12 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 {
 	int i, r, username_index = -1;
 	FILE *fd;
-	DWORD len;
+	uint32_t len;
+	uint8_t* buf = NULL;
 	WPARAM ret = BOOTCHECK_CANCEL;
 	BOOL in_files_dir = FALSE, esp_already_asked = FALSE;
 	BOOL is_windows_to_go = ((image_options & IMOP_WINTOGO) && (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO));
+	const char* msg;
 	const char* grub = "grub";
 	const char* core_img = "core.img";
 	const char* ldlinux = "ldlinux";
@@ -1603,10 +1605,6 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 
 		// Check UEFI bootloaders for revocation
 		if (IS_EFI_BOOTABLE(img_report)) {
-			uint8_t* buf = NULL;
-			uint32_t len;
-			const char* msg;
-
 			for (i = 0; i < ARRAYSIZE(img_report.efi_boot_path) && img_report.efi_boot_path[i][0] != 0; i++) {
 				static const char* revocation_type[] = { "UEFI DBX", "Windows SSP", "Linux SBAT", "Windows SVN" };
 				len = ReadISOFileToBuffer(image_path, img_report.efi_boot_path[i], &buf);
@@ -1720,7 +1718,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		if ((partition_type == PARTITION_STYLE_MBR) && HAS_SYSLINUX(img_report)) {
 			if (SL_MAJOR(img_report.sl_version) < 5) {
 				IGNORE_RETVAL(_chdirU(app_data_dir));
-				for (i = 0; i<NB_OLD_C32; i++) {
+				for (i = 0; i < NB_OLD_C32; i++) {
 					if (img_report.has_old_c32[i]) {
 						if (!in_files_dir) {
 							IGNORE_RETVAL(_mkdir(FILES_DIR));

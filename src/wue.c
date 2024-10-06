@@ -790,10 +790,14 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 	char boot_wim_path[] = "?:\\sources\\boot.wim", key_path[64];
 	char appraiserres_dll_src[] = "?:\\sources\\appraiserres.dll";
 	char appraiserres_dll_dst[] = "?:\\sources\\appraiserres.bak";
+	char setup_exe[] = "?:\\setup.exe";
+	char setup_dll[] = "?:\\setup.dll";
 	char *mount_path = NULL, path[MAX_PATH];
+	uint8_t* buf = NULL;
+	uint16_t setup_arch;
 	HKEY hKey = NULL, hSubKey = NULL;
 	LSTATUS status;
-	DWORD dwDisp, dwVal = 1;
+	DWORD dwDisp, dwVal = 1, dwSize;
 
 	assert(unattend_xml_path != NULL);
 	uprintf("Applying Windows customization:");
@@ -830,6 +834,30 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 				if (validate_md5sum) {
 					md5sum_totalbytes -= _filesizeU(appraiserres_dll_dst);
 					StrArrayAdd(&modified_files, appraiserres_dll_src, TRUE);
+				}
+			}
+			// Apply the 'setup.exe' wrapper for Windows 11 24H2 in-place upgrades
+			if (img_report.win_version.build >= 26000) {
+				setup_exe[0] = drive_letter;
+				setup_dll[0] = drive_letter;
+				dwSize = read_file(setup_exe, &buf);
+				if (dwSize != 0) {
+					setup_arch = GetPeArch(buf);
+					free(buf);
+					if (setup_arch != IMAGE_FILE_MACHINE_AMD64 && setup_arch != IMAGE_FILE_MACHINE_ARM64) {
+						uprintf("WARNING: Unsupported arch 0x%x -- in-place upgrade wrapper can not be added");
+					} else if (!MoveFileExU(setup_exe, setup_dll, 0)) {
+						uprintf("Could not rename '%s': %s", setup_exe, WindowsErrorString());
+					} else {
+						uprintf("Renamed '%s' → '%s'", setup_exe, setup_dll);
+						uprintf("Created '%s' bypass wrapper (from embedded)", setup_exe);
+						buf = GetResource(hMainInstance, MAKEINTRESOURCEA(setup_arch == IMAGE_FILE_MACHINE_AMD64 ? IDR_SETUP_X64 : IDR_SETUP_ARM64),
+							_RT_RCDATA, "setup.exe", &dwSize, FALSE);
+						if (buf == NULL)
+							uprintf("Could not access embedded 'setup.exe'");
+						else
+							write_file(setup_exe, buf, dwSize);
+					}
 				}
 			}
 		}

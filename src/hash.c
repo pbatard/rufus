@@ -2091,7 +2091,7 @@ BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 
 	// Look for a .sbat section
 	sbat = GetPeSection(buf, ".sbat", &sbat_len);
-	if (sbat == NULL || sbat < buf || sbat >= buf + len)
+	if (sbat == NULL || sbat < (char*)buf || sbat >= (char*)buf + len)
 		return FALSE;
 
 	for (i = 0; sbat[i] != '\0'; ) {
