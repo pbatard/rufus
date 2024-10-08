@@ -629,6 +629,8 @@ typedef struct {
 #define UNATTEND_SET_USER                   0x00040
 #define UNATTEND_DISABLE_BITLOCKER          0x00080
 #define UNATTEND_FORCE_S_MODE               0x00100
+#define UNATTEND_USE_MS2023_BOOTLOADERS     0x00200
+#define UNATTEND_FULL_MASK                  0x003FF
 #define UNATTEND_DEFAULT_MASK               0x000FF
 #define UNATTEND_WINDOWS_TO_GO              0x10000		// Special flag for Windows To Go
 
@@ -636,9 +638,14 @@ typedef struct {
 #define UNATTEND_SPECIALIZE_DEPLOYMENT_MASK (UNATTEND_NO_ONLINE_ACCOUNT)
 #define UNATTEND_OOBE_SHELL_SETUP_MASK      (UNATTEND_NO_DATA_COLLECTION | UNATTEND_SET_USER | UNATTEND_DUPLICATE_LOCALE)
 #define UNATTEND_OOBE_INTERNATIONAL_MASK    (UNATTEND_DUPLICATE_LOCALE)
-#define UNATTEND_OOBE_MASK                  (UNATTEND_OOBE_SHELL_SETUP_MASK | UNATTEND_OOBE_INTERNATIONAL_MASK | UNATTEND_DISABLE_BITLOCKER)
+#define UNATTEND_OOBE_MASK                  (UNATTEND_OOBE_SHELL_SETUP_MASK | UNATTEND_OOBE_INTERNATIONAL_MASK | UNATTEND_DISABLE_BITLOCKER | UNATTEND_USE_MS2023_BOOTLOADERS)
 #define UNATTEND_OFFLINE_SERVICING_MASK     (UNATTEND_OFFLINE_INTERNAL_DRIVES | UNATTEND_FORCE_S_MODE)
 #define UNATTEND_DEFAULT_SELECTION_MASK     (UNATTEND_SECUREBOOT_TPM_MINRAM | UNATTEND_NO_ONLINE_ACCOUNT | UNATTEND_OFFLINE_INTERNAL_DRIVES)
+
+/* Used with ListDirectoryContent */
+#define LIST_DIR_TYPE_FILE			0x01
+#define LIST_DIR_TYPE_DIRECTORY		0x02
+#define LIST_DIR_TYPE_RECURSIVE		0x80
 
 /* Hash tables */
 typedef struct htab_entry {
@@ -786,6 +793,7 @@ extern char* get_token_data_buffer(const char* token, unsigned int n, const char
 extern char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix);
 extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);
 extern char* replace_char(const char* src, const char c, const char* rep);
+extern char* remove_substr(const char* src, const char* sub);
 extern void parse_update(char* buf, size_t len);
 extern void* get_data_from_asn1(const uint8_t* buf, size_t buf_len, const char* oid_str, uint8_t asn1_type, size_t* data_len);
 extern int sanitize_label(char* label);
@@ -835,6 +843,8 @@ extern uint16_t GetPeArch(uint8_t* buf);
 extern uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len);
 extern uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva);
 extern uint32_t FindResourceRva(const wchar_t* name, uint8_t* root, uint8_t* dir, uint32_t* len);
+extern DWORD ListDirectoryContent(StrArray* arr, char* dir, uint8_t type);
+extern BOOL TakeOwnership(LPCSTR lpszOwnFile);
 #define GetTextWidth(hDlg, id) GetTextSize(GetDlgItem(hDlg, id), NULL).cx
 
 DWORD WINAPI HashThread(void* param);

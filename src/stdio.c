@@ -203,7 +203,7 @@ void DumpBufferHex(void *buf, size_t size)
 			uprintf("%s\n", line);
 		line[0] = 0;
 		sprintf(&line[strlen(line)], "  %08x  ", (unsigned int)i);
-		for(j=0,k=0; k<16; j++,k++) {
+		for(j = 0,k = 0; k < 16; j++,k++) {
 			if (i+j < size) {
 				sprintf(&line[strlen(line)], "%02x", buffer[i+j]);
 			} else {
@@ -212,7 +212,7 @@ void DumpBufferHex(void *buf, size_t size)
 			sprintf(&line[strlen(line)], " ");
 		}
 		sprintf(&line[strlen(line)], " ");
-		for(j=0,k=0; k<16; j++,k++) {
+		for(j = 0,k = 0; k < 16; j++,k++) {
 			if (i+j < size) {
 				if ((buffer[i+j] < 32) || (buffer[i+j] > 126)) {
 					sprintf(&line[strlen(line)], ".");
@@ -919,4 +919,61 @@ BOOL ExtractZip(const char* src_zip, const char* dest_dir)
 	extracted_bytes = bled_uncompress_to_dir(src_zip, dest_dir, BLED_COMPRESSION_ZIP);
 	bled_exit();
 	return (extracted_bytes > 0);
+}
+
+// Returns a list of all the files or folders from a directory
+DWORD ListDirectoryContent(StrArray* arr, char* dir, uint8_t type)
+{
+	WIN32_FIND_DATAA FindFileData = { 0 };
+	HANDLE hFind;
+	DWORD dwError, dwResult;
+	char mask[MAX_PATH + 1], path[MAX_PATH + 1];
+
+	if (arr == NULL || dir == NULL || (type & 0x03) == 0)
+		return ERROR_INVALID_PARAMETER;
+
+	if (PathCombineU(mask, dir, "*") == NULL)
+		return GetLastError();
+
+	hFind = FindFirstFileU(mask, &FindFileData);
+	if (hFind == INVALID_HANDLE_VALUE)
+		return GetLastError();
+
+	dwResult = ERROR_FILE_NOT_FOUND;
+	do {
+		if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+			if (strcmp(FindFileData.cFileName, ".") == 0 ||
+				strcmp(FindFileData.cFileName, "..") == 0 ||
+				(type & LIST_DIR_TYPE_RECURSIVE) == 0)
+				continue;
+			if (PathCombineU(path, dir, FindFileData.cFileName) == NULL)
+				break;
+			// Append a trailing backslash to directories
+			if (path[strlen(path) - 1] != '\\') {
+				path[strlen(path) + 1] = '\0';
+				path[strlen(path)] = '\\';
+			}
+			if (type & LIST_DIR_TYPE_DIRECTORY)
+				StrArrayAdd(arr, path, TRUE);
+			dwError = ListDirectoryContent(arr, path, type);
+			if (dwError != NO_ERROR && dwError != ERROR_FILE_NOT_FOUND) {
+				SetLastError(dwError);
+				break;
+			}
+		} else {
+			if (type & LIST_DIR_TYPE_FILE) {
+				if (PathCombineU(path, dir, FindFileData.cFileName) == NULL)
+					break;
+				StrArrayAdd(arr, path, TRUE);
+			}
+			dwResult = NO_ERROR;
+		}
+	} while (FindNextFileU(hFind, &FindFileData));
+
+	dwError = GetLastError();
+	FindClose(hFind);
+
+	if (dwError != ERROR_NO_MORE_FILES)
+		return dwError;
+	return dwResult;
 }

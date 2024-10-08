@@ -1267,7 +1267,7 @@ out:
 }
 
 /*
- * Replace all 'c' characters in string 'src' with the substring 'rep'
+ * Replace all 'c' characters in string 'src' with the substring 'rep'.
  * The returned string is allocated and must be freed by the caller.
  */
 char* replace_char(const char* src, const char c, const char* rep)
@@ -1297,6 +1297,30 @@ char* replace_char(const char* src, const char c, const char* rep)
 		}
 	}
 	res[j] = 0;
+	return res;
+}
+
+/*
+ * Remove all instances of substring 'sub' form string 'src.
+ * The returned string is allocated and must be freed by the caller.
+ */
+char* remove_substr(const char* src, const char* sub)
+{
+	size_t i, j, str_len = safe_strlen(src), sub_len = safe_strlen(sub);
+	char* res;
+
+	if ((src == NULL) || (sub == NULL) || (sub_len > str_len))
+		return NULL;
+
+	res = (char*)calloc(str_len + 1, 1);
+	if (res == NULL)
+		return NULL;
+	for (i = 0, j = 0; i <= str_len; ) {
+		if (i <= str_len - sub_len && memcmp(&src[i], sub, sub_len) == 0)
+			i += sub_len;
+		else
+			res[j++] = src[i++];
+	}
 	return res;
 }
 
@@ -1697,8 +1721,7 @@ uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva)
 static BOOL FoundResourceRva = FALSE;
 uint32_t FindResourceRva(const wchar_t* name, uint8_t* root, uint8_t* dir, uint32_t* len)
 {
-	uint32_t rva;
-	WORD i;
+	uint32_t i, rva;
 	IMAGE_RESOURCE_DIRECTORY* _dir = (IMAGE_RESOURCE_DIRECTORY*)dir;
 	IMAGE_RESOURCE_DIRECTORY_ENTRY* dir_entry = (IMAGE_RESOURCE_DIRECTORY_ENTRY*)&_dir[1];
 	IMAGE_RESOURCE_DIR_STRING_U* dir_string;
@@ -1711,7 +1734,7 @@ uint32_t FindResourceRva(const wchar_t* name, uint8_t* root, uint8_t* dir, uint3
 	if (root == dir)
 		FoundResourceRva = FALSE;
 
-	for (i = 0; i < _dir->NumberOfNamedEntries + _dir->NumberOfIdEntries; i++) {
+	for (i = 0; i < (uint32_t)_dir->NumberOfNamedEntries + _dir->NumberOfIdEntries; i++) {
 		if (!FoundResourceRva && i < _dir->NumberOfNamedEntries) {
 			dir_string = (IMAGE_RESOURCE_DIR_STRING_U*)(root + dir_entry[i].NameOffset);
 			if (dir_string->Length != wcslen(name) ||

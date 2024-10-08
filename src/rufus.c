@@ -1586,6 +1586,10 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				StrArrayAdd(&options, lmprintf(MSG_335), TRUE);
 				MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
 				if (expert_mode) {
+					if (!appstore_version && img_report.win_version.build >= 26100) {
+						StrArrayAdd(&options, lmprintf(MSG_350), TRUE);
+						MAP_BIT(UNATTEND_USE_MS2023_BOOTLOADERS);
+					}
 					StrArrayAdd(&options, lmprintf(MSG_346), TRUE);
 					MAP_BIT(UNATTEND_FORCE_S_MODE);
 				}
@@ -1597,7 +1601,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				i = remap16(i, map, TRUE);
 				unattend_xml_path = CreateUnattendXml(arch, i);
 				// Remember the user preferences for the current session.
-				unattend_xml_mask &= ~(remap16(0x1ff, map, TRUE));
+				unattend_xml_mask &= ~(remap16(UNATTEND_FULL_MASK, map, TRUE));
 				unattend_xml_mask |= i;
 				WriteSetting32(SETTING_WUE_OPTIONS, (UNATTEND_DEFAULT_MASK << 16) | unattend_xml_mask);
 			}
