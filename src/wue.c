@@ -1026,7 +1026,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			}
 			// Now that we should be able to write to the destination directories, copy the content.
 			ListDirectoryContent(&files, path, LIST_DIR_TYPE_FILE | LIST_DIR_TYPE_RECURSIVE);
-			for (i = 0; r && i < (int)files.Index; i++) {
+			for (i = 0; i < (int)files.Index; i++) {
 				rep = remove_substr(files.String[i], "_EX");
 				assert(rep != NULL);
 				TakeOwnership(rep);

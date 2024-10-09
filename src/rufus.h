@@ -528,6 +528,12 @@ typedef struct ALIGNED(64) {
 	uint64_t bytecount;
 } HASH_CONTEXT;
 
+/* Certificate info */
+typedef struct {
+	char name[256];
+	uint8_t thumbprint[SHA1_HASHSIZE];
+} cert_info_t;
+
 /* Hash functions */
 typedef void hash_init_t(HASH_CONTEXT* ctx);
 typedef void hash_write_t(HASH_CONTEXT* ctx, const uint8_t* buf, size_t len);
@@ -658,7 +664,7 @@ typedef struct htab_table {
 	uint32_t size;
 	uint32_t filled;
 } htab_table;
-#define HTAB_EMPTY {NULL, 0, 0}
+#define HTAB_EMPTY { NULL, 0, 0 }
 extern BOOL htab_create(uint32_t nel, htab_table* htab);
 extern void htab_destroy(htab_table* htab);
 extern uint32_t htab_hash(char* str, htab_table* htab);
@@ -799,6 +805,7 @@ extern void* get_data_from_asn1(const uint8_t* buf, size_t buf_len, const char* 
 extern int sanitize_label(char* label);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 extern char* GetSignatureName(const char* path, const char* country_code, BOOL bSilent);
+extern BOOL GetIssuerCertificateInfo(uint8_t* cert, cert_info_t* info);
 extern uint64_t GetSignatureTimeStamp(const char* path);
 extern LONG ValidateSignature(HWND hDlg, const char* path);
 extern BOOL ValidateOpensslSignature(BYTE* pbBuffer, DWORD dwBufferLen, BYTE* pbSignature, DWORD dwSigLen);
@@ -841,6 +848,7 @@ extern uint32_t ResolveDllAddress(dll_resolver_t* resolver);
 extern sbat_entry_t* GetSbatEntries(char* sbatlevel);
 extern uint16_t GetPeArch(uint8_t* buf);
 extern uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len);
+extern uint8_t* GetPeSignatureData(uint8_t* buf);
 extern uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva);
 extern uint32_t FindResourceRva(const wchar_t* name, uint8_t* root, uint8_t* dir, uint32_t* len);
 extern DWORD ListDirectoryContent(StrArray* arr, char* dir, uint8_t type);

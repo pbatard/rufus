@@ -117,6 +117,7 @@ StrArray modified_files = { 0 };
 extern int default_thread_priority;
 extern const char* efi_archname[ARCH_MAX];
 extern char* sbat_level_txt;
+extern BOOL expert_mode;
 
 /*
  * Rotate 32 or 64 bit integers by n bytes.
@@ -2166,10 +2167,35 @@ BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 	return FALSE;
 }
 
+BOOL IsRevokedByCert(uint8_t* buf, uint32_t len)
+{
+	int i;
+	uint8_t* cert;
+	cert_info_t info;
+
+	cert = GetPeSignatureData(buf);
+	if (cert == NULL)
+		return FALSE;
+	if (!GetIssuerCertificateInfo(cert, &info))
+		return FALSE;
+
+	for (i = 0; i < ARRAYSIZE(certdbx); i += SHA1_HASHSIZE) {
+		if (!expert_mode)
+			continue;
+		if (memcmp(info.thumbprint, &certdbx[i], SHA1_HASHSIZE) == 0) {
+			uprintf("Found '%s' revoked certificate", info.name);
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 {
 	uint32_t i;
 	uint8_t hash[SHA256_HASHSIZE];
+	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
+	IMAGE_NT_HEADERS* pe_header;
 
 	// Fall back to embedded sbat_level.txt if we couldn't access remote
 	if (sbat_entries == NULL) {
@@ -2177,8 +2203,10 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 		sbat_entries = GetSbatEntries(sbat_level_txt);
 	}
 
-	// TODO: More elaborate PE checks?
-	if (buf == NULL || len < 0x100 || buf[0] != 'M' || buf[1] != 'Z')
+	if (buf == NULL || len < 0x100 || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
+		return -2;
+	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
 		return -2;
 	if (!PE256Buffer(buf, len, hash))
 		return -1;
@@ -2193,9 +2221,12 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 	// Check for Linux SBAT revocation
 	if (IsRevokedBySbat(buf, len))
 		return 3;
-	// Sheck for Microsoft SVN revocation
+	// Check for Microsoft SVN revocation
 	if (IsRevokedBySvn(buf, len))
 		return 4;
+	// Check for DBX certificate revocation
+	if (IsRevokedByCert(buf, len))
+		return 5;
 	return 0;
 }
 

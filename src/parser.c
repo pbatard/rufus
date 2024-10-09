@@ -24,6 +24,8 @@
 #endif
 
 #include <windows.h>
+#include <wincrypt.h>
+#include <wintrust.h>
 #include <stdio.h>
 #include <wchar.h>
 #include <string.h>
@@ -1643,10 +1645,12 @@ uint16_t GetPeArch(uint8_t* buf)
 	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
 	IMAGE_NT_HEADERS* pe_header;
 
-	if (buf == NULL)
+	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
 		return IMAGE_FILE_MACHINE_UNKNOWN;
 
 	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
+		return IMAGE_FILE_MACHINE_UNKNOWN;
 	return pe_header->FileHeader.Machine;
 }
 
@@ -1662,10 +1666,12 @@ uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len)
 
 	static_strcpy(section_name, name);
 
-	if (buf == NULL || name == NULL)
+	if (buf == NULL || name == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
 		return NULL;
 
 	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
+		return NULL;
 	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
 		section_header = (IMAGE_SECTION_HEADER*)(&pe_header[1]);
 		nb_sections = pe_header->FileHeader.NumberOfSections;
@@ -1693,10 +1699,12 @@ uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva)
 	IMAGE_NT_HEADERS64* pe64_header;
 	IMAGE_SECTION_HEADER* section_header;
 
-	if (buf == NULL)
+	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
 		return NULL;
 
 	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
+		return NULL;
 	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
 		section_header = (IMAGE_SECTION_HEADER*)(pe_header + 1);
 		nb_sections = pe_header->FileHeader.NumberOfSections;
@@ -1754,4 +1762,29 @@ uint32_t FindResourceRva(const wchar_t* name, uint8_t* root, uint8_t* dir, uint3
 		}
 	}
 	return 0;
+}
+
+uint8_t* GetPeSignatureData(uint8_t* buf)
+{
+	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
+	IMAGE_NT_HEADERS* pe_header;
+	IMAGE_DATA_DIRECTORY sec_dir;
+	WIN_CERTIFICATE* cert;
+
+	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
+		return NULL;
+
+	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
+		return NULL;
+
+	sec_dir = pe_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY];
+	if (sec_dir.VirtualAddress == 0 || sec_dir.Size == 0)
+		return NULL;
+
+	cert = (WIN_CERTIFICATE*)&buf[sec_dir.VirtualAddress];
+	if (cert->dwLength == 0 || cert->wCertificateType != WIN_CERT_TYPE_PKCS_SIGNED_DATA)
+		return NULL;
+
+	return (uint8_t*)cert;
 }
