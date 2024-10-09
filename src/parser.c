@@ -1643,12 +1643,12 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
 uint16_t GetPeArch(uint8_t* buf)
 {
 	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
-	IMAGE_NT_HEADERS* pe_header;
+	IMAGE_NT_HEADERS32* pe_header;
 
 	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
 		return IMAGE_FILE_MACHINE_UNKNOWN;
 
-	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
 	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
 		return IMAGE_FILE_MACHINE_UNKNOWN;
 	return pe_header->FileHeader.Machine;
@@ -1660,7 +1660,7 @@ uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len)
 	char section_name[IMAGE_SIZEOF_SHORT_NAME] = { 0 };
 	uint32_t i, nb_sections;
 	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
-	IMAGE_NT_HEADERS* pe_header;
+	IMAGE_NT_HEADERS32* pe_header;
 	IMAGE_NT_HEADERS64* pe64_header;
 	IMAGE_SECTION_HEADER* section_header;
 
@@ -1669,7 +1669,7 @@ uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len)
 	if (buf == NULL || name == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
 		return NULL;
 
-	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
 	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
 		return NULL;
 	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
@@ -1695,14 +1695,14 @@ uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva)
 {
 	uint32_t i, nb_sections;
 	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
-	IMAGE_NT_HEADERS* pe_header;
+	IMAGE_NT_HEADERS32* pe_header;
 	IMAGE_NT_HEADERS64* pe64_header;
 	IMAGE_SECTION_HEADER* section_header;
 
 	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
 		return NULL;
 
-	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
 	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
 		return NULL;
 	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
@@ -1767,18 +1767,24 @@ uint32_t FindResourceRva(const wchar_t* name, uint8_t* root, uint8_t* dir, uint3
 uint8_t* GetPeSignatureData(uint8_t* buf)
 {
 	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
-	IMAGE_NT_HEADERS* pe_header;
+	IMAGE_NT_HEADERS32* pe_header;
+	IMAGE_NT_HEADERS64* pe64_header;
 	IMAGE_DATA_DIRECTORY sec_dir;
 	WIN_CERTIFICATE* cert;
 
 	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
 		return NULL;
 
-	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
 	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
 		return NULL;
 
-	sec_dir = pe_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY];
+	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
+		sec_dir = pe_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY];
+	} else {
+		pe64_header = (IMAGE_NT_HEADERS64*)pe_header;
+		sec_dir = pe64_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY];
+	}
 	if (sec_dir.VirtualAddress == 0 || sec_dir.Size == 0)
 		return NULL;
 

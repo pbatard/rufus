@@ -384,27 +384,31 @@ out:
 	return p;
 }
 
-// Return the issuer certificate's name and thumbprint
-BOOL GetIssuerCertificateInfo(uint8_t* cert, cert_info_t* info)
+// Fills the certificate's name and thumbprint.
+// Tries the issuer first, and if none is available, falls back to current cert.
+// Returns 0 for unsigned, -1 on error, 1 for signer or 2 for issuer.
+int GetIssuerCertificateInfo(uint8_t* cert, cert_info_t* info)
 {
-	BOOL ret = FALSE;
+	int ret = 0;
 	DWORD dwSize, dwEncoding, dwContentType, dwFormatType, dwSignerInfoSize = 0;
 	WIN_CERTIFICATE* pWinCert = (WIN_CERTIFICATE*)cert;
 	CRYPT_DATA_BLOB signedDataBlob;
 	HCERTSTORE hStore = NULL;
 	HCRYPTMSG hMsg = NULL;
 	PCMSG_SIGNER_INFO pSignerInfo = NULL;
-	PCCERT_CONTEXT pCertContext = NULL, pIssuerCertContext = NULL;
+	PCCERT_CONTEXT pCertContext[2] = { NULL, NULL };
 	PCCERT_CHAIN_CONTEXT pChainContext = NULL;
 	CERT_CHAIN_PARA chainPara;
+	int CertIndex = 0;
 
-	if (cert == NULL || info == NULL || pWinCert->dwLength == 0)
-		return FALSE;
-
-	signedDataBlob.cbData = pWinCert->dwLength - sizeof(WIN_CERTIFICATE);
-	signedDataBlob.pbData = pWinCert->bCertificate;
+	if (info == NULL)
+		return -1;
+	if (pWinCert == NULL || pWinCert->dwLength == 0)
+		return 0;
 
 	// Get message handle and store handle from the signed file.
+	signedDataBlob.cbData = pWinCert->dwLength;
+	signedDataBlob.pbData = pWinCert->bCertificate;
 	if (!CryptQueryObject(CERT_QUERY_OBJECT_BLOB, &signedDataBlob,
 		CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED, CERT_QUERY_FORMAT_FLAG_BINARY,
 		0, &dwEncoding, &dwContentType, &dwFormatType, &hStore, &hMsg, NULL)) {
@@ -420,7 +424,7 @@ BOOL GetIssuerCertificateInfo(uint8_t* cert, cert_info_t* info)
 
 	// Allocate memory for signer information.
 	pSignerInfo = (PCMSG_SIGNER_INFO)calloc(dwSignerInfoSize, 1);
-	if (!pSignerInfo) {
+	if (pSignerInfo == NULL) {
 		uprintf("PKI: Could not allocate memory for signer information");
 		goto out;
 	}
@@ -432,8 +436,8 @@ BOOL GetIssuerCertificateInfo(uint8_t* cert, cert_info_t* info)
 	}
 
 	// Search for the signer certificate in the temporary certificate store.
-	pCertContext = CertFindCertificateInStore(hStore, ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)pSignerInfo, NULL);
-	if (!pCertContext) {
+	pCertContext[0] = CertFindCertificateInStore(hStore, ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)pSignerInfo, NULL);
+	if (pCertContext[0] == NULL) {
 		uprintf("PKI: Failed to locate signer certificate in store: %s", WinPKIErrorString());
 		goto out;
 	}
@@ -441,21 +445,19 @@ BOOL GetIssuerCertificateInfo(uint8_t* cert, cert_info_t* info)
 	// Build a certificate chain to get the issuer (CA) certificate.
 	memset(&chainPara, 0, sizeof(chainPara));
 	chainPara.cbSize = sizeof(CERT_CHAIN_PARA);
-	if (!CertGetCertificateChain(NULL, pCertContext, NULL, hStore, &chainPara, 0, NULL, &pChainContext)) {
+	if (!CertGetCertificateChain(NULL, pCertContext[0], NULL, hStore, &chainPara, 0, NULL, &pChainContext)) {
 		uprintf("PKI: Failed to build certificate chain. Error code: %s", WinPKIErrorString());
 		goto out;
 	}
 
-	// Get the issuer's certificate (second certificate in the chain)
+	// Try to get the issuer's certificate (second certificate in the chain) if available
 	if (pChainContext->cChain > 0 && pChainContext->rgpChain[0]->cElement > 1) {
-		pIssuerCertContext = pChainContext->rgpChain[0]->rgpElement[1]->pCertContext;
-	} else {
-		uprintf("PKI: Failed to retrieve issuer's certificate: %s", WinPKIErrorString());
-		goto out;
+		pCertContext[1] = pChainContext->rgpChain[0]->rgpElement[1]->pCertContext;
+		CertIndex = 1;
 	}
 
 	// Isolate the signing certificate subject name
-	dwSize = CertGetNameStringA(pIssuerCertContext, CERT_NAME_ATTR_TYPE, 0, szOID_COMMON_NAME,
+	dwSize = CertGetNameStringA(pCertContext[CertIndex], CERT_NAME_ATTR_TYPE, 0, szOID_COMMON_NAME,
 		info->name, sizeof(info->name));
 	if (dwSize <= 1) {
 		uprintf("PKI: Failed to get Subject Name");
@@ -463,19 +465,19 @@ BOOL GetIssuerCertificateInfo(uint8_t* cert, cert_info_t* info)
 	}
 
 	dwSize = SHA1_HASHSIZE;
-	if (!CryptHashCertificate(0, CALG_SHA1, 0, pIssuerCertContext->pbCertEncoded,
-		pIssuerCertContext->cbCertEncoded, info->thumbprint, &dwSize)) {
+	if (!CryptHashCertificate(0, CALG_SHA1, 0, pCertContext[CertIndex]->pbCertEncoded,
+		pCertContext[CertIndex]->cbCertEncoded, info->thumbprint, &dwSize)) {
 		uprintf("PKI: Failed to compute the thumbprint: %s", WinPKIErrorString());
 		goto out;
 	}
-	ret = TRUE;
+	ret = CertIndex + 1;
 
 out:
 	safe_free(pSignerInfo);
-	if (pIssuerCertContext != NULL)
-		CertFreeCertificateContext(pIssuerCertContext);
-	if (pCertContext != NULL)
-		CertFreeCertificateContext(pCertContext);
+	if (pCertContext[1] != NULL)
+		CertFreeCertificateContext(pCertContext[1]);
+	if (pCertContext[0] != NULL)
+		CertFreeCertificateContext(pCertContext[0]);
 	if (hStore != NULL)
 		CertCloseStore(hStore, 0);
 	if (hMsg != NULL)

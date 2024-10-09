@@ -117,7 +117,7 @@ StrArray modified_files = { 0 };
 extern int default_thread_priority;
 extern const char* efi_archname[ARCH_MAX];
 extern char* sbat_level_txt;
-extern BOOL expert_mode;
+extern BOOL expert_mode, usb_debug;
 
 /*
  * Rotate 32 or 64 bit integers by n bytes.
@@ -2081,7 +2081,7 @@ BOOL IsFileInDB(const char* path)
 	return FALSE;
 }
 
-BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
+static BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 {
 	char* sbat = NULL, *version_str;
 	uint32_t i, j, sbat_len;
@@ -2109,6 +2109,7 @@ BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 		for (; sbat[i] != ',' && sbat[i] != '\0' && sbat[i] != '\n'; i++);
 		sbat[i++] = '\0';
 		entry.version = atoi(version_str);
+		uuprintf("  SBAT: %s,%d", entry.product, entry.version);
 		for (; sbat[i] != '\0' && sbat[i] != '\n'; i++);
 		if (entry.version == 0)
 			continue;
@@ -2121,13 +2122,13 @@ BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 	return FALSE;
 }
 
-BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
+static BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 {
 	wchar_t* rsrc_name = NULL;
 	uint8_t *root;
 	uint32_t i, j, rsrc_rva, rsrc_len, *svn_ver;
 	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
-	IMAGE_NT_HEADERS* pe_header;
+	IMAGE_NT_HEADERS32* pe_header;
 	IMAGE_NT_HEADERS64* pe64_header;
 	IMAGE_DATA_DIRECTORY img_data_dir;
 
@@ -2143,7 +2144,7 @@ BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 		if (rsrc_name == NULL)
 			continue;
 
-		pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+		pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
 		if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
 			img_data_dir = pe_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE];
 		} else {
@@ -2157,6 +2158,7 @@ BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 		if (rsrc_rva != 0) {
 			if (rsrc_len == sizeof(uint32_t)) {
 				svn_ver = (uint32_t*)RvaToPhysical(buf, rsrc_rva);
+				uuprintf("  SVN version: %d.%d", *svn_ver >> 16, *svn_ver & 0xffff);
 				if (svn_ver != NULL && *svn_ver < sbat_entries[i].version)
 					return TRUE;
 			} else {
@@ -2167,18 +2169,20 @@ BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 	return FALSE;
 }
 
-BOOL IsRevokedByCert(uint8_t* buf, uint32_t len)
+static BOOL IsRevokedByCert(uint8_t* buf, uint32_t len)
 {
 	int i;
 	uint8_t* cert;
 	cert_info_t info;
 
 	cert = GetPeSignatureData(buf);
-	if (cert == NULL)
-		return FALSE;
-	if (!GetIssuerCertificateInfo(cert, &info))
+	i = GetIssuerCertificateInfo(cert, &info);
+	if (i == 0)
+		uuprintf("  (Unsigned Bootloader)");
+	if (i <= 0)
 		return FALSE;
 
+	uuprintf("  Signed by: %s", info.name);
 	for (i = 0; i < ARRAYSIZE(certdbx); i += SHA1_HASHSIZE) {
 		if (!expert_mode)
 			continue;
@@ -2195,7 +2199,7 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 	uint32_t i;
 	uint8_t hash[SHA256_HASHSIZE];
 	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
-	IMAGE_NT_HEADERS* pe_header;
+	IMAGE_NT_HEADERS32* pe_header;
 
 	// Fall back to embedded sbat_level.txt if we couldn't access remote
 	if (sbat_entries == NULL) {
@@ -2205,11 +2209,15 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 
 	if (buf == NULL || len < 0x100 || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
 		return -2;
-	pe_header = (IMAGE_NT_HEADERS*)&buf[dos_header->e_lfanew];
+	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
 	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
 		return -2;
 	if (!PE256Buffer(buf, len, hash))
 		return -1;
+	// Check for UEFI DBX certificate revocation
+	// This also displays the name of the signer/issuer cert if available
+	if (IsRevokedByCert(buf, len))
+		return 5;
 	// Check for UEFI DBX revocation
 	for (i = 0; i < ARRAYSIZE(pe256dbx); i += SHA256_HASHSIZE)
 		if (memcmp(hash, &pe256dbx[i], SHA256_HASHSIZE) == 0)
@@ -2224,9 +2232,6 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 	// Check for Microsoft SVN revocation
 	if (IsRevokedBySvn(buf, len))
 		return 4;
-	// Check for DBX certificate revocation
-	if (IsRevokedByCert(buf, len))
-		return 5;
 	return 0;
 }
 

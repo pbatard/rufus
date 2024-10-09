@@ -610,6 +610,7 @@ t MSG_347 "Expert Mode"
 t MSG_348 "Extracting archive files: %s"
 t MSG_349 "Use Rufus MBR"
 t MSG_350 "Use 'Windows UEFI CA 2023' signed bootloaders [EXPERIMENTAL]"
+t MSG_351 "Checking for UEFI bootloader revocation..."
 # The following messages are for the Windows Store listing only and are not used by the application
 t MSG_900 "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
 t MSG_901 "Official site: %s"
