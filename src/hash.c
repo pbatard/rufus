@@ -2171,27 +2171,38 @@ static BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 	return FALSE;
 }
 
-static BOOL IsRevokedByCert(uint8_t* buf, uint32_t len)
+static BOOL IsRevokedByCert(cert_info_t* info)
+{
+	int i;
+
+	for (i = 0; i < ARRAYSIZE(certdbx); i += SHA1_HASHSIZE) {
+		if (!expert_mode)
+			continue;
+		if (memcmp(info->thumbprint, &certdbx[i], SHA1_HASHSIZE) == 0) {
+			uprintf("Found '%s' revoked certificate", info->name);
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+BOOL IsSignedBySecureBootAuthority(uint8_t* buf, uint32_t len)
 {
 	int i;
 	uint8_t* cert;
 	cert_info_t info;
 
-	cert = GetPeSignatureData(buf);
-	i = GetIssuerCertificateInfo(cert, &info);
-	if (i == 0)
-		uuprintf("  (Unsigned Bootloader)");
-	if (i <= 0)
+	if (buf == NULL || len < 0x100)
 		return FALSE;
 
-	uuprintf("  Signed by: %s", info.name);
-	for (i = 0; i < ARRAYSIZE(certdbx); i += SHA1_HASHSIZE) {
-		if (!expert_mode)
-			continue;
-		if (memcmp(info.thumbprint, &certdbx[i], SHA1_HASHSIZE) == 0) {
-			uprintf("Found '%s' revoked certificate", info.name);
+	// Get the signer/issuer info
+	cert = GetPeSignatureData(buf);
+	// Secure Boot Authority is always an issuer
+	if (GetIssuerCertificateInfo(cert, &info) != 2)
+		return FALSE;
+	for (i = 0; i < ARRAYSIZE(certauth); i += SHA1_HASHSIZE) {
+		if (memcmp(info.thumbprint, &certauth[i], SHA1_HASHSIZE) == 0)
 			return TRUE;
-		}
 	}
 	return FALSE;
 }
@@ -2202,6 +2213,9 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 	uint8_t hash[SHA256_HASHSIZE];
 	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
 	IMAGE_NT_HEADERS32* pe_header;
+	uint8_t* cert;
+	cert_info_t info;
+	int r;
 
 	// Fall back to embedded sbat_level.txt if we couldn't access remote
 	if (sbat_entries == NULL) {
@@ -2214,12 +2228,17 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
 	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
 		return -2;
+
+	// Get the signer/issuer info
+	cert = GetPeSignatureData(buf);
+	r = GetIssuerCertificateInfo(cert, &info);
+	if (r == 0)
+		uuprintf("  (Unsigned Bootloader)");
+	else if (r > 0)
+		uuprintf("  Signed by: %s", info.name);
+
 	if (!PE256Buffer(buf, len, hash))
 		return -1;
-	// Check for UEFI DBX certificate revocation
-	// This also displays the name of the signer/issuer cert if available
-	if (IsRevokedByCert(buf, len))
-		return 5;
 	// Check for UEFI DBX revocation
 	for (i = 0; i < ARRAYSIZE(pe256dbx); i += SHA256_HASHSIZE)
 		if (memcmp(hash, &pe256dbx[i], SHA256_HASHSIZE) == 0)
@@ -2234,6 +2253,9 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 	// Check for Microsoft SVN revocation
 	if (IsRevokedBySvn(buf, len))
 		return 4;
+	// Check for UEFI DBX certificate revocation
+	if (IsRevokedByCert(&info))
+		return 5;
 	return 0;
 }
 

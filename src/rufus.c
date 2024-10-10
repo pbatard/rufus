@@ -1609,43 +1609,61 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 
 		// Check UEFI bootloaders for revocation
 		if (IS_EFI_BOOTABLE(img_report)) {
-			assert(ARRAYSIZE(img_report.efi_boot_path) > 0);
+			BOOL has_secureboot_signed_bootloader = FALSE;
+			assert(ARRAYSIZE(img_report.efi_boot_entry) > 0);
 			PrintStatus(0, MSG_351);
 			uuprintf("UEFI Secure Boot revocation checks:");
-			rr = 0;
-			for (i = 0; i < ARRAYSIZE(img_report.efi_boot_path) && img_report.efi_boot_path[i][0] != 0; i++) {
-				static const char* revocation_type[] = { "UEFI DBX", "Windows SSP", "Linux SBAT", "Windows SVN", "Cert DBX" };
-				cdio_loglevel_default = CDIO_LOG_WARN;
-				len = ReadISOFileToBuffer(image_path, img_report.efi_boot_path[i], &buf);
-				cdio_loglevel_default = usb_debug ? CDIO_LOG_DEBUG : CDIO_LOG_WARN;
-				if (len == 0) {
-					uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", img_report.efi_boot_path[i]);
-					continue;
-				}
-				uuprintf("• %s", img_report.efi_boot_path[i]);
-				r = IsBootloaderRevoked(buf, len);
-				safe_free(buf);
-				if (r > 0) {
-					assert(r <= ARRAYSIZE(revocation_type));
-					if (rr == 0)
-						rr = r;
-					uprintf("Warning: '%s' has been revoked by %s", img_report.efi_boot_path[i], revocation_type[r - 1]);
-					is_bootloader_revoked = TRUE;
+			// Make sure we have at least one regular EFI bootloader that is formally signed
+			// for Secure Boot, since it doesn't make sense to report revocation otherwise.
+			for (i = 0; !has_secureboot_signed_bootloader && i < ARRAYSIZE(img_report.efi_boot_entry) &&
+				img_report.efi_boot_entry[i].path[0] != 0; i++) {
+				if (img_report.efi_boot_entry[i].type == EBT_MAIN) {
+					len = ReadISOFileToBuffer(image_path, img_report.efi_boot_entry[i].path, &buf);
+					if (len == 0) {
+						uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", img_report.efi_boot_entry[i].path);
+						continue;
+					}
+					if (IsSignedBySecureBootAuthority(buf, len))
+						has_secureboot_signed_bootloader = TRUE;
+					free(buf);
 				}
 			}
-			if (rr > 0) {
-				switch (rr) {
-				case 2:
-					msg = lmprintf(MSG_341, "Error code: 0xc0000428");
-					break;
-				default:
-					msg = lmprintf(MSG_340);
-					break;
+			if (!has_secureboot_signed_bootloader) {
+				uuprintf("  No Secure Boot signed bootloader found -- skipping");
+			} else {
+				rr = 0;
+				for (i = 0; i < ARRAYSIZE(img_report.efi_boot_entry) && img_report.efi_boot_entry[i].path[0] != 0; i++) {
+					static const char* revocation_type[] = { "UEFI DBX", "Windows SSP", "Linux SBAT", "Windows SVN", "Cert DBX" };
+					len = ReadISOFileToBuffer(image_path, img_report.efi_boot_entry[i].path, &buf);
+					if (len == 0) {
+						uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", img_report.efi_boot_entry[i].path);
+						continue;
+					}
+					uuprintf("• %s", img_report.efi_boot_entry[i].path);
+					r = IsBootloaderRevoked(buf, len);
+					safe_free(buf);
+					if (r > 0) {
+						assert(r <= ARRAYSIZE(revocation_type));
+						if (rr == 0)
+							rr = r;
+						uprintf("Warning: '%s' has been revoked by %s", img_report.efi_boot_entry[i].path, revocation_type[r - 1]);
+						is_bootloader_revoked = TRUE;
+					}
 				}
-				r = MessageBoxExU(hMainDialog, lmprintf(MSG_339, msg), lmprintf(MSG_338),
-					MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
-				if (r == IDCANCEL)
-					goto out;
+				if (rr > 0) {
+					switch (rr) {
+					case 2:
+						msg = lmprintf(MSG_341, "Error code: 0xc0000428");
+						break;
+					default:
+						msg = lmprintf(MSG_340);
+						break;
+					}
+					r = MessageBoxExU(hMainDialog, lmprintf(MSG_339, msg), lmprintf(MSG_338),
+						MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+					if (r == IDCANCEL)
+						goto out;
+				}
 			}
 		}
 
@@ -3516,7 +3534,7 @@ skip_args_processing:
 	is_vds_available = IsVdsAvailable(FALSE);
 	use_vds = ReadSettingBool(SETTING_USE_VDS) && is_vds_available;
 	usb_debug = ReadSettingBool(SETTING_ENABLE_USB_DEBUG);
-	cdio_loglevel_default = usb_debug ? CDIO_LOG_DEBUG : CDIO_LOG_WARN;
+	cdio_loglevel_default = usb_debug ? CDIO_LOG_INFO : CDIO_LOG_WARN;
 	use_rufus_mbr = !ReadSettingBool(SETTING_DISABLE_RUFUS_MBR);
 //	validate_md5sum = ReadSettingBool(SETTING_ENABLE_RUNTIME_VALIDATION);
 	detect_fakes = !ReadSettingBool(SETTING_DISABLE_FAKE_DRIVES_CHECK);
@@ -3807,7 +3825,7 @@ extern int TestHashes(void);
 			// Alt-. => Enable USB enumeration debug
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == VK_OEM_PERIOD)) {
 				usb_debug = !usb_debug;
-				cdio_loglevel_default = usb_debug ? CDIO_LOG_DEBUG : CDIO_LOG_WARN;
+				cdio_loglevel_default = usb_debug ? CDIO_LOG_INFO : CDIO_LOG_WARN;
 				WriteSettingBool(SETTING_ENABLE_USB_DEBUG, usb_debug);
 				PrintStatusTimeout(lmprintf(MSG_270), usb_debug);
 				GetDevices(0);

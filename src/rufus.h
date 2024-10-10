@@ -327,6 +327,13 @@ enum file_io_type {
 	FILE_IO_APPEND
 };
 
+enum EFI_BOOT_TYPE {
+	EBT_MAIN = 0,
+	EBT_GRUB,
+	EBT_MOKMANAGER,
+	EBT_BOOTMGR
+};
+
 /* Special handling for old .c32 files we need to replace */
 #define NB_OLD_C32          2
 #define OLD_C32_NAMES       { "menu.c32", "vesamenu.c32" }
@@ -384,12 +391,17 @@ enum ArchType {
 };
 
 typedef struct {
+	uint8_t type;
+	char path[64];
+} efi_boot_entry_t; 
+
+typedef struct {
 	char label[192];					// 3*64 to account for UTF-8
 	char usb_label[192];				// converted USB label for workaround
 	char cfg_path[128];					// path to the ISO's isolinux.cfg
 	char reactos_path[128];				// path to the ISO's freeldr.sys or setupldr.sys
 	char wininst_path[MAX_WININST][64];	// path to the Windows install image(s)
-	char efi_boot_path[64][32];	// paths of detected UEFI bootloaders
+	efi_boot_entry_t efi_boot_entry[64];// types and paths of detected UEFI bootloaders
 	char efi_img_path[128];				// path to an efi.img file
 	uint64_t image_size;
 	uint64_t projected_size;
@@ -823,6 +835,7 @@ extern BOOL PE256Buffer(uint8_t* buf, uint32_t len, uint8_t* hash);
 extern void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name);
 extern BOOL HashBuffer(const unsigned type, const uint8_t* buf, const size_t len, uint8_t* sum);
 extern BOOL IsFileInDB(const char* path);
+extern BOOL IsSignedBySecureBootAuthority(uint8_t* buf, uint32_t len);
 extern int IsBootloaderRevoked(uint8_t* buf, uint32_t len);
 extern void PrintRevokedBootloaderInfo(void);
 extern BOOL IsBufferInDB(const unsigned char* buf, const size_t len);

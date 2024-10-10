@@ -249,9 +249,10 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 				// We may extract the bootloaders for revocation validation later but
 				// to do so, since we're working with case sensitive file systems, we
 				// must store all found UEFI bootloader paths with the right case.
-				for (j = 0; j < ARRAYSIZE(img_report.efi_boot_path); j++) {
-					if (img_report.efi_boot_path[j][0] == 0) {
-						static_strcpy(img_report.efi_boot_path[j], psz_fullpath);
+				for (j = 0; j < ARRAYSIZE(img_report.efi_boot_entry); j++) {
+					if (img_report.efi_boot_entry[j].path[0] == 0) {
+						img_report.efi_boot_entry[j].type = EBT_BOOTMGR;
+						static_strcpy(img_report.efi_boot_entry[j].path, psz_fullpath);
 						break;
 					}
 				}
@@ -291,9 +292,10 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 					if (safe_stricmp(psz_basename, bootloader_name) == 0) {
 						if (k == 0)
 							img_report.has_efi |= (2 << i);	// start at 2 since "bootmgr.efi" is bit 0
-						for (j = 0; j < ARRAYSIZE(img_report.efi_boot_path); j++) {
-							if (img_report.efi_boot_path[j][0] == 0) {
-								static_strcpy(img_report.efi_boot_path[j], psz_fullpath);
+						for (j = 0; j < ARRAYSIZE(img_report.efi_boot_entry); j++) {
+							if (img_report.efi_boot_entry[j].path[0] == 0) {
+								img_report.efi_boot_entry[j].type = (uint8_t)k;
+								static_strcpy(img_report.efi_boot_entry[j].path, psz_fullpath);
 								break;
 							}
 						}
@@ -1559,6 +1561,7 @@ uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** bu
 	iso9660_stat_t* p_statbuf = NULL;
 
 	*buf = NULL;
+	cdio_loglevel_default = CDIO_LOG_WARN;
 
 	// First try to open as UDF - fallback to ISO if it failed
 	p_udf = udf_open(iso);
@@ -1632,6 +1635,7 @@ out:
 	udf_dirent_free(p_udf_file);
 	iso9660_close(p_iso);
 	udf_close(p_udf);
+	cdio_loglevel_default = usb_debug ? CDIO_LOG_INFO : CDIO_LOG_WARN;
 	if (ret == 0)
 		safe_free(*buf);
 	return ret;
