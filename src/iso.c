@@ -1134,7 +1134,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		last_nb_blocks = 0;
 		iso_blocking_status = 0;
 		symlinked_syslinux[0] = 0;
-		StrArrayCreate(&modified_files, 8);
+		StrArrayClear(&modified_files);
 		if (validate_md5sum) {
 			md5sum_totalbytes = 0;
 			// If there isn't an already existing md5sum.txt create one

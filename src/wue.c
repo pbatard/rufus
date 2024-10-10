@@ -806,12 +806,14 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 	char appraiserres_dll_dst[] = "?:\\sources\\appraiserres.bak";
 	char setup_exe[] = "?:\\setup.exe";
 	char setup_dll[] = "?:\\setup.dll";
+	char md5sum_path[] = "?:\\md5sum.txt";
 	char *mount_path = NULL, path[MAX_PATH];
 	uint8_t* buf = NULL;
 	uint16_t setup_arch;
 	HKEY hKey = NULL, hSubKey = NULL;
 	LSTATUS status;
 	DWORD dwDisp, dwVal = 1, dwSize;
+	FILE* fd_md5sum;
 
 	assert(unattend_xml_path != NULL);
 	uprintf("Applying Windows customization:");
@@ -854,6 +856,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			if (img_report.win_version.build >= 26000) {
 				setup_exe[0] = drive_letter;
 				setup_dll[0] = drive_letter;
+				md5sum_path[0] = drive_letter;
 				dwSize = read_file(setup_exe, &buf);
 				if (dwSize != 0) {
 					setup_arch = GetPeArch(buf);
@@ -864,13 +867,24 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 						uprintf("Could not rename '%s': %s", setup_exe, WindowsErrorString());
 					} else {
 						uprintf("Renamed '%s' → '%s'", setup_exe, setup_dll);
-						uprintf("Created '%s' bypass wrapper (from embedded)", setup_exe);
 						buf = GetResource(hMainInstance, MAKEINTRESOURCEA(setup_arch == IMAGE_FILE_MACHINE_AMD64 ? IDR_SETUP_X64 : IDR_SETUP_ARM64),
 							_RT_RCDATA, "setup.exe", &dwSize, FALSE);
-						if (buf == NULL)
+						if (buf == NULL) {
 							uprintf("Could not access embedded 'setup.exe'");
-						else
-							write_file(setup_exe, buf, dwSize);
+						} else if (write_file(setup_exe, buf, dwSize) == dwSize) {
+							uprintf("Created '%s' bypass wrapper (from embedded)", setup_exe);
+							if (validate_md5sum) {
+								if ((fd_md5sum = fopenU(md5sum_path, "ab")) != NULL) {
+									fprintf(fd_md5sum, "00000000000000000000000000000000  ./setup.dll\n");
+									fclose(fd_md5sum);
+								}
+								StrArrayAdd(&modified_files, setup_exe, TRUE);
+								StrArrayAdd(&modified_files, setup_dll, TRUE);
+								md5sum_totalbytes += dwSize;
+							}
+						} else {
+							uprintf("Could not create '%s' bypass wrapper", setup_exe);
+						}
 					}
 				}
 			}

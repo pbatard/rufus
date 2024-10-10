@@ -2103,6 +2103,7 @@ static void InitDialog(HWND hDlg)
 	// Create the string arrays
 	StrArrayCreate(&BlockingProcessList, 16);
 	StrArrayCreate(&ImageList, 16);
+	StrArrayCreate(&modified_files, 8);
 	// Set various checkboxes
 	CheckDlgButton(hDlg, IDC_QUICK_FORMAT, BST_CHECKED);
 	CheckDlgButton(hDlg, IDC_EXTENDED_LABEL, BST_CHECKED);
@@ -2277,6 +2278,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			StopProcessSearch();
 			StrArrayDestroy(&BlockingProcessList);
 			StrArrayDestroy(&ImageList);
+			StrArrayDestroy(&modified_files);
 			DestroyAllTooltips();
 			DestroyWindow(hLogDialog);
 			GetWindowRect(hDlg, &relaunch_rc);

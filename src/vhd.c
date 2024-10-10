@@ -729,7 +729,7 @@ BOOL WimExtractFile(const char* image, int index, const char* src, const char* d
 /// <returns>TRUE if the index was found in the image, FALSE otherwise.</returns>
 BOOL WimIsValidIndex(const char* image, int index)
 {
-	int i = 1;
+	int i = 1, cur_index;
 	BOOL r = FALSE;
 	DWORD dw = 0;
 	HANDLE hWim = NULL;
@@ -768,7 +768,9 @@ BOOL WimIsValidIndex(const char* image, int index)
 		goto out;
 
 	while ((str = get_token_data_file_indexed("IMAGE INDEX", xml_file, i)) != NULL) {
-		if (atoi(str) == index) {
+		cur_index = atoi(str);
+		safe_free(str);
+		if (cur_index == index) {
 			r = TRUE;
 			break;
 		}
@@ -1061,7 +1063,7 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 
 	r = 0;
 	UpdateProgressWithInfo(OP_FORMAT, MSG_261, SelectedDrive.DiskSize, SelectedDrive.DiskSize);
-	uprintf("Operation complete.");
+	uprintf("Saved '%s'", img_save->ImagePath);
 
 out:
 	safe_closehandle(overlapped.hEvent);
@@ -1100,6 +1102,8 @@ static DWORD WINAPI FfuSaveImageThread(void* param)
 	safe_free(img_save->DevicePath);
 	safe_free(img_save->ImagePath);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
+	if (!IS_ERROR(ErrorStatus))
+		uprintf("Saved '%s'", img_save->ImagePath);
 	ExitThread(r);
 }
 

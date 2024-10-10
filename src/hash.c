@@ -2158,9 +2158,11 @@ static BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 		if (rsrc_rva != 0) {
 			if (rsrc_len == sizeof(uint32_t)) {
 				svn_ver = (uint32_t*)RvaToPhysical(buf, rsrc_rva);
-				uuprintf("  SVN version: %d.%d", *svn_ver >> 16, *svn_ver & 0xffff);
-				if (svn_ver != NULL && *svn_ver < sbat_entries[i].version)
-					return TRUE;
+				if (svn_ver != NULL) {
+					uuprintf("  SVN version: %d.%d", *svn_ver >> 16, *svn_ver & 0xffff);
+					if (*svn_ver < sbat_entries[i].version)
+						return TRUE;
+				}
 			} else {
 				uprintf("WARNING: Unexpected Secure Version Number size");
 			}
@@ -2264,12 +2266,12 @@ void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name)
 	char *md5_data = NULL, *new_data = NULL, *str_pos, *d, *s, *p;
 
 	if (!img_report.has_md5sum && !validate_md5sum)
-		goto out;
+		return;
 
 	static_sprintf(md5_path, "%s\\%s", dest_dir, md5sum_name);
 	md5_size = read_file(md5_path, (uint8_t**)&md5_data);
 	if (md5_size == 0)
-		goto out;
+		return;
 
 	for (i = 0; i < modified_files.Index; i++) {
 		for (j = 0; j < (uint32_t)strlen(modified_files.String[i]); j++)
@@ -2301,7 +2303,7 @@ void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name)
 		new_data = malloc(md5_size + 1024);
 		assert(new_data != NULL);
 		if (new_data == NULL)
-			goto out;
+			return;
 		// Will be nonzero if we created the file, otherwise zero
 		if (md5sum_totalbytes != 0) {
 			snprintf(new_data, md5_size + 1024, "# md5sum_totalbytes = 0x%llx\n", md5sum_totalbytes);
@@ -2372,10 +2374,6 @@ void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name)
 
 	write_file(md5_path, md5_data, md5_size);
 	free(md5_data);
-
-out:
-	// We no longer need the string array at this stage
-	StrArrayDestroy(&modified_files);
 }
 
 #if defined(_DEBUG) || defined(TEST) || defined(ALPHA)
