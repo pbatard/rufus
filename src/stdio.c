@@ -233,16 +233,18 @@ const char *WindowsErrorString(void)
 	static char err_string[256] = { 0 };
 
 	DWORD size, presize;
-	DWORD error_code, format_error;
+	DWORD error_code, _error_code, format_error;
 	HANDLE hModule = NULL;
 
 	error_code = GetLastError();
+	_error_code = error_code;
+retry:
 	// Check for specific facility error codes
-	switch (HRESULT_FACILITY(error_code)) {
+	switch (HRESULT_FACILITY(_error_code)) {
 	case FACILITY_NULL:
 		// Special case for internet related errors, that don't actually have a facility
 		// set but still require a hModule into wininet to display the messages.
-		if ((error_code >= INTERNET_ERROR_BASE) && (error_code <= INTERNET_ERROR_LAST))
+		if ((_error_code >= INTERNET_ERROR_BASE) && (_error_code <= INTERNET_ERROR_LAST))
 			hModule = GetModuleHandleA("wininet.dll");
 		break;
 	case FACILITY_ITF:
@@ -260,22 +262,26 @@ const char *WindowsErrorString(void)
 	// coverity[var_deref_model]
 	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS |
 		((hModule != NULL) ? FORMAT_MESSAGE_FROM_HMODULE : 0), hModule,
-		error_code, MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
+		_error_code, MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
 		&err_string[presize], (DWORD)(sizeof(err_string) - strlen(err_string)), NULL);
 	if (size == 0) {
 		format_error = GetLastError();
 		switch (format_error) {
 		case ERROR_SUCCESS:
-			static_sprintf(err_string, "[0x%08lX] (No Windows Error String)", error_code);
+			static_sprintf(err_string, "[0x%08lX] (No Windows Error String)", _error_code);
 			break;
 		case ERROR_MR_MID_NOT_FOUND:
 		case ERROR_MUI_FILE_NOT_FOUND:
 		case ERROR_MUI_FILE_NOT_LOADED:
+			// We might be trying with the wrong facility. Remove it and try again.
+			if (HRESULT_FACILITY(_error_code) != FACILITY_NULL) {
+				_error_code = HRESULT_CODE(_error_code);
+				goto retry;
+			}
 			static_sprintf(err_string, "[0x%08lX] (NB: This system was unable to provide an English error message)", error_code);
 			break;
 		default:
-			static_sprintf(err_string, "[0x%08lX] (FormatMessage error code 0x%08lX)",
-				error_code, format_error);
+			static_sprintf(err_string, "[0x%08lX] (FormatMessage error code 0x%08lX)", error_code, format_error);
 			break;
 		}
 	} else {
