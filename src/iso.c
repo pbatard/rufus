@@ -112,7 +112,8 @@ static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.
 static const char* isolinux_bin[] = { "isolinux.bin", "boot.bin" };
 static const char* pe_dirname[] = { "/i386", "/amd64", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
-static const char* reactos_name = "setupldr.sys"; // TODO: freeldr.sys doesn't seem to work
+static const char* reactos_name = "freeldr.sys";
+static const char* reactos_old_name = "setupldr.sys";
 static const char* kolibri_name = "kolibri.img";
 static const char* autorun_name = "autorun.inf";
 static const char* manjaro_marker = ".miso";
@@ -274,9 +275,12 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			}
 		}
 
-		// Check for ReactOS' setupldr.sys anywhere
-		if ((img_report.reactos_path[0] == 0) && (safe_stricmp(psz_basename, reactos_name) == 0))
-			static_strcpy(img_report.reactos_path, psz_fullpath);
+		// Check for ReactOS presence
+		if (img_report.reactos_path[0] == 0) {
+			if ((safe_stricmp(psz_basename, reactos_name) == 0) ||
+				(safe_stricmp(psz_basename, reactos_old_name) == 0))
+					static_strcpy(img_report.reactos_path, psz_fullpath);
+		}
 
 		// Check for the first 'efi*.img' we can find (that hopefully contains EFI boot files)
 		if (!HAS_EFI_IMG(img_report) && (safe_strlen(psz_basename) >= 7) &&
