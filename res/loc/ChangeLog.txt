@@ -5,6 +5,10 @@ To edit a translation, please make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translation
 Or simply download https://files.akeo.ie/pollock/pollock-1.5.exe and follow its directions.
 
+o v4.? (????.??.??) ** NOT FINAL!!! PLEASE DO NOT SEND UNSOLICITED TRANSLATIONS! **
+  - *NEW*      MSG_350 "Use 'Windows UEFI CA 2023' signed bootloaders [EXPERIMENTAL]"
+  - *NEW*      MSG_351 "Checking for UEFI bootloader revocation..."
+
 o v4.5 (2024.05.??)
   - *UPDATED*  IDC_RUFUS_MBR -> IDC_UEFI_MEDIA_VALIDATION "Enable runtime UEFI media validation"
   - *UPDATED*  MSG_167 "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
