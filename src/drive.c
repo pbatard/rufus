@@ -2647,3 +2647,45 @@ out:
 	safe_closehandle(hPhysical);
 	return ret;
 }
+
+/*
+ * Detect filtered drives, that have been added by users through the registry
+ * entries IgnoreDisk01 - IgnoreDisk08. These entries must contain *decorated*
+ * string GUIDs that match the GPT Disk GUID of the drive to filter out, as
+ * reported by Rufus, such as "{F333EC2E-25C9-488D-A7FC-9147C2367623}".
+ */
+BOOL IsFilteredDrive(DWORD DriveIndex)
+{
+	char setting_name[32];
+	DWORD i, size = 0;
+	BOOL r, ret = FALSE;
+	HANDLE hPhysical = INVALID_HANDLE_VALUE;
+	BYTE layout[4096] = { 0 };
+	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
+	GUID* DiskGuid;
+
+	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE, TRUE);
+	if (hPhysical == INVALID_HANDLE_VALUE)
+		goto out;
+
+	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL);
+	if (!r || size <= 0)
+		goto out;
+
+	// Only works for GPT drives
+	if (DriveLayout->PartitionStyle != PARTITION_STYLE_GPT)
+		goto out;
+	for (i = 1; i <= MAX_IGNORE_USB; i++) {
+		static_sprintf(setting_name, "IgnoreDisk%02d", i);
+		DiskGuid = StringToGuid(ReadSettingStr(setting_name));
+		if (CompareGUID(&DriveLayout->Gpt.DiskId, DiskGuid)) {
+			uprintf("Device eliminated because it matches Disk GUID %s", GuidToString(DiskGuid, TRUE));
+			ret = TRUE;
+			goto out;
+		}
+	}
+
+out:
+	safe_closehandle(hPhysical);
+	return ret;
+}

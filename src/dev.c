@@ -943,6 +943,9 @@ BOOL GetDevices(DWORD devnum)
 					uprintf("Device eliminated because it was detected as a Microsoft Dev Drive");
 					safe_free(devint_detail_data);
 					break;
+				} else if (IsFilteredDrive(drive_index)) {
+					safe_free(devint_detail_data);
+					break;
 				}
 				// Windows 10 19H1 mounts a 'PortableBaseLayer' for its Windows Sandbox feature => unlist those
 				if (safe_strcmp(label, windows_sandbox_vhd_label) == 0) {
