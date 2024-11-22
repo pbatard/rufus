@@ -104,6 +104,7 @@ static comp_assoc file_assoc[] = {
 	{ ".bz2", BLED_COMPRESSION_BZIP2 },
 	{ ".xz", BLED_COMPRESSION_XZ },
 	{ ".vtsi", BLED_COMPRESSION_VTSI },
+	{ ".zst", BLED_COMPRESSION_ZSTD },
 	{ ".ffu", BLED_COMPRESSION_MAX },
 	{ ".vhd", BLED_COMPRESSION_MAX + 1 },
 	{ ".vhdx", BLED_COMPRESSION_MAX + 2 },
