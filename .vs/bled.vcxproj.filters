@@ -111,6 +111,12 @@
     <ClCompile Include="..\src\bled\zstd_error_private.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\bled\zstd_common.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\bled\zstd_ddict.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\bled\bb_archive.h">
@@ -186,6 +192,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\bled\zstd_mem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\bled\zstd_bits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

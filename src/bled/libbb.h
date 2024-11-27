@@ -39,24 +39,37 @@
 #include <sys/types.h>
 #include <io.h>
 
-#define ONE_TB                      1099511627776ULL
+#define ONE_TB                          1099511627776ULL
 
-#define ENABLE_DESKTOP              1
+#define ENABLE_DESKTOP                  1
 #if ENABLE_DESKTOP
-#define IF_DESKTOP(x)               x
+#define IF_DESKTOP(x)                   x
 #define IF_NOT_DESKTOP(x)
 #else
 #define IF_DESKTOP(x)
-#define IF_NOT_DESKTOP(x)           x
+#define IF_NOT_DESKTOP(x)               x
 #endif
-#define IF_NOT_FEATURE_LZMA_FAST(x) x
-#define ENABLE_FEATURE_UNZIP_CDF    1
-#define ENABLE_FEATURE_UNZIP_BZIP2  1
-#define ENABLE_FEATURE_UNZIP_LZMA   1
-#define ENABLE_FEATURE_UNZIP_XZ     1
+#define IF_NOT_FEATURE_LZMA_FAST(x)     x
+#define ENABLE_FEATURE_UNZIP_CDF        1
+#define ENABLE_FEATURE_UNZIP_BZIP2      1
+#define ENABLE_FEATURE_UNZIP_LZMA       1
+#define ENABLE_FEATURE_UNZIP_XZ         1
+#define ENABLE_FEATURE_CLEAN_UP         1
+#define uoff_t                          unsigned off_t
+#define OFF_FMT                         "ll"
 
-#define uoff_t                      unsigned off_t
-#define OFF_FMT                     "ll"
+#define SEAMLESS_COMPRESSION            0
+#if (SEAMLESS_COMPRESSION)
+#define ENABLE_FEATURE_SEAMLESS_BZ2     1
+#define ENABLE_FEATURE_SEAMLESS_GZ      1
+#define ENABLE_FEATURE_SEAMLESS_LZMA    1
+#define ENABLE_FEATURE_SEAMLESS_XZ      1
+#define ENABLE_FEATURE_SEAMLESS_Z       1
+#define ENABLE_FEATURE_SEAMLESS_ZSTD    1
+#define IF_FEATURE_SEAMLESS_BZ2(x)      x
+#define IF_FEATURE_SEAMLESS_XZ(x)       x
+#define IF_FEATURE_SEAMLESS_ZSTD(x)     x
+#endif
 
 #ifndef _MODE_T_
 #define _MODE_T_
@@ -149,8 +162,8 @@ extern unsigned long* bled_cancel_request;
 #define bb_printf(...) do { if (bled_printf != NULL) bled_printf(__VA_ARGS__); \
 	else { printf(__VA_ARGS__); putchar('\n'); } } while(0)
 #define bb_error_msg(...) bb_printf("\nError: " __VA_ARGS__)
-#define bb_error_msg_and_die(...) do {bb_error_msg(__VA_ARGS__); xfunc_die();} while(0)
-#define bb_error_msg_and_err(...) do {bb_error_msg(__VA_ARGS__); goto err;} while(0)
+#define bb_error_msg_and_die(...) do { bb_error_msg(__VA_ARGS__); xfunc_die(); } while(0)
+#define bb_error_msg_and_err(...) do { bb_error_msg(__VA_ARGS__); goto err; } while(0)
 #define bb_perror_msg bb_error_msg
 #define bb_perror_msg_and_die bb_error_msg_and_die
 #define bb_simple_error_msg bb_error_msg
@@ -167,15 +180,15 @@ static inline void *xrealloc(void *ptr, size_t size) {
 
 #define bb_msg_read_error "read error"
 #define bb_msg_write_error "write error"
-#define bb_mode_string(str, mode) "[not implemented]"
+#define bb_mode_string(str, mode) str
 #define bb_make_directory(path, mode, flags) SHCreateDirectoryExU(NULL, path, NULL)
 
-static inline int link(const char *oldpath, const char *newpath) {errno = ENOSYS; return -1;}
-static inline int symlink(const char *oldpath, const char *newpath) {errno = ENOSYS; return -1;}
-static inline int chown(const char *path, uid_t owner, gid_t group) {errno = ENOSYS; return -1;}
-static inline int mknod(const char *pathname, mode_t mode, dev_t dev) {errno = ENOSYS; return -1;}
+static inline int link(const char *oldpath, const char *newpath) { errno = ENOSYS; return -1; }
+static inline int symlink(const char *oldpath, const char *newpath) { errno = ENOSYS; return -1; }
+static inline int chown(const char *path, uid_t owner, gid_t group) { errno = ENOSYS; return -1; }
+static inline int mknod(const char *pathname, mode_t mode, dev_t dev) { errno = ENOSYS; return -1; }
 static inline int utimes64(const char* filename, const struct timeval64 times64[2]) { errno = ENOSYS; return -1; }
-static inline int fnmatch(const char *pattern, const char *string, int flags) {return PathMatchSpecA(string, pattern)?0:1;}
+static inline int fnmatch(const char *pattern, const char *string, int flags) { return PathMatchSpecA(string, pattern) ? 0 : 1; }
 static inline pid_t wait(int* status) { *status = 4; return -1; }
 #define wait_any_nohang wait
 
@@ -283,6 +296,19 @@ static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
 #define xzalloc(x) calloc(x, 1)
 #define malloc_or_warn malloc
 #define mkdir(x, y) _mkdirU(x)
+struct fd_pair { int rd; int wr; };
+void xpipe(int filedes[2]) FAST_FUNC;
+#define xpiped_pair(pair) xpipe(&((pair).rd))
+#define xpipe(filedes) _pipe(filedes, 0x1000, _O_BINARY)
+#define xlseek lseek
+#define xread safe_read
+static inline void xmove_fd(int from, int to)
+{
+	if (from != to) {
+		_dup2(from, to);
+		_close(from);
+	}
+}
 
 #if defined(_MSC_VER)
 #define _S_IFBLK 0x3000

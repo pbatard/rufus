@@ -9,6 +9,7 @@
 #define ZSTD_TRACE                      0
 #define ZSTD_DECOMPRESS_DICTIONARY      0
 #define ZSTD_DECOMPRESS_MULTIFRAME      0
+#define ZSTD_NO_TRACE                   1
 
 #if CONFIG_FEATURE_ZSTD_SMALL >= 9
 #define ZSTD_NO_INLINE 1
@@ -39,6 +40,16 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
+#endif
+
+#ifndef __has_attribute
+#define __has_attribute(x) 0
+#endif
+#ifndef __has_builtin
+#define __has_builtin(x) 0
+#endif
+#ifndef __has_feature
+#define __has_feature(x) 0
 #endif
 
 /* Include zstd_deps.h first with all the options we need enabled. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -24,7 +24,18 @@
 #ifndef ZSTD_DEPS_COMMON
 #define ZSTD_DEPS_COMMON
 
-#include <assert.h>
+/* Even though we use qsort_r only for the dictionary builder, the macro
+ * _GNU_SOURCE has to be declared *before* the inclusion of any standard
+ * header and the script 'combine.sh' combines the whole zstd source code
+ * in a single file.
+ */
+#if defined(__linux) || defined(__linux__) || defined(linux) || defined(__gnu_linux__) || \
+    defined(__CYGWIN__) || defined(__MSYS__)
+#if !defined(_GNU_SOURCE) && !defined(__ANDROID__) /* NDK doesn't ship qsort_r(). */
+#define _GNU_SOURCE
+#endif
+#endif
+
 #include <limits.h>
 #include <stddef.h>
 #include <string.h>
@@ -85,6 +96,13 @@
 #include <assert.h>
 
 #endif /* ZSTD_DEPS_ASSERT */
+
+#else
+
+#ifndef assert
+#define assert(condition) ((void)0)
+#endif
+
 #endif /* ZSTD_DEPS_NEED_ASSERT */
 
 /* Need:
@@ -114,17 +132,13 @@
 #endif /* ZSTD_DEPS_NEED_STDINT */
 
 #define DEBUG_STATIC_ASSERT(c) (void)sizeof(char[(c) ? 1 : -1])
+
 #include "libbb.h"
+
+#if (DEBUGLEVEL >= 1)
 #define RAWLOG(l, ...)         { if (l <= ZSTD_DEBUGLEVEL) bb_printf(__VA_ARGS__); }
 #define DEBUGLOG(l, ...)       { if (l <= ZSTD_DEBUGLEVEL) bb_printf(__VA_ARGS__); }
-
-#if defined(__GNUC__)
-#  define MEM_STATIC static __inline __attribute__((unused))
-#elif (defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) /* C99 */)
-#  define MEM_STATIC static inline
-#elif defined(_MSC_VER)
-#  define MEM_STATIC static __inline
 #else
-#  define MEM_STATIC static  /* this version may generate warnings for unused static functions; disable the relevant warning */
+#define RAWLOG(l, ...)         do { } while (0)
+#define DEBUGLOG(l, ...)       do { } while (0)
 #endif
-

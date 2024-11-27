@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Yann Collet, Facebook, Inc.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -34,16 +34,11 @@
  * ZSTD_getDictID_fromDict()
  */
 
-MEM_STATIC const void* ZSTD_DDict_dictContent(const ZSTD_DDict* ddict);
-MEM_STATIC size_t ZSTD_DDict_dictSize(const ZSTD_DDict* ddict);
+const void* ZSTD_DDict_dictContent(const ZSTD_DDict* ddict);
+size_t ZSTD_DDict_dictSize(const ZSTD_DDict* ddict);
 
-MEM_STATIC void ZSTD_copyDDictParameters(ZSTD_DCtx* dctx, const ZSTD_DDict* ddict);
+void ZSTD_copyDDictParameters(ZSTD_DCtx* dctx, const ZSTD_DDict* ddict);
 
-#if ZSTD_DECOMPRESS_DICTIONARY == 0
-MEM_STATIC void ZSTD_clearDict(ZSTD_DCtx* dctx) { (void)dctx; }
-MEM_STATIC size_t ZSTD_DCtx_refDDict(ZSTD_DCtx* dctx, const ZSTD_DDict* ddict) { (void)dctx; (void)ddict; return 0; }
-MEM_STATIC size_t ZSTD_checkOutBuffer(ZSTD_DStream const* zds, ZSTD_outBuffer const* output) { (void)zds;  (void)output; return 0; }
-MEM_STATIC ZSTD_DDict const* ZSTD_getDDict(ZSTD_DCtx* dctx) { (void)dctx; return NULL; }
-#endif
+
 
 #endif /* ZSTD_DDICT_H */

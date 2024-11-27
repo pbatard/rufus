@@ -65,6 +65,8 @@
     <ClCompile Include="..\src\bled\xz_dec_bcj.c" />
     <ClCompile Include="..\src\bled\xz_dec_lzma2.c" />
     <ClCompile Include="..\src\bled\xz_dec_stream.c" />
+    <ClCompile Include="..\src\bled\zstd_common.c" />
+    <ClCompile Include="..\src\bled\zstd_ddict.c" />
     <ClCompile Include="..\src\bled\zstd_decompress.c" />
     <ClCompile Include="..\src\bled\zstd_decompress_block.c" />
     <ClCompile Include="..\src\bled\zstd_entropy_common.c" />
@@ -85,6 +87,7 @@
     <ClInclude Include="..\src\bled\xz_private.h" />
     <ClInclude Include="..\src\bled\xz_stream.h" />
     <ClInclude Include="..\src\bled\zstd.h" />
+    <ClInclude Include="..\src\bled\zstd_bits.h" />
     <ClInclude Include="..\src\bled\zstd_compiler.h" />
     <ClInclude Include="..\src\bled\zstd_config.h" />
     <ClInclude Include="..\src\bled\zstd_cpu.h" />

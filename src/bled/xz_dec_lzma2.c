@@ -10,7 +10,6 @@
 
 #include "xz_private.h"
 #include "xz_lzma2.h"
-#include <assert.h>
 
 /*
  * Range decoder initialization eats the first five bytes of each LZMA chunk.
@@ -623,7 +622,7 @@ static void XZ_FUNC lzma_len(struct xz_dec_lzma2 *s, struct lzma_len_dec *l,
 		uint32_t pos_state)
 {
 	uint16_t *probs;
-	uint32_t limit, v;
+	uint32_t limit;
 
 	if (!rc_bit(&s->rc, &l->choice)) {
 		probs = l->low[pos_state];
@@ -642,9 +641,7 @@ static void XZ_FUNC lzma_len(struct xz_dec_lzma2 *s, struct lzma_len_dec *l,
 		}
 	}
 
-	v = s->lzma.len + rc_bittree(&s->rc, probs, limit) - limit;
-	assert(v >= s->lzma.len);
-	s->lzma.len = (v < s->lzma.len) ? 0 : v;
+	s->lzma.len += rc_bittree(&s->rc, probs, limit) - limit;
 }
 
 /* Decode a match. The distance will be stored in s->lzma.rep0. */
@@ -663,7 +660,6 @@ static void XZ_FUNC lzma_match(struct xz_dec_lzma2 *s, uint32_t pos_state)
 	lzma_len(s, &s->lzma.match_len_dec, pos_state);
 
 	probs = s->lzma.dist_slot[lzma_get_dist_state(s->lzma.len)];
-	// coverity[overflow_const]
 	dist_slot = rc_bittree(&s->rc, probs, DIST_SLOTS) - DIST_SLOTS;
 
 	if (dist_slot < DIST_MODEL_START) {

@@ -9,9 +9,9 @@ void FAST_FUNC header_verbose_list(const file_header_t *file_header)
 {
 	struct tm tm_time;
 	struct tm *ptm = &tm_time; //localtime(&file_header->mtime);
+	char modestr[12];
 
 #if ENABLE_FEATURE_TAR_UNAME_GNAME
-	char modestr[12];
 	char uid[sizeof(int)*3 + 2];
 	/*char gid[sizeof(int)*3 + 2];*/
 	char *user;

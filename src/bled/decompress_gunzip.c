@@ -1269,7 +1269,6 @@ unpack_gz_stream(transformer_state_t *xstate)
 		return -1;
 	}
 	to_read = -1;
-//	bytebuffer_max = 0x8000;
 	bytebuffer = xmalloc(bytebuffer_max);
 	if (bytebuffer == NULL) {
 		bb_error_msg("alloc error");

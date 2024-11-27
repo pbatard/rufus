@@ -121,8 +121,10 @@ am_libbled_a_OBJECTS = libbled_a-bled.$(OBJEXT) \
 	libbled_a-xz_dec_bcj.$(OBJEXT) \
 	libbled_a-xz_dec_lzma2.$(OBJEXT) \
 	libbled_a-xz_dec_stream.$(OBJEXT) libbled_a-xxhash.$(OBJEXT) \
+	libbled_a-zstd_common.$(OBJEXT) \
 	libbled_a-zstd_decompress.$(OBJEXT) \
 	libbled_a-zstd_decompress_block.$(OBJEXT) \
+	libbled_a-zstd_ddict.$(OBJEXT) \
 	libbled_a-zstd_entropy_common.$(OBJEXT) \
 	libbled_a-zstd_error_private.$(OBJEXT)
 libbled_a_OBJECTS = $(am_libbled_a_OBJECTS)
@@ -279,7 +281,8 @@ libbled_a_SOURCES = bled.c crc32.c data_align.c data_extract_all.c data_skip.c d
   decompress_unzstd.c decompress_vtsi.c filter_accept_all.c filter_accept_list.c filter_accept_reject_list.c \
   find_list_entry.c fse_decompress.c  header_list.c header_skip.c header_verbose_list.c huf_decompress.c \
   init_handle.c open_transformer.c seek_by_jump.c seek_by_read.c xz_dec_bcj.c xz_dec_lzma2.c xz_dec_stream.c \
-  xxhash.c zstd_decompress.c zstd_decompress_block.c zstd_entropy_common.c zstd_error_private.c
+  xxhash.c zstd_common.c zstd_decompress.c zstd_decompress_block.c zstd_ddict.c zstd_entropy_common.c \
+  zstd_error_private.c
 
 libbled_a_CFLAGS = $(AM_CFLAGS) -I$(srcdir)/.. -Wno-undef -Wno-strict-aliasing
 all: all-am
@@ -517,6 +520,12 @@ libbled_a-xxhash.o: xxhash.c
 libbled_a-xxhash.obj: xxhash.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-xxhash.obj `if test -f 'xxhash.c'; then $(CYGPATH_W) 'xxhash.c'; else $(CYGPATH_W) '$(srcdir)/xxhash.c'; fi`
 
+libbled_a-zstd_common.o: zstd_common.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_common.o `test -f 'zstd_common.c' || echo '$(srcdir)/'`zstd_common.c
+
+libbled_a-zstd_common.obj: zstd_common.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_common.obj `if test -f 'zstd_common.c'; then $(CYGPATH_W) 'zstd_common.c'; else $(CYGPATH_W) '$(srcdir)/zstd_common.c'; fi`
+
 libbled_a-zstd_decompress.o: zstd_decompress.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_decompress.o `test -f 'zstd_decompress.c' || echo '$(srcdir)/'`zstd_decompress.c
 
@@ -528,6 +537,12 @@ libbled_a-zstd_decompress_block.o: zstd_decompress_block.c
 
 libbled_a-zstd_decompress_block.obj: zstd_decompress_block.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_decompress_block.obj `if test -f 'zstd_decompress_block.c'; then $(CYGPATH_W) 'zstd_decompress_block.c'; else $(CYGPATH_W) '$(srcdir)/zstd_decompress_block.c'; fi`
+
+libbled_a-zstd_ddict.o: zstd_ddict.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_ddict.o `test -f 'zstd_ddict.c' || echo '$(srcdir)/'`zstd_ddict.c
+
+libbled_a-zstd_ddict.obj: zstd_ddict.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_ddict.obj `if test -f 'zstd_ddict.c'; then $(CYGPATH_W) 'zstd_ddict.c'; else $(CYGPATH_W) '$(srcdir)/zstd_ddict.c'; fi`
 
 libbled_a-zstd_entropy_common.o: zstd_entropy_common.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_entropy_common.o `test -f 'zstd_entropy_common.c' || echo '$(srcdir)/'`zstd_entropy_common.c

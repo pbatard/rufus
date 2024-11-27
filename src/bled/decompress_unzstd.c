@@ -17,12 +17,6 @@
 #include "zstd_deps.h"
 #include "zstd_internal.h"
 
-ZSTD_customMem ZSTD_defaultCMem = { ZSTD_customMalloc, ZSTD_customFree, NULL };
-
-ZSTDLIB_API const char* ZSTD_getErrorName(size_t code) {
-	return ERR_getErrorName(code);
-}
-
 ALWAYS_INLINE static size_t roundupsize(size_t size, size_t align)
 {
 	return (size + align - 1U) & ~(align - 1);
