@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <windows.h>
 #include <malloc.h>
 #include <inttypes.h>
@@ -36,6 +37,7 @@
 #define MB                          1048576LL
 #define GB                          1073741824LL
 #define TB                          1099511627776LL
+#define PB                          1125899906842624LL
 
 /*
  * Features not ready for prime time and that may *DESTROY* your data - USE AT YOUR OWN RISKS!
@@ -186,6 +188,7 @@ static __inline void static_repchr(char* p, char s, char r) {
 }
 #define to_unix_path(str) static_repchr(str, '\\', '/')
 #define to_windows_path(str) static_repchr(str, '/', '\\')
+#define if_not_assert(cond) assert(cond); if (!(cond))
 
 extern void uprintf(const char *format, ...);
 extern void uprintfs(const char *str);
@@ -324,6 +327,13 @@ enum file_io_type {
 	FILE_IO_APPEND
 };
 
+enum EFI_BOOT_TYPE {
+	EBT_MAIN = 0,
+	EBT_GRUB,
+	EBT_MOKMANAGER,
+	EBT_BOOTMGR
+};
+
 /* Special handling for old .c32 files we need to replace */
 #define NB_OLD_C32          2
 #define OLD_C32_NAMES       { "menu.c32", "vesamenu.c32" }
@@ -375,12 +385,15 @@ enum ArchType {
 	ARCH_ARM_32,
 	ARCH_ARM_64,
 	ARCH_IA_64,
-	ARCH_RISCV_32,
 	ARCH_RISCV_64,
-	ARCH_RISCV_128,
 	ARCH_EBC,
 	ARCH_MAX
 };
+
+typedef struct {
+	uint8_t type;
+	char path[64];
+} efi_boot_entry_t; 
 
 typedef struct {
 	char label[192];					// 3*64 to account for UTF-8
@@ -388,7 +401,7 @@ typedef struct {
 	char cfg_path[128];					// path to the ISO's isolinux.cfg
 	char reactos_path[128];				// path to the ISO's freeldr.sys or setupldr.sys
 	char wininst_path[MAX_WININST][64];	// path to the Windows install image(s)
-	char efi_boot_path[ARCH_MAX][30];	// paths of detected UEFI bootloaders
+	efi_boot_entry_t efi_boot_entry[64];// types and paths of detected UEFI bootloaders
 	char efi_img_path[128];				// path to an efi.img file
 	uint64_t image_size;
 	uint64_t projected_size;
@@ -484,6 +497,12 @@ typedef struct {
 	uint32_t* address;	// 32-bit will do, as we're not dealing with >4GB DLLs...
 } dll_resolver_t;
 
+/* SBAT entry */
+typedef struct {
+	char* product;
+	uint32_t version;
+} sbat_entry_t;
+
 /* Alignment macro */
 #if defined(__GNUC__)
 #define ALIGNED(m) __attribute__ ((__aligned__(m)))
@@ -520,6 +539,12 @@ typedef struct ALIGNED(64) {
 	uint64_t state[8];
 	uint64_t bytecount;
 } HASH_CONTEXT;
+
+/* Certificate info */
+typedef struct {
+	char name[256];
+	uint8_t thumbprint[SHA1_HASHSIZE];
+} cert_info_t;
 
 /* Hash functions */
 typedef void hash_init_t(HASH_CONTEXT* ctx);
@@ -622,16 +647,23 @@ typedef struct {
 #define UNATTEND_SET_USER                   0x00040
 #define UNATTEND_DISABLE_BITLOCKER          0x00080
 #define UNATTEND_FORCE_S_MODE               0x00100
+#define UNATTEND_USE_MS2023_BOOTLOADERS     0x00200
+#define UNATTEND_FULL_MASK                  0x003FF
 #define UNATTEND_DEFAULT_MASK               0x000FF
 #define UNATTEND_WINDOWS_TO_GO              0x10000		// Special flag for Windows To Go
 
 #define UNATTEND_WINPE_SETUP_MASK           (UNATTEND_SECUREBOOT_TPM_MINRAM)
 #define UNATTEND_SPECIALIZE_DEPLOYMENT_MASK (UNATTEND_NO_ONLINE_ACCOUNT)
-#define UNATTEND_OOBE_SHELL_SETUP_MASK      (UNATTEND_NO_DATA_COLLECTION | UNATTEND_SET_USER)
+#define UNATTEND_OOBE_SHELL_SETUP_MASK      (UNATTEND_NO_DATA_COLLECTION | UNATTEND_SET_USER | UNATTEND_DUPLICATE_LOCALE)
 #define UNATTEND_OOBE_INTERNATIONAL_MASK    (UNATTEND_DUPLICATE_LOCALE)
-#define UNATTEND_OOBE_MASK                  (UNATTEND_OOBE_SHELL_SETUP_MASK | UNATTEND_OOBE_INTERNATIONAL_MASK | UNATTEND_DISABLE_BITLOCKER)
+#define UNATTEND_OOBE_MASK                  (UNATTEND_OOBE_SHELL_SETUP_MASK | UNATTEND_OOBE_INTERNATIONAL_MASK | UNATTEND_DISABLE_BITLOCKER | UNATTEND_USE_MS2023_BOOTLOADERS)
 #define UNATTEND_OFFLINE_SERVICING_MASK     (UNATTEND_OFFLINE_INTERNAL_DRIVES | UNATTEND_FORCE_S_MODE)
 #define UNATTEND_DEFAULT_SELECTION_MASK     (UNATTEND_SECUREBOOT_TPM_MINRAM | UNATTEND_NO_ONLINE_ACCOUNT | UNATTEND_OFFLINE_INTERNAL_DRIVES)
+
+/* Used with ListDirectoryContent */
+#define LIST_DIR_TYPE_FILE			0x01
+#define LIST_DIR_TYPE_DIRECTORY		0x02
+#define LIST_DIR_TYPE_RECURSIVE		0x80
 
 /* Hash tables */
 typedef struct htab_entry {
@@ -644,7 +676,7 @@ typedef struct htab_table {
 	uint32_t size;
 	uint32_t filled;
 } htab_table;
-#define HTAB_EMPTY {NULL, 0, 0}
+#define HTAB_EMPTY { NULL, 0, 0 }
 extern BOOL htab_create(uint32_t nel, htab_table* htab);
 extern void htab_destroy(htab_table* htab);
 extern uint32_t htab_hash(char* str, htab_table* htab);
@@ -684,11 +716,13 @@ extern size_t ubuffer_pos;
 extern const int nb_steps[FS_MAX];
 extern float fScale;
 extern windows_version_t WindowsVersion;
+extern sbat_entry_t* sbat_entries;
 extern int dialog_showing, force_update, fs_type, boot_type, partition_type, target_type;
 extern unsigned long syslinux_ldlinux_len[2];
 extern char ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH];
 extern char sysnative_dir[MAX_PATH], app_data_dir[MAX_PATH], *image_path, *fido_url;
+extern StrArray modified_files;
 
 /*
  * Shared prototypes
@@ -778,11 +812,13 @@ extern char* get_token_data_buffer(const char* token, unsigned int n, const char
 extern char* insert_section_data(const char* filename, const char* section, const char* data, BOOL dos2unix);
 extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);
 extern char* replace_char(const char* src, const char c, const char* rep);
+extern char* remove_substr(const char* src, const char* sub);
 extern void parse_update(char* buf, size_t len);
 extern void* get_data_from_asn1(const uint8_t* buf, size_t buf_len, const char* oid_str, uint8_t asn1_type, size_t* data_len);
 extern int sanitize_label(char* label);
 extern int IsHDD(DWORD DriveIndex, uint16_t vid, uint16_t pid, const char* strid);
 extern char* GetSignatureName(const char* path, const char* country_code, BOOL bSilent);
+extern int GetIssuerCertificateInfo(uint8_t* cert, cert_info_t* info);
 extern uint64_t GetSignatureTimeStamp(const char* path);
 extern LONG ValidateSignature(HWND hDlg, const char* path);
 extern BOOL ValidateOpensslSignature(BYTE* pbBuffer, DWORD dwBufferLen, BYTE* pbSignature, DWORD dwSigLen);
@@ -795,11 +831,12 @@ extern HANDLE CreateFileWithTimeout(LPCSTR lpFileName, DWORD dwDesiredAccess, DW
 	HANDLE hTemplateFile, DWORD dwTimeOut);
 extern BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads);
 extern BOOL HashFile(const unsigned type, const char* path, uint8_t* sum);
-extern BOOL PE256File(const char* path, uint8_t* hash);
+extern BOOL PE256Buffer(uint8_t* buf, uint32_t len, uint8_t* hash);
 extern void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name);
 extern BOOL HashBuffer(const unsigned type, const uint8_t* buf, const size_t len, uint8_t* sum);
 extern BOOL IsFileInDB(const char* path);
-extern int IsBootloaderRevoked(const char* path);
+extern BOOL IsSignedBySecureBootAuthority(uint8_t* buf, uint32_t len);
+extern int IsBootloaderRevoked(uint8_t* buf, uint32_t len);
 extern void PrintRevokedBootloaderInfo(void);
 extern BOOL IsBufferInDB(const unsigned char* buf, const size_t len);
 #define printbits(x) _printbits(sizeof(x), &x, 0)
@@ -822,6 +859,14 @@ extern HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAcce
 	DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
 	DWORD dwFlagsAndAttributes, LONGLONG fileSize);
 extern uint32_t ResolveDllAddress(dll_resolver_t* resolver);
+extern sbat_entry_t* GetSbatEntries(char* sbatlevel);
+extern uint16_t GetPeArch(uint8_t* buf);
+extern uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len);
+extern uint8_t* GetPeSignatureData(uint8_t* buf);
+extern uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva);
+extern uint32_t FindResourceRva(const wchar_t* name, uint8_t* root, uint8_t* dir, uint32_t* len);
+extern DWORD ListDirectoryContent(StrArray* arr, char* dir, uint8_t type);
+extern BOOL TakeOwnership(LPCSTR lpszOwnFile);
 #define GetTextWidth(hDlg, id) GetTextSize(GetDlgItem(hDlg, id), NULL).cx
 
 DWORD WINAPI HashThread(void* param);

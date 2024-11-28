@@ -426,6 +426,11 @@ static unsigned int test_rw(HANDLE hDrive, blk64_t last_block, size_t block_size
 		cancel_ops = -1;
 		return 0;
 	}
+	if ((first_block * block_size > 1 * PB) || (last_block * block_size > 1 * PB)) {
+		uprintf("%sDisk is too large\n", bb_prefix);
+		cancel_ops = -1;
+		return 0;
+	}
 
 	buffer = allocate_buffer(2 * blocks_at_once * block_size);
 	if (!buffer) {
@@ -543,8 +548,12 @@ static unsigned int test_rw(HANDLE hDrive, blk64_t last_block, size_t block_size
 			for (i=0; i < got; i++) {
 				if (memcmp(read_buffer + i * block_size,
 					   buffer + i * block_size,
-					   block_size))
+					   block_size)) {
+					if_not_assert(currently_testing * block_size < 1 * PB) 
+						goto out;
+					// coverity[overflow_const]
 					bb_count += bb_output(currently_testing+i-got, CORRUPTION_ERROR);
+				}
 			}
 			if (v_flag > 1)
 				print_status();

@@ -31,6 +31,7 @@
 #include "resource.h"
 #include "registry.h"
 #include "msapi_utf8.h"
+#include "timezoneapi.h"
 #include "localization.h"
 
  /* Memory leaks detection - define _CRTDBG_MAP_ALLOC as preprocessor macro */
@@ -50,6 +51,7 @@ extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 extern BOOL validate_md5sum;
 extern uint64_t md5sum_totalbytes;
 extern StrArray modified_files;
+extern const char* efi_archname[ARCH_MAX];
 
 /// <summary>
 /// Create an installation answer file containing the sections specified by the flags.
@@ -60,10 +62,13 @@ extern StrArray modified_files;
 /// <returns>The path of a newly created answer file on success or NULL on error.</returns>
 char* CreateUnattendXml(int arch, int flags)
 {
+	const static char* xml_arch_names[5] = { "x86", "amd64", "arm", "arm64" };
+	const static char* unallowed_account_names[] = { "Administrator", "Guest", "KRBTGT", "Local" };
 	static char path[MAX_PATH];
+	char* tzstr;
 	FILE* fd;
+	TIME_ZONE_INFORMATION tz_info;
 	int i, order;
-	const char* xml_arch_names[5] = { "x86", "amd64", "arm", "arm64" };
 	unattend_xml_flags = flags;
 	if (arch < ARCH_X86_32 || arch > ARCH_ARM_64 || flags == 0) {
 		uprintf("Note: No Windows User Experience options selected");
@@ -149,37 +154,65 @@ char* CreateUnattendXml(int arch, int flags)
 				fprintf(fd, "        <ProtectYourPC>3</ProtectYourPC>\n");
 				fprintf(fd, "      </OOBE>\n");
 			}
-			if (flags & UNATTEND_SET_USER) {
-				if ((unattend_username[0] == 0) || (stricmp(unattend_username, "Administrator") == 0) ||
-					(stricmp(unattend_username, "Guest") == 0)) {
-					uprintf("WARNING: '%s' is not allowed as local account name - Option ignored", unattend_username);
+			if (flags & UNATTEND_DUPLICATE_LOCALE) {
+				if ((GetTimeZoneInformation(&tz_info) == TIME_ZONE_ID_INVALID) ||
+					((tzstr = wchar_to_utf8(tz_info.StandardName)) == NULL)) {
+					uprintf("WARNING: Could not retrieve current timezone: %s", WindowsErrorString());
 				} else {
-					uprintf("• Use '%s' for local account name", unattend_username);
-					// If we create a local account in unattend.xml, then we can get Windows 11
-					// 22H2 to skip MSA even if the network is connected during installation.
-					fprintf(fd, "      <UserAccounts>\n");
-					fprintf(fd, "        <LocalAccounts>\n");
-					fprintf(fd, "          <LocalAccount wcm:action=\"add\">\n");
-					fprintf(fd, "            <Name>%s</Name>\n", unattend_username);
-					fprintf(fd, "            <DisplayName>%s</DisplayName>\n", unattend_username);
-					fprintf(fd, "            <Group>Administrators;Power Users</Group>\n");
-					// Sets an empty password for the account (which, in Microsoft's convoluted ways,
-					// needs to be initialized to the Base64 encoded UTF-16 string "Password").
-					// The use of an empty password has both the advantage of not having to ask users
-					// to type in a password in Rufus (which they might be weary of) as well as allowing
-					// automated logon during setup.
-					fprintf(fd, "            <Password>\n");
-					fprintf(fd, "              <Value>UABhAHMAcwB3AG8AcgBkAA==</Value>\n");
-					fprintf(fd, "              <PlainText>false</PlainText>\n");
-					fprintf(fd, "            </Password>\n");
-					fprintf(fd, "          </LocalAccount>\n");
-					fprintf(fd, "        </LocalAccounts>\n");
-					fprintf(fd, "      </UserAccounts>\n");
-					// Since we set a blank password, we'll ask the user to change it at next logon.
+					fprintf(fd, "      <TimeZone>%s</TimeZone>\n", tzstr);
+					free(tzstr);
+				}
+			}
+			if (flags & UNATTEND_SET_USER || flags & UNATTEND_USE_MS2023_BOOTLOADERS) {
+				if (flags & UNATTEND_SET_USER) {
+					for (i = 0; (i < ARRAYSIZE(unallowed_account_names)) && (stricmp(unattend_username, unallowed_account_names[i]) != 0); i++);
+					if (i < ARRAYSIZE(unallowed_account_names)) {
+						uprintf("WARNING: '%s' is not allowed as local account name - Option ignored", unattend_username);
+					} else if (unattend_username[0] != 0) {
+						uprintf("• Use '%s' for local account name", unattend_username);
+						// If we create a local account in unattend.xml, then we can get Windows 11
+						// 22H2 to skip MSA even if the network is connected during installation.
+						fprintf(fd, "      <UserAccounts>\n");
+						fprintf(fd, "        <LocalAccounts>\n");
+						fprintf(fd, "          <LocalAccount wcm:action=\"add\">\n");
+						fprintf(fd, "            <Name>%s</Name>\n", unattend_username);
+						fprintf(fd, "            <DisplayName>%s</DisplayName>\n", unattend_username);
+						fprintf(fd, "            <Group>Administrators;Power Users</Group>\n");
+						// Sets an empty password for the account (which, in Microsoft's convoluted ways,
+						// needs to be initialized to the Base64 encoded UTF-16 string "Password").
+						// The use of an empty password has both the advantage of not having to ask users
+						// to type in a password in Rufus (which they might be weary of) as well as allowing
+						// automated logon during setup.
+						fprintf(fd, "            <Password>\n");
+						fprintf(fd, "              <Value>UABhAHMAcwB3AG8AcgBkAA==</Value>\n");
+						fprintf(fd, "              <PlainText>false</PlainText>\n");
+						fprintf(fd, "            </Password>\n");
+						fprintf(fd, "          </LocalAccount>\n");
+						fprintf(fd, "        </LocalAccounts>\n");
+						fprintf(fd, "      </UserAccounts>\n");
+						// Since we set a blank password, we'll ask the user to change it at next logon.
+						fprintf(fd, "      <FirstLogonCommands>\n");
+						fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
+						fprintf(fd, "          <Order>%d</Order>\n", order++);
+						fprintf(fd, "          <CommandLine>net user &quot;%s&quot; /logonpasswordchg:yes</CommandLine>\n", unattend_username);
+						fprintf(fd, "        </SynchronousCommand>\n");
+						// Some people report that using the `net user` command above might reset the password expiration to 90 days...
+						// To alleviate that, blanket set passwords on the target machine to never expire.
+						fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
+						fprintf(fd, "          <Order>%d</Order>\n", order++);
+						fprintf(fd, "          <CommandLine>net accounts /maxpwage:unlimited</CommandLine>\n");
+						fprintf(fd, "        </SynchronousCommand>\n");
+						fprintf(fd, "      </FirstLogonCommands>\n");
+					}
+				}
+				if (flags & UNATTEND_USE_MS2023_BOOTLOADERS) {
+					uprintf("• Use 'Windows UEFI CA 2023' signed bootloaders");
+					// TODO: Validate that we can have multiple <FirstLogonCommands> sections
 					fprintf(fd, "      <FirstLogonCommands>\n");
 					fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
 					fprintf(fd, "          <Order>%d</Order>\n", order++);
-					fprintf(fd, "          <CommandLine>net user &quot;%s&quot; /logonpasswordchg:yes</CommandLine>\n", unattend_username);
+					// TODO: Validate the actual value on a machine where updates have been applied
+					fprintf(fd, "          <CommandLine>reg add HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Secureboot /v AvailableUpdates /t REG_DWORD /d 0x3c0 /f\n");
 					fprintf(fd, "        </SynchronousCommand>\n");
 					fprintf(fd, "      </FirstLogonCommands>\n");
 				}
@@ -631,7 +664,7 @@ out:
 
 /// <summary>
 /// Setup a Windows To Go drive according to the official Microsoft instructions detailed at:
-/// https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-8.1-and-8/jj721578(v=ws.11).
+/// https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/deployment/windows-to-go/deploy-windows-to-go
 /// Note that as opposed to the technet guide above we use bcdedit rather than 'unattend.xml'
 /// to disable the recovery environment.
 /// </summary>
@@ -771,10 +804,16 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 	char boot_wim_path[] = "?:\\sources\\boot.wim", key_path[64];
 	char appraiserres_dll_src[] = "?:\\sources\\appraiserres.dll";
 	char appraiserres_dll_dst[] = "?:\\sources\\appraiserres.bak";
+	char setup_exe[] = "?:\\setup.exe";
+	char setup_dll[] = "?:\\setup.dll";
+	char md5sum_path[] = "?:\\md5sum.txt";
 	char *mount_path = NULL, path[MAX_PATH];
+	uint8_t* buf = NULL;
+	uint16_t setup_arch;
 	HKEY hKey = NULL, hSubKey = NULL;
 	LSTATUS status;
-	DWORD dwDisp, dwVal = 1;
+	DWORD dwDisp, dwVal = 1, dwSize;
+	FILE* fd_md5sum;
 
 	assert(unattend_xml_path != NULL);
 	uprintf("Applying Windows customization:");
@@ -813,12 +852,49 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 					StrArrayAdd(&modified_files, appraiserres_dll_src, TRUE);
 				}
 			}
+			// Apply the 'setup.exe' wrapper for Windows 11 24H2 in-place upgrades
+			if (img_report.win_version.build >= 26000) {
+				setup_exe[0] = drive_letter;
+				setup_dll[0] = drive_letter;
+				md5sum_path[0] = drive_letter;
+				dwSize = read_file(setup_exe, &buf);
+				if (dwSize != 0) {
+					setup_arch = GetPeArch(buf);
+					free(buf);
+					if (setup_arch != IMAGE_FILE_MACHINE_AMD64 && setup_arch != IMAGE_FILE_MACHINE_ARM64) {
+						uprintf("WARNING: Unsupported arch 0x%x -- in-place upgrade wrapper will not be added", setup_arch);
+					} else if (!MoveFileExU(setup_exe, setup_dll, 0)) {
+						uprintf("Could not rename '%s': %s", setup_exe, WindowsErrorString());
+					} else {
+						uprintf("Renamed '%s' → '%s'", setup_exe, setup_dll);
+						buf = GetResource(hMainInstance, MAKEINTRESOURCEA(setup_arch == IMAGE_FILE_MACHINE_AMD64 ? IDR_SETUP_X64 : IDR_SETUP_ARM64),
+							_RT_RCDATA, "setup.exe", &dwSize, FALSE);
+						if (buf == NULL) {
+							uprintf("Could not access embedded 'setup.exe'");
+						} else if (write_file(setup_exe, buf, dwSize) == dwSize) {
+							uprintf("Created '%s' bypass wrapper (from embedded)", setup_exe);
+							if (validate_md5sum) {
+								if ((fd_md5sum = fopenU(md5sum_path, "ab")) != NULL) {
+									fprintf(fd_md5sum, "00000000000000000000000000000000  ./setup.dll\n");
+									fclose(fd_md5sum);
+								}
+								StrArrayAdd(&modified_files, setup_exe, TRUE);
+								StrArrayAdd(&modified_files, setup_dll, TRUE);
+								md5sum_totalbytes += dwSize;
+							}
+						} else {
+							uprintf("Could not create '%s' bypass wrapper", setup_exe);
+						}
+					}
+				}
+			}
 		}
 
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 0, PATCH_PROGRESS_TOTAL);
 		// We only need to mount boot.wim if we have windowsPE data to deal with. If
 		// not, we can just copy our unattend.xml in \sources\$OEM$\$$\Panther\.
-		if (flags & UNATTEND_WINPE_SETUP_MASK) {
+		// We also need to mount it if we use the 'Windows UEFI CA 2023' signed bootloaders.
+		if (flags & UNATTEND_WINPE_SETUP_MASK || flags & UNATTEND_USE_MS2023_BOOTLOADERS) {
 			if (validate_md5sum)
 				md5sum_totalbytes -= _filesizeU(boot_wim_path);
 			uprintf("Mounting '%s[%d]'...", boot_wim_path, wim_index);
@@ -892,7 +968,8 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			// If we have a windowsPE section, copy the answer files to the root of boot.wim as
 			// Autounattend.xml. This also results in that file being automatically copied over
 			// to %WINDIR%\Panther\unattend.xml for later passes processing.
-			assert(mount_path != NULL);
+			if_not_assert(mount_path != NULL)
+				goto out;
 			static_sprintf(path, "%s\\Autounattend.xml", mount_path);
 			if (!CopyFileU(unattend_xml_path, path, TRUE)) {
 				uprintf("Could not create boot.wim 'Autounattend.xml': %s", WindowsErrorString());
@@ -921,6 +998,62 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 		}
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 103, PATCH_PROGRESS_TOTAL);
 	}
+
+	if (flags & UNATTEND_USE_MS2023_BOOTLOADERS) {
+		if_not_assert(mount_path != NULL)
+			goto out;
+		static_sprintf(path, "%s\\Windows\\Boot\\EFI_EX\\bootmgfw_EX.efi", mount_path);
+		if (!PathFileExistsU(path)) {
+			uprintf("Could not find 2023 signed UEFI bootloader - Ignoring option");
+		} else {
+			char path2[MAX_PATH], *rep;
+			StrArray files, dirs;
+			// Replace /EFI/Boot/boot###.efi
+			for (i = 1; i < ARRAYSIZE(efi_archname); i++) {
+				static_sprintf(path2, "%c:\\efi\\boot\\boot%s.efi", drive_letter, efi_archname[i]);
+				if (!PathFileExistsA(path2))
+					continue;
+				if (!CopyFileU(path, path2, FALSE))
+					uprintf("WARNING: Could not replace 'boot%s.efi': %s", efi_archname[i], WindowsErrorString());
+				break;
+			}
+			// Replace /bootmgr.efi
+			static_sprintf(path, "%s\\Windows\\Boot\\EFI_EX\\bootmgr_EX.efi", mount_path);
+			static_sprintf(path2, "%c:\\bootmgr.efi", drive_letter);
+			if (!CopyFileU(path, path2, FALSE))
+				uprintf("WARNING: Could not replace 'bootmgr.efi': %s", WindowsErrorString());
+			// Microsoft "secures" the Windows\Boot\ dir through their SUPER OBNOXIOUS AND
+			// WORTHLESS use of DACLs + read-only flags, so we first need to re-take control
+			// of all directories under there recursively.
+			StrArrayCreate(&dirs, 64);
+			StrArrayCreate(&files, 64);
+			static_sprintf(path, "%s\\Windows\\Boot\\", mount_path);
+			StrArrayAdd(&dirs, path, TRUE);
+			static_sprintf(path, "%s\\Windows\\Boot\\EFI_EX\\", mount_path);
+			StrArrayAdd(&dirs, path, TRUE);
+			ListDirectoryContent(&dirs, path, LIST_DIR_TYPE_DIRECTORY | LIST_DIR_TYPE_RECURSIVE);
+			for (i = 0; i < (int)dirs.Index; i++) {
+				rep = remove_substr(dirs.String[i], "_EX");
+				assert(rep != NULL);
+				TakeOwnership(rep);
+				safe_free(rep);
+			}
+			// Now that we should be able to write to the destination directories, copy the content.
+			ListDirectoryContent(&files, path, LIST_DIR_TYPE_FILE | LIST_DIR_TYPE_RECURSIVE);
+			for (i = 0; i < (int)files.Index; i++) {
+				rep = remove_substr(files.String[i], "_EX");
+				assert(rep != NULL);
+				TakeOwnership(rep);
+				if (!CopyFileU(files.String[i], rep, FALSE) && rep != NULL)
+					uprintf("WARNING: Could not replace '%s': %s", &rep[strlen(mount_path) + 1], WindowsErrorString());
+				safe_free(rep);
+			}
+			StrArrayDestroy(&dirs);
+			StrArrayDestroy(&files);
+			uprintf("Replaced EFI bootloader files with 'Windows UEFI CA 2023' signed versions");
+		}
+	}
+
 	r = TRUE;
 
 out:

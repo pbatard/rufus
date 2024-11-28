@@ -67,9 +67,9 @@ mbr:
 	push es
 	mov  ds, ax		# Original MBR is in segment 0
 	mov  bx, 0x0413		# McAfee thinks we are a virus if we use 413 directly...
-	mov  ax,[bx]
+	mov  ax,ds:[bx]
 	dec  ax			# Remove 1KB from the RAM for our copy
-	mov  [bx],ax
+	mov  ds:[bx],ax
 	shl  ax, 6		# Convert to segment address
 	sub  ax, MBR_ADDR>>4	# For convenience of disassembly, so that irrespective
 	mov  es, ax		# of the segment, our base address remains MBR_ADDR

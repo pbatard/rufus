@@ -271,9 +271,9 @@ char* GetSignatureName(const char* path, const char* country_code, BOOL bSilent)
 	HCERTSTORE hStore = NULL;
 	HCRYPTMSG hMsg = NULL;
 	PCCERT_CONTEXT pCertContext = NULL;
-	DWORD dwSize, dwEncoding, dwContentType, dwFormatType;
+	DWORD dwSize, dwEncoding, dwContentType, dwFormatType, dwSignerInfoSize = 0;
 	PCMSG_SIGNER_INFO pSignerInfo = NULL;
-	DWORD dwSignerInfo = 0;
+	// TODO: Do we really need CertInfo? Or can we just reference pSignerInfo?
 	CERT_INFO CertInfo = { 0 };
 	SPROG_PUBLISHERINFO ProgPubInfo = { 0 };
 	wchar_t *szFileName;
@@ -311,21 +311,21 @@ char* GetSignatureName(const char* path, const char* country_code, BOOL bSilent)
 		goto out;
 
 	// Get signer information size.
-	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfo);
+	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfoSize);
 	if (!r) {
 		uprintf("PKI: Failed to get signer size: %s", WinPKIErrorString());
 		goto out;
 	}
 
 	// Allocate memory for signer information.
-	pSignerInfo = (PCMSG_SIGNER_INFO)calloc(dwSignerInfo, 1);
+	pSignerInfo = (PCMSG_SIGNER_INFO)calloc(dwSignerInfoSize, 1);
 	if (!pSignerInfo) {
 		uprintf("PKI: Could not allocate memory for signer information");
 		goto out;
 	}
 
 	// Get Signer Information.
-	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, (PVOID)pSignerInfo, &dwSignerInfo);
+	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, (PVOID)pSignerInfo, &dwSignerInfoSize);
 	if (!r) {
 		uprintf("PKI: Failed to get signer information: %s", WinPKIErrorString());
 		goto out;
@@ -334,10 +334,9 @@ char* GetSignatureName(const char* path, const char* country_code, BOOL bSilent)
 	// Search for the signer certificate in the temporary certificate store.
 	CertInfo.Issuer = pSignerInfo->Issuer;
 	CertInfo.SerialNumber = pSignerInfo->SerialNumber;
-
 	pCertContext = CertFindCertificateInStore(hStore, ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)&CertInfo, NULL);
 	if (!pCertContext) {
-		uprintf("PKI: Failed to locate signer certificate in temporary store: %s", WinPKIErrorString());
+		uprintf("PKI: Failed to locate signer certificate in store: %s", WinPKIErrorString());
 		goto out;
 	}
 
@@ -383,6 +382,107 @@ out:
 	if (hMsg != NULL)
 		CryptMsgClose(hMsg);
 	return p;
+}
+
+// Fills the certificate's name and thumbprint.
+// Tries the issuer first, and if none is available, falls back to current cert.
+// Returns 0 for unsigned, -1 on error, 1 for signer or 2 for issuer.
+int GetIssuerCertificateInfo(uint8_t* cert, cert_info_t* info)
+{
+	int ret = 0;
+	DWORD dwSize, dwEncoding, dwContentType, dwFormatType, dwSignerInfoSize = 0;
+	WIN_CERTIFICATE* pWinCert = (WIN_CERTIFICATE*)cert;
+	CRYPT_DATA_BLOB signedDataBlob;
+	HCERTSTORE hStore = NULL;
+	HCRYPTMSG hMsg = NULL;
+	PCMSG_SIGNER_INFO pSignerInfo = NULL;
+	PCCERT_CONTEXT pCertContext[2] = { NULL, NULL };
+	PCCERT_CHAIN_CONTEXT pChainContext = NULL;
+	CERT_CHAIN_PARA chainPara;
+	int CertIndex = 0;
+
+	if (info == NULL)
+		return -1;
+	if (pWinCert == NULL || pWinCert->dwLength == 0)
+		return 0;
+
+	// Get message handle and store handle from the signed file.
+	signedDataBlob.cbData = pWinCert->dwLength;
+	signedDataBlob.pbData = pWinCert->bCertificate;
+	if (!CryptQueryObject(CERT_QUERY_OBJECT_BLOB, &signedDataBlob,
+		CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED, CERT_QUERY_FORMAT_FLAG_BINARY,
+		0, &dwEncoding, &dwContentType, &dwFormatType, &hStore, &hMsg, NULL)) {
+		uprintf("PKI: Failed to get signature: %s", WinPKIErrorString());
+		goto out;
+	}
+
+	// Get signer information size.
+	if (!CryptMsgGetParam(hMsg, CMSG_SIGNER_CERT_INFO_PARAM, 0, NULL, &dwSignerInfoSize)) {
+		uprintf("PKI: Failed to get signer size: %s", WinPKIErrorString());
+		goto out;
+	}
+
+	// Allocate memory for signer information.
+	pSignerInfo = (PCMSG_SIGNER_INFO)calloc(dwSignerInfoSize, 1);
+	if (pSignerInfo == NULL) {
+		uprintf("PKI: Could not allocate memory for signer information");
+		goto out;
+	}
+
+	// Get Signer Information.
+	if (!CryptMsgGetParam(hMsg, CMSG_SIGNER_CERT_INFO_PARAM, 0, pSignerInfo, &dwSignerInfoSize)) {
+		uprintf("PKI: Failed to get signer info: %s", WinPKIErrorString());
+		goto out;
+	}
+
+	// Search for the signer certificate in the temporary certificate store.
+	pCertContext[0] = CertFindCertificateInStore(hStore, ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID)pSignerInfo, NULL);
+	if (pCertContext[0] == NULL) {
+		uprintf("PKI: Failed to locate signer certificate in store: %s", WinPKIErrorString());
+		goto out;
+	}
+
+	// Build a certificate chain to get the issuer (CA) certificate.
+	memset(&chainPara, 0, sizeof(chainPara));
+	chainPara.cbSize = sizeof(CERT_CHAIN_PARA);
+	if (!CertGetCertificateChain(NULL, pCertContext[0], NULL, hStore, &chainPara, 0, NULL, &pChainContext)) {
+		uprintf("PKI: Failed to build certificate chain. Error code: %s", WinPKIErrorString());
+		goto out;
+	}
+
+	// Try to get the issuer's certificate (second certificate in the chain) if available
+	if (pChainContext->cChain > 0 && pChainContext->rgpChain[0]->cElement > 1) {
+		pCertContext[1] = pChainContext->rgpChain[0]->rgpElement[1]->pCertContext;
+		CertIndex = 1;
+	}
+
+	// Isolate the signing certificate subject name
+	dwSize = CertGetNameStringA(pCertContext[CertIndex], CERT_NAME_ATTR_TYPE, 0, szOID_COMMON_NAME,
+		info->name, sizeof(info->name));
+	if (dwSize <= 1) {
+		uprintf("PKI: Failed to get Subject Name");
+		goto out;
+	}
+
+	dwSize = SHA1_HASHSIZE;
+	if (!CryptHashCertificate(0, CALG_SHA1, 0, pCertContext[CertIndex]->pbCertEncoded,
+		pCertContext[CertIndex]->cbCertEncoded, info->thumbprint, &dwSize)) {
+		uprintf("PKI: Failed to compute the thumbprint: %s", WinPKIErrorString());
+		goto out;
+	}
+	ret = CertIndex + 1;
+
+out:
+	safe_free(pSignerInfo);
+	if (pCertContext[1] != NULL)
+		CertFreeCertificateContext(pCertContext[1]);
+	if (pCertContext[0] != NULL)
+		CertFreeCertificateContext(pCertContext[0]);
+	if (hStore != NULL)
+		CertCloseStore(hStore, 0);
+	if (hMsg != NULL)
+		CryptMsgClose(hMsg);
+	return ret;
 }
 
 // The timestamping authorities we use are RFC 3161 compliant
@@ -523,9 +623,8 @@ uint64_t GetSignatureTimeStamp(const char* path)
 	HMODULE hm;
 	HCERTSTORE hStore = NULL;
 	HCRYPTMSG hMsg = NULL;
-	DWORD dwSize, dwEncoding, dwContentType, dwFormatType;
+	DWORD dwSize, dwEncoding, dwContentType, dwFormatType, dwSignerInfoSize = 0;
 	PCMSG_SIGNER_INFO pSignerInfo = NULL;
-	DWORD dwSignerInfo = 0;
 	wchar_t *szFileName;
 	uint64_t timestamp = 0ULL, nested_timestamp;
 
@@ -559,21 +658,21 @@ uint64_t GetSignatureTimeStamp(const char* path)
 	}
 
 	// Get signer information size.
-	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfo);
+	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, NULL, &dwSignerInfoSize);
 	if (!r) {
 		uprintf("PKI: Failed to get signer size: %s", WinPKIErrorString());
 		goto out;
 	}
 
 	// Allocate memory for signer information.
-	pSignerInfo = (PCMSG_SIGNER_INFO)calloc(dwSignerInfo, 1);
+	pSignerInfo = (PCMSG_SIGNER_INFO)calloc(dwSignerInfoSize, 1);
 	if (!pSignerInfo) {
 		uprintf("PKI: Could not allocate memory for signer information");
 		goto out;
 	}
 
 	// Get Signer Information.
-	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, (PVOID)pSignerInfo, &dwSignerInfo);
+	r = CryptMsgGetParam(hMsg, CMSG_SIGNER_INFO_PARAM, 0, (PVOID)pSignerInfo, &dwSignerInfoSize);
 	if (!r) {
 		uprintf("PKI: Failed to get signer information: %s", WinPKIErrorString());
 		goto out;

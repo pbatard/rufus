@@ -11,6 +11,7 @@
  */
 
 #include "config.h"
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #if HAVE_UNISTD_H
@@ -374,7 +375,9 @@ ipg_retry:
 	 * adjust inode count to reflect the adjusted inodes_per_group
 	 */
 	if ((__u64)super->s_inodes_per_group * fs->group_desc_count > ~0U) {
-		ipg--;
+		assert(ipg != 0);
+		if (ipg != 0)
+			ipg--;
 		goto ipg_retry;
 	}
 	super->s_inodes_count = super->s_inodes_per_group *

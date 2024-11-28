@@ -24,6 +24,8 @@
 #endif
 
 #include <windows.h>
+#include <wincrypt.h>
+#include <wintrust.h>
 #include <stdio.h>
 #include <wchar.h>
 #include <string.h>
@@ -1267,7 +1269,7 @@ out:
 }
 
 /*
- * Replace all 'c' characters in string 'src' with the substring 'rep'
+ * Replace all 'c' characters in string 'src' with the substring 'rep'.
  * The returned string is allocated and must be freed by the caller.
  */
 char* replace_char(const char* src, const char c, const char* rep)
@@ -1297,6 +1299,30 @@ char* replace_char(const char* src, const char c, const char* rep)
 		}
 	}
 	res[j] = 0;
+	return res;
+}
+
+/*
+ * Remove all instances of substring 'sub' form string 'src.
+ * The returned string is allocated and must be freed by the caller.
+ */
+char* remove_substr(const char* src, const char* sub)
+{
+	size_t i, j, str_len = safe_strlen(src), sub_len = safe_strlen(sub);
+	char* res;
+
+	if ((src == NULL) || (sub == NULL) || (sub_len > str_len))
+		return NULL;
+
+	res = (char*)calloc(str_len + 1, 1);
+	if (res == NULL)
+		return NULL;
+	for (i = 0, j = 0; i <= str_len; ) {
+		if (i <= str_len - sub_len && memcmp(&src[i], sub, sub_len) == 0)
+			i += sub_len;
+		else
+			res[j++] = src[i++];
+	}
 	return res;
 }
 
@@ -1543,4 +1569,228 @@ int sanitize_label(char* label)
 	}
 
 	return 0;
+}
+
+/*
+ * Parse an sbat_level.txt file and returns an array of (product_name, min_version) tuples.
+ * Array must be freed by caller.
+ */
+sbat_entry_t* GetSbatEntries(char* sbatlevel)
+{
+	BOOL eol, eof;
+	char* version_str;
+	uint32_t i, num_entries;
+	sbat_entry_t* _sbat_entries;
+
+	if (sbatlevel == NULL)
+		return NULL;
+
+	num_entries = 0;
+	for (i = 0; sbatlevel[i] != '\0'; i++)
+		if (sbatlevel[i] == '\n')
+			num_entries++;
+
+	if (num_entries == 0)
+		return NULL;
+	_sbat_entries = calloc(num_entries + 2, sizeof(sbat_entry_t));
+	if (_sbat_entries == NULL)
+		return NULL;
+
+	num_entries = 0;
+	for (i = 0; sbatlevel[i] != '\0'; ) {
+		// Eliminate blank lines
+		if (sbatlevel[i] == '\n') {
+			i++;
+			continue;
+		}
+		// Eliminate comments
+		if (sbatlevel[i] == '#') {
+			while (sbatlevel[i] != '\n' && sbatlevel[i] != '\0')
+				i++;
+			continue;
+		}
+		_sbat_entries[num_entries].product = &sbatlevel[i];
+		for (; sbatlevel[i] != ',' && sbatlevel[i] != '\0' && sbatlevel[i] != '\n'; i++);
+		if (sbatlevel[i] == '\0' || sbatlevel[i] == '\n')
+			break;
+		sbatlevel[i++] = '\0';
+		version_str = &sbatlevel[i];
+		for (; sbatlevel[i] != ',' && sbatlevel[i] != '\0' && sbatlevel[i] != '\n'; i++);
+		eol = (sbatlevel[i] == '\0' || sbatlevel[i] == '\n');
+		eof = (sbatlevel[i] == '\0');
+		sbatlevel[i] = '\0';
+		if (!eof)
+			i++;
+		// Allow the provision of an hex version
+		if (version_str[0] == '0' && version_str[1] == 'x')
+			_sbat_entries[num_entries].version = strtoul(version_str, NULL, 16);
+		else
+			_sbat_entries[num_entries].version = strtoul(version_str, NULL, 10);
+		if (!eol)
+			for (; sbatlevel[i] != '\0' && sbatlevel[i] != '\n'; i++);
+		if (_sbat_entries[num_entries].version != 0)
+			num_entries++;
+	}
+
+	return _sbat_entries;
+}
+
+/*
+ * PE parsing functions
+ */
+
+// Return the arch of a PE executable buffer
+uint16_t GetPeArch(uint8_t* buf)
+{
+	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
+	IMAGE_NT_HEADERS32* pe_header;
+
+	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
+		return IMAGE_FILE_MACHINE_UNKNOWN;
+
+	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
+	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
+		return IMAGE_FILE_MACHINE_UNKNOWN;
+	return pe_header->FileHeader.Machine;
+}
+
+// Return the address and (optionally) the length of a PE section from a PE buffer
+uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len)
+{
+	char section_name[IMAGE_SIZEOF_SHORT_NAME] = { 0 };
+	uint32_t i, nb_sections;
+	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
+	IMAGE_NT_HEADERS32* pe_header;
+	IMAGE_NT_HEADERS64* pe64_header;
+	IMAGE_SECTION_HEADER* section_header;
+
+	static_strcpy(section_name, name);
+
+	if (buf == NULL || name == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
+		return NULL;
+
+	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
+	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
+		return NULL;
+	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
+		section_header = (IMAGE_SECTION_HEADER*)(&pe_header[1]);
+		nb_sections = pe_header->FileHeader.NumberOfSections;
+	} else {
+		pe64_header = (IMAGE_NT_HEADERS64*)pe_header;
+		section_header = (IMAGE_SECTION_HEADER*)(&pe64_header[1]);
+		nb_sections = pe64_header->FileHeader.NumberOfSections;
+	}
+	for (i = 0; i < nb_sections; i++) {
+		if (memcmp(section_header[i].Name, section_name, sizeof(section_name)) == 0) {
+			if (len != NULL)
+				*len = section_header->SizeOfRawData;
+			return &buf[section_header[i].PointerToRawData];
+		}
+	}
+	return NULL;
+}
+
+// Convert an RVA address to a physical address from a PE buffer
+uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva)
+{
+	uint32_t i, nb_sections;
+	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
+	IMAGE_NT_HEADERS32* pe_header;
+	IMAGE_NT_HEADERS64* pe64_header;
+	IMAGE_SECTION_HEADER* section_header;
+
+	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
+		return NULL;
+
+	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
+	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
+		return NULL;
+	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
+		section_header = (IMAGE_SECTION_HEADER*)(pe_header + 1);
+		nb_sections = pe_header->FileHeader.NumberOfSections;
+	} else {
+		pe64_header = (IMAGE_NT_HEADERS64*)pe_header;
+		section_header = (IMAGE_SECTION_HEADER*)(pe64_header + 1);
+		nb_sections = pe64_header->FileHeader.NumberOfSections;
+	}
+
+	for (i = 0; i < nb_sections; i++) {
+		if ((section_header[i].VirtualAddress <= rva && rva < (section_header[i].VirtualAddress + section_header[i].Misc.VirtualSize)))
+			break;
+	}
+	if (i >= nb_sections)
+		return NULL;
+
+	return &buf[section_header[i].PointerToRawData + (rva - section_header[i].VirtualAddress)];
+}
+
+// Using the MS APIs to poke the resources of the EFI bootloaders is simply TOO. DAMN. SLOW.
+// So, to QUICKLY access the resources we need, we reivent Microsoft's sub-optimal resource parser.
+static BOOL FoundResourceRva = FALSE;
+uint32_t FindResourceRva(const wchar_t* name, uint8_t* root, uint8_t* dir, uint32_t* len)
+{
+	uint32_t i, rva;
+	IMAGE_RESOURCE_DIRECTORY* _dir = (IMAGE_RESOURCE_DIRECTORY*)dir;
+	IMAGE_RESOURCE_DIRECTORY_ENTRY* dir_entry = (IMAGE_RESOURCE_DIRECTORY_ENTRY*)&_dir[1];
+	IMAGE_RESOURCE_DIR_STRING_U* dir_string;
+	IMAGE_RESOURCE_DATA_ENTRY* data_entry;
+
+	if (root == NULL || dir == NULL || name == NULL)
+		return 0;
+
+	// Initial invocation should always start at the root
+	if (root == dir)
+		FoundResourceRva = FALSE;
+
+	for (i = 0; i < (uint32_t)_dir->NumberOfNamedEntries + _dir->NumberOfIdEntries; i++) {
+		if (!FoundResourceRva && i < _dir->NumberOfNamedEntries) {
+			dir_string = (IMAGE_RESOURCE_DIR_STRING_U*)(root + dir_entry[i].NameOffset);
+			if (dir_string->Length != wcslen(name) ||
+				memcmp(name, dir_string->NameString, wcslen(name)) != 0)
+				continue;
+			FoundResourceRva = TRUE;
+		}
+		if (dir_entry[i].OffsetToData & IMAGE_RESOURCE_DATA_IS_DIRECTORY) {
+			rva = FindResourceRva(name, root, &root[dir_entry[i].OffsetToDirectory], len);
+			if (rva != 0)
+				return rva;
+		} else if (FoundResourceRva) {
+			data_entry = (IMAGE_RESOURCE_DATA_ENTRY*)(root + dir_entry[i].OffsetToData);
+			if (len != NULL)
+				*len = data_entry->Size;
+			return data_entry->OffsetToData;
+		}
+	}
+	return 0;
+}
+
+uint8_t* GetPeSignatureData(uint8_t* buf)
+{
+	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
+	IMAGE_NT_HEADERS32* pe_header;
+	IMAGE_NT_HEADERS64* pe64_header;
+	IMAGE_DATA_DIRECTORY sec_dir;
+	WIN_CERTIFICATE* cert;
+
+	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
+		return NULL;
+
+	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
+	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
+		return NULL;
+
+	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
+		sec_dir = pe_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY];
+	} else {
+		pe64_header = (IMAGE_NT_HEADERS64*)pe_header;
+		sec_dir = pe64_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY];
+	}
+	if (sec_dir.VirtualAddress == 0 || sec_dir.Size == 0)
+		return NULL;
+
+	cert = (WIN_CERTIFICATE*)&buf[sec_dir.VirtualAddress];
+	if (cert->dwLength == 0 || cert->wCertificateType != WIN_CERT_TYPE_PKCS_SIGNED_DATA)
+		return NULL;
+
+	return (uint8_t*)cert;
 }

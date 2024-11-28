@@ -27,7 +27,7 @@ del /q *.map >NUL 2>&1
 
 set WDK_PATH=C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0\x64
 set ZIP_PATH=C:\Program Files\7-Zip
-set SIGNATURE_SHA1=3dbc3a2a0e9ce8803b422cfdbc60acd33164965d
+set SIGNATURE_SHA1=fc4686753937a93fdcd48c2bb4375e239af92dcb
 set MANIFEST=AppxManifest.xml
 set ARCHS=x86 x64 arm arm64
 set DEFAULT_SCALE=200
@@ -98,7 +98,7 @@ if "%VERSION_OVERRIDE%"=="" (
 echo Will create %VERSION% AppStore Bundle
 pause
 
-"%WDK_PATH%\signtool" sign /v /sha1 %SIGNATURE_SHA1% /fd SHA256 /tr http://sha256timestamp.ws.symantec.com/sha256/timestamp /td SHA256 *.exe
+"%WDK_PATH%\signtool" sign /v /sha1 %SIGNATURE_SHA1% /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 *.exe
 if ERRORLEVEL 1 goto out
 
 echo [Files]> bundle.map

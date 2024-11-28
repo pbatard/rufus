@@ -103,21 +103,30 @@ am_libbled_a_OBJECTS = libbled_a-bled.$(OBJEXT) \
 	libbled_a-decompress_unlzma.$(OBJEXT) \
 	libbled_a-decompress_unxz.$(OBJEXT) \
 	libbled_a-decompress_unzip.$(OBJEXT) \
+	libbled_a-decompress_unzstd.$(OBJEXT) \
 	libbled_a-decompress_vtsi.$(OBJEXT) \
 	libbled_a-filter_accept_all.$(OBJEXT) \
 	libbled_a-filter_accept_list.$(OBJEXT) \
 	libbled_a-filter_accept_reject_list.$(OBJEXT) \
 	libbled_a-find_list_entry.$(OBJEXT) \
+	libbled_a-fse_decompress.$(OBJEXT) \
 	libbled_a-header_list.$(OBJEXT) \
 	libbled_a-header_skip.$(OBJEXT) \
 	libbled_a-header_verbose_list.$(OBJEXT) \
+	libbled_a-huf_decompress.$(OBJEXT) \
 	libbled_a-init_handle.$(OBJEXT) \
 	libbled_a-open_transformer.$(OBJEXT) \
 	libbled_a-seek_by_jump.$(OBJEXT) \
 	libbled_a-seek_by_read.$(OBJEXT) \
 	libbled_a-xz_dec_bcj.$(OBJEXT) \
 	libbled_a-xz_dec_lzma2.$(OBJEXT) \
-	libbled_a-xz_dec_stream.$(OBJEXT)
+	libbled_a-xz_dec_stream.$(OBJEXT) libbled_a-xxhash.$(OBJEXT) \
+	libbled_a-zstd_common.$(OBJEXT) \
+	libbled_a-zstd_decompress.$(OBJEXT) \
+	libbled_a-zstd_decompress_block.$(OBJEXT) \
+	libbled_a-zstd_ddict.$(OBJEXT) \
+	libbled_a-zstd_entropy_common.$(OBJEXT) \
+	libbled_a-zstd_error_private.$(OBJEXT)
 libbled_a_OBJECTS = $(am_libbled_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -269,9 +278,11 @@ top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libbled.a
 libbled_a_SOURCES = bled.c crc32.c data_align.c data_extract_all.c data_skip.c decompress_bunzip2.c \
   decompress_gunzip.c decompress_uncompress.c decompress_unlzma.c decompress_unxz.c decompress_unzip.c \
-  decompress_vtsi.c filter_accept_all.c filter_accept_list.c filter_accept_reject_list.c find_list_entry.c \
-  header_list.c header_skip.c header_verbose_list.c init_handle.c open_transformer.c \
-  seek_by_jump.c seek_by_read.c xz_dec_bcj.c xz_dec_lzma2.c xz_dec_stream.c
+  decompress_unzstd.c decompress_vtsi.c filter_accept_all.c filter_accept_list.c filter_accept_reject_list.c \
+  find_list_entry.c fse_decompress.c  header_list.c header_skip.c header_verbose_list.c huf_decompress.c \
+  init_handle.c open_transformer.c seek_by_jump.c seek_by_read.c xz_dec_bcj.c xz_dec_lzma2.c xz_dec_stream.c \
+  xxhash.c zstd_common.c zstd_decompress.c zstd_decompress_block.c zstd_ddict.c zstd_entropy_common.c \
+  zstd_error_private.c
 
 libbled_a_CFLAGS = $(AM_CFLAGS) -I$(srcdir)/.. -Wno-undef -Wno-strict-aliasing
 all: all-am
@@ -395,6 +406,12 @@ libbled_a-decompress_unzip.o: decompress_unzip.c
 libbled_a-decompress_unzip.obj: decompress_unzip.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-decompress_unzip.obj `if test -f 'decompress_unzip.c'; then $(CYGPATH_W) 'decompress_unzip.c'; else $(CYGPATH_W) '$(srcdir)/decompress_unzip.c'; fi`
 
+libbled_a-decompress_unzstd.o: decompress_unzstd.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-decompress_unzstd.o `test -f 'decompress_unzstd.c' || echo '$(srcdir)/'`decompress_unzstd.c
+
+libbled_a-decompress_unzstd.obj: decompress_unzstd.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-decompress_unzstd.obj `if test -f 'decompress_unzstd.c'; then $(CYGPATH_W) 'decompress_unzstd.c'; else $(CYGPATH_W) '$(srcdir)/decompress_unzstd.c'; fi`
+
 libbled_a-decompress_vtsi.o: decompress_vtsi.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-decompress_vtsi.o `test -f 'decompress_vtsi.c' || echo '$(srcdir)/'`decompress_vtsi.c
 
@@ -425,6 +442,12 @@ libbled_a-find_list_entry.o: find_list_entry.c
 libbled_a-find_list_entry.obj: find_list_entry.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-find_list_entry.obj `if test -f 'find_list_entry.c'; then $(CYGPATH_W) 'find_list_entry.c'; else $(CYGPATH_W) '$(srcdir)/find_list_entry.c'; fi`
 
+libbled_a-fse_decompress.o: fse_decompress.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-fse_decompress.o `test -f 'fse_decompress.c' || echo '$(srcdir)/'`fse_decompress.c
+
+libbled_a-fse_decompress.obj: fse_decompress.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-fse_decompress.obj `if test -f 'fse_decompress.c'; then $(CYGPATH_W) 'fse_decompress.c'; else $(CYGPATH_W) '$(srcdir)/fse_decompress.c'; fi`
+
 libbled_a-header_list.o: header_list.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-header_list.o `test -f 'header_list.c' || echo '$(srcdir)/'`header_list.c
 
@@ -442,6 +465,12 @@ libbled_a-header_verbose_list.o: header_verbose_list.c
 
 libbled_a-header_verbose_list.obj: header_verbose_list.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-header_verbose_list.obj `if test -f 'header_verbose_list.c'; then $(CYGPATH_W) 'header_verbose_list.c'; else $(CYGPATH_W) '$(srcdir)/header_verbose_list.c'; fi`
+
+libbled_a-huf_decompress.o: huf_decompress.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-huf_decompress.o `test -f 'huf_decompress.c' || echo '$(srcdir)/'`huf_decompress.c
+
+libbled_a-huf_decompress.obj: huf_decompress.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-huf_decompress.obj `if test -f 'huf_decompress.c'; then $(CYGPATH_W) 'huf_decompress.c'; else $(CYGPATH_W) '$(srcdir)/huf_decompress.c'; fi`
 
 libbled_a-init_handle.o: init_handle.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-init_handle.o `test -f 'init_handle.c' || echo '$(srcdir)/'`init_handle.c
@@ -484,6 +513,48 @@ libbled_a-xz_dec_stream.o: xz_dec_stream.c
 
 libbled_a-xz_dec_stream.obj: xz_dec_stream.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-xz_dec_stream.obj `if test -f 'xz_dec_stream.c'; then $(CYGPATH_W) 'xz_dec_stream.c'; else $(CYGPATH_W) '$(srcdir)/xz_dec_stream.c'; fi`
+
+libbled_a-xxhash.o: xxhash.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-xxhash.o `test -f 'xxhash.c' || echo '$(srcdir)/'`xxhash.c
+
+libbled_a-xxhash.obj: xxhash.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-xxhash.obj `if test -f 'xxhash.c'; then $(CYGPATH_W) 'xxhash.c'; else $(CYGPATH_W) '$(srcdir)/xxhash.c'; fi`
+
+libbled_a-zstd_common.o: zstd_common.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_common.o `test -f 'zstd_common.c' || echo '$(srcdir)/'`zstd_common.c
+
+libbled_a-zstd_common.obj: zstd_common.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_common.obj `if test -f 'zstd_common.c'; then $(CYGPATH_W) 'zstd_common.c'; else $(CYGPATH_W) '$(srcdir)/zstd_common.c'; fi`
+
+libbled_a-zstd_decompress.o: zstd_decompress.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_decompress.o `test -f 'zstd_decompress.c' || echo '$(srcdir)/'`zstd_decompress.c
+
+libbled_a-zstd_decompress.obj: zstd_decompress.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_decompress.obj `if test -f 'zstd_decompress.c'; then $(CYGPATH_W) 'zstd_decompress.c'; else $(CYGPATH_W) '$(srcdir)/zstd_decompress.c'; fi`
+
+libbled_a-zstd_decompress_block.o: zstd_decompress_block.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_decompress_block.o `test -f 'zstd_decompress_block.c' || echo '$(srcdir)/'`zstd_decompress_block.c
+
+libbled_a-zstd_decompress_block.obj: zstd_decompress_block.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_decompress_block.obj `if test -f 'zstd_decompress_block.c'; then $(CYGPATH_W) 'zstd_decompress_block.c'; else $(CYGPATH_W) '$(srcdir)/zstd_decompress_block.c'; fi`
+
+libbled_a-zstd_ddict.o: zstd_ddict.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_ddict.o `test -f 'zstd_ddict.c' || echo '$(srcdir)/'`zstd_ddict.c
+
+libbled_a-zstd_ddict.obj: zstd_ddict.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_ddict.obj `if test -f 'zstd_ddict.c'; then $(CYGPATH_W) 'zstd_ddict.c'; else $(CYGPATH_W) '$(srcdir)/zstd_ddict.c'; fi`
+
+libbled_a-zstd_entropy_common.o: zstd_entropy_common.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_entropy_common.o `test -f 'zstd_entropy_common.c' || echo '$(srcdir)/'`zstd_entropy_common.c
+
+libbled_a-zstd_entropy_common.obj: zstd_entropy_common.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_entropy_common.obj `if test -f 'zstd_entropy_common.c'; then $(CYGPATH_W) 'zstd_entropy_common.c'; else $(CYGPATH_W) '$(srcdir)/zstd_entropy_common.c'; fi`
+
+libbled_a-zstd_error_private.o: zstd_error_private.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_error_private.o `test -f 'zstd_error_private.c' || echo '$(srcdir)/'`zstd_error_private.c
+
+libbled_a-zstd_error_private.obj: zstd_error_private.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-zstd_error_private.obj `if test -f 'zstd_error_private.c'; then $(CYGPATH_W) 'zstd_error_private.c'; else $(CYGPATH_W) '$(srcdir)/zstd_error_private.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

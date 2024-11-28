@@ -1,3 +1,12 @@
+o Version 4.6 (2024.10.21)
+    Add a new setup.exe wrapper to bypass Windows 11 24H2 in-place upgrade restrictions
+    Add TimeZone to regional options replication
+    Set local account passwords to not expire by default
+    Fix an error when trying to write compressed VHD images
+    Fix an error when invoking Rufus from the PowerShell commandline
+    Improve revoked UEFI bootloaders check to support Linux SBAT, Windows SVN and cert DBX
+    Improve support for ReactOS boot media
+  
 o Version 4.5 (2024.05.22)
     Add new advanced option to perform runtime UEFI media validation of suitable images (Windows, most Linux)
     Move the 'Use Rufus MBR' advanced option to a cheat mode (Alt-A)

@@ -98,9 +98,8 @@ const char* md5sum_name[2] = { "md5sum.txt", "MD5SUMS" };
 static const char* casper_dirname = "/casper";
 static const char* proxmox_dirname = "/proxmox";
 const char* efi_dirname = "/efi/boot";
-const char* efi_bootname[ARCH_MAX] = {
-	"boot.efi", "bootia32.efi", "bootx64.efi", "bootarm.efi", "bootaa64.efi", "bootia64.efi",
-	"bootriscv32.efi", "bootriscv64.efi", "bootriscv128.efi", "bootebc.efi" };
+const char* efi_bootname[3] = { "boot", "grub", "mm" };
+const char* efi_archname[ARCH_MAX] = { "", "ia32", "x64", "arm", "aa64", "ia64", "riscv64", "ebc" };
 static const char* sources_str = "/sources";
 static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm" };
 // We only support GRUB/BIOS (x86) that uses a standard config dir (/boot/grub/i386-pc/)
@@ -113,7 +112,7 @@ static const char* syslinux_cfg[] = { "isolinux.cfg", "syslinux.cfg", "extlinux.
 static const char* isolinux_bin[] = { "isolinux.bin", "boot.bin" };
 static const char* pe_dirname[] = { "/i386", "/amd64", "/minint" };
 static const char* pe_file[] = { "ntdetect.com", "setupldr.bin", "txtsetup.sif" };
-static const char* reactos_name = "setupldr.sys"; // TODO: freeldr.sys doesn't seem to work
+static const char* reactos_name[] = { "setupldr.sys", "freeldr.sys" };
 static const char* kolibri_name = "kolibri.img";
 static const char* autorun_name = "autorun.inf";
 static const char* manjaro_marker = ".miso";
@@ -146,8 +145,8 @@ static __inline char* sanitize_filename(char* filename, BOOL* is_identical)
 	}
 
 	// Must start after the drive part (D:\...) so that we don't eliminate the first column
-	for (i=2; i<safe_strlen(ret); i++) {
-		for (j=0; j<sizeof(unauthorized); j++) {
+	for (i = 2; i<safe_strlen(ret); i++) {
+		for (j = 0; j<sizeof(unauthorized); j++) {
 			if (ret[i] == unauthorized[j]) {
 				ret[i] = '_';
 				*is_identical = FALSE;
@@ -169,7 +168,8 @@ static void log_handler (cdio_log_level_t level, const char *message)
 static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const char* psz_basename,
 	const char* psz_fullpath, EXTRACT_PROPS *props)
 {
-	size_t i, j, len;
+	size_t i, j, k, len;
+	char bootloader_name[32];
 
 	// Check for an isolinux/syslinux config file anywhere
 	memset(props, 0, sizeof(EXTRACT_PROPS));
@@ -249,9 +249,10 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 				// We may extract the bootloaders for revocation validation later but
 				// to do so, since we're working with case sensitive file systems, we
 				// must store all found UEFI bootloader paths with the right case.
-				for (j = 0; j < ARRAYSIZE(img_report.efi_boot_path); j++) {
-					if (img_report.efi_boot_path[j][0] == 0) {
-						static_strcpy(img_report.efi_boot_path[j], psz_fullpath);
+				for (j = 0; j < ARRAYSIZE(img_report.efi_boot_entry); j++) {
+					if (img_report.efi_boot_entry[j].path[0] == 0) {
+						img_report.efi_boot_entry[j].type = EBT_BOOTMGR;
+						static_strcpy(img_report.efi_boot_entry[j].path, psz_fullpath);
 						break;
 					}
 				}
@@ -273,9 +274,12 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			}
 		}
 
-		// Check for ReactOS' setupldr.sys anywhere
-		if ((img_report.reactos_path[0] == 0) && (safe_stricmp(psz_basename, reactos_name) == 0))
-			static_strcpy(img_report.reactos_path, psz_fullpath);
+		// Check for ReactOS presence anywhere
+		if (img_report.reactos_path[0] == 0) {
+			for (i = 0; i < ARRAYSIZE(reactos_name); i++)
+				if (safe_stricmp(psz_basename, reactos_name[i]) == 0)
+					static_strcpy(img_report.reactos_path, psz_fullpath);
+		}
 
 		// Check for the first 'efi*.img' we can find (that hopefully contains EFI boot files)
 		if (!HAS_EFI_IMG(img_report) && (safe_strlen(psz_basename) >= 7) &&
@@ -285,13 +289,18 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 
 		// Check for the EFI boot entries
 		if (safe_stricmp(psz_dirname, efi_dirname) == 0) {
-			for (i = 0; i < ARRAYSIZE(efi_bootname); i++) {
-				if (safe_stricmp(psz_basename, efi_bootname[i]) == 0) {
-					img_report.has_efi |= (2 << i);	// start at 2 since "bootmgr.efi" is bit 0
-					for (j = 0; j < ARRAYSIZE(img_report.efi_boot_path); j++) {
-						if (img_report.efi_boot_path[j][0] == 0) {
-							static_strcpy(img_report.efi_boot_path[j], psz_fullpath);
-							break;
+			for (k = 0; k < ARRAYSIZE(efi_bootname); k++) {
+				for (i = 0; i < ARRAYSIZE(efi_archname); i++) {
+					static_sprintf(bootloader_name, "%s%s.efi", efi_bootname[k], efi_archname[i]);
+					if (safe_stricmp(psz_basename, bootloader_name) == 0) {
+						if (k == 0)
+							img_report.has_efi |= (2 << i);	// start at 2 since "bootmgr.efi" is bit 0
+						for (j = 0; j < ARRAYSIZE(img_report.efi_boot_entry); j++) {
+							if (img_report.efi_boot_entry[j].path[0] == 0) {
+								img_report.efi_boot_entry[j].type = (uint8_t)k;
+								static_strcpy(img_report.efi_boot_entry[j].path, psz_fullpath);
+								break;
+							}
 						}
 					}
 				}
@@ -302,7 +311,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			// https://salsa.debian.org/live-team/live-build/-/commit/5bff71fea2dd54adcd6c428d3f1981734079a2f7
 			// Because of this, if we detect a small bootx64.efi file, we assert that it's a
 			// broken link and try to extract a "good" version from the El-Torito image.
-			if ((safe_stricmp(psz_basename, efi_bootname[2]) == 0) && (file_length < 256)) {
+			if ((safe_stricmp(psz_basename, "bootx64.efi") == 0) && (file_length < 256)) {
 				img_report.has_efi |= 0x4000;
 				static_strcpy(img_report.efi_img_path, "[BOOT]/1-Boot-NoEmul.img");
 			}
@@ -1130,7 +1139,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		last_nb_blocks = 0;
 		iso_blocking_status = 0;
 		symlinked_syslinux[0] = 0;
-		StrArrayCreate(&modified_files, 8);
+		StrArrayClear(&modified_files);
 		if (validate_md5sum) {
 			md5sum_totalbytes = 0;
 			// If there isn't an already existing md5sum.txt create one
@@ -1268,7 +1277,7 @@ out:
 							sl_index = i;
 						}
 					}
-					free(buf);
+					safe_free(buf);
 				}
 				DeleteFileU(isolinux_tmp);
 			}
@@ -1555,6 +1564,7 @@ uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** bu
 	iso9660_stat_t* p_statbuf = NULL;
 
 	*buf = NULL;
+	cdio_loglevel_default = CDIO_LOG_WARN;
 
 	// First try to open as UDF - fallback to ISO if it failed
 	p_udf = udf_open(iso);
@@ -1571,8 +1581,8 @@ uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** bu
 		goto out;
 	}
 	file_length = udf_get_file_length(p_udf_file);
-	if (file_length > UINT32_MAX) {
-		uprintf("Only files smaller than 4 GB are supported");
+	if (file_length > 1 * GB) {
+		uprintf("Only files smaller than 1 GB are supported");
 		goto out;
 	}
 	nblocks = (uint32_t)((file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
@@ -1604,10 +1614,11 @@ try_iso:
 		goto out;
 	}
 	file_length = p_statbuf->total_size;
-	if (file_length > UINT32_MAX) {
-		uprintf("Only files smaller than 4 GB are supported");
+	if (file_length > 1 * GB) {
+		uprintf("Only files smaller than 1 GB are supported");
 		goto out;
 	}
+	// coverity[cast_overflow]
 	nblocks = (uint32_t)((file_length + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE);
 	*buf = malloc(nblocks * ISO_BLOCKSIZE + 1);
 	if (*buf == NULL) {
@@ -1627,6 +1638,7 @@ out:
 	udf_dirent_free(p_udf_file);
 	iso9660_close(p_iso);
 	udf_close(p_udf);
+	cdio_loglevel_default = usb_debug ? CDIO_LOG_INFO : CDIO_LOG_WARN;
 	if (ret == 0)
 		safe_free(*buf);
 	return ret;
@@ -1746,7 +1758,7 @@ BOOL HasEfiImgBootLoaders(void)
 	int32_t dc, c;
 	struct libfat_filesystem *lf_fs = NULL;
 	struct libfat_direntry direntry;
-	char name[12] = { 0 };
+	char name[12] = { 0 }, bootloader_name[32];
 	int i, j, k;
 
 	if ((image_path == NULL) || !HAS_EFI_IMG(img_report))
@@ -1787,23 +1799,24 @@ BOOL HasEfiImgBootLoaders(void)
 		goto out;
 	dc = direntry.entry[26] + (direntry.entry[27] << 8);
 
-	for (i = 0; i < ARRAYSIZE(efi_bootname); i++) {
+	for (i = 0; i < ARRAYSIZE(efi_archname); i++) {
+		static_sprintf(bootloader_name, "boot%s.efi", efi_archname[i]);
 		// TODO: bootriscv###.efi will need LFN support but cross that bridge when/if we get there...
-		if (strlen(efi_bootname[i]) > 12)
+		if (strlen(bootloader_name) > 12)
 			continue;
-		for (j = 0, k = 0; efi_bootname[i][j] != 0; j++) {
-			if (efi_bootname[i][j] == '.') {
+		for (j = 0, k = 0; bootloader_name[j] != 0; j++) {
+			if (bootloader_name[j] == '.') {
 				while (k < 8)
 					name[k++] = ' ';
 			} else {
-				name[k++] = toupper(efi_bootname[i][j]);
+				name[k++] = toupper(bootloader_name[j]);
 			}
 		}
 		c = libfat_searchdir(lf_fs, dc, name, &direntry);
 		if (c > 0) {
 			if (!ret)
 				uprintf("  Detected EFI bootloader(s) (from '%s'):", img_report.efi_img_path);
-			uprintf("  ● '%s'", efi_bootname[i]);
+			uprintf("  ● '%s'", bootloader_name);
 			ret = TRUE;
 		}
 	}

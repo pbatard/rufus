@@ -203,7 +203,7 @@ void DumpBufferHex(void *buf, size_t size)
 			uprintf("%s\n", line);
 		line[0] = 0;
 		sprintf(&line[strlen(line)], "  %08x  ", (unsigned int)i);
-		for(j=0,k=0; k<16; j++,k++) {
+		for(j = 0,k = 0; k < 16; j++,k++) {
 			if (i+j < size) {
 				sprintf(&line[strlen(line)], "%02x", buffer[i+j]);
 			} else {
@@ -212,7 +212,7 @@ void DumpBufferHex(void *buf, size_t size)
 			sprintf(&line[strlen(line)], " ");
 		}
 		sprintf(&line[strlen(line)], " ");
-		for(j=0,k=0; k<16; j++,k++) {
+		for(j = 0,k = 0; k < 16; j++,k++) {
 			if (i+j < size) {
 				if ((buffer[i+j] < 32) || (buffer[i+j] > 126)) {
 					sprintf(&line[strlen(line)], ".");
@@ -233,16 +233,18 @@ const char *WindowsErrorString(void)
 	static char err_string[256] = { 0 };
 
 	DWORD size, presize;
-	DWORD error_code, format_error;
+	DWORD error_code, _error_code, format_error;
 	HANDLE hModule = NULL;
 
 	error_code = GetLastError();
+	_error_code = error_code;
+retry:
 	// Check for specific facility error codes
-	switch (HRESULT_FACILITY(error_code)) {
+	switch (HRESULT_FACILITY(_error_code)) {
 	case FACILITY_NULL:
 		// Special case for internet related errors, that don't actually have a facility
 		// set but still require a hModule into wininet to display the messages.
-		if ((error_code >= INTERNET_ERROR_BASE) && (error_code <= INTERNET_ERROR_LAST))
+		if ((_error_code >= INTERNET_ERROR_BASE) && (_error_code <= INTERNET_ERROR_LAST))
 			hModule = GetModuleHandleA("wininet.dll");
 		break;
 	case FACILITY_ITF:
@@ -260,22 +262,26 @@ const char *WindowsErrorString(void)
 	// coverity[var_deref_model]
 	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS |
 		((hModule != NULL) ? FORMAT_MESSAGE_FROM_HMODULE : 0), hModule,
-		HRESULT_CODE(error_code), MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
-		&err_string[presize], (DWORD)(sizeof(err_string)-strlen(err_string)), NULL);
+		_error_code, MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
+		&err_string[presize], (DWORD)(sizeof(err_string) - strlen(err_string)), NULL);
 	if (size == 0) {
 		format_error = GetLastError();
 		switch (format_error) {
 		case ERROR_SUCCESS:
-			static_sprintf(err_string, "[0x%08lX] (No Windows Error String)", error_code);
+			static_sprintf(err_string, "[0x%08lX] (No Windows Error String)", _error_code);
 			break;
 		case ERROR_MR_MID_NOT_FOUND:
 		case ERROR_MUI_FILE_NOT_FOUND:
 		case ERROR_MUI_FILE_NOT_LOADED:
+			// We might be trying with the wrong facility. Remove it and try again.
+			if (HRESULT_FACILITY(_error_code) != FACILITY_NULL) {
+				_error_code = HRESULT_CODE(_error_code);
+				goto retry;
+			}
 			static_sprintf(err_string, "[0x%08lX] (NB: This system was unable to provide an English error message)", error_code);
 			break;
 		default:
-			static_sprintf(err_string, "[0x%08lX] (FormatMessage error code 0x%08lX)",
-				error_code, format_error);
+			static_sprintf(err_string, "[0x%08lX] (FormatMessage error code 0x%08lX)", error_code, format_error);
 			break;
 		}
 	} else {
@@ -519,7 +525,7 @@ HANDLE CreateFileWithTimeout(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwS
 	if (hThread != NULL) {
 		if (WaitForSingleObject(hThread, dwTimeOut) == WAIT_TIMEOUT) {
 			CancelSynchronousIo(hThread);
-			WaitForSingleObject(hThread, INFINITE);
+			WaitForSingleObject(hThread, 30000);
 			params.dwError = WAIT_TIMEOUT;
 		}
 		CloseHandle(hThread);
@@ -857,7 +863,8 @@ uint32_t ResolveDllAddress(dll_resolver_t* resolver)
 
 	// NB: SymLoadModuleEx() does not load a PDB unless the file has an explicit '.pdb' extension
 	base_address = pfSymLoadModuleEx(hRufus, NULL, path, NULL, DEFAULT_BASE_ADDRESS, 0, NULL, 0);
-	assert(base_address == DEFAULT_BASE_ADDRESS);
+	if_not_assert(base_address == DEFAULT_BASE_ADDRESS)
+		goto out;
 	// On Windows 11 ARM64 the following call will return *TWO* different addresses for the same
 	// call, because most Windows DLL's are ARM64X, which means that they are an unholy union of
 	// both X64 and ARM64 code in the same binary...
@@ -918,4 +925,61 @@ BOOL ExtractZip(const char* src_zip, const char* dest_dir)
 	extracted_bytes = bled_uncompress_to_dir(src_zip, dest_dir, BLED_COMPRESSION_ZIP);
 	bled_exit();
 	return (extracted_bytes > 0);
+}
+
+// Returns a list of all the files or folders from a directory
+DWORD ListDirectoryContent(StrArray* arr, char* dir, uint8_t type)
+{
+	WIN32_FIND_DATAA FindFileData = { 0 };
+	HANDLE hFind;
+	DWORD dwError, dwResult;
+	char mask[MAX_PATH + 1], path[MAX_PATH + 1];
+
+	if (arr == NULL || dir == NULL || (type & 0x03) == 0)
+		return ERROR_INVALID_PARAMETER;
+
+	if (PathCombineU(mask, dir, "*") == NULL)
+		return GetLastError();
+
+	hFind = FindFirstFileU(mask, &FindFileData);
+	if (hFind == INVALID_HANDLE_VALUE)
+		return GetLastError();
+
+	dwResult = ERROR_FILE_NOT_FOUND;
+	do {
+		if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+			if (strcmp(FindFileData.cFileName, ".") == 0 ||
+				strcmp(FindFileData.cFileName, "..") == 0 ||
+				(type & LIST_DIR_TYPE_RECURSIVE) == 0)
+				continue;
+			if (PathCombineU(path, dir, FindFileData.cFileName) == NULL)
+				break;
+			// Append a trailing backslash to directories
+			if (path[strlen(path) - 1] != '\\') {
+				path[strlen(path) + 1] = '\0';
+				path[strlen(path)] = '\\';
+			}
+			if (type & LIST_DIR_TYPE_DIRECTORY)
+				StrArrayAdd(arr, path, TRUE);
+			dwError = ListDirectoryContent(arr, path, type);
+			if (dwError != NO_ERROR && dwError != ERROR_FILE_NOT_FOUND) {
+				SetLastError(dwError);
+				break;
+			}
+		} else {
+			if (type & LIST_DIR_TYPE_FILE) {
+				if (PathCombineU(path, dir, FindFileData.cFileName) == NULL)
+					break;
+				StrArrayAdd(arr, path, TRUE);
+			}
+			dwResult = NO_ERROR;
+		}
+	} while (FindNextFileU(hFind, &FindFileData));
+
+	dwError = GetLastError();
+	FindClose(hFind);
+
+	if (dwError != ERROR_NO_MORE_FILES)
+		return dwError;
+	return dwResult;
 }

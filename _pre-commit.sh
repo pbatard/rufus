@@ -32,6 +32,7 @@ s/^\([ \t]*\)*\(FILE\|PRODUCT\)VERSION\([ \t]*\)\([0-9]*\),\([0-9]*\),[0-9]*,\(.
 s/^\([ \t]*\)VALUE\([ \t]*\)"\(File\|Product\)Version",\([ \t]*\)"\(.*\)\..*"[ \t]*/\1VALUE\2"\3Version",\4"\5.@@BUILD@@"/
 s/^\(.*\)"Rufus \(.*\)\..*"\(.*\)/\1"Rufus \2.@@BUILD@@"\3/
 s/^\([ \t]*\)Version="\([0-9]*\)\.\([0-9]*\)\.[0-9]*\.\([0-9]*\)"\(.*\)/\1Version="\2.\3.@@BUILD@@.\4"\5/
+s/\xef\xbf\xbd/\xa9/
 _EOF
 
 # First run sed to substitute our variable in the sed command file

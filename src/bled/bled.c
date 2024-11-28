@@ -1,7 +1,7 @@
 /*
  * Bled (Base Library for Easy Decompression)
  *
- * Copyright © 2014-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2024 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -31,7 +31,9 @@ jmp_buf bb_error_jmp;
 char* bb_virtual_buf = NULL;
 size_t bb_virtual_len = 0, bb_virtual_pos = 0;
 int bb_virtual_fd = -1;
-uint32_t BB_BUFSIZE = 0x10000;
+// ZSTD has a minimal buffer size of (1 << ZSTD_BLOCKSIZELOG_MAX) + ZSTD_blockHeaderSize = 128 KB + 3
+// So we set our bufsize to 256 KB
+uint32_t BB_BUFSIZE = 0x40000;
 
 static long long int unpack_none(transformer_state_t *xstate)
 {
@@ -49,6 +51,7 @@ unpacker_t unpacker[BLED_COMPRESSION_MAX] = {
 	unpack_xz_stream,
 	unpack_none,
 	unpack_vtsi_stream,
+	unpack_zstd_stream,
 };
 
 /* Uncompress file 'src', compressed using 'type', to file 'dst' */
@@ -267,7 +270,7 @@ int64_t bled_uncompress_from_buffer_to_buffer(const char* src, const size_t src_
 
 /* Initialize the library.
  * When the parameters are not NULL or zero you can:
- * - specify the buffer size to use (must be larger than 64KB and a power of two)
+ * - specify the buffer size to use (must be larger than 256KB and a power of two)
  * - specify the printf-like function you want to use to output message
  *   void print_function(const char* format, ...);
  * - specify the read/write functions you want to use;
@@ -283,11 +286,11 @@ int bled_init(uint32_t buffer_size, printf_t print_function, read_t read_functio
 	if (bled_initialized)
 		return -1;
 	BB_BUFSIZE = buffer_size;
-	/* buffer_size must be larger than 64 KB and a power of two */
-	if (buffer_size < 0x10000 || (buffer_size & (buffer_size - 1)) != 0) {
+	/* buffer_size must be larger than 256 KB and a power of two */
+	if (buffer_size < 0x40000 || (buffer_size & (buffer_size - 1)) != 0) {
 		if (buffer_size != 0 && print_function != NULL)
 			print_function("bled_init: invalid buffer_size, defaulting to 64 KB");
-		BB_BUFSIZE = 0x10000;
+		BB_BUFSIZE = 0x40000;
 	}
 	bled_printf = print_function;
 	bled_read = read_function;

@@ -17,8 +17,6 @@
 # define dbg(...) ((void)0)
 #endif
 
-#define xread safe_read
-
 enum {
 #if BB_BIG_ENDIAN
 	ZIP_FILEHEADER_MAGIC = 0x504b0304,

@@ -1,7 +1,7 @@
 /*
  * Bled (Base Library for Easy Decompression)
  *
- * Copyright © 2014-2015 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2024 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -31,6 +31,7 @@ typedef enum {
 	BLED_COMPRESSION_XZ,		// .xz
 	BLED_COMPRESSION_7ZIP,		// .7z
 	BLED_COMPRESSION_VTSI,		// .vtsi
+	BLED_COMPRESSION_ZSTD,		// .zst
 	BLED_COMPRESSION_MAX
 } bled_compression_type;
 

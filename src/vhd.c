@@ -17,7 +17,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// MinGW includes virdisk.h in windows.h, but we we don't want that
+// because we must apply a delay-loading workaround, and that workaround
+// has to apply between the winnt.h include and the virdisk.h include.
+// So we define _INC_VIRTDISK, to prevent the virdisk.h include in
+// windows.h, and then take care of the workaround (and virtdisk.h
+// include) in vhd.h.
+#define _INC_VIRTDISK
 #include <windows.h>
+#undef _INC_VIRTDISK
 #include <windowsx.h>
 #include <stdlib.h>
 #include <io.h>
@@ -68,9 +76,10 @@ static uint8_t wim_flags = 0;
 static uint32_t progress_report_mask;
 static uint64_t progress_offset = 0, progress_total = 100;
 static wchar_t wmount_path[MAX_PATH] = { 0 }, wmount_track[MAX_PATH] = { 0 };
-static char sevenzip_path[MAX_PATH];
-static BOOL count_files;
+static char sevenzip_path[MAX_PATH], physical_path[128] = "";
 static int progress_op = OP_FILE_COPY, progress_msg = MSG_267;
+static BOOL count_files;
+static HANDLE mounted_handle = INVALID_HANDLE_VALUE;
 
 static BOOL Get7ZipPath(void)
 {
@@ -95,6 +104,7 @@ static comp_assoc file_assoc[] = {
 	{ ".bz2", BLED_COMPRESSION_BZIP2 },
 	{ ".xz", BLED_COMPRESSION_XZ },
 	{ ".vtsi", BLED_COMPRESSION_VTSI },
+	{ ".zst", BLED_COMPRESSION_ZSTD },
 	{ ".ffu", BLED_COMPRESSION_MAX },
 	{ ".vhd", BLED_COMPRESSION_MAX + 1 },
 	{ ".vhdx", BLED_COMPRESSION_MAX + 2 },
@@ -720,7 +730,7 @@ BOOL WimExtractFile(const char* image, int index, const char* src, const char* d
 /// <returns>TRUE if the index was found in the image, FALSE otherwise.</returns>
 BOOL WimIsValidIndex(const char* image, int index)
 {
-	int i = 1;
+	int i = 1, cur_index;
 	BOOL r = FALSE;
 	DWORD dw = 0;
 	HANDLE hWim = NULL;
@@ -759,7 +769,9 @@ BOOL WimIsValidIndex(const char* image, int index)
 		goto out;
 
 	while ((str = get_token_data_file_indexed("IMAGE INDEX", xml_file, i)) != NULL) {
-		if (atoi(str) == index) {
+		cur_index = atoi(str);
+		safe_free(str);
+		if (cur_index == index) {
 			r = TRUE;
 			break;
 		}
@@ -897,23 +909,6 @@ BOOL WimApplyImage(const char* image, int index, const char* dst)
 	return dw;
 }
 
-// VirtDisk API Prototypes since we can't use delay-loading because of MinGW
-// See https://github.com/pbatard/rufus/issues/2272#issuecomment-1615976013
-PF_TYPE_DECL(WINAPI, DWORD, CreateVirtualDisk, (PVIRTUAL_STORAGE_TYPE, PCWSTR,
-	VIRTUAL_DISK_ACCESS_MASK, PSECURITY_DESCRIPTOR, CREATE_VIRTUAL_DISK_FLAG, ULONG,
-	PCREATE_VIRTUAL_DISK_PARAMETERS, LPOVERLAPPED, PHANDLE));
-PF_TYPE_DECL(WINAPI, DWORD, OpenVirtualDisk, (PVIRTUAL_STORAGE_TYPE, PCWSTR,
-	VIRTUAL_DISK_ACCESS_MASK, OPEN_VIRTUAL_DISK_FLAG, POPEN_VIRTUAL_DISK_PARAMETERS, PHANDLE));
-PF_TYPE_DECL(WINAPI, DWORD, AttachVirtualDisk, (HANDLE, PSECURITY_DESCRIPTOR,
-	ATTACH_VIRTUAL_DISK_FLAG, ULONG, PATTACH_VIRTUAL_DISK_PARAMETERS, LPOVERLAPPED));
-PF_TYPE_DECL(WINAPI, DWORD, DetachVirtualDisk, (HANDLE, DETACH_VIRTUAL_DISK_FLAG, ULONG));
-PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskPhysicalPath, (HANDLE, PULONG, PWSTR));
-PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskOperationProgress, (HANDLE, LPOVERLAPPED, PVIRTUAL_DISK_PROGRESS));
-PF_TYPE_DECL(WINAPI, DWORD, GetVirtualDiskInformation, (HANDLE, PULONG, PGET_VIRTUAL_DISK_INFO, PULONG));
-
-static char physical_path[128] = "";
-static HANDLE mounted_handle = INVALID_HANDLE_VALUE;
-
 // Mount an ISO or a VHD/VHDX image and provide its size
 // Returns the physical path of the mounted image or NULL on error.
 char* VhdMountImageAndGetSize(const char* path, uint64_t* disk_size)
@@ -926,12 +921,6 @@ char* VhdMountImageAndGetSize(const char* path, uint64_t* disk_size)
 	ULONG size = ARRAYSIZE(wtmp);
 	wconvert(path);
 	char *ret = NULL, *ext = NULL;
-
-	PF_INIT_OR_OUT(OpenVirtualDisk, VirtDisk);
-	PF_INIT_OR_OUT(AttachVirtualDisk, VirtDisk);
-	PF_INIT_OR_OUT(GetVirtualDiskPhysicalPath, VirtDisk);
-	if (disk_size != NULL)
-		PF_INIT_OR_OUT(GetVirtualDiskInformation, VirtDisk);
 
 	if (wpath == NULL)
 		return NULL;
@@ -946,7 +935,7 @@ char* VhdMountImageAndGetSize(const char* path, uint64_t* disk_size)
 	else if (safe_stricmp(ext, ".vhd") == 0)
 		vtype.DeviceId = VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
 
-	r = pfOpenVirtualDisk(&vtype, wpath, VIRTUAL_DISK_ACCESS_READ | VIRTUAL_DISK_ACCESS_GET_INFO,
+	r = OpenVirtualDisk(&vtype, wpath, VIRTUAL_DISK_ACCESS_READ | VIRTUAL_DISK_ACCESS_GET_INFO,
 		OPEN_VIRTUAL_DISK_FLAG_NONE, NULL, &mounted_handle);
 	if (r != ERROR_SUCCESS) {
 		SetLastError(r);
@@ -955,7 +944,7 @@ char* VhdMountImageAndGetSize(const char* path, uint64_t* disk_size)
 	}
 
 	vparams.Version = ATTACH_VIRTUAL_DISK_VERSION_1;
-	r = pfAttachVirtualDisk(mounted_handle, NULL, ATTACH_VIRTUAL_DISK_FLAG_READ_ONLY |
+	r = AttachVirtualDisk(mounted_handle, NULL, ATTACH_VIRTUAL_DISK_FLAG_READ_ONLY |
 		ATTACH_VIRTUAL_DISK_FLAG_NO_DRIVE_LETTER, 0, &vparams, NULL);
 	if (r != ERROR_SUCCESS) {
 		SetLastError(r);
@@ -963,7 +952,7 @@ char* VhdMountImageAndGetSize(const char* path, uint64_t* disk_size)
 		goto out;
 	}
 
-	r = pfGetVirtualDiskPhysicalPath(mounted_handle, &size, wtmp);
+	r = GetVirtualDiskPhysicalPath(mounted_handle, &size, wtmp);
 	if (r != ERROR_SUCCESS) {
 		SetLastError(r);
 		uprintf("Could not obtain physical path for mounted image '%s': %s", path, WindowsErrorString());
@@ -975,7 +964,7 @@ char* VhdMountImageAndGetSize(const char* path, uint64_t* disk_size)
 		*disk_size = 0;
 		disk_info.Version = GET_VIRTUAL_DISK_INFO_SIZE;
 		size = sizeof(disk_info);
-		r = pfGetVirtualDiskInformation(mounted_handle, &size, &disk_info, NULL);
+		r = GetVirtualDiskInformation(mounted_handle, &size, &disk_info, NULL);
 		if (r != ERROR_SUCCESS) {
 			SetLastError(r);
 			uprintf("Could not obtain virtual size of mounted image '%s': %s", path, WindowsErrorString());
@@ -995,12 +984,10 @@ out:
 
 void VhdUnmountImage(void)
 {
-	PF_INIT_OR_OUT(DetachVirtualDisk, VirtDisk);
-
 	if ((mounted_handle == NULL) || (mounted_handle == INVALID_HANDLE_VALUE))
 		goto out;
 
-	pfDetachVirtualDisk(mounted_handle, DETACH_VIRTUAL_DISK_FLAG_NONE, 0);
+	DetachVirtualDisk(mounted_handle, DETACH_VIRTUAL_DISK_FLAG_NONE, 0);
 	safe_closehandle(mounted_handle);
 out:
 	physical_path[0] = 0;
@@ -1022,11 +1009,9 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 	OVERLAPPED overlapped = { 0 };
 	DWORD r = ERROR_NOT_FOUND, flags;
 
-	PF_INIT_OR_OUT(CreateVirtualDisk, VirtDisk);
-	PF_INIT_OR_OUT(GetVirtualDiskOperationProgress, VirtDisk);
-
-	assert(img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD ||
-		img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHDX);
+	if_not_assert(img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD ||
+		img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHDX)
+		return ERROR_INVALID_PARAMETER;
 
 	UpdateProgressWithInfoInit(NULL, FALSE);
 
@@ -1052,7 +1037,7 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 	// CreateVirtualDisk() does not have an overwrite flag...
 	DeleteFileW(wDst);
 
-	r = pfCreateVirtualDisk(&vtype, wDst, VIRTUAL_DISK_ACCESS_NONE, NULL,
+	r = CreateVirtualDisk(&vtype, wDst, VIRTUAL_DISK_ACCESS_NONE, NULL,
 		flags, 0, (PCREATE_VIRTUAL_DISK_PARAMETERS)&vparams, &overlapped, &handle);
 	if (r != ERROR_SUCCESS && r != ERROR_IO_PENDING) {
 		SetLastError(r);
@@ -1066,7 +1051,7 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 				CancelIoEx(handle, &overlapped);
 				goto out;
 			}
-			if (pfGetVirtualDiskOperationProgress(handle, &overlapped, &vprogress) == ERROR_SUCCESS) {
+			if (GetVirtualDiskOperationProgress(handle, &overlapped, &vprogress) == ERROR_SUCCESS) {
 				if (vprogress.OperationStatus == ERROR_IO_PENDING)
 					UpdateProgressWithInfo(OP_FORMAT, MSG_261, vprogress.CurrentValue, vprogress.CompletionValue);
 			}
@@ -1079,7 +1064,7 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 
 	r = 0;
 	UpdateProgressWithInfo(OP_FORMAT, MSG_261, SelectedDrive.DiskSize, SelectedDrive.DiskSize);
-	uprintf("Operation complete.");
+	uprintf("Saved '%s'", img_save->ImagePath);
 
 out:
 	safe_closehandle(overlapped.hEvent);
@@ -1118,6 +1103,8 @@ static DWORD WINAPI FfuSaveImageThread(void* param)
 	safe_free(img_save->DevicePath);
 	safe_free(img_save->ImagePath);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
+	if (!IS_ERROR(ErrorStatus))
+		uprintf("Saved '%s'", img_save->ImagePath);
 	ExitThread(r);
 }
 

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-05-09 19:08+0100\n"
-"PO-Revision-Date: 2024-05-09 19:38+0100\n"
+"POT-Creation-Date: 2024-08-13 12:38+0100\n"
+"PO-Revision-Date: 2024-08-13 13:22+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pl_PL\n"
@@ -173,7 +173,7 @@ msgstr "Szukaj aktualizacji - Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
 msgid "A newer version is available. Please download the latest version!"
-msgstr "Jest dostępna nowsza wersja. Proszę pobrać najnowszą wersję!"
+msgstr "Nowsza wersja jest dostępna. Proszę pobrać najnowszą wersję!"
 
 #. • IDD_NEW_VERSION → IDC_WEBSITE
 msgid "Click here to go to the website"
@@ -491,7 +491,7 @@ msgstr "Nie można skopiować plików na dysk docelowy."
 
 #. • MSG_070
 msgid "Cancelled by user."
-msgstr "Przerwane przez użytkwonika."
+msgstr "Przerwane przez użytkownika."
 
 #. • MSG_071
 #.
@@ -517,7 +517,7 @@ msgstr "Nie można ponownie zamontować woluminu."
 
 #. • MSG_076
 msgid "Unable to patch/setup files for boot."
-msgstr "Nie można załatać/skonfigurować plików do bootowania."
+msgstr "Nie można załatać/skonfigurować plików do rozruchu."
 
 #. • MSG_077
 msgid "Unable to assign a drive letter."
@@ -551,7 +551,7 @@ msgstr "Niewspierany obraz"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
-msgstr "Ten obraz nie jest bootowalny lub używa kompresji sektora rozruchowego niewspieranej przez Rufusa..."
+msgstr "Ten obraz nie jest rozruchowy lub używa kompresji sektora rozruchowego niewspieranej przez Rufusa..."
 
 #. • MSG_083
 msgid "Replace %s?"
@@ -612,7 +612,7 @@ msgstr "Niewspierane ISO"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "Podczas używania Systemu Typu UEFI, tylko bootowalne obrazy ISO EFI są wspierane. Proszę wybrać bootowalny obraz ISO EFI lub ustawić System Docelowy na BIOS."
+msgstr "Podczas używania Systemu Typu UEFI, tylko rozruchowe obrazy ISO EFI są wspierane. Proszę wybrać rozruchowy obraz ISO EFI lub ustawić System Docelowy na BIOS."
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -652,7 +652,7 @@ msgid ""
 "\n"
 "Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"WAŻNE: Próbujesz zainstalować 'Windows To Go', lecz dysk docelowy nie ma atrybytu 'LOKALNY'. Z tego powodu Windows prawdopodobnie zawiesi się podczas startu, ponieważ Microsoft nie zaprojektował go do działania z dyskami, które zamiast tego mają atrybut 'WYMIENNY'.\n"
+"WAŻNE: Próbujesz zainstalować 'Windows To Go', lecz dysk docelowy nie ma atrybutu 'LOKALNY'. Z tego powodu Windows prawdopodobnie zawiesi się podczas startu, ponieważ Microsoft nie zaprojektował go do działania z dyskami, które zamiast tego mają atrybut 'WYMIENNY'.\n"
 "\n"
 "Czy nadal chcesz kontynuować?\n"
 "\n"
@@ -675,7 +675,7 @@ msgid ""
 "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
 "Do you want to visit the 7-zip download page?"
 msgstr ""
-"Twoja platforma nie może wypakować plików z archiwów WIM. Wypakowanie WIM jest wymagane aby utworzyć bootowalny dysk USB EFI z Windows 7 i Windows Vista. Możesz to naprawić instalując aktualną wersję 7-Zip.\n"
+"Twoja platforma nie może wypakować plików z archiwów WIM. Wypakowanie WIM jest wymagane aby utworzyć rozruchowy dysk USB EFI z Windows 7 i Windows Vista. Możesz to naprawić instalując aktualną wersję 7-Zip.\n"
 "Czy chcesz odwiedzić stronę pobierania 7-zip?"
 
 #. • MSG_103
@@ -700,7 +700,7 @@ msgstr ""
 "Ponieważ ten plik jest większy niż 100 KB i zawsze jest obecny na obrazach ISO %s, nie jest dołączony do Rufusa.\n"
 "\n"
 "Rufus może pobrać brakujący plik dla ciebie:\n"
-"- Wybierz 'Yes', aby połączyć sie z internetem i pobrać plik\n"
+"- Wybierz 'Yes', aby połączyć się z internetem i pobrać plik\n"
 "- Wybierz 'No', jeśli chcesz później ręcznie skopiować ten plik na dysk \n"
 "\n"
 "Informacja: Plik zostanie pobrany do obecnego folderu i jeśli '%s' istnieje, zostanie użyty ponownie automatycznie."
@@ -710,7 +710,7 @@ msgid ""
 "Cancelling may leave the device in an UNUSABLE state.\n"
 "If you are sure you want to cancel, click YES. Otherwise, click NO."
 msgstr ""
-"Przerwanie operacji może pozostawic urządzenie w stanie NIEZDATNYM DO UŻYTKU.\n"
+"Przerwanie operacji może pozostawić urządzenie w stanie NIEZDATNYM DO UŻYTKU.\n"
 "Jeśli jesteś pewien, że chcesz przerwać operację, naciśnij TAK. W innym razie naciśnij NIE."
 
 #. • MSG_106
@@ -860,7 +860,7 @@ msgstr "Nie pokazuj więcej tej wiadomości"
 
 #. • MSG_128
 msgid "Important notice about %s"
-msgstr "Ważna informacjoa o %s"
+msgstr "Ważna informacja o %s"
 
 #. • MSG_129
 msgid ""
@@ -896,7 +896,7 @@ msgid ""
 msgstr ""
 "Rufus wykrył, że próbujesz utworzyć nośnik \"Windows To Go\" bazujący na ISO 1809.\n"
 "\n"
-"Z powodu *BŁĘDU MICROSOFTU*, ten nośnik ulegnie awarii podczas bootowania systemu (Blue Screen of Death), chyba że ręcznie zastąpisz plik \"WppRecorder.sys\" wersją z 1803.\n"
+"Z powodu *BŁĘDU MICROSOFTU*, ten nośnik ulegnie awarii podczas rozruchu systemu (Blue Screen of Death), chyba że ręcznie zastąpisz plik \"WppRecorder.sys\" wersją z 1803.\n"
 "\n"
 "Należy również pamiętać, że powodem, dla którego Rufus nie może automatycznie rozwiązać tego problemu, jest to, że \"WppRecorder.sys” jest plikiem chronionym prawem autorskim firmy Microsoft, więc nie możemy zgodnie z prawem osadzić kopii pliku w aplikacji."
 
@@ -968,7 +968,7 @@ msgstr "Pobierz obraz ISO"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
-msgstr "Typ komputera, na którym chcesz użyć bootowalnego dysku. Przed stworzeniem dysku musisz sam określić, czy docelowy komputer posiada BIOS, czy UEFI, inaczej może się nie uruchomić."
+msgstr "Typ komputera, na którym chcesz użyć dysku rozruchowego. Przed stworzeniem dysku musisz sam określić, czy docelowy komputer posiada BIOS, czy UEFI, inaczej może się nie uruchomić."
 
 #. • MSG_151
 #.
@@ -1018,7 +1018,7 @@ msgstr "Przełącz opcje zaawansowane"
 
 #. • MSG_161
 msgid "Check the device for bad blocks using a test pattern"
-msgstr "Sprawdź urządzenie pod kątem błędnych sektorów używając wzoru testoego"
+msgstr "Sprawdź urządzenie pod kątem błędnych sektorów używając wzoru testowego"
 
 #. • MSG_162
 msgid "Uncheck this box to use the \"slow\" format method"
@@ -1030,7 +1030,7 @@ msgstr "Metoda, która zostanie użyta do stworzenia partycji"
 
 #. • MSG_164
 msgid "Method that will be used to make the drive bootable"
-msgstr "Metoda, która zostanie użyta, aby uczynić dysk bootowalnym"
+msgstr "Metoda, która zostanie użyta, aby uczynić dysk rozruchowym"
 
 #. • MSG_165
 msgid "Click to select or download an image..."
@@ -1128,7 +1128,7 @@ msgid ""
 "Rufus does not install or run background services, therefore update checks are performed only when the main application is running.\\line\n"
 "Internet access is of course required when checking for updates."
 msgstr ""
-"Rufus nie instaluje lub uruchamia procesów w tle, dlatego aktualizacje są sprawdzane wylącznie przy starcie głównego okna aplikacji.\\line\n"
+"Rufus nie instaluje lub uruchamia procesów w tle, dlatego aktualizacje są sprawdzane wyłącznie przy starcie głównego okna aplikacji.\\line\n"
 "Dostęp do internetu jest wymagany podczas sprawdzania aktualizacji."
 
 #. • MSG_187
@@ -1182,7 +1182,7 @@ msgid ""
 msgstr ""
 "WAŻNE: TEN DYSK UŻYWA NIESTANDARDOWEGO ROZMIARU SEKTORA!\n"
 "\n"
-"Standardowe dyski używają 512-bajtowego rozmiaru sektora, lecz ten dysk używa %d-bajtowego. W wielu przypadkach oznacza to, że NIE będziesz mógł bootować z tego dysku.\n"
+"Standardowe dyski używają 512-bajtowego rozmiaru sektora, lecz ten dysk używa %d-bajtowego. W wielu przypadkach oznacza to, że NIE będziesz mógł startować z tego dysku.\n"
 "Rufus może spróbować utworzyć dysk rozruchowy, ale NIE MA GWARANCJI, że to zadziała."
 
 #. • MSG_197
@@ -1350,7 +1350,7 @@ msgstr "Kopiowanie plików ISO: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (%s)..."
-msgstr "Ustawianie bootowania Win7 EFI (%s)..."
+msgstr "Ustawianie rozruchu Win7 EFI (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1552,9 +1552,9 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"Obraz, który wybrałeś to obraz 'ISOHybrid'. To znacza iż może zostać zapisany w trybie %s (kopia plików) lub trybie %s (obraz dysku).\n"
+"Obraz, który wybrałeś to obraz 'ISOHybrid'. Oznacza to, że może zostać zapisany w trybie %s (kopia plików) lub trybie %s (obraz dysku).\n"
 "Rufus zaleca użycie trybu %s, abyś zawsze miał pełny dostęp do dysku po jego zapisaniu.\n"
-"Jednak jeśli napotkasz problemy podczas bootowania możesz spróbować zapisać ten obraz ponownie w trybie %s.\n"
+"Jednak jeśli napotkasz problemy podczas rozruchu możesz spróbować zapisać ten obraz ponownie w trybie %s.\n"
 "\n"
 "Proszę wybrać tryb którego chcesz użyć do zapisania tego obrazu:"
 
@@ -1739,13 +1739,13 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"Obraz ISO, który został wybrany używa UEFI i jest dość mały, żeby być zapisanym jako partycja systemowa EFI (ESP). Zapisywanie do ESP zamiast to ogólnej partycji zajmującej cały dysk. Może być bardziej odpowiedni dla niektórych typów instalacji.\n"
+"Wybrany plik ISO używa UEFI i jest na tyle mały, że można go zapisać jako partycję systemową EFI (ESP). Zapisanie na ESP, zamiast zapisywania na ogólnej partycji danych zajmującej cały dysk, może być preferowane dla niektórych typów instalacji.\n"
 "\n"
-"Proszę wybrać tryb którym chesz zapisać ten obraz:"
+"Proszę wybrać tryb, w którym chcesz zapisać ten obraz:"
 
 #. • MSG_311
 msgid "Use %s (in the main application window) to enable."
-msgstr "Użyj %s w głownym oknie aplikacji, żeby włączyć."
+msgstr "Użyj %s w głównym oknie aplikacji, żeby włączyć."
 
 #. • MSG_312
 msgid "Extra hashes (SHA512)"
@@ -1853,9 +1853,9 @@ msgid ""
 msgstr ""
 "Dodatkowy plik (\"diskcopy.dll\") musi zostać pobrany od Microsoft, żeby zainstalować MS-DOS:\n"
 "- Wybierz opcję \"Tak\", aby pobrać pliku z internetu\n"
-"- Wybierz opcję \"Nie\", aby anulować operajcę\n"
+"- Wybierz opcję \"Nie\", aby anulować operację\n"
 "\n"
-"Uwaga: Plik zostanie pobrany do folderu aplikacji i będzie użyty pownownie, gdy będzie dostępny."
+"Uwaga: Plik zostanie pobrany do folderu aplikacji i będzie użyty ponownie, gdy będzie dostępny."
 
 #. • MSG_338
 msgid "Revoked UEFI bootloader detected"
@@ -1868,9 +1868,9 @@ msgid ""
 "- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
 "- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
 msgstr ""
-"Rufus wykrył, że wybrany plik ISO zawiera bootloader UEFI, który został unieważniony, i który wygenereuje %s. gdy włączony zostanie \"Secure Boot\" w pełni zaktualizowanym systemie UEFI.\n"
+"Rufus wykrył, że wybrany plik ISO zawiera bootloader UEFI, który został unieważniony, i który wygeneruje %s. gdy włączony zostanie \"Secure Boot\" w pełni zaktualizowanym systemie UEFI.\n"
 "\n"
-"- Jeśli uzyskałeś ten obraz ISO z niezaufanego źródła, powinienneś rozważyć możliwość, że może on zawierać złośliwe oprogramowanie dla UEFI i unikać jego uruchamiania.\n"
+"- Jeśli uzyskałeś ten obraz ISO z niezaufanego źródła, powinieneś rozważyć możliwość, że może on zawierać złośliwe oprogramowanie dla UEFI i unikać jego uruchamiania.\n"
 "- Jeśli uzyskałeś go z zaufanego źródła, powinieneś spróbować znaleźć nowszą wersję, która nie wygeneruje tego ostrzeżenia."
 
 #. • MSG_340
@@ -1923,7 +1923,7 @@ msgstr "Użyj Rufus MBR"
 #.
 #. The following messages are for the Windows Store listing only and are not used by the application
 msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
-msgstr "Rufus to narzędzie, które pomaga formatować i tworzyć bootowalne dyski flash USB, takie jak klucze USB / pendrive, pendrive'y itp."
+msgstr "Rufus to narzędzie, które pomaga formatować i tworzyć dyski rozruchowe flash USB, takie jak klucze USB, pendrive-y itp."
 
 #. • MSG_901
 msgid "Official site: %s"
@@ -1962,7 +1962,7 @@ msgstr "Sformatuj nośnik używając: FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3"
 
 #. • MSG_911
 msgid "Create FreeDOS bootable USB drives"
-msgstr "Stwórz bootowalny nośnik USB FreeDOS"
+msgstr "Stwórz nośnik rozruchowy USB FreeDOS"
 
 #. • MSG_912
 msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
@@ -1986,7 +1986,7 @@ msgstr "Twórz dyski instalacyjne systemu Windows 11 dla komputerów, które nie
 
 #. • MSG_917
 msgid "Create persistent Linux partitions"
-msgstr "Stwórz particje persistent Linuxa"
+msgstr "Utwórz trwałe partycje Linux"
 
 #. • MSG_918
 msgid "Create VHD/DD images of the selected drive"
@@ -1998,7 +1998,7 @@ msgstr "Oblicz sumy kontrolne MD5, SHA-1, SHA-256 i SHA-512 dla wybranego obrazu
 
 #. • MSG_920
 msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
-msgstr "Sprawdź dysk pod względem spójności danych lub wykryj \"nieorginalny\" pendrive"
+msgstr "Sprawdź dysk pod względem spójności danych lub wykryj \"nieoryginalny\" pendrive"
 
 #. • MSG_921
 msgid "Download official Microsoft Windows retail ISOs"

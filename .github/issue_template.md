@@ -23,6 +23,7 @@ YOU HAVE BEEN WARNED.
 
 Checklist
 ---------
+- [ ] I have been made aware that if my problem can be summarized as _"I've created or tried to create a media using Rufus, and ..."_, and I am not including a log, **this issue will be summarily closed**.
 - [ ] I looked at https://github.com/pbatard/rufus/wiki/FAQ to see if my question has already been answered.
 - [ ] I performed a search in the issue tracker for similar issues using keywords relevant to my problem, such as the error message I got from the log.
 - [ ] I clicked the 'Log' button (🗒️) or pressed <kbd>Ctrl</kbd>-<kbd>L</kbd> in Rufus, or used [DebugView](https://learn.microsoft.com/en-us/sysinternals/downloads/debugview), and copy/pasted the log into the section that says `<FULL LOG>` below.

@@ -25,6 +25,8 @@
 #include <sddl.h>
 #include <gpedit.h>
 #include <assert.h>
+#include <accctrl.h>
+#include <aclapi.h>
 
 #include "re.h"
 #include "rufus.h"
@@ -80,8 +82,7 @@ BOOL htab_create(uint32_t nel, htab_table* htab)
 	if (htab == NULL) {
 		return FALSE;
 	}
-	assert(htab->table == NULL);
-	if (htab->table != NULL) {
+	if_not_assert(htab->table == NULL) {
 		uprintf("Warning: htab_create() was called with a non empty table");
 		return FALSE;
 	}
@@ -197,8 +198,7 @@ uint32_t htab_hash(char* str, htab_table* htab)
 	// Not found => New entry
 
 	// If the table is full return an error
-	assert(htab->filled < htab->size);
-	if (htab->filled >= htab->size) {
+	if_not_assert(htab->filled < htab->size) {
 		uprintf("Hash table is full (%d entries)", htab->size);
 		return 0;
 	}
@@ -740,7 +740,7 @@ out:
 /*
  * Get a resource from the RC. If needed that resource can be duplicated.
  * If duplicate is true and len is non-zero, the a zeroed buffer of 'len'
- * size is allocated for the resource. Else the buffer is allocate for
+ * size is allocated for the resource. Else the buffer is allocated for
  * the resource size.
  */
 uint8_t* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate)
@@ -1199,7 +1199,8 @@ BOOL MountRegistryHive(const HKEY key, const char* pszHiveName, const char* pszH
 	LSTATUS status;
 	HANDLE token = INVALID_HANDLE_VALUE;
 
-	assert((key == HKEY_LOCAL_MACHINE) || (key == HKEY_USERS));
+	if_not_assert((key == HKEY_LOCAL_MACHINE) || (key == HKEY_USERS))
+		return FALSE;
 
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token)) {
 		uprintf("Could not get current process token: %s", WindowsErrorString());
@@ -1230,7 +1231,8 @@ BOOL UnmountRegistryHive(const HKEY key, const char* pszHiveName)
 {
 	LSTATUS status;
 
-	assert((key == HKEY_LOCAL_MACHINE) || (key == HKEY_USERS));
+	if_not_assert((key == HKEY_LOCAL_MACHINE) || (key == HKEY_USERS))
+		return FALSE;
 
 	status = RegUnLoadKeyA(key, pszHiveName);
 	if (status != ERROR_SUCCESS) {
@@ -1241,4 +1243,74 @@ BOOL UnmountRegistryHive(const HKEY key, const char* pszHiveName)
 			(key == HKEY_LOCAL_MACHINE) ? "HKLM" : "HKCU", pszHiveName);
 
 	return (status == ERROR_SUCCESS);
+}
+
+/*
+ * Take administrative ownership of a file or directory, and grant all access rights.
+ */
+BOOL TakeOwnership(LPCSTR lpszOwnFile)
+{
+	BOOL ret = FALSE;
+	HANDLE hToken = NULL;
+	PSID pSIDAdmin = NULL;
+	PACL pOldDACL = NULL, pNewDACL = NULL;
+	PSECURITY_DESCRIPTOR pSD = NULL;
+	SID_IDENTIFIER_AUTHORITY SIDAuthNT = SECURITY_NT_AUTHORITY;
+	EXPLICIT_ACCESS ea = { 0 };
+
+	if (lpszOwnFile == NULL)
+		return FALSE;
+
+	// Create a SID for the BUILTIN\Administrators group.
+	if (!AllocateAndInitializeSid(&SIDAuthNT, 2, SECURITY_BUILTIN_DOMAIN_RID,
+		DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &pSIDAdmin))
+		goto out;
+
+	// Open a handle to the access token for the calling process.
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken))
+		goto out;
+
+	// Enable the SE_TAKE_OWNERSHIP_NAME privilege.
+	if (!SetPrivilege(hToken, SE_TAKE_OWNERSHIP_NAME, TRUE))
+		goto out;
+
+	// Set the owner in the object's security descriptor.
+	if (SetNamedSecurityInfoU(lpszOwnFile, SE_FILE_OBJECT, OWNER_SECURITY_INFORMATION,
+		pSIDAdmin, NULL, NULL, NULL) != ERROR_SUCCESS)
+		goto out;
+
+	// Disable the SE_TAKE_OWNERSHIP_NAME privilege.
+	if (!SetPrivilege(hToken, SE_TAKE_OWNERSHIP_NAME, FALSE))
+		goto out;
+
+	// Get a pointer to the existing DACL.
+	if (GetNamedSecurityInfoU(lpszOwnFile, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION,
+		NULL, NULL, &pOldDACL, NULL, &pSD) != ERROR_SUCCESS)
+		goto out;
+
+	// Initialize an EXPLICIT_ACCESS structure for the new ACE
+	// with full control for Administrators.
+	ea.grfAccessPermissions = GENERIC_ALL;
+	ea.grfAccessMode = GRANT_ACCESS;
+	ea.grfInheritance = SUB_CONTAINERS_AND_OBJECTS_INHERIT;
+	ea.Trustee.TrusteeForm = TRUSTEE_IS_SID;
+	ea.Trustee.TrusteeType = TRUSTEE_IS_GROUP;
+	ea.Trustee.ptstrName = (LPTSTR)pSIDAdmin;
+
+	// Create a new ACL that merges the new ACE into the existing DACL.
+	if (SetEntriesInAcl(1, &ea, pOldDACL, &pNewDACL) != ERROR_SUCCESS)
+		goto out;
+
+	// Try to modify the object's DACL.
+	if (SetNamedSecurityInfoU(lpszOwnFile, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION,
+		NULL, NULL, pNewDACL, NULL) != ERROR_SUCCESS)
+		goto out;
+
+	ret = TRUE;
+
+out:
+	FreeSid(pSIDAdmin);
+	LocalFree(pNewDACL);
+	safe_closehandle(hToken);
+	return ret;
 }

@@ -69,11 +69,11 @@ enum bootcheck_return {
 	BOOTCHECK_GENERAL_ERROR = -3,
 };
 
-static const char* cmdline_hogger = "rufus.com";
+static const char* cmdline_hogger = ".\\rufus.com";
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
 static const char* vs_reg = "Software\\Microsoft\\VisualStudio";
 static const char* arch_name[ARCH_MAX] = {
-	"unknown", "x86_32", "x86_64", "ARM", "ARM64", "Itanic", "RISC-V 32", "RISC-V 64", "RISC-V 128", "EBC" };
+	"unknown", "x86_32", "x86_64", "ARM", "ARM64", "Itanic", "RISC-V 64", "EBC" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL size_check = TRUE;
 static BOOL log_displayed = FALSE;
@@ -145,11 +145,13 @@ char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
 char *archive_path = NULL, image_option_txt[128], *fido_url = NULL, *save_image_type = NULL;
+char* sbat_level_txt = NULL;
 StrArray BlockingProcessList, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
 RUFUS_DRIVE rufus_drive[MAX_DRIVES] = { 0 };
+sbat_entry_t* sbat_entries = NULL;
 
 // hdc is a memory DC with a 32bpp bitmap selected into it.
 // This function sets the alpha channel to 255 without
@@ -1453,7 +1455,8 @@ static void DisplayISOProps(void)
 // Insert the image name into the Boot selection dropdown and (re)populate the Image option dropdown
 static void UpdateImage(BOOL update_image_option_only)
 {
-	assert(image_index != 0);
+	if_not_assert(image_index != 0)
+		return;
 
 	if (!update_image_option_only) {
 		if (ComboBox_GetItemData(hBootType, image_index) == BT_IMAGE)
@@ -1531,14 +1534,8 @@ static uint8_t FindArch(const char* path)
 	case IMAGE_FILE_MACHINE_IA64:
 		ret = ARCH_IA_64;
 		break;
-	case IMAGE_FILE_MACHINE_RISCV32:
-		ret = ARCH_RISCV_32;
-		break;
 	case IMAGE_FILE_MACHINE_RISCV64:
 		ret = ARCH_RISCV_64;
-		break;
-	case IMAGE_FILE_MACHINE_RISCV128:
-		ret = ARCH_RISCV_128;
 		break;
 	case IMAGE_FILE_MACHINE_EBC:
 		ret = ARCH_EBC;
@@ -1620,7 +1617,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 				arch = FindArch(tmp_path);
 				if (arch != 0) {
 					uprintf("  Image contains a%s %s EFI boot manager",
-						(arch >= ARCH_RISCV_32 && arch <= ARCH_RISCV_128) ? "" : "n", arch_name[arch]);
+						(arch == ARCH_RISCV_64) ? "" : "n", arch_name[arch]);
 					img_report.has_efi = 1 | (1 << arch);
 					img_report.has_bootmgr_efi = TRUE;
 					img_report.wininst_index = 1;
@@ -1725,12 +1722,14 @@ out:
 // Likewise, boot check will block message processing => use a thread
 static DWORD WINAPI BootCheckThread(LPVOID param)
 {
-	int i, r, username_index = -1;
+	int i, r, rr, username_index = -1;
 	FILE *fd;
-	DWORD len;
+	uint32_t len;
+	uint8_t* buf = NULL;
 	WPARAM ret = BOOTCHECK_CANCEL;
 	BOOL in_files_dir = FALSE, esp_already_asked = FALSE;
 	BOOL is_windows_to_go = ((image_options & IMOP_WINTOGO) && (ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO));
+	const char* msg;
 	const char* grub = "grub";
 	const char* core_img = "core.img";
 	const char* ldlinux = "ldlinux";
@@ -1752,8 +1751,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	}
 
 	if (boot_type == BT_IMAGE) {
-		assert(image_path != NULL);
-		if (image_path == NULL)
+		if_not_assert(image_path != NULL)
 			goto out;
 		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 			// This ISO image is too big for the selected target
@@ -1911,6 +1909,10 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				StrArrayAdd(&options, lmprintf(MSG_335), TRUE);
 				MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
 				if (expert_mode) {
+					if (!appstore_version && img_report.win_version.build >= 26100) {
+						StrArrayAdd(&options, lmprintf(MSG_350), TRUE);
+						MAP_BIT(UNATTEND_USE_MS2023_BOOTLOADERS);
+					}
 					StrArrayAdd(&options, lmprintf(MSG_346), TRUE);
 					MAP_BIT(UNATTEND_FORCE_S_MODE);
 				}
@@ -1922,7 +1924,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				i = remap16(i, map, TRUE);
 				unattend_xml_path = CreateUnattendXml(arch, i);
 				// Remember the user preferences for the current session.
-				unattend_xml_mask &= ~(remap16(0x1ff, map, TRUE));
+				unattend_xml_mask &= ~(remap16(UNATTEND_FULL_MASK, map, TRUE));
 				unattend_xml_mask |= i;
 				WriteSetting32(SETTING_WUE_OPTIONS, (UNATTEND_DEFAULT_MASK << 16) | unattend_xml_mask);
 			}
@@ -1930,26 +1932,61 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 
 		// Check UEFI bootloaders for revocation
 		if (IS_EFI_BOOTABLE(img_report)) {
-			// coverity[swapped_arguments]
-			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, tmp) != 0) {
-				// ExtractISOFile() is case sensitive, so we must use 
-				for (i = 0; i < ARRAYSIZE(img_report.efi_boot_path) && img_report.efi_boot_path[i][0] != 0; i++) {
-					if (ExtractISOFile(image_path, img_report.efi_boot_path[i], tmp, FILE_ATTRIBUTE_NORMAL) == 0) {
-						uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", img_report.efi_boot_path[i]);
+			BOOL has_secureboot_signed_bootloader = FALSE;
+			assert(ARRAYSIZE(img_report.efi_boot_entry) > 0);
+			PrintStatus(0, MSG_351);
+			uuprintf("UEFI Secure Boot revocation checks:");
+			// Make sure we have at least one regular EFI bootloader that is formally signed
+			// for Secure Boot, since it doesn't make sense to report revocation otherwise.
+			for (i = 0; !has_secureboot_signed_bootloader && i < ARRAYSIZE(img_report.efi_boot_entry) &&
+				img_report.efi_boot_entry[i].path[0] != 0; i++) {
+				if (img_report.efi_boot_entry[i].type == EBT_MAIN) {
+					len = ReadISOFileToBuffer(image_path, img_report.efi_boot_entry[i].path, &buf);
+					if (len == 0) {
+						uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", img_report.efi_boot_entry[i].path);
 						continue;
 					}
-					r = IsBootloaderRevoked(tmp);
+					if (IsSignedBySecureBootAuthority(buf, len))
+						has_secureboot_signed_bootloader = TRUE;
+					free(buf);
+				}
+			}
+			if (!has_secureboot_signed_bootloader) {
+				uuprintf("  No Secure Boot signed bootloader found -- skipping");
+			} else {
+				rr = 0;
+				for (i = 0; i < ARRAYSIZE(img_report.efi_boot_entry) && img_report.efi_boot_entry[i].path[0] != 0; i++) {
+					static const char* revocation_type[] = { "UEFI DBX", "Windows SSP", "Linux SBAT", "Windows SVN", "Cert DBX" };
+					len = ReadISOFileToBuffer(image_path, img_report.efi_boot_entry[i].path, &buf);
+					if (len == 0) {
+						uprintf("Warning: Failed to extract '%s' to check for UEFI revocation", img_report.efi_boot_entry[i].path);
+						continue;
+					}
+					uuprintf("• %s", img_report.efi_boot_entry[i].path);
+					r = IsBootloaderRevoked(buf, len);
+					safe_free(buf);
 					if (r > 0) {
+						assert(r <= ARRAYSIZE(revocation_type));
+						if (rr == 0)
+							rr = r;
+						uprintf("Warning: '%s' has been revoked by %s", img_report.efi_boot_entry[i].path, revocation_type[r - 1]);
 						is_bootloader_revoked = TRUE;
-						r = MessageBoxExU(hMainDialog, lmprintf(MSG_339,
-							(r == 1) ? lmprintf(MSG_340) : lmprintf(MSG_341, "Error code: 0xc0000428")),
-							lmprintf(MSG_338), MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
-						if (r == IDCANCEL)
-							goto out;
-						break;
 					}
 				}
-				DeleteFileU(tmp);
+				if (rr > 0) {
+					switch (rr) {
+					case 2:
+						msg = lmprintf(MSG_341, "Error code: 0xc0000428");
+						break;
+					default:
+						msg = lmprintf(MSG_340);
+						break;
+					}
+					r = MessageBoxExU(hMainDialog, lmprintf(MSG_339, msg), lmprintf(MSG_338),
+						MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+					if (r == IDCANCEL)
+						goto out;
+				}
 			}
 		}
 
@@ -2005,7 +2042,6 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					IGNORE_RETVAL(_chdir(tmp));
 					// The following loops through the grub2 version (which may have the ISO label appended)
 					// and breaks it according to '.' or '-' until it finds a match on the server.
-					// 
 					for (i = (int)strlen(img_report.grub2_version), grub2_len = 0; i > 0 && grub2_len <= 0; i--) {
 						c = img_report.grub2_version[i];
 						if (c != 0 && c != '.' && c != '-')
@@ -2036,7 +2072,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		if ((partition_type == PARTITION_STYLE_MBR) && HAS_SYSLINUX(img_report)) {
 			if (SL_MAJOR(img_report.sl_version) < 5) {
 				IGNORE_RETVAL(_chdirU(app_data_dir));
-				for (i = 0; i<NB_OLD_C32; i++) {
+				for (i = 0; i < NB_OLD_C32; i++) {
 					if (img_report.has_old_c32[i]) {
 						if (!in_files_dir) {
 							IGNORE_RETVAL(_mkdir(FILES_DIR));
@@ -2075,7 +2111,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				IGNORE_RETVAL(_chdirU(app_data_dir));
 				IGNORE_RETVAL(_mkdir(FILES_DIR));
 				IGNORE_RETVAL(_chdir(FILES_DIR));
-				for (i=0; i<2; i++) {
+				for (i = 0; i < 2; i++) {
 					// Check if we already have the relevant ldlinux_v#.##.sys & ldlinux_v#.##.bss files
 					static_sprintf(tmp, "%s-%s%s\\%s.%s", syslinux, img_report.sl_version_str,
 						img_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
@@ -2097,7 +2133,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 						lmprintf(MSG_115), MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid);
 					if (r != IDYES)
 						goto out;
-					for (i=0; i<2; i++) {
+					for (i = 0; i < 2; i++) {
 						static_sprintf(tmp, "%s-%s", syslinux, img_report.sl_version_str);
 						IGNORE_RETVAL(_mkdir(tmp));
 						if (*img_report.sl_version_ext != 0) {
@@ -2408,6 +2444,7 @@ static void InitDialog(HWND hDlg)
 	// Create the string arrays
 	StrArrayCreate(&BlockingProcessList, 16);
 	StrArrayCreate(&ImageList, 16);
+	StrArrayCreate(&modified_files, 8);
 	// Set various checkboxes
 	CheckDlgButton(hDlg, IDC_QUICK_FORMAT, BST_CHECKED);
 	CheckDlgButton(hDlg, IDC_EXTENDED_LABEL, BST_CHECKED);
@@ -2584,6 +2621,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			StopProcessSearch();
 			StrArrayDestroy(&BlockingProcessList);
 			StrArrayDestroy(&ImageList);
+			StrArrayDestroy(&modified_files);
 			DestroyAllTooltips();
 			DestroyWindow(hLogDialog);
 			GetWindowRect(hDlg, &relaunch_rc);
@@ -2825,7 +2863,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					img_provided = FALSE;	// One off thing...
 				} else {
 					char* old_image_path = image_path;
-					char extensions[128] = "*.iso;*.img;*.vhd;*.vhdx;*.usb;*.bz2;*.bzip2;*.gz;*.lzma;*.xz;*.Z;*.zip;*.wic;*.wim;*.esd;*.vtsi";
+					char extensions[128] = "*.iso;*.img;*.vhd;*.vhdx;*.usb;*.bz2;*.bzip2;*.gz;*.lzma;*.xz;*.Z;*.zip;*.zst;*.wic;*.wim;*.esd;*.vtsi";
 					if (has_ffu_support)
 						strcat(extensions, ";*.ffu");
 					// If declared globaly, lmprintf(MSG_280) would be called on each message...
@@ -3304,6 +3342,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (!Notification(MSG_WARNING_QUESTION, NULL, NULL, title, lmprintf(MSG_132)))
 				goto aborted_start;
 		}
+		PrintStatus(0, MSG_142);
 
 		GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
 		if (MessageBoxExU(hMainDialog, lmprintf(MSG_003, tmp),
@@ -3339,6 +3378,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if (queued_hotplug_event)
 			SendMessage(hDlg, UM_MEDIA_CHANGE, 0, 0);
 		if (wParam == BOOTCHECK_CANCEL) {
+			nb_devices = ComboBox_GetCount(hDeviceList);
+			PrintStatus(0, (nb_devices == 1) ? MSG_208 : MSG_209, nb_devices);
+			PrintStatus(5000, MSG_041);
 			if (unattend_xml_path != NULL) {
 				DeleteFileU(unattend_xml_path);
 				unattend_xml_path = NULL;
@@ -3468,13 +3510,13 @@ static HANDLE SetHogger(void)
 	int i;
 
 	hog_data = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_XT_HOGGER),
-		_RT_RCDATA, cmdline_hogger, &hog_size, FALSE);
+		_RT_RCDATA, &cmdline_hogger[2], &hog_size, FALSE);
 	if (hog_data != NULL) {
 		// Create our synchronisation mutex
 		hogmutex = CreateMutexA(NULL, TRUE, "Global/Rufus_CmdLine");
 
 		// Extract the hogger resource
-		hFile = CreateFileA(cmdline_hogger, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ,
+		hFile = CreateFileA(&cmdline_hogger[2], GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
 			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hFile != INVALID_HANDLE_VALUE) {
 			// coverity[check_return]
@@ -3483,7 +3525,7 @@ static HANDLE SetHogger(void)
 		safe_closehandle(hFile);
 
 		// Now launch the file from the commandline, by simulating keypresses
-		input = (INPUT*)calloc(strlen(cmdline_hogger)+1, sizeof(INPUT));
+		input = (INPUT*)calloc(strlen(cmdline_hogger) + 1, sizeof(INPUT));
 		if (input != NULL) {
 			for (i = 0; i < (int)strlen(cmdline_hogger); i++) {
 				input[i].type = INPUT_KEYBOARD;
@@ -3835,7 +3877,7 @@ skip_args_processing:
 	is_vds_available = IsVdsAvailable(FALSE);
 	use_vds = ReadSettingBool(SETTING_USE_VDS) && is_vds_available;
 	usb_debug = ReadSettingBool(SETTING_ENABLE_USB_DEBUG);
-	cdio_loglevel_default = usb_debug ? CDIO_LOG_DEBUG : CDIO_LOG_WARN;
+	cdio_loglevel_default = usb_debug ? CDIO_LOG_INFO : CDIO_LOG_WARN;
 	use_rufus_mbr = !ReadSettingBool(SETTING_DISABLE_RUFUS_MBR);
 //	validate_md5sum = ReadSettingBool(SETTING_ENABLE_RUNTIME_VALIDATION);
 	detect_fakes = !ReadSettingBool(SETTING_DISABLE_FAKE_DRIVES_CHECK);
@@ -4126,7 +4168,7 @@ extern int TestHashes(void);
 			// Alt-. => Enable USB enumeration debug
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == VK_OEM_PERIOD)) {
 				usb_debug = !usb_debug;
-				cdio_loglevel_default = usb_debug ? CDIO_LOG_DEBUG : CDIO_LOG_WARN;
+				cdio_loglevel_default = usb_debug ? CDIO_LOG_INFO : CDIO_LOG_WARN;
 				WriteSettingBool(SETTING_ENABLE_USB_DEBUG, usb_debug);
 				PrintStatusTimeout(lmprintf(MSG_270), usb_debug);
 				GetDevices(0);
@@ -4426,7 +4468,7 @@ out:
 		ReleaseMutex(hogmutex);
 		safe_closehandle(hogmutex);
 		// Unconditional delete with retry, just in case...
-		for (i = 0; (!DeleteFileA(cmdline_hogger)) && (i <= 10); i++)
+		for (i = 0; (!DeleteFileA(&cmdline_hogger[2])) && (i <= 10); i++)
 			Sleep(200);
 	}
 	// Kill the update check thread if running
@@ -4448,6 +4490,8 @@ out:
 	safe_free(fido_url);
 	safe_free(fido_script);
 	safe_free(pe256ssp);
+	safe_free(sbat_entries);
+	safe_free(sbat_level_txt);
 	if (argv != NULL) {
 		for (i = 0; i < argc; i++)
 			safe_free(argv[i]);

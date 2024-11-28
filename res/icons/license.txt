@@ -8,6 +8,11 @@ o hash-*.png, info-*.png, lang-*.png, log-*.png, save-*.png, settings-*.png
   CC BY-ND 4.0 when used as native resolution bitmaps, Commercial License otherwise
   See https://www.axialis.com/icongenerator/iconset-license.html#free
 
+o setup.ico
+  Base SVG from https://tablericons.com/
+  No attribution required.
+  With arrow overlay from Axialis Icon Set.
+
 NB: To be on the safe side with regards to icon use and redistribution, we
     did purchase a Commercial License for the Axialis icons.
     If you are planning to use these icons outside of this project, you may

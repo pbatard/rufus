@@ -17,6 +17,9 @@ enum {
 	/* (unsigned) cast suppresses "integer overflow in expression" warning */
 	XZ_MAGIC1a  = 256 * (unsigned)(256 * (256 * 0xfd + '7') + 'z') + 'X',
 	XZ_MAGIC2a  = 256 * 'Z' + 0,
+	ZSTD_MAGIC1 = 0x28B5,
+	ZSTD_MAGIC2 = 0x2FFD,
+	ZSTD_MAGIC  = 0x28B52FFD,
 #else
 	COMPRESS_MAGIC = 0x9d1f,
 	GZIP_MAGIC  = 0x8b1f,
@@ -25,6 +28,9 @@ enum {
 	XZ_MAGIC2   = 'z' + ('X' + ('Z' + 0 * 256) * 256) * 256,
 	XZ_MAGIC1a  = 0xfd + ('7' + ('z' + 'X' * 256) * 256) * 256,
 	XZ_MAGIC2a  = 'Z' + 0 * 256,
+	ZSTD_MAGIC1 = 0xB528,
+	ZSTD_MAGIC2 = 0xFD2F,
+	ZSTD_MAGIC  = 0xFD2FB528,
 #endif
 };
 
@@ -290,6 +296,7 @@ IF_DESKTOP(long long) int unpack_bz2_stream(transformer_state_t *xstate) FAST_FU
 IF_DESKTOP(long long) int unpack_lzma_stream(transformer_state_t *xstate) FAST_FUNC;
 IF_DESKTOP(long long) int unpack_xz_stream(transformer_state_t *xstate) FAST_FUNC;
 IF_DESKTOP(long long) int unpack_vtsi_stream(transformer_state_t *xstate) FAST_FUNC;
+IF_DESKTOP(long long) int unpack_zstd_stream(transformer_state_t *xstate) FAST_FUNC;
 
 char* append_ext(char *filename, const char *expected_ext) FAST_FUNC;
 int bbunpack(char **argv,
