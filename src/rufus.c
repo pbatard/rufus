@@ -59,6 +59,12 @@
 #include "../res/grub2/grub2_version.h"
 #include<dwmapi.h>
 #include <Richedit.h>
+// Temporary workaround for MinGW32 delay-loading
+// See https://github.com/pbatard/rufus/pull/2513
+#if defined(__MINGW32__)
+#undef DECLSPEC_IMPORT
+#define DECLSPEC_IMPORT __attribute__((visibility("hidden")))
+#endif
 #include <uxtheme.h>
 
 
@@ -1035,13 +1041,19 @@ static BOOL CALLBACK ThemeCallback(HWND hWnd, LPARAM lParam)
 		SetWindowTheme(hWnd, isDarkmode ? L"DarkMode_CFD" : L"Explorer", NULL);
 	}
 	else if (_wcsicmp(str, L"ToolbarWindow32") == 0)
-	{
-		wchar_t toolbarText[50];
-		wchar_t multiToolbarText[50] ;
+	{WCHAR toolbarText[50];
+		WCHAR multiToolbarText[50];
 		utf8_to_wchar_no_alloc(lmprintf(MSG_315), multiToolbarText, ARRAYSIZE(multiToolbarText));
-		GetWindowText(hWnd, &toolbarText, 16);
-		 if (_wcsicmp(toolbarText, multiToolbarText) != 0)
+		int len = GetWindowTextLength(hWnd);
+		GetWindowText(hWnd, (WCHAR*)toolbarText, len);
+		if (strcmp((char*)toolbarText, (char*)multiToolbarText) != 0)
 			SetWindowTheme(hWnd, isDarkmode ? L"DarkMode" : L"Explorer", NULL);
+		else
+		{
+			HWND tooltip = (HWND)SendMessage(hWnd, TB_GETTOOLTIPS, 0, 0);
+			SendMessageW(tooltip, TTM_SETWINDOWTHEME, 0, (LPARAM)&L"DarkMode_Explorer");
+		}
+
 	}
 	else if (_wcsicmp(str, L"EDIT") == 0)
 	{

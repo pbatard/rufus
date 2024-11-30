@@ -370,6 +370,7 @@ uninstall-am:
 all: dwmapi-delaylib.lib version-delaylib.lib virtdisk-delaylib.lib wininet-delaylib.lib wintrust-delaylib.lib uxtheme-delaylib.lib
 
 %.def64: %.def
+
 	$(AM_V_SED) "s/@.*//" $< >$@
 
 %-delaylib.lib: %$(DEF_SUFFIX)
