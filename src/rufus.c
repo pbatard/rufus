@@ -48,7 +48,6 @@
 
 #include "ui.h"
 #include "re.h"
-#include "cpu.h"
 #include "vhd.h"
 #include "wue.h"
 #include "drive.h"
@@ -69,7 +68,7 @@ static const char* cmdline_hogger = ".\\rufus.com";
 static const char* ep_reg = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
 static const char* vs_reg = "Software\\Microsoft\\VisualStudio";
 static const char* arch_name[ARCH_MAX] = {
-	"unknown", "x86_32", "x86_64", "ARM", "ARM64", "Itanic", "RISC-V 64", "EBC" };
+	"unknown", "x86_32", "x86_64", "ARM", "ARM64", "IA64", "RISC-V 64", "LoongArch 64", "EBC" };
 static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL size_check = TRUE;
 static BOOL log_displayed = FALSE;
@@ -93,7 +92,7 @@ static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], u
 
 extern HANDLE update_check_thread, wim_thread;
 extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes, is_bootloader_revoked;
-extern BOOL validate_md5sum;
+extern BOOL validate_md5sum, cpu_has_sha1_accel, cpu_has_sha256_accel;
 extern BYTE* fido_script;
 extern HWND hFidoDlg;
 extern uint8_t* grub2_buf;
@@ -118,6 +117,7 @@ uint32_t dur_mins, dur_secs;
 loc_cmd* selected_locale = NULL;
 WORD selected_langid = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 DWORD MainThreadId;
+USHORT NativeMachine = IMAGE_FILE_MACHINE_UNKNOWN;
 HWND hDeviceList, hPartitionScheme, hTargetSystem, hFileSystem, hClusterSize, hLabel, hBootType, hNBPasses, hLog = NULL;
 HWND hImageOption, hLogDialog = NULL, hProgress = NULL;
 HANDLE dialog_handle = NULL, format_thread = NULL;
@@ -1963,7 +1963,7 @@ static void InitDialog(HWND hDlg)
 {
 	DWORD len;
 	HDC hDC;
-	USHORT ProcessMachine = IMAGE_FILE_MACHINE_UNKNOWN, NativeMachine = IMAGE_FILE_MACHINE_UNKNOWN;
+	USHORT ProcessMachine = IMAGE_FILE_MACHINE_UNKNOWN;
 	int i, lfHeight;
 	char tmp[128], *token, *buf, *ext, *msg;
 	static char* resource[2] = { MAKEINTRESOURCEA(IDR_SL_LDLINUX_V4_SYS), MAKEINTRESOURCEA(IDR_SL_LDLINUX_V6_SYS) };

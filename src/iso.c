@@ -99,7 +99,7 @@ static const char* casper_dirname = "/casper";
 static const char* proxmox_dirname = "/proxmox";
 const char* efi_dirname = "/efi/boot";
 const char* efi_bootname[3] = { "boot", "grub", "mm" };
-const char* efi_archname[ARCH_MAX] = { "", "ia32", "x64", "arm", "aa64", "ia64", "riscv64", "ebc" };
+const char* efi_archname[ARCH_MAX] = { "", "ia32", "x64", "arm", "aa64", "ia64", "riscv64", "loongarch64", "ebc" };
 static const char* sources_str = "/sources";
 static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm" };
 // We only support GRUB/BIOS (x86) that uses a standard config dir (/boot/grub/i386-pc/)
@@ -1801,7 +1801,7 @@ BOOL HasEfiImgBootLoaders(void)
 
 	for (i = 0; i < ARRAYSIZE(efi_archname); i++) {
 		static_sprintf(bootloader_name, "boot%s.efi", efi_archname[i]);
-		// TODO: bootriscv###.efi will need LFN support but cross that bridge when/if we get there...
+		// TODO: bootriscv64.efi and bootloongarch64.efi need LFN support
 		if (strlen(bootloader_name) > 12)
 			continue;
 		for (j = 0, k = 0; bootloader_name[j] != 0; j++) {

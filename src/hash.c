@@ -65,11 +65,11 @@
 #include <string.h>
 #include <inttypes.h>
 #include <errno.h>
+#include <intrin.h>
 #include <windows.h>
 #include <windowsx.h>
 
 #include "db.h"
-#include "cpu.h"
 #include "rufus.h"
 #include "winio.h"
 #include "missing.h"
@@ -77,14 +77,10 @@
 #include "msapi_utf8.h"
 #include "localization.h"
 
-/* Includes for SHA-1 and SHA-256 intrinsics */
-#if defined(CPU_X86_SHA1_ACCELERATION) || defined(CPU_X86_SHA256_ACCELERATION)
-#if defined(_MSC_VER)
-#include <immintrin.h>
-#elif defined(__GNUC__)
-#include <stdint.h>
-#include <x86intrin.h>
-#endif
+#if (defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__i386) || \
+     defined(_X86_) || defined(__I86__) || defined(__x86_64__))
+#define CPU_X86_SHA1_ACCELERATION       1
+#define CPU_X86_SHA256_ACCELERATION     1
 #endif
 
 #if defined(_MSC_VER)
@@ -107,6 +103,7 @@ char hash_str[HASH_MAX][150];
 HANDLE data_ready[HASH_MAX] = { 0 }, thread_ready[HASH_MAX] = { 0 };
 DWORD read_size[NUM_BUFFERS];
 BOOL enable_extra_hashes = FALSE, validate_md5sum = FALSE;
+BOOL cpu_has_sha1_accel = FALSE, cpu_has_sha256_accel = FALSE;
 uint8_t ALIGNED(64) buffer[NUM_BUFFERS][BUFFER_SIZE];
 uint8_t* pe256ssp = NULL;
 uint32_t proc_bufnum, hash_count[HASH_MAX] = { MD5_HASHSIZE, SHA1_HASHSIZE, SHA256_HASHSIZE, SHA512_HASHSIZE };
@@ -118,6 +115,78 @@ extern int default_thread_priority;
 extern const char* efi_archname[ARCH_MAX];
 extern char* sbat_level_txt;
 extern BOOL expert_mode, usb_debug;
+
+/*
+ * Detect if the processor supports SHA-1 acceleration. We only check for
+ * the three ISAs we need - SSSE3, SSE4.1 and SHA. We don't check for OS
+ * support or XSAVE because that's been enabled since Windows 2000.
+ */
+BOOL DetectSHA1Acceleration(void)
+{
+#if defined(CPU_X86_SHA1_ACCELERATION)
+#if defined(_MSC_VER)
+	uint32_t regs0[4] = { 0,0,0,0 }, regs1[4] = { 0,0,0,0 }, regs7[4] = { 0,0,0,0 };
+	const uint32_t SSSE3_BIT = 1u << 9; /* Function 1, Bit  9 of ECX */
+	const uint32_t SSE41_BIT = 1u << 19; /* Function 1, Bit 19 of ECX */
+	const uint32_t SHA_BIT = 1u << 29; /* Function 7, Bit 29 of EBX */
+
+	__cpuid(regs0, 0);
+	const uint32_t highest = regs0[0]; /*EAX*/
+
+	if (highest >= 0x01) {
+		__cpuidex(regs1, 1, 0);
+	}
+	if (highest >= 0x07) {
+		__cpuidex(regs7, 7, 0);
+	}
+
+	return (regs1[2] /*ECX*/ & SSSE3_BIT) && (regs1[2] /*ECX*/ & SSE41_BIT) && (regs7[1] /*EBX*/ & SHA_BIT) ? TRUE : FALSE;
+#elif defined(__GNUC__) || defined(__clang__)
+	/* __builtin_cpu_supports available in GCC 4.8.1 and above */
+	return __builtin_cpu_supports("ssse3") && __builtin_cpu_supports("sse4.1") && __builtin_cpu_supports("sha") ? TRUE : FALSE;
+#else
+	return FALSE;
+#endif
+#else
+	return FALSE;
+#endif
+}
+
+/*
+ * Detect if the processor supports SHA-256 acceleration. We only check for
+ * the three ISAs we need - SSSE3, SSE4.1 and SHA. We don't check for OS
+ * support or XSAVE because that's been enabled since Windows 2000.
+ */
+BOOL DetectSHA256Acceleration(void)
+{
+#if defined(CPU_X86_SHA256_ACCELERATION)
+#if defined(_MSC_VER)
+	uint32_t regs0[4] = { 0,0,0,0 }, regs1[4] = { 0,0,0,0 }, regs7[4] = { 0,0,0,0 };
+	const uint32_t SSSE3_BIT = 1u << 9; /* Function 1, Bit  9 of ECX */
+	const uint32_t SSE41_BIT = 1u << 19; /* Function 1, Bit 19 of ECX */
+	const uint32_t SHA_BIT = 1u << 29; /* Function 7, Bit 29 of EBX */
+
+	__cpuid(regs0, 0);
+	const uint32_t highest = regs0[0]; /*EAX*/
+
+	if (highest >= 0x01) {
+		__cpuidex(regs1, 1, 0);
+	}
+	if (highest >= 0x07) {
+		__cpuidex(regs7, 7, 0);
+	}
+
+	return (regs1[2] /*ECX*/ & SSSE3_BIT) && (regs1[2] /*ECX*/ & SSE41_BIT) && (regs7[1] /*EBX*/ & SHA_BIT) ? TRUE : FALSE;
+#elif defined(__GNUC__) || defined(__clang__)
+	/* __builtin_cpu_supports available in GCC 4.8.1 and above */
+	return __builtin_cpu_supports("ssse3") && __builtin_cpu_supports("sse4.1") && __builtin_cpu_supports("sha") ? TRUE : FALSE;
+#else
+	return FALSE;
+#endif
+#else
+	return FALSE;
+#endif
+}
 
 /*
  * Rotate 32 or 64 bit integers by n bytes.

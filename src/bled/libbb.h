@@ -180,7 +180,6 @@ static inline void *xrealloc(void *ptr, size_t size) {
 
 #define bb_msg_read_error "read error"
 #define bb_msg_write_error "write error"
-#define bb_mode_string(str, mode) str
 #define bb_make_directory(path, mode, flags) SHCreateDirectoryExU(NULL, path, NULL)
 
 static inline int link(const char *oldpath, const char *newpath) { errno = ENOSYS; return -1; }

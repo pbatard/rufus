@@ -9,7 +9,6 @@ void FAST_FUNC header_verbose_list(const file_header_t *file_header)
 {
 	struct tm tm_time;
 	struct tm *ptm = &tm_time; //localtime(&file_header->mtime);
-	char modestr[12];
 
 #if ENABLE_FEATURE_TAR_UNAME_GNAME
 	char uid[sizeof(int)*3 + 2];
@@ -29,8 +28,8 @@ void FAST_FUNC header_verbose_list(const file_header_t *file_header)
 		/*sprintf(gid, "%u", (unsigned)file_header->gid);*/
 		group = utoa(file_header->gid);
 	}
-	printf("%s %s/%s %9"OFF_FMT"u %4u-%02u-%02u %02u:%02u:%02u %s",
-		bb_mode_string(modestr, file_header->mode),
+	printf("%u %s/%s %9"OFF_FMT"u %4u-%02u-%02u %02u:%02u:%02u %s",
+		file_header->mode,
 		user,
 		group,
 		file_header->size,
@@ -46,8 +45,8 @@ void FAST_FUNC header_verbose_list(const file_header_t *file_header)
 
 	localtime_r(&file_header->mtime, ptm);
 
-	printf("%s %u/%u %9"OFF_FMT"u %4u-%02u-%02u %02u:%02u:%02u %s",
-		bb_mode_string(modestr, file_header->mode),
+	printf("%u %u/%u %9"OFF_FMT"u %4u-%02u-%02u %02u:%02u:%02u %s",
+		file_header->mode,
 		(unsigned)file_header->uid,
 		(unsigned)file_header->gid,
 		file_header->size,

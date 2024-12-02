@@ -60,6 +60,7 @@ HANDLE update_check_thread = NULL;
 extern loc_cmd* selected_locale;
 extern HANDLE dialog_handle;
 extern BOOL is_x86_64;
+extern USHORT NativeMachine;
 static DWORD error_code, fido_len = 0;
 static BOOL force_update_check = FALSE;
 static const char* request_headers = "Accept-Encoding: gzip, deflate";
@@ -522,6 +523,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 #endif
 	vuprintf("Using %s for the update check", RUFUS_URL);
 	for (k = 0; (k < max_channel) && (!found_new_version); k++) {
+		// Get the arch name and convert it lowercase
+		char* archname = strdup(GetArchName(WindowsVersion.Arch));
+		safe_strtolower(archname);
 		// Free any previous buffers we might have used
 		safe_free(buf);
 		safe_free(sig);
@@ -533,7 +537,8 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		// This allows sunsetting OS versions (eg XP) or providing different downloads for different archs/groups.
 		// Note that for BETAs, we only catter for x64 regardless of the OS arch.
 		static_sprintf(urlpath, "%s%s%s_win_%s_%lu.%lu.ver", APPLICATION_NAME, (k == 0) ? "": "_",
-			(k == 0) ? "" : channel[k], GetArchName(WindowsVersion.Arch), WindowsVersion.Major, WindowsVersion.Minor);
+			(k == 0) ? "" : channel[k], archname, WindowsVersion.Major, WindowsVersion.Minor);
+		safe_free(archname);
 		vuprintf("Base update check: %s", urlpath);
 		for (i = 0, j = (int)safe_strlen(urlpath) - 5; (j > 0) && (i < ARRAYSIZE(verpos)); j--) {
 			if ((urlpath[j] == '.') || (urlpath[j] == '_')) {
@@ -796,8 +801,8 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	}
 
 	static_sprintf(cmdline, "\"%s\" -NonInteractive -Sta -NoProfile –ExecutionPolicy Bypass "
-		"-File \"%s\" -PipeName %s -LocData \"%s\" -Icon \"%s\" -AppTitle \"%s\"",
-		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_149));
+		"-File \"%s\" -PipeName %s -LocData \"%s\" -Icon \"%s\" -AppTitle \"%s\" -PlatformArch \"%s\"",
+		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_149), GetArchName(NativeMachine));
 
 #ifndef RUFUS_TEST
 	// For extra security, even after we validated that the LZMA download is properly

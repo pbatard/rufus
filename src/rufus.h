@@ -183,6 +183,7 @@ static __inline void safe_strcp(char* dst, const size_t dst_max, const char* src
 #else
 #define safe_vsnprintf vsnprintf
 #endif
+#define safe_strtolower(str) do { if (str != NULL) CharLowerA(str); } while(0)
 static __inline void static_repchr(char* p, char s, char r) {
 	if (p != NULL) while (*p != 0) { if (*p == s) *p = r; p++; }
 }
@@ -377,7 +378,7 @@ typedef struct {
 	uint16_t revision;
 } winver_t;
 
-/* We can't use the Microsoft enums as we want to have RISC-V */
+/* We can't use the Microsoft enums as we want to have RISC-V and LoongArch */
 enum ArchType {
 	ARCH_UNKNOWN = 0,
 	ARCH_X86_32,
@@ -386,6 +387,7 @@ enum ArchType {
 	ARCH_ARM_64,
 	ARCH_IA_64,
 	ARCH_RISCV_64,
+	ARCH_LOONGARCH_64,
 	ARCH_EBC,
 	ARCH_MAX
 };
@@ -597,11 +599,11 @@ static __inline const char* GetArchName(USHORT uArch)
 	case IMAGE_FILE_MACHINE_I386:
 		return "x86";
 	case IMAGE_FILE_MACHINE_ARM64:
-		return "arm64";
+		return "ARM64";
 	case IMAGE_FILE_MACHINE_ARM:
-		return "arm";
+		return "ARM32";
 	default:
-		return "unknown";
+		return "Unknown";
 	}
 }
 
@@ -830,6 +832,8 @@ extern HANDLE CreateFileWithTimeout(LPCSTR lpFileName, DWORD dwDesiredAccess, DW
 	LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes,
 	HANDLE hTemplateFile, DWORD dwTimeOut);
 extern BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads);
+extern BOOL DetectSHA1Acceleration(void);
+extern BOOL DetectSHA256Acceleration(void);
 extern BOOL HashFile(const unsigned type, const char* path, uint8_t* sum);
 extern BOOL PE256Buffer(uint8_t* buf, uint32_t len, uint8_t* hash);
 extern void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name);

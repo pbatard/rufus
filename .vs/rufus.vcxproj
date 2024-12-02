@@ -381,7 +381,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\badblocks.c" />
-    <ClCompile Include="..\src\cpu.c" />
     <ClCompile Include="..\src\dos_locale.c" />
     <ClCompile Include="..\src\drive.c" />
     <ClCompile Include="..\src\format.c" />
@@ -413,7 +412,6 @@
     <ClInclude Include="..\res\grub\grub_version.h" />
     <ClInclude Include="..\src\badblocks.h" />
     <ClInclude Include="..\src\bled\bled.h" />
-    <ClInclude Include="..\src\cpu.h" />
     <ClInclude Include="..\src\drive.h" />
     <ClInclude Include="..\src\format.h" />
     <ClInclude Include="..\src\gpt_types.h" />
