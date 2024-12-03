@@ -1758,8 +1758,8 @@ BOOL HasEfiImgBootLoaders(void)
 	int32_t dc, c;
 	struct libfat_filesystem *lf_fs = NULL;
 	struct libfat_direntry direntry;
-	char name[12] = { 0 }, bootloader_name[32];
-	int i, j, k;
+	char bootloader_name[16];
+	int i;
 
 	if ((image_path == NULL) || !HAS_EFI_IMG(img_report))
 		return FALSE;
@@ -1799,24 +1799,19 @@ BOOL HasEfiImgBootLoaders(void)
 		goto out;
 	dc = direntry.entry[26] + (direntry.entry[27] << 8);
 
-	for (i = 0; i < ARRAYSIZE(efi_archname); i++) {
-		static_sprintf(bootloader_name, "boot%s.efi", efi_archname[i]);
-		// TODO: bootriscv64.efi and bootloongarch64.efi need LFN support
-		if (strlen(bootloader_name) > 12)
-			continue;
-		for (j = 0, k = 0; bootloader_name[j] != 0; j++) {
-			if (bootloader_name[j] == '.') {
-				while (k < 8)
-					name[k++] = ' ';
-			} else {
-				name[k++] = toupper(bootloader_name[j]);
-			}
-		}
-		c = libfat_searchdir(lf_fs, dc, name, &direntry);
+	for (i = 1; i < ARRAYSIZE(efi_archname); i++) {
+		// We consider it unlikely that any bootri#####.efi or bootlo#####.efi files
+		// in the /efi/boot/ subdirectory will be anything but 'bootriscv64.efi' and
+		// 'bootloongarch64.efi', so we'll use the ~1 LFN shortened names for them.
+		static_sprintf(bootloader_name, "BOOT%c%c%c%cEFI", efi_archname[i][0], efi_archname[i][1],
+			strlen(efi_archname[i]) > 4 ? '~' : efi_archname[i][2],
+			strlen(efi_archname[i]) > 4 ? '1' : (strlen(efi_archname[i]) > 3 ? efi_archname[i][3] : ' '));
+		safe_strtoupper(bootloader_name);
+		c = libfat_searchdir(lf_fs, dc, bootloader_name, &direntry);
 		if (c > 0) {
 			if (!ret)
 				uprintf("  Detected EFI bootloader(s) (from '%s'):", img_report.efi_img_path);
-			uprintf("  ● '%s'", bootloader_name);
+			uprintf("  ● 'boot%s.efi'", efi_archname[i]);
 			ret = TRUE;
 		}
 	}

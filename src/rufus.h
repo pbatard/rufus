@@ -184,6 +184,7 @@ static __inline void safe_strcp(char* dst, const size_t dst_max, const char* src
 #define safe_vsnprintf vsnprintf
 #endif
 #define safe_strtolower(str) do { if (str != NULL) CharLowerA(str); } while(0)
+#define safe_strtoupper(str) do { if (str != NULL) CharUpperA(str); } while(0)
 static __inline void static_repchr(char* p, char s, char r) {
 	if (p != NULL) while (*p != 0) { if (*p == s) *p = r; p++; }
 }
