@@ -3173,6 +3173,7 @@ static HANDLE SetHogger(void)
 		hogmutex = CreateMutexA(NULL, TRUE, "Global/Rufus_CmdLine");
 
 		// Extract the hogger resource
+		_chdirU(cur_dir);
 		hFile = CreateFileA(&cmdline_hogger[2], GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
 			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hFile != INVALID_HANDLE_VALUE) {
@@ -4119,7 +4120,7 @@ extern int TestHashes(void);
 	}
 
 out:
-	_chdirU(app_dir);
+	_chdirU(cur_dir);
 	// Destroy the hogger mutex first, so that the cmdline app can exit and we can delete it
 	if (hogmutex != NULL) {
 		ReleaseMutex(hogmutex);
