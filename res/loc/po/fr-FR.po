@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2024-04-25 12:25+0100\n"
-"PO-Revision-Date: 2024-04-25 12:46+0100\n"
+"PO-Revision-Date: 2024-12-17 14:54+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: French (Français)\n"
 "X-Rufus-LCID: 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.5\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -161,7 +161,7 @@ msgstr "Recherche mises à jour"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
 msgid "Include beta versions"
-msgstr "Inclure les bétas"
+msgstr "Inclure les versions bêta"
 
 #. • IDD_UPDATE_POLICY → IDC_CHECK_NOW
 msgid "Check Now"
@@ -460,7 +460,7 @@ msgstr "Veuillez insérer un média dans le lecteur."
 
 #. • MSG_062
 msgid "An unsupported command was received."
-msgstr "Commande non supportée."
+msgstr "Une commande non prise en charge a été reçue."
 
 #. • MSG_063
 msgid "Memory allocation error."
@@ -484,7 +484,7 @@ msgstr "Impossible d'accéder au média. Il peut être en cours d'utilisation pa
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "Echec de partitionnement."
+msgstr "Échec de partitionnement."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
@@ -506,23 +506,23 @@ msgstr "La vérification de blocs défectueux a été interrompue."
 
 #. • MSG_073
 msgid "ISO image scan failure."
-msgstr "Echec d'analyse de l'image ISO."
+msgstr "Échec d'analyse de l'image ISO."
 
 #. • MSG_074
 msgid "ISO image extraction failure."
-msgstr "Echec d'extraction de l'image ISO."
+msgstr "Échec d'extraction de l'image ISO."
 
 #. • MSG_075
 msgid "Unable to remount volume."
-msgstr "Echec lors du remontage du volume."
+msgstr "Échec lors du remontage du volume."
 
 #. • MSG_076
 msgid "Unable to patch/setup files for boot."
-msgstr "Echec de modification des fichiers de démarrage."
+msgstr "Échec de modification des fichiers de démarrage."
 
 #. • MSG_077
 msgid "Unable to assign a drive letter."
-msgstr "Echec d'assignation d'une lettre de volume."
+msgstr "Échec d'assignation d'une lettre de volume."
 
 #. • MSG_078
 msgid "Can't mount GUID volume."
@@ -548,7 +548,7 @@ msgstr ""
 
 #. • MSG_081
 msgid "Unsupported image"
-msgstr "Image non supportée"
+msgstr "Image non prise en charge"
 
 #. • MSG_082
 msgid "This image is either non-bootable, or it uses a boot or compression method that is not supported by Rufus..."
@@ -609,7 +609,7 @@ msgstr "L'image est trop large pour être copiée sur le périphérique sélecti
 
 #. • MSG_090
 msgid "Unsupported ISO"
-msgstr "Image ISO non supportée"
+msgstr "Image ISO non prise en charge"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
@@ -617,7 +617,7 @@ msgstr "Quand UEFI est sélectionné, seules les images ISO basées sur EFI sont
 
 #. • MSG_092
 msgid "Unsupported filesystem"
-msgstr "Système de fichiers non supporté"
+msgstr "Système de fichiers non pris en charge"
 
 #. • MSG_093
 msgid ""
@@ -669,7 +669,7 @@ msgstr "Cette image ISO contient un fichier de plus de 4 Go, soit plus que la ta
 
 #. • MSG_101
 msgid "Missing WIM support"
-msgstr "Support pour archives WIM non disponible"
+msgstr "Prise en charge des archives WIM non disponible"
 
 #. • MSG_102
 msgid ""
@@ -906,7 +906,7 @@ msgid ""
 msgstr ""
 "Parce que MBR a été sélectionné pour le schéma de partition, Rufus peut seulement créer une partition sur ce média occupant jusqu’à 2 To, ce qui laissera %s d’espace disque non-disponible.\n"
 "\n"
-"Etes-vous sûr de vouloir continuer ?"
+"Êtes-vous sûr de vouloir continuer ?"
 
 #. • MSG_135
 msgid "Version"
@@ -1203,7 +1203,7 @@ msgstr "Analyse de l'image..."
 
 #. • MSG_203
 msgid "Failed to scan image"
-msgstr "Echec d'analyse de l'image"
+msgstr "Échec de l'analyse de l'image"
 
 #. • MSG_204
 #.
@@ -1252,7 +1252,7 @@ msgstr "Opération annulée"
 
 #. • MSG_212
 msgid "Failed"
-msgstr "ECHEC"
+msgstr "Échec"
 
 #. • MSG_213
 #.
@@ -1262,7 +1262,7 @@ msgstr "Lancement de la nouvelle application..."
 
 #. • MSG_214
 msgid "Failed to launch new application"
-msgstr "Echec de lancement de l'application"
+msgstr "Échec de lancement de l'application"
 
 #. • MSG_215
 #.
@@ -1284,11 +1284,11 @@ msgstr "Formatage : %s"
 
 #. • MSG_218
 msgid "Creating file system: Task %d/%d completed"
-msgstr "Système de fichiers : Tâche %d/%d complétée"
+msgstr "Système de fichiers : Tâche %d/%d terminée"
 
 #. • MSG_219
 msgid "NTFS Fixup: %d%% completed"
-msgstr "Finalisation NTFS : %d%% complété"
+msgstr "Finalisation NTFS : %d%% terminé"
 
 #. • MSG_220
 #.
@@ -1300,7 +1300,7 @@ msgstr "Formatage (%s) - durée estimée %d :%02d..."
 
 #. • MSG_221
 msgid "Setting label (%s)..."
-msgstr "Ecriture du label (%s)..."
+msgstr "Écriture du label (%s)..."
 
 #. • MSG_222
 #.
@@ -1330,11 +1330,11 @@ msgstr "Fermeture des volumes existants..."
 
 #. • MSG_228
 msgid "Writing Master Boot Record..."
-msgstr "Ecriture du MBR..."
+msgstr "Écriture du MBR..."
 
 #. • MSG_229
 msgid "Writing Partition Boot Record..."
-msgstr "Ecriture du PBR..."
+msgstr "Écriture du PBR..."
 
 #. • MSG_230
 msgid "Copying DOS files..."
@@ -1346,7 +1346,7 @@ msgstr "Copie des fichiers ISO : %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (%s)..."
-msgstr "Ecriture boot Win7 EFI (%s)..."
+msgstr "Écriture boot Win7 EFI (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1392,7 +1392,7 @@ msgid ""
 "\n"
 "The download will be deleted. Please check the log for more details."
 msgstr ""
-"La signature de la mise à jour qui vient d’être téléchargée ne peut pas être validée. Cela peut indiquer que votre système n’est pas configuré correctement pour la validation de signatures digitales, ou que le téléchargement contient un fichier malicieux.\n"
+"La signature de la mise à jour qui vient d’être téléchargée ne peut pas être validée. Cela peut indiquer que votre système n’est pas configuré correctement pour la validation de signatures numériques, ou que le téléchargement contient un fichier malicieux.\n"
 "\n"
 "Le téléchargement va être supprimé. Veuillez consulter le log pour plus de détails."
 
@@ -1402,7 +1402,7 @@ msgstr "Téléchargement : %s"
 
 #. • MSG_242
 msgid "Failed to download file."
-msgstr "Echec de téléchargement du fichier."
+msgstr "Échec de téléchargement du fichier."
 
 #. • MSG_243
 msgid "Checking for Rufus updates..."
@@ -1430,7 +1430,7 @@ msgstr "Clés de registre supprimées"
 
 #. • MSG_249
 msgid "Failed to delete application registry keys"
-msgstr "Echec de suppression des clés registres"
+msgstr "Échec de suppression des clés registres"
 
 #. • MSG_250
 #.
@@ -1480,7 +1480,7 @@ msgstr "Compression NTFS"
 
 #. • MSG_261
 msgid "Writing image: %s"
-msgstr "Ecriture d'image : %s"
+msgstr "Écriture d'image : %s"
 
 #. • MSG_262
 #.
@@ -1524,7 +1524,7 @@ msgstr "Debug USB"
 
 #. • MSG_271
 msgid "Computing image checksums: %s"
-msgstr "Calculation des checksums de l'image : %s"
+msgstr "Calcul des checksums de l'image : %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
@@ -1558,13 +1558,13 @@ msgstr ""
 #.
 #. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
 msgid "Write in %s mode (Recommended)"
-msgstr "Ecrire en mode %s (Recommandé)"
+msgstr "Écrire en mode %s (Recommandé)"
 
 #. • MSG_277
 #.
 #. '%s' will be replaced with your translation for MSG_095 ("DD Image")
 msgid "Write in %s mode"
-msgstr "Ecrire en mode %s"
+msgstr "Écrire en mode %s"
 
 #. • MSG_278
 msgid "Checking for conflicting processes..."
@@ -1592,7 +1592,7 @@ msgstr "Signature invalide"
 
 #. • MSG_284
 msgid "The downloaded executable is missing a digital signature."
-msgstr "L'exécutable téléchargé ne possède pas de signature digitale."
+msgstr "L'exécutable téléchargé ne possède pas de signature numérique."
 
 #. • MSG_285
 msgid ""
@@ -1610,7 +1610,7 @@ msgstr "Effacement à zéro : %s"
 
 #. • MSG_287
 msgid "Detection of non-USB removable drives"
-msgstr "Détection disques non-USB détachables"
+msgstr "Détection des disques détachables non-USB"
 
 #. • MSG_288
 msgid "Missing elevated privileges"
@@ -1618,15 +1618,15 @@ msgstr "Privilèges élevés manquants"
 
 #. • MSG_289
 msgid "This application can only run with elevated privileges"
-msgstr "Cette application peut seulement être exécutée avec privilèges administratifs"
+msgstr "Cette application peut seulement être exécutée avec les privilèges administrateur"
 
 #. • MSG_290
 msgid "File Indexing"
-msgstr "Indexation de fichiers"
+msgstr "Indexation des fichiers"
 
 #. • MSG_291
 msgid "Version selection"
-msgstr "Sélection de version"
+msgstr "Sélection de la version"
 
 #. • MSG_292
 msgid "Please select the version of Windows you want to install:"
@@ -1634,7 +1634,7 @@ msgstr "Sélectionnez la version de Windows que vous souhaitez installer :"
 
 #. • MSG_293
 msgid "Unsupported Windows version"
-msgstr "Version de Windows non supportée"
+msgstr "Version de Windows non prise en charge"
 
 #. • MSG_294
 msgid ""
@@ -1656,7 +1656,7 @@ msgid ""
 msgstr ""
 "Cette version de Rufus n'a pas produite par ses développeurs officiels.\n"
 "\n"
-"Etes-vous sur de vouloir la lancer ?"
+"Êtes-vous sûr de vouloir la lancer ?"
 
 #. • MSG_297
 msgid "Truncated ISO detected"
@@ -1688,7 +1688,7 @@ msgid ""
 msgstr ""
 "Rufus n'a pas pu valider que le timestamp du fichier de mise à jour téléchargé est plus récent que celui de l'exécutable en cours.\n"
 "\n"
-"Afin de mitiger des scenarios d'attaque potentiels, le processus de mise à jour a été interrompu et le téléchargement va être supprimé. Pour plus de détails, veuillez consulter le log."
+"Afin d'éviter des scenarios d'attaque potentiels, le processus de mise à jour a été interrompu et le téléchargement va être supprimé. Pour plus de détails, veuillez consulter le log."
 
 #. • MSG_301
 msgid "Show application settings"
@@ -1744,7 +1744,7 @@ msgstr "Utilisez %s (dans la fenêtre d’application principale) pour active."
 
 #. • MSG_312
 msgid "Extra hashes (SHA512)"
-msgstr "Checksum hash supplémentaire (SHA512)"
+msgstr "Checksum supplémentaire (SHA512)"
 
 #. • MSG_313
 msgid "Save to VHD"
@@ -1752,7 +1752,7 @@ msgstr "Sauver en image VHD"
 
 #. • MSG_314
 msgid "Compute image checksums"
-msgstr "Calculer les checksums the l’image sélectionnée"
+msgstr "Calculer les checksums de l’image sélectionnée"
 
 #. • MSG_315
 msgid "Multiple buttons"
@@ -1768,7 +1768,7 @@ msgstr "ID disque"
 
 #. • MSG_318
 msgid "Default thread priority: %d"
-msgstr "Priorité de thread part default : %d"
+msgstr "Priorité de thread par défaut : %d"
 
 #. • MSG_319
 msgid "Ignore Boot Marker"
@@ -1776,7 +1776,7 @@ msgstr "Ignorer le marqueur de démarrage"
 
 #. • MSG_320
 msgid "Refreshing partition layout (%s)..."
-msgstr "Rafraichissement du schéma de partition (%s)..."
+msgstr "Rafraîchissement du schéma de partition (%s)..."
 
 #. • MSG_321
 msgid ""
@@ -1784,7 +1784,7 @@ msgid ""
 "As a result, DD image writing mode will be enforced."
 msgstr ""
 "L’image que vous avez sélectionnée est de type ISOHybrid, mais ses créateurs ne l’ont pas rendue compatible avec le mode ISO (i.e. copie de fichier).\n"
-"A cause de cela, seule l’écriture en mode DD est applicable."
+"À cause de cela, seule l’écriture en mode DD est applicable."
 
 #. • MSG_322
 msgid "Unable to open or read '%s'"
@@ -1832,7 +1832,7 @@ msgstr "Définir les options régionales avec les mêmes valeurs que celles de c
 
 #. • MSG_335
 msgid "Disable BitLocker automatic device encryption"
-msgstr "Désactiver l'encryption automatique BitLocker"
+msgstr "Désactiver le cryptage automatique BitLocker"
 
 #. • MSG_336
 msgid "Persistent log"
