@@ -1094,7 +1094,7 @@ msgstr "نسخه %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "ترجمه فارسی:\\line‏ •سید عرفان <mailto:aa3245540@gmail.com>\\line‏ •ضیاءالدین عظیمی <mailto:s.zia.azimi@gmail.com>"
+msgstr "ترجمه فارسی:\\line‏ •سید عرفان <mailto:mv@mvaop.ir>\\line‏ •ضیاءالدین عظیمی <mailto:s.zia.azimi@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
