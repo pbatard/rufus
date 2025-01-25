@@ -3,6 +3,7 @@ name: MinGW
 on: 
   push:
     paths-ignore:
+      - '.github/ISSUE_TEMPLATE/**'
       - '.gitignore'
       - '.gitattributes'
       - 'res/**'

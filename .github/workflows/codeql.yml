@@ -4,6 +4,7 @@ on:
   push:
     branches: [master]
     paths-ignore:
+      - '.github/ISSUE_TEMPLATE/**'
       - '.gitignore'
       - '.gitattributes'
       - 'res/**'
