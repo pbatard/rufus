@@ -1875,7 +1875,7 @@ msgid ""
 msgstr ""
 "Rufus ha rilevato che l'ISO selezionata contiene un bootloader UEFI che è stato revocato e che quando Secure Boot è abilitato su un sistema UEFI completamente aggiornato produrrà %s. \n"
 "\n"
-"- Se hai ottenuto questa immagine ISO da una so0egente non affidabile, dovresti considerare la possibilità che possa contenere malware UEFI ed evitare di eseguire l'avvio da esso.\n"
+"- Se hai ottenuto questa immagine ISO da una sorgente non affidabile, dovresti considerare la possibilità che possa contenere malware UEFI ed evitare di eseguire l'avvio da esso.\n"
 "- Se l'hai ottenuto da una sorgente attendibile, dovresti provare a cercare una versione più aggiornata, che non genererà questo avviso."
 
 #. • MSG_340
