@@ -234,10 +234,22 @@ const char *WindowsErrorString(void)
 
 	DWORD size, presize;
 	DWORD error_code, _error_code, format_error;
+	LCID locale;
 	HANDLE hModule = NULL;
 
 	error_code = GetLastError();
 	_error_code = error_code;
+	// Set thread locale to en-US when in this function.
+	// This is because kernel32!FormatMessage is documented to try the following order when dwLanguageId==0:
+	// - Language neutral
+	// - Thread locale
+	// - User default locale
+	// - System default locale
+	// - English US
+	// Some Windows localisations do not provide English MUI resources for specific error codes.
+	// So with thread locale set to en-US, FormatMessage will try neutral, then en-US, then fall back to localised string.
+	locale = GetThreadLocale();
+	SetThreadLocale(MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT));
 retry:
 	// Check for specific facility error codes
 	switch (HRESULT_FACILITY(_error_code)) {
@@ -262,7 +274,7 @@ retry:
 	// coverity[var_deref_model]
 	size = FormatMessageU(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS |
 		((hModule != NULL) ? FORMAT_MESSAGE_FROM_HMODULE : 0), hModule,
-		_error_code, MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
+		_error_code, 0,
 		&err_string[presize], (DWORD)(sizeof(err_string) - strlen(err_string)), NULL);
 	if (size == 0) {
 		format_error = GetLastError();
@@ -278,7 +290,7 @@ retry:
 				_error_code = HRESULT_CODE(_error_code);
 				goto retry;
 			}
-			static_sprintf(err_string, "[0x%08lX] (NB: This system was unable to provide an English error message)", error_code);
+			static_sprintf(err_string, "[0x%08lX] (NB: This system was unable to provide a descriptive error message)", error_code);
 			break;
 		default:
 			static_sprintf(err_string, "[0x%08lX] (FormatMessage error code 0x%08lX)", error_code, format_error);
@@ -293,6 +305,7 @@ retry:
 			err_string[size--] = 0;
 	}
 
+	SetThreadLocale(locale);	// Set the original thread locale on exit
 	SetLastError(error_code);	// Make sure we don't change the errorcode on exit
 	return err_string;
 }
