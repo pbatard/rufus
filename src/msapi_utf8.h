@@ -6,7 +6,7 @@
  *
  * See also: https://utf8everywhere.org
  *
- * Copyright © 2010-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2010-2025 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -174,14 +174,24 @@ static __inline DWORD FormatMessageU(DWORD dwFlags, LPCVOID lpSource, DWORD dwMe
 									 DWORD dwLanguageId, char* lpBuffer, DWORD nSize, va_list *Arguments)
 {
 	DWORD ret = 0, err = ERROR_INVALID_DATA;
-	// coverity[returned_null]
+	// Exclude support for the FORMAT_MESSAGE_ALLOCATE_BUFFER special case.
+	if (dwFlags & FORMAT_MESSAGE_ALLOCATE_BUFFER) {
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return 0;
+	}
 	walloc(lpBuffer, nSize);
+	if (wlpBuffer == NULL) {
+		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+		return 0;
+	}
 	ret = FormatMessageW(dwFlags, lpSource, dwMessageId, dwLanguageId, wlpBuffer, nSize, Arguments);
 	err = GetLastError();
 	if ((ret != 0) && ((ret = wchar_to_utf8_no_alloc(wlpBuffer, lpBuffer, nSize)) == 0)) {
 		err = GetLastError();
 		ret = 0;
 	}
+	// Coverity doesn't realise that we filtered out the FORMAT_MESSAGE_ALLOCATE_BUFFER case
+	// coverity[leaked_storage]
 	wfree(lpBuffer);
 	SetLastError(err);
 	return ret;

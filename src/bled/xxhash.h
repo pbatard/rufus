@@ -3402,6 +3402,7 @@ XXH64_finalize(xxh_u64 hash, const xxh_u8* ptr, size_t len, XXH_alignment align)
         hash ^= (xxh_u64)(XXH_get32bits(ptr)) * XXH_PRIME64_1;
         ptr += 4;
         hash = XXH_rotl64(hash, 23) * XXH_PRIME64_2 + XXH_PRIME64_3;
+        // coverity[overflow_const]
         len -= 4;
     }
     while (len > 0) {

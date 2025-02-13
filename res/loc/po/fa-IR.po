@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2024-04-29 19:24+0300\n"
-"PO-Revision-Date: 2024-04-29 20:25+0330\n"
+"PO-Revision-Date: 2025-02-13 12:00+0000\n"
 "Last-Translator: MasterVito <mv@mvaop.ir>\n"
 "Language-Team: \n"
 "Language: fa_IR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Persian (پارسی)\n"
 "X-Rufus-LCID: 0x0429\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.5\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1094,7 +1094,7 @@ msgstr "نسخه %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "ترجمه فارسی:\\line‏ •سید عرفان <mailto:mv@mvaop.ir>\\line‏ •ضیاءالدین عظیمی <mailto:s.zia.azimi@gmail.com>"
+msgstr "ترجمه فارسی:\\line‏ •مستر ویتو <mailto:mv@mvaop.ir>\\line‏ •ضیاءالدین عظیمی <mailto:s.zia.azimi@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"

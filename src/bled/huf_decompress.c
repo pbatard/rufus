@@ -1208,6 +1208,7 @@ size_t HUF_readDTableX2_wksp(HUF_DTable* DTable,
     if (tableLog <= HUF_DECODER_FAST_TABLELOG && maxTableLog > HUF_DECODER_FAST_TABLELOG) maxTableLog = HUF_DECODER_FAST_TABLELOG;
 
     /* find maxWeight */
+    // coverity[underflow]
     for (maxW = tableLog; wksp->rankStats[maxW]==0; maxW--) {}  /* necessarily finds a solution before 0 */
 
     /* Get start index of each weight */

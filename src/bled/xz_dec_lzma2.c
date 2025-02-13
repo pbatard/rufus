@@ -641,6 +641,7 @@ static void XZ_FUNC lzma_len(struct xz_dec_lzma2 *s, struct lzma_len_dec *l,
 		}
 	}
 
+	// coverity[overflow_const]
 	s->lzma.len += rc_bittree(&s->rc, probs, limit) - limit;
 }
 

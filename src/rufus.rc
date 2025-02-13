@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 4.7.2219"
+CAPTION "Rufus 4.7.2220"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
@@ -399,8 +399,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,7,2219,0
- PRODUCTVERSION 4,7,2219,0
+ FILEVERSION 4,7,2220,0
+ PRODUCTVERSION 4,7,2220,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -418,13 +418,13 @@ BEGIN
             VALUE "Comments", "https://rufus.ie"
             VALUE "CompanyName", "Akeo Consulting"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "4.7.2219"
+            VALUE "FileVersion", "4.7.2220"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2025 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "https://www.gnu.org/licenses/gpl-3.0.html"
             VALUE "OriginalFilename", "rufus-4.7.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "4.7.2219"
+            VALUE "ProductVersion", "4.7.2220"
         END
     END
     BLOCK "VarFileInfo"

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Elementary Unicode compliant find/replace parser
- * Copyright © 2012-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2025 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ static loc_cmd* get_loc_cmd(char c, char* line) {
 	char *endptr, *expected_endptr, *token;
 	loc_cmd* lcmd = NULL;
 
-	for (j=0; j<ARRAYSIZE(parse_cmd); j++) {
+	for (j = 0; j<ARRAYSIZE(parse_cmd); j++) {
 		if (c == parse_cmd[j].c)
 			break;
 	}
@@ -133,10 +133,11 @@ static loc_cmd* get_loc_cmd(char c, char* line) {
 		case 'u':	// comma or dot separated list of unsigned integers (to end of line)
 			// count the number of commas
 			lcmd->unum_size = 1;
-			for (l=i; line[l] != 0; l++) {
+			for (l = i; line[l] != 0; l++) {
 				if ((line[l] == '.') || (line[l] == ','))
 					lcmd->unum_size++;
 			}
+			free(lcmd->unum);
 			lcmd->unum = (uint32_t*)malloc(lcmd->unum_size * sizeof(uint32_t));
 			if (lcmd->unum == NULL) {
 				luprint("could not allocate memory");
