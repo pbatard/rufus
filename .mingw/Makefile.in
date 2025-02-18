@@ -212,6 +212,7 @@ AM_V_SED = $(AM_V_SED_$(V))
 # target arch. Oh, and we can't use 'target_cpu' or AC definitions on account that we are
 # switching archs when building on our local machine, and don't want to have to go though
 # a costly reconf each time when we can simply issue a 'make clean'.
+# Oh, and to find the number after the @ sign, just have a look at the MinGW .a libraries.
 TUPLE := $(shell $(CC) -dumpmachine)
 TARGET := $(word 1,$(subst -, ,$(TUPLE)))
 DEF_SUFFIX := $(if $(TARGET:x86_64=),.def,.def64)
@@ -367,6 +368,7 @@ uninstall-am:
 
 
 .PHONY: all
+# Ideally, we would also have cfgmgr32-delaylib here, but it doesn't actually delay load... :(
 all: dwmapi-delaylib.lib version-delaylib.lib virtdisk-delaylib.lib wininet-delaylib.lib wintrust-delaylib.lib
 
 %.def64: %.def

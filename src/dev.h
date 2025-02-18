@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device detection and enumeration
- * Copyright © 2014-2019 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2025 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,20 +46,6 @@ typedef struct usb_device_props {
 /*
  * Windows DDK API definitions. Most of it copied from MinGW's includes
  */
-typedef DWORD DEVNODE, DEVINST;
-typedef DEVNODE *PDEVNODE, *PDEVINST;
-typedef DWORD RETURN_TYPE;
-typedef RETURN_TYPE CONFIGRET;
-typedef CHAR *DEVINSTID_A;
-
-#ifndef CM_GETIDLIST_FILTER_PRESENT
-#define CM_GETIDLIST_FILTER_PRESENT                 0x00000100
-#endif
-
-#ifndef FILE_DEVICE_USB
-#define FILE_DEVICE_USB                         FILE_DEVICE_UNKNOWN
-#endif
-
 typedef enum USB_CONNECTION_STATUS {
 	NoDeviceConnected,
 	DeviceConnected,
@@ -77,26 +63,16 @@ typedef enum USB_HUB_NODE {
 	UsbMIParent
 } USB_HUB_NODE;
 
-/* Cfgmgr32.dll interface */
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Device_IDA(DEVINST dnDevInst, CHAR* Buffer, ULONG BufferLen, ULONG ulFlags);
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Device_ID_List_SizeA(PULONG pulLen, PCSTR pszFilter, ULONG ulFlags);
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Device_ID_ListA(PCSTR pszFilter, PCHAR Buffer, ULONG BufferLen, ULONG ulFlags);
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Locate_DevNodeA(PDEVINST pdnDevInst, DEVINSTID_A pDeviceID, ULONG ulFlags);
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Child(PDEVINST pdnDevInst, DEVINST dnDevInst, ULONG ulFlags);
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Parent(PDEVINST pdnDevInst, DEVINST dnDevInst, ULONG ulFlags);
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_Sibling(PDEVINST pdnDevInst, DEVINST dnDevInst, ULONG ulFlags);
-DECLSPEC_IMPORT CONFIGRET WINAPI CM_Get_DevNode_Status(PULONG pulStatus, PULONG pulProblemNumber, DEVINST dnDevInst, ULONG ulFlags);
-
 #define USB_HUB_CYCLE_PORT                        273
 #define USB_GET_NODE_CONNECTION_INFORMATION_EX    274
 #define USB_GET_NODE_CONNECTION_INFORMATION_EX_V2 279
 
 #define IOCTL_USB_HUB_CYCLE_PORT \
-  CTL_CODE(FILE_DEVICE_USB, USB_HUB_CYCLE_PORT, METHOD_BUFFERED, FILE_ANY_ACCESS)
+  CTL_CODE(FILE_DEVICE_UNKNOWN, USB_HUB_CYCLE_PORT, METHOD_BUFFERED, FILE_ANY_ACCESS)
 #define IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX \
-  CTL_CODE(FILE_DEVICE_USB, USB_GET_NODE_CONNECTION_INFORMATION_EX, METHOD_BUFFERED, FILE_ANY_ACCESS)
+  CTL_CODE(FILE_DEVICE_UNKNOWN, USB_GET_NODE_CONNECTION_INFORMATION_EX, METHOD_BUFFERED, FILE_ANY_ACCESS)
 #define IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX_V2 \
-  CTL_CODE(FILE_DEVICE_USB, USB_GET_NODE_CONNECTION_INFORMATION_EX_V2, METHOD_BUFFERED, FILE_ANY_ACCESS)
+  CTL_CODE(FILE_DEVICE_UNKNOWN, USB_GET_NODE_CONNECTION_INFORMATION_EX_V2, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
 /* Most of the structures below need to be packed */
 #pragma pack(push, 1)

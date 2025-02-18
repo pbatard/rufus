@@ -502,6 +502,9 @@ uninstall-am:
 	pdf-am ps ps-am tags tags-am uninstall uninstall-am
 
 
+upx: all
+	@upx --lzma --best src/$(TARGET)$(EXEEXT)
+
 # This step produces the UPX compressed and signed releases that are made available for public download
 # NB: UPX v3.09 or later is needed for LZMA compression (http://upx.sourceforge.net/)
 release: all

@@ -1,0 +1,10 @@
+EXPORTS
+  CM_Get_Device_IDA@16
+  CM_Get_Device_ID_List_SizeA@12
+  CM_Get_Device_ID_ListA@16
+  CM_Locate_DevNodeA@12
+  CM_Get_Child@12
+  CM_Get_Sibling@12
+  CM_Get_Parent@12
+  CM_Get_DevNode_Status@16
+  CM_Get_DevNode_Registry_PropertyA@24

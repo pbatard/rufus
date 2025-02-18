@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2025 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -690,6 +690,7 @@ typedef struct {
 	uint32_t Index;		// Current array size
 	uint32_t Max;		// Maximum array size
 } StrArray;
+#define STRARRAY_EMPTY { NULL, 0, 0 };
 extern void StrArrayCreate(StrArray* arr, uint32_t initial_size);
 extern int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL);
 extern int32_t StrArrayFind(StrArray* arr, const char* str);

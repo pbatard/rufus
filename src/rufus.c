@@ -3257,19 +3257,31 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{0, 0, NULL, 0}
 	};
 
-	// Disable loading system DLLs from the current directory (sideloading mitigation)
+	// Disable loading system DLLs from the current directory (side-loading mitigation)
 	// PS: You know that official MSDN documentation for SetDllDirectory() that explicitly
 	// indicates that "If the parameter is an empty string (""), the call removes the current
-	// directory from the default DLL search order"? Yeah, that doesn't work. At all.
-	// Still, we invoke it, for platforms where the following call might actually work...
-	SetDllDirectoryA("");
+	// directory from the default DLL search order"? Yeah, that doesn't work. At all. And as
+	// a matter of fact, Microsoft has now altered their doc to remove that part, though it
+	// is still *currently* being mentioned in their doc for Dynamic-Link Library Security:
+	// https://web.archive.org/web/20250206201109/https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-security
+	// So, Microsoft currently offers NO WAY to easily disable the main vulnerability most
+	// applications suffer from, which is the loading of bloody DLLs from the current/app
+	// dir, even for executables, like Rufus, that are designed from the get go to NEVER EVER
+	// rely on any DLLs there, and would like to DISABLE THIS UTTER BULLSHIT OF AN ENTIRELY
+	// PREVENTABLE SECURITY RISK! The end result of all this is that we have to contend with
+	// delay loading (*when* it actually works) or direct hooking (when it doesn't) and no
+	// longer try to bother with a quick and easy side-loading fix that Microsoft has been
+	// dangling as a lure, for years, but hasn't actually bothered to implement... 
+	// SetDllDirectoryA("");
 
 	// For libraries on the KnownDLLs list, the system will always load them from System32.
 	// For other DLLs we link directly to, we can delay load the DLL and use a delay load
 	// hook to load them from System32. Note that, for this to work, something like:
 	// 'somelib.dll;%(DelayLoadDLLs)' must be added to the 'Delay Loaded Dlls' option of
-	// the linker properties in Visual Studio (which means this won't work with MinGW).
-	// For all other DLLs, use SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32).
+	// the linker properties in Visual Studio... which means this won't work with MinGW.
+	// For all other DLLs, use SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32),
+	// though this *STILL* does not prevent the Windows default of looking for DLLs in the
+	// current directories.
 	SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
