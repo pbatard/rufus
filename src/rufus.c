@@ -3427,8 +3427,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			if ((strchr(tmp, 'p') != NULL) || ((strchr(tmp, 'P') != NULL) && (strchr(tmp, 'P')[1] != 'H')))
 				ini_flags[0] = 'a';
 
-			// Now enable the hogger before processing the rest of the arguments
-			if (!disable_hogger) {
+			// Now enable the hogger before processing the rest of the arguments.
+			// Note that with POSIX shells (e.g. msys) we don't enable the hogger as it is not needed.
+			if (!disable_hogger && getenv("SHELL") == NULL) {
 				// Reattach the console, if we were started from commandline
 				if (AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
 					uprintf("Enabling console line hogger");
