@@ -165,7 +165,7 @@ static int8_t IsCompressedBootableImage(const char* path)
 					uprintf("  An FFU image was selected, but this system does not have FFU support!");
 				}
 			} else {
-				physical_disk = VhdMountImage(path);
+				physical_disk = VhdMountImageAndGetSize(path, &img_report.projected_size);
 				if (physical_disk != NULL) {
 					img_report.is_vhd = TRUE;
 					fd = fopenU(physical_disk, "rb");
