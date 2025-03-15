@@ -110,7 +110,10 @@ OPENED_LIBRARIES_VARS;
 RUFUS_UPDATE update = { { 0,0,0 },{ 0,0 }, NULL, NULL };
 HINSTANCE hMainInstance;
 HWND hMainDialog, hMultiToolbar, hSaveToolbar, hHashToolbar, hAdvancedDeviceToolbar, hAdvancedFormatToolbar, hUpdatesDlg = NULL;
-HFONT hInfoFont;
+HFONT hInfoFont = NULL;
+static HFONT hSectionHeaderFont = NULL;
+extern HIMAGELIST hUpImageList, hDownImageList;
+HICON hSmallIcon, hBigIcon = NULL;
 uint8_t image_options = IMOP_WINTOGO;
 uint16_t rufus_version[3], embedded_sl_version[2];
 uint32_t dur_mins, dur_secs;
@@ -941,7 +944,7 @@ out:
 BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hDC;
-	HFONT hf;
+	static HFONT hf = NULL;
 	LONG lfHeight;
 	LONG_PTR style;
 	DWORD log_size;
@@ -954,12 +957,14 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 		// Increase the size of our log textbox to MAX_LOG_SIZE (unsigned word)
 		PostMessage(hLog, EM_LIMITTEXT, MAX_LOG_SIZE , 0);
-		// Set the font to Unicode so that we can display anything
-		hDC = GetDC(NULL);
-		lfHeight = -MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72);
-		safe_release_dc(NULL, hDC);
-		hf = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
-			DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Consolas");
+		if (hf == NULL) {
+			// Set the font to Unicode so that we can display anything
+			hDC = GetDC(NULL);
+			lfHeight = -MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72);
+			safe_release_dc(NULL, hDC);
+			hf = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+				DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Consolas");
+		}
 		SendDlgItemMessageA(hDlg, IDC_LOG_EDIT, WM_SETFONT, (WPARAM)hf, TRUE);
 		// Set 'Close Log' as the selected button
 		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDCANCEL), TRUE);
@@ -974,6 +979,12 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		style = GetWindowLongPtr(hLog, GWL_STYLE);
 		style &= ~(ES_RIGHT);
 		SetWindowLongPtr(hLog, GWL_STYLE, style);
+		break;
+	case WM_NCDESTROY:
+		if (hf != NULL) {
+			DeleteObject(hf);
+			hf = NULL;
+		}
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
@@ -2023,8 +2034,10 @@ static void InitDialog(HWND hDlg)
 	SetAccessibleName(hNBPasses, lmprintf(MSG_316));
 
 	// Create the font and brush for the progress messages
-	hInfoFont = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
-		0, 0, PROOF_QUALITY, 0, "Segoe UI");
+	if (hInfoFont == NULL) {
+		hInfoFont = CreateFontA(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+			0, 0, PROOF_QUALITY, 0, "Segoe UI");
+	}
 
 	// Create the title bar icon
 	SetTitleBarIcon(hDlg);
@@ -2127,7 +2140,7 @@ static void InitDialog(HWND hDlg)
 	CheckDlgButton(hDlg, IDC_EXTENDED_LABEL, BST_CHECKED);
 
 	CreateAdditionalControls(hDlg);
-	SetSectionHeaders(hDlg);
+	SetSectionHeaders(hDlg, &hSectionHeaderFont);
 	PositionMainControls(hDlg);
 	AdjustForLowDPI(hDlg);
 	// Because we created the log dialog before we computed our sizes, we need to send a custom message
@@ -2135,7 +2148,7 @@ static void InitDialog(HWND hDlg)
 	// Limit the amount of characters for the Persistence size field
 	SendMessage(GetDlgItem(hDlg, IDC_PERSISTENCE_SIZE), EM_LIMITTEXT, 7, 0);
 	// Create the status line and initialize the taskbar icon for progress overlay
-	CreateStatusBar();
+	CreateStatusBar(&hInfoFont);
 
 	// Set the various tooltips
 	CreateTooltip(hFileSystem, lmprintf(MSG_157), -1);
@@ -2826,7 +2839,38 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		CreateStaticFont((HDC)wParam, &hyperlink_font, FALSE);
 		SelectObject((HDC)wParam, hyperlink_font);
 		SetTextColor((HDC)wParam, TOOLBAR_ICON_COLOR);
-		return (INT_PTR)CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
+		return (INT_PTR)GetSysColorBrush(COLOR_BTNFACE);
+
+	case WM_NCDESTROY:
+		if (hyperlink_font != NULL) {
+			DeleteObject(hyperlink_font);
+			hyperlink_font = NULL;
+		}
+		if (hInfoFont != NULL) {
+			DeleteObject(hInfoFont);
+			hInfoFont = NULL;
+		}
+		if (hSectionHeaderFont != NULL) {
+			DeleteObject(hSectionHeaderFont);
+			hSectionHeaderFont = NULL;
+		}
+		if (hUpImageList != NULL) {
+			ImageList_Destroy(hUpImageList);
+			hUpImageList = NULL;
+		}
+		if (hDownImageList != NULL) {
+			ImageList_Destroy(hDownImageList);
+			hDownImageList = NULL;
+		}
+		if (hSmallIcon != NULL) {
+			DestroyIcon(hSmallIcon);
+			hSmallIcon = NULL;
+		}
+		if (hBigIcon != NULL) {
+			DestroyIcon(hBigIcon);
+			hBigIcon = NULL;
+		}
+		break;
 
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {

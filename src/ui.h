@@ -91,7 +91,7 @@ extern void GetHalfDropwdownWidth(HWND hDlg);
 extern void GetFullWidth(HWND hDlg);
 extern void PositionMainControls(HWND hDlg);
 extern void AdjustForLowDPI(HWND hDlg);
-extern void SetSectionHeaders(HWND hDlg);
+extern void SetSectionHeaders(HWND hDlg, HFONT* hFont);
 extern void SetPersistencePos(uint64_t pos);
 extern void SetPersistenceSize(void);
 extern void TogglePersistenceControls(BOOL display);

@@ -755,7 +755,7 @@ extern INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, 
 extern void CenterDialog(HWND hDlg, HWND hParent);
 extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float scale);
 extern void ResizeButtonHeight(HWND hDlg, int id);
-extern void CreateStatusBar(void);
+extern void CreateStatusBar(HFONT* hFont);
 extern void CreateStaticFont(HDC hDC, HFONT* hFont, BOOL underlined);
 extern void SetTitleBarIcon(HWND hDlg);
 extern BOOL CreateTaskbarList(void);

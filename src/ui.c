@@ -555,22 +555,25 @@ void AdjustForLowDPI(HWND hDlg)
 	InvalidateRect(hDlg, NULL, TRUE);
 }
 
-void SetSectionHeaders(HWND hDlg)
+void SetSectionHeaders(HWND hDlg, HFONT* hFont)
 {
 	RECT rc;
 	HWND hCtrl;
 	SIZE sz;
-	HFONT hf;
 	wchar_t wtmp[128];
 	size_t wlen;
 	int i;
 
 	// Set the section header fonts and resize the static controls accordingly
-	hf = CreateFontA(-MulDiv(14, GetDeviceCaps(GetDC(hMainDialog), LOGPIXELSY), 72), 0, 0, 0,
-		FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Segoe UI");
+	if (*hFont == NULL) {
+		HDC hDC = GetDC(hMainDialog);
+		*hFont = CreateFontA(-MulDiv(14, GetDeviceCaps(hDC, LOGPIXELSY), 72), 0, 0, 0,
+			FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Segoe UI");
+		safe_release_dc(hMainDialog, hDC);
+	}
 
 	for (i = 0; i < ARRAYSIZE(section_control_ids); i++) {
-		SendDlgItemMessageA(hDlg, section_control_ids[i], WM_SETFONT, (WPARAM)hf, TRUE);
+		SendDlgItemMessageA(hDlg, section_control_ids[i], WM_SETFONT, (WPARAM)*hFont, TRUE);
 		hCtrl = GetDlgItem(hDlg, section_control_ids[i]);
 		memset(wtmp, 0, sizeof(wtmp));
 		GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp) - 4);
@@ -957,11 +960,14 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 		GetClientRect(hCtrl, &rc);
 		rc2 = rc;
 		InflateRect(&rc, -1, -1);
-		SelectObject(hDC, GetStockObject(DC_PEN));
-		SelectObject(hDC, GetStockObject(NULL_BRUSH));
+		HPEN hOldPen = (HPEN)SelectObject(hDC, GetStockObject(DC_PEN));
+		HBRUSH hOldBrush = (HBRUSH)SelectObject(hDC, GetStockObject(NULL_BRUSH));
 		// TODO: Handle SetText message so we can avoid this call
 		GetWindowTextW(hProgress, winfo, ARRAYSIZE(winfo));
-		SelectObject(hDC, hInfoFont);
+		HFONT hOldFont = NULL;
+		if (hInfoFont != NULL) {
+			hOldFont = (HFONT)SelectObject(hDC, hInfoFont);
+		}
 		GetTextExtentPoint32(hDC, winfo, (int)wcslen(winfo), &size);
 		if (size.cx > rc.right)
 			size.cx = rc.right;
@@ -1013,6 +1019,11 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 		// Bounding rectangle
 		SetDCPenColor(hDC, PROGRESS_BAR_BOX_COLOR);
 		Rectangle(hDC, rc2.left, rc2.top, rc2.right, rc2.bottom);
+		if (hOldFont != NULL) {
+			SelectObject(hDC, hOldFont);
+		}
+		SelectObject(hDC, hOldPen);
+		SelectObject(hDC, hOldBrush);
 		EndPaint(hCtrl, &ps);
 		return (INT_PTR)TRUE;
 	}
@@ -1586,10 +1597,13 @@ void SetBootTypeDropdownWidth(void)
 void OnPaint(HDC hdc)
 {
 	int i;
-	HPEN hp = CreatePen(0, (fScale < 1.5f) ? 2 : 3, RGB(0, 0, 0));
-	SelectObject(hdc, hp);
+	COLORREF cp = GetSysColor(COLOR_WINDOWTEXT);
+	HPEN hp = CreatePen(0, (fScale < 1.5f) ? 2 : 3, cp);
+	HPEN hop = (HPEN)SelectObject(hdc, hp);
 	for (i = 0; i < ARRAYSIZE(section_vpos); i++) {
 		MoveToEx(hdc, mw + 10, section_vpos[i], NULL);
 		LineTo(hdc, mw + fw, section_vpos[i]);
 	}
+	SelectObject(hdc, hop);
+	DeleteObject(hp);
 }
