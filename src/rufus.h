@@ -172,6 +172,7 @@ static __inline void safe_strcp(char* dst, const size_t dst_max, const char* src
 #define safe_strnicmp(str1, str2, count) _strnicmp(((str1 == NULL) ? "<NULL>" : str1), ((str2 == NULL) ? "<NULL>" : str2), count)
 #define safe_closehandle(h) do { if ((h != INVALID_HANDLE_VALUE) && (h != NULL)) { CloseHandle(h); h = INVALID_HANDLE_VALUE; } } while(0)
 #define safe_release_dc(hDlg, hDC) do { if ((hDC != INVALID_HANDLE_VALUE) && (hDC != NULL)) { ReleaseDC(hDlg, hDC); hDC = NULL; } } while(0)
+#define safe_delete_object(hObj) do { if (hObj != NULL) { DeleteObject(hObj); hObj = NULL; } } while(0)
 #define safe_sprintf(dst, count, ...) do { size_t _count = count; char* _dst = dst; _snprintf_s(_dst, _count, _TRUNCATE, __VA_ARGS__); \
 	_dst[(_count) - 1] = 0; } while(0)
 #define static_sprintf(dst, ...) safe_sprintf(dst, sizeof(dst), __VA_ARGS__)
@@ -755,7 +756,7 @@ extern INT_PTR MyDialogBox(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, 
 extern void CenterDialog(HWND hDlg, HWND hParent);
 extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh, float scale);
 extern void ResizeButtonHeight(HWND hDlg, int id);
-extern void CreateStatusBar(void);
+extern void CreateStatusBar(HFONT* hFont);
 extern void CreateStaticFont(HDC hDC, HFONT* hFont, BOOL underlined);
 extern void SetTitleBarIcon(HWND hDlg);
 extern BOOL CreateTaskbarList(void);

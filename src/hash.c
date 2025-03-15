@@ -1886,19 +1886,21 @@ out:
  */
 INT_PTR CALLBACK HashCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	static HFONT hFont = NULL;
 	int i, dw, dh;
 	RECT rc;
-	HFONT hFont;
 	HDC hDC;
 
 	switch (message) {
 	case WM_INITDIALOG:
 		apply_localization(IDD_HASH, hDlg);
-		hDC = GetDC(hDlg);
-		hFont = CreateFontA(-MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72),
-			0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
-			0, 0, PROOF_QUALITY, 0, "Courier New");
-		safe_release_dc(hDlg, hDC);
+		if (hFont == NULL) {
+			hDC = GetDC(hDlg);
+			hFont = CreateFontA(-MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72),
+				0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+				0, 0, PROOF_QUALITY, 0, "Courier New");
+			safe_release_dc(hDlg, hDC);
+		}
 		SendDlgItemMessageA(hDlg, IDC_MD5, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendDlgItemMessageA(hDlg, IDC_SHA1, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendDlgItemMessageA(hDlg, IDC_SHA256, WM_SETFONT, (WPARAM)hFont, TRUE);
@@ -1941,6 +1943,9 @@ INT_PTR CALLBACK HashCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		// Set focus on the OK button
 		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDOK), TRUE);
 		CenterDialog(hDlg, NULL);
+		break;
+	case WM_NCDESTROY:
+		safe_delete_object(hFont);
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
