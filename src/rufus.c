@@ -2837,6 +2837,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SetTextColor((HDC)wParam, TOOLBAR_ICON_COLOR);
 		return (INT_PTR)GetSysColorBrush(COLOR_BTNFACE);
 
+	case WM_DESTROY:
+		safe_destroy_toolbar_imagelist(hSaveToolbar);
+		safe_destroy_toolbar_imagelist(hHashToolbar);
+		safe_destroy_toolbar_imagelist(hMultiToolbar);
+		break;
+
 	case WM_NCDESTROY:
 		safe_delete_object(hyperlink_font);
 		safe_delete_object(hInfoFont);
