@@ -1,0 +1,15 @@
+EXPORTS
+  BeginBufferedAnimation@32
+  BufferedPaintRenderAnimation@8
+  BufferedPaintStopAllAnimations@4
+  CloseThemeData@4
+  DrawThemeBackground@24
+  DrawThemeParentBackground@12
+  DrawThemeTextEx@36
+  EndBufferedAnimation@8
+  GetThemeBackgroundContentRect@24
+  GetThemeFont@24
+  GetThemePartSize@28
+  GetThemeTransitionDuration@24
+  OpenThemeData@8
+  SetWindowTheme@12

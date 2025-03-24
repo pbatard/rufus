@@ -786,6 +786,7 @@ extern void ResizeMoveCtrl(HWND hDlg, HWND hCtrl, int dx, int dy, int dw, int dh
 extern void ResizeButtonHeight(HWND hDlg, int id);
 extern void CreateStatusBar(HFONT* hFont);
 extern void CreateStaticFont(HDC hDC, HFONT* hFont, BOOL underlined);
+extern void SetHyperLinkFont(HWND hWnd, HDC hDC, HFONT* hFont, BOOL underlined);
 extern void SetTitleBarIcon(HWND hDlg);
 extern BOOL CreateTaskbarList(void);
 extern BOOL SetTaskbarProgressState(TASKBAR_PROGRESS_FLAGS tbpFlags);
@@ -955,8 +956,13 @@ out:
 #define PF_TYPE_DECL(api, ret, proc, args)	PF_TYPE(api, ret, proc, args); PF_DECL(proc)
 #define PF_INIT(proc, name)					if (pf##proc == NULL) pf##proc = \
 	(proc##_t) GetProcAddress(GetLibraryHandle(#name), #proc)
+#define PF_INIT_ID(proc, name, id)			if (pf##proc == NULL) pf##proc = \
+	(proc##_t) GetProcAddress(GetLibraryHandle(#name), MAKEINTRESOURCEA(id))
 #define PF_INIT_OR_OUT(proc, name)			do {PF_INIT(proc, name);         \
 	if (pf##proc == NULL) {uprintf("Unable to locate %s() in '%s.dll': %s",  \
+	#proc, #name, WindowsErrorString()); goto out;} } while(0)
+#define PF_INIT_ID_OR_OUT(proc, name, id)	do {PF_INIT_ID(proc, name, id);  \
+	if (pf##proc == NULL) {uprintf("Unable to locate %s() in %s.dll: %s\n",  \
 	#proc, #name, WindowsErrorString()); goto out;} } while(0)
 #define PF_INIT_OR_SET_STATUS(proc, name)	do {PF_INIT(proc, name);         \
 	if ((pf##proc == NULL) && (NT_SUCCESS(status))) status = STATUS_PROCEDURE_NOT_FOUND; } while(0)

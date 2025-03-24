@@ -78,6 +78,8 @@
 #include "msapi_utf8.h"
 #include "localization.h"
 
+#include "darkmode.h"
+
 #if (defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__i386) || \
      defined(_X86_) || defined(__I86__) || defined(__x86_64__))
 #define CPU_X86_SHA1_ACCELERATION       1
@@ -1894,6 +1896,7 @@ INT_PTR CALLBACK HashCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 
 	switch (message) {
 	case WM_INITDIALOG:
+		SetDarkModeForDlg(hDlg);
 		apply_localization(IDD_HASH, hDlg);
 		if (hFont == NULL) {
 			hDC = GetDC(hDlg);
@@ -1941,6 +1944,7 @@ INT_PTR CALLBACK HashCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 			for (i = (int)strlen(image_path); (i > 0) && (image_path[i] != '\\'); i--);
 			SetWindowTextU(hDlg, &image_path[i + 1]);
 		}
+		SetDarkModeForChild(hDlg);
 		// Set focus on the OK button
 		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDOK), TRUE);
 		CenterDialog(hDlg, NULL);

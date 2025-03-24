@@ -57,6 +57,8 @@
 #include "../res/grub/grub_version.h"
 #include "../res/grub2/grub2_version.h"
 
+#include "darkmode.h"
+
 enum bootcheck_return {
 	BOOTCHECK_PROCEED = 0,
 	BOOTCHECK_CANCEL = -1,
@@ -957,6 +959,7 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	EXT_DECL(log_ext, "rufus.log", __VA_GROUP__("*.log"), __VA_GROUP__("Rufus log"));
 	switch (message) {
 	case WM_INITDIALOG:
+		SetDarkModeForDlg(hDlg);
 		apply_localization(IDD_LOG, hDlg);
 		hLog = GetDlgItem(hDlg, IDC_LOG_EDIT);
 
@@ -984,6 +987,7 @@ BOOL CALLBACK LogCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		style = GetWindowLongPtr(hLog, GWL_STYLE);
 		style &= ~(ES_RIGHT);
 		SetWindowLongPtr(hLog, GWL_STYLE, style);
+		SetDarkModeForChild(hDlg);
 		break;
 	case WM_NCDESTROY:
 		safe_delete_object(hf);
@@ -2760,6 +2764,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case WM_INITDIALOG:
+		InitAndSetDarkModeForMainDlg(hDlg);
 		// Make sure fScale is set before the first call to apply localization, so that move/resize scale appropriately
 		hDC = GetDC(hDlg);
 		fScale = GetDeviceCaps(hDC, LOGPIXELSX) / 96.0f;
@@ -2806,6 +2811,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		MessageBoxA(NULL, "This is a Test version of " APPLICATION_NAME " - It is meant to be used for "
 			"testing ONLY and should NOT be distributed as a release.", "TEST VERSION", MSG_INFO);
 #endif
+		SetDarkModeForChild(hDlg);
+		SubclassStatusBar(hStatus);
+		SetHyperLinkFont(GetDlgItem(hDlg, IDS_CSM_HELP_TXT), (HDC)wParam, &hHyperlinkFont, FALSE);
 		// Let's not take any risk: Ask Windows to redraw the whole dialog before we exit init
 		RedrawWindow(hMainDialog, NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW);
 		InvalidateRect(hMainDialog, NULL, TRUE);
@@ -2824,12 +2832,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetBkMode(pDI->hDC, TRANSPARENT);
 			switch (pDI->itemID) {
 			case SB_SECTION_LEFT:
-				SetTextColor(pDI->hDC, GetSysColor(COLOR_BTNTEXT));
+				SetTextColor(pDI->hDC, IsDarkModeEnabled() ? GetTextColorForDarkMode() : GetSysColor(COLOR_BTNTEXT));
 				DrawTextExU(pDI->hDC, szStatusMessage, -1, &pDI->rcItem,
 					DT_LEFT | DT_END_ELLIPSIS | DT_PATH_ELLIPSIS, NULL);
 				return (INT_PTR)TRUE;
 			case SB_SECTION_RIGHT:
-				SetTextColor(pDI->hDC, GetSysColor(COLOR_3DSHADOW));
+				SetTextColor(pDI->hDC, IsDarkModeEnabled() ? GetDisabledTextColor() : GetSysColor(COLOR_3DSHADOW));
 				DrawTextExA(pDI->hDC, szTimer, -1, &pDI->rcItem, DT_LEFT, NULL);
 				return (INT_PTR)TRUE;
 			}
@@ -2846,7 +2854,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if ((HWND)lParam != GetDlgItem(hDlg, IDS_CSM_HELP_TXT))
 			return FALSE;
 		SetBkMode((HDC)wParam, TRANSPARENT);
-		CreateStaticFont((HDC)wParam, &hHyperlinkFont, FALSE);
 		SelectObject((HDC)wParam, hHyperlinkFont);
 		SetTextColor((HDC)wParam, TOOLBAR_ICON_COLOR);
 		return (INT_PTR)GetSysColorBrush(COLOR_BTNFACE);
@@ -4189,6 +4196,7 @@ out:
 			uprintf("Could not delete '%s': %s", loc_file, WindowsErrorString());
 	}
 	DestroyAllTooltips();
+	DestroyDarkModeGDIObjects();
 	ClrAlertPromptHook();
 	exit_localization();
 	safe_free(image_path);
