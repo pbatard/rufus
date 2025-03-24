@@ -840,7 +840,7 @@ void ToggleImageOptions(void)
 // We need to create the small toolbar buttons first so that we can compute their width
 void CreateSmallButtons(HWND hDlg)
 {
-	HIMAGELIST hImageList;
+	HIMAGELIST hSaveImageList, hHashImageList;
 	HICON hIconSave, hIconHash;
 	int icon_offset = 0, i16 = GetSystemMetrics(SM_CXSMICON);
 	TBBUTTON tbToolbarButtons[1];
@@ -854,12 +854,12 @@ void CreateSmallButtons(HWND hDlg)
 
 	hSaveToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, TOOLBAR_STYLE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_SAVE_TOOLBAR, hMainInstance, NULL);
-	hImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE | ILC_MIRROR, 1, 0);
+	hSaveImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE | ILC_MIRROR, 1, 0);
 	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_SAVE_16 + icon_offset), _RT_RCDATA, "save icon", &bufsize, FALSE);
 	hIconSave = CreateIconFromResourceEx(buffer, bufsize, TRUE, 0x30000, 0, 0, 0);
-	ImageList_AddIcon(hImageList, hIconSave);
+	ImageList_AddIcon(hSaveImageList, hIconSave);
 	DestroyIcon(hIconSave);
-	SendMessage(hSaveToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hImageList);
+	SendMessage(hSaveToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hSaveImageList);
 	SendMessage(hSaveToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
 	memset(tbToolbarButtons, 0, sizeof(TBBUTTON));
 	tbToolbarButtons[0].idCommand = IDC_SAVE;
@@ -871,12 +871,12 @@ void CreateSmallButtons(HWND hDlg)
 
 	hHashToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, TOOLBAR_STYLE,
 		0, 0, 0, 0, hMainDialog, (HMENU)IDC_HASH_TOOLBAR, hMainInstance, NULL);
-	hImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE | ILC_MIRROR, 1, 0);
+	hHashImageList = ImageList_Create(i16, i16, ILC_COLOR32 | ILC_HIGHQUALITYSCALE | ILC_MIRROR, 1, 0);
 	buffer = GetResource(hMainInstance, MAKEINTRESOURCEA(IDI_HASH_16 + icon_offset), _RT_RCDATA, "hash icon", &bufsize, FALSE);
 	hIconHash = CreateIconFromResourceEx(buffer, bufsize, TRUE, 0x30000, 0, 0, 0);
-	ImageList_AddIcon(hImageList, hIconHash);
+	ImageList_AddIcon(hHashImageList, hIconHash);
 	DestroyIcon(hIconHash);
-	SendMessage(hHashToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hImageList);
+	SendMessage(hHashToolbar, TB_SETIMAGELIST, (WPARAM)0, (LPARAM)hHashImageList);
 	SendMessage(hHashToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
 	memset(tbToolbarButtons, 0, sizeof(TBBUTTON));
 	tbToolbarButtons[0].idCommand = IDC_HASH;

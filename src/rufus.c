@@ -2204,7 +2204,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	static LPITEMIDLIST pidlDesktop = NULL;
 	static SHChangeNotifyEntry NotifyEntry;
 	static DWORD_PTR thread_affinity[HASH_MAX + 1];
-	static HFONT hyperlink_font = NULL;
+	static HFONT hHyperlinkFont = NULL;
 	static wchar_t wtooltip[128];
 	LONG lPos;
 	BOOL set_selected_fs;
@@ -2832,19 +2832,25 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if ((HWND)lParam != GetDlgItem(hDlg, IDS_CSM_HELP_TXT))
 			return FALSE;
 		SetBkMode((HDC)wParam, TRANSPARENT);
-		CreateStaticFont((HDC)wParam, &hyperlink_font, FALSE);
-		SelectObject((HDC)wParam, hyperlink_font);
+		CreateStaticFont((HDC)wParam, &hHyperlinkFont, FALSE);
+		SelectObject((HDC)wParam, hHyperlinkFont);
 		SetTextColor((HDC)wParam, TOOLBAR_ICON_COLOR);
 		return (INT_PTR)GetSysColorBrush(COLOR_BTNFACE);
 
+	case WM_DESTROY:
+		safe_destroy_imagelist_from_toolbar(hSaveToolbar);
+		safe_destroy_imagelist_from_toolbar(hHashToolbar);
+		safe_destroy_imagelist_from_toolbar(hMultiToolbar);
+		break;
+
 	case WM_NCDESTROY:
-		safe_delete_object(hyperlink_font);
+		safe_delete_object(hHyperlinkFont);
 		safe_delete_object(hInfoFont);
 		safe_delete_object(hSectionHeaderFont);
-		safe_delete_object(hUpImageList);
-		safe_delete_object(hDownImageList);
-		safe_delete_object(hSmallIcon);
-		safe_delete_object(hBigIcon);
+		safe_destroy_imagelist(hUpImageList);
+		safe_destroy_imagelist(hDownImageList);
+		safe_destroy_icon(hSmallIcon);
+		safe_destroy_icon(hBigIcon);
 		break;
 
 	case WM_NOTIFY:
