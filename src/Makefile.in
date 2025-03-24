@@ -87,8 +87,8 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-am_rufus_OBJECTS = rufus-badblocks.$(OBJEXT) rufus-dev.$(OBJEXT) \
-	rufus-dos.$(OBJEXT) rufus-dos_locale.$(OBJEXT) \
+am_rufus_OBJECTS = rufus-badblocks.$(OBJEXT) rufus-darkmode.$(OBJEXT) \
+	rufus-dev.$(OBJEXT) rufus-dos.$(OBJEXT) rufus-dos_locale.$(OBJEXT) \
 	rufus-drive.$(OBJEXT) rufus-format.$(OBJEXT) \
 	rufus-format_ext.$(OBJEXT) rufus-format_fat32.$(OBJEXT) \
 	rufus-hash.$(OBJEXT) rufus-icon.$(OBJEXT) rufus-iso.$(OBJEXT) \
@@ -116,30 +116,30 @@ am__v_P_1 = :
 AM_V_GEN = $(am__v_GEN_@AM_V@)
 am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
 am__v_GEN_0 = @echo "  GEN     " $@;
-am__v_GEN_1 = 
+am__v_GEN_1 =
 AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
-am__v_at_1 = 
+am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp =
 am__depfiles_maybe =
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
-am__v_lt_1 = 
+am__v_lt_1 =
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_@AM_V@)
 am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
 am__v_CC_0 = @echo "  CC      " $@;
-am__v_CC_1 = 
+am__v_CC_1 =
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
-am__v_CCLD_1 = 
+am__v_CCLD_1 =
 SOURCES = $(rufus_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
@@ -279,12 +279,12 @@ NONVULNERABLE_LIBS = -lsetupapi -lole32 -lgdi32 -lshlwapi -lcrypt32 -lcomctl32 -
 # See https://github.com/pbatard/rufus/issues/2272
 # Oh, and don't bother trying to delay load cfgmgr32.dll, even with the DECLSPEC_IMPORT __attribute__((visibility("hidden")))
 # override. It just DOESN'T BLOODY WORK and you will waste HOURS on a wild goose chase!!!
-VULNERABLE_LIBS = -ldwmapi-delaylib -lversion-delaylib -lvirtdisk-delaylib -lwininet-delaylib -lwintrust-delaylib
+VULNERABLE_LIBS = -ldwmapi-delaylib -lversion-delaylib -lvirtdisk-delaylib -lwininet-delaylib -lwintrust-delaylib -luxtheme-delaylib
 AM_V_WINDRES_0 = @echo "  RC     $@";$(WINDRES)
 AM_V_WINDRES_1 = $(WINDRES)
 AM_V_WINDRES_ = $(AM_V_WINDRES_$(AM_DEFAULT_VERBOSITY))
 AM_V_WINDRES = $(AM_V_WINDRES_$(V))
-rufus_SOURCES = badblocks.c dev.c dos.c dos_locale.c drive.c format.c format_ext.c format_fat32.c hash.c icon.c iso.c \
+rufus_SOURCES = badblocks.c darkmode.c dev.c dos.c dos_locale.c drive.c format.c format_ext.c format_fat32.c hash.c icon.c iso.c \
 	localization.c net.c parser.c pki.c process.c re.c rufus.c smart.c stdfn.c stdio.c stdlg.c syslinux.c ui.c vhd.c wue.c
 
 rufus_CFLAGS = -I$(srcdir)/ms-sys/inc -I$(srcdir)/syslinux/libfat -I$(srcdir)/syslinux/libinstaller -I$(srcdir)/syslinux/win -I$(srcdir)/libcdio -I$(srcdir)/../res $(AM_CFLAGS) \
@@ -332,7 +332,7 @@ $(am__aclocal_m4_deps):
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 
-rufus$(EXEEXT): $(rufus_OBJECTS) $(rufus_DEPENDENCIES) $(EXTRA_rufus_DEPENDENCIES) 
+rufus$(EXEEXT): $(rufus_OBJECTS) $(rufus_DEPENDENCIES) $(EXTRA_rufus_DEPENDENCIES)
 	@rm -f rufus$(EXEEXT)
 	$(AM_V_CCLD)$(rufus_LINK) $(rufus_OBJECTS) $(rufus_LDADD) $(LIBS)
 
@@ -353,6 +353,12 @@ rufus-badblocks.o: badblocks.c
 
 rufus-badblocks.obj: badblocks.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-badblocks.obj `if test -f 'badblocks.c'; then $(CYGPATH_W) 'badblocks.c'; else $(CYGPATH_W) '$(srcdir)/badblocks.c'; fi`
+
+rufus-darkmode.o: darkmode.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-darkmode.o `test -f 'darkmode.c' || echo '$(srcdir)/'`darkmode.c
+
+rufus-darkmode.obj: darkmode.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-darkmode.obj `if test -f 'darkmode.c'; then $(CYGPATH_W) 'darkmode.c'; else $(CYGPATH_W) '$(srcdir)/darkmode.c'; fi`
 
 rufus-dev.o: dev.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rufus_CFLAGS) $(CFLAGS) -c -o rufus-dev.o `test -f 'dev.c' || echo '$(srcdir)/'`dev.c

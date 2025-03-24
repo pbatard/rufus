@@ -5,7 +5,7 @@ NONVULNERABLE_LIBS = -lsetupapi -lole32 -lgdi32 -lshlwapi -lcrypt32 -lcomctl32 -
 # See https://github.com/pbatard/rufus/issues/2272
 # Oh, and don't bother trying to delay load cfgmgr32.dll, even with the DECLSPEC_IMPORT __attribute__((visibility("hidden")))
 # override. It just DOESN'T BLOODY WORK and you will waste HOURS on a wild goose chase!!!
-VULNERABLE_LIBS = -ldwmapi-delaylib -lversion-delaylib -lvirtdisk-delaylib -lwininet-delaylib -lwintrust-delaylib
+VULNERABLE_LIBS = -ldwmapi-delaylib -lversion-delaylib -lvirtdisk-delaylib -lwininet-delaylib -lwintrust-delaylib -luxtheme-delaylib
 
 noinst_PROGRAMS = rufus
 
@@ -17,7 +17,7 @@ AM_V_WINDRES   = $(AM_V_WINDRES_$(V))
 %_rc.o: %.rc ../res/loc/embedded.loc
 	$(AM_V_WINDRES) $(AM_RCFLAGS) -i $< -o $@
 
-rufus_SOURCES = badblocks.c dev.c dos.c dos_locale.c drive.c format.c format_ext.c format_fat32.c hash.c icon.c iso.c \
+rufus_SOURCES = badblocks.c darkmode.c dev.c dos.c dos_locale.c drive.c format.c format_ext.c format_fat32.c hash.c icon.c iso.c \
 	localization.c net.c parser.c pki.c process.c re.c rufus.c smart.c stdfn.c stdio.c stdlg.c syslinux.c ui.c vhd.c wue.c
 rufus_CFLAGS = -I$(srcdir)/ms-sys/inc -I$(srcdir)/syslinux/libfat -I$(srcdir)/syslinux/libinstaller -I$(srcdir)/syslinux/win -I$(srcdir)/libcdio -I$(srcdir)/../res $(AM_CFLAGS) \
 	-DEXT2_FLAT_INCLUDES=0 -DSOLUTION=rufus
