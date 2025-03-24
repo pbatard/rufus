@@ -43,6 +43,7 @@
 #include "registry.h"
 #include "settings.h"
 #include "license.h"
+#include "darkmode.h"
 
 /* Globals */
 extern BOOL is_x86_64, appstore_version;
@@ -329,6 +330,7 @@ INT_PTR CALLBACK LicenseCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 	HWND hLicense;
 	switch (message) {
 	case WM_INITDIALOG:
+		SetDarkModeForDlg(hDlg);
 		hLicense = GetDlgItem(hDlg, IDC_LICENSE_TEXT);
 		apply_localization(IDD_LICENSE, hDlg);
 		CenterDialog(hDlg, NULL);
@@ -341,6 +343,7 @@ INT_PTR CALLBACK LicenseCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		style &= ~(ES_RIGHT);
 		SetWindowLongPtr(hLicense, GWL_STYLE, style);
 		SetDlgItemTextA(hDlg, IDC_LICENSE_TEXT, gplv3);
+		SetDarkModeForChild(hDlg);
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
@@ -373,6 +376,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
 	switch (message) {
 	case WM_INITDIALOG:
+		SetDarkModeForDlg(hDlg);
 		resized_already = FALSE;
 		// Execute dialog localization
 		apply_localization(IDD_ABOUTBOX, hDlg);
@@ -407,6 +411,7 @@ INT_PTR CALLBACK AboutCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		// Need to send an explicit SetSel to avoid being positioned at the end of richedit control when tabstop is used
 		SendMessage(hEdit[1], EM_SETSEL, 0, 0);
 		SendMessage(hEdit[0], EM_REQUESTRESIZE, 0, 0);
+		SetDarkModeForChild(hDlg);
 		break;
 	case WM_NOTIFY:
 		switch (((LPNMHDR)lParam)->code) {
@@ -479,6 +484,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 
 	switch (message) {
 	case WM_INITDIALOG:
+		SetDarkModeForDlg(hDlg);
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
 		ncm.cbSize = sizeof(ncm);
 		// If we're compiling with the Vista SDK or later, the NONCLIENTMETRICS struct
@@ -561,6 +567,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDYES), 0, dh -cbh, 0, 0, 1.0f);
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDNO), 0, dh -cbh, 0, 0, 1.0f);
 		}
+		SetDarkModeForChild(hDlg);
 		return (INT_PTR)TRUE;
 	case WM_CTLCOLORSTATIC:
 		// Change the background colour for static text and icon
@@ -690,6 +697,7 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 
 	switch (message) {
 	case WM_INITDIALOG:
+		SetDarkModeForDlg(hDlg);
 		// Don't overflow our max radio button
 		if (nDialogItems > (IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1 + 1)) {
 			uprintf("Warning: Too many options requested for Selection (%d vs %d)",
@@ -796,6 +804,7 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		// Set the default selection
 		for (i = 0, m = 1; i < nDialogItems; i++, m <<= 1)
 			Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), (m & selection_dialog_mask) ? BST_CHECKED : BST_UNCHECKED);
+		SetDarkModeForChild(hDlg);
 		return (INT_PTR)TRUE;
 	case WM_CTLCOLORSTATIC:
 		// Change the background colour for static text and icon
@@ -883,6 +892,7 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 
 	switch (message) {
 	case WM_INITDIALOG:
+		SetDarkModeForDlg(hDlg);
 		// Don't overflow our max radio button
 		if (nDialogItems > (IDC_LIST_ITEMMAX - IDC_LIST_ITEM1 + 1)) {
 			uprintf("Warning: Too many items requested for List (%d vs %d)",
@@ -942,6 +952,7 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		ResizeButtonHeight(hDlg, IDOK);
 		ResizeButtonHeight(hDlg, IDCANCEL);
 		return (INT_PTR)TRUE;
+		SetDarkModeForChild(hDlg);
 	case WM_CTLCOLORSTATIC:
 		// Change the background colour for static text and icon
 		SetBkMode((HDC)wParam, TRANSPARENT);
@@ -1063,6 +1074,7 @@ BOOL CreateTooltip(HWND hControl, const char* message, int duration)
 	if (ttlist[i].hTip == NULL) {
 		return FALSE;
 	}
+	SetDarkTheme(ttlist[i].hTip);
 	ttlist[i].hCtrl = hControl;
 
 	// Subclass the tooltip to handle multiline
@@ -1291,6 +1303,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
 	switch (message) {
 	case WM_INITDIALOG:
+		SetDarkModeForDlg(hDlg);
 		resized_already = FALSE;
 		hUpdatesDlg = hDlg;
 		apply_localization(IDD_UPDATE_POLICY, hDlg);
@@ -1338,6 +1351,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		SendMessage(hPolicy, EM_SETEVENTMASK, 0, ENM_LINK|ENM_REQUESTRESIZE);
 		SendMessageA(hPolicy, EM_SETBKGNDCOLOR, 0, (LPARAM)GetSysColor(COLOR_BTNFACE));
 		SendMessage(hPolicy, EM_REQUESTRESIZE, 0, 0);
+		SetDarkModeForChild(hDlg);
 		break;
 	case WM_NOTIFY:
 		if ((((LPNMHDR)lParam)->code == EN_REQUESTRESIZE) && (!resized_already)) {
@@ -1561,6 +1575,37 @@ void CreateStaticFont(HDC hDC, HFONT* hFont, BOOL underlined)
 	*hFont = CreateFontIndirect(&lf);
 }
 
+void SetHyperLinkFont(HWND hWnd, HDC hDC, HFONT* hFont, BOOL underlined)
+{
+	static BOOL use_static_font = FALSE;
+	LOGFONT lf = { 0 };
+	HFONT hFontTmp = NULL;
+
+	if (*hFont == NULL) {
+		hFontTmp = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
+		if (hFontTmp != NULL) {
+			GetObject(hFontTmp, sizeof(LOGFONT), &lf);
+			use_static_font = FALSE;
+		} else {
+			NONCLIENTMETRICS ncm = { 0 };
+			ncm.cbSize = sizeof(NONCLIENTMETRICS);
+			if (SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &ncm, 0)) {
+				lf = ncm.lfStatusFont;
+				use_static_font = FALSE;
+			} else {
+				CreateStaticFont(hDC, hFont, underlined);
+				use_static_font = TRUE;
+			}
+		}
+		if (!use_static_font) {
+			lf.lfUnderline = underlined;
+			*hFont = CreateFontIndirect(&lf);
+		}
+	}
+	if (!use_static_font)
+		SendMessage(hWnd, WM_SETFONT, (WPARAM)*hFont, TRUE);
+}
+
 /*
  * Work around the limitations of edit control, to display a hand cursor for hyperlinks
  * NB: The LTEXT control must have SS_NOTIFY attribute for this to work
@@ -1587,7 +1632,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	char cmdline[] = APPLICATION_NAME " -w 150";
 	static char* filepath = NULL;
 	static int download_status = 0;
-	static HFONT hyperlink_font = NULL;
+	static HFONT hHyperlinkFont = NULL;
 	static HANDLE hThread = NULL;
 	HWND hNotes;
 	LONG err;
@@ -1598,6 +1643,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 
 	switch (message) {
 	case WM_INITDIALOG:
+		SetDarkModeForDlg(hDlg);
 		apply_localization(IDD_NEW_VERSION, hDlg);
 		download_status = 0;
 		SetTitleBarIcon(hDlg);
@@ -1618,18 +1664,20 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		if (update.download_url == NULL)
 			EnableWindow(GetDlgItem(hDlg, IDC_DOWNLOAD), FALSE);
 		ResizeButtonHeight(hDlg, IDCANCEL);
+		SetDarkModeForChild(hDlg);
+		SubclassProgressBarControl(GetDlgItem(hDlg, IDC_PROGRESS));
+		SetHyperLinkFont(GetDlgItem(hDlg, IDC_WEBSITE), (HDC)wParam, &hHyperlinkFont, TRUE);
 		break;
 	case WM_CTLCOLORSTATIC:
 		if ((HWND)lParam != GetDlgItem(hDlg, IDC_WEBSITE))
 			return FALSE;
 		// Change the font for the hyperlink
 		SetBkMode((HDC)wParam, TRANSPARENT);
-		CreateStaticFont((HDC)wParam, &hyperlink_font, TRUE);
-		SelectObject((HDC)wParam, hyperlink_font);
-		SetTextColor((HDC)wParam, RGB(0,0,125));	// DARK_BLUE
+		SelectObject((HDC)wParam, hHyperlinkFont);
+		SetTextColor((HDC)wParam, GetSysColor(COLOR_HOTLIGHT));
 		return (INT_PTR)GetSysColorBrush(COLOR_BTNFACE);
 	case WM_NCDESTROY:
-		safe_delete_object(hyperlink_font);
+		safe_delete_object(hHyperlinkFont);
 		break;
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {

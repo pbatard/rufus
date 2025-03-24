@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 4.10.2257"
+CAPTION "Rufus 4.10.2258"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
@@ -211,7 +211,7 @@ CAPTION "Update policy and settings"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     ICON            IDI_ICON,IDC_ABOUT_ICON,11,8,20,20
-    CONTROL         "",IDC_POLICY,"RichEdit20W",WS_VSCROLL | WS_TABSTOP | 0x804,46,8,235,132,WS_EX_STATICEDGE
+    CONTROL         "",IDC_POLICY,"RichEdit20W",WS_VSCROLL | WS_TABSTOP | 0x804,45,8,236,132,WS_EX_STATICEDGE
     GROUPBOX        "Settings",IDS_UPDATE_SETTINGS_GRP,45,145,165,46
     LTEXT           "Check for updates",IDS_UPDATE_FREQUENCY_TXT,51,158,80,10
     COMBOBOX        IDC_UPDATE_FREQUENCY,133,158,66,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
@@ -407,8 +407,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,10,2257,0
- PRODUCTVERSION 4,10,2257,0
+ FILEVERSION 4,10,2258,0
+ PRODUCTVERSION 4,10,2258,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -426,13 +426,13 @@ BEGIN
             VALUE "Comments", "https://rufus.ie"
             VALUE "CompanyName", "Akeo Consulting"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "4.10.2257"
+            VALUE "FileVersion", "4.10.2258"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2025 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "https://www.gnu.org/licenses/gpl-3.0.html"
             VALUE "OriginalFilename", "rufus-4.10.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "4.10.2257"
+            VALUE "ProductVersion", "4.10.2258"
         END
     END
     BLOCK "VarFileInfo"

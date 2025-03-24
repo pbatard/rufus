@@ -74,6 +74,7 @@
 #include "rufus.h"
 #include "winio.h"
 #include "missing.h"
+#include "darkmode.h"
 #include "resource.h"
 #include "msapi_utf8.h"
 #include "localization.h"
@@ -1894,6 +1895,7 @@ INT_PTR CALLBACK HashCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 
 	switch (message) {
 	case WM_INITDIALOG:
+		SetDarkModeForDlg(hDlg);
 		apply_localization(IDD_HASH, hDlg);
 		if (hFont == NULL) {
 			hDC = GetDC(hDlg);
@@ -1941,6 +1943,7 @@ INT_PTR CALLBACK HashCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 			for (i = (int)strlen(image_path); (i > 0) && (image_path[i] != '\\'); i--);
 			SetWindowTextU(hDlg, &image_path[i + 1]);
 		}
+		SetDarkModeForChild(hDlg);
 		// Set focus on the OK button
 		SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDOK), TRUE);
 		CenterDialog(hDlg, NULL);

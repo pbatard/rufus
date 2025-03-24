@@ -96,6 +96,9 @@
     <ClCompile Include="..\src\xml.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\darkmode.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\rufus.h">
@@ -204,6 +207,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\xml.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\darkmode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
