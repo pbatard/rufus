@@ -88,7 +88,7 @@ PF_TYPE_DECL(WINAPI, BOOL, SetWindowCompositionAttribute, (HWND, WINDOWCOMPOSITI
 
 static BOOL isDarkEnabled = FALSE;
 
-BOOL IsAtLeastWin10Build(DWORD buildNumber)
+static BOOL IsAtLeastWin10Build(DWORD buildNumber)
 {
 	if (!IsWindows10OrGreater()) {
 		return FALSE;
@@ -111,6 +111,17 @@ static BOOL IsAtLeastWin10(void)
 static BOOL IsAtLeastWin11(void)
 {
 	return IsAtLeastWin10Build(WIN11_21H2);
+}
+
+static BOOL IsHighContrast(void)
+{
+	HIGHCONTRASTW highContrast;
+	ZeroMemory(&highContrast, sizeof(HIGHCONTRASTW));
+	highContrast.cbSize = sizeof(HIGHCONTRASTW);
+	if (SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(HIGHCONTRASTW), &highContrast, FALSE)) {
+		return (highContrast.dwFlags & HCF_HIGHCONTRASTON) == HCF_HIGHCONTRASTON;
+	}
+	return FALSE;
 }
 
 BOOL IsDarkModeEnabled(void)
@@ -137,8 +148,10 @@ BOOL GetDarkModeFromReg(void)
 }
 
 
-void InitDarkMode(HWND hWnd) {
-	if (!IsAtLeastWin10()) {
+void InitDarkMode(HWND hWnd)
+{
+	if (!IsAtLeastWin10() || IsHighContrast()) {
+		isDarkEnabled = FALSE;
 		return;
 	}
 
@@ -156,20 +169,19 @@ void InitDarkMode(HWND hWnd) {
 
 out:
 	isDarkEnabled = FALSE;
-	return;
 }
 
 void SetDarkTitleBar(HWND hWnd)
 {
-	BOOL dark = IsDarkModeEnabled();
+	BOOL enableDark = IsDarkModeEnabled();
 
 	if (IsAtLeastWin11()) {
-		DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &dark, sizeof(dark));
+		DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &enableDark, sizeof(enableDark));
 	}
 	else if (IsAtLeastWin10()) {
 		PF_INIT_OR_OUT(SetWindowCompositionAttribute, user32);
 
-		WINDOWCOMPOSITIONATTRIBDATA data = { WCA_USEDARKMODECOLORS, &dark, sizeof(dark) };
+		WINDOWCOMPOSITIONATTRIBDATA data = { WCA_USEDARKMODECOLORS, &enableDark, sizeof(enableDark) };
 		pfSetWindowCompositionAttribute(hWnd, &data);
 	}
 	else {
@@ -215,7 +227,7 @@ static double CalculatePerceivedLightness(COLORREF c)
 BOOL InitAccentColor(void)
 {
 	BOOL opaque = TRUE;
-	if (IsDarkModeEnabled() && SUCCEEDED(DwmGetColorizationColor(&cAccent, &opaque))) {
+	if (SUCCEEDED(DwmGetColorizationColor(&cAccent, &opaque))) {
 		cAccent = RGB(GetBValue(cAccent), GetGValue(cAccent), GetRValue(cAccent));
 		// check if accent color is too dark
 		static double lightnessTreshold = 50.0 - 4.0;
@@ -615,19 +627,16 @@ static LRESULT CALLBACK ButtonSubclass(
 
 	case WM_ERASEBKGND:
 	{
-		if (IsDarkModeEnabled()) {
-			if (pButtonData->hTheme == NULL) {
-				pButtonData->hTheme = OpenThemeData(hWnd, VSCLASS_BUTTON);
-			}
+		if (pButtonData->hTheme == NULL) {
+			pButtonData->hTheme = OpenThemeData(hWnd, VSCLASS_BUTTON);
+		}
 
-			if (pButtonData->hTheme) {
-				return TRUE;
-			}
+		if (pButtonData->hTheme) {
+			return TRUE;
 		}
 		break;
 	}
 
-	case WM_DPICHANGED:
 	case WM_THEMECHANGED:
 	{
 		if (pButtonData->hTheme) {
@@ -639,29 +648,26 @@ static LRESULT CALLBACK ButtonSubclass(
 	case WM_PRINTCLIENT:
 	case WM_PAINT:
 	{
-		if (IsDarkModeEnabled()) {
+		if (pButtonData->hTheme == NULL) {
+			pButtonData->hTheme = OpenThemeData(hWnd, VSCLASS_BUTTON);
 			if (pButtonData->hTheme == NULL) {
-				pButtonData->hTheme = OpenThemeData(hWnd, VSCLASS_BUTTON);
-				if (pButtonData->hTheme == NULL) {
-					break;
-				}
+				break;
 			}
-			PAINTSTRUCT ps;
-			ZeroMemory(&ps, sizeof(PAINTSTRUCT));
-			HDC hdc = (HDC)wParam;
-			if (!hdc) {
-				hdc = BeginPaint(hWnd, &ps);
-			}
-
-			PaintButton(hWnd, hdc, *pButtonData);
-
-			if (ps.hdc) {
-				EndPaint(hWnd, &ps);
-			}
-
-			return 0;
 		}
-		break;
+		PAINTSTRUCT ps;
+		ZeroMemory(&ps, sizeof(PAINTSTRUCT));
+		HDC hdc = (HDC)wParam;
+		if (!hdc) {
+			hdc = BeginPaint(hWnd, &ps);
+		}
+
+		PaintButton(hWnd, hdc, *pButtonData);
+
+		if (ps.hdc) {
+			EndPaint(hWnd, &ps);
+		}
+
+		return 0;
 	}
 
 	case WM_SIZE:
@@ -673,13 +679,10 @@ static LRESULT CALLBACK ButtonSubclass(
 
 	case WM_ENABLE:
 	{
-		if (IsDarkModeEnabled()) {
-			// skip the button's normal wndproc so it won't redraw out of wm_paint
-			LRESULT lr = DefWindowProc(hWnd, uMsg, wParam, lParam);
-			InvalidateRect(hWnd, NULL, FALSE);
-			return lr;
-		}
-		break;
+		// skip the button's normal wndproc so it won't redraw out of wm_paint
+		LRESULT lr = DefWindowProc(hWnd, uMsg, wParam, lParam);
+		InvalidateRect(hWnd, NULL, FALSE);
+		return lr;
 	}
 	}
 	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
@@ -802,19 +805,16 @@ static LRESULT CALLBACK GroupboxSubclass(
 
 	case WM_ERASEBKGND:
 	{
-		if (IsDarkModeEnabled()) {
-			if (pButtonData->hTheme == NULL) {
-				pButtonData->hTheme = OpenThemeData(hWnd, VSCLASS_BUTTON);
-			}
+		if (pButtonData->hTheme == NULL) {
+			pButtonData->hTheme = OpenThemeData(hWnd, VSCLASS_BUTTON);
+		}
 
-			if (pButtonData->hTheme) {
-				return TRUE;
-			}
+		if (pButtonData->hTheme) {
+			return TRUE;
 		}
 		break;
 	}
 
-	case WM_DPICHANGED:
 	case WM_THEMECHANGED:
 	{
 		if (pButtonData->hTheme) {
@@ -826,29 +826,26 @@ static LRESULT CALLBACK GroupboxSubclass(
 	case WM_PRINTCLIENT:
 	case WM_PAINT:
 	{
-		if (IsDarkModeEnabled()) {
+		if (pButtonData->hTheme == NULL) {
+			pButtonData->hTheme = OpenThemeData(hWnd, VSCLASS_BUTTON);
 			if (pButtonData->hTheme == NULL) {
-				pButtonData->hTheme = OpenThemeData(hWnd, VSCLASS_BUTTON);
-				if (pButtonData->hTheme == NULL) {
-					break;
-				}
+				break;
 			}
-			PAINTSTRUCT ps;
-			ZeroMemory(&ps, sizeof(PAINTSTRUCT));
-			HDC hdc = (HDC)wParam;
-			if (!hdc) {
-				hdc = BeginPaint(hWnd, &ps);
-			}
-
-			PaintGroupbox(hWnd, hdc, *pButtonData);
-
-			if (ps.hdc) {
-				EndPaint(hWnd, &ps);
-			}
-
-			return 0;
 		}
-		break;
+		PAINTSTRUCT ps;
+		ZeroMemory(&ps, sizeof(PAINTSTRUCT));
+		HDC hdc = (HDC)wParam;
+		if (!hdc) {
+			hdc = BeginPaint(hWnd, &ps);
+		}
+
+		PaintGroupbox(hWnd, hdc, *pButtonData);
+
+		if (ps.hdc) {
+			EndPaint(hWnd, &ps);
+		}
+
+		return 0;
 	}
 
 	case WM_ENABLE:
@@ -882,16 +879,12 @@ static LRESULT DarkToolBarNotifyCustomDraw(HWND hWnd, UINT uMsg, WPARAM wParam, 
 	switch (lpnmtbcd->nmcd.dwDrawStage) {
 	case CDDS_PREPAINT:
 	{
-		LRESULT lr = CDRF_DODEFAULT;
-		if (IsDarkModeEnabled()) {
-			if (IsAtLeastWin11()) {
-				roundCornerValue = 5;
-			}
-
-			FillRect(lpnmtbcd->nmcd.hdc, &lpnmtbcd->nmcd.rc, GetBackgroundBrush());
-			lr |= CDRF_NOTIFYITEMDRAW;
+		if (IsAtLeastWin11()) {
+			roundCornerValue = 5;
 		}
-		return lr;
+
+		FillRect(lpnmtbcd->nmcd.hdc, &lpnmtbcd->nmcd.rc, GetBackgroundBrush());
+		return CDRF_NOTIFYITEMDRAW;
 	}
 
 	case CDDS_ITEMPREPAINT:
@@ -946,10 +939,7 @@ static LRESULT DarkTrackBarNotifyCustomDraw(HWND hWnd, UINT uMsg, WPARAM wParam,
 	switch (lpnmcd->dwDrawStage) {
 	case CDDS_PREPAINT:
 	{
-		if (IsDarkModeEnabled()) {
-			return CDRF_NOTIFYITEMDRAW;
-		}
-		return CDRF_DODEFAULT;
+		return CDRF_NOTIFYITEMDRAW;
 	}
 
 	case CDDS_ITEMPREPAINT:
@@ -1010,7 +1000,7 @@ static LRESULT CALLBACK WindowNotifySubclass(
 	case WM_NOTIFY:
 	{
 		LPNMHDR nmhdr = (LPNMHDR)lParam;
-		WCHAR str[30] = { 0 };
+		WCHAR str[32] = { 0 };
 		GetClassName(nmhdr->hwndFrom, str, ARRAYSIZE(str));
 
 		switch (nmhdr->code) {
@@ -1058,7 +1048,7 @@ static void PaintStatusBar(HWND hWnd, HDC hdc, StatusBarData statusBarData)
 	ZeroMemory(&borders, sizeof(borders));
 	SendMessage(hWnd, SB_GETBORDERS, 0, (LPARAM)&borders);
 
-	RECT rcClient = { 0,0,0,0 };
+	RECT rcClient = { 0 };
 	GetClientRect(hWnd, &rcClient);
 
 	HPEN holdPen = (HPEN)SelectObject(hdc, GetEdgePen());
@@ -1144,11 +1134,7 @@ static LRESULT CALLBACK StatusBarSubclass(
 	switch (uMsg) {
 	case WM_ERASEBKGND:
 	{
-		if (!IsDarkModeEnabled()) {
-			break;
-		}
-
-		RECT rcClient = { 0,0,0,0 };
+		RECT rcClient = { 0 };
 		GetClientRect(hWnd, &rcClient);
 		FillRect((HDC)wParam, &rcClient, GetBackgroundBrush());
 		return TRUE;
@@ -1156,10 +1142,6 @@ static LRESULT CALLBACK StatusBarSubclass(
 
 	case WM_PAINT:
 	{
-		if (!IsDarkModeEnabled()) {
-			break;
-		}
-
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
 
@@ -1180,7 +1162,6 @@ static LRESULT CALLBACK StatusBarSubclass(
 		break;
 	}
 
-	case WM_DPICHANGED:
 	case WM_THEMECHANGED:
 	{
 		if (pStatusBarData->hFont != NULL) {
@@ -1301,19 +1282,16 @@ static LRESULT CALLBACK ProgressBarSubclass(
 
 	case WM_ERASEBKGND:
 	{
-		if (IsDarkModeEnabled()) {
-			if (pProgressBarData->hTheme == NULL) {
-				pProgressBarData->hTheme = OpenThemeData(hWnd, VSCLASS_PROGRESS);
-			}
+		if (pProgressBarData->hTheme == NULL) {
+			pProgressBarData->hTheme = OpenThemeData(hWnd, VSCLASS_PROGRESS);
+		}
 
-			if (pProgressBarData->hTheme) {
-				return TRUE;
-			}
+		if (pProgressBarData->hTheme) {
+			return TRUE;
 		}
 		break;
 	}
 
-	case WM_DPICHANGED:
 	case WM_THEMECHANGED:
 	{
 		if (pProgressBarData->hTheme) {
@@ -1341,10 +1319,6 @@ static LRESULT CALLBACK ProgressBarSubclass(
 
 	case WM_PAINT:
 	{
-		if (!IsDarkModeEnabled()) {
-			break;
-		}
-
 		if (pProgressBarData->hTheme == NULL) {
 			pProgressBarData->hTheme = OpenThemeData(hWnd, VSCLASS_PROGRESS);
 			if (pProgressBarData->hTheme == NULL) {
@@ -1442,10 +1416,6 @@ const UINT_PTR g_WindowCtlColorSubclassID = 42;
 
 static LRESULT OnCtlColor(HDC hdc)
 {
-	if (!IsDarkModeEnabled()) {
-		return FALSE;
-	}
-
 	SetTextColor(hdc, GetTextColorForDarkMode());
 	SetBkColor(hdc, GetBackgroundColor());
 	return (LRESULT)GetBackgroundBrush();
@@ -1453,13 +1423,9 @@ static LRESULT OnCtlColor(HDC hdc)
 
 static LRESULT OnCtlColorStatic(WPARAM wParam, LPARAM lParam)
 {
-	if (!IsDarkModeEnabled()) {
-		return FALSE;
-	}
-
 	HDC hdc = (HDC)wParam;
 	HWND hWnd = (HWND)lParam;
-	WCHAR str[30] = { 0 };
+	WCHAR str[32] = { 0 };
 	GetClassName(hWnd, str, ARRAYSIZE(str));
 
 	if (_wcsicmp(str, WC_STATIC) == 0) {
@@ -1481,12 +1447,8 @@ static LRESULT OnCtlColorStatic(WPARAM wParam, LPARAM lParam)
 	return OnCtlColor(hdc);
 }
 
-static LRESULT OnCtlColorSofter(HDC hdc)
+static LRESULT OnCtlColorControl(HDC hdc)
 {
-	if (!IsDarkModeEnabled()) {
-		return FALSE;
-	}
-
 	SetTextColor(hdc, GetTextColorForDarkMode());
 	SetBkColor(hdc, GetControlBackgroundColor());
 	return (LRESULT)GetControlBackgroundBrush();
@@ -1501,7 +1463,7 @@ static INT_PTR OnCtlColorListbox(WPARAM wParam, LPARAM lParam)
 	const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
 	BOOL isComboBox = (nStyle & LBS_COMBOBOX) == LBS_COMBOBOX;
 	if ((!isComboBox || !isDarkEnabled) && IsWindowEnabled(hWnd)) {
-		return (INT_PTR)OnCtlColorSofter(hdc);
+		return (INT_PTR)OnCtlColorControl(hdc);
 	}
 	return (INT_PTR)OnCtlColor(hdc);
 }
@@ -1520,11 +1482,7 @@ static LRESULT CALLBACK WindowCtlColorSubclass(
 	switch (uMsg) {
 	case WM_ERASEBKGND:
 	{
-		if (!IsDarkModeEnabled()) {
-			break;
-		}
-
-		RECT rcClient = { 0,0,0,0 };
+		RECT rcClient = { 0 };
 		GetClientRect(hWnd, &rcClient);
 		FillRect((HDC)wParam, &rcClient, GetBackgroundBrush());
 		return TRUE;
@@ -1538,42 +1496,27 @@ static LRESULT CALLBACK WindowCtlColorSubclass(
 
 	case WM_CTLCOLOREDIT:
 	{
-		if (IsDarkModeEnabled()) {
-			return OnCtlColorSofter((HDC)wParam);
-		}
-		break;
+		return OnCtlColorControl((HDC)wParam);
 	}
 
 	case WM_CTLCOLORLISTBOX:
 	{
-		if (IsDarkModeEnabled()) {
-			return OnCtlColorListbox(wParam, lParam);
-		}
-		break;
+		return OnCtlColorListbox(wParam, lParam);
 	}
 
 	case WM_CTLCOLORDLG:
 	{
-		if (IsDarkModeEnabled()) {
-			return OnCtlColor((HDC)wParam);
-		}
-		break;
+		return OnCtlColor((HDC)wParam);
 	}
 
 	case WM_CTLCOLORSTATIC:
 	{
-		if (IsDarkModeEnabled()) {
-			return OnCtlColorStatic(wParam, lParam);
-		}
-		break;
+		return OnCtlColorStatic(wParam, lParam);
 	}
 
 	case WM_PRINTCLIENT:
 	{
-		if (IsDarkModeEnabled()) {
-			return TRUE;
-		}
-		break;
+		return TRUE;
 	}
 	}
 	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
@@ -1594,7 +1537,7 @@ static BOOL CALLBACK DarkModeForChildCallback(HWND hWnd, LPARAM lParam)
 {
 	(void)lParam;
 
-	WCHAR str[30] = { 0 };
+	WCHAR str[32] = { 0 };
 	GetClassName(hWnd, str, ARRAYSIZE(str));
 
 	if (_wcsicmp(str, WC_STATIC) == 0) {
@@ -1613,11 +1556,6 @@ static BOOL CALLBACK DarkModeForChildCallback(HWND hWnd, LPARAM lParam)
 		case BS_RADIOBUTTON:
 		case BS_AUTORADIOBUTTON:
 		{
-			if ((nButtonStyle & BS_PUSHLIKE) == BS_PUSHLIKE) {
-				SetDarkTheme(hWnd);
-				break;
-			}
-
 			if (IsAtLeastWin11()) {
 				SetDarkTheme(hWnd);
 			}
@@ -1647,7 +1585,7 @@ static BOOL CALLBACK DarkModeForChildCallback(HWND hWnd, LPARAM lParam)
 		}
 	}
 	else if (_wcsicmp(str, WC_COMBOBOX) == 0) {
-		SetWindowTheme(hWnd, IsDarkModeEnabled() ? L"DarkMode_CFD" : NULL, NULL);
+		SetWindowTheme(hWnd, L"DarkMode_CFD", NULL);
 	}
 	else if (_wcsicmp(str, TOOLBARCLASSNAME) == 0) {
 		HWND hTips = (HWND)SendMessage(hWnd, TB_GETTOOLTIPS, 0, 0);
@@ -1658,30 +1596,34 @@ static BOOL CALLBACK DarkModeForChildCallback(HWND hWnd, LPARAM lParam)
 	else if (_wcsicmp(str, WC_EDIT) == 0) {
 		const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
 		if (((nStyle & WS_VSCROLL) == WS_VSCROLL) || ((nStyle & WS_HSCROLL) == WS_HSCROLL)) {
-			SetDarkTheme(hWnd);
-			SetWindowLongPtr(hWnd, GWL_STYLE, nStyle | WS_BORDER);
 			const LONG_PTR nExStyle = GetWindowLongPtr(hWnd, GWL_EXSTYLE);
+
+			SetWindowLongPtr(hWnd, GWL_STYLE, nStyle | WS_BORDER);
 			SetWindowLongPtr(hWnd, GWL_EXSTYLE, nExStyle & ~WS_EX_CLIENTEDGE);
+			SetDarkTheme(hWnd);
 		}
 		else {
-			SetWindowTheme(hWnd, IsDarkModeEnabled() ? L"DarkMode_CFD" : NULL, NULL);
+			SetWindowTheme(hWnd, L"DarkMode_CFD", NULL);
 		}
 	}
 	else if (_wcsicmp(str, RICHEDIT_CLASS) == 0) {
+		const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
 		const LONG_PTR nExStyle = GetWindowLongPtr(hWnd, GWL_EXSTYLE);
+
 		BOOL hasStaticEdge = (nExStyle & WS_EX_STATICEDGE) == WS_EX_STATICEDGE;
-		COLORREF cBg = IsDarkModeEnabled() ? (hasStaticEdge ? GetControlBackgroundColor() : GetBackgroundColor()) : GetSysColor(COLOR_BTNFACE);
-		SendMessage(hWnd, EM_SETBKGNDCOLOR, 0, (LPARAM)cBg);
+		COLORREF cBg = (hasStaticEdge ? GetControlBackgroundColor() : GetBackgroundColor());
+
 		CHARFORMATW cf;
 		ZeroMemory(&cf, sizeof(CHARFORMATW));
 		cf.cbSize = sizeof(CHARFORMATW);
 		cf.dwMask = CFM_COLOR;
-		cf.crTextColor = IsDarkModeEnabled() ? GetTextColorForDarkMode() : GetSysColor(COLOR_WINDOWTEXT);
+		cf.crTextColor = GetTextColorForDarkMode();
+
+		SendMessage(hWnd, EM_SETBKGNDCOLOR, 0, (LPARAM)cBg);
 		SendMessage(hWnd, EM_SETCHARFORMAT, SCF_DEFAULT, (LPARAM)&cf);
-		SetWindowTheme(hWnd, NULL, IsDarkModeEnabled() ? L"DarkMode_Explorer::ScrollBar" : NULL);
-		const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
 		SetWindowLongPtr(hWnd, GWL_STYLE, nStyle | WS_BORDER);
 		SetWindowLongPtr(hWnd, GWL_EXSTYLE, nExStyle & ~WS_EX_STATICEDGE);
+		SetWindowTheme(hWnd, NULL, L"DarkMode_Explorer::ScrollBar");
 	}
 
 	return TRUE;

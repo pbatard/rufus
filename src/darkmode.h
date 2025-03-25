@@ -23,7 +23,6 @@
 #include <Windows.h>
 
 BOOL IsDarkModeEnabled(void);
-BOOL IsAtLeastWin10Build(DWORD buildNumber);
 BOOL GetDarkModeFromReg(void);
 void InitDarkMode(HWND hWnd);
 void SetDarkTitleBar(HWND hWnd);
