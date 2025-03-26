@@ -956,8 +956,7 @@ static LRESULT DarkTrackBarNotifyCustomDraw(HWND hWnd, UINT uMsg, WPARAM wParam,
 
 		case TBCD_CHANNEL:
 		{
-			const LONG_PTR nStyle = GetWindowLongPtr(lpnmcd->hdr.hwndFrom, GWL_STYLE);
-			if ((nStyle & WS_DISABLED) == WS_DISABLED) {
+			if (IsWindowEnabled(lpnmcd->hdr.hwndFrom) == FALSE) {
 				FillRect(lpnmcd->hdc, &lpnmcd->rc, GetBackgroundBrush());
 				PaintRoundFrameRect(lpnmcd->hdc, lpnmcd->rc, GetEdgePen(), 0, 0);
 			}
@@ -1272,7 +1271,7 @@ static LRESULT CALLBACK ProgressBarSubclass(
 	switch (uMsg) {
 	case WM_NCDESTROY:
 	{
-		RemoveWindowSubclass(hWnd, ButtonSubclass, uIdSubclass);
+		RemoveWindowSubclass(hWnd, ProgressBarSubclass, uIdSubclass);
 		if (pProgressBarData->hTheme) {
 			CloseThemeData(pProgressBarData->hTheme);
 		}
