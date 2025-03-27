@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 4.7.2227"
+CAPTION "Rufus 4.7.2228"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
@@ -312,6 +312,14 @@ BEGIN
     "IDR_MD5_BOOTARM         RCDATA                  ""../res/md5/bootarm.efi""\r\n"
     "IDR_MD5_BOOTAA64        RCDATA                  ""../res/md5/bootaa64.efi""\r\n"
     "IDR_MD5_BOOTRISCV64     RCDATA                  ""../res/md5/bootriscv64.efi""\r\n"
+    "IDR_MD5_BOOTLOONGARCH64 RCDATA                  ""../res/md5/bootloongarch64.efi""\r\n"
+    "IDR_DBX_IA32            RCDATA                  ""../res/dbx/x86_DBXUpdate.bin""\r\n"
+    "IDR_DBX_X64             RCDATA                  ""../res/dbx/amd64_DBXUpdate.bin""\r\n"
+    "IDR_DBX_ARM             RCDATA                  ""../res/dbx/arm_DBXUpdate.bin""\r\n"
+    "IDR_DBX_AA64            RCDATA                  ""../res/dbx/arm64_DBXUpdate.bin""\r\n"
+    "IDR_DBX_IA64            RCDATA                  ""../res/dbx/ia64_DBXUpdate.bin""\r\n"
+    "IDR_DBX_RISCV64         RCDATA                  ""../res/dbx/riscv64_DBXUpdate.bin""\r\n"
+    "IDR_DBX_LOONGARCH64     RCDATA                  ""../res/dbx/loongarch64_DBXUpdate.bin""\r\n"
     "IDI_LANG_16             RCDATA                  ""../res/icons/lang-16.png""\r\n"
     "IDI_INFO_16             RCDATA                  ""../res/icons/info-16.png""\r\n"
     "IDI_SETTINGS_16         RCDATA                  ""../res/icons/settings-16.png""\r\n"
@@ -399,8 +407,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,7,2227,0
- PRODUCTVERSION 4,7,2227,0
+ FILEVERSION 4,7,2228,0
+ PRODUCTVERSION 4,7,2228,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -418,13 +426,13 @@ BEGIN
             VALUE "Comments", "https://rufus.ie"
             VALUE "CompanyName", "Akeo Consulting"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "4.7.2227"
+            VALUE "FileVersion", "4.7.2228"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2025 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "https://www.gnu.org/licenses/gpl-3.0.html"
             VALUE "OriginalFilename", "rufus-4.7.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "4.7.2227"
+            VALUE "ProductVersion", "4.7.2228"
         END
     END
     BLOCK "VarFileInfo"
@@ -499,6 +507,14 @@ IDR_MD5_BOOTX64         RCDATA                  "../res/md5/bootx64.efi"
 IDR_MD5_BOOTARM         RCDATA                  "../res/md5/bootarm.efi"
 IDR_MD5_BOOTAA64        RCDATA                  "../res/md5/bootaa64.efi"
 IDR_MD5_BOOTRISCV64     RCDATA                  "../res/md5/bootriscv64.efi"
+IDR_MD5_BOOTLOONGARCH64 RCDATA                  "../res/md5/bootloongarch64.efi"
+IDR_DBX_IA32            RCDATA                  "../res/dbx/x86_DBXUpdate.bin"
+IDR_DBX_X64             RCDATA                  "../res/dbx/amd64_DBXUpdate.bin"
+IDR_DBX_ARM             RCDATA                  "../res/dbx/arm_DBXUpdate.bin"
+IDR_DBX_AA64            RCDATA                  "../res/dbx/arm64_DBXUpdate.bin"
+IDR_DBX_IA64            RCDATA                  "../res/dbx/ia64_DBXUpdate.bin"
+IDR_DBX_RISCV64         RCDATA                  "../res/dbx/riscv64_DBXUpdate.bin"
+IDR_DBX_LOONGARCH64     RCDATA                  "../res/dbx/loongarch64_DBXUpdate.bin"
 IDI_LANG_16             RCDATA                  "../res/icons/lang-16.png"
 IDI_INFO_16             RCDATA                  "../res/icons/info-16.png"
 IDI_SETTINGS_16         RCDATA                  "../res/icons/settings-16.png"

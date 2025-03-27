@@ -8,8 +8,11 @@ Or simply download https://files.akeo.ie/pollock/pollock-1.5.exe and follow its 
 o v4.? (????.??.??) ** NOT FINAL!!! PLEASE DO NOT SEND UNSOLICITED TRANSLATIONS! **
   - *NEW*      MSG_350 "Use 'Windows UEFI CA 2023' signed bootloaders [EXPERIMENTAL]"
   - *NEW*      MSG_351 "Checking for UEFI bootloader revocation..."
+  - *NEW*      MSG_352 "Checking for UEFI DBX updates..."
+  - *NEW*      MSG_353 "DBX update available"
+  - *NEW*      MSG_354 "Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks..."
 
-o v4.5 (2024.05.??)
+o v4.5 (2024.05.22)
   - *UPDATED*  IDC_RUFUS_MBR -> IDC_UEFI_MEDIA_VALIDATION "Enable runtime UEFI media validation"
   - *UPDATED*  MSG_167 "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
   - *NEW*      MSG_337 "An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS (...)"

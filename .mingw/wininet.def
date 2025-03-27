@@ -2,6 +2,7 @@ EXPORTS
   HttpQueryInfoA@20
   HttpOpenRequestA@32
   HttpSendRequestA@20
+  HttpAddRequestHeadersA@16
   InternetCloseHandle@4
   InternetConnectA@32
   InternetCrackUrlA@16

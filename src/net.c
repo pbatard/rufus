@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright © 2012-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2025 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <assert.h>
+#include <time.h>
 #include <virtdisk.h>
 
 #include "rufus.h"
@@ -45,6 +46,7 @@
 #include "msapi_utf8.h"
 #include "localization.h"
 #include "bled/bled.h"
+#include "dbx/dbx_info.h"
 
 #include "settings.h"
 
@@ -63,7 +65,8 @@ extern BOOL is_x86_64;
 extern USHORT NativeMachine;
 static DWORD error_code, fido_len = 0;
 static BOOL force_update_check = FALSE;
-static const char* request_headers = "Accept-Encoding: gzip, deflate";
+static const char* request_headers[2] = { "Accept-Encoding: none", "Accept-Encoding: gzip, deflate" };
+extern const char* efi_archname[ARCH_MAX];
 
 #if defined(__MINGW32__)
 #define INetworkListManager_get_IsConnectedToInternet INetworkListManager_IsConnectedToInternet
@@ -168,8 +171,8 @@ out:
  * If hProgressDialog is not NULL, this function will send INIT and EXIT messages
  * to the dialog in question, with WPARAM being set to nonzero for EXIT on success
  * and also attempt to indicate progress using an IDC_PROGRESS control
- * Note that when a buffer is used, the actual size of the buffer is one more than its reported
- * size (with the extra byte set to 0) to accommodate for calls that need a NUL-terminated buffer.
+ * Note that when a buffer is used, the actual size of the buffer is two more than its reported
+ * size (with the extra bytes set to 0) to accommodate for calls that need NUL-terminated data.
  */
 uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char* user_agent,
 	BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress)
@@ -178,12 +181,12 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	const char* short_name;
 	unsigned char buf[DOWNLOAD_BUFFER_SIZE];
 	char hostname[64], urlpath[128], strsize[32];
-	BOOL r = FALSE;
+	BOOL r = FALSE, use_github_api;
 	DWORD dwSize, dwWritten, dwDownloaded;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
-	URL_COMPONENTSA UrlParts = {sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
-		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1};
+	URL_COMPONENTSA UrlParts = { sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
+		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1 };
 	uint64_t size = 0, total_size = 0;
 
 	ErrorStatus = 0;
@@ -224,20 +227,28 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
 		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
 		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_HYPERLINK |
-		((UrlParts.nScheme==INTERNET_SCHEME_HTTPS)?INTERNET_FLAG_SECURE:0), (DWORD_PTR)NULL);
+		((UrlParts.nScheme == INTERNET_SCHEME_HTTPS) ? INTERNET_FLAG_SECURE : 0), (DWORD_PTR)NULL);
 	if (hRequest == NULL) {
 		uprintf("Could not open URL %s: %s", url, WindowsErrorString());
 		goto out;
 	}
 
-	if (!HttpSendRequestA(hRequest, request_headers, -1L, NULL, 0)) {
+	// If we are querying the GitHub API, we need to enable raw content and
+	// set 'Accept-Encoding' to 'none' to get the data length.
+	use_github_api = (strstr(url, "api.github.com") != NULL);
+	if (use_github_api && !HttpAddRequestHeadersA(hRequest, "Accept: application/vnd.github.v3.raw",
+		(DWORD)-1, HTTP_ADDREQ_FLAG_ADD)) {
+		uprintf("Unable to enable raw content from GitHub API: %s", WindowsErrorString());
+		goto out;
+	}
+	if (!HttpSendRequestA(hRequest, request_headers[use_github_api ? 0 : 1], -1L, NULL, 0)) {
 		uprintf("Unable to send request: %s", WindowsErrorString());
 		goto out;
 	}
 
 	// Get the file size
 	dwSize = sizeof(DownloadStatus);
-	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
+	HttpQueryInfoA(hRequest, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&DownloadStatus, &dwSize, NULL);
 	if (DownloadStatus != 200) {
 		error_code = ERROR_INTERNET_ITEM_NOT_FOUND;
 		SetLastError(RUFUS_ERROR(error_code));
@@ -272,7 +283,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 			goto out;
 		}
 		// Allocate one extra byte, so that caller can rely on NUL-terminated text if needed
-		*buffer = calloc((size_t)total_size + 1, 1);
+		*buffer = calloc((size_t)total_size + 2, 1);
 		if (*buffer == NULL) {
 			uprintf("Could not allocate buffer for download");
 			goto out;
@@ -437,8 +448,87 @@ static __inline uint64_t to_uint64_t(uint16_t x[3]) {
 	return ret;
 }
 
+BOOL UseLocalDbx(int arch)
+{
+	char reg_name[32];
+	static_sprintf(reg_name, "DBXTimestamp_%s", efi_archname[arch]);
+	return (uint64_t)ReadSetting64(reg_name) > dbx_info[arch - 1].timestamp;
+}
+
+static void CheckForDBXUpdates(int verbose)
+{
+	int i, r;
+	char reg_name[32], timestamp_url[256], path[MAX_PATH];
+	char *p, *c, *rep, *buf = NULL;
+	struct tm t = { 0 };
+	uint64_t size, timestamp;
+	BOOL already_prompted = FALSE;
+
+	for (i = 0; i < ARRAYSIZE(dbx_info); i++) {
+		// Get the epoch of the last commit
+		timestamp = 0;
+		static_strcpy(timestamp_url, dbx_info[i].url);
+		p = strstr(timestamp_url, "contents/");
+		if (p == NULL)
+			continue;
+		*p = 0;
+		rep = replace_char(&p[9], '/', "%2F");
+		static_strcat(timestamp_url, "commits?path=");
+		static_strcat(timestamp_url, rep);
+		free(rep);
+		static_strcat(timestamp_url, "&page=1&per_page=1");
+		vuprintf("Querying %s for DBX update timestamp", timestamp_url);
+		size = DownloadToFileOrBuffer(timestamp_url, NULL, (BYTE**)&buf, NULL, FALSE);
+		if (size == 0)
+			continue;
+		// Assumes that the GitHub JSON commit dates are of the form:
+		// "date":[ ]*"2025-02-24T20:20:22Z"
+		p = strstr(buf, "\"date\":");
+		if (p == NULL) {
+			safe_free(buf);
+			continue;
+		}
+		c = &p[7];
+		while (*c == ' ' || *c == '"')
+			c++;
+		p = c;
+		while (*c != '"' && *c != '\0')
+			c++;
+		*c = 0;
+		// "Thank you, X3J11 ANSI committee, for introducing the well thought through 'struct tm'", said ABSOLUTELY NOONE ever!
+		r = sscanf(p, "%d-%d-%dT%d:%d:%dZ", &t.tm_year, &t.tm_mon, &t.tm_mday, &t.tm_hour, &t.tm_min, &t.tm_sec);
+		safe_free(buf);
+		if (r != 6)
+			continue;
+		t.tm_year -= 1900;
+		t.tm_mon -= 1;
+		timestamp = _mktime64(&t);
+		vuprintf("DBX update timestamp is %" PRId64, timestamp);
+		static_sprintf(reg_name, "DBXTimestamp_%s", efi_archname[i + 1]);
+		// Check if we have an external DBX that is newer than embedded/last downloaded
+		if (timestamp <= MAX(dbx_info[i].timestamp, (uint64_t)ReadSetting64(reg_name)))
+			continue;
+		if (!already_prompted) {
+			r = MessageBoxExU(hMainDialog, lmprintf(MSG_354), lmprintf(MSG_353),
+				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+			already_prompted = TRUE;
+			if (r != IDYES)
+				break;
+			IGNORE_RETVAL(_chdirU(app_data_dir));
+			IGNORE_RETVAL(_mkdir(FILES_DIR));
+			IGNORE_RETVAL(_chdir(FILES_DIR));
+		}
+		static_sprintf(path, "%s\\%s\\dbx_%s.bin", app_data_dir, FILES_DIR, efi_archname[i + 1]);
+		if (DownloadToFileOrBuffer(dbx_info[i].url, path, NULL, NULL, FALSE) != 0) {
+			WriteSetting64(reg_name, timestamp);
+			uprintf("Saved %s as 'dbx_%s.bin'", dbx_info[i].url, efi_archname[i + 1]);
+		} else
+			uprintf("Warning: Failed to download %s", dbx_info[i].url);
+	}
+}
+
 /*
- * Background thread to check for updates
+ * Background thread to check for updates (including UEFI DBX updates)
  */
 static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 {
@@ -491,6 +581,10 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 			}
 		}
 	}
+
+	// Perform the DBX Update check
+	PrintInfoDebug(3000, MSG_352);
+	CheckForDBXUpdates(verbose);
 
 	PrintInfoDebug(3000, MSG_243);
 	status++;	// 1
@@ -549,13 +643,13 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 
 		UrlParts.lpszUrlPath = urlpath;
 		UrlParts.dwUrlPathLength = sizeof(urlpath);
-		for (i=0; i<ARRAYSIZE(verpos); i++) {
+		for (i = 0; i < ARRAYSIZE(verpos); i++) {
 			vvuprintf("Trying %s", UrlParts.lpszUrlPath);
 			hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
-				INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP|INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS|
-				INTERNET_FLAG_NO_COOKIES|INTERNET_FLAG_NO_UI|INTERNET_FLAG_NO_CACHE_WRITE|INTERNET_FLAG_HYPERLINK|
-				((UrlParts.nScheme == INTERNET_SCHEME_HTTPS)?INTERNET_FLAG_SECURE:0), (DWORD_PTR)NULL);
-			if ((hRequest == NULL) || (!HttpSendRequestA(hRequest, request_headers, -1L, NULL, 0))) {
+				INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
+				INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_HYPERLINK |
+				((UrlParts.nScheme == INTERNET_SCHEME_HTTPS) ? INTERNET_FLAG_SECURE : 0), (DWORD_PTR)NULL);
+			if ((hRequest == NULL) || (!HttpSendRequestA(hRequest, request_headers[1], -1L, NULL, 0))) {
 				uprintf("Unable to send request: %s", WindowsErrorString());
 				goto out;
 			}
@@ -929,7 +1023,7 @@ BOOL IsDownloadable(const char* url)
 	if (hRequest == NULL)
 		goto out;
 
-	if (!HttpSendRequestA(hRequest, request_headers, -1L, NULL, 0))
+	if (!HttpSendRequestA(hRequest, request_headers[1], -1L, NULL, 0))
 		goto out;
 
 	// Get the file size

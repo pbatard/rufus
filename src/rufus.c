@@ -1162,6 +1162,30 @@ static void UpdateImage(BOOL update_image_option_only)
 	IGNORE_RETVAL(ComboBox_SetCurSel(hImageOption, imop_win_sel));
 }
 
+enum ArchType MachineToArch(WORD machine)
+{
+	switch (machine) {
+	case IMAGE_FILE_MACHINE_I386:
+		return ARCH_X86_32;
+	case IMAGE_FILE_MACHINE_AMD64:
+		return ARCH_X86_64;
+	case IMAGE_FILE_MACHINE_ARM:
+		return ARCH_ARM_32;
+	case IMAGE_FILE_MACHINE_ARM64:
+		return ARCH_ARM_64;
+	case IMAGE_FILE_MACHINE_IA64:
+		return ARCH_IA_64;
+	case IMAGE_FILE_MACHINE_RISCV64:
+		return ARCH_RISCV_64;
+	case IMAGE_FILE_MACHINE_LOONGARCH64:
+		return ARCH_LOONGARCH_64;
+	case IMAGE_FILE_MACHINE_EBC:
+		return ARCH_EBC;
+	default:
+		return ARCH_UNKNOWN;
+	}
+}
+
 /// <summary>
 /// Parse a PE executable file and return its CPU architecture.
 /// </summary>
@@ -1203,36 +1227,14 @@ static uint8_t FindArch(const char* path)
 		goto out;
 	}
 
-	switch (pImageNTHeader->FileHeader.Machine) {
-	case IMAGE_FILE_MACHINE_I386:
-		ret = ARCH_X86_32;
-		break;
-	case IMAGE_FILE_MACHINE_AMD64:
-		ret = ARCH_X86_64;
-		break;
-	case IMAGE_FILE_MACHINE_ARM:
-		ret = ARCH_ARM_32;
-		break;
-	case IMAGE_FILE_MACHINE_ARM64:
-		ret = ARCH_ARM_64;
-		break;
-	case IMAGE_FILE_MACHINE_IA64:
-		ret = ARCH_IA_64;
-		break;
-	case IMAGE_FILE_MACHINE_RISCV64:
-		ret = ARCH_RISCV_64;
-		break;
-	case IMAGE_FILE_MACHINE_EBC:
-		ret = ARCH_EBC;
-		break;
-	}
+	ret = MachineToArch(pImageNTHeader->FileHeader.Machine);
 
 out:
 	if (pImageDOSHeader != NULL)
 		UnmapViewOfFile(pImageDOSHeader);
 	safe_closehandle(hFileMapping);
 	safe_closehandle(hFile);
-	assert(ret < ARCH_MAX);
+	assert(ret != 0 && ret < ARCH_MAX);
 	return ret;
 }
 
@@ -2101,7 +2103,6 @@ static void InitDialog(HWND hDlg)
 			"one. Because of this, some messages will only be displayed in English.", selected_locale->txt[1]);
 		uprintf("If you think you can help update this translation, please e-mail the author of this application");
 	}
-	PrintRevokedBootloaderInfo();
 	// Detect and report system limitations
 	if (ReadRegistryKeyBool(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Policies\\Microsoft\\FVE"))
 		uprintf("WARNING: This system has a policy set to prevent write access to FIXED drives not using BitLocker");

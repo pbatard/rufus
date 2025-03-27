@@ -71,13 +71,22 @@
 #define IDR_UEFI_NTFS                   502
 #define IDR_SETUP_X64                   503
 #define IDR_SETUP_ARM64                 504
-// The following should match the ArchType array values + 600
+// The following should match the ArchType array values +600/+700
 #define IDR_MD5_BOOT                    600
 #define IDR_MD5_BOOTIA32                601
 #define IDR_MD5_BOOTX64                 602
 #define IDR_MD5_BOOTARM                 603
 #define IDR_MD5_BOOTAA64                604
-#define IDR_MD5_BOOTRISCV64             607
+#define IDR_MD5_BOOTRISCV64             606
+#define IDR_MD5_BOOTLOONGARCH64         607
+#define IDR_DBX                         700
+#define IDR_DBX_IA32                    701
+#define IDR_DBX_X64                     702
+#define IDR_DBX_ARM                     703
+#define IDR_DBX_AA64                    704
+#define IDR_DBX_IA64                    705
+#define IDR_DBX_RISCV64                 706
+#define IDR_DBX_LOONGARCH64             707
 #define IDM_SELECT                      901
 #define IDM_DOWNLOAD                    902
 #define IDC_DEVICE                      1001
@@ -605,7 +614,7 @@
 #define MSG_MAX                         3400
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
