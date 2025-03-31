@@ -405,10 +405,14 @@ static BOOL IsRefsAvailable(MEDIA_TYPE MediaType)
 	// Microsoft in Windows 10 1709, except for the Enterprise and Pro Workstation
 	// versions. Oh and VdsService::QueryFileSystemTypes() is *USELESS* to detect
 	// if ReFS is available on the system. Oh, and it only applies to fixed media.
+	// Oh and Microsoft removed the ability to format a volume to ReFS unless you
+	// use VDS... Why do I even bother with this?
 
 	if (MediaType != FixedMedia)
 		return FALSE;
 	if (WindowsVersion.Version < WINDOWS_8_1 || WindowsVersion.BuildNumber <= 0)
+		return FALSE;
+	if (!use_vds)
 		return FALSE;
 	// Per https://gist.github.com/0xbadfca11/da0598e47dd643d933dc
 	if (WindowsVersion.BuildNumber < 16226)
@@ -4051,6 +4055,7 @@ extern int TestHashes(void);
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'V')) {
 				if (is_vds_available) {
 					use_vds = !use_vds;
+					SetFileSystemAndClusterSize(NULL);
 					WriteSettingBool(SETTING_USE_VDS, use_vds);
 					PrintStatusTimeout("VDS", use_vds);
 				}
