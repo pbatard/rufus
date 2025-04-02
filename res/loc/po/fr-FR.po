@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-04-25 12:25+0100\n"
-"PO-Revision-Date: 2024-12-17 14:54+0100\n"
+"POT-Creation-Date: 2025-04-02 11:34+0100\n"
+"PO-Revision-Date: 2025-04-02 11:51+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: French (Français)\n"
 "X-Rufus-LCID: 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.6\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1080,7 +1080,7 @@ msgid "Version %d.%d (Build %d)"
 msgstr ""
 
 #. • MSG_176
-msgid "mailto:support@akeo.ie"
+msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
 msgstr "Traduction Française : Pete Batard <mailto:pete@akeo.ie>"
 
 #. • MSG_177
@@ -1913,6 +1913,36 @@ msgstr "Extraction d'archive : %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Utilisation du MBR Rufus"
+
+#. • MSG_350
+msgid "Use 'Windows UEFI CA 2023' signed bootloaders [EXPERIMENTAL]"
+msgstr "Utiliser les bootloaders signés par 'Windows UEFI CA 2023' [EXPÉRIMENTAL]"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "Vérification de la revocation des bootloaders UEFI..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "Vérification des mises à jour de DBX UEFI..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "Mise à jour DBX disponible"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus a trouvé une mise à jour des fichiers DBX utilisés pour effectuer la validation des revocations Secure Boot sous UEFI. Voulez-vous télécharger cette mise à jour ?\n"
+"- Sélectionnez 'Oui' pour vous connecter à Internet et le télécharger ce contenu\n"
+"- Sélectionnez 'Non' pour annuler l’opération\n"
+"\n"
+"Note : Ces fichiers seront téléchargés dans le répertoire de l'application et réutilisés automatiquement si ils sont présent."
 
 #. • MSG_900
 #.

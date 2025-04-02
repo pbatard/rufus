@@ -1,3 +1,16 @@
+o Version 4.7 (2025.04.??)
+    Add a mechanism to detect and download updated DBXs from the official UEFI repository
+    Add ztsd compression support for disk images
+    Add a new exclusion feature in the settings, to ignore disks with a specific GPT GUID
+    Improve detection for compressed VHD images that are too large to fit the target drive
+    Fix commandline hogger not being deleted when running Rufus from a different directory
+    Fix FAT filenames from embedded images being potentially truncated on image extraction
+    Fix a side-loading vulnerability [CVE-2025-26624] with cfgmgr32.dll (with thanks to @EmperialX)
+    Fix UI memory leaks (courtesy of @ozone10)
+    Fall back to user/system default locale when getting error description (courtesy of @Rairii)
+    Don't run the commandline hogger on POSIX shells
+    Drop ARM 32-bit support (Note that ARM 64-bit support is *NOT* affected by this)
+
 o Version 4.6 (2024.10.21)
     Add a new setup.exe wrapper to bypass Windows 11 24H2 in-place upgrade restrictions
     Add TimeZone to regional options replication

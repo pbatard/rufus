@@ -29,7 +29,7 @@ set WDK_PATH=C:\Program Files (x86)\Windows Kits\10\bin\10.0.22000.0\x64
 set ZIP_PATH=C:\Program Files\7-Zip
 set SIGNATURE_SHA1=fc4686753937a93fdcd48c2bb4375e239af92dcb
 set MANIFEST=AppxManifest.xml
-set ARCHS=x86 x64 arm arm64
+set ARCHS=x86 x64 arm64
 set DEFAULT_SCALE=200
 set OTHER_SCALES=100 125 150 400
 set SCALED_IMAGES=LargeTile SmallTile Square44x44Logo Square150x150Logo StoreLogo Wide310x150Logo
@@ -69,25 +69,25 @@ for %%a in (%ARCHS%) do (
   )
 )
 
-rem exiftool.exe can't be installed in the Windows system directories...
-if not exist exiftool.exe (
-  echo exiftool.exe must exist in this directory
+rem Use our own get_pe_info executable - source is in this directory
+if not exist get_pe_info.exe (
+  echo get_pe_info.exe must exist in this directory. Compile it with MinGW.
   goto out
 )
 
 rem Make sure we're not trying to create a package from an ALPHA or BETA version!
-exiftool -s3 -*InternalName* rufus_x64.exe | findstr /C:"ALPHA" 1>nul && (
+get_pe_info.exe -i rufus_x64.exe | findstr /C:"ALPHA" 1>nul && (
   echo Alpha version detected - ABORTED
   goto out
 )
-exiftool -s3 -*InternalName* rufus_x64.exe | findstr /C:"BETA" 1>nul && (
+get_pe_info.exe -i rufus_x64.exe | findstr /C:"BETA" 1>nul && (
   echo Beta version detected - ABORTED
   goto out
 )
 
 rem Populate the version from the executable
 if "%VERSION_OVERRIDE%"=="" (
-  exiftool -s3 -*FileVersionNumber* rufus_x64.exe > version.txt
+  get_pe_info.exe -v rufus_x64.exe > version.txt
   set /p VERSION=<version.txt
   del version.txt
 ) else (
