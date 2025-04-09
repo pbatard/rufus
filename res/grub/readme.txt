@@ -1,6 +1,6 @@
 This directory contains the Grub4DOS boot records that are used by Rufus
 
-* grldr.mbr was taken from the official 2023-03-06 release from
+* grldr.mbr was taken from the official 2024-02-26 release from
   https://github.com/chenall/grub4dos/releases/tag/0.4.6a
 
 * Note that, for convenience reasons, the first 512 bytes from this grldr.mbr are

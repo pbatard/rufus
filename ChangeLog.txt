@@ -1,4 +1,4 @@
-o Version 4.7 (2025.04.??)
+o Version 4.7 (2025.04.09)
     Add a mechanism to detect and download updated DBXs from the official UEFI repository
     Add ztsd compression support for disk images
     Add a new exclusion feature in the settings, to ignore disks with a specific GPT GUID
@@ -7,9 +7,10 @@ o Version 4.7 (2025.04.??)
     Fix FAT filenames from embedded images being potentially truncated on image extraction
     Fix a side-loading vulnerability [CVE-2025-26624] with cfgmgr32.dll (with thanks to @EmperialX)
     Fix UI memory leaks (courtesy of @ozone10)
-    Fall back to user/system default locale when getting error description (courtesy of @Rairii)
+    Fall back to user/system default locale when getting error description (courtesy of @Wack0)
     Don't run the commandline hogger on POSIX shells
-    Drop ARM 32-bit support (Note that ARM 64-bit support is *NOT* affected by this)
+    Drop ARM 32-bit builds (Note that ARM 64-bit builds are *NOT* affected by this)
+    Update FreeDOS and Grub4DOS to latest
 
 o Version 4.6 (2024.10.21)
     Add a new setup.exe wrapper to bypass Windows 11 24H2 in-place upgrade restrictions

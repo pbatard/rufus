@@ -1,5 +1,5 @@
-All of the executables found in this repository where extracted from:
-https://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.3/official/FD13-FullUSB.zip
+All of the executables found in this repository where extracted from FreeDOS v1.4:
+https://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.4/FD14-FullUSB.zip
 
 o COMMAND.COM was extracted from packages\base\freecom.zip
 o DISPLAY.EXE was extracted from packages\base\display.zip
