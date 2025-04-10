@@ -291,6 +291,11 @@ BOOL ChangeIconColor(HICON* hIcon, COLORREF newColor) {
 					if (hbm) {
 						SetDIBits(hdcBitmap, hbm, 0, bm.bmHeight, pixels, &bmi, DIB_RGB_COLORS);
 
+						if (ii.hbmColor) {
+							DeleteObject(ii.hbmColor);
+							ii.hbmColor = NULL;
+						}
+
 						ii.hbmColor = hbm;
 						hIconNew = CreateIconIndirect(&ii);
 					}
@@ -1333,7 +1338,7 @@ static LRESULT CALLBACK ProgressBarSubclass(
 		EndPaint(hWnd, &ps);
 
 		return 0;
-		
+
 	}
 	}
 	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
