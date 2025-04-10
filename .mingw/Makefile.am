@@ -21,7 +21,7 @@ DEF_SUFFIX    := $(if $(TARGET:x86_64=),.def,.def64)
 
 .PHONY: all
 # Ideally, we would also have cfgmgr32-delaylib here, but it doesn't actually delay load... :(
-all: dwmapi-delaylib.lib version-delaylib.lib virtdisk-delaylib.lib wininet-delaylib.lib wintrust-delaylib.lib
+all: dwmapi-delaylib.lib version-delaylib.lib virtdisk-delaylib.lib wininet-delaylib.lib wintrust-delaylib.lib uxtheme-delaylib.lib
 
 %.def64: %.def
 	$(AM_V_SED) "s/@.*//" $< >$@
