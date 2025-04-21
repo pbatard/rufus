@@ -180,8 +180,8 @@ blob_release_location(struct blob_descriptor *blob)
 			      (void*)&blob->staging_file_name);
 #endif
 	case BLOB_IN_ATTACHED_BUFFER:
-		STATIC_ASSERT((void*)&blob->file_on_disk ==
-			      (void*)&blob->attached_buffer);
+		STATIC_ASSERT(offsetof(struct blob_descriptor, file_on_disk) ==
+			offsetof(struct blob_descriptor, attached_buffer));
 		FREE(blob->file_on_disk);
 		break;
 #ifdef _WIN32
@@ -570,6 +570,7 @@ for_blob_in_table_sorted_by_sequential_order(struct blob_table *table,
  * Note: if the WIM file contains solid resource(s), then this structure is
  * sometimes overloaded to describe a "resource" rather than a "blob".  See the
  * code for details.  */
+PRAGMA_BEGIN_PACKED
 struct blob_descriptor_disk {
 
 	/* Size, offset, and flags of the blob.  */
@@ -586,6 +587,7 @@ struct blob_descriptor_disk {
 	 * zeroes if this blob is of zero length.  */
 	u8 hash[SHA1_HASH_SIZE];
 } __attribute__((packed));
+PRAGMA_END_PACKED
 
 /* Given a nonempty run of consecutive blob descriptors with the SOLID flag set,
  * count how many specify resources (as opposed to blobs within those
@@ -1178,7 +1180,7 @@ write_blob_table_from_blob_list(struct list_head *blob_list,
 	logical_offset = 0;
 	list_for_each_entry(blob, blob_list, blob_table_list) {
 		if (blob->out_reshdr.flags & WIM_RESHDR_FLAG_SOLID) {
-			struct wim_reshdr tmp_reshdr;
+			struct wim_reshdr tmp_reshdr = { 0 };
 
 			/* Eww.  When WIMGAPI sees multiple solid resources, it
 			 * expects the offsets to be adjusted as if there were

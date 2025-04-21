@@ -38,7 +38,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(__i386__) || defined(__x86_64__)
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
 
 /*
  * With old GCC versions we have to manually save and restore the x86_32 PIC
@@ -49,6 +49,24 @@
 #else
 #  define EBX_CONSTRAINT "=b"
 #endif
+
+#if defined(_MSC_VER)
+#include <intrin.h>
+
+#define read_xcr _xgetbv
+
+static inline void
+cpuid(u32 leaf, u32 subleaf, u32* a, u32* b, u32* c, u32* d)
+{
+	int regs[4];
+	__cpuidex(regs, leaf, subleaf);
+	*a = (uint32_t)regs[0];
+	*b = (uint32_t)regs[1];
+	*c = (uint32_t)regs[2];
+	*d = (uint32_t)regs[3];
+}
+
+#else
 
 /* Execute the CPUID instruction. */
 static inline void
@@ -79,6 +97,7 @@ read_xcr(u32 index)
 
 	return ((u64)d << 32) | a;
 }
+#endif
 
 static u32
 get_cpu_features(void)
@@ -225,7 +244,7 @@ get_cpu_features(void)
 	return features;
 }
 
-#elif defined(__aarch64__) && defined(_WIN32)
+#elif (defined(__aarch64__) || (defined(_M_ARM64)) && defined(_WIN32))
 
 #include <windows.h>
 
@@ -248,7 +267,7 @@ static const struct {
 	const char *name;
 	u32 feature;
 } feature_table[] = {
-#if defined(__i386__) || defined(__x86_64__)
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
 	{"ssse3",	X86_CPU_FEATURE_SSSE3},
 	{"sse4.1",	X86_CPU_FEATURE_SSE4_1},
 	{"sse4.2",	X86_CPU_FEATURE_SSE4_2},
@@ -256,7 +275,7 @@ static const struct {
 	{"bmi2",	X86_CPU_FEATURE_BMI2},
 	{"sha",		X86_CPU_FEATURE_SHA},
 	{"sha1",	X86_CPU_FEATURE_SHA},
-#elif defined(__aarch64__)
+#elif defined(__aarch64__) || defined(_M_ARM64)
 	{"sha1",	ARM_CPU_FEATURE_SHA1},
 #else
 #  error "CPU_FEATURES_ENABLED was set but no features are defined!"

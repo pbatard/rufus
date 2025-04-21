@@ -428,7 +428,7 @@ win32_rename_replacement(const wchar_t *srcpath, const wchar_t *dstpath)
 	 * which on Windows will in fact not actually delete it immediately but
 	 * rather mark it for deletion when the last handle to it is closed.  */
 	{
-		static const wchar_t orig_suffix[5] = L".orig";
+		static const wchar_t orig_suffix[] = L".orig";
 		const size_t num_rand_chars = 9;
 		wchar_t *p;
 
@@ -477,7 +477,7 @@ do_pread_or_pwrite(int fd, void *buf, size_t count, off_t offset,
 	HANDLE h;
 	LARGE_INTEGER orig_offset;
 	DWORD result = 0xFFFFFFFF;
-	LARGE_INTEGER relative_offset;
+	LARGE_INTEGER relative_offset = { 0 };
 	OVERLAPPED overlapped;
 	BOOL bret;
 	DWORD err = 0;
@@ -754,7 +754,7 @@ get_random_bytes(void *p, size_t n)
 			wimlib_assert(0);
 			count = 0;
 		}
-		p += count;
+		p = _PTR(p + count);
 		n -= count;
 	}
 }

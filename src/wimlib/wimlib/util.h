@@ -87,6 +87,7 @@ memdup(const void *mem, size_t size);
 #ifndef HAVE_MEMPCPY
 void *
 mempcpy(void *dst, const void *src, size_t n);
+#define wmempcpy(d, s, n) mempcpy(d, s, (n) * sizeof(wchar_t))
 #endif
 
 /**************************
@@ -107,7 +108,6 @@ static inline bool
 is_power_of_2(unsigned long n)
 {
 	return (n != 0 && (n & (n - 1)) == 0);
-
 }
 
 static inline u64

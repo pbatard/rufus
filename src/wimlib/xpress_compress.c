@@ -98,8 +98,8 @@ struct xpress_item;
 struct xpress_compressor {
 
 	/* Pointer to the compress() implementation chosen at allocation time */
-	size_t (*impl)(struct xpress_compressor *,
-		       const void *, size_t, void *, size_t);
+	size_t (*impl)(struct xpress_compressor * restrict,
+		       const void * restrict, size_t, void *, size_t);
 
 	/* Symbol frequency counters for the Huffman code  */
 	u32 freqs[XPRESS_NUM_SYMBOLS];
@@ -529,7 +529,7 @@ xpress_compress_greedy(struct xpress_compressor * restrict c,
 	const u8 * const in_end = in_begin + in_nbytes;
 	struct xpress_item *next_chosen_item = c->chosen_items;
 	unsigned len_3_too_far;
-	u32 next_hashes[2] = {};
+	u32 next_hashes[2] = { 0 };
 
 	if (in_nbytes <= 8192)
 		len_3_too_far = 2048;
@@ -592,7 +592,7 @@ xpress_compress_lazy(struct xpress_compressor * restrict c,
 	const u8 * const in_end = in_begin + in_nbytes;
 	struct xpress_item *next_chosen_item = c->chosen_items;
 	unsigned len_3_too_far;
-	u32 next_hashes[2] = {};
+	u32 next_hashes[2] = { 0 };
 
 	if (in_nbytes <= 8192)
 		len_3_too_far = 2048;
@@ -907,7 +907,7 @@ xpress_find_matches(struct xpress_compressor * restrict c,
 	const u8 * const in_begin = in;
 	const u8 *in_next = in_begin;
 	struct lz_match *cache_ptr = c->match_cache;
-	u32 next_hashes[2] = {};
+	u32 next_hashes[2] = { 0 };
 	u32 max_len = in_nbytes;
 	u32 nice_len = min(max_len, c->nice_match_length);
 

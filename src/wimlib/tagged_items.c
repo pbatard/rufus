@@ -36,6 +36,7 @@
  * Header that begins each tagged metadata item associated with a file in a WIM
  * metadata resource
  */
+PRAGMA_BEGIN_ALIGN(8)
 struct tagged_item_header {
 
 	/* identifies the type of metadata item (see TAG_* constants) */
@@ -48,7 +49,7 @@ struct tagged_item_header {
 	u8 data[0];
 
 	/* then zero-padded to an 8-byte boundary */
-} __attribute__((aligned(8)));
+} PRAGMA_END_ALIGN(8);
 
 /*
  * Retrieve from @inode the first metadata item that is tagged with @tag and

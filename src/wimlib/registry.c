@@ -114,6 +114,7 @@ struct vk {
 	le16 name_size;
 	le32 data_size;
 	le32 data_offset;
+#ifndef _WIN32
 #define REG_NONE			cpu_to_le32(0)
 #define REG_SZ				cpu_to_le32(1)
 #define REG_EXPAND_SZ			cpu_to_le32(2)
@@ -128,6 +129,7 @@ struct vk {
 #define REG_RESOURCE_REQUIREMENTS_LIST	cpu_to_le32(10)
 #define REG_QWORD			cpu_to_le32(11)
 #define REG_QWORD_LITTLE_ENDIAN		cpu_to_le32(11)
+#endif
 	le32 data_type;
 #define VK_COMPRESSED_NAME		cpu_to_le16(0x0001)
 	le16 flags;

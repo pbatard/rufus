@@ -182,8 +182,13 @@ list_splice_tail(struct list_head *list, struct list_head *head)
  * @type:	the type of the struct this is embedded in.
  * @member:	the name of the list_struct within the struct.
  */
+#ifdef _MSC_VER
+#define list_entry(ptr, type, member) \
+	((type *)((uintptr_t)(ptr) - (uintptr_t)offsetof(type, member)))
+#else
 #define list_entry(ptr, type, member) \
 	container_of(ptr, type, member)
+#endif
 
 /**
  * list_first_entry - get the first element from a list
@@ -324,10 +329,15 @@ hlist_add_head(struct hlist_node *n, struct hlist_head *h)
 
 #define hlist_entry(ptr, type, member) container_of(ptr,type,member)
 
+#ifdef _MSC_VER
+#define hlist_entry_safe(ptr, type, member) \
+	( (ptr) ? hlist_entry(ptr, type, member) : NULL )
+#else
 #define hlist_entry_safe(ptr, type, member) \
 	({ typeof(ptr) ____ptr = (ptr); \
 	   ____ptr ? hlist_entry(____ptr, type, member) : NULL; \
 	})
+#endif
 
 /**
  * hlist_for_each_entry	- iterate over list of given type
@@ -349,7 +359,7 @@ hlist_add_head(struct hlist_node *n, struct hlist_head *h)
  */
 #define hlist_for_each_entry_safe(pos, n, head, member) 		\
 	for (pos = hlist_entry_safe((head)->first, typeof(*pos), member);\
-	     pos && ({ n = pos->member.next; 1; });			\
+	     pos && ((n = pos->member.next) - n + 1);			\
 	     pos = hlist_entry_safe(n, typeof(*pos), member))
 
 #endif /* _WIMLIB_LIST_H */

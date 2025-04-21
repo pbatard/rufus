@@ -29,6 +29,7 @@
 
 #include <string.h>
 
+#include "wimlib/assert.h"
 #include "wimlib/error.h"
 #include "wimlib/test_support.h"
 #include "wimlib/util.h"
@@ -705,6 +706,9 @@ static void
 xml_write_element(struct xml_node *element, struct xml_out_buf *buf)
 {
 	struct xml_node *child;
+	wimlib_assert(element != NULL);
+	if (element == NULL)
+		return;
 
 	/* Write the start tag. */
 	xml_puts(buf, T("<"));

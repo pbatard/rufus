@@ -588,7 +588,7 @@ lzms_init_huffman_codes(struct lzms_decompressor *d, unsigned num_offset_slots)
 			       LZMS_DELTA_POWER_TABLEBITS);
 }
 
-static noinline void
+static _noinline void
 lzms_rebuild_huffman_code(struct lzms_huffman_rebuild_info *rebuild_info)
 {
 	lzms_build_huffman_code(rebuild_info);
@@ -721,7 +721,7 @@ lzms_decompress(const void * const restrict in, const size_t in_nbytes,
 {
 	struct lzms_decompressor *d = _d;
 	u8 *out_next = out;
-	u8 * const out_end = out + out_nbytes;
+	u8 * const out_end = _PTR(out + out_nbytes);
 	struct lzms_range_decoder rd;
 	struct lzms_input_bitstream is;
 
@@ -742,8 +742,8 @@ lzms_decompress(const void * const restrict in, const size_t in_nbytes,
 	u32 match_state = 0;
 	u32 lz_state = 0;
 	u32 delta_state = 0;
-	u32 lz_rep_states[LZMS_NUM_LZ_REP_DECISIONS] = {};
-	u32 delta_rep_states[LZMS_NUM_DELTA_REP_DECISIONS] = {};
+	u32 lz_rep_states[LZMS_NUM_LZ_REP_DECISIONS] = { 0 };
+	u32 delta_rep_states[LZMS_NUM_DELTA_REP_DECISIONS] = { 0 };
 
 	/*
 	 * Requirements on the compressed data:

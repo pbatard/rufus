@@ -75,7 +75,7 @@ static inline tchar *
 progress_get_win32_path(const tchar *path)
 {
 #ifdef _WIN32
-	if (!wcsncmp(path, L"\\??\\", 4)) {
+	if (path != NULL && !wcsncmp(path, L"\\??\\", 4)) {
 		((wchar_t *)path)[1] = L'\\';
 		return (wchar_t *)&path[1];
 	}

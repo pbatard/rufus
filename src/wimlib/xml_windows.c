@@ -348,10 +348,11 @@ language_id_to_name(u16 id)
 	return NULL;
 }
 
+#ifndef _WIN32
 /* PE binary processor architecture codes (common ones only)  */
 #define IMAGE_FILE_MACHINE_I386		0x014C
 #define IMAGE_FILE_MACHINE_ARM		0x01C0
-#define IMAGE_FILE_MACHINE_ARMV7	0x01C4
+#define IMAGE_FILE_MACHINE_ARMNT	0x01C4
 #define IMAGE_FILE_MACHINE_THUMB	0x01C2
 #define IMAGE_FILE_MACHINE_IA64		0x0200
 #define IMAGE_FILE_MACHINE_AMD64	0x8664
@@ -363,6 +364,7 @@ language_id_to_name(u16 id)
 #define PROCESSOR_ARCHITECTURE_IA64	6
 #define PROCESSOR_ARCHITECTURE_AMD64	9
 #define PROCESSOR_ARCHITECTURE_ARM64	12
+#endif
 
 /* Translate a processor architecture code as given in a PE binary to the code
  * used by the Windows API.  Returns -1 if the code is not recognized.  */
@@ -373,7 +375,7 @@ pe_arch_to_windows_arch(unsigned pe_arch)
 	case IMAGE_FILE_MACHINE_I386:
 		return PROCESSOR_ARCHITECTURE_INTEL;
 	case IMAGE_FILE_MACHINE_ARM:
-	case IMAGE_FILE_MACHINE_ARMV7:
+	case IMAGE_FILE_MACHINE_ARMNT:
 	case IMAGE_FILE_MACHINE_THUMB:
 		return PROCESSOR_ARCHITECTURE_ARM;
 	case IMAGE_FILE_MACHINE_IA64:
@@ -536,7 +538,7 @@ set_default_language(struct windows_info_ctx *ctx, const struct regf *regf)
 		const char *language_name = language_id_to_name(language_id);
 		if (language_name) {
 			size_t len = strlen(language_name);
-			tchar tstr[len + 1];
+			tchar *tstr = alloca((len + 1) * sizeof(tchar));
 			for (size_t i = 0; i <= len; i++)
 				tstr[i] = language_name[i];
 			set_string_property(ctx, T("WINDOWS/LANGUAGES/DEFAULT"),

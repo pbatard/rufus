@@ -7,6 +7,7 @@
 
 #ifdef _WIN32
 
+#include <unistd.h>
 #include "wimlib/types.h"
 
 struct blob_descriptor;

@@ -1383,8 +1383,7 @@ extract_blob_to_fd(struct blob_descriptor *blob, struct filedes *fd,
 int
 sha1_blob(struct blob_descriptor *blob)
 {
-	static const struct read_blob_callbacks cbs = {
-	};
+	static const struct read_blob_callbacks cbs = { 0 };
 	return read_blob_with_sha1(blob, &cbs, false);
 }
 

@@ -173,7 +173,12 @@ do_xml_path_walk(struct xml_node *element, const tchar *path, bool create,
 		 struct xml_node **result_ret)
 {
 	size_t n = tstrlen(path) + 1;
+#ifdef _RUFUS
+	wimlib_assert(n < MAX_PATH);
+	tchar buf[MAX_PATH];
+#else
 	tchar buf[n];
+#endif
 	tchar *p;
 	tchar c;
 
@@ -1049,7 +1054,7 @@ write_wim_xml_data(WIMStruct *wim, int image, u64 total_bytes,
 	struct wim_xml_info *info = wim->xml_info;
 	int ret;
 	struct xml_node *orig_totalbytes_element;
-	struct xml_out_buf buf = {};
+	struct xml_out_buf buf = { 0 };
 	const utf16lechar *raw_doc;
 	size_t raw_doc_size;
 

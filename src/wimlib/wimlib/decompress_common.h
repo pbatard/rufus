@@ -401,16 +401,17 @@ read_huffsym(struct input_bitstream *is, const u16 decode_table[],
  * DECODE_TABLE_ALIGNMENT-byte aligned boundary as well.
  */
 #define DECODE_TABLE(name, num_syms, table_bits, max_codeword_len) \
+	PRAGMA_BEGIN_ALIGN(DECODE_TABLE_ALIGNMENT) \
 	u16 name[DECODE_TABLE_SIZE((num_syms), (table_bits), \
 				   (max_codeword_len))]	\
-		__attribute__((aligned(DECODE_TABLE_ALIGNMENT)))
+	PRAGMA_END_ALIGN(DECODE_TABLE_ALIGNMENT)
 
 /*
  * Declare the temporary "working_space" array needed for building the decode
  * table for a Huffman code.
  */
 #define DECODE_TABLE_WORKING_SPACE(name, num_syms, max_codeword_len)	\
-	u16 name[2 * ((max_codeword_len) + 1)  + (num_syms)];
+	u16 name[2 * ((max_codeword_len) + 1)  + (num_syms)]
 
 int
 make_huffman_decode_table(u16 decode_table[], unsigned num_syms,

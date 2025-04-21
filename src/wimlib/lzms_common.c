@@ -551,8 +551,8 @@ have_opcode:
  * @last_target_usages must be a temporary array of length >= 65536.
  */
 void
-lzms_x86_filter(u8 data[restrict], s32 size,
-		s32 last_target_usages[restrict], bool undo)
+lzms_x86_filter(u8* restrict data, s32 size,
+		s32* restrict last_target_usages, bool undo)
 {
 	/*
 	 * Note: this filter runs unconditionally and uses a custom algorithm to

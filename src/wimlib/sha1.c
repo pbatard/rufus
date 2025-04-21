@@ -64,13 +64,19 @@ rol32(u32 v, int bits)
  * the compiler from making counter-productive optimizations when there aren't
  * enough registers available to hold the full array.
  */
+#ifdef _MSC_VER
+#include <intrin.h>
+#pragma intrinsic(_ReadWriteBarrier)
+#define FORCE_NOT_CACHED(array)	_ReadWriteBarrier()
+#else
 #define FORCE_NOT_CACHED(array)	asm volatile("" : "+m" (array))
+#endif
 
 /*
  * Expands to FORCE_NOT_CACHED() if the architecture has 16 or fewer general
  * purpose registers, otherwise does nothing.
  */
-#if defined(__i386__) || defined(__x86_64__) || defined(__arm__)
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64) || defined(__arm__)
 #  define FORCE_NOT_CACHED_IF_FEW_REGS(array)	FORCE_NOT_CACHED(array)
 #else
 #  define FORCE_NOT_CACHED_IF_FEW_REGS(array)	(void)(array)
@@ -112,7 +118,7 @@ rol32(u32 v, int bits)
 	SHA1_GENERIC_5ROUNDS((i) + 15);
 
 static void
-sha1_blocks_generic(u32 h[5], const void *data, size_t num_blocks)
+sha1_blocks_generic(u32 h[5], const u8 *data, size_t num_blocks)
 {
 	do {
 		u32 a = h[0];
@@ -160,7 +166,7 @@ sha1_blocks_generic(u32 h[5], const void *data, size_t num_blocks)
  * During rounds 80-95, the first 16 message schedule words for the next block
  * are prepared.
  */
-#if defined(__i386__) || defined(__x86_64__)
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
 #include <immintrin.h>
 
 #define SHA1_SSSE3_PRECALC(i, w0, w1, w2, w3, w4, w5, w6, w7)		\
@@ -173,18 +179,18 @@ sha1_blocks_generic(u32 h[5], const void *data, size_t num_blocks)
 		 * w[i-16..i+3] are in (w0, w1, w2, w3, w4).
 		 */							\
 		if ((i) % 4 == 0) {					\
-			w4 = _mm_alignr_epi8(w1, w0, 8) ^ w2;		\
+			w4 = _mm_xor_si128(_mm_alignr_epi8(w1, w0, 8), w2);		\
 			t0 = _mm_srli_si128(w3, 4);			\
 		} else if ((i) % 4 == 1) {				\
-			t0 ^= w4 ^ w0;					\
+			t0 = _mm_xor_si128(t0, _mm_xor_si128(w4, w0));	\
 			t1 = _mm_slli_si128(t0, 12);			\
 		} else if ((i) % 4 == 2) {				\
 			t2 = _mm_slli_epi32(t1, 2);			\
 			w4 = _mm_slli_epi32(t0, 1);			\
 			t0 = _mm_srli_epi32(t0, 31);			\
-			t2 ^= _mm_srli_epi32(t1, 30);			\
+			t2 = _mm_xor_si128(t2, _mm_srli_epi32(t1, 30));	\
 		} else {						\
-			w4 ^= t0 ^ t2;					\
+			w4 = _mm_xor_si128(w4, _mm_xor_si128(t0, t2));	\
 			t0 = _mm_add_epi32(w4, k);			\
 			_mm_store_si128((__m128i *)&tmp[((i) - 3) % 16], t0);	\
 		}							\
@@ -196,21 +202,21 @@ sha1_blocks_generic(u32 h[5], const void *data, size_t num_blocks)
 		 * note the reuse of w4.
 		 */							\
 		if ((i) % 4 == 0)					\
-			w4 ^= _mm_alignr_epi8(w3, w2, 8);		\
+			w4 = _mm_xor_si128(w4, _mm_alignr_epi8(w3, w2, 8));		\
 		else if ((i) % 4 == 1)					\
-			w4 ^= w5 ^ w0;					\
+			w4 = _mm_xor_si128(w4, _mm_xor_si128(w5, w0));			\
 		else if ((i) % 4 == 2)					\
-			w4 = _mm_slli_epi32(w4, 2) ^			\
-			     _mm_srli_epi32(w4, 30);			\
+			w4 = _mm_xor_si128(_mm_slli_epi32(w4, 2),		\
+			     _mm_srli_epi32(w4, 30));			\
 		else							\
 			_mm_store_si128((__m128i *)&tmp[((i) - 3) % 16],\
 					_mm_add_epi32(w4, k));		\
 	} else if ((i) < 96) {						\
 		/* Precomputation of w[0..15] for next block */		\
 		if ((i) == 80 && --num_blocks != 0)			\
-			data += SHA1_BLOCK_SIZE;			\
+			data = _PTR(data + SHA1_BLOCK_SIZE);	\
 		if ((i) % 4 == 0)					\
-			w0 = _mm_loadu_si128(data + (((i) - 80) * 4));	\
+			w0 = _mm_loadu_si128(_PTR(data + (((i) - 80) * 4)));	\
 		else if ((i) % 4 == 1)					\
 			w0 = _mm_shuffle_epi8(w0, bswap32_mask);	\
 		else if ((i) % 4 == 2)					\
@@ -252,12 +258,12 @@ sha1_blocks_generic(u32 h[5], const void *data, size_t num_blocks)
 			      11, 10,  9,  8, 15, 14, 13, 12);		\
 	__m128i w0, w1, w2, w3, w4, w5, w6, w7;				\
 	__m128i k = _mm_set1_epi32(SHA1_K(0));				\
-	u32 tmp[16] __attribute__((aligned(16)));			\
+	PRAGMA_ALIGN(u32 tmp[16], 16);			\
 									\
-	w0 = _mm_shuffle_epi8(_mm_loadu_si128(data +  0), bswap32_mask); \
-	w1 = _mm_shuffle_epi8(_mm_loadu_si128(data + 16), bswap32_mask); \
-	w2 = _mm_shuffle_epi8(_mm_loadu_si128(data + 32), bswap32_mask); \
-	w3 = _mm_shuffle_epi8(_mm_loadu_si128(data + 48), bswap32_mask); \
+	w0 = _mm_shuffle_epi8(_mm_loadu_si128(_PTR(data +  0)), bswap32_mask); \
+	w1 = _mm_shuffle_epi8(_mm_loadu_si128(_PTR(data + 16)), bswap32_mask); \
+	w2 = _mm_shuffle_epi8(_mm_loadu_si128(_PTR(data + 32)), bswap32_mask); \
+	w3 = _mm_shuffle_epi8(_mm_loadu_si128(_PTR(data + 48)), bswap32_mask); \
 	_mm_store_si128((__m128i *)&tmp[0], _mm_add_epi32(w0, k));	\
 	_mm_store_si128((__m128i *)&tmp[4], _mm_add_epi32(w1, k));	\
 	_mm_store_si128((__m128i *)&tmp[8], _mm_add_epi32(w2, k));	\
@@ -323,13 +329,13 @@ sha1_blocks_x86_avx_bmi2(u32 h[5], const void *data, size_t num_blocks)
  * so during the j'th set of 4 rounds we do the SHA1MSG2 step for j+1'th set of
  * message schedule words, PXOR for j+2'th set, and SHA1MSG1 for the j+3'th set.
  */
-#if defined(__i386__) || defined(__x86_64__)
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
 #include <immintrin.h>
 
 #define SHA1_NI_4ROUNDS(i, w0, w1, w2, w3, we0, we1)			\
 	if ((i) < 16)							\
 		w0 = _mm_shuffle_epi8(					\
-			_mm_loadu_si128(data + ((i) * 4)), bswap_mask);	\
+			_mm_loadu_si128(_PTR(data + ((i) * 4))), bswap_mask);	\
 	if ((i) == 0)							\
 		we0 = _mm_add_epi32(h_e, w0);				\
 	else								\
@@ -339,7 +345,7 @@ sha1_blocks_x86_avx_bmi2(u32 h[5], const void *data, size_t num_blocks)
 		w1 = _mm_sha1msg2_epu32(w1, w0);			\
 	abcd = _mm_sha1rnds4_epu32(abcd, we0, (i) / 20);		\
 	if ((i) >= 8 && (i) < 72)					\
-		w2 ^= w0;						\
+		w2 = _mm_xor_si128(w2, w0);				\
 	if ((i) >= 4 && (i) < 68)					\
 		w3 = _mm_sha1msg1_epu32(w3, w0);			\
 	/*
@@ -355,7 +361,7 @@ sha1_blocks_x86_avx_bmi2(u32 h[5], const void *data, size_t num_blocks)
 
 #define HAVE_SHA1_BLOCKS_X86_SHA
 static void __attribute__((target("sha,sse4.1")))
-sha1_blocks_x86_sha(u32 h[5], const void *data, size_t num_blocks)
+sha1_blocks_x86_sha(u32 h[5], const u8 *data, size_t num_blocks)
 {
 	const __m128i bswap_mask =
 		_mm_setr_epi8(15, 14, 13, 12, 11, 10,  9,  8,
@@ -403,8 +409,8 @@ sha1_blocks_x86_sha(u32 h[5], const void *data, size_t num_blocks)
  *   set of 4 message schedule words: SHA1SU0 which does w[i-16] ^ w[i-14] ^
  *   w[i-8], and SHA1SU1 which XOR's in w[i-3] and rotates left by 1.
  */
-#if defined(__aarch64__) && \
-	(defined(__clang__) || (defined(__GNUC__) && __GNUC__ >= 5))
+#if (defined(__aarch64__) || defined(_M_ARM64)) && \
+	(defined(__clang__) || defined(_MSC_VER) || (defined(__GNUC__) && __GNUC__ >= 5))
 
 /*
  * clang's arm_neon.h used to have a bug where it only defined the SHA-1
@@ -445,7 +451,7 @@ sha1_blocks_x86_sha(u32 h[5], const void *data, size_t num_blocks)
 		    vsha1pq_u32((abcd), (e), (w)))
 
 #define SHA1_CE_4ROUNDS(i, w0, w1, w2, w3, e0, e1)	\
-	tmp = w0 + SHA1_CE_K(i);			\
+	tmp = vaddq_u32(w0, SHA1_CE_K(i));			\
 	e1 = vsha1h_u32(vgetq_lane_u32(abcd, 0));	\
 	abcd = SHA1_CE_OP((i), abcd, e0, tmp);		\
 	if ((i) >= 12 && (i) < 76)			\
@@ -471,7 +477,7 @@ static void
 	 * too, but only in clang 15 and earlier.  So, use "sha2" here.
 	 */
 	__attribute__((target("sha2")))
-#else
+#elif defined (__GNUC__)
 	/* gcc wants "+crypto".  "+sha2" doesn't work. */
 	__attribute__((target("+crypto")))
 #endif
@@ -488,10 +494,10 @@ sha1_blocks_arm_ce(u32 h[5], const void *data, size_t num_blocks)
 		u32 e0 = h[4], e1;
 		uint32x4_t tmp, w0, w1, w2, w3;
 
-		w0 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(data + 0)));
-		w1 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(data + 16)));
-		w2 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(data + 32)));
-		w3 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(data + 48)));
+		w0 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(_PTR(data + 0))));
+		w1 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(_PTR(data + 16))));
+		w2 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(_PTR(data + 32))));
+		w3 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(_PTR(data + 48))));
 
 		SHA1_CE_16ROUNDS(0);
 		SHA1_CE_16ROUNDS(16);
@@ -499,9 +505,9 @@ sha1_blocks_arm_ce(u32 h[5], const void *data, size_t num_blocks)
 		SHA1_CE_16ROUNDS(48);
 		SHA1_CE_16ROUNDS(64);
 
-		h_abcd += abcd;
+		h_abcd = vaddq_u32(h_abcd, abcd);
 		h[4] += e0;
-		data += SHA1_BLOCK_SIZE;
+		data = _PTR(data + SHA1_BLOCK_SIZE);
 	} while (--num_blocks);
 
 	vst1q_u32(h, h_abcd);
@@ -517,23 +523,31 @@ sha1_blocks(u32 h[5], const void *data, size_t num_blocks)
 {
 #ifdef HAVE_SHA1_BLOCKS_X86_SHA
 	if ((cpu_features & (X86_CPU_FEATURE_SHA | X86_CPU_FEATURE_SSE4_1)) ==
-	    (X86_CPU_FEATURE_SHA | X86_CPU_FEATURE_SSE4_1))
-		return sha1_blocks_x86_sha(h, data, num_blocks);
+	    (X86_CPU_FEATURE_SHA | X86_CPU_FEATURE_SSE4_1)) {
+		sha1_blocks_x86_sha(h, data, num_blocks);
+		return;
+	}
 #endif
 #ifdef HAVE_SHA1_BLOCKS_X86_AVX_BMI2
 	if ((cpu_features & (X86_CPU_FEATURE_AVX | X86_CPU_FEATURE_BMI2)) ==
-	    (X86_CPU_FEATURE_AVX | X86_CPU_FEATURE_BMI2))
-		return sha1_blocks_x86_avx_bmi2(h, data, num_blocks);
+	    (X86_CPU_FEATURE_AVX | X86_CPU_FEATURE_BMI2)) {
+		sha1_blocks_x86_avx_bmi2(h, data, num_blocks);
+		return;
+	}
 #endif
 #ifdef HAVE_SHA1_BLOCKS_X86_SSSE3
-	if (cpu_features & X86_CPU_FEATURE_SSSE3)
-		return sha1_blocks_x86_ssse3(h, data, num_blocks);
+	if (cpu_features & X86_CPU_FEATURE_SSSE3) {
+		sha1_blocks_x86_ssse3(h, data, num_blocks);
+		return;
+	}
 #endif
 #ifdef HAVE_SHA1_BLOCKS_ARM_CE
-	if (cpu_features & ARM_CPU_FEATURE_SHA1)
-		return sha1_blocks_arm_ce(h, data, num_blocks);
+	if (cpu_features & ARM_CPU_FEATURE_SHA1) {
+		sha1_blocks_arm_ce(h, data, num_blocks);
+		return;
+	}
 #endif
-	return sha1_blocks_generic(h, data, num_blocks);
+	sha1_blocks_generic(h, data, num_blocks);
 }
 
 /*
@@ -572,14 +586,14 @@ sha1_update(struct sha1_ctx *ctx, const void *data, size_t len)
 		}
 		memcpy(&ctx->buffer[buffered], data, remaining);
 		sha1_blocks(ctx->h, ctx->buffer, 1);
-		data += remaining;
+		data = _PTR(data + remaining);
 		len -= remaining;
 	}
 
 	blocks = len / SHA1_BLOCK_SIZE;
 	if (blocks) {
 		sha1_blocks(ctx->h, data, blocks);
-		data += blocks * SHA1_BLOCK_SIZE;
+		data = _PTR(data + blocks * SHA1_BLOCK_SIZE);
 		len -= blocks * SHA1_BLOCK_SIZE;
 	}
 

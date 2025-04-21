@@ -3825,10 +3825,20 @@ relaunch:
 		}
 #if defined(_DEBUG) || defined(TEST) || defined(ALPHA)
 extern int TestHashes(void);
+#include "wimlib.h"
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-			TestHashes();
+			int r;
+			WIMStruct* wim;
+			r = wimlib_open_wim(L"C:\\tmp\\boot.wim", WIMLIB_OPEN_FLAG_CHECK_INTEGRITY, &wim);
+			if (r == 0) {
+				wimlib_print_header(wim);
+				wimlib_free(wim);
+			} else {
+				uprintf("Failed to open WIM: %d", r);
+			}
+//			TestHashes();
 			continue;
 		}
 #endif

@@ -499,6 +499,7 @@ new_parallel_chunk_compressor(int out_ctype, u32 out_chunk_size,
 	return 0;
 
 err:
-	parallel_chunk_compressor_destroy(&ctx->base);
+	if (ctx)
+		parallel_chunk_compressor_destroy(&ctx->base);
 	return ret;
 }

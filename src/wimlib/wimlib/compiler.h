@@ -27,6 +27,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <stdlib.h>
+
 #ifndef _WIMLIB_COMPILER_H
 #define _WIMLIB_COMPILER_H
 
@@ -49,17 +51,52 @@
 #  define __has_builtin(builtin)	0
 #endif
 
+#ifdef _MSC_VER
+#if !__has_attribute(attribute)
+#define __attribute__(x)
+#endif
+
 /* Declare that the annotated function should always be inlined.  This might be
  * desirable in highly tuned code, e.g. compression codecs.  */
-#define forceinline		inline __attribute__((always_inline))
+#define forceinline		__inline
 
 /* Declare that the annotated function should *not* be inlined.  */
-#define noinline		__attribute__((noinline))
+#define _noinline		__declspec(noinline)
 
 /* Functionally the same as 'noinline', but documents that the reason for not
  * inlining is to prevent the annotated function from being inlined into a
  * recursive function, thereby increasing its stack usage.  */
-#define noinline_for_stack	noinline
+#define noinline_for_stack	_noinline
+
+/* Hint that the expression is usually true.  */
+#define likely(expr)		(expr)
+
+/* Hint that the expression is usually false.  */
+#define unlikely(expr)		(expr)
+
+#if defined(_M_IX86) || defined(_M_X64)
+/* Prefetch into L1 cache for read.  */
+#define prefetchr		_m_prefetch
+
+/* Prefetch into L1 cache for write.  */
+#define prefetchw		_m_prefetchw
+#else
+#define prefetchr(x)
+#define prefetchw(x)
+#endif
+
+#else
+/* Declare that the annotated function should always be inlined.  This might be
+ * desirable in highly tuned code, e.g. compression codecs.  */
+#define forceinline		inline __attribute__((always_inline))
+
+ /* Declare that the annotated function should *not* be inlined.  */
+#define _noinline		__attribute__((noinline))
+
+/* Functionally the same as 'noinline', but documents that the reason for not
+ * inlining is to prevent the annotated function from being inlined into a
+ * recursive function, thereby increasing its stack usage.  */
+#define noinline_for_stack	_noinline
 
 /* Hint that the expression is usually true.  */
 #define likely(expr)		__builtin_expect(!!(expr), 1)
@@ -72,6 +109,7 @@
 
 /* Prefetch into L1 cache for write.  */
 #define prefetchw(addr)		__builtin_prefetch((addr), 1)
+#endif
 
 /* Hint that the annotated function takes a printf()-like format string and
  * arguments.  This is currently disabled on Windows because MinGW does not
@@ -101,24 +139,29 @@
 
 /* UNALIGNED_ACCESS_IS_FAST should be defined to 1 if unaligned memory accesses
  * can be performed efficiently on the target platform.  */
-#if defined(__x86_64__) || defined(__i386__) || \
+#if defined(__x86_64__) || defined(__i386__) || defined(_M_IX86) || defined(_M_X64) || \
 	defined(__ARM_FEATURE_UNALIGNED) || defined(__powerpc64__)
 #  define UNALIGNED_ACCESS_IS_FAST 1
 #else
 #  define UNALIGNED_ACCESS_IS_FAST 0
 #endif
 
+
 /* Get the minimum of two variables, without multiple evaluation.  */
+#ifndef _MSC_VER
 #undef min
 #define min(a, b)  ({ typeof(a) _a = (a); typeof(b) _b = (b); \
 		    (_a < _b) ? _a : _b; })
+#endif
 #undef MIN
 #define MIN(a, b)	min((a), (b))
 
 /* Get the maximum of two variables, without multiple evaluation.  */
+#ifndef _MSC_VER
 #undef max
 #define max(a, b)  ({ typeof(a) _a = (a); typeof(b) _b = (b); \
 		    (_a > _b) ? _a : _b; })
+#endif
 #undef MAX
 #define MAX(a, b)	max((a), (b))
 
@@ -128,7 +171,7 @@
 
 /* Swap the values of two variables, without multiple evaluation.  */
 #ifndef swap
-#  define swap(a, b) ({ typeof(a) _a = (a); (a) = (b); (b) = _a; })
+#  define swap(a, b) do { typeof(a) _a = (a); (a) = (b); (b) = _a; } while(0)
 #endif
 #define SWAP(a, b)	swap((a), (b))
 
@@ -152,11 +195,92 @@
 
 /* STATIC_ASSERT_ZERO() - verify the truth of an expression at compilation time
  * and also produce a result of value '0' to be used in constant expressions */
-#define STATIC_ASSERT_ZERO(expr) ((int)sizeof(char[-!(expr)]))
+#define STATIC_ASSERT_ZERO(expr)	(0 * sizeof(char[1 - 2 * !(expr)]))
 
 #define CONCAT_IMPL(s1, s2)	s1##s2
 
 /* CONCAT() - concatenate two tokens at preprocessing time.  */
 #define CONCAT(s1, s2)		CONCAT_IMPL(s1, s2)
+
+#ifdef _MSC_VER
+#define PRAGMA_BEGIN_PACKED		__pragma(pack(push, 1))
+#define PRAGMA_END_PACKED		__pragma(pack(pop))
+#else
+#define PRAGMA_BEGIN_PACKED
+#define PRAGMA_END_PACKED
+#endif
+
+#ifdef _MSC_VER
+#define PRAGMA_ALIGN(x, a)		__declspec(align(a)) x
+#define PRAGMA_BEGIN_ALIGN(a)	__declspec(align(a))
+#define PRAGMA_END_ALIGN(a)
+#else
+#define PRAGMA_ALIGN(x, a)		x __attribute__((aligned(a)))
+#define PRAGMA_BEGIN_ALIGN(a)
+#define PRAGMA_END_ALIGN(a)		__attribute__((aligned(a)))
+#endif
+
+#ifdef _MSC_VER
+#define _PTR(x)	(void*)((uintptr_t)x)
+#else
+#define _PTR(x)	x
+#endif
+
+#ifdef _MSC_VER
+#include <intrin.h>
+#include <stdint.h>
+uint32_t __inline __builtin_ctz(uint32_t value)
+{
+	unsigned long trailing_zero = 0;
+	if (_BitScanForward(&trailing_zero, value))
+		return trailing_zero;
+	return 32;
+}
+uint32_t __inline __builtin_clz(uint32_t value)
+{
+	unsigned long leading_zero = 0;
+	if (_BitScanReverse(&leading_zero, value))
+		return 31 - leading_zero;
+	return 32;
+}
+#if defined(_M_X64) || defined(_M_ARM64)
+uint32_t __inline __builtin_clzll(uint64_t value)
+{
+	unsigned long leading_zero = 0;
+	if (_BitScanReverse64(&leading_zero, value))
+		return 63 - leading_zero;
+	return 64;
+}
+uint32_t __inline __builtin_ctzll(uint64_t value)
+{
+	unsigned long trailing_zero = 0;
+	if (_BitScanForward64(&trailing_zero, value))
+		return trailing_zero;
+	return 64;
+}
+#else
+uint32_t __inline __builtin_clzll(uint64_t value)
+{
+	if (value == 0)
+		return 64;
+	uint32_t msh = (uint32_t)(value >> 32);
+	uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
+	if (msh != 0)
+		return __builtin_clz(msh);
+	return 32 + __builtin_clz(lsh);
+}
+uint32_t __inline __builtin_ctzll(uint64_t value)
+{
+	if (value == 0)
+		return 64;
+	uint32_t msh = (uint32_t)(value >> 32);
+	uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
+	if (msh != 0)
+		return __builtin_ctz(msh);
+	return 32 + __builtin_ctz(lsh);
+}
+#endif
+#define __builtin_clzl __builtin_clzll
+#endif
 
 #endif /* _WIMLIB_COMPILER_H */

@@ -177,6 +177,7 @@ check_that_powers_fit_in_bitfield(void)
 
 /* A stripped-down version of the adaptive state in LZMS which excludes the
  * probability entries and Huffman codes  */
+PRAGMA_BEGIN_ALIGN(64)
 struct lzms_adaptive_state {
 
 	/* Recent offsets for LZ matches  */
@@ -198,7 +199,7 @@ struct lzms_adaptive_state {
 	u8 lz_rep_states[LZMS_NUM_LZ_REP_DECISIONS];
 	u8 delta_state;
 	u8 delta_rep_states[LZMS_NUM_DELTA_REP_DECISIONS];
-} __attribute__((aligned(64)));
+} PRAGMA_END_ALIGN(64);
 
 /*
  * This structure represents a byte position in the preprocessed input data and
@@ -209,6 +210,7 @@ struct lzms_adaptive_state {
  * each outgoing edge from this node is labeled with a literal or a match that
  * can be taken to advance from this position to a later position.
  */
+PRAGMA_BEGIN_ALIGN(64)
 struct lzms_optimum_node {
 
 	/*
@@ -251,7 +253,7 @@ struct lzms_optimum_node {
 	 * maintained per-position and are only updated occasionally.
 	 */
 	struct lzms_adaptive_state state;
-} __attribute__((aligned(64)));
+} PRAGMA_END_ALIGN(64);
 
 /* The main compressor structure  */
 struct lzms_compressor {
@@ -921,7 +923,7 @@ lzms_encode_nonempty_item_list(struct lzms_compressor *c,
 				cur_node -= item.length;
 				cur_node->item = item;
 				item = orig_node->extra_items[i];
-			} while (++i != orig_node->num_extra_items);
+			} while (++i != orig_node->num_extra_items && i < 2);
 		}
 		cur_node -= item.length;
 		saved_item = cur_node->item;

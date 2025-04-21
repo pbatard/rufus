@@ -200,6 +200,7 @@ static __inline void static_repchr(char* p, char s, char r) {
 
 extern void uprintf(const char *format, ...);
 extern void uprintfs(const char *str);
+extern void wuprintf(const wchar_t* format, ...);
 #define vuprintf(...) do { if (verbose) uprintf(__VA_ARGS__); } while(0)
 #define vvuprintf(...) do { if (verbose > 1) uprintf(__VA_ARGS__); } while(0)
 #define suprintf(...) do { if (!bSilent) uprintf(__VA_ARGS__); } while(0)

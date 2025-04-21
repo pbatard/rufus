@@ -42,6 +42,15 @@
 /* Watch out for conflict with ntfs-3g/endians.h ... */
 #ifndef _NTFS_ENDIANS_H
 
+#ifdef _MSC_VER
+
+#include <intrin.h>
+#define bswap16 _byteswap_ushort
+#define bswap32 _byteswap_ulong
+#define bswap64 _byteswap_uint64
+
+#else
+
 #define bswap16_const(n)			\
 	((((u16)(n) & 0x00FF) << 8)	|	\
 	 (((u16)(n) & 0xFF00) >> 8))
@@ -92,6 +101,8 @@ static forceinline u64 do_bswap64(u64 n)
 #define bswap16(n) (__builtin_constant_p(n) ? bswap16_const(n) : do_bswap16(n))
 #define bswap32(n) (__builtin_constant_p(n) ? bswap32_const(n) : do_bswap32(n))
 #define bswap64(n) (__builtin_constant_p(n) ? bswap64_const(n) : do_bswap64(n))
+
+#endif /* _MSC_VER */
 
 #if CPU_IS_BIG_ENDIAN()
 #  define cpu_to_le16(n) ((_force_attr le16)bswap16(n))

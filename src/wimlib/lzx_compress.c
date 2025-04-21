@@ -260,6 +260,7 @@ struct lzx_block_split_stats {
  * since items cannot be written until all items for the block have been chosen
  * and the block's Huffman codes have been computed.
  */
+PRAGMA_BEGIN_ALIGN(8)
 struct lzx_sequence {
 
 	/*
@@ -287,7 +288,7 @@ struct lzx_sequence {
 	u32 adjusted_offset_and_mainsym;
 #define SEQ_MAINSYM_BITS	10
 #define SEQ_MAINSYM_MASK	(((u32)1 << SEQ_MAINSYM_BITS) - 1)
-} __attribute__((aligned(8)));
+} PRAGMA_END_ALIGN(8);
 
 /*
  * This structure represents a byte position in the input buffer and a node in
@@ -298,6 +299,7 @@ struct lzx_sequence {
  * each outgoing edge from this node is labeled with a literal or a match that
  * can be taken to advance from this position to a later position.
  */
+PRAGMA_BEGIN_ALIGN(8)
 struct lzx_optimum_node {
 
 	/* The cost, in bits, of the lowest-cost path that has been found to
@@ -333,7 +335,7 @@ struct lzx_optimum_node {
 #  define OPTIMUM_GAP_MATCH 0x80000000
 #endif
 
-} __attribute__((aligned(8)));
+} PRAGMA_END_ALIGN(8);
 
 /* The cost model for near-optimal parsing */
 struct lzx_costs {
@@ -511,9 +513,11 @@ static forceinline unsigned
 lzx_get_offset_slot(struct lzx_compressor *c, u32 adjusted_offset,
 		    bool is_16_bit)
 {
+#ifndef _MSC_VER
 	if (__builtin_constant_p(adjusted_offset) &&
 	    adjusted_offset < LZX_NUM_RECENT_OFFSETS)
 		return adjusted_offset;
+#endif
 	if (is_16_bit || adjusted_offset < ARRAY_LEN(c->offset_slot_tab_1))
 		return c->offset_slot_tab_1[adjusted_offset];
 	return c->offset_slot_tab_2[adjusted_offset >> 14];
@@ -719,10 +723,10 @@ lzx_reset_symbol_frequencies(struct lzx_compressor *c)
 }
 
 static unsigned
-lzx_compute_precode_items(const u8 lens[restrict],
-			  const u8 prev_lens[restrict],
-			  u32 precode_freqs[restrict],
-			  unsigned precode_items[restrict])
+lzx_compute_precode_items(const u8* restrict lens,
+			  const u8* restrict prev_lens,
+			  u32* restrict precode_freqs,
+			  unsigned* restrict precode_items)
 {
 	unsigned *itemptr;
 	unsigned run_start;
@@ -842,14 +846,14 @@ lzx_compute_precode_items(const u8 lens[restrict],
  */
 static void
 lzx_write_compressed_code(struct lzx_output_bitstream *os,
-			  const u8 lens[restrict],
-			  const u8 prev_lens[restrict],
+			  const u8* restrict lens,
+			  const u8* restrict prev_lens,
 			  unsigned num_lens)
 {
 	u32 precode_freqs[LZX_PRECODE_NUM_SYMBOLS];
-	u8 precode_lens[LZX_PRECODE_NUM_SYMBOLS];
-	u32 precode_codewords[LZX_PRECODE_NUM_SYMBOLS];
-	unsigned precode_items[num_lens];
+	u8 precode_lens[LZX_PRECODE_NUM_SYMBOLS] = { 0 };
+	u32 precode_codewords[LZX_PRECODE_NUM_SYMBOLS] = { 0 };
+	unsigned* precode_items = alloca(num_lens * sizeof(unsigned));
 	unsigned num_precode_items;
 	unsigned precode_item;
 	unsigned precode_sym;
@@ -1007,6 +1011,8 @@ lzx_write_sequences(struct lzx_output_bitstream *os, int block_type,
 		main_symbol = seq->adjusted_offset_and_mainsym & SEQ_MAINSYM_MASK;
 
 		offset_slot = (main_symbol - LZX_NUM_CHARS) / LZX_NUM_LEN_HEADERS;
+		if (offset_slot >= LZX_MAX_OFFSET_SLOTS)
+			return;
 		num_extra_bits = lzx_extra_offset_bits[offset_slot];
 		extra_bits = adjusted_offset - (lzx_offset_slot_base[offset_slot] +
 						LZX_OFFSET_ADJUSTMENT);
@@ -1021,7 +1027,8 @@ lzx_write_sequences(struct lzx_output_bitstream *os, int block_type,
 		STATIC_ASSERT(WORDBITS < 64 || CAN_BUFFER(MAX_MATCH_BITS));
 
 		/* Output the main symbol for the match.  */
-
+		if (main_symbol >= LZX_MAINCODE_MAX_NUM_SYMBOLS)
+			return;
 		lzx_add_bits(os, codes->codewords.main[main_symbol],
 			     codes->lens.main[main_symbol]);
 		if (!CAN_BUFFER(MAX_MATCH_BITS))
@@ -1029,7 +1036,8 @@ lzx_write_sequences(struct lzx_output_bitstream *os, int block_type,
 
 		/* If needed, output the length symbol for the match.  */
 
-		if (matchlen >= LZX_MIN_SECONDARY_LEN) {
+		if (matchlen >= LZX_MIN_SECONDARY_LEN &&
+			matchlen < LZX_MIN_SECONDARY_LEN + LZX_LENCODE_NUM_SYMBOLS) {
 			lzx_add_bits(os, codes->codewords.len[matchlen -
 							      LZX_MIN_SECONDARY_LEN],
 				     codes->lens.len[matchlen -
@@ -1313,9 +1321,10 @@ lzx_should_end_block(struct lzx_block_split_stats *stats)
  * This is represented as a 64-bit integer for efficiency.  There are three
  * offsets of 21 bits each.  Bit 64 is garbage.
  */
+PRAGMA_BEGIN_ALIGN(8)
 struct lzx_lru_queue {
 	u64 R;
-} __attribute__((aligned(8)));
+} PRAGMA_END_ALIGN(8);
 
 #define LZX_QUEUE_OFFSET_SHIFT	21
 #define LZX_QUEUE_OFFSET_MASK	(((u64)1 << LZX_QUEUE_OFFSET_SHIFT) - 1)
@@ -1563,7 +1572,7 @@ lzx_find_min_cost_path(struct lzx_compressor * const restrict c,
 	 * been optimized by taking advantage of 'struct lzx_lru_queue' and
 	 * 'struct lzx_optimum_node' both being 8 bytes in size and alignment.
 	 */
-	struct lzx_lru_queue queues[512];
+	struct lzx_lru_queue queues[512] = { 0 };
 	STATIC_ASSERT(ARRAY_LEN(queues) >= LZX_MAX_MATCH_LEN + 1);
 	STATIC_ASSERT(sizeof(c->optimum_nodes[0]) == sizeof(queues[0]));
 #define QUEUE(node) \
@@ -1572,7 +1581,7 @@ lzx_find_min_cost_path(struct lzx_compressor * const restrict c,
 	/*(queues[(uintptr_t)(node) / sizeof(*(node)) % ARRAY_LEN(queues)])*/
 
 #if CONSIDER_GAP_MATCHES
-	u32 matches_before_gap[ARRAY_LEN(queues)];
+	u32 matches_before_gap[ARRAY_LEN(queues)] = { 0 };
 #define MATCH_BEFORE_GAP(node) \
 	(matches_before_gap[(uintptr_t)(node) / sizeof(*(node)) % \
 			    ARRAY_LEN(matches_before_gap)])

@@ -36,6 +36,7 @@
 
 #ifdef _WIN32
 
+#ifndef _MSC_VER
 /*
  * The Windows Overlay Filesystem filter (WOF, a.k.a. wof.sys) is a filesystem
  * filter driver, available in Windows 8.1 and later, which allows files to be
@@ -205,6 +206,8 @@ typedef struct _WIM_PROVIDER_UPDATE_OVERLAY_INPUT {
 	ULONG         WimFileNameLength;
 } WIM_PROVIDER_UPDATE_OVERLAY_INPUT, *PWIM_PROVIDER_UPDATE_OVERLAY_INPUT;
 
+#endif
+
 /*----------------------------------------------------------------------------*
  *        WOF reparse point and WimOverlay.dat structs (undocumented)         *
  *----------------------------------------------------------------------------*/
@@ -219,6 +222,7 @@ typedef struct _WIM_PROVIDER_UPDATE_OVERLAY_INPUT {
  * WOF, although they document the structures which must be passed into the
  * ioctls, which are often similar.
  */
+PRAGMA_BEGIN_PACKED
 struct wim_provider_rpdata {
 	/* Set to 2.  Uncertain meaning.  */
 	le32 version;
@@ -416,6 +420,7 @@ struct WimOverlay_dat_entry_2 {
 		utf16lechar wim_file_name[];
 	} __attribute__((packed));
 } __attribute__((packed));
+PRAGMA_END_PACKED
 
 static void __attribute__((unused))
 wof_check_structs(void)

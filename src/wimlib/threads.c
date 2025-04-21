@@ -38,7 +38,7 @@
 
 #ifdef _WIN32
 
-static WINAPI DWORD
+static DWORD WINAPI
 win32_thrproc(LPVOID lpParameter)
 {
 	struct thread *t = (struct thread *)lpParameter;

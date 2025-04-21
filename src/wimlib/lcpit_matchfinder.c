@@ -88,8 +88,8 @@
  *	Annual Symposium on Combinatorial Pattern Matching pp. 181-192.
  */
 static void
-build_LCP(u32 SA_and_LCP[restrict], const u32 ISA[restrict],
-	  const u8 T[restrict], const u32 n,
+build_LCP(u32* restrict SA_and_LCP, const u32* restrict ISA,
+	  const u8* restrict T, const u32 n,
 	  const u32 min_lcp, const u32 max_lcp)
 {
 	u32 h = 0;
@@ -170,7 +170,7 @@ build_LCP(u32 SA_and_LCP[restrict], const u32 ISA[restrict],
  *	Volume 1, Issue 4, pp. 605-623.
  */
 static void
-build_LCPIT(u32 intervals[restrict], u32 pos_data[restrict], const u32 n)
+build_LCPIT(u32* restrict intervals, u32* restrict pos_data, const u32 n)
 {
 	u32 * const SA_and_LCP = intervals;
 	u32 next_interval_idx;
@@ -293,10 +293,10 @@ build_LCPIT(u32 intervals[restrict], u32 pos_data[restrict], const u32 n)
  */
 static forceinline u32
 lcpit_advance_one_byte(const u32 cur_pos,
-		       u32 pos_data[restrict],
-		       u32 intervals[restrict],
-		       u32 next[restrict],
-		       struct lz_match matches[restrict],
+		       u32* restrict pos_data,
+		       u32* restrict intervals,
+		       u32* restrict next,
+		       struct lz_match* restrict matches,
 		       const bool record_matches)
 {
 	u32 ref;
@@ -389,8 +389,8 @@ expand_SA(void *p, u32 n)
 
 /* Like build_LCP(), but for buffers larger than MAX_NORMAL_BUFSIZE.  */
 static void
-build_LCP_huge(u64 SA_and_LCP64[restrict], const u32 ISA[restrict],
-	       const u8 T[restrict], const u32 n,
+build_LCP_huge(u64* restrict SA_and_LCP64, const u32* restrict ISA,
+	       const u8* restrict T, const u32 n,
 	       const u32 min_lcp, const u32 max_lcp)
 {
 	u32 h = 0;
@@ -426,7 +426,7 @@ build_LCP_huge(u64 SA_and_LCP64[restrict], const u32 ISA[restrict],
  * 16n.  (The non-huge version is 8n.)
  */
 static void
-build_LCPIT_huge(u64 intervals64[restrict], u32 pos_data[restrict], const u32 n)
+build_LCPIT_huge(u64* restrict intervals64, u32* restrict pos_data, const u32 n)
 {
 	u64 * const SA_and_LCP64 = intervals64;
 	u32 next_interval_idx;
@@ -495,10 +495,10 @@ build_LCPIT_huge(u64 intervals64[restrict], u32 pos_data[restrict], const u32 n)
  * MAX_NORMAL_BUFSIZE.  */
 static forceinline u32
 lcpit_advance_one_byte_huge(const u32 cur_pos,
-			    u32 pos_data[restrict],
-			    u64 intervals64[restrict],
-			    u32 prefetch_next[restrict],
-			    struct lz_match matches[restrict],
+			    u32* restrict pos_data,
+			    u64* restrict intervals64,
+			    u32* restrict prefetch_next,
+			    struct lz_match* restrict matches,
 			    const bool record_matches)
 {
 	u32 interval_idx;
@@ -645,7 +645,7 @@ build_SA(u32 SA[], const u8 T[], u32 n, u32 *tmp)
  * the inverse suffix array is a mapping from suffix position to suffix rank.
  */
 static void
-build_ISA(u32 ISA[restrict], const u32 SA[restrict], u32 n)
+build_ISA(u32* restrict ISA, const u32* restrict SA, u32 n)
 {
 	for (u32 r = 0; r < n; r++)
 		ISA[SA[r]] = r;

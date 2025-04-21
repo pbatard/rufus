@@ -197,6 +197,9 @@
     <ClInclude Include="..\src\efi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\res\dbx\dbx_info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\msvc-missing\unistd.h">
       <Filter>Header Files</Filter>
     </ClInclude>

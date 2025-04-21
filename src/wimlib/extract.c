@@ -145,12 +145,13 @@ end_file_metadata_phase(struct apply_ctx *ctx)
 
 /* Are all bytes in the specified buffer zero? */
 static bool
-is_all_zeroes(const u8 *p, const size_t size)
+is_all_zeroes(const u8 *buf, const size_t size)
 {
-	const u8 * const end = p + size;
+	uintptr_t p = (uintptr_t)buf;
+	const uintptr_t end = p + size;
 
-	for (; (uintptr_t)p % WORDBYTES && p != end; p++)
-		if (*p)
+	for (; p % WORDBYTES && p != end; p++)
+		if (*((const u8 *)p))
 			return false;
 
 	for (; end - p >= WORDBYTES; p += WORDBYTES)
@@ -158,7 +159,7 @@ is_all_zeroes(const u8 *p, const size_t size)
 			return false;
 
 	for (; p != end; p++)
-		if (*p)
+		if (*((const u8*)p))
 			return false;
 
 	return true;
@@ -187,14 +188,14 @@ is_all_zeroes(const u8 *p, const size_t size)
 bool
 detect_sparse_region(const void *data, size_t size, size_t *len_ret)
 {
-	const void *p = data;
-	const void * const end = data + size;
+	uintptr_t p = (uintptr_t)data;
+	const uintptr_t end = p + size;
 	size_t len = 0;
 	bool zeroes = false;
 
 	while (p != end) {
 		size_t n = min(end - p, SPARSE_UNIT);
-		bool z = is_all_zeroes(p, n);
+		bool z = is_all_zeroes((const u8 *)p, n);
 
 		if (len != 0 && z != zeroes)
 			break;
@@ -818,20 +819,13 @@ file_name_valid(utf16lechar *name, size_t num_chars, bool fix)
 	if (num_chars == 0)
 		return true;
 	for (i = 0; i < num_chars; i++) {
-		switch (le16_to_cpu(name[i])) {
-	#ifdef _WIN32
-		case '\x01'...'\x1F':
-		case '\\':
-		case ':':
-		case '*':
-		case '?':
-		case '"':
-		case '<':
-		case '>':
-		case '|':
-	#endif
-		case '/':
-		case '\0':
+		u16 c = le16_to_cpu(name[i]);
+		if (c == '/' || c == '\0'
+#ifdef _WIN32
+			|| (c >= '\x01' && c <= '\x1F') || c == ':' || c == '?'
+			|| c == '"' || c == '<' || c == '>' || c == '|'
+#endif
+		) {
 			if (fix)
 				name[i] = replacement_char;
 			else
@@ -911,7 +905,7 @@ dentry_calculate_extraction_name(struct wim_dentry *dentry,
 
 out_replace:
 	{
-		utf16lechar utf16_name_copy[dentry->d_name_nbytes / 2];
+		utf16lechar* utf16_name_copy = alloca(dentry->d_name_nbytes);
 
 		memcpy(utf16_name_copy, dentry->d_name, dentry->d_name_nbytes);
 		file_name_valid(utf16_name_copy, dentry->d_name_nbytes / 2, true);
@@ -928,10 +922,11 @@ out_replace:
 		tchar_nchars /= sizeof(tchar);
 
 		size_t fixed_name_num_chars = tchar_nchars;
-		tchar fixed_name[tchar_nchars + 50];
+		tchar* fixed_name = alloca((tchar_nchars + 50) * sizeof(tchar));
 
 		tmemcpy(fixed_name, tchar_name, tchar_nchars);
-		fixed_name_num_chars += tsprintf(fixed_name + tchar_nchars,
+		fixed_name_num_chars += tsnprintf(fixed_name + tchar_nchars,
+						 tchar_nchars + 50,
 						 T(" (invalid filename #%lu)"),
 						 ++ctx->invalid_sequence);
 
@@ -1895,7 +1890,7 @@ static int
 extract_all_images(WIMStruct *wim, const tchar *target, int extract_flags)
 {
 	size_t output_path_len = tstrlen(target);
-	tchar buf[output_path_len + 1 + 128 + 1];
+	tchar* buf = alloca((output_path_len + 1 + 128 + 1) * sizeof(tchar));
 	int ret;
 	int image;
 	const tchar *image_name;
@@ -1917,7 +1912,7 @@ extract_all_images(WIMStruct *wim, const tchar *target, int extract_flags)
 		} else {
 			/* Image name is empty or contains forbidden characters.
 			 * Use image number instead. */
-			tsprintf(buf + output_path_len + 1, T("%d"), image);
+			tsnprintf(buf + output_path_len + 1, output_path_len + 1 + 128 + 1, T("%d"), image);
 		}
 		ret = extract_single_image(wim, image, buf, extract_flags);
 		if (ret)

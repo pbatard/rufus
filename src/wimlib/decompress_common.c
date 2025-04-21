@@ -218,7 +218,7 @@ make_huffman_decode_table(u16 decode_table[], unsigned num_syms,
 			unsigned n = stores_per_loop;
 			do {
 				*(__m128i *)entry_ptr = v;
-				entry_ptr += sizeof(v);
+				entry_ptr = _PTR(entry_ptr + sizeof(v));
 			} while (--n);
 		}
 	}
@@ -246,7 +246,7 @@ make_huffman_decode_table(u16 decode_table[], unsigned num_syms,
 			unsigned n = stores_per_loop;
 			do {
 				*(aliased_word_t *)entry_ptr = v;
-				entry_ptr += sizeof(v);
+				entry_ptr = _PTR(entry_ptr + sizeof(v));
 			} while (--n);
 		}
 	}
@@ -263,7 +263,7 @@ make_huffman_decode_table(u16 decode_table[], unsigned num_syms,
 			unsigned n = stores_per_loop;
 			do {
 				*(u16 *)entry_ptr = v;
-				entry_ptr += sizeof(v);
+				entry_ptr = _PTR(entry_ptr + sizeof(v));
 			} while (--n);
 		}
 	}

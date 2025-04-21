@@ -441,13 +441,13 @@ wimlib_print_available_images(const WIMStruct *wim, int image)
 	int first;
 	int last;
 	int i;
-	int n;
+	int n = 80;
 	if (image == WIMLIB_ALL_IMAGES) {
-		n = tprintf(T("Available Images:\n"));
+		tprintf(T("Available Images:\n"));
 		first = 1;
 		last = wim->hdr.image_count;
 	} else if (image >= 1 && image <= wim->hdr.image_count) {
-		n = tprintf(T("Information for Image %d\n"), image);
+		tprintf(T("Information for Image %d\n"), image);
 		first = image;
 		last = image;
 	} else {
@@ -961,6 +961,7 @@ wimlib_global_init(int init_flags)
 	if (lib_initialized)
 		goto out;
 
+	mutex_init(&lib_initialization_mutex);
 	mutex_lock(&lib_initialization_mutex);
 
 	if (lib_initialized)
@@ -1025,4 +1026,5 @@ wimlib_global_cleanup(void)
 
 out_unlock:
 	mutex_unlock(&lib_initialization_mutex);
+	mutex_destroy(&lib_initialization_mutex);
 }

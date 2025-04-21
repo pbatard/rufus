@@ -135,9 +135,13 @@ now_as_wim_timestamp(void)
 void
 wim_timestamp_to_str(u64 timestamp, tchar *buf, size_t len)
 {
-	struct tm tm;
+	struct tm tm = { 0 };
 	time_t t = wim_timestamp_to_time_t(timestamp);
 
+#ifdef _WIN32
+	gmtime_s(&tm, &t);
+#else
 	gmtime_r(&t, &tm);
+#endif
 	tstrftime(buf, len, T("%a %b %d %H:%M:%S %Y UTC"), &tm);
 }

@@ -1,8 +1,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29215.179
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rufus", ".vs\rufus.vcxproj", "{731858A7-0303-4988-877B-9C0DD6471864}"
+	ProjectSection(ProjectDependencies) = postProject
+		{633CFC82-E01B-4777-BDE4-DC0739804332} = {633CFC82-E01B-4777-BDE4-DC0739804332}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ms-sys", ".vs\ms-sys.vcxproj", "{2B1D078D-8EB4-4398-9CA4-23457265A7F6}"
 EndProject
@@ -24,8 +27,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bled", ".vs\bled.vcxproj", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ext2fs", ".vs\ext2fs.vcxproj", "{B01F5886-2B39-4B66-B65C-6427135B6A02}"
 EndProject
-
-
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wimlib", ".vs\wimlib.vcxproj", "{633CFC82-E01B-4777-BDE4-DC0739804332}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|arm = Debug|arm
@@ -214,6 +217,22 @@ Global
 		{B01F5886-2B39-4B66-B65C-6427135B6A02}.Release|x64.Build.0 = Release|x64
 		{B01F5886-2B39-4B66-B65C-6427135B6A02}.Release|x86.ActiveCfg = Release|Win32
 		{B01F5886-2B39-4B66-B65C-6427135B6A02}.Release|x86.Build.0 = Release|Win32
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Debug|arm.ActiveCfg = Debug|ARM
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Debug|arm.Build.0 = Debug|ARM
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Debug|arm64.ActiveCfg = Debug|ARM64
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Debug|arm64.Build.0 = Debug|ARM64
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Debug|x64.ActiveCfg = Debug|x64
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Debug|x64.Build.0 = Debug|x64
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Debug|x86.ActiveCfg = Debug|Win32
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Debug|x86.Build.0 = Debug|Win32
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Release|arm.ActiveCfg = Release|ARM
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Release|arm.Build.0 = Release|ARM
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Release|arm64.ActiveCfg = Release|ARM64
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Release|arm64.Build.0 = Release|ARM64
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Release|x64.ActiveCfg = Release|x64
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Release|x64.Build.0 = Release|x64
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Release|x86.ActiveCfg = Release|Win32
+		{633CFC82-E01B-4777-BDE4-DC0739804332}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

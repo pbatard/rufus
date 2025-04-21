@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 /* Wrapper around a file descriptor that keeps track of offset (including in
  * pipes, which don't support lseek()) and a cached flag that tells whether the
@@ -48,7 +49,12 @@ static inline void filedes_invalidate(struct filedes *fd)
 	fd->fd = -1;
 }
 
+#ifdef _MSC_VER
+#include <io.h>
+#define filedes_close(f) _close((f)->fd)
+#else
 #define filedes_close(f) close((f)->fd)
+#endif
 
 static inline bool
 filedes_valid(const struct filedes *fd)

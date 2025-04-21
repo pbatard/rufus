@@ -56,9 +56,15 @@
 
 #define INVALID_CODEPOINT	0xFFFFFFFF
 #define VALIDATE(expr)		if (validate && unlikely(!(expr))) goto invalid
+#ifndef IS_SURROGATE
 #define IS_SURROGATE(c)		((c) >= 0xD800 && (c) < 0xE000)
+#endif
+#ifndef IS_HIGH_SURROGATE
 #define IS_HIGH_SURROGATE(c)	((c) >= 0xD800 && (c) < 0xDC00)
+#endif
+#ifndef IS_LOW_SURROGATE
 #define IS_LOW_SURROGATE(c)	((c) >= 0xDC00 && (c) < 0xE000)
+#endif
 #define IS_UTF8_TAIL(c)		(((c) & 0xC0) == 0x80)
 
 /*

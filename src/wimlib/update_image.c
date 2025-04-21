@@ -742,7 +742,7 @@ get_capture_config(const tchar *config_file, struct capture_config *config,
 
 		size_t len = tstrlen(fs_source_path) +
 			     tstrlen(wimboot_cfgfile);
-		struct stat st;
+		struct _stat64 st;
 
 		tmp_config_file = MALLOC((len + 1) * sizeof(tchar));
 		if (!tmp_config_file)

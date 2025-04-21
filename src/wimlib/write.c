@@ -1020,6 +1020,9 @@ write_blob_process_chunk(const struct blob_descriptor *blob, u64 offset,
 	const u8 *chunkptr, *chunkend;
 
 	wimlib_assert(size != 0);
+	wimlib_assert(ctx);
+	if (!ctx)
+		return WIMLIB_ERR_INVALID_PARAM;
 
 	if (ctx->compressor == NULL) {
 		/* Write chunk uncompressed.  */
@@ -1042,6 +1045,8 @@ write_blob_process_chunk(const struct blob_descriptor *blob, u64 offset,
 			ret = prepare_chunk_buffer(ctx);
 			if (ret)
 				return ret;
+			if (!ctx->cur_chunk_buf)
+				return WIMLIB_ERR_INTEGRITY;
 		}
 
 		if (ctx->write_resource_flags & WRITE_RESOURCE_FLAG_SOLID) {
@@ -1132,6 +1137,9 @@ compute_blob_list_stats(struct list_head *blob_list,
 			const struct wim_resource_descriptor *rdesc = blob->rdesc;
 			WIMStruct *wim = rdesc->wim;
 
+			wimlib_assert(wim);
+			if (!wim)
+				return WIMLIB_ERR_INVALID_PARAM;
 			if (prev_wim_part != wim) {
 				prev_wim_part = wim;
 				total_parts++;
@@ -3247,7 +3255,9 @@ overwrite_wim_via_tmpfile(WIMStruct *wim, int write_flags, unsigned num_threads)
 	/* Write the WIM to a temporary file in the same directory as the
 	 * original WIM. */
 	wim_name_len = tstrlen(wim->filename);
-	tchar tmpfile[wim_name_len + 10];
+	tchar* tmpfile = alloca((wim_name_len + 10) * sizeof(tchar));
+	if (!tmpfile)
+		return WIMLIB_ERR_NOMEM;
 	tmemcpy(tmpfile, wim->filename, wim_name_len);
 	get_random_alnum_chars(tmpfile + wim_name_len, 9);
 	tmpfile[wim_name_len + 9] = T('\0');

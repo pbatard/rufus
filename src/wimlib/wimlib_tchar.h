@@ -4,7 +4,7 @@
 /* Functions to act on "tchar" strings, which have a platform-dependent encoding
  * and character size. */
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #include <wchar.h>
 /*
  * For Windows builds, the "tchar" type will be 2 bytes and will be equivalent
@@ -26,9 +26,22 @@ typedef wchar_t tchar;
 #  define tmempcpy	wmempcpy
 #  define tstrcat	wcscat
 #  define tstrcpy	wcscpy
+#ifdef _RUFUS
+#  define tprintf	wuprintf
+#else
 #  define tprintf	wprintf
+#endif
+#ifdef _WIN32
+#  define tsprintf	_swprintf
+#else
 #  define tsprintf	swprintf
+#endif
+#  define tsnprintf snwprintf
+#ifdef _RUFUS
+#  define tfprintf(f, ...)	((f == stdout || f == stderr) ? wuprintf(__VA_ARGS__) : fwprintf(f, __VA_ARGS__))
+#else
 #  define tfprintf	fwprintf
+#endif
 #  define tvfprintf	vfwprintf
 #  define tscanf	swscanf
 #  define istalpha(c)	iswalpha((wchar_t)(c))
@@ -42,12 +55,19 @@ typedef wchar_t tchar;
 #  define tstrstr	wcsstr
 #  define tstrlen	wcslen
 #  define tmemcmp	wmemcmp
-#  define tstrcasecmp   _wcsicmp
+#  define tstrcasecmp	_wcsicmp
 #  define tstrftime	wcsftime
+#ifdef _RUFUS
+#  define tputchar(c)	wuprintf(L"%c", c)
+#  define tputc(c, f)	((f == stdout || f == stderr) ? wuprintf(L"%c", c) : _putw(c, f))
+#  define tputs(s)		wuprintf(L"%s\n", s)
+#  define tfputs(s, f)	((f == stdout || f == stderr) ? wuprintf(s) : fputws(s, f))
+#else
 #  define tputchar	putwchar
 #  define tputc		putwc
 #  define tputs		_putws
 #  define tfputs	fputws
+#endif
 #  define tfopen	_wfopen
 #  define topen		_wopen
 #  define tstat		_wstati64

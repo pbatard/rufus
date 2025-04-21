@@ -99,6 +99,34 @@ void uprintf(const char *format, ...)
 	free(wbuf);
 }
 
+void wuprintf(const wchar_t* format, ...)
+{
+	static wchar_t wbuf[4096];
+	wchar_t* p = wbuf;
+	va_list args;
+	int n;
+
+	va_start(args, format);
+	n = _vsnwprintf_s(p, ARRAYSIZE(wbuf) - 3, _TRUNCATE, format, args);
+	va_end(args);
+
+	p += (n < 0) ? ARRAYSIZE(wbuf) - 3 : n;
+
+	if (n >= 1 && p[-1] == L'\n') {
+		p[-1] = L'\r';
+		*p++ = L'\n';
+		*p = L'\0';
+	}
+
+	// coverity[dont_call]
+	OutputDebugStringW(wbuf);
+	if ((hLog != NULL) && (hLog != INVALID_HANDLE_VALUE)) {
+		Edit_SetSel(hLog, MAX_LOG_SIZE, MAX_LOG_SIZE);
+		Edit_ReplaceSel(hLog, wbuf);
+		Edit_Scroll(hLog, Edit_GetLineCount(hLog), 0);
+	}
+}
+
 void uprintfs(const char* str)
 {
 	wchar_t* wstr;

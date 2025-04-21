@@ -1137,7 +1137,7 @@ adjust_compression_attribute(HANDLE h, const struct wim_dentry *dentry,
 {
 	const bool compressed = (dentry->d_inode->i_attributes &
 				 FILE_ATTRIBUTE_COMPRESSED);
-	FILE_BASIC_INFORMATION info;
+	FILE_BASIC_INFORMATION info = { 0 };
 	USHORT compression_state;
 	NTSTATUS status;
 
@@ -1244,7 +1244,7 @@ remove_conflicting_short_name(const struct wim_dentry *dentry, struct win32_appl
 	HANDLE h;
 	size_t bufsize = offsetof(FILE_NAME_INFORMATION, FileName) +
 			 (13 * sizeof(wchar_t));
-	u8 buf[bufsize] __attribute__((aligned(8)));
+	u8* buf = wimlib_aligned_malloc(bufsize, 8);
 	bool retried = false;
 	FILE_NAME_INFORMATION *info = (FILE_NAME_INFORMATION *)buf;
 
@@ -1289,6 +1289,7 @@ retry:
 	}
 	NtClose(h);
 out:
+	wimlib_aligned_free(buf);
 	build_extraction_path(dentry, ctx);
 	return status;
 }
@@ -1326,7 +1327,7 @@ set_short_name(HANDLE h, const struct wim_dentry *dentry,
 	size_t bufsize = offsetof(FILE_NAME_INFORMATION, FileName) +
 			 max(dentry->d_short_name_nbytes, sizeof(wchar_t)) +
 			 sizeof(wchar_t);
-	u8 buf[bufsize] __attribute__((aligned(8)));
+	u8* buf = wimlib_aligned_malloc(bufsize, 8);
 	FILE_NAME_INFORMATION *info = (FILE_NAME_INFORMATION *)buf;
 	NTSTATUS status;
 	bool tried_to_remove_existing = false;
@@ -1339,8 +1340,10 @@ set_short_name(HANDLE h, const struct wim_dentry *dentry,
 retry:
 	status = NtSetInformationFile(h, &ctx->iosb, info, bufsize,
 				      FileShortNameInformation);
-	if (NT_SUCCESS(status))
+	if (NT_SUCCESS(status)) {
+		wimlib_aligned_free(buf);
 		return 0;
+	}
 
 	if (status == STATUS_SHORT_NAMES_NOT_ENABLED_ON_VOLUME) {
 		if (dentry->d_short_name_nbytes == 0)
@@ -1353,8 +1356,10 @@ retry:
 
 			ret = win32_get_drive_path(ctx->common.target,
 						   volume);
-			if (ret)
+			if (ret) {
+				wimlib_aligned_free(buf);
 				return ret;
+			}
 			if (try_to_enable_short_names(volume))
 				goto retry;
 		}
@@ -1392,10 +1397,12 @@ retry:
 			ctx->num_set_short_name_failures++;
 		else
 			ctx->num_remove_short_name_failures++;
+		wimlib_aligned_free(buf);
 		return 0;
 	}
 
 	winnt_error(status, L"Can't set short name on \"%ls\"", current_path(ctx));
+	wimlib_aligned_free(buf);
 	return WIMLIB_ERR_SET_SHORT_NAME;
 }
 
@@ -1634,7 +1641,7 @@ create_empty_streams(const struct wim_dentry *dentry,
 		if (strm->stream_type == STREAM_TYPE_REPARSE_POINT &&
 		    ctx->common.supported_features.reparse_points)
 		{
-			u8 buf[REPARSE_DATA_OFFSET] __attribute__((aligned(8)));
+			PRAGMA_ALIGN(u8 buf[REPARSE_DATA_OFFSET], 8);
 			struct reparse_buffer_disk *rpbuf =
 				(struct reparse_buffer_disk *)buf;
 			complete_reparse_point(rpbuf, inode, 0);
@@ -1843,7 +1850,7 @@ create_link(HANDLE h, const struct wim_dentry *dentry,
 
 		size_t bufsize = offsetof(FILE_LINK_INFORMATION, FileName) +
 				 ctx->pathbuf.Length + sizeof(wchar_t);
-		u8 buf[bufsize] __attribute__((aligned(8)));
+		u8* buf = wimlib_aligned_malloc(bufsize, 8);
 		FILE_LINK_INFORMATION *info = (FILE_LINK_INFORMATION *)buf;
 		NTSTATUS status;
 
@@ -1868,11 +1875,14 @@ create_link(HANDLE h, const struct wim_dentry *dentry,
 			status = NtSetInformationFile(h, &ctx->iosb, info,
 						      bufsize,
 						      FileLinkInformation);
-			if (NT_SUCCESS(status))
+			if (NT_SUCCESS(status)) {
+				wimlib_aligned_free(buf);
 				return 0;
+			}
 		} while (++i < 32);
 		winnt_error(status, L"Failed to create link \"%ls\"",
 			    current_path(ctx));
+		wimlib_aligned_free(buf);
 		return WIMLIB_ERR_LINK;
 	} else {
 		HANDLE h2;
@@ -2205,7 +2215,7 @@ try_rpfix(struct reparse_buffer_disk *rpbuf, u16 *rpbuflen_p,
 
 	fixed_subst_name_nchars = target_ntpath_nchars + relpath_nchars;
 
-	wchar_t fixed_subst_name[fixed_subst_name_nchars];
+	wchar_t* fixed_subst_name = MALLOC(fixed_subst_name_nchars * sizeof(wchar_t));
 
 	wmemcpy(fixed_subst_name, ctx->target_ntpath.Buffer, target_ntpath_nchars);
 	wmemcpy(&fixed_subst_name[target_ntpath_nchars], relpath, relpath_nchars);
@@ -2225,6 +2235,7 @@ try_rpfix(struct reparse_buffer_disk *rpbuf, u16 *rpbuflen_p,
 	link.print_name = (wchar_t *)fixed_print_name;
 	link.print_name_nbytes = fixed_print_name_nchars * sizeof(wchar_t);
 	make_link_reparse_point(&link, rpbuf, rpbuflen_p);
+	FREE(fixed_subst_name);
 }
 
 /* Sets the reparse point on the specified file.  This handles "fixing" the
@@ -2370,12 +2381,12 @@ fail:
 static int
 pwrite_to_handle(HANDLE h, const void *data, size_t size, u64 offset)
 {
-	const void * const end = data + size;
-	const void *p;
+	const uintptr_t end = (uintptr_t)data + size;
+	uintptr_t p;
 	IO_STATUS_BLOCK iosb;
 	NTSTATUS status;
 
-	for (p = data; p != end; p += iosb.Information,
+	for (p = (uintptr_t)data; p != end; p += iosb.Information,
 				 offset += iosb.Information)
 	{
 		LARGE_INTEGER offs = { .QuadPart = offset };
@@ -2398,8 +2409,8 @@ win32_extract_chunk(const struct blob_descriptor *blob, u64 offset,
 		    const void *chunk, size_t size, void *_ctx)
 {
 	struct win32_apply_ctx *ctx = _ctx;
-	const void * const end = chunk + size;
-	const void *p;
+	const uintptr_t end = (uintptr_t)chunk + size;
+	uintptr_t p;
 	bool zeroes;
 	size_t len;
 	unsigned i;
@@ -2409,13 +2420,13 @@ win32_extract_chunk(const struct blob_descriptor *blob, u64 offset,
 	 * For sparse streams, only write nonzero regions.  This lets the
 	 * filesystem use holes to represent zero regions.
 	 */
-	for (p = chunk; p != end; p += len, offset += len) {
-		zeroes = maybe_detect_sparse_region(p, end - p, &len,
+	for (p = (uintptr_t)chunk; p != end; p += len, offset += len) {
+		zeroes = maybe_detect_sparse_region((const void*)p, end - p, &len,
 						    ctx->any_sparse_streams);
 		for (i = 0; i < ctx->num_open_handles; i++) {
 			if (!zeroes || !ctx->is_sparse_stream[i]) {
 				ret = pwrite_to_handle(ctx->open_handles[i],
-						       p, len, offset);
+						       (void*)p, len, offset);
 				if (ret)
 					return ret;
 			}
@@ -2837,11 +2848,11 @@ set_object_id(HANDLE h, const struct wim_inode *inode,
 static int
 set_xattrs(HANDLE h, const struct wim_inode *inode, struct win32_apply_ctx *ctx)
 {
-	const void *entries, *entries_end;
+	uintptr_t entries, entries_end;
 	u32 len;
 	const struct wim_xattr_entry *entry;
 	size_t bufsize = 0;
-	u8 _buf[1024] __attribute__((aligned(4)));
+	PRAGMA_ALIGN(u8 _buf[1024], 4);
 	u8 *buf = _buf;
 	FILE_FULL_EA_INFORMATION *ea, *ea_prev;
 	NTSTATUS status;
@@ -2850,15 +2861,14 @@ set_xattrs(HANDLE h, const struct wim_inode *inode, struct win32_apply_ctx *ctx)
 	if (!ctx->common.supported_features.xattrs)
 		return 0;
 
-	entries = inode_get_xattrs(inode, &len);
-	if (likely(entries == NULL || len == 0))  /* No extended attributes? */
+	entries = (uintptr_t)inode_get_xattrs(inode, &len);
+	if (likely(entries == 0 || len == 0))  /* No extended attributes? */
 		return 0;
 	entries_end = entries + len;
 
-	entry = entries;
-	for (entry = entries; (void *)entry < entries_end;
+	for (entry = (const struct wim_xattr_entry*)entries; (uintptr_t)entry < entries_end;
 	     entry = xattr_entry_next(entry)) {
-		if (!valid_xattr_entry(entry, entries_end - (void *)entry)) {
+		if (!valid_xattr_entry(entry, (size_t)(entries_end - (uintptr_t)entry))) {
 			ERROR("\"%"TS"\": extended attribute is corrupt or unsupported",
 			      inode_any_full_path(inode));
 			return WIMLIB_ERR_INVALID_XATTR;
@@ -2883,7 +2893,7 @@ set_xattrs(HANDLE h, const struct wim_inode *inode, struct win32_apply_ctx *ctx)
 
 	ea_prev = NULL;
 	ea = (FILE_FULL_EA_INFORMATION *)buf;
-	for (entry = entries; (void *)entry < entries_end;
+	for (entry = (const struct wim_xattr_entry*)entries; (uintptr_t)entry < entries_end;
 	     entry = xattr_entry_next(entry)) {
 		u8 *p;
 
@@ -2898,6 +2908,10 @@ set_xattrs(HANDLE h, const struct wim_inode *inode, struct win32_apply_ctx *ctx)
 			*p++ = 0;
 		ea_prev = ea;
 		ea = (FILE_FULL_EA_INFORMATION *)p;
+	}
+	if (ea_prev == NULL) {
+		ret = WIMLIB_ERR_INVALID_PARAM;
+		goto out;
 	}
 	ea_prev->NextEntryOffset = 0;
 	wimlib_assert((u8 *)ea - buf == bufsize);

@@ -375,7 +375,7 @@ request_vss_snapshot(IVssBackupComponents *vss, wchar_t *volume,
 		return false;
 	}
 
-	res = vss->vtable->AddToSnapshotSet(vss, volume, (GUID){}, snapshot_id);
+	res = vss->vtable->AddToSnapshotSet(vss, volume, (GUID){ 0 }, snapshot_id);
 	if (FAILED(res)) {
 		ERROR("IVssBackupComponents.AddToSnapshotSet() error: %x",
 		      (u32)res);
@@ -496,8 +496,9 @@ vss_create_snapshot(const wchar_t *source, UNICODE_STRING *vss_path_ret,
 		ret = WIMLIB_ERR_NOMEM;
 		goto err;
 	}
-
-	wsprintf(vss_path_ret->Buffer, L"\\??\\%ls\\%ls",
+	swprintf(vss_path_ret->Buffer,
+		 vss_path_ret->MaximumLength / sizeof(wchar_t),
+		 L"\\??\\%ls\\%ls",
 		 &snapshot->props.m_pwszSnapshotDeviceObject[4],
 		 &source_abspath[3]);
 	*snapshot_ret = &snapshot->base;

@@ -33,11 +33,13 @@
 #include "wimlib/sha1.h"
 #include "wimlib/util.h"
 
+PRAGMA_BEGIN_PACKED
 struct wim_security_data_disk {
 	le32 total_length;
 	le32 num_entries;
 	le64 sizes[];
 } __attribute__((packed));
+PRAGMA_END_PACKED
 
 struct wim_security_data *
 new_wim_security_data(void)

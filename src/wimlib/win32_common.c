@@ -37,7 +37,7 @@ win32_modify_privilege(const wchar_t *privilege, bool enable)
 {
 	HANDLE hToken;
 	LUID luid;
-	TOKEN_PRIVILEGES newState;
+	TOKEN_PRIVILEGES newState = { 0 };
 	bool ret = FALSE;
 
 	if (!OpenProcessToken(GetCurrentProcess(),
@@ -94,10 +94,16 @@ NTSTATUS (WINAPI *func_RtlDosPathNameToNtPathName_U_WithStatus)
 		(IN PCWSTR DosName,
 		 OUT PUNICODE_STRING NtName,
 		 OUT PCWSTR *PartName,
-		 OUT PRTL_RELATIVE_NAME_U RelativeName);
+		 OUT PRTL_RELATIVE_NAME_U RelativeName) = NULL;
+
+BOOLEAN (WINAPI *func_RtlDosPathNameToNtPathName_U)
+		(IN PCWSTR DosName,
+		 OUT PUNICODE_STRING NtName,
+		 OUT PCWSTR* PartName,
+		 OUT PRTL_RELATIVE_NAME_U RelativeName) = NULL;
 
 NTSTATUS (WINAPI *func_RtlCreateSystemVolumeInformationFolder)
-		(PCUNICODE_STRING VolumeRootPath);
+		(PCUNICODE_STRING VolumeRootPath) = NULL;
 
 static bool acquired_privileges = false;
 
@@ -117,9 +123,14 @@ init_ntdll(void)
 		(void *)GetProcAddress(ntdll_handle,
 				       "RtlDosPathNameToNtPathName_U_WithStatus");
 
+	func_RtlDosPathNameToNtPathName_U =
+		(void*)GetProcAddress(ntdll_handle,
+			           "RtlDosPathNameToNtPathName_U");
+
 	func_RtlCreateSystemVolumeInformationFolder =
 		(void *)GetProcAddress(ntdll_handle,
 				       "RtlCreateSystemVolumeInformationFolder");
+
 	return 0;
 }
 
@@ -183,11 +194,14 @@ win32_path_to_nt_path(const wchar_t *win32_path, UNICODE_STRING *nt_path)
 		status = (*func_RtlDosPathNameToNtPathName_U_WithStatus)(win32_path,
 									 nt_path,
 									 NULL, NULL);
-	} else {
-		if (RtlDosPathNameToNtPathName_U(win32_path, nt_path, NULL, NULL))
+	} else if (func_RtlDosPathNameToNtPathName_U) {
+		if ((*func_RtlDosPathNameToNtPathName_U)(win32_path, nt_path, NULL, NULL))
 			status = STATUS_SUCCESS;
 		else
 			status = STATUS_NO_MEMORY;
+	} else {
+		winnt_error(STATUS_UNSUCCESSFUL, L"RtlDosPathNameToNtPathName_U functions not found");
+		return WIMLIB_ERR_RESOURCE_NOT_FOUND;
 	}
 
 	if (likely(NT_SUCCESS(status)))
@@ -269,7 +283,7 @@ static void
 windows_msg(u32 code, const wchar_t *format, va_list va,
 	    bool is_ntstatus, bool is_error)
 {
-	wchar_t _buf[STACK_MAX / 8];
+	wchar_t _buf[STACK_MAX / 8] = { 0 };
 	wchar_t *buf = _buf;
 	size_t buflen = ARRAY_LEN(_buf);
 	size_t ret;
@@ -378,14 +392,14 @@ winnt_error(NTSTATUS status, const wchar_t *format, ...)
  * permission is, in general, required on the handle.
  */
 NTSTATUS
-winnt_fsctl(HANDLE h, u32 code, const void *in, u32 in_size,
-	    void *out, u32 out_size_avail, u32 *actual_out_size_ret)
+winnt_fsctl(HANDLE h, u32 code, const void* in, u32 in_size,
+	void* out, u32 out_size_avail, u32* actual_out_size_ret)
 {
 	IO_STATUS_BLOCK iosb;
 	NTSTATUS status;
 
 	status = NtFsControlFile(h, NULL, NULL, NULL, &iosb, code,
-				 (void *)in, in_size, out, out_size_avail);
+		(void*)in, in_size, out, out_size_avail);
 	if (status == STATUS_PENDING) {
 		/* Beware: this case is often encountered with remote
 		 * filesystems, but rarely with local filesystems.  */

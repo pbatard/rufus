@@ -71,6 +71,7 @@
 
 /* On-disk format of a WIM dentry (directory entry), located in the metadata
  * resource for a WIM image.  */
+PRAGMA_BEGIN_PACKED
 struct wim_dentry_on_disk {
 
 	/* Length of this directory entry in bytes, not including any extra
@@ -221,6 +222,7 @@ struct wim_extra_stream_entry_on_disk {
 	 * @name_nbytes != 0; i.e., if this stream is named.  */
 	utf16lechar name[];
 } __attribute__((packed));
+PRAGMA_END_PACKED
 
 static void
 do_dentry_set_name(struct wim_dentry *dentry, utf16lechar *name,
@@ -488,7 +490,7 @@ calculate_dentry_full_path(struct wim_dentry *dentry)
 		d = d->d_parent;  /* assumes d == d->d_parent for root  */
 	} while (!dentry_is_root(d));
 
-	utf16lechar ubuf[ulen];
+	utf16lechar* ubuf = alloca(ulen * sizeof(utf16lechar));
 	utf16lechar *p = &ubuf[ulen];
 
 	d = dentry;
@@ -846,7 +848,7 @@ get_parent_dentry(WIMStruct *wim, const tchar *path,
 		  CASE_SENSITIVITY_TYPE case_type)
 {
 	size_t path_len = tstrlen(path);
-	tchar buf[path_len + 1];
+	tchar* buf = alloca((path_len + 1) * sizeof(tchar));
 
 	tmemcpy(buf, path, path_len + 1);
 	to_parent_name(buf, path_len);

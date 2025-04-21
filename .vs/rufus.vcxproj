@@ -121,19 +121,19 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <BuildLog />
     <ClCompile>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_RUFUS;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\src\wimlib;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExceptionHandling>Async</ExceptionHandling>
       <DisableSpecificWarnings>4091;5255;28251;28252;28253;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <Optimization>Disabled</Optimization>
-      <AdditionalOptions>/utf-8 $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -152,18 +152,18 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <BuildLog />
     <ClCompile>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_RUFUS;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\src\wimlib;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExceptionHandling>Async</ExceptionHandling>
       <DisableSpecificWarnings>4091;5255;28251;28252;28253;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalOptions>/utf-8 $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -184,18 +184,18 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <BuildLog />
     <ClCompile>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_RUFUS;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\src\wimlib;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExceptionHandling>Async</ExceptionHandling>
       <DisableSpecificWarnings>4091;5255;28251;28252;28253;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalOptions>/utf-8 $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -219,8 +219,8 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\src\wimlib;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_RUFUS;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -229,10 +229,10 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <DisableSpecificWarnings>4091;5255;28251;28252;28253;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <Optimization>Disabled</Optimization>
-      <AdditionalOptions>/utf-8 $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -251,20 +251,20 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <BuildLog />
     <ClCompile>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_RUFUS;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\src\wimlib;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExceptionHandling>Async</ExceptionHandling>
       <DisableSpecificWarnings>4091;5255;28251;28252;28253;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <UndefinePreprocessorDefinitions>NDEBUG</UndefinePreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -283,20 +283,20 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <BuildLog />
     <ClCompile>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_RUFUS;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\src\wimlib;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExceptionHandling>Async</ExceptionHandling>
       <DisableSpecificWarnings>4091;5255;28251;28252;28253;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <UndefinePreprocessorDefinitions>NDEBUG</UndefinePreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -317,20 +317,20 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <BuildLog />
     <ClCompile>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_RUFUS;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\src\wimlib;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExceptionHandling>Async</ExceptionHandling>
       <DisableSpecificWarnings>4091;5255;28251;28252;28253;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <UndefinePreprocessorDefinitions>NDEBUG</UndefinePreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -354,20 +354,20 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_RUFUS;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\src\wimlib;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExceptionHandling>Async</ExceptionHandling>
       <DisableSpecificWarnings>4091;5255;28251;28252;28253;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <UndefinePreprocessorDefinitions>NDEBUG</UndefinePreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -413,6 +413,7 @@
     <ClCompile Include="..\src\xml.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\res\dbx\dbx_info.h" />
     <ClInclude Include="..\res\grub2\grub2_version.h" />
     <ClInclude Include="..\res\grub\grub_version.h" />
     <ClInclude Include="..\src\badblocks.h" />
@@ -490,6 +491,9 @@
     </ProjectReference>
     <ProjectReference Include="ext2fs.vcxproj">
       <Project>{b01f5886-2b39-4b66-b65c-6427135b6a02}</Project>
+    </ProjectReference>
+    <ProjectReference Include="wimlib.vcxproj">
+      <Project>{633cfc82-e01b-4777-bde4-dc0739804332}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

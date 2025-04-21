@@ -34,7 +34,7 @@ guids_equal(const u8 guid1[GUID_SIZE], const u8 guid2[GUID_SIZE])
 static inline void
 generate_guid(u8 guid[GUID_SIZE])
 {
-	return get_random_bytes(guid, GUID_SIZE);
+	get_random_bytes(guid, GUID_SIZE);
 }
 
 #endif /* _WIMLIB_GUID_H */

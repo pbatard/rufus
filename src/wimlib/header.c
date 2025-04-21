@@ -62,7 +62,7 @@
 int
 read_wim_header(WIMStruct *wim, struct wim_header *hdr)
 {
-	struct wim_header_disk disk_hdr __attribute__((aligned(8)));
+	PRAGMA_ALIGN(struct wim_header_disk disk_hdr, 8);
 	struct filedes *in_fd = &wim->in_fd;
 	const tchar *filename = wim->filename;
 	int ret;
@@ -170,7 +170,7 @@ int
 write_wim_header(const struct wim_header *hdr, struct filedes *out_fd,
 		 off_t offset)
 {
-	struct wim_header_disk disk_hdr __attribute__((aligned(8)));
+	PRAGMA_ALIGN(struct wim_header_disk disk_hdr, 8);
 	int ret;
 
 	disk_hdr.magic = cpu_to_le64(hdr->magic);
@@ -210,21 +210,21 @@ write_wim_header_flags(u32 hdr_flags, struct filedes *out_fd)
 
 static const struct {
 	u32 flag;
-	const char *name;
+	const tchar *name;
 } hdr_flags[] = {
-	{WIM_HDR_FLAG_RESERVED,		"RESERVED"},
-	{WIM_HDR_FLAG_COMPRESSION,	"COMPRESSION"},
-	{WIM_HDR_FLAG_READONLY,		"READONLY"},
-	{WIM_HDR_FLAG_SPANNED,		"SPANNED"},
-	{WIM_HDR_FLAG_RESOURCE_ONLY,	"RESOURCE_ONLY"},
-	{WIM_HDR_FLAG_METADATA_ONLY,	"METADATA_ONLY"},
-	{WIM_HDR_FLAG_WRITE_IN_PROGRESS,"WRITE_IN_PROGRESS"},
-	{WIM_HDR_FLAG_RP_FIX,		"RP_FIX"},
-	{WIM_HDR_FLAG_COMPRESS_RESERVED,"COMPRESS_RESERVED"},
-	{WIM_HDR_FLAG_COMPRESS_LZX,	"COMPRESS_LZX"},
-	{WIM_HDR_FLAG_COMPRESS_XPRESS,	"COMPRESS_XPRESS"},
-	{WIM_HDR_FLAG_COMPRESS_LZMS,	"COMPRESS_LZMS"},
-	{WIM_HDR_FLAG_COMPRESS_XPRESS_2,"COMPRESS_XPRESS_2"},
+	{WIM_HDR_FLAG_RESERVED,		T("RESERVED")},
+	{WIM_HDR_FLAG_COMPRESSION,	T("COMPRESSION")},
+	{WIM_HDR_FLAG_READONLY,		T("READONLY")},
+	{WIM_HDR_FLAG_SPANNED,		T("SPANNED")},
+	{WIM_HDR_FLAG_RESOURCE_ONLY,	T("RESOURCE_ONLY")},
+	{WIM_HDR_FLAG_METADATA_ONLY,	T("METADATA_ONLY")},
+	{WIM_HDR_FLAG_WRITE_IN_PROGRESS,T("WRITE_IN_PROGRESS")},
+	{WIM_HDR_FLAG_RP_FIX,		T("RP_FIX")},
+	{WIM_HDR_FLAG_COMPRESS_RESERVED,T("COMPRESS_RESERVED")},
+	{WIM_HDR_FLAG_COMPRESS_LZX,	T("COMPRESS_LZX")},
+	{WIM_HDR_FLAG_COMPRESS_XPRESS,	T("COMPRESS_XPRESS")},
+	{WIM_HDR_FLAG_COMPRESS_LZMS,	T("COMPRESS_LZMS")},
+	{WIM_HDR_FLAG_COMPRESS_XPRESS_2,T("COMPRESS_XPRESS_2")},
 };
 
 /* API function documented in wimlib.h  */

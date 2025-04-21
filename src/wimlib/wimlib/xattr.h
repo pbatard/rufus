@@ -22,6 +22,7 @@
  * item tagged with TAG_XATTRS.  This is the preferred xattr format, since it is
  * also used by WIMGAPI and DISM starting in Windows 10 version 1607.
  */
+PRAGMA_BEGIN_PACKED
 struct wim_xattr_entry {
 
 	/* length of xattr value in bytes */
@@ -41,6 +42,7 @@ struct wim_xattr_entry {
 
 	/* no padding at end! */
 } __attribute__((packed));
+PRAGMA_END_PACKED
 
 static inline size_t
 xattr_entry_size(const struct wim_xattr_entry *entry)
@@ -57,7 +59,7 @@ xattr_entry_size(const struct wim_xattr_entry *entry)
 static inline struct wim_xattr_entry *
 xattr_entry_next(const struct wim_xattr_entry *entry)
 {
-	return (void *)entry + xattr_entry_size(entry);
+	return (void *)_PTR(entry + xattr_entry_size(entry));
 }
 
 static inline bool
@@ -80,6 +82,7 @@ valid_xattr_entry(const struct wim_xattr_entry *entry, size_t avail)
  * xattr support in both WIMGAPI and wimlib).  Now we use TAG_XATTRS for both
  * Windows and Linux xattrs.
  */
+PRAGMA_BEGIN_ALIGN(4)
 struct wimlib_xattr_entry_old {
 
 	/* length of xattr name in bytes, excluding a null terminator */
@@ -98,7 +101,7 @@ struct wimlib_xattr_entry_old {
 	/* u8 value[0]; */
 
 	/* then zero-padded to a 4-byte boundary */
-} __attribute__((aligned(4)));
+} PRAGMA_END_ALIGN(4);
 
 static inline size_t
 old_xattr_entry_size(const struct wimlib_xattr_entry_old *entry)
@@ -116,7 +119,7 @@ old_xattr_entry_size(const struct wimlib_xattr_entry_old *entry)
 static inline struct wimlib_xattr_entry_old *
 old_xattr_entry_next(const struct wimlib_xattr_entry_old *entry)
 {
-	return (void *)entry + old_xattr_entry_size(entry);
+	return (void *)_PTR(entry + old_xattr_entry_size(entry));
 }
 
 static inline bool
