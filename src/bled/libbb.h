@@ -304,7 +304,7 @@ void xpipe(int filedes[2]) FAST_FUNC;
 static inline void xmove_fd(int from, int to)
 {
 	if (from != to) {
-		_dup2(from, to);
+		(void)_dup2(from, to);
 		_close(from);
 	}
 }

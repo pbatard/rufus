@@ -368,7 +368,7 @@ static enum xz_ret XZ_FUNC crc32_validate(struct xz_dec *s, struct xz_buf *b)
  */
 static bool XZ_FUNC check_skip(struct xz_dec *s, struct xz_buf *b)
 {
-	while (s->pos < check_sizes[s->check_type]) {
+	while (s->check_type < 16 && s->pos < check_sizes[s->check_type]) {
 		if (b->in_pos == b->in_size)
 			return false;
 

@@ -39,7 +39,7 @@ static inline void write8(le8_t * _p, uint8_t _v)
     *_p = _v;
 }
 
-#if defined(__i386__) || defined(__x86_64__)
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
 
 /* Littleendian architectures which support unaligned memory accesses */
 

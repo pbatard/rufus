@@ -261,7 +261,7 @@ typedef uint64_t bb__aliased_uint64_t FIX_ALIASING;
 /* NB: unaligned parameter should be a pointer, aligned one -
  * a lvalue. This makes it more likely to not swap them by mistake
  */
-#if defined(i386) || defined(__x86_64__) || defined(__powerpc__)
+#if defined(i386) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64) || defined(__powerpc__)
 # define BB_UNALIGNED_MEMACCESS_OK 1
 # define move_from_unaligned_int(v, intp)  ((v) = *(bb__aliased_int*)(intp))
 # define move_from_unaligned_long(v, longp) ((v) = *(bb__aliased_long*)(longp))

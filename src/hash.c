@@ -1697,7 +1697,7 @@ BOOL efi_image_parse(uint8_t* efi, size_t len, struct efi_image_regions** regp)
 	if (len < 0x80)
 		return FALSE;
 	dos = (void*)efi;
-	if (dos->e_lfanew > len - 0x40)
+	if (dos->e_lfanew > (LONG)len - 0x40)
 		return FALSE;
 	nt = (void*)(efi + dos->e_lfanew);
 	authsz = 0;
@@ -2230,7 +2230,7 @@ static BOOL IsRevokedByDbx(uint8_t* hash, uint8_t* buf, uint32_t len)
 		goto out;
 
 	efi_var_auth = (EFI_VARIABLE_AUTHENTICATION_2*)dbx_data;
-	fluff_size = efi_var_auth->AuthInfo.Hdr.dwLength + sizeof(EFI_TIME); // +sizeof(EFI_SIGNATURE_LIST);
+	fluff_size = efi_var_auth->AuthInfo.Hdr.dwLength + sizeof(EFI_TIME);
 	if (dbx_size <= fluff_size)
 		goto out;
 	efi_sig_list = (EFI_SIGNATURE_LIST*)&dbx_data[fluff_size];

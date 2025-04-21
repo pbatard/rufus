@@ -843,7 +843,7 @@ char* FAST_FUNC
 unpack_bz2_data(const char *packed, int packed_len, int unpacked_len)
 {
 	char *outbuf = NULL;
-	bunzip_data *bd;
+	bunzip_data *bd = NULL;
 	int i;
 	jmp_buf jmpbuf;
 

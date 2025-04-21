@@ -118,7 +118,7 @@ MEM_STATIC ZSTD_cpuid_t ZSTD_cpuid(void) {
           : "a"(7), "c"(0)
           : "edx");
     }
-#elif defined(__x86_64__) || defined(_M_X64) || defined(__i386__)
+#elif defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
     U32 n;
     __asm__("cpuid" : "=a"(n) : "a"(0) : "ebx", "ecx", "edx");
     if (n >= 1) {

@@ -923,14 +923,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 			dwSize = (DWORD)strlen(FORCE_URL);
 #endif
 			IMG_SAVE img_save = { 0 };
-// WTF is wrong with Microsoft's static analyzer reporting a potential buffer overflow here?!?
-#if defined(_MSC_VER)
-#pragma warning(disable: 6386)
-#endif
 			url[min(dwSize, dwAvail)] = 0;
-#if defined(_MSC_VER)
-#pragma warning(default: 6386)
-#endif
 			EXT_DECL(img_ext, GetShortName(url), __VA_GROUP__("*.iso"), __VA_GROUP__(lmprintf(MSG_036)));
 			img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_ISO;
 			img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, NULL);

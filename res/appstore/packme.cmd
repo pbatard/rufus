@@ -70,24 +70,24 @@ for %%a in (%ARCHS%) do (
 )
 
 rem Use our own get_pe_info executable - source is in this directory
-if not exist get_pe_info.exe (
-  echo get_pe_info.exe must exist in this directory. Compile it with MinGW.
+if not exist ..\get_pe_info.exe (
+  echo ..\get_pe_info.exe must exist in the parent directory. Compile it with MinGW.
   goto out
 )
 
 rem Make sure we're not trying to create a package from an ALPHA or BETA version!
-get_pe_info.exe -i rufus_x64.exe | findstr /C:"ALPHA" 1>nul && (
+..\get_pe_info.exe -i rufus_x64.exe | findstr /C:"ALPHA" 1>nul && (
   echo Alpha version detected - ABORTED
   goto out
 )
-get_pe_info.exe -i rufus_x64.exe | findstr /C:"BETA" 1>nul && (
+..\get_pe_info.exe -i rufus_x64.exe | findstr /C:"BETA" 1>nul && (
   echo Beta version detected - ABORTED
   goto out
 )
 
 rem Populate the version from the executable
 if "%VERSION_OVERRIDE%"=="" (
-  get_pe_info.exe -v rufus_x64.exe > version.txt
+  ..\get_pe_info.exe -v rufus_x64.exe > version.txt
   set /p VERSION=<version.txt
   del version.txt
 ) else (

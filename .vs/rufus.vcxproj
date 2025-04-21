@@ -423,6 +423,7 @@
     <ClInclude Include="..\src\hdd_vs_ufd.h" />
     <ClInclude Include="..\src\mbr_types.h" />
     <ClInclude Include="..\src\missing.h" />
+    <ClInclude Include="..\src\msvc-missing\unistd.h" />
     <ClInclude Include="..\src\process.h" />
     <ClInclude Include="..\src\re.h" />
     <ClInclude Include="..\src\settings.h" />

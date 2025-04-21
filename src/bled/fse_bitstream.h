@@ -312,7 +312,7 @@ FORCE_INLINE_TEMPLATE size_t BIT_getMiddleBits(BitContainerType bitContainer, U3
      * such cpus old (pre-Haswell, 2013) and their performance is not of that
      * importance.
      */
-#if defined(__x86_64__) || defined(_M_X86)
+#if defined(__x86_64__) || defined(_M_X64)
     return (bitContainer >> (start & regMask)) & ((((U64)1) << nbBits) - 1);
 #else
     return (bitContainer >> (start & regMask)) & BIT_mask[nbBits];
