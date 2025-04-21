@@ -133,6 +133,13 @@ char* CreateUnattendXml(int arch, int flags)
 			fprintf(fd, "          <Path>reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OOBE /v BypassNRO /t REG_DWORD /d 1 /f</Path>\n");
 			fprintf(fd, "        </RunSynchronousCommand>\n");
 		}
+		if (flags & UNATTEND_UTC_CLOCK) {
+			uprintf("• Use UTC time");
+			fprintf(fd, "        <RunSynchronousCommand wcm:action=\"add\">\n");
+			fprintf(fd, "          <Order>%d</Order>\n", order++);
+			fprintf(fd, "          <Path>reg add HKLM\\SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d 1 /f</Path>\n");
+			fprintf(fd, "        </RunSynchronousCommand>\n");
+		}
 		fprintf(fd, "      </RunSynchronous>\n");
 		fprintf(fd, "    </component>\n");
 		fprintf(fd, "  </settings>\n");

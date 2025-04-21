@@ -1517,6 +1517,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
 					MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
 				}
+				StrArrayAdd(&options, lmprintf(MSG_355), TRUE);
+				MAP_BIT(UNATTEND_UTC_CLOCK);
 				StrArrayAdd(&options, lmprintf(MSG_333), TRUE);
 				username_index = _log2(b);
 				MAP_BIT(UNATTEND_SET_USER);
@@ -1589,6 +1591,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					StrArrayAdd(&options, lmprintf(MSG_330), TRUE);
 					MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
 				}
+				StrArrayAdd(&options, lmprintf(MSG_355), TRUE);
+				MAP_BIT(UNATTEND_UTC_CLOCK);
 				StrArrayAdd(&options, lmprintf(MSG_333), TRUE);
 				username_index = _log2(b);
 				MAP_BIT(UNATTEND_SET_USER);

@@ -1919,6 +1919,10 @@ msgstr "Wypakowywanie plików z archiwum: %s"
 msgid "Use Rufus MBR"
 msgstr "Użyj Rufus MBR"
 
+#. • MSG_355
+msgid "Use UTC time"
+msgstr "Użyj czasu UTC"
+
 #. • MSG_900
 #.
 #. The following messages are for the Windows Store listing only and are not used by the application

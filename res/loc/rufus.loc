@@ -617,6 +617,7 @@ t MSG_354 "Rufus has found an updated version of the DBX files used to perform U
 	"- Select 'Yes' to connect to the Internet and download this content\n"
 	"- Select 'No' to cancel the operation\n\n"
 	"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+t MSG_355 "Use UTC time"
 # The following messages are for the Windows Store listing only and are not used by the application
 t MSG_900 "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
 t MSG_901 "Official site: %s"
@@ -10649,6 +10650,7 @@ t MSG_346 "Ogranicz system Windows do trybu S (NIEZGODNY z obejściem konta onli
 t MSG_347 "Tryb eksperta"
 t MSG_348 "Wypakowywanie plików z archiwum: %s"
 t MSG_349 "Użyj Rufus MBR"
+t MSG_355 "Użyj czasu UTC"
 t MSG_900 "Rufus to narzędzie, które pomaga formatować i tworzyć dyski rozruchowe flash USB, takie jak klucze USB, pendrive-y itp."
 t MSG_901 "Oficjalna strona: %s"
 t MSG_902 "Kod źródłowy: %s"

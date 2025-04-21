@@ -11,6 +11,7 @@ o v4.? (????.??.??) ** NOT FINAL!!! PLEASE DO NOT SEND UNSOLICITED TRANSLATIONS!
   - *NEW*      MSG_352 "Checking for UEFI DBX updates..."
   - *NEW*      MSG_353 "DBX update available"
   - *NEW*      MSG_354 "Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks..."
+  - *NEW*      MSG_355 "Use UTC time"
 
 o v4.5 (2024.05.22)
   - *UPDATED*  IDC_RUFUS_MBR -> IDC_UEFI_MEDIA_VALIDATION "Enable runtime UEFI media validation"
