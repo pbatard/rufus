@@ -3831,9 +3831,28 @@ extern int TestHashes(void);
 			&& (msg.wParam == 'T')) {
 			int r;
 			WIMStruct* wim;
-			r = wimlib_open_wim(L"C:\\tmp\\boot.wim", WIMLIB_OPEN_FLAG_CHECK_INTEGRITY, &wim);
+			r = wimlib_open_wim(L"D:\\Incoming\\Win11_24H2_EnglishInternational_x64.iso|sources/boot.wim", WIMLIB_OPEN_FLAG_CHECK_INTEGRITY, &wim);
+//			r = wimlib_open_wim(L"C:\\tmp\\test.iso|sources/boot.wim", WIMLIB_OPEN_FLAG_CHECK_INTEGRITY, &wim);
+//			r = wimlib_open_wim(L"C:\\tmp\\boot.wim", WIMLIB_OPEN_FLAG_CHECK_INTEGRITY, &wim);
 			if (r == 0) {
+				int image;
+				wchar_t* xml;
+				size_t xml_size;
 				wimlib_print_header(wim);
+				if (wimlib_get_xml_data(wim, (void**) & xml, &xml_size) == 0) {
+					xml[(xml_size / sizeof(wchar_t)) - 1] = L'\0';
+					wuprintf(L"%s", xml);
+					free(xml);
+				}
+				image = wimlib_resolve_image(wim, L"1");
+				uprintf("image = %d", image);
+				const wchar_t* fn = L"Windows/win.ini";
+				r = wimlib_extract_paths(wim, image, L"C:\\tmp\\wim", &fn, 1, WIMLIB_EXTRACT_FLAG_NORPFIX |
+					WIMLIB_EXTRACT_FLAG_GLOB_PATHS | WIMLIB_EXTRACT_FLAG_STRICT_GLOB | WIMLIB_EXTRACT_FLAG_NO_PRESERVE_DIR_STRUCTURE);
+				if (r == 0)
+					uprintf("Successfully extracted '%S'", fn);
+				else
+					uprintf("Failed to extract '%S': %d", fn, r);
 				wimlib_free(wim);
 			} else {
 				uprintf("Failed to open WIM: %d", r);

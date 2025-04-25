@@ -8,4 +8,4 @@ libwim_a_SOURCES = avl_tree.c blob_table.c compress.c compress_common.c compress
 	sha1.c solid.c split.c tagged_items.c textfile.c threads.c timestamp.c update_image.c \
 	util.c wim.c wimboot.c win32_apply.c win32_capture.c win32_common.c win32_replacements.c \
 	win32_vss.c write.c xml.c xmlproc.c xml_windows.c xpress_compress.c xpress_decompress.c
-libwim_a_CFLAGS = $(AM_CFLAGS) -I$(srcdir)/.. -DHAVE_CONFIG_H -D_RUFUS -D__SSE2__ -D_POSIX -D_POSIX_THREAD_SAFE_FUNCTIONS -DUNICODE -D_UNICODE -D__MINGW_USE_VC2005_COMPAT -Wno-undef -Wno-strict-aliasing -Wno-shadow -Wno-incompatible-pointer-types -Wno-sequence-point
+libwim_a_CFLAGS = $(AM_CFLAGS) -I$(srcdir)/.. -I$(srcdir)/../libcdio -DHAVE_CONFIG_H -D_RUFUS -D__SSE2__ -D_POSIX -D_POSIX_THREAD_SAFE_FUNCTIONS -DUNICODE -D_UNICODE -D__MINGW_USE_VC2005_COMPAT -Wno-undef -Wno-strict-aliasing -Wno-shadow -Wno-incompatible-pointer-types -Wno-sequence-point

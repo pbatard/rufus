@@ -4,6 +4,7 @@
 
 /*
  * Copyright 2012-2023 Eric Biggers
+ * Copyright 2025 Pete Batard <pete@akeo.ie>
  *
  * This file is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -616,11 +617,77 @@ wimlib_register_progress_function(WIMStruct *wim,
 	wim->progctx = progctx;
 }
 
+#ifdef WITH_LIBCDIO
+static int 
+open_iso_wim_file(const tchar* filename, struct filedes* fd_ret)
+{
+	int ret = 0;
+	size_t n;
+	char *iso_filename, *iso_path = NULL;
+	udf_dirent_t *p_udf_root;
+
+	/* If the wim path contains a pipe separator, look it up inside an ISO */
+	if (tstr_to_utf8(filename, (tstrlen(filename) + 1) * sizeof(tchar), &iso_path, &n))
+		return WIMLIB_ERR_NOMEM;
+	iso_filename = strchr(iso_path, '|');
+	if (iso_filename == NULL) {
+		ret = WIMLIB_ERR_NO_FILENAME;
+		goto out;
+	}
+
+	*iso_filename++ = '\0';
+	filedes_init(fd_ret, 0);
+
+	/* Try to open as UDF image */
+	fd_ret->p_udf = udf_open(iso_path);
+	if (!fd_ret->p_udf)
+		goto try_iso;
+	p_udf_root = udf_get_root(fd_ret->p_udf, true, 0);
+	if (!p_udf_root) {
+		ret = WIMLIB_ERR_OPEN;
+		goto out;
+	}
+	fd_ret->p_udf_file = udf_fopen(p_udf_root, iso_filename);
+	udf_dirent_free(p_udf_root);
+	if (!fd_ret->p_udf_file) {
+		ret = WIMLIB_ERR_OPEN;
+		goto out;
+	}
+	fd_ret->is_udf = 1;
+	goto out;
+
+try_iso:
+	/* Try to open as ISO9660 image */
+	fd_ret->p_iso = iso9660_open_ext(iso_path, ISO_EXTENSION_ALL);
+	if (!fd_ret->p_iso) {
+		ret = WIMLIB_ERR_OPEN;
+		goto out;
+	}
+	fd_ret->p_iso_file = iso9660_ifs_stat_translate(fd_ret->p_iso, iso_filename);
+	if (!fd_ret->p_iso_file) {
+		ret = WIMLIB_ERR_OPEN;
+		goto out;
+	}
+	fd_ret->is_iso = 1;
+
+out:
+	FREE(iso_path);
+	/* Because we use an union, make sure fd is cleared on error */
+	if (ret)
+		fd_ret->fd = 0;
+	return ret;
+}
+#endif
+
 static int
 open_wim_file(const tchar *filename, struct filedes *fd_ret)
 {
 	int raw_fd;
 
+#ifdef WITH_LIBCDIO
+	if (open_iso_wim_file(filename, fd_ret) == 0)
+		return 0;
+#endif
 	raw_fd = topen(filename, O_RDONLY | O_BINARY);
 	if (raw_fd < 0) {
 		ERROR_WITH_ERRNO("Can't open \"%"TS"\" read-only", filename);
@@ -653,6 +720,16 @@ begin_read(WIMStruct *wim, const void *wim_filename_or_fd, int open_flags)
 			return ret;
 
 		/* The file size is needed for enforcing some limits later. */
+#ifdef WITH_LIBCDIO
+		if ((wim->in_fd.is_udf | wim->in_fd.is_iso) &&
+			(open_flags & WIMLIB_OPEN_FLAG_WRITE_ACCESS))
+			return WIMLIB_ERR_WIM_IS_READONLY;
+		if (wim->in_fd.is_udf)
+			wim->file_size = udf_get_file_length(wim->in_fd.p_udf_file);
+		else if (wim->in_fd.is_iso)
+			wim->file_size = wim->in_fd.p_iso_file->total_size;
+		else
+#endif
 		if (fstat(wim->in_fd.fd, &stbuf) == 0)
 			wim->file_size = stbuf.st_size;
 
@@ -668,6 +745,12 @@ begin_read(WIMStruct *wim, const void *wim_filename_or_fd, int open_flags)
 		 * Warning: in Windows native builds, realpath() calls the
 		 * replacement function in win32_replacements.c.
 		 */
+#ifdef WITH_LIBCDIO
+		/* No overwriting for libcdio, so simply duplicate */
+		if (tstrchr(wimfile, T('|')))
+			wim->filename = tstrdup(wimfile);
+		else
+#endif
 		wim->filename = realpath(wimfile, NULL);
 		if (!wim->filename) {
 			ERROR_WITH_ERRNO("Failed to get full path to file "
@@ -900,10 +983,22 @@ wim_decrement_refcnt(WIMStruct *wim)
 	wimlib_assert(wim->refcnt > 0);
 	if (--wim->refcnt != 0)
 		return;
-	if (filedes_valid(&wim->in_fd))
-		filedes_close(&wim->in_fd);
-	if (filedes_valid(&wim->out_fd))
-		filedes_close(&wim->out_fd);
+#ifdef WITH_LIBCDIO
+	if (wim->in_fd.is_udf) {
+		udf_dirent_free(wim->in_fd.p_udf_file);
+		udf_close(wim->in_fd.p_udf);
+	} else if (wim->in_fd.is_iso) {
+		iso9660_stat_free(wim->in_fd.p_iso_file);
+		iso9660_close(wim->in_fd.p_iso);
+	} else {
+#endif
+		if (filedes_valid(&wim->in_fd))
+			filedes_close(&wim->in_fd);
+		if (filedes_valid(&wim->out_fd))
+			filedes_close(&wim->out_fd);
+#ifdef WITH_LIBCDIO
+	}
+#endif
 	wimlib_free_decompressor(wim->decompressor);
 	xml_free_info_struct(wim->xml_info);
 	FREE(wim->filename);
