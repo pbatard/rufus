@@ -770,3 +770,17 @@ udf_dirent_free(udf_dirent_t *p_udf_dirent)
   }
   return true;
 }
+
+/*!
+  Seek to a specific offset in a UDF file. Must be a multiple of UDF_BLOCKSIZE.
+*/
+bool
+udf_setpos(udf_dirent_t* p_udf_dirent, off_t offset)
+{
+    if (!p_udf_dirent)
+	return false;
+    if (offset % UDF_BLOCKSIZE || offset > uint64_from_le(p_udf_dirent->fe.info_len))
+	return false;
+    p_udf_dirent->p_udf->i_position = offset;
+    return true;
+}

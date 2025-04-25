@@ -190,6 +190,8 @@ extern "C" {
     bool udf_get_lba(const udf_file_entry_t *p_udf_fe, 
                      /*out*/ uint32_t *start, /*out*/ uint32_t *end);
 
+    bool udf_setpos(udf_dirent_t* p_udf_dirent, off_t offset);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

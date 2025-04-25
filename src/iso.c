@@ -1496,7 +1496,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 			uprintf("Error reading UDF file %s", iso_file);
 			goto out;
 		}
-		buf_size = (DWORD)MIN(file_length, read_size);
+		buf_size = (DWORD)MIN(file_length, (int64_t)read_size);
 		if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
 			uprintf("  Error writing file %s: %s", dest_file, WindowsErrorString());
 			goto out;
