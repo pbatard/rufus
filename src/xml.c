@@ -24,20 +24,31 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
 #include <sys/types.h>
-#ifndef EZXML_NOMMAP
-#include <sys/mman.h>
-#endif // EZXML_NOMMAP
 #include <sys/stat.h>
-#include "ezxml.h"
+#include "xml.h"
+#include "rufus.h"
+#include "msapi_utf8.h"
 
+/* Memory leaks detection - define _CRTDBG_MAP_ALLOC as preprocessor macro */
+#ifdef _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
+#define EZXML_NOMMAP
 #define EZXML_WS   "\t\r\n "  // whitespace
-#define EZXML_ERRL 128        // maximum error string length
+#define EZXML_ERRL 256        // maximum error string length
 
+#ifdef _MSC_VER
+#pragma warning(disable:6011)
+#pragma warning(disable:4267)
+#endif
 typedef struct ezxml_root *ezxml_root_t;
 struct ezxml_root {       // additional data for the root tag
     struct ezxml xml;     // is a super-struct built on top of ezxml struct
@@ -56,12 +67,29 @@ struct ezxml_root {       // additional data for the root tag
 
 char *EZXML_NIL[] = { NULL }; // empty, null terminated array of strings
 
+// what realloc should be doing all along
+static inline void* _realloc(void* ptr, unsigned int size) {
+    void* old_ptr = ptr;
+    ptr = realloc(ptr, size);
+    if (ptr == NULL)
+        free(old_ptr);
+    return ptr;
+}
+
 // returns the first child tag with the given name or NULL if not found
 ezxml_t ezxml_child(ezxml_t xml, const char *name)
 {
     xml = (xml) ? xml->child : NULL;
     while (xml && strcmp(name, xml->name)) xml = xml->sibling;
     return xml;
+}
+
+// returns the value of the first child tag with the given name or NULL if not found
+char* ezxml_child_val(ezxml_t xml, const char* name)
+{
+    xml = (xml) ? xml->child : NULL;
+    while (xml && strcmp(name, xml->name)) xml = xml->sibling;
+    return xml ? xml->txt : NULL;
 }
 
 // returns the Nth tag with the same name in the same subsection or NULL if not
@@ -119,6 +147,19 @@ ezxml_t ezxml_get(ezxml_t xml, ...)
     return r;
 }
 
+// Same as above but returns the text value or NULL if not found
+char* ezxml_get_val(ezxml_t xml, ...)
+{
+    va_list ap;
+    ezxml_t r;
+
+    va_start(ap, xml);
+    r = ezxml_vget(xml, ap);
+    va_end(ap);
+    return r ? r->txt : NULL;
+}
+
+
 // returns a null terminated array of processing instructions for the given
 // target
 const char **ezxml_pi(ezxml_t xml, const char *target)
@@ -138,13 +179,14 @@ ezxml_t ezxml_err(ezxml_root_t root, char *s, const char *err, ...)
     va_list ap;
     int line = 1;
     char *t, fmt[EZXML_ERRL];
-    
+
     for (t = root->s; t < s; t++) if (*t == '\n') line++;
-    snprintf(fmt, EZXML_ERRL, "[error near line %d]: %s", line, err);
+    snprintf(fmt, EZXML_ERRL, "xml parsing error near line %d: %s", line, err);
 
     va_start(ap, err);
     vsnprintf(root->err, EZXML_ERRL, fmt, ap);
     va_end(ap);
+    uprintf("%s", root->err);
 
     return &root->xml;
 }
@@ -168,7 +210,7 @@ char *ezxml_decode(char *s, char **ent, char t)
     }
     
     for (s = r; ; ) {
-        while (*s && *s != '&' && (*s != '%' || t != '%') && !isspace(*s)) s++;
+        while (*s && *s != '&' && (*s != '%' || t != '%') && !isspace((uint8_t)*s)) s++;
 
         if (! *s) break;
         else if (t != 'c' && ! strncmp(s, "&#", 2)) { // character reference
@@ -176,11 +218,13 @@ char *ezxml_decode(char *s, char **ent, char t)
             else c = strtol(s + 2, &e, 10); // base 10
             if (! c || *e != ';') { s++; continue; } // not a character ref
 
-            if (c < 0x80) *(s++) = c; // US-ASCII subset
+            if (c < 0x80) *(s++) = (char)c; // US-ASCII subset
             else { // multi-byte UTF-8 sequence
                 for (b = 0, d = c; d; d /= 2) b++; // number of bits in c
+                // UTF-8 can ecode max 36 bits (standard says 21) - noop on 32 bit.
+                if (b > 36) { s++; continue; }
                 b = (b - 2) / 5; // number of bytes in payload
-                *(s++) = (0xFF << (7 - b)) | (c >> (6 * b)); // head
+                *(s++) = (char)(0xFF << (7 - b)) | (char)(c >> (6 * b)); // head
                 while (b) *(s++) = 0x80 | ((c >> (6 * --b)) & 0x3F); // payload
             }
 
@@ -192,24 +236,24 @@ char *ezxml_decode(char *s, char **ent, char t)
                  b += 2); // find entity in entity list
 
             if (ent[b++]) { // found a match
-                if ((c = strlen(ent[b])) - 1 > (e = strchr(s, ';')) - s) {
-                    l = (d = (s - r)) + c + strlen(e); // new length
-                    r = (r == m) ? strcpy(malloc(l), r) : realloc(r, l);
+                if ((c = (long)strlen(ent[b])) - 1 > (e = strchr(s, ';')) - s) {
+                    l = (d = (long)(s - r)) + c + (long)strlen(e); // new length
+                    r = (r == m) ? strcpy(malloc(l), r) : _realloc(r, l);
                     e = strchr((s = r + d), ';'); // fix up pointers
                 }
 
                 memmove(s + c, e + 1, strlen(e)); // shift rest of string
-                strncpy(s, ent[b], c); // copy in replacement text
+                strncpy_s(s, c, ent[b], _TRUNCATE); // copy in replacement text
             }
             else s++; // not a known entity
         }
-        else if ((t == ' ' || t == '*') && isspace(*s)) *(s++) = ' ';
+        else if ((t == ' ' || t == '*') && isspace((uint8_t)*s)) *(s++) = ' ';
         else s++; // no decoding needed
     }
 
     if (t == '*') { // normalize spaces for non-cdata attributes
         for (s = r; *s; s++) {
-            if ((l = strspn(s, " "))) memmove(s, s + l, strlen(s + l) + 1);
+            if ((l = (long)strspn(s, " "))) memmove(s, s + l, strlen(s + l) + 1);
             while (*s && *s != ' ') s++;
         }
         if (--s >= r && *s == ' ') *s = '\0'; // trim any trailing space
@@ -300,16 +344,16 @@ void ezxml_proc_inst(ezxml_root_t root, char *s, size_t len)
 
     while (root->pi[i] && strcmp(target, root->pi[i][0])) i++; // find target
     if (! root->pi[i]) { // new target
-        root->pi = realloc(root->pi, sizeof(char **) * (i + 2));
+        root->pi = _realloc(root->pi, sizeof(char **) * (i + 2));
         root->pi[i] = malloc(sizeof(char *) * 3);
         root->pi[i][0] = target;
         root->pi[i][1] = (char *)(root->pi[i + 1] = NULL); // terminate pi list
-        root->pi[i][2] = strdup(""); // empty document position list
+        root->pi[i][2] = _strdup(""); // empty document position list
     }
 
     while (root->pi[i][j]) j++; // find end of instruction list for this target
-    root->pi[i] = realloc(root->pi[i], sizeof(char *) * (j + 3));
-    root->pi[i][j + 2] = realloc(root->pi[i][j + 1], j + 1);
+    root->pi[i] = _realloc(root->pi[i], sizeof(char *) * (j + 3));
+    root->pi[i][j + 2] = _realloc(root->pi[i][j + 1], j + 1);
     strcpy(root->pi[i][j + 2] + j - 1, (root->xml.name) ? ">" : "<");
     root->pi[i][j + 1] = NULL; // null terminate pi list for this target
     root->pi[i][j] = s; // set instruction
@@ -320,6 +364,7 @@ short ezxml_internal_dtd(ezxml_root_t root, char *s, size_t len)
 {
     char q, *c, *t, *n = NULL, *v, **ent, **pe;
     int i, j;
+    size_t n_len, n_off;
     
     pe = memcpy(malloc(sizeof(EZXML_NIL)), EZXML_NIL, sizeof(EZXML_NIL));
 
@@ -330,7 +375,13 @@ short ezxml_internal_dtd(ezxml_root_t root, char *s, size_t len)
         else if (! strncmp(s, "<!ENTITY", 8)) { // parse entity definitions
             c = s += strspn(s + 8, EZXML_WS) + 8; // skip white space separator
             n = s + strspn(s, EZXML_WS "%"); // find name
-            *(s = n + strcspn(n, EZXML_WS)) = ';'; // append ; to name
+            n_len = strlen(n);
+            n_off = strcspn(n, EZXML_WS);
+            if(n_off >= n_len) {
+                ezxml_err(root, NULL, "write past buffer (<!ENTITY)");
+                break;
+            }
+            *(s = n + n_off) = ';'; // append ; to name
 
             v = s + strspn(s + 1, EZXML_WS) + 1; // find value
             if ((q = *(v++)) != '"' && q != '\'') { // skip externals
@@ -339,7 +390,7 @@ short ezxml_internal_dtd(ezxml_root_t root, char *s, size_t len)
             }
 
             for (i = 0, ent = (*c == '%') ? pe : root->ent; ent[i]; i++);
-            ent = realloc(ent, (i + 3) * sizeof(char *)); // space for next ent
+            ent = _realloc(ent, (i + 3) * sizeof(char *)); // space for next ent
             if (*c == '%') pe = ent;
             else root->ent = ent;
 
@@ -359,9 +410,10 @@ short ezxml_internal_dtd(ezxml_root_t root, char *s, size_t len)
             if (! *t) { ezxml_err(root, t, "unclosed <!ATTLIST"); break; }
             if (*(s = t + strcspn(t, EZXML_WS ">")) == '>') continue;
             else *s = '\0'; // null terminate tag name
-            for (i = 0; root->attr[i] && strcmp(n, root->attr[i][0]); i++);
+            for (i = 0; n && root->attr[i] && strcmp(n, root->attr[i][0]); i++);
 
-            while (*(n = ++s + strspn(s, EZXML_WS)) && *n != '>') {
+            ++s;
+            while (*(n = s + strspn(s, EZXML_WS)) && *n != '>') {
                 if (*(s = n + strcspn(n, EZXML_WS))) *s = '\0'; // attr name
                 else { ezxml_err(root, t, "malformed <!ATTLIST"); break; }
 
@@ -386,7 +438,7 @@ short ezxml_internal_dtd(ezxml_root_t root, char *s, size_t len)
 
                 if (! root->attr[i]) { // new tag name
                     root->attr = (! i) ? malloc(2 * sizeof(char **))
-                                       : realloc(root->attr,
+                                       : _realloc(root->attr,
                                                  (i + 2) * sizeof(char **));
                     root->attr[i] = malloc(2 * sizeof(char *));
                     root->attr[i][0] = t; // set tag name
@@ -394,7 +446,7 @@ short ezxml_internal_dtd(ezxml_root_t root, char *s, size_t len)
                 }
 
                 for (j = 1; root->attr[i][j]; j += 3); // find end of list
-                root->attr[i] = realloc(root->attr[i],
+                root->attr[i] = _realloc(root->attr[i],
                                         (j + 4) * sizeof(char *));
 
                 root->attr[i][j + 3] = NULL; // null terminate list
@@ -438,23 +490,23 @@ char *ezxml_str2utf8(char **s, size_t *len)
             c = (((c & 0x3FF) << 10) | (d & 0x3FF)) + 0x10000;
         }
 
-        while (l + 6 > max) u = realloc(u, max += EZXML_BUFSIZE);
-        if (c < 0x80) u[l++] = c; // US-ASCII subset
+        while (l + 6 > max) u = _realloc(u, max += EZXML_BUFSIZE);
+        if (c < 0x80) u[l++] = (char)c; // US-ASCII subset
         else { // multi-byte UTF-8 sequence
             for (b = 0, d = c; d; d /= 2) b++; // bits in c
             b = (b - 2) / 5; // bytes in payload
-            u[l++] = (0xFF << (7 - b)) | (c >> (6 * b)); // head
+            u[l++] = (char)(0xFF << (7 - b)) | (char)(c >> (6 * b)); // head
             while (b) u[l++] = 0x80 | ((c >> (6 * --b)) & 0x3F); // payload
         }
     }
-    return *s = realloc(u, *len = l);
+    return *s = _realloc(u, *len = l);
 }
 
 // frees a tag attribute list
 void ezxml_free_attr(char **attr) {
     int i = 0;
     char *m;
-    
+
     if (! attr || attr == EZXML_NIL) return; // nothing to free
     while (attr[i]) i += 2; // find end of attribute list
     m = attr[i + 1]; // list of which names and values are malloced
@@ -473,6 +525,7 @@ ezxml_t ezxml_parse_str(char *s, size_t len)
     char q, e, *d, **attr, **a = NULL; // initialize a to avoid compile warning
     int l, i, j;
 
+    if (!root) return NULL;
     root->m = s;
     if (! len) return ezxml_err(root, NULL, "root tag missing");
     root->u = ezxml_str2utf8(&s, &len); // convert utf-16 to utf-8
@@ -493,7 +546,7 @@ ezxml_t ezxml_parse_str(char *s, size_t len)
                 return ezxml_err(root, d, "markup outside of root element");
 
             s += strcspn(s, EZXML_WS "/>");
-            while (isspace(*s)) *(s++) = '\0'; // null terminate tag name
+            while (isspace((uint8_t)*s)) *(s++) = '\0'; // null terminate tag name
   
             if (*s && *s != '/' && *s != '>') // find tag in default attr list
                 for (i = 0; (a = root->attr[i]) && strcmp(a[0], d); i++);
@@ -509,7 +562,7 @@ ezxml_t ezxml_parse_str(char *s, size_t len)
                 attr[l] = s; // set attribute name
 
                 s += strcspn(s, EZXML_WS "=/>");
-                if (*s == '=' || isspace(*s)) { 
+                if (*s == '=' || isspace((uint8_t)*s)) {
                     *(s++) = '\0'; // null terminate tag attribute name
                     q = *(s += strspn(s, EZXML_WS "="));
                     if (q == '"' || q == '\'') { // attribute value
@@ -528,7 +581,7 @@ ezxml_t ezxml_parse_str(char *s, size_t len)
                             attr[l + 3][l / 2] = EZXML_TXTM; // value malloced
                     }
                 }
-                while (isspace(*s)) s++;
+                while (isspace((uint8_t)*s)) s++;
             }
 
             if (*s == '/') { // self closing tag
@@ -555,7 +608,7 @@ ezxml_t ezxml_parse_str(char *s, size_t len)
             if (! (q = *s) && e != '>') return ezxml_err(root, d, "missing >");
             *s = '\0'; // temporarily null terminate tag name
             if (ezxml_close_tag(root, d, s)) return &root->xml;
-            if (isspace(*s = q)) s += strspn(s, EZXML_WS);
+            if (isspace((uint8_t)(*s = q))) s += strspn(s, EZXML_WS);
         }
         else if (! strncmp(s, "!--", 3)) { // xml comment
             if (! (s = strstr(s + 3, "--")) || (*(s += 2) != '>' && *s) ||
@@ -611,11 +664,11 @@ ezxml_t ezxml_parse_fp(FILE *fp)
     if (! (s = malloc(EZXML_BUFSIZE))) return NULL;
     do {
         len += (l = fread((s + len), 1, EZXML_BUFSIZE, fp));
-        if (l == EZXML_BUFSIZE) s = realloc(s, len + EZXML_BUFSIZE);
+        if (l == EZXML_BUFSIZE) s = _realloc(s, len + EZXML_BUFSIZE);
     } while (s && l == EZXML_BUFSIZE);
 
     if (! s) return NULL;
-    root = (ezxml_root_t)ezxml_parse_str(s, len);
+    if (!(root = (ezxml_root_t)ezxml_parse_str(s, len))) { free(s); return NULL; };
     root->len = -1; // so we know to free s in ezxml_free()
     return &root->xml;
 }
@@ -639,12 +692,14 @@ ezxml_t ezxml_parse_fd(int fd)
         MAP_FAILED) {
         madvise(m, l, MADV_SEQUENTIAL); // optimize for sequential access
         root = (ezxml_root_t)ezxml_parse_str(m, st.st_size);
+        if (!root) { munmap(m,l); return NULL; };
         madvise(m, root->len = l, MADV_NORMAL); // put it back to normal
     }
     else { // mmap failed, read file into memory
 #endif // EZXML_NOMMAP
-        l = read(fd, m = malloc(st.st_size), st.st_size);
+        l = (long)_read(fd, m = malloc((size_t)st.st_size), (unsigned int)st.st_size);
         root = (ezxml_root_t)ezxml_parse_str(m, l);
+        if (!root) { free(m); return NULL; };
         root->len = -1; // so we know to free s in ezxml_free()
 #ifndef EZXML_NOMMAP
     }
@@ -655,10 +710,10 @@ ezxml_t ezxml_parse_fd(int fd)
 // a wrapper for ezxml_parse_fd that accepts a file name
 ezxml_t ezxml_parse_file(const char *file)
 {
-    int fd = open(file, O_RDONLY, 0);
+    int fd = _openU(file, O_RDONLY, 0);
     ezxml_t xml = ezxml_parse_fd(fd);
     
-    if (fd >= 0) close(fd);
+    if (fd >= 0) _close(fd);
     return xml;
 }
 
@@ -670,7 +725,7 @@ char *ezxml_ampencode(const char *s, size_t len, char **dst, size_t *dlen,
     const char *e;
     
     for (e = s + len; s != e; s++) {
-        while (*dlen + 10 > *max) *dst = realloc(*dst, *max += EZXML_BUFSIZE);
+        while (*dlen + 10 > *max) *dst = _realloc(*dst, *max += EZXML_BUFSIZE);
 
         switch (*s) {
         case '\0': return *dst;
@@ -701,13 +756,13 @@ char *ezxml_toxml_r(ezxml_t xml, char **s, size_t *len, size_t *max,
     *s = ezxml_ampencode(txt + start, xml->off - start, s, len, max, 0);
 
     while (*len + strlen(xml->name) + 4 > *max) // reallocate s
-        *s = realloc(*s, *max += EZXML_BUFSIZE);
+        *s = _realloc(*s, *max += EZXML_BUFSIZE);
 
     *len += sprintf(*s + *len, "<%s", xml->name); // open tag
     for (i = 0; xml->attr[i]; i += 2) { // tag attributes
         if (ezxml_attr(xml, xml->attr[i]) != xml->attr[i + 1]) continue;
         while (*len + strlen(xml->attr[i]) + 7 > *max) // reallocate s
-            *s = realloc(*s, *max += EZXML_BUFSIZE);
+            *s = _realloc(*s, *max += EZXML_BUFSIZE);
 
         *len += sprintf(*s + *len, " %s=\"", xml->attr[i]);
         ezxml_ampencode(xml->attr[i + 1], -1, s, len, max, 1);
@@ -719,7 +774,7 @@ char *ezxml_toxml_r(ezxml_t xml, char **s, size_t *len, size_t *max,
         if (! attr[i][j + 1] || ezxml_attr(xml, attr[i][j]) != attr[i][j + 1])
             continue; // skip duplicates and non-values
         while (*len + strlen(attr[i][j]) + 7 > *max) // reallocate s
-            *s = realloc(*s, *max += EZXML_BUFSIZE);
+            *s = _realloc(*s, *max += EZXML_BUFSIZE);
 
         *len += sprintf(*s + *len, " %s=\"", attr[i][j]);
         ezxml_ampencode(attr[i][j + 1], -1, s, len, max, 1);
@@ -731,7 +786,7 @@ char *ezxml_toxml_r(ezxml_t xml, char **s, size_t *len, size_t *max,
                       : ezxml_ampencode(xml->txt, -1, s, len, max, 0);  //data
     
     while (*len + strlen(xml->name) + 4 > *max) // reallocate s
-        *s = realloc(*s, *max += EZXML_BUFSIZE);
+        *s = _realloc(*s, *max += EZXML_BUFSIZE);
 
     *len += sprintf(*s + *len, "</%s>", xml->name); // close tag
 
@@ -747,10 +802,12 @@ char *ezxml_toxml(ezxml_t xml)
     ezxml_t p = (xml) ? xml->parent : NULL, o = (xml) ? xml->ordered : NULL;
     ezxml_root_t root = (ezxml_root_t)xml;
     size_t len = 0, max = EZXML_BUFSIZE;
-    char *s = strcpy(malloc(max), ""), *t, *n;
+    char *s = malloc(max), *t, *n;
     int i, j, k;
 
-    if (! xml || ! xml->name) return realloc(s, len + 1);
+    if (!s) return (NULL);
+    s = strcpy(s, "");
+    if (! xml || ! xml->name) return _realloc(s, len + 1);
     while (root->xml.parent) root = (ezxml_root_t)root->xml.parent; // root tag
 
     for (i = 0; ! p && root->pi[i]; i++) { // pre-root processing instructions
@@ -758,7 +815,7 @@ char *ezxml_toxml(ezxml_t xml)
         for (j = 1; (n = root->pi[i][j]); j++) {
             if (root->pi[i][k][j - 1] == '>') continue; // not pre-root
             while (len + strlen(t = root->pi[i][0]) + strlen(n) + 7 > max)
-                s = realloc(s, max += EZXML_BUFSIZE);
+                s = _realloc(s, max += EZXML_BUFSIZE);
             len += sprintf(s + len, "<?%s%s%s?>\n", t, *n ? " " : "", n);
         }
     }
@@ -773,11 +830,11 @@ char *ezxml_toxml(ezxml_t xml)
         for (j = 1; (n = root->pi[i][j]); j++) {
             if (root->pi[i][k][j - 1] == '<') continue; // not post-root
             while (len + strlen(t = root->pi[i][0]) + strlen(n) + 7 > max)
-                s = realloc(s, max += EZXML_BUFSIZE);
+                s = _realloc(s, max += EZXML_BUFSIZE);
             len += sprintf(s + len, "\n<?%s%s%s?>", t, *n ? " " : "", n);
         }
     }
-    return realloc(s, len + 1);
+    return _realloc(s, len + 1);
 }
 
 // free the memory allocated for the ezxml structure
@@ -835,12 +892,15 @@ ezxml_t ezxml_new(const char *name)
 {
     static char *ent[] = { "lt;", "&#60;", "gt;", "&#62;", "quot;", "&#34;",
                            "apos;", "&#39;", "amp;", "&#38;", NULL };
-    ezxml_root_t root = (ezxml_root_t)memset(malloc(sizeof(struct ezxml_root)), 
-                                             '\0', sizeof(struct ezxml_root));
+    ezxml_root_t root;
+    char **p_ent;
+    if (!(root  = malloc(sizeof(struct ezxml_root)))) return NULL;
+    if (!(p_ent = malloc(sizeof(ent)))) { free(root); return NULL; };
+    root = (ezxml_root_t)memset(root, '\0', sizeof(struct ezxml_root));
     root->xml.name = (char *)name;
     root->cur = &root->xml;
     strcpy(root->err, root->xml.txt = "");
-    root->ent = memcpy(malloc(sizeof(ent)), ent, sizeof(ent));
+    root->ent = memcpy(p_ent, ent, sizeof(ent));
     root->attr = root->pi = (char ***)(root->xml.attr = EZXML_NIL);
     return &root->xml;
 }
@@ -924,15 +984,17 @@ ezxml_t ezxml_set_attr(ezxml_t xml, const char *name, const char *value)
     if (! xml->attr[l]) { // not found, add as new attribute
         if (! value) return xml; // nothing to do
         if (xml->attr == EZXML_NIL) { // first attribute
+            if (l >= 1) return NULL;
             xml->attr = malloc(4 * sizeof(char *));
-            xml->attr[1] = strdup(""); // empty list of malloced names/vals
+            xml->attr[1] = _strdup(""); // empty list of malloced names/vals
         }
-        else xml->attr = realloc(xml->attr, (l + 4) * sizeof(char *));
+        else xml->attr = _realloc(xml->attr, (l + 4) * sizeof(char *));
 
         xml->attr[l] = (char *)name; // set attribute name
         xml->attr[l + 2] = NULL; // null terminate attribute list
         xml->attr[l + 3] = realloc(xml->attr[l + 1],
-                                   (c = strlen(xml->attr[l + 1])) + 2);
+                                   (c =(long)strlen(xml->attr[l + 1])) + 2);
+        if (!xml->attr[l + 3]) return NULL;
         strcpy(xml->attr[l + 3] + c, " "); // set name/value as not malloced
         if (xml->flags & EZXML_DUP) xml->attr[l + 3][c] = EZXML_NAMEM;
     }
@@ -947,7 +1009,7 @@ ezxml_t ezxml_set_attr(ezxml_t xml, const char *name, const char *value)
     else { // remove attribute
         if (xml->attr[c + 1][l / 2] & EZXML_NAMEM) free(xml->attr[l]);
         memmove(xml->attr + l, xml->attr + l + 2, (c - l + 2) * sizeof(char*));
-        xml->attr = realloc(xml->attr, (c + 2) * sizeof(char *));
+        xml->attr = _realloc(xml->attr, (c + 2) * sizeof(char *));
         memmove(xml->attr[c + 1] + (l / 2), xml->attr[c + 1] + (l / 2) + 1,
                 (c / 2) - (l / 2)); // fix list of which name/vals are malloced
     }
@@ -1006,8 +1068,8 @@ int main(int argc, char **argv)
     if (argc != 2) return fprintf(stderr, "usage: %s xmlfile\n", argv[0]);
 
     xml = ezxml_parse_file(argv[1]);
-    printf("%s\n", (s = ezxml_toxml(xml)));
-    free(s);
+    s = ezxml_toxml(xml);
+    if (s) { printf("%s\n", s); free(s); }
     i = fprintf(stderr, "%s", ezxml_error(xml));
     ezxml_free(xml);
     return (i) ? 1 : 0;

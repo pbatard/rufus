@@ -93,6 +93,9 @@
     <ClCompile Include="..\src\wue.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\xml.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\rufus.h">
@@ -195,6 +198,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\msvc-missing\unistd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\xml.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

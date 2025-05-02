@@ -76,6 +76,10 @@ ezxml_t ezxml_parse_fp(FILE *fp);
 // if not found
 ezxml_t ezxml_child(ezxml_t xml, const char *name);
 
+// returns the value of the first child tag (one level deeper) with the given
+// name or NULL if not found
+char* ezxml_child_val(ezxml_t xml, const char* name);
+
 // returns the next tag of the same name in the same section and depth or NULL
 // if not found
 #define ezxml_next(xml) ((xml) ? xml->next : NULL)
@@ -100,6 +104,9 @@ const char *ezxml_attr(ezxml_t xml, const char *attr);
 // This retrieves the title of the 3rd book on the 1st shelf of library.
 // Returns NULL if not found.
 ezxml_t ezxml_get(ezxml_t xml, ...);
+
+// Same as above but returns the text value or NULL if not found
+char* ezxml_get_val(ezxml_t xml, ...);
 
 // Converts an ezxml structure back to xml. Returns a string of xml data that
 // must be freed.

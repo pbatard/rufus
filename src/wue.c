@@ -25,6 +25,7 @@
 
 #include "rufus.h"
 #include "vhd.h"
+#include "xml.h"
 #include "drive.h"
 #include "format.h"
 #include "missing.h"
@@ -418,24 +419,24 @@ out:
 /// <summary>
 /// Populate the img_report Window version from an install[.wim|.esd] XML index
 /// </summary>
-/// <param name="xml_file">The path of the extracted index XML.</param>
+/// <param name="xml">The index XML data.</param>
+/// <param name="xml_len">The length of the index XML data.</param>
 /// <param name="index">The index of the occurrence to look for.</param>
-static void PopulateWindowsVersionFromXml(const char* xml_file, int index)
+static void PopulateWindowsVersionFromXml(const char* xml, size_t xml_len, int index)
 {
 	char* val;
+	ezxml_t pxml = ezxml_parse_str((char*)xml, xml_len);
+	if (pxml == NULL)
+		return;
 
-	val = get_token_data_file_indexed("MAJOR", xml_file, index);
+	val = ezxml_get_val(pxml, "IMAGE", index, "WINDOWS", 0, "VERSION", 0, "MAJOR", -1);
 	img_report.win_version.major = (uint16_t)safe_atoi(val);
-	free(val);
-	val = get_token_data_file_indexed("MINOR", xml_file, index);
+	val = ezxml_get_val(pxml, "IMAGE", index, "WINDOWS", 0, "VERSION", 0, "MINOR", -1);
 	img_report.win_version.minor = (uint16_t)safe_atoi(val);
-	free(val);
-	val = get_token_data_file_indexed("BUILD", xml_file, index);
+	val = ezxml_get_val(pxml, "IMAGE", index, "WINDOWS", 0, "VERSION", 0, "BUILD", -1);
 	img_report.win_version.build = (uint16_t)safe_atoi(val);
-	free(val);
-	val = get_token_data_file_indexed("SPBUILD", xml_file, index);
+	val = ezxml_get_val(pxml, "IMAGE", index, "WINDOWS", 0, "VERSION", 0, "SPBUILD", -1);
 	img_report.win_version.revision = (uint16_t)safe_atoi(val);
-	free(val);
 	// Adjust versions so that we produce a more accurate report in the log
 	// (and yeah, I know we won't properly report Server, but I don't care)
 	if (img_report.win_version.major <= 5) {
@@ -463,10 +464,11 @@ static void PopulateWindowsVersionFromXml(const char* xml_file, int index)
 		if (img_report.win_version.build > 20000)
 			img_report.win_version.major = 11;
 	}
+	ezxml_free(pxml);
 }
 
 /// <summary>
-/// Populate the img_report Window version from an an install[.wim|.esd], mounting the
+/// Populate the img_report Window version from an install[.wim|.esd].
 /// ISO if needed. Requires Windows 8 or later.
 /// </summary>
 /// <param name="">(none)</param>
@@ -474,7 +476,8 @@ static void PopulateWindowsVersionFromXml(const char* xml_file, int index)
 BOOL PopulateWindowsVersion(void)
 {
 	char *mounted_iso, mounted_image_path[128];
-	char xml_file[MAX_PATH] = "";
+	char xml_file[MAX_PATH] = "", *xml;
+	size_t xml_len;
 
 	memset(&img_report.win_version, 0, sizeof(img_report.win_version));
 
@@ -506,7 +509,12 @@ BOOL PopulateWindowsVersion(void)
 		goto out;
 	}
 
-	PopulateWindowsVersionFromXml(xml_file, 1);
+	xml_len = read_file(xml_file, (uint8_t**)&xml);
+	if (xml_len == 0) {
+		uprintf("Could not read WIM index XML");
+		goto out;
+	}
+	PopulateWindowsVersionFromXml(xml, xml_len, 1);
 
 out:
 	DeleteFileU(xml_file);
@@ -549,12 +557,14 @@ BOOL CopySKUSiPolicy(const char* drive_name)
 /// <returns>-2 on user cancel, -1 on other error, >=0 on success.</returns>
 int SetWinToGoIndex(void)
 {
-	char* mounted_iso, mounted_image_path[128];
-	char xml_file[MAX_PATH] = "";
-	char* install_names[MAX_WININST];
-	StrArray version_name, version_index;
 	int i;
+	char* mounted_iso, mounted_image_path[128];
+	char* install_names[MAX_WININST];
+	char xml_file[MAX_PATH] = "", *xml = NULL;
+	size_t xml_len;
+	StrArray version_name, version_index;
 	BOOL bNonStandard = FALSE;
+	ezxml_t index = NULL, image = NULL;
 
 	// Sanity checks
 	wintogo_index = -1;
@@ -600,22 +610,31 @@ int SetWinToGoIndex(void)
 		goto out;
 	}
 
+	xml_len = read_file(xml_file, (uint8_t**)&xml);
+	if (xml_len == 0) {
+		uprintf("Could not read WIM XML");
+		goto out;
+	}
+
 	StrArrayCreate(&version_name, 16);
 	StrArrayCreate(&version_index, 16);
-	for (i = 0; StrArrayAdd(&version_index, get_token_data_file_indexed("IMAGE INDEX", xml_file, i + 1), FALSE) >= 0; i++) {
+	index = ezxml_parse_str((char*)xml, xml_len);
+	if (index == NULL) {
+		uprintf("Could not parse WIM XML");
+		goto out;
+	}
+
+	for (i = 0, image = ezxml_child(index, "IMAGE");
+		StrArrayAdd(&version_index, ezxml_attr(image, "INDEX"), TRUE) >= 0;
+		image = image->next, i++) {
 		// Some people are apparently creating *unofficial* Windows ISOs that don't have DISPLAYNAME elements.
-		// If we are parsing such an ISO, try to fall back to using DESCRIPTION. Of course, since we don't use
-		// a formal XML parser, if an ISO mixes entries with both DISPLAYNAME and DESCRIPTION and others with
-		// only DESCRIPTION, the version names we report will be wrong.
-		// But hey, there's only so far I'm willing to go to help people who, not content to have demonstrated
-		// their utter ignorance on development matters, are also trying to lecture experienced developers
-		// about specific "noob mistakes"... that don't exist in the code they are trying to criticize.
-		if (StrArrayAdd(&version_name, get_token_data_file_indexed("DISPLAYNAME", xml_file, i + 1), FALSE) < 0) {
-			bNonStandard = TRUE;
-			if (StrArrayAdd(&version_name, get_token_data_file_indexed("DESCRIPTION", xml_file, i + 1), FALSE) < 0) {
+		// If we are parsing such an ISO, try to fall back to using DESCRIPTION.
+		if (StrArrayAdd(&version_name, ezxml_child_val(image, "DISPLAYNAME"), TRUE) < 0) {
+			if (StrArrayAdd(&version_name, ezxml_child_val(image, "DESCRIPTION"), TRUE) < 0) {
 				uprintf("Warning: Could not find a description for image index %d", i + 1);
 				StrArrayAdd(&version_name, "Unknown Windows Version", TRUE);
 			}
+			bNonStandard = TRUE;
 		}
 	}
 	if (bNonStandard)
@@ -632,7 +651,7 @@ int SetWinToGoIndex(void)
 		wintogo_index = atoi(version_index.String[i - 1]);
 	if (i > 0) {
 		// re-populate the version data from the selected XML index
-		PopulateWindowsVersionFromXml(xml_file, i);
+		PopulateWindowsVersionFromXml(xml, xml_len, i);
 		// If we couldn't obtain the major and build, we have a problem
 		if (img_report.win_version.major == 0 || img_report.win_version.build == 0)
 			uprintf("Warning: Could not obtain version information from XML index (Nonstandard Windows image?)");
@@ -656,6 +675,8 @@ int SetWinToGoIndex(void)
 	StrArrayDestroy(&version_index);
 
 out:
+	ezxml_free(index);
+	free(xml);
 	DeleteFileU(xml_file);
 	if (!img_report.is_windows_img)
 		VhdUnmountImage();
