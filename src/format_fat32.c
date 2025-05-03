@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * Large FAT32 formatting
  * Copyright © 2007-2009 Tom Thornhill/Ridgecrop
- * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2025 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -192,8 +192,10 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 		ErrorStatus = RUFUS_ERROR(ERROR_INVALID_PARAMETER);
 		goto out;
 	}
-	PrintInfoDebug(0, MSG_222, "Large FAT32");
-	UpdateProgressWithInfoInit(NULL, TRUE);
+	if (!(Flags & FP_NO_PROGRESS)) {
+		PrintInfoDebug(0, MSG_222, "Large FAT32");
+		UpdateProgressWithInfoInit(NULL, TRUE);
+	}
 	VolumeId = GetVolumeID();
 
 	// Open the drive and lock it
@@ -423,7 +425,8 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	}
 
 	for (i = 0; i < (SystemAreaSize + BurstSize - 1); i += BurstSize) {
-		UpdateProgressWithInfo(OP_FORMAT, MSG_217, (uint64_t)i, (uint64_t)SystemAreaSize + BurstSize);
+		if (!(Flags & FP_NO_PROGRESS))
+			UpdateProgressWithInfo(OP_FORMAT, MSG_217, (uint64_t)i, (uint64_t)SystemAreaSize + BurstSize);
 		CHECK_FOR_USER_CANCEL;
 		if (write_sectors(hLogicalVolume, BytesPerSect, i, BurstSize, pZeroSect) != (BytesPerSect * BurstSize)) {
 			die("Error clearing reserved sectors", ERROR_WRITE_FAULT);
@@ -447,7 +450,8 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 
 	if (!(Flags & FP_NO_BOOT)) {
 		// Must do it here, as have issues when trying to write the PBR after a remount
-		PrintInfoDebug(0, MSG_229);
+		if (!(Flags & FP_NO_PROGRESS))
+			PrintInfoDebug(0, MSG_229);
 		if (!WritePBR(hLogicalVolume)) {
 			// Non fatal error, but the drive probably won't boot
 			uprintf("Could not write partition boot record - drive may not boot...");
@@ -455,8 +459,10 @@ BOOL FormatLargeFAT32(DWORD DriveIndex, uint64_t PartitionOffset, DWORD ClusterS
 	}
 
 	// Set the FAT32 volume label
-	PrintInfo(0, MSG_221, lmprintf(MSG_307));
-	uprintf("Setting label...");
+	if (!(Flags & FP_NO_PROGRESS)) {
+		PrintInfo(0, MSG_221, lmprintf(MSG_307));
+		uprintf("Setting label...");
+	}
 	// Handle must be closed for SetVolumeLabel to work
 	safe_closehandle(hLogicalVolume);
 	VolumeName = write_as_esp ?

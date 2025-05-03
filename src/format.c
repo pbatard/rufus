@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Formatting function calls
- * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2025 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1084,16 +1084,8 @@ BOOL WritePBR(HANDLE hLogicalVolume)
 
 static void update_progress(const uint64_t processed_bytes)
 {
-	// NB: We don't really care about resetting this value to UINT64_MAX for a new pass.
-	static uint64_t last_value = UINT64_MAX;
-	uint64_t cur_value;
-
 	UpdateProgressWithInfo(OP_FORMAT, MSG_261, processed_bytes, img_report.image_size);
-	cur_value = (processed_bytes * min(80, img_report.image_size)) / img_report.image_size;
-	if (cur_value != last_value) {
-		last_value = cur_value;
-		uprintfs("+");
-	}
+	uprint_progress(processed_bytes, img_report.image_size);
 }
 
 // Some compressed images use streams that aren't multiple of the sector
@@ -1165,7 +1157,6 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 	HANDLE hSourceImage = INVALID_HANDLE_VALUE;
 	DWORD i, read_size[NUM_BUFFERS] = { 0 }, write_size, comp_size, buf_size;
 	uint64_t wb, target_size = bZeroDrive ? SelectedDrive.DiskSize : MIN((uint64_t)SelectedDrive.DiskSize, img_report.image_size);
-	uint64_t cur_value, last_value = 0;
 	int64_t bled_ret;
 	uint8_t* buffer = NULL;
 	uint32_t zero_data, *cmp_buffer = NULL;
@@ -1211,11 +1202,10 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 		}
 
 		read_size[0] = buf_size;
+		uprint_progress(0, 0);
 		for (wb = 0, write_size = 0; wb < target_size; wb += write_size) {
 			UpdateProgressWithInfo(OP_FORMAT, fast_zeroing ? MSG_306 : MSG_286, wb, target_size);
-			cur_value = (wb * 80) / target_size;
-			for (; cur_value > last_value && last_value < 80; last_value++)
-				uprintfs("+");
+			uprint_progress(wb, target_size);
 			// Don't overflow our projected size (mostly for VHDs)
 			if (wb + read_size[0] > target_size)
 				read_size[0] = (DWORD)(target_size - wb);
@@ -1308,6 +1298,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 		if_not_assert((uintptr_t)sec_buf% SelectedDrive.SectorSize == 0)
 			goto out;
 		sec_buf_pos = 0;
+		update_progress(0);
 		bled_init(256 * KB, uprintf, NULL, sector_write, update_progress, NULL, &ErrorStatus);
 		bled_ret = bled_uncompress_with_handles(hSourceImage, hPhysicalDrive, img_report.compression_type);
 		bled_exit();
@@ -1362,12 +1353,11 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 		ReadFileAsync(hSourceImage, &buffer[read_bufnum * buf_size], (DWORD)MIN(buf_size, target_size));
 
 		read_size[proc_bufnum] = 1;	// To avoid early loop exit
+		uprint_progress(0, 0);
 		for (wb = 0; read_size[proc_bufnum] != 0; wb += read_size[proc_bufnum]) {
 			// 0. Update the progress
 			UpdateProgressWithInfo(OP_FORMAT, MSG_261, wb, target_size);
-			cur_value = (wb * 80) / target_size;
-			for ( ; cur_value > last_value && last_value < 80; last_value++)
-				uprintfs("+");
+			uprint_progress(wb, target_size);
 
 			if (wb >= target_size)
 				break;

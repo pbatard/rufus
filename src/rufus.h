@@ -91,6 +91,7 @@
 #define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
 #define MAX_USERNAME_LENGTH         128			// Maximum size we'll accept for a WUE specified username
 #define MAX_WININST                 4			// Max number of install[.wim|.esd] we can handle on an image
+#define MAX_MARKER                  80.0f		// Max number of '+' signs we display for progress
 #define MBR_UEFI_MARKER             0x49464555	// 'U', 'E', 'F', 'I', as a 32 bit little endian longword
 #define MORE_INFO_URL               0xFFFF
 #define PROJECTED_SIZE_RATIO        110			// Percentage by which we inflate projected_size to prevent persistence overflow
@@ -201,6 +202,7 @@ static __inline void static_repchr(char* p, char s, char r) {
 extern void uprintf(const char *format, ...);
 extern void uprintfs(const char *str);
 extern void wuprintf(const wchar_t* format, ...);
+extern void uprint_progress(uint64_t cur_value, uint64_t max_value);
 #define vuprintf(...) do { if (verbose) uprintf(__VA_ARGS__); } while(0)
 #define vvuprintf(...) do { if (verbose > 1) uprintf(__VA_ARGS__); } while(0)
 #define suprintf(...) do { if (!bSilent) uprintf(__VA_ARGS__); } while(0)
@@ -757,6 +759,7 @@ extern void PrintStatusInfo(BOOL info, BOOL debug, unsigned int duration, int ms
 extern void UpdateProgress(int op, float percent);
 extern void _UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_t total, BOOL force);
 #define UpdateProgressWithInfo(op, msg, processed, total) _UpdateProgressWithInfo(op, msg, processed, total, FALSE)
+#define UpdateProgressWithInfoUpTo(upto, op, msg, processed, total) _UpdateProgressWithInfo(op, msg, (processed) * (upto), (total) * 100, FALSE)
 #define UpdateProgressWithInfoForce(op, msg, processed, total) _UpdateProgressWithInfo(op, msg, processed, total, TRUE)
 #define UpdateProgressWithInfoInit(hProgressDialog, bNoAltMode) UpdateProgressWithInfo(OP_INIT, (int)bNoAltMode, (uint64_t)(uintptr_t)hProgressDialog, 0);
 extern const char* StrError(DWORD error_code, BOOL use_default_locale);

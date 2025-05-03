@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2025 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@
 #define FP_LARGE_FAT32                      0x00010000
 #define FP_NO_BOOT                          0x00020000
 #define FP_CREATE_PERSISTENCE_CONF          0x00040000
+#define FP_NO_PROGRESS                      0x00080000
 
 #define FILE_FLOPPY_DISKETTE                0x00000004
 

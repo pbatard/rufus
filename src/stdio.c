@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard User I/O Routines (logging, status, error, etc.)
- * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2025 Pete Batard <pete@akeo.ie>
  * Copyright © 2020 Mattiwatti <mattiwatti@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -139,6 +139,19 @@ void uprintfs(const char* str)
 		Edit_Scroll(hLog, Edit_GetLineCount(hLog), 0);
 	}
 	free(wstr);
+}
+
+void uprint_progress(uint64_t cur_value, uint64_t max_value)
+{
+	static uint64_t last_value = 0;
+	if (cur_value == 0) {
+		last_value = 0;
+		return;
+	}
+	assert(max_value != 0);
+	cur_value = (uint64_t)(((float)cur_value / (float)max_value) * min(MAX_MARKER, (float)max_value));
+	for (; cur_value > last_value && last_value < 80; last_value++)
+		uprintfs("+");
 }
 
 uint32_t read_file(const char* path, uint8_t** buf)

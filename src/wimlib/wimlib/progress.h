@@ -43,12 +43,12 @@ set_next_progress(u64 completed_bytes, u64 total_bytes, u64 *next_progress_p)
 	if (*next_progress_p < total_bytes) {
 		/*
 		 * Send the next message as soon as:
-		 *	- another 1/100 of the total has been processed;
-		 *	- OR another 1 GiB has been processed;
+		 *	- another 1/1000 of the total has been processed;
+		 *	- OR another 256 MiB has been processed;
 		 *	- OR all bytes have been processed.
 		 */
-		*next_progress_p = min(min(completed_bytes + total_bytes / 100,
-					   completed_bytes + (1UL << 30)),
+		*next_progress_p = min(min(completed_bytes + total_bytes / 1000,
+					   completed_bytes + (1UL << 28)),
 				       total_bytes);
 	} else {
 		/* Last message has been sent.  */

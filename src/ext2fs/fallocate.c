@@ -838,6 +838,7 @@ errcode_t ext2fs_fallocate(ext2_filsys fs, int flags, ext2_ino_t ino,
 	}
 
 	/* XXX: Allocate a bunch of blocks the slow way */
+	ext2fs_print_progress(0, 0);
 	for (blk = start; blk < start + len; blk++) {
 		/* For Rufus usage */
 		err = ext2fs_print_progress(blk, start + len);
