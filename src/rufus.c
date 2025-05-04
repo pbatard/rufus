@@ -90,7 +90,7 @@ static char szTimer[12] = "00:00:00";
 static unsigned int timer;
 static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], uppercase_cancel[64];
 
-extern HANDLE update_check_thread, wim_thread;
+extern HANDLE update_check_thread;
 extern HIMAGELIST hUpImageList, hDownImageList;
 extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes, is_bootloader_revoked;
 extern BOOL validate_md5sum, cpu_has_sha1_accel, cpu_has_sha256_accel;
@@ -1303,7 +1303,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		// coverity[swapped_arguments]
 		if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, tmp_path) != 0) {
 			// Only look at index 1 for now. If people complain, we may look for more.
-			if (WimExtractFile(image_path, 1, "Windows\\Boot\\EFI\\bootmgr.efi", tmp_path, TRUE)) {
+			if (WimExtractFile(image_path, 1, "Windows\\Boot\\EFI\\bootmgr.efi", tmp_path)) {
 				arch = FindArch(tmp_path);
 				if (arch != 0) {
 					uprintf("  Image contains a%s %s EFI boot manager",
@@ -1546,12 +1546,6 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			if (!IS_EFI_BOOTABLE(img_report)) {
 				// Unsupported ISO
 				MessageBoxExU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
-				goto out;
-			}
-			if (HAS_WIN7_EFI(img_report) && (!WimExtractCheck(FALSE))) {
-				// Your platform cannot extract files from WIM archives => download 7-zip?
-				if (MessageBoxExU(hMainDialog, lmprintf(MSG_102), lmprintf(MSG_101), MB_YESNO | MB_ICONERROR | MB_IS_RTL, selected_langid) == IDYES)
-					ShellExecuteA(hMainDialog, "open", SEVENZIP_URL, NULL, NULL, SW_SHOWNORMAL);
 				goto out;
 			}
 		} else if ( ((fs_type == FS_NTFS) && !HAS_WINDOWS(img_report) && !HAS_GRUB(img_report) && 
@@ -3825,39 +3819,10 @@ relaunch:
 		}
 #if defined(_DEBUG) || defined(TEST) || defined(ALPHA)
 extern int TestHashes(void);
-#include "wimlib.h"
 		// Ctrl-T => Alternate Test mode that doesn't require a full rebuild
 		if ((ctrl_without_focus || ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.message == WM_KEYDOWN)))
 			&& (msg.wParam == 'T')) {
-			int r;
-			WIMStruct* wim;
-			r = wimlib_open_wim(L"D:\\Incoming\\Win11_24H2_EnglishInternational_x64.iso|sources/boot.wim", WIMLIB_OPEN_FLAG_CHECK_INTEGRITY, &wim);
-//			r = wimlib_open_wim(L"C:\\tmp\\test.iso|sources/boot.wim", WIMLIB_OPEN_FLAG_CHECK_INTEGRITY, &wim);
-//			r = wimlib_open_wim(L"C:\\tmp\\boot.wim", WIMLIB_OPEN_FLAG_CHECK_INTEGRITY, &wim);
-			if (r == 0) {
-				int image;
-				wchar_t* xml;
-				size_t xml_size;
-				wimlib_print_header(wim);
-				if (wimlib_get_xml_data(wim, (void**) & xml, &xml_size) == 0) {
-					xml[(xml_size / sizeof(wchar_t)) - 1] = L'\0';
-					wuprintf(L"%s", xml);
-					free(xml);
-				}
-				image = wimlib_resolve_image(wim, L"1");
-				uprintf("image = %d", image);
-				const wchar_t* fn = L"Windows/win.ini";
-				r = wimlib_extract_paths(wim, image, L"C:\\tmp\\wim", &fn, 1, WIMLIB_EXTRACT_FLAG_NORPFIX |
-					WIMLIB_EXTRACT_FLAG_GLOB_PATHS | WIMLIB_EXTRACT_FLAG_STRICT_GLOB | WIMLIB_EXTRACT_FLAG_NO_PRESERVE_DIR_STRUCTURE);
-				if (r == 0)
-					uprintf("Successfully extracted '%S'", fn);
-				else
-					uprintf("Failed to extract '%S': %d", fn, r);
-				wimlib_free(wim);
-			} else {
-				uprintf("Failed to open WIM: %d", r);
-			}
-//			TestHashes();
+			TestHashes();
 			continue;
 		}
 #endif
@@ -3886,8 +3851,6 @@ extern int TestHashes(void);
 				WriteSetting32(SETTING_DEFAULT_THREAD_PRIORITY, default_thread_priority - THREAD_PRIORITY_ABOVE_NORMAL);
 				if (format_thread != NULL)
 					SetThreadPriority(format_thread, default_thread_priority);
-				if (wim_thread != NULL)
-					SetThreadPriority(wim_thread, default_thread_priority);
 			}
 			PrintStatus(STATUS_MSG_TIMEOUT, MSG_318, default_thread_priority);
 			continue;

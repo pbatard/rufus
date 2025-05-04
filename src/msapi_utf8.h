@@ -750,6 +750,17 @@ static __inline DWORD GetTempFileNameU(char* lpPathName, char* lpPrefixString, U
 	return ret;
 }
 
+static __inline DWORD GetTempDirNameU(char* lpPathName, char* lpPrefixString, UINT uUnique, char* lpTempDirName)
+{
+	DWORD ret = GetTempFileNameU(lpPathName, lpPrefixString, uUnique, lpTempDirName);
+	if (ret != 0) {
+		DeleteFileU(lpTempDirName);
+		if (!CreateDirectoryU(lpTempDirName, NULL))
+			ret = 0;
+	}
+	return ret;
+}
+
 static __inline DWORD GetModuleFileNameU(HMODULE hModule, char* lpFilename, DWORD nSize)
 {
 	DWORD ret = 0, err = ERROR_INVALID_DATA;

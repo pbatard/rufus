@@ -400,6 +400,10 @@
 #include <stdint.h>
 #include <time.h>
 
+#ifdef _RUFUS
+#include "msapi_utf8.h"
+#endif
+
 #ifdef BUILDING_WIMLIB
   /*
    * On i386, gcc assumes that the stack is 16-byte aligned at function entry.
@@ -2755,6 +2759,22 @@ wimlib_add_tree(WIMStruct *wim, int image,
 		const wimlib_tchar *fs_source_path,
 		const wimlib_tchar *wim_target_path, int add_flags);
 
+#ifdef _RUFUS
+static __inline int
+wimlib_add_treeU(WIMStruct *wim, int image,
+		const char *fs_source_path,
+		const char *wim_target_path, int add_flags)
+{
+	int r;
+	wconvert(fs_source_path);
+	wconvert(wim_target_path);
+	r = wimlib_add_tree(wim, image, wfs_source_path, wwim_target_path, add_flags);
+	wfree(fs_source_path);
+	wfree(wim_target_path);
+	return r;
+}
+#endif
+
 /**
  * @ingroup G_creating_and_opening_wims
  *
@@ -3020,6 +3040,19 @@ WIMLIBAPI int
 wimlib_extract_image(WIMStruct *wim, int image,
 		     const wimlib_tchar *target, int extract_flags);
 
+#ifdef _RUFUS
+static __inline int
+wimlib_extract_imageU(WIMStruct *wim, int image,
+		     const char *target, int extract_flags)
+{
+	int r;
+	wconvert(target);
+	r = wimlib_extract_image(wim, image, wtarget, extract_flags);
+	wfree(target);
+	return r;
+}
+#endif
+
 /**
  * @ingroup G_extracting_wims
  *
@@ -3181,6 +3214,33 @@ wimlib_extract_paths(WIMStruct *wim,
 		     const wimlib_tchar * const *paths,
 		     size_t num_paths,
 		     int extract_flags);
+
+#ifdef _RUFUS
+static __inline int
+wimlib_extract_pathsU(WIMStruct* wim,
+	int image,
+	const char* target,
+	const char* const* paths,
+	size_t num_paths,
+	int extract_flags)
+{
+	int r = WIMLIB_ERR_NOMEM;
+	wconvert(target);
+	wimlib_tchar** wpaths = calloc(num_paths, sizeof(wimlib_tchar*));
+	if (!wpaths)
+		goto out;
+	for (size_t i = 0; i < num_paths; i++)
+		wpaths[i] = utf8_to_wchar(paths[i]);
+	r = wimlib_extract_paths(wim, image, wtarget, (const wimlib_tchar* const*)wpaths, num_paths, extract_flags);
+
+out:
+	for (size_t i = 0; wpaths && i < num_paths; i++)
+		free(wpaths[i]);
+	free(wpaths);
+	wfree(target);
+	return r;
+}
+#endif
 
 /**
  * @ingroup G_wim_information
@@ -3738,6 +3798,19 @@ WIMLIBAPI int
 wimlib_open_wim(const wimlib_tchar *wim_file,
 		int open_flags,
 		WIMStruct **wim_ret);
+
+#ifdef _RUFUS
+static __inline int
+wimlib_open_wimU(const char* wim_file,
+	int open_flags,
+	WIMStruct** wim_ret)
+{
+	wconvert(wim_file);
+	int r = wimlib_open_wim(wwim_file, open_flags, wim_ret);
+	wfree(wim_file);
+	return r;
+}
+#endif
 
 /**
  * @ingroup G_creating_and_opening_wims

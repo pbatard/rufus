@@ -73,7 +73,6 @@ static unsigned int sec_buf_pos = 0;
 extern const int nb_steps[FS_MAX];
 extern const char* md5sum_name[2];
 extern uint32_t dur_mins, dur_secs;
-extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing;
 extern BOOL write_as_image, use_vds, write_as_esp, is_vds_available, has_ffu_support, use_rufus_mbr;
 extern char* archive_path;
@@ -1960,7 +1959,7 @@ DWORD WINAPI FormatThread(void* param)
 						ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_PATCH));
 					} else {
 						efi_dst[sizeof(efi_dst) - sizeof("\\bootx64.efi")] = '\\';
-						if (!WimExtractFile(img_report.wininst_path[0], 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst, FALSE)) {
+						if (!WimExtractFile(img_report.wininst_path[0], 1, "Windows\\Boot\\EFI\\bootmgfw.efi", efi_dst)) {
 							uprintf("Failed to setup Win7 EFI boot");
 							ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_PATCH));
 						}

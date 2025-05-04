@@ -24,10 +24,11 @@ typedef unsigned short mode_t;
 #ifndef _SSIZE_T_DEFINED
 #define _SSIZE_T_DEFINED
 #undef ssize_t
-/* From https://awesomekling.github.io/How-SerenityOS-declares-ssize_t/ */
-#define unsigned signed
-typedef size_t ssize_t;
-#undef unsigned
+#ifdef _WIN64
+typedef __int64 ssize_t;
+#else
+typedef int ssize_t;
+#endif /* _WIN64 */
 #endif /* _SSIZE_T_DEFINED */
 
 /* ext2fs needs this, which we picked from libcdio-driver/filemode.h */

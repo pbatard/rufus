@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Windows User Experience
- * Copyright © 2022-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2022-2025 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include "xml.h"
 #include "drive.h"
 #include "format.h"
+#include "wimlib.h"
 #include "missing.h"
 #include "resource.h"
 #include "registry.h"
@@ -48,7 +49,6 @@ int unattend_xml_mask = UNATTEND_DEFAULT_SELECTION_MASK;
 char *unattend_xml_path = NULL, unattend_username[MAX_USERNAME_LENGTH];
 BOOL is_bootloader_revoked = FALSE;
 
-extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 extern BOOL validate_md5sum;
 extern uint64_t md5sum_totalbytes;
 extern StrArray modified_files;
@@ -422,7 +422,7 @@ out:
 /// <param name="xml">The index XML data.</param>
 /// <param name="xml_len">The length of the index XML data.</param>
 /// <param name="index">The index of the occurrence to look for.</param>
-static void PopulateWindowsVersionFromXml(const char* xml, size_t xml_len, int index)
+static void PopulateWindowsVersionFromXml(const wchar_t* xml, size_t xml_len, int index)
 {
 	char* val;
 	ezxml_t pxml = ezxml_parse_str((char*)xml, xml_len);
@@ -469,57 +469,42 @@ static void PopulateWindowsVersionFromXml(const char* xml, size_t xml_len, int i
 
 /// <summary>
 /// Populate the img_report Window version from an install[.wim|.esd].
-/// ISO if needed. Requires Windows 8 or later.
 /// </summary>
 /// <param name="">(none)</param>
 /// <returns>TRUE on success, FALSE if we couldn't populate the version.</returns>
 BOOL PopulateWindowsVersion(void)
 {
-	char *mounted_iso, mounted_image_path[128];
-	char xml_file[MAX_PATH] = "", *xml;
+	int r;
+	char wim_path[MAX_PATH] = "";
+	wchar_t* xml = NULL;
 	size_t xml_len;
+	WIMStruct* wim;
 
 	memset(&img_report.win_version, 0, sizeof(img_report.win_version));
 
-	if ((WindowsVersion.Version < WINDOWS_8) || ((WimExtractCheck(TRUE) & 4) == 0))
-		return FALSE;
-
-	// If we're not using a straight install.wim, we need to mount the ISO to access it
+	static_strcpy(wim_path, image_path);
 	if (!img_report.is_windows_img) {
-		mounted_iso = VhdMountImage(image_path);
-		if (mounted_iso == NULL) {
-			uprintf("Could not mount Windows ISO for build number detection");
-			return FALSE;
-		}
-		static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[0][2]);
+		static_strcat(wim_path, "|");
+		static_strcat(wim_path, &img_report.wininst_path[0][3]);
 	}
 
-	// Now take a look at the XML file in install.wim to list our versions
-	if ((GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, xml_file) == 0) || (xml_file[0] == 0)) {
-		// Last ditch effort to get a tmp file - just extract it to the current directory
-		static_strcpy(xml_file, ".\\RufVXml.tmp");
-	}
-	// GetTempFileName() may leave a file behind
-	DeleteFileU(xml_file);
-
-	// Must use the Windows WIM API as 7z messes up the XML
-	if (!WimExtractFile_API(img_report.is_windows_img ? image_path : mounted_image_path,
-		0, "[1].xml", xml_file, TRUE)) {
-		uprintf("Could not acquire WIM index");
+	r = wimlib_open_wimU(wim_path, 0, &wim);
+	if (r != 0) {
+		uprintf("Could not open WIM: Error %d", r);
 		goto out;
 	}
 
-	xml_len = read_file(xml_file, (uint8_t**)&xml);
-	if (xml_len == 0) {
-		uprintf("Could not read WIM index XML");
+	r = wimlib_get_xml_data(wim, (void**)&xml, &xml_len);
+	if (r != 0) {
+		uprintf("Could not read WIM XML index: Error %d", r);
 		goto out;
 	}
+
 	PopulateWindowsVersionFromXml(xml, xml_len, 1);
 
 out:
-	DeleteFileU(xml_file);
-	if (!img_report.is_windows_img)
-		VhdUnmountImage();
+	free(xml);
+	wimlib_free(wim);
 
 	return ((img_report.win_version.major != 0) && (img_report.win_version.build != 0));
 }
@@ -557,22 +542,20 @@ BOOL CopySKUSiPolicy(const char* drive_name)
 /// <returns>-2 on user cancel, -1 on other error, >=0 on success.</returns>
 int SetWinToGoIndex(void)
 {
-	int i;
-	char* mounted_iso, mounted_image_path[128];
+	int i, r;
+	WIMStruct* wim = NULL;
 	char* install_names[MAX_WININST];
-	char xml_file[MAX_PATH] = "", *xml = NULL;
+	wchar_t wim_path[MAX_PATH] = L"", *xml = NULL;
 	size_t xml_len;
-	StrArray version_name, version_index;
+	StrArray version_name = { 0 }, version_index = { 0 };
 	BOOL bNonStandard = FALSE;
 	ezxml_t index = NULL, image = NULL;
 
 	// Sanity checks
 	wintogo_index = -1;
 	wininst_index = 0;
-	if ((WindowsVersion.Version < WINDOWS_8) || ((WimExtractCheck(FALSE) & 4) == 0) ||
-		(ComboBox_GetCurItemData(hFileSystem) != FS_NTFS)) {
+	if (ComboBox_GetCurItemData(hFileSystem) != FS_NTFS)
 		return -1;
-	}
 
 	// If we have multiple windows install images, ask the user the one to use
 	if (img_report.wininst_index > 1) {
@@ -585,34 +568,21 @@ int SetWinToGoIndex(void)
 			wininst_index = 0;
 	}
 
-	// If we're not using a straight install.wim, we need to mount the ISO to access it
+	utf8_to_wchar_no_alloc(image_path, wim_path, ARRAYSIZE(wim_path));
 	if (!img_report.is_windows_img) {
-		mounted_iso = VhdMountImage(image_path);
-		if (mounted_iso == NULL) {
-			uprintf("Could not mount ISO for Windows To Go selection");
-			return -1;
-		}
-		static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[wininst_index][2]);
+		wcscat(wim_path, L"|");
+		utf8_to_wchar_no_alloc(&img_report.wininst_path[wininst_index][2],
+			&wim_path[wcslen(wim_path)], (int)ARRAYSIZE(wim_path) - wcslen(wim_path));
 	}
 
-	// Now take a look at the XML file in install.wim to list our versions
-	if ((GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, xml_file) == 0) || (xml_file[0] == 0)) {
-		// Last ditch effort to get a tmp file - just extract it to the current directory
-		static_strcpy(xml_file, ".\\RufVXml.tmp");
-	}
-	// GetTempFileName() may leave a file behind
-	DeleteFileU(xml_file);
-
-	// Must use the Windows WIM API as 7z messes up the XML
-	if (!WimExtractFile_API(img_report.is_windows_img ? image_path : mounted_image_path,
-		0, "[1].xml", xml_file, FALSE)) {
-		uprintf("Could not acquire WIM index");
+	r = wimlib_open_wim(wim_path, 0, &wim);
+	if (r != 0) {
+		uprintf("Could not open WIM: %d", r);
 		goto out;
 	}
-
-	xml_len = read_file(xml_file, (uint8_t**)&xml);
-	if (xml_len == 0) {
-		uprintf("Could not read WIM XML");
+	r = wimlib_get_xml_data(wim, (void**)&xml, &xml_len);
+	if (r != 0) {
+		uprintf("Could not read WIM XML index: %d", r);
 		goto out;
 	}
 
@@ -671,15 +641,13 @@ int SetWinToGoIndex(void)
 			Notification(MSG_INFO, NULL, &more_info, lmprintf(MSG_128, "Windows To Go"), lmprintf(MSG_133));
 		}
 	}
-	StrArrayDestroy(&version_name);
-	StrArrayDestroy(&version_index);
 
 out:
-	ezxml_free(index);
+	StrArrayDestroy(&version_name);
+	StrArrayDestroy(&version_index);
 	free(xml);
-	DeleteFileU(xml_file);
-	if (!img_report.is_windows_img)
-		VhdUnmountImage();
+	ezxml_free(index);
+	wimlib_free(wim);
 	return wintogo_index;
 }
 
@@ -695,7 +663,7 @@ out:
 /// <returns>TRUE on success, FALSE on error.</returns>
 BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 {
-	char *mounted_iso, *ms_efi = NULL, mounted_image_path[128], cmd[MAX_PATH];
+	char *ms_efi = NULL, wim_path[MAX_PATH], cmd[MAX_PATH];
 	ULONG cluster_size;
 
 	uprintf("Windows To Go mode selected");
@@ -705,28 +673,19 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		return FALSE;
 	}
 
+	static_strcpy(wim_path, image_path);
 	if (!img_report.is_windows_img) {
-		mounted_iso = VhdMountImage(image_path);
-		if (mounted_iso == NULL) {
-			uprintf("Could not mount ISO for Windows To Go installation");
-			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_EXTRACT));
-			return FALSE;
-		}
-		static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[wininst_index][2]);
-		uprintf("Mounted ISO as '%s'", mounted_iso);
+		static_strcat(wim_path, "|");
+		static_strcat(wim_path, &img_report.wininst_path[wininst_index][3]);
 	}
 
 	// Now we use the WIM API to apply that image
-	if (!WimApplyImage(img_report.is_windows_img ? image_path : mounted_image_path, wintogo_index, drive_name)) {
+	if (!WimApplyImage(wim_path, wintogo_index, drive_name)) {
 		uprintf("Failed to apply Windows To Go image");
 		if (!IS_ERROR(ErrorStatus))
 			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_EXTRACT));
-		if (!img_report.is_windows_img)
-			VhdUnmountImage();
 		return FALSE;
 	}
-	if (!img_report.is_windows_img)
-		VhdUnmountImage();
 
 	if (use_esp) {
 		uprintf("Setting up EFI System Partition");
@@ -745,7 +704,7 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		// completely neuter it) and IVdsDiskPartitionMF::FormatPartitionEx(), which is what you are supposed to
 		// use for ESPs, explicitly states: "This method cannot be used to format removable media."
 		if (!FormatPartition(DriveIndex, SelectedDrive.Partition[partition_index[PI_ESP]].Offset, cluster_size, FS_FAT32, "",
-			FP_QUICK | FP_FORCE | FP_LARGE_FAT32 | FP_NO_BOOT)) {
+			FP_QUICK | FP_FORCE | FP_LARGE_FAT32 | FP_NO_BOOT | FP_NO_PROGRESS)) {
 			uprintf("Could not format EFI System Partition");
 			return FALSE;
 		}
@@ -778,7 +737,7 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 
 	CopySKUSiPolicy((use_esp) ? ms_efi : drive_name);
 
-	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, wim_proc_files + 2 * wim_extra_files, wim_nb_files);
+	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, 99, 100);
 
 	// Setting internal drives offline for Windows To Go is crucial if, for instance, you are using ReFS
 	// on Windows 10 (therefore ReFS v3.4) and don't want a Windows 11 To Go boot to automatically
@@ -800,7 +759,7 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	uprintf(cmd);
 	RunCommand(cmd, sysnative_dir, usb_debug);
 
-	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, wim_nb_files, wim_nb_files);
+	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, 100, 100);
 
 	if (use_esp) {
 		Sleep(200);
@@ -819,22 +778,25 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 // NB: Work with a copy of unattend_xml_flags as a paremeter since we will modify it.
 {
-	BOOL r = FALSE, is_hive_mounted = FALSE;
-	int i, wim_index = 2;
+	BOOL r = FALSE, is_hive_mounted = FALSE, update_boot_wim = FALSE;
+	int i, wim_index = 2, wuc_index = 0;
 	const char* offline_hive_name = "RUFUS_OFFLINE_HIVE";
 	char boot_wim_path[] = "?:\\sources\\boot.wim", key_path[64];
+	char tmp_dir[2][MAX_PATH] = { "", "" };
 	char appraiserres_dll_src[] = "?:\\sources\\appraiserres.dll";
 	char appraiserres_dll_dst[] = "?:\\sources\\appraiserres.bak";
 	char setup_exe[] = "?:\\setup.exe";
 	char setup_dll[] = "?:\\setup.dll";
 	char md5sum_path[] = "?:\\md5sum.txt";
-	char *mount_path = NULL, path[MAX_PATH];
+	char path[MAX_PATH];
 	uint8_t* buf = NULL;
 	uint16_t setup_arch;
 	HKEY hKey = NULL, hSubKey = NULL;
 	LSTATUS status;
 	DWORD dwDisp, dwVal = 1, dwSize;
 	FILE* fd_md5sum;
+	WIMStruct* wim;
+	struct wimlib_update_command wuc[2] = { 0 };
 
 	assert(unattend_xml_path != NULL);
 	uprintf("Applying Windows customization:");
@@ -912,30 +874,43 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 		}
 
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 0, PATCH_PROGRESS_TOTAL);
-		// We only need to mount boot.wim if we have windowsPE data to deal with. If
-		// not, we can just copy our unattend.xml in \sources\$OEM$\$$\Panther\.
-		// We also need to mount it if we use the 'Windows UEFI CA 2023' signed bootloaders.
+		// We only need to alter boot.wim if we have windowsPE data to deal with.
+		// If not, we can just copy our unattend.xml in \sources\$OEM$\$$\Panther\.
+		// We also need to do so if we use the 'Windows UEFI CA 2023' signed bootloaders.
 		if (flags & UNATTEND_WINPE_SETUP_MASK || flags & UNATTEND_USE_MS2023_BOOTLOADERS) {
 			if (validate_md5sum)
 				md5sum_totalbytes -= _filesizeU(boot_wim_path);
-			uprintf("Mounting '%s[%d]'...", boot_wim_path, wim_index);
 			// Some "unofficial" ISOs have a modified boot.wim that doesn't have Windows Setup at index 2...
-			if (!WimIsValidIndex(boot_wim_path, wim_index)) {
+			// TODO: we could try to look for "Microsoft Windows Setup" in the XML DESCRIPTION to locate the index
+			wimlib_global_init(0);
+			wimlib_set_print_errors(true);
+			update_boot_wim = (wimlib_open_wimU(boot_wim_path, WIMLIB_OPEN_FLAG_WRITE_ACCESS, &wim) == 0);
+			if (!update_boot_wim) {
+				uprintf("Could not open '%s'", boot_wim_path);
+				goto out;
+			}
+			// Setup image should be index 2
+			if (wimlib_resolve_image(wim, L"2") != 2) {
 				uprintf("WARNING: This image appears to be an UNOFFICIAL Windows ISO!");
 				uprintf("Rufus recommends that you only use OFFICIAL retail Microsoft Windows images, such as");
 				uprintf("the ones that can be downloaded through the download facility of this application.");
 				wim_index = 1;
 			}
-			mount_path = WimMountImage(boot_wim_path, wim_index);
-			if (mount_path == NULL)
-				goto out;
 		}
 
 		if (flags & UNATTEND_SECUREBOOT_TPM_MINRAM) {
+			char tmp_path[MAX_PATH];
+			const char* reg_path = "Windows\\System32\\config\\SYSTEM";
+			if (GetTempDirNameU(temp_dir, APPLICATION_NAME, 0, tmp_dir[0]) == 0) {
+				uprintf("WARNING: Could not create temp dir for registry changes");
+				goto copy_unattend;
+			}
+			static_sprintf(tmp_path, "%s\\SYSTEM", tmp_dir[0]);
 			// Try to create the registry keys directly, and fallback to using unattend
 			// if that fails (which the Windows Store version is expected to do).
-			static_sprintf(path, "%s\\Windows\\System32\\config\\SYSTEM", mount_path);
-			if (!MountRegistryHive(HKEY_LOCAL_MACHINE, offline_hive_name, path)) {
+			if (wimlib_extract_pathsU(wim, wim_index, tmp_dir[0], &reg_path, 1,
+					WIMLIB_EXTRACT_FLAG_NO_PRESERVE_DIR_STRUCTURE) != 0 ||
+				!MountRegistryHive(HKEY_LOCAL_MACHINE, offline_hive_name, tmp_path)) {
 				uprintf("Falling back to creating the registry keys through unattend.xml");
 				goto copy_unattend;
 			}
@@ -968,6 +943,11 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 				}
 				uprintf("Created 'HKLM\\SYSTEM\\Setup\\LabConfig\\%s' registry key", bypass_name[i]);
 			}
+			wuc[wuc_index].op = WIMLIB_UPDATE_OP_ADD;
+			wuc[wuc_index].add.fs_source_path = utf8_to_wchar(tmp_path);
+			wuc[wuc_index].add.wim_target_path = L"Windows\\System32\\config\\SYSTEM";
+			wuc_index++;
+
 			// We were successfull in creating the keys so disable the windowsPE section from unattend.xml
 			// We do this by replacing '<settings pass="windowsPE">' with '<settings pass="disabled">'
 			// (provided that the registry key creation was the only item for this pass)
@@ -989,14 +969,13 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			// If we have a windowsPE section, copy the answer files to the root of boot.wim as
 			// Autounattend.xml. This also results in that file being automatically copied over
 			// to %WINDIR%\Panther\unattend.xml for later passes processing.
-			if_not_assert(mount_path != NULL)
+			if_not_assert(update_boot_wim)
 				goto out;
-			static_sprintf(path, "%s\\Autounattend.xml", mount_path);
-			if (!CopyFileU(unattend_xml_path, path, TRUE)) {
-				uprintf("Could not create boot.wim 'Autounattend.xml': %s", WindowsErrorString());
-				goto out;
-			}
-			uprintf("Added 'Autounattend.xml' to '%s'", boot_wim_path);
+			wuc[wuc_index].op = WIMLIB_UPDATE_OP_ADD;
+			wuc[wuc_index].add.fs_source_path = utf8_to_wchar(unattend_xml_path);
+			wuc[wuc_index].add.wim_target_path = L"Autounattend.xml";
+			uprintf("Added '%S' to '%s'", wuc[wuc_index].add.wim_target_path, boot_wim_path);
+			wuc_index++;
 		} else {
 			// If there is no windowsPE section in our unattend, then copying it as Autounattend.xml on
 			// the root of boot.wim will not work as Windows Setup does *NOT* carry Autounattend.xml into
@@ -1021,57 +1000,50 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 	}
 
 	if (flags & UNATTEND_USE_MS2023_BOOTLOADERS) {
-		if_not_assert(mount_path != NULL)
+		StrArray files;
+		char tmp_dir2[MAX_PATH], *rep;
+		const char* efi_ex_path = "Windows\\Boot\\EFI_EX";
+		if_not_assert(update_boot_wim)
 			goto out;
-		static_sprintf(path, "%s\\Windows\\Boot\\EFI_EX\\bootmgfw_EX.efi", mount_path);
-		if (!PathFileExistsU(path)) {
-			uprintf("Could not find 2023 signed UEFI bootloader - Ignoring option");
+		if (GetTempDirNameU(temp_dir, APPLICATION_NAME, 0, tmp_dir[1]) == 0) {
+			uprintf("WARNING: Could not create temp dir for 2023 signed UEFI bootloaders");
+			goto out;
+		}
+		if (wimlib_extract_pathsU(wim, wim_index, tmp_dir[1], &efi_ex_path, 1,
+			WIMLIB_EXTRACT_FLAG_NO_ACLS | WIMLIB_EXTRACT_FLAG_NO_PRESERVE_DIR_STRUCTURE) != 0) {
+			uprintf("Could not find 2023 signed UEFI bootloaders - Ignoring option");
 		} else {
-			char path2[MAX_PATH], *rep;
-			StrArray files, dirs;
+			static_strcat(tmp_dir[1], "\\EFI");
+			static_sprintf(tmp_dir2, "%s_EX", tmp_dir[1]);
+			MoveFileU(tmp_dir2, tmp_dir[1]);
+			StrArrayCreate(&files, 64);
+			ListDirectoryContent(&files, tmp_dir[1], LIST_DIR_TYPE_FILE | LIST_DIR_TYPE_RECURSIVE);
+			for (i = 0; i < (int)files.Index; i++) {
+				rep = remove_substr(files.String[i], "_EX");
+				assert(rep != NULL);
+				if (!MoveFileU(files.String[i], rep))
+					uprintf("WARNING: Could not rename '%s': %s", files.String[i], WindowsErrorString());
+				safe_free(rep);
+			}
+			StrArrayDestroy(&files);
 			// Replace /EFI/Boot/boot###.efi
 			for (i = 1; i < ARRAYSIZE(efi_archname); i++) {
-				static_sprintf(path2, "%c:\\efi\\boot\\boot%s.efi", drive_letter, efi_archname[i]);
-				if (!PathFileExistsA(path2))
+				static_sprintf(tmp_dir2, "%c:\\efi\\boot\\boot%s.efi", drive_letter, efi_archname[i]);
+				if (!PathFileExistsA(tmp_dir2))
 					continue;
-				if (!CopyFileU(path, path2, FALSE))
+				static_sprintf(path, "%s\\bootmgfw.efi", tmp_dir[1]);
+				if (!CopyFileU(path, tmp_dir2, FALSE))
 					uprintf("WARNING: Could not replace 'boot%s.efi': %s", efi_archname[i], WindowsErrorString());
 				break;
 			}
 			// Replace /bootmgr.efi
-			static_sprintf(path, "%s\\Windows\\Boot\\EFI_EX\\bootmgr_EX.efi", mount_path);
-			static_sprintf(path2, "%c:\\bootmgr.efi", drive_letter);
-			if (!CopyFileU(path, path2, FALSE))
+			static_sprintf(path, "%s\\bootmgr.efi", tmp_dir[1]);
+			if (!CopyFileU(path, tmp_dir2, FALSE))
 				uprintf("WARNING: Could not replace 'bootmgr.efi': %s", WindowsErrorString());
-			// Microsoft "secures" the Windows\Boot\ dir through their SUPER OBNOXIOUS AND
-			// WORTHLESS use of DACLs + read-only flags, so we first need to re-take control
-			// of all directories under there recursively.
-			StrArrayCreate(&dirs, 64);
-			StrArrayCreate(&files, 64);
-			static_sprintf(path, "%s\\Windows\\Boot\\", mount_path);
-			StrArrayAdd(&dirs, path, TRUE);
-			static_sprintf(path, "%s\\Windows\\Boot\\EFI_EX\\", mount_path);
-			StrArrayAdd(&dirs, path, TRUE);
-			ListDirectoryContent(&dirs, path, LIST_DIR_TYPE_DIRECTORY | LIST_DIR_TYPE_RECURSIVE);
-			for (i = 0; i < (int)dirs.Index; i++) {
-				rep = remove_substr(dirs.String[i], "_EX");
-				assert(rep != NULL);
-				TakeOwnership(rep);
-				safe_free(rep);
-			}
-			// Now that we should be able to write to the destination directories, copy the content.
-			ListDirectoryContent(&files, path, LIST_DIR_TYPE_FILE | LIST_DIR_TYPE_RECURSIVE);
-			for (i = 0; i < (int)files.Index; i++) {
-				rep = remove_substr(files.String[i], "_EX");
-				assert(rep != NULL);
-				TakeOwnership(rep);
-				if (!CopyFileU(files.String[i], rep, FALSE) && rep != NULL)
-					uprintf("WARNING: Could not replace '%s': %s", &rep[strlen(mount_path) + 1], WindowsErrorString());
-				safe_free(rep);
-			}
-			StrArrayDestroy(&dirs);
-			StrArrayDestroy(&files);
-			uprintf("Replaced EFI bootloader files with 'Windows UEFI CA 2023' signed versions");
+			if (wimlib_add_treeU(wim, wim_index, tmp_dir[1], "Windows\\Boot\\EFI", 0))
+				uprintf("WARNING: Could not replace EFI bootloader files with 'Windows UEFI CA 2023' versions");
+			else
+				uprintf("Replaced EFI bootloader files with 'Windows UEFI CA 2023' signed versions");
 		}
 	}
 
@@ -1086,15 +1058,25 @@ out:
 		UnmountRegistryHive(HKEY_LOCAL_MACHINE, offline_hive_name);
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 104, PATCH_PROGRESS_TOTAL);
 	}
-	if (mount_path) {
-		uprintf("Unmounting '%s[%d]'...", boot_wim_path, wim_index);
-		WimUnmountImage(boot_wim_path, wim_index, TRUE);
+	if (update_boot_wim) {
+		uprintf("Updating '%s[%d]'...", boot_wim_path, wim_index);
+		if (wimlib_update_image(wim, wim_index, wuc, wuc_index, 0) != 0 ||
+			wimlib_overwrite(wim, WIMLIB_WRITE_FLAG_RECOMPRESS, 0) != 0) {
+			uprintf("Error: Failed to update %s", boot_wim_path);
+			r = FALSE;
+		}
+		for (i = 0; i < ARRAYSIZE(tmp_dir); i++)
+			if (tmp_dir[i][0])
+				SHDeleteDirectoryExU(NULL, tmp_dir[i], FOF_NO_UI);
+		for (i = 0; i < wuc_index; i++)
+			free(wuc[i].add.fs_source_path);
+		wimlib_free(wim);
+		wimlib_global_cleanup();
 		if (validate_md5sum) {
 			md5sum_totalbytes += _filesizeU(boot_wim_path);
 			StrArrayAdd(&modified_files, boot_wim_path, TRUE);
 		}
 		UpdateProgressWithInfo(OP_PATCH, MSG_325, PATCH_PROGRESS_TOTAL, PATCH_PROGRESS_TOTAL);
 	}
-	free(mount_path);
 	return r;
 }
