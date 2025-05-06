@@ -610,7 +610,9 @@ sha1_final(struct sha1_ctx *ctx, u8 hash[SHA1_HASH_SIZE])
 
 	ctx->buffer[buffered++] = 0x80;
 	if (buffered > SHA1_BLOCK_SIZE - 8) {
-		memset(&ctx->buffer[buffered], 0, SHA1_BLOCK_SIZE - buffered);
+		// Keep Coverity happy
+		if (buffered != SHA1_BLOCK_SIZE)
+			memset(&ctx->buffer[buffered], 0, SHA1_BLOCK_SIZE - buffered);
 		sha1_blocks(ctx->h, ctx->buffer, 1);
 		buffered = 0;
 	}

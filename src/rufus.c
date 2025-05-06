@@ -22,6 +22,14 @@
 #include <crtdbg.h>
 #endif
 
+// Temporary workaround for MinGW32 delay-loading
+// See https://github.com/pbatard/rufus/pull/2513 as well as
+// https://sourceware.org/bugzilla/show_bug.cgi?id=14339
+#if defined(__MINGW32__)
+#undef DECLSPEC_IMPORT
+#define DECLSPEC_IMPORT __attribute__((visibility("hidden")))
+#endif
+
 #include <windows.h>
 #include <windowsx.h>
 #include <stdlib.h>

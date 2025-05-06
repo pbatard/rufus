@@ -587,6 +587,7 @@ bool
 lcpit_matchfinder_init(struct lcpit_matchfinder *mf, size_t max_bufsize,
 		       u32 min_match_len, u32 nice_match_len)
 {
+	// coverity[dead_error_condition]
 	if (lcpit_matchfinder_get_needed_memory(max_bufsize) > SIZE_MAX)
 		return false;
 	if (max_bufsize > MAX_HUGE_BUFSIZE - PREFETCH_SAFETY)

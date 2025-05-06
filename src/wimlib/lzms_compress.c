@@ -1971,8 +1971,10 @@ begin:
 			if (next_item_idx < 0)
 				break;
 			if (next_item_idx == 0)
+				// coverity[assigned_value]
 				item_to_take = cur_node->item;
 			else
+				// coverity[assigned_value]
 				item_to_take = cur_node->extra_items[next_item_idx - 1];
 			--next_item_idx;
 		}

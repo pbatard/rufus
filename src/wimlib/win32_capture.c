@@ -2800,10 +2800,8 @@ generate_wim_structures_recursive(struct wim_dentry **root_ret,
 		root->d_short_name_nbytes = nbytes;
 	}
 
-	if (inode->i_nlink > 1) { /* Already seen this inode?  */
-		ret = 0;
+	if (inode->i_nlink > 1) /* Already seen this inode?  */
 		goto out_progress;
-	}
 
 	/* The file attributes and timestamps were cached from the MFT.  */
 	inode->i_attributes = ni->attributes;

@@ -1044,8 +1044,8 @@ wimlib_get_version_string(void)
 	return T(PACKAGE_VERSION);
 }
 
+static volatile uint16_t lib_initialization_mutex = 0;
 static bool lib_initialized = false;
-static struct mutex lib_initialization_mutex = MUTEX_INITIALIZER;
 
 /* API function documented in wimlib.h  */
 WIMLIBAPI int
@@ -1053,11 +1053,13 @@ wimlib_global_init(int init_flags)
 {
 	int ret = 0;
 
-	if (lib_initialized)
-		goto out;
-
-	mutex_init(&lib_initialization_mutex);
-	mutex_lock(&lib_initialization_mutex);
+	// Non problematic init/cleanup mutex (Windows only) to keep static
+	// analysers happy. Only one thread at a time can run the code between
+	// initial InterlockedIncrement and ending InterlockedDecrement.
+	while (InterlockedIncrement16(&lib_initialization_mutex) >= 2) {
+		InterlockedDecrement16(&lib_initialization_mutex);
+		Sleep(100);
+	}
 
 	if (lib_initialized)
 		goto out_unlock;
@@ -1095,8 +1097,7 @@ wimlib_global_init(int init_flags)
 	lib_initialized = true;
 	ret = 0;
 out_unlock:
-	mutex_unlock(&lib_initialization_mutex);
-out:
+	InterlockedDecrement16(&lib_initialization_mutex);
 	return ret;
 }
 
@@ -1104,10 +1105,10 @@ out:
 WIMLIBAPI void
 wimlib_global_cleanup(void)
 {
-	if (!lib_initialized)
-		return;
-
-	mutex_lock(&lib_initialization_mutex);
+	while (InterlockedIncrement16(&lib_initialization_mutex) >= 2) {
+		InterlockedDecrement16(&lib_initialization_mutex);
+		Sleep(100);
+	}
 
 	if (!lib_initialized)
 		goto out_unlock;
@@ -1120,6 +1121,5 @@ wimlib_global_cleanup(void)
 	lib_initialized = false;
 
 out_unlock:
-	mutex_unlock(&lib_initialization_mutex);
-	mutex_destroy(&lib_initialization_mutex);
+	InterlockedDecrement16(&lib_initialization_mutex);
 }

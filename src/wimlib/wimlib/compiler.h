@@ -234,14 +234,15 @@ uint32_t __inline __builtin_ctz(uint32_t value)
 	unsigned long trailing_zero = 0;
 	if (_BitScanForward(&trailing_zero, value))
 		return trailing_zero;
-	return 32;
+	// Undefined behaviour => return 0 to appease static analyzers
+	return 0;
 }
 uint32_t __inline __builtin_clz(uint32_t value)
 {
 	unsigned long leading_zero = 0;
 	if (_BitScanReverse(&leading_zero, value))
 		return 31 - leading_zero;
-	return 32;
+	return 0;
 }
 #if defined(_M_X64) || defined(_M_ARM64)
 uint32_t __inline __builtin_clzll(uint64_t value)
@@ -249,20 +250,20 @@ uint32_t __inline __builtin_clzll(uint64_t value)
 	unsigned long leading_zero = 0;
 	if (_BitScanReverse64(&leading_zero, value))
 		return 63 - leading_zero;
-	return 64;
+	return 0;
 }
 uint32_t __inline __builtin_ctzll(uint64_t value)
 {
 	unsigned long trailing_zero = 0;
 	if (_BitScanForward64(&trailing_zero, value))
 		return trailing_zero;
-	return 64;
+	return 0;
 }
 #else
 uint32_t __inline __builtin_clzll(uint64_t value)
 {
 	if (value == 0)
-		return 64;
+		return 0;
 	uint32_t msh = (uint32_t)(value >> 32);
 	uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
 	if (msh != 0)
@@ -272,7 +273,7 @@ uint32_t __inline __builtin_clzll(uint64_t value)
 uint32_t __inline __builtin_ctzll(uint64_t value)
 {
 	if (value == 0)
-		return 64;
+		return 0;
 	uint32_t msh = (uint32_t)(value >> 32);
 	uint32_t lsh = (uint32_t)(value & 0xFFFFFFFF);
 	if (msh != 0)

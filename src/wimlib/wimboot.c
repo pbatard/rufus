@@ -809,6 +809,7 @@ update_wimoverlay_manually(const wchar_t *drive, const wchar_t *wim_path,
 	if (ret)
 		goto out;
 
+	// coverity[tainted_data]
 	ret = prepare_wimoverlay_dat(old_contents, wim_path, wim_guid, image,
 				     &new_contents, &new_contents_size,
 				     &new_data_source_id);

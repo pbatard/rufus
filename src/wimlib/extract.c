@@ -390,6 +390,7 @@ create_temporary_file(struct filedes *fd_ret, tchar **name_ret)
 
 #ifdef _WIN32
 retry:
+	// coverity[secure_temp]
 	name = _wtempnam(NULL, L"wimlib");
 	if (!name) {
 		ERROR_WITH_ERRNO("Failed to create temporary filename");

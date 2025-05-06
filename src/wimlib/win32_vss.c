@@ -215,7 +215,7 @@ struct IVssBackupComponentsVTable {
  *----------------------------------------------------------------------------*/
 
 static bool vss_initialized;
-static struct mutex vss_initialization_mutex = MUTEX_INITIALIZER;
+static volatile uint16_t vss_initialization_mutex = 0;
 
 /* vssapi.dll  */
 static HANDLE hVssapi;
@@ -282,35 +282,47 @@ err:
 static bool
 vss_global_init(void)
 {
-	if (vss_initialized)
-		return true;
+	bool ret = true;
 
-	mutex_lock(&vss_initialization_mutex);
-	if (!vss_initialized)
-		vss_initialized = vss_global_init_impl();
-	mutex_unlock(&vss_initialization_mutex);
+	while (InterlockedIncrement16(&vss_initialization_mutex) >= 2) {
+		InterlockedDecrement16(&vss_initialization_mutex);
+		Sleep(100);
+	}
 
 	if (vss_initialized)
-		return true;
-	ERROR("The Volume Shadow Copy Service (VSS) API could not be "
-	      "initialized.");
-	return false;
+		goto out_unlock;
+
+	vss_initialized = vss_global_init_impl();
+
+	if (!vss_initialized) {
+		ERROR("The Volume Shadow Copy Service (VSS) API could not be "
+		      "initialized.");
+		ret = false;
+	}
+
+out_unlock:
+	InterlockedDecrement16(&vss_initialization_mutex);
+	return ret;
 }
 
 void
 vss_global_cleanup(void)
 {
-	if (!vss_initialized)
-		return;
-
-	mutex_lock(&vss_initialization_mutex);
-	if (vss_initialized) {
-		(*func_CoUninitialize)();
-		FreeLibrary(hOle32);
-		FreeLibrary(hVssapi);
-		vss_initialized = false;
+	while (InterlockedIncrement16(&vss_initialization_mutex) >= 2) {
+		InterlockedDecrement16(&vss_initialization_mutex);
+		Sleep(100);
 	}
-	mutex_unlock(&vss_initialization_mutex);
+
+	if (!vss_initialized)
+		goto out_unlock;
+
+	(*func_CoUninitialize)();
+	FreeLibrary(hOle32);
+	FreeLibrary(hVssapi);
+	vss_initialized = false;
+
+out_unlock:
+	InterlockedDecrement16(&vss_initialization_mutex);
 }
 
 /*----------------------------------------------------------------------------*

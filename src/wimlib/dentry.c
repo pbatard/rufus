@@ -490,7 +490,10 @@ calculate_dentry_full_path(struct wim_dentry *dentry)
 		d = d->d_parent;  /* assumes d == d->d_parent for root  */
 	} while (!dentry_is_root(d));
 
-	utf16lechar* ubuf = alloca(ulen * sizeof(utf16lechar));
+	// +1 to keep Coverity happy
+	utf16lechar *ubuf = alloca((ulen + 1) * sizeof(utf16lechar));
+	if (!ubuf)
+		return WIMLIB_ERR_NOMEM;
 	utf16lechar *p = &ubuf[ulen];
 
 	d = dentry;
@@ -518,7 +521,8 @@ calculate_dentry_full_path(struct wim_dentry *dentry)
 tchar *
 dentry_full_path(struct wim_dentry *dentry)
 {
-	calculate_dentry_full_path(dentry);
+	if (calculate_dentry_full_path(dentry))
+		return NULL;
 	return dentry->d_full_path;
 }
 

@@ -76,6 +76,8 @@ calculate_chunk_sha1(struct filedes *in_fd, size_t this_chunk_size,
 					 "integrity checksums");
 			return ret;
 		}
+		// I have no idea what Coverity is hallucinating with here...
+		// coverity[overrun-call]
 		sha1_update(&ctx, buf, bytes_to_read);
 		bytes_remaining -= bytes_to_read;
 		offset += bytes_to_read;

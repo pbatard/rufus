@@ -237,7 +237,7 @@ char *ezxml_decode(char *s, char **ent, char t)
 
             if (ent[b++]) { // found a match
                 if ((c = (long)strlen(ent[b])) - 1 > (e = strchr(s, ';')) - s) {
-                    l = (d = (long)(s - r)) + c + (long)strlen(e); // new length
+                    l = (d = (long)(s - r)) + c + (long)(e ? strlen(e) : 0); // new length
                     r = (r == m) ? strcpy(malloc(l), r) : _realloc(r, l);
                     e = strchr((s = r + d), ';'); // fix up pointers
                 }
@@ -683,8 +683,7 @@ ezxml_t ezxml_parse_fd(int fd)
     size_t l;
     void *m;
 
-    if (fd < 0) return NULL;
-    fstat(fd, &st);
+    if (fd < 0 || fstat(fd, &st)) return NULL;
 
 #ifndef EZXML_NOMMAP
     l = (st.st_size + sysconf(_SC_PAGESIZE) - 1) & ~(sysconf(_SC_PAGESIZE) -1);
@@ -698,6 +697,7 @@ ezxml_t ezxml_parse_fd(int fd)
     else { // mmap failed, read file into memory
 #endif // EZXML_NOMMAP
         l = (long)_read(fd, m = malloc((size_t)st.st_size), (unsigned int)st.st_size);
+        if (l < 0) { free(m); return NULL; };
         root = (ezxml_root_t)ezxml_parse_str(m, l);
         if (!root) { free(m); return NULL; };
         root->len = -1; // so we know to free s in ezxml_free()
@@ -719,7 +719,7 @@ ezxml_t ezxml_parse_file(const char *file)
 
 // Encodes ampersand sequences appending the results to *dst, reallocating *dst
 // if length excedes max. a is non-zero for attribute encoding. Returns *dst
-char *ezxml_ampencode(const char *s, size_t len, char **dst, size_t *dlen,
+char *ezxml_ampencode(const char *s, ssize_t len, char **dst, size_t *dlen,
                       size_t *max, short a)
 {
     const char *e;

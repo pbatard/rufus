@@ -644,7 +644,8 @@ xml_parse_document(const tchar *p, struct xml_node **doc_ret)
 	int ret;
 	struct xml_node *doc;
 
-	skip_string(&p, BYTE_ORDER_MARK);
+	// Keep static analysers happy since we don't care about returned value.
+	(void)skip_string(&p, BYTE_ORDER_MARK);
 	if (!skip_misc(&p))
 		return WIMLIB_ERR_XML;
 	ret = parse_element(&p, NULL, 0, &doc);

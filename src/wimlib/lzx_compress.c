@@ -1452,6 +1452,7 @@ lzx_walk_item_list(struct lzx_compressor *c, u32 block_size, bool is_16_bit,
 		/* Tally/record a match. */
 		matchlen = item & OPTIMUM_LEN_MASK;
 		adjusted_offset = item >> OPTIMUM_OFFSET_SHIFT;
+		// coverity[overrun-call]
 		mainsym = lzx_tally_main_and_lensyms(c, matchlen,
 						     adjusted_offset,
 						     is_16_bit);
