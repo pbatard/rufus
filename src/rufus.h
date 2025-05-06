@@ -369,6 +369,7 @@ enum EFI_BOOT_TYPE {
 #define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_WININST(r))
 #define IS_WINDOWS_1X(r)    (r.has_bootmgr_efi && (r.win_version.major >= 10))
 #define IS_WINDOWS_11(r)    (r.has_bootmgr_efi && (r.win_version.major >= 11))
+#define IS_FAT32_COMPAT(r)  ((r.has_4GB_file == 0 || (r.has_4GB_file == 0x81 && allow_dual_uefi_bios)) && !r.needs_ntfs)
 #define HAS_EFI_IMG(r)      (r.efi_img_path[0] != 0)
 #define IS_DD_BOOTABLE(r)   (r.is_bootable_img > 0)
 #define IS_DD_ONLY(r)       ((r.is_bootable_img > 0) && (!r.is_iso || r.disable_iso))
@@ -437,7 +438,7 @@ typedef struct {
 	uint8_t has_md5sum;
 	uint8_t wininst_index;
 	uint8_t has_symlinks;
-	BOOLEAN has_4GB_file;
+	uint8_t has_4GB_file;
 	BOOLEAN has_long_filename;
 	BOOLEAN has_deep_directories;
 	BOOLEAN has_bootmgr;

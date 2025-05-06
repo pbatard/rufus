@@ -188,8 +188,8 @@ static void SetAllowedFileSystems(void)
 		break;
 	case BT_IMAGE:
 		allowed_filesystem[FS_NTFS] = TRUE;
-		// Don't allow anything besides NTFS if the image has a >4GB file or explicitly requires NTFS
-		if ((image_path != NULL) && (img_report.has_4GB_file || img_report.needs_ntfs))
+		// Don't allow anything besides NTFS if the image is not compatible
+		if ((image_path != NULL) && !IS_FAT32_COMPAT(img_report))
 			break;
 		if (!HAS_WINDOWS(img_report) || (target_type != TT_BIOS) || allow_dual_uefi_bios) {
 			if (!HAS_WINTOGO(img_report) || (ComboBox_GetCurItemData(hImageOption) != IMOP_WIN_TO_GO)) {
@@ -1561,7 +1561,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			MessageBoxExU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
 		}
-		if ((IS_FAT(fs_type)) && (img_report.has_4GB_file)) {
+		if (IS_FAT(fs_type) && !IS_FAT32_COMPAT(img_report)) {
 			// This ISO image contains a file larger than 4GB file (FAT32)
 			MessageBoxExU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
@@ -3841,7 +3841,7 @@ extern int TestHashes(void);
 		if (no_focus)
 			continue;
 
-		// Alt +/- => Increase or decrease thread priority for format/file-copy/wim-apply operations
+		// Alt +/- => Increase or decrease thread priority for format/file-copy operations
 		if ((msg.message == WM_SYSKEYDOWN) && ((msg.wParam == VK_OEM_PLUS) || (msg.wParam == VK_OEM_MINUS) ||
 			(msg.wParam == VK_ADD) || (msg.wParam == VK_SUBTRACT))) {
 			int delta = ((msg.wParam == VK_OEM_PLUS) || (msg.wParam == VK_ADD)) ? +1 : -1;
@@ -3912,6 +3912,7 @@ extern int TestHashes(void);
 				WriteSettingBool(SETTING_ENABLE_WIN_DUAL_EFI_BIOS, allow_dual_uefi_bios);
 				PrintStatusTimeout(lmprintf(MSG_266), allow_dual_uefi_bios);
 				SetPartitionSchemeAndTargetSystem(FALSE);
+				SetFileSystemAndClusterSize(NULL);
 				continue;
 			}
 			// Alt-F => Toggle detection of USB HDDs

@@ -44,6 +44,7 @@
 
 #include "rufus.h"
 #include "ui.h"
+#include "vhd.h"
 #include "drive.h"
 #include "libfat.h"
 #include "missing.h"
@@ -69,8 +70,6 @@ _Static_assert(256 * KB >= ISO_BLOCKSIZE, "Can't set PROGRESS_THRESHOLD");
 CdIo_t* cdio_open (const char* psz_source, driver_id_t driver_id) {return NULL;}
 void cdio_destroy (CdIo_t* p_cdio) {}
 
-uint32_t GetInstallWimVersion(const char* iso);
-
 typedef struct {
 	BOOLEAN is_cfg;
 	BOOLEAN is_conf;
@@ -81,7 +80,10 @@ typedef struct {
 } EXTRACT_PROPS;
 
 RUFUS_IMG_REPORT img_report;
+FILE* fd_md5sum = NULL;
 int64_t iso_blocking_status = -1;
+uint64_t total_blocks, extra_blocks, nb_blocks, last_nb_blocks;
+
 extern uint64_t md5sum_totalbytes;
 extern BOOL preserve_timestamps, enable_ntfs_compression, validate_md5sum;
 extern HANDLE format_thread;
@@ -124,9 +126,7 @@ const char* old_c32_name[NB_OLD_C32] = OLD_C32_NAMES;
 static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
 static uint8_t joliet_level = 0;
 static uint32_t md5sum_size = 0;
-static uint64_t total_blocks, extra_blocks, nb_blocks, last_nb_blocks;
 static BOOL scan_only = FALSE;
-static FILE* fd_md5sum = NULL;
 static StrArray config_path, isolinux_path;
 static char symlinked_syslinux[MAX_PATH], *md5sum_data = NULL, *md5sum_pos = NULL;
 
@@ -161,6 +161,83 @@ static void log_handler (cdio_log_level_t level, const char *message)
 	uprintf("libcdio: %s", message);
 }
 
+// Returns TRUE if a path appears in md5sum.txt
+static BOOL is_in_md5sum(char* path)
+{
+	BOOL found = FALSE;
+	char c[3], * p, * pos = md5sum_pos, * nul_pos;
+
+	// If we are creating the md5sum file from scratch, every file is in it.
+	if (fd_md5sum != NULL)
+		return TRUE;
+
+	// If we don't have an existing file at this stage, then no file is in it.
+	if (md5sum_size == 0 || md5sum_data == NULL)
+		return FALSE;
+
+	// We should have a "X:/xyz" path
+	assert(path[1] == ':' && path[2] == '/');
+
+	// Modify the path to have " ./xyz"
+	c[0] = path[0];
+	c[1] = path[1];
+	path[0] = ' ';
+	path[1] = '.';
+
+	// Search for the string in the remainder of the md5sum.txt
+	// NB: md5sum_data is always NUL terminated.
+	p = strstr(pos, path);
+	// Cater for the case where we matched a partial string and look for the full one
+	while (p != NULL && p[strlen(path)] != '\n' && p[strlen(path)] != '\r' && p[strlen(path)] != '\0') {
+		pos = p + strlen(path);
+		p = strstr(pos, path);
+	}
+	found = (p != NULL);
+	// If not found in remainder and we have a remainder, loop to search from beginning
+	if (!found && pos != md5sum_data) {
+		nul_pos = pos;
+		c[2] = *nul_pos;
+		*nul_pos = 0;
+		p = strstr(md5sum_data, path);
+		while (p != NULL && p[strlen(path)] != '\n' && p[strlen(path)] != '\r' && p[strlen(path)] != '\0') {
+			pos = p + strlen(path);
+			p = strstr(pos, path);
+		}
+		*nul_pos = c[2];
+		found = (p != NULL);
+	}
+
+	path[0] = c[0];
+	path[1] = c[1];
+	if (found)
+		md5sum_pos = p + strlen(path);
+	return found;
+}
+
+static void _print_extracted_file(char* psz_fullpath, uint64_t file_length, BOOL split)
+{
+	size_t nul_pos;
+
+	if (psz_fullpath == NULL)
+		return;
+	// Replace slashes with backslashes and append the size to the path for UI display
+	to_windows_path(psz_fullpath);
+	nul_pos = strlen(psz_fullpath);
+	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, TRUE, FALSE));
+	uprintf(split ? "Splitting: %s" : "Extracting: %s", psz_fullpath);
+	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, FALSE, FALSE));
+	PrintStatus(0, MSG_000, psz_fullpath);	// MSG_000 is "%s"
+	// Remove the appended size for extraction
+	psz_fullpath[nul_pos] = 0;
+	// ISO9660 cannot handle backslashes
+	to_unix_path(psz_fullpath);
+	// Update md5sum_totalbytes as needed
+	if (is_in_md5sum(psz_fullpath))
+		md5sum_totalbytes += file_length;
+}
+#define print_extracted_file(p, l) _print_extracted_file(p, l, FALSE)
+#define print_split_file(p, l) _print_extracted_file(p, l, TRUE)
+
 /*
  * Scan and set ISO properties
  * Returns true if the the current file does not need to be processed further
@@ -169,7 +246,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 	const char* psz_fullpath, EXTRACT_PROPS *props)
 {
 	size_t i, j, k, len;
-	char bootloader_name[32];
+	char bootloader_name[32], path[MAX_PATH];
 
 	// Check for an isolinux/syslinux config file anywhere
 	memset(props, 0, sizeof(EXTRACT_PROPS));
@@ -215,6 +292,26 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		if ((psz_dirname != NULL) && (psz_dirname[0] == 0) && (safe_stricmp(psz_basename, ldlinux_name) == 0)) {
 			uprintf("Skipping '%s' file from ISO image", psz_basename);
 			return TRUE;
+		}
+
+		// Split a >4GB install.wim if the target filesystem is FAT
+		if (file_length >= 4 * GB && psz_dirname != NULL && IS_FAT(fs_type) && img_report.has_4GB_file == 0x81) {
+			if (safe_stricmp(&psz_dirname[max(0, ((int)safe_strlen(psz_dirname)) -
+				((int)strlen(sources_str)))], sources_str) == 0) {
+				for (i = 0; i < ARRAYSIZE(wininst_name) - 1; i++) {
+					if (safe_stricmp(psz_basename, wininst_name[i]) == 0 && file_length >= 4 * GB) {
+						print_split_file((char*)psz_fullpath, file_length);
+						char* dst = safe_strdup(psz_fullpath);
+						dst[strlen(dst) - 3] = 's';
+						dst[strlen(dst) - 2] = 'w';
+						dst[strlen(dst) - 1] = 'm';
+						static_sprintf(path, "%s|%s/%s", image_path, psz_dirname, psz_basename);
+						WimSplitFile(path, dst);
+						free(dst);
+						return TRUE;
+					}
+				}
+			}
 		}
 	} else {	// Scan-time checks
 		// Check for GRUB artifacts
@@ -327,6 +424,8 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 							static_sprintf(img_report.wininst_path[img_report.wininst_index],
 								"?:%s", psz_fullpath);
 							img_report.wininst_index++;
+							if (file_length >= 4 * GB)
+								img_report.has_4GB_file |= 0x80;
 						}
 					}
 				}
@@ -357,7 +456,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 				img_report.has_old_c32[i] = TRUE;
 		}
 		if (file_length >= 4 * GB)
-			img_report.has_4GB_file = TRUE;
+			img_report.has_4GB_file++;
 		// Compute projected size needed (NB: ISO_BLOCKSIZE = UDF_BLOCKSIZE)
 		if (file_length != 0)
 			total_blocks += (file_length + (ISO_BLOCKSIZE - 1)) / ISO_BLOCKSIZE;
@@ -496,81 +595,6 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 		StrArrayAdd(&modified_files, psz_fullpath, TRUE);
 
 	free(src);
-}
-
-// Returns TRUE if a path appears in md5sum.txt
-static BOOL is_in_md5sum(char* path)
-{
-	BOOL found = FALSE;
-	char c[3], *p, *pos = md5sum_pos, *nul_pos;
-
-	// If we are creating the md5sum file from scratch, every file is in it.
-	if (fd_md5sum != NULL)
-		return TRUE;
-
-	// If we don't have an existing file at this stage, then no file is in it.
-	if (md5sum_size == 0 || md5sum_data == NULL)
-		return FALSE;
-
-	// We should have a "X:/xyz" path
-	assert(path[1] == ':' && path[2] == '/');
-
-	// Modify the path to have " ./xyz"
-	c[0] = path[0];
-	c[1] = path[1];
-	path[0] = ' ';
-	path[1] = '.';
-
-	// Search for the string in the remainder of the md5sum.txt
-	// NB: md5sum_data is always NUL terminated.
-	p = strstr(pos, path);
-	// Cater for the case where we matched a partial string and look for the full one
-	while (p != NULL && p[strlen(path)] != '\n' && p[strlen(path)] != '\r' && p[strlen(path)] != '\0') {
-		pos = p + strlen(path);
-		p = strstr(pos, path);
-	}
-	found = (p != NULL);
-	// If not found in remainder and we have a remainder, loop to search from beginning
-	if (!found && pos != md5sum_data) {
-		nul_pos = pos;
-		c[2] = *nul_pos;
-		*nul_pos = 0;
-		p = strstr(md5sum_data, path);
-		while (p != NULL && p[strlen(path)] != '\n' && p[strlen(path)] != '\r' && p[strlen(path)] != '\0') {
-			pos = p + strlen(path);
-			p = strstr(pos, path);
-		}
-		*nul_pos = c[2];
-		found = (p != NULL);
-	}
-
-	path[0] = c[0];
-	path[1] = c[1];
-	if (found)
-		md5sum_pos = p + strlen(path);
-	return found;
-}
-
-static void print_extracted_file(char* psz_fullpath, uint64_t file_length)
-{
-	size_t nul_pos;
-
-	if (psz_fullpath == NULL)
-		return;
-	// Replace slashes with backslashes and append the size to the path for UI display
-	to_windows_path(psz_fullpath);
-	nul_pos = strlen(psz_fullpath);
-	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, TRUE, FALSE));
-	uprintf("Extracting: %s", psz_fullpath);
-	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, FALSE, FALSE));
-	PrintStatus(0, MSG_000, psz_fullpath);	// MSG_000 is "%s"
-	// Remove the appended size for extraction
-	psz_fullpath[nul_pos] = 0;
-	// ISO9660 cannot handle backslashes
-	to_unix_path(psz_fullpath);
-	// Update md5sum_totalbytes as needed
-	if (is_in_md5sum(psz_fullpath))
-		md5sum_totalbytes += file_length;
 }
 
 // Convert from time_t to FILETIME
@@ -1319,7 +1343,8 @@ out:
 			safe_free(tmp);
 		}
 		if (HAS_WININST(img_report)) {
-			img_report.wininst_version = GetInstallWimVersion(src_iso);
+			static_sprintf(path, "%s|%s", image_path, &img_report.wininst_path[0][2]);
+			img_report.wininst_version = GetWimVersion(path);
 		}
 		if (img_report.has_grub2) {
 			char grub_path[128];
@@ -1642,71 +1667,6 @@ out:
 	if (ret == 0)
 		safe_free(*buf);
 	return ret;
-}
-
-uint32_t GetInstallWimVersion(const char* iso)
-{
-	char *wim_path = NULL, buf[UDF_BLOCKSIZE] = { 0 };
-	uint32_t* wim_header = (uint32_t*)buf, r = 0xffffffff;
-	iso9660_t* p_iso = NULL;
-	udf_t* p_udf = NULL;
-	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;
-	iso9660_stat_t *p_statbuf = NULL;
-
-	wim_path = safe_strdup(&img_report.wininst_path[0][2]);
-	if (wim_path == NULL)
-		goto out;
-	// UDF indiscriminately accepts slash or backslash delimiters,
-	// but ISO-9660 requires slash
-	to_unix_path(wim_path);
-
-	// First try to open as UDF - fallback to ISO if it failed
-	p_udf = udf_open(iso);
-	if (p_udf == NULL)
-		goto try_iso;
-
-	p_udf_root = udf_get_root(p_udf, true, 0);
-	if (p_udf_root == NULL) {
-		uprintf("Could not locate UDF root directory");
-		goto out;
-	}
-	p_udf_file = udf_fopen(p_udf_root, wim_path);
-	if (!p_udf_file) {
-		uprintf("Could not locate file %s in ISO image", wim_path);
-		goto out;
-	}
-	if (udf_read_block(p_udf_file, buf, 1) != UDF_BLOCKSIZE) {
-		uprintf("Error reading UDF file %s", wim_path);
-		goto out;
-	}
-	r = wim_header[3];
-	goto out;
-
-try_iso:
-	p_iso = iso9660_open_ext(iso, ISO_EXTENSION_MASK);
-	if (p_iso == NULL) {
-		uprintf("Could not open image '%s'", iso);
-		goto out;
-	}
-	p_statbuf = iso9660_ifs_stat_translate(p_iso, wim_path);
-	if (p_statbuf == NULL) {
-		uprintf("Could not get ISO-9660 file information for file %s", wim_path);
-		goto out;
-	}
-	if (iso9660_iso_seek_read(p_iso, buf, p_statbuf->lsn, 1) != ISO_BLOCKSIZE) {
-		uprintf("Error reading ISO-9660 file %s at LSN %d", wim_path, p_statbuf->lsn);
-		goto out;
-	}
-	r = wim_header[3];
-
-out:
-	iso9660_stat_free(p_statbuf);
-	udf_dirent_free(p_udf_root);
-	udf_dirent_free(p_udf_file);
-	iso9660_close(p_iso);
-	udf_close(p_udf);
-	safe_free(wim_path);
-	return bswap_uint32(r);
 }
 
 #define ISO_NB_BLOCKS 16

@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Windows function calls
- * Copyright © 2013-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2025 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -885,7 +885,17 @@ next_progress_line:
 		};
 	} else {
 		// TODO: Detect user cancellation here?
-		WaitForSingleObject(pi.hProcess, INFINITE);
+		switch (WaitForSingleObject(pi.hProcess, 1800000)) {
+		case WAIT_TIMEOUT:
+			uprintf("Command did not terminate within timeout duration");
+			break;
+		case WAIT_OBJECT_0:
+			uprintf("Command was terminated by user");
+			break;
+		default:
+			uprintf("Error while waiting for command to be terminated: %s", WindowsErrorString());
+			break;
+		}
 	}
 
 	if (!GetExitCodeProcess(pi.hProcess, &ret))

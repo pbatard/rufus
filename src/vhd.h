@@ -109,8 +109,10 @@ enum WIMMessage {
 	WIM_MSG_ABORT_IMAGE = -1
 };
 
+extern uint32_t GetWimVersion(const char* image);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst);
 extern BOOL WimApplyImage(const char* image, int index, const char* dst);
+extern BOOL WimSplitFile(const char* src, const char* dst);
 extern int8_t IsBootableImage(const char* path);
 extern char* VhdMountImageAndGetSize(const char* path, uint64_t* disksize);
 #define VhdMountImage(path) VhdMountImageAndGetSize(path, NULL)

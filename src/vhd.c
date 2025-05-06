@@ -49,10 +49,13 @@ extern char* save_image_type;
 extern BOOL ignore_boot_marker, has_ffu_support;
 extern RUFUS_DRIVE rufus_drive[MAX_DRIVES];
 extern HANDLE format_thread;
+extern FILE* fd_md5sum;
+extern uint64_t total_blocks, extra_blocks, nb_blocks, last_nb_blocks;
 
 static char physical_path[128] = "";
 static int progress_op = OP_FILE_COPY, progress_msg = MSG_267;
 static HANDLE mounted_handle = INVALID_HANDLE_VALUE;
+static struct wimlib_progress_info_split last_split_progress;
 
 typedef struct {
 	const char* ext;
@@ -239,11 +242,55 @@ static enum wimlib_progress_status WimProgressFunc(enum wimlib_progress_msg msg_
 		if (info->extract.current_file_count >= info->extract.end_file_count)
 			uprintf("\n");
 		break;
+	case WIMLIB_PROGRESS_MSG_SPLIT_BEGIN_PART:
+		last_split_progress = info->split;
+		uprintf("● %S", info->split.part_name);
+		break;
+	case WIMLIB_PROGRESS_MSG_SPLIT_END_PART:
+		if (fd_md5sum != NULL) {
+			// Don't bother computing the hash at write time - just do it post creation
+			uint8_t sum[MD5_HASHSIZE];
+			char* filename = wchar_to_utf8(info->split.part_name);
+			if (filename != NULL) {
+				HashFile(HASH_MD5, filename, sum);
+				for (int j = 0; j < MD5_HASHSIZE; j++)
+					fprintf(fd_md5sum, "%02x", sum[j]);
+				fprintf(fd_md5sum, "  ./%s\n", &filename[3]);
+				free(filename);
+			}
+		}
+		break;
+	case WIMLIB_PROGRESS_MSG_WRITE_STREAMS:
+		uint64_t completed_bytes = last_split_progress.completed_bytes + info->write_streams.completed_compressed_bytes;
+		nb_blocks = last_nb_blocks + completed_bytes / 2048;
+		UpdateProgressWithInfo(OP_FILE_COPY, MSG_231, nb_blocks, total_blocks + extra_blocks);
+		break;
 	default:
 		break;
 	}
 
 	return WIMLIB_PROGRESS_STATUS_CONTINUE;
+}
+
+// Return the WIM version of an image
+uint32_t GetWimVersion(const char* image)
+{
+	int r;
+	WIMStruct* wim;
+	struct wimlib_wim_info info;
+
+	if (image == NULL)
+		return 0;
+
+	r = wimlib_open_wimU(image, 0, &wim);
+	if (r == 0) {
+		r = wimlib_get_wim_info(wim, &info);
+		wimlib_free(wim);
+		if (r == 0)
+			return info.wim_version;
+	}
+	uprintf("WARNING: Could not get WIM version: Error %d", r);
+	return 0;
 }
 
 // Extract a file from a WIM image. Returns the allocated path of the extracted file or NULL on error.
@@ -276,6 +323,29 @@ BOOL WimExtractFile(const char* image, int index, const char* src, const char* d
 			uprintf("  Could not rename %s to %s: %s", tmp, dst, WindowsErrorString());
 			r = 1;
 		}
+	}
+	wimlib_global_cleanup();
+
+out:
+	return (r == 0);
+}
+
+// Split an install.wim for FAT32 limits
+BOOL WimSplitFile(const char* src, const char* dst)
+{
+	int r = 1;
+	WIMStruct* wim;
+
+	if ((src == NULL) || (dst == NULL))
+		goto out;
+
+	wimlib_global_init(0);
+	wimlib_set_print_errors(true);
+	r = wimlib_open_wimU(src, 0, &wim);
+	if (r == 0) {
+		wimlib_register_progress_function(wim, WimProgressFunc, NULL);
+		r = wimlib_splitU(wim, dst, 4094ULL * MB, WIMLIB_WRITE_FLAG_FSYNC);
+		wimlib_free(wim);
 	}
 	wimlib_global_cleanup();
 

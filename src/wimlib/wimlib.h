@@ -4434,6 +4434,20 @@ wimlib_split(WIMStruct *wim,
 	     uint64_t part_size,
 	     int write_flags);
 
+#ifdef _RUFUS
+static __inline int
+wimlib_splitU(WIMStruct *wim,
+	     const char *swm_name,
+	     uint64_t part_size,
+	     int write_flags)
+{
+	wconvert(swm_name);
+	int r = wimlib_split(wim, wswm_name, part_size, write_flags);
+	wfree(swm_name);
+	return r;
+}
+#endif
+
 /**
  * @ingroup G_general
  *
