@@ -59,6 +59,7 @@
  * optimizations.
  */
 
+#include "wimlib/assert.h"
 #include "wimlib/bitops.h"
 #include "wimlib/compress_common.h"
 #include "wimlib/compressor_ops.h"
@@ -504,6 +505,8 @@ xpress_record_match(struct xpress_compressor *c, unsigned length, unsigned offse
 	unsigned log2_offset = bsr32(offset);
 	unsigned sym = XPRESS_NUM_CHARS + ((log2_offset << 4) | len_hdr);
 
+	wimlib_assert(sym < XPRESS_NUM_SYMBOLS);
+	// coverity[overrun-local]
 	c->freqs[sym]++;
 
 	return (struct xpress_item) {
@@ -759,6 +762,8 @@ xpress_tally_item_list(struct xpress_compressor *c,
 			len_hdr = min(0xF, adjusted_len);
 			sym = XPRESS_NUM_CHARS + ((log2_offset << 4) | len_hdr);
 
+			wimlib_assert(sym < XPRESS_NUM_SYMBOLS);
+			// coverity[overrun-local]
 			c->freqs[sym]++;
 		}
 		cur_node += length;
@@ -872,6 +877,8 @@ xpress_find_min_cost_path(struct xpress_compressor *c, size_t in_nbytes,
 					len_hdr = min(adjusted_len, 0xF);
 					sym = XPRESS_NUM_CHARS +
 					      ((log2_offset << 4) | len_hdr);
+					wimlib_assert(sym < XPRESS_NUM_SYMBOLS);
+					// coverity[overrun-local]
 					cost_to_end =
 						offset_cost + c->costs[sym] +
 						(cur_node + len)->cost_to_end;

@@ -1451,7 +1451,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	if (boot_type == BT_IMAGE) {
 		if_not_assert(image_path != NULL)
 			goto out;
-		if ((size_check) && (MAX(img_report.image_size, img_report.projected_size) > (uint64_t)SelectedDrive.DiskSize)) {
+		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 			// This ISO image is too big for the selected target
 			MessageBoxExU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;

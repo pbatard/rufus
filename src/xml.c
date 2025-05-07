@@ -240,6 +240,7 @@ char *ezxml_decode(char *s, char **ent, char t)
                     l = (d = (long)(s - r)) + c + (long)(e ? strlen(e) : 0); // new length
                     r = (r == m) ? strcpy(malloc(l), r) : _realloc(r, l);
                     e = strchr((s = r + d), ';'); // fix up pointers
+                    if (!e) return r;
                 }
 
                 memmove(s + c, e + 1, strlen(e)); // shift rest of string
@@ -680,7 +681,7 @@ ezxml_t ezxml_parse_fd(int fd)
 {
     ezxml_root_t root;
     struct stat st;
-    size_t l;
+    ssize_t l;
     void *m;
 
     if (fd < 0 || fstat(fd, &st)) return NULL;
@@ -696,7 +697,7 @@ ezxml_t ezxml_parse_fd(int fd)
     }
     else { // mmap failed, read file into memory
 #endif // EZXML_NOMMAP
-        l = (long)_read(fd, m = malloc((size_t)st.st_size), (unsigned int)st.st_size);
+        l = (ssize_t)_read(fd, m = malloc((size_t)st.st_size), (unsigned int)st.st_size);
         if (l < 0) { free(m); return NULL; };
         root = (ezxml_root_t)ezxml_parse_str(m, l);
         if (!root) { free(m); return NULL; };
