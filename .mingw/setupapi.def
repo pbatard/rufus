@@ -1,0 +1,20 @@
+EXPORTS
+  CM_Locate_DevNodeA@12
+  CM_Get_DevNode_Registry_PropertyA@24
+  CM_Get_DevNode_Status@16
+  CM_Get_Child@12
+  CM_Get_Parent@12
+  CM_Get_Sibling@12
+  CM_Get_Device_IDA@16
+  CM_Get_Device_ID_ListA@16
+  CM_Get_Device_ID_List_SizeA@12
+  SetupDiGetDeviceInstanceIdA@20
+  SetupDiGetDeviceRegistryPropertyA@28
+  SetupDiGetDeviceRegistryPropertyW@28
+  SetupDiChangeState@8
+  SetupDiGetClassDevsA@16
+  SetupDiSetClassInstallParamsW@16
+  SetupDiEnumDeviceInfo@12
+  SetupDiEnumDeviceInterfaces@20
+  SetupDiDestroyDeviceInfoList@4
+  SetupDiGetDeviceInterfaceDetailA@24

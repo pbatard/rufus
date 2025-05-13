@@ -22,14 +22,6 @@
 #include <crtdbg.h>
 #endif
 
-// Temporary workaround for MinGW32 delay-loading
-// See https://github.com/pbatard/rufus/pull/2513 as well as
-// https://sourceware.org/bugzilla/show_bug.cgi?id=14339
-#if defined(__MINGW32__)
-#undef DECLSPEC_IMPORT
-#define DECLSPEC_IMPORT __attribute__((visibility("hidden")))
-#endif
-
 #include <windows.h>
 #include <windowsx.h>
 #include <stdlib.h>
@@ -4219,3 +4211,30 @@ out:
 
 	return 0;
 }
+
+/*
+ * The following adds a Load Configuration section in .rdata for MinGW, that can then be referenced
+ * by a PE post processing script to emulate the /DEPENDENTLOADFLAG:0x800 behaviour of MSVC.
+ * See https://github.com/pbatard/rufus/blob/master/loadcfg.py for such a script.
+ * Note however that, per https://github.com/pbatard/rufus/issues/2701#issuecomment-2874788564
+ * /DEPENDENTLOADFLAG is far from being the ultimate solution to stop DLL side-loading vulnerabilities...
+ */
+#if defined(__MINGW32__)
+// MinGW produces a warning since we don't use this section in the code => silence it.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-const-variable"
+// Add a 16-byte marker for scripts to easily locate this section.
+static const char _load_config_marker[16] __attribute__((aligned(16))) __attribute__((section(".rdata"))) = "_RUFUS_LOAD_CFG";
+#if defined(_M_AMD64)
+static const IMAGE_LOAD_CONFIG_DIRECTORY64 _load_config __attribute__((aligned(16))) __attribute__((section(".rdata"))) = {
+	.Size = sizeof(IMAGE_LOAD_CONFIG_DIRECTORY64),
+	.DependentLoadFlags = LOAD_LIBRARY_SEARCH_SYSTEM32
+};
+#else
+static const IMAGE_LOAD_CONFIG_DIRECTORY32 _load_config __attribute__((aligned(16))) __attribute__((section(".rdata"))) = {
+	.Size = sizeof(IMAGE_LOAD_CONFIG_DIRECTORY32),
+	.DependentLoadFlags = LOAD_LIBRARY_SEARCH_SYSTEM32
+};
+#endif
+#pragma GCC diagnostic pop
+#endif

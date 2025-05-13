@@ -240,8 +240,8 @@ char *ezxml_decode(char *s, char **ent, char t)
                     l = (d = (long)(s - r)) + c + (long)(e ? strlen(e) : 0); // new length
                     r = (r == m) ? strcpy(malloc(l), r) : _realloc(r, l);
                     e = strchr((s = r + d), ';'); // fix up pointers
-                    if (!e) return r;
                 }
+                if (!e) return r;
 
                 memmove(s + c, e + 1, strlen(e)); // shift rest of string
                 strncpy_s(s, c, ent[b], _TRUNCATE); // copy in replacement text

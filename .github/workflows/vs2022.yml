@@ -50,6 +50,11 @@ jobs:
       with:
         msbuild-architecture: x64
 
+    - name: Install UPX
+      uses: crazy-max/ghaction-upx@v3
+      with:
+        install-only: true
+
     - name: Set ALPHA
       id: set_alpha
       shell: bash
@@ -75,6 +80,10 @@ jobs:
         msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ matrix.TARGET_PLATFORM }},ForceImportBeforeCppTargets=%GITHUB_WORKSPACE%\.vs\Generate.PDB.props
         move .\${{ matrix.TARGET_PLATFORM }}\Release\rufus.exe .\rufus_${{ matrix.TARGET_PLATFORM }}.exe
         move .\${{ matrix.TARGET_PLATFORM }}\Release\rufus.pdb .\rufus_${{ matrix.TARGET_PLATFORM }}.pdb
+
+    - name: Compress executables
+      if: ${{ matrix.TARGET_PLATFORM != 'arm64' }}
+      run: upx --lzma --best .\rufus_${{ matrix.TARGET_PLATFORM }}.exe
 
     - name: Display SHA-256
       run: sha256sum ./rufus_${{ matrix.TARGET_PLATFORM }}.exe

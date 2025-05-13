@@ -24,12 +24,6 @@
 #endif
 
 #include <windows.h>
-// Temporary workaround for MinGW32 delay-loading
-// See https://github.com/pbatard/rufus/pull/2513
-#if defined(__MINGW32__)
-#undef DECLSPEC_IMPORT
-#define DECLSPEC_IMPORT __attribute__((visibility("hidden")))
-#endif
 #include <wininet.h>
 #include <netlistmgr.h>
 #include <stdio.h>

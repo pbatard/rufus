@@ -1,0 +1,14 @@
+EXPORTS
+  CertFindCertificateInStore@24
+  CertGetCertificateChain@32
+  CertGetNameStringA@24
+  CertCloseStore@8
+  CertFreeCertificateContext@4
+  CryptQueryObject@44
+  CryptDecodeObjectEx@32
+  CryptHashCertificate@28
+  CryptMsgGetParam@20
+  CryptMsgClose@4
+  CryptMsgGetParam@20
+  CryptMsgOpenToDecode@24
+  CryptMsgUpdate@16
