@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2005, 2006, 2008, 2010, 2012 Rocky Bernstein <rocky@gnu.org>
+  Copyright (C) 2005, 2006, 2008, 2010, 2012, 2024 Rocky Bernstein <rocky@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ udf_get_filename(const udf_dirent_t *p_udf_dirent)
 
 /* Copy an UDF File Entry into a Directory Entry structure. */
 bool
-udf_get_file_entry(const udf_dirent_t *p_udf_dirent, 
+udf_get_file_entry(const udf_dirent_t *p_udf_dirent,
 		   /*out*/ udf_file_entry_t *p_udf_fe)
 {
   if (!p_udf_dirent) return false;
@@ -59,10 +59,10 @@ udf_get_file_entry(const udf_dirent_t *p_udf_dirent,
 /*!
   Return the file id descriptor of the given file.
 */
-bool udf_get_fileid_descriptor(const udf_dirent_t *p_udf_dirent, 
+bool udf_get_fileid_descriptor(const udf_dirent_t *p_udf_dirent,
 			       /*out*/ udf_fileid_desc_t *p_udf_fid)
 {
-  
+
   if (!p_udf_dirent) return false;
   if (!p_udf_dirent->fid) {
     /* FIXME do something about trying to get the descriptor. */
@@ -76,7 +76,7 @@ bool udf_get_fileid_descriptor(const udf_dirent_t *p_udf_dirent,
 /*!
   Return the number of hard links of the file. Return 0 if error.
 */
-uint16_t udf_get_link_count(const udf_dirent_t *p_udf_dirent) 
+uint16_t udf_get_link_count(const udf_dirent_t *p_udf_dirent)
 {
   if (p_udf_dirent) {
     return uint16_from_le(p_udf_dirent->fe.link_count);
@@ -87,7 +87,7 @@ uint16_t udf_get_link_count(const udf_dirent_t *p_udf_dirent)
 /*!
   Return the file length the file. Return 2147483647L if error.
 */
-uint64_t udf_get_file_length(const udf_dirent_t *p_udf_dirent) 
+uint64_t udf_get_file_length(const udf_dirent_t *p_udf_dirent)
 {
   if (p_udf_dirent) {
     return uint64_from_le(p_udf_dirent->fe.info_len);
@@ -109,11 +109,11 @@ udf_is_dir(const udf_dirent_t *p_udf_dirent)
  * block.
  */
 static lba_t
-offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset, 
+offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 	      /*out*/ lba_t *pi_lba, /*out*/ uint32_t *pi_max_size)
 {
   udf_t *p_udf = p_udf_dirent->p_udf;
-  const udf_file_entry_t *p_udf_fe = (udf_file_entry_t *) 
+  const udf_file_entry_t *p_udf_fe = (udf_file_entry_t *)
     &p_udf_dirent->fe;
   const udf_icbtag_t *p_icb_tag = &p_udf_fe->icb_tag;
   const uint16_t strat_type= uint16_from_le(p_icb_tag->strat_type);
@@ -134,9 +134,9 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
       uint64_t lsector;
       int ad_offset, ad_num = 0;
       uint16_t addr_ilk = uint16_from_le(p_icb_tag->flags&ICBTAG_FLAG_AD_MASK);
-      
+
       switch (addr_ilk) {
-      case ICBTAG_FLAG_AD_SHORT: 
+      case ICBTAG_FLAG_AD_SHORT:
 	{
 	  udf_short_ad_t *p_icb;
 	  /*
@@ -147,23 +147,23 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 	  do {
 	    i_offset -= icblen;
 	    ad_offset = sizeof(udf_short_ad_t) * ad_num;
-	    if (ad_offset > uint32_from_le(p_udf_fe->i_alloc_descs)) {
+	    if (ad_offset > uint32_from_le(p_udf_fe->u_alloc_descs)) {
 	      cdio_warn("File offset out of bounds");
 	      return CDIO_INVALID_LBA;
 	    }
-	    p_icb = (udf_short_ad_t *) 
-	      GETICB( uint32_from_le(p_udf_fe->i_extended_attr) 
+	    p_icb = (udf_short_ad_t *)
+	      GETICB( uint32_from_le(p_udf_fe->u_extended_attr)
 		      + ad_offset );
 	    icblen = p_icb->len;
 	    ad_num++;
 	  } while(i_offset >= icblen);
-	  
+
 	  lsector = (i_offset / UDF_BLOCKSIZE) + p_icb->pos;
-	  
+
 	  *pi_max_size = p_icb->len;
 	}
 	break;
-      case ICBTAG_FLAG_AD_LONG: 
+      case ICBTAG_FLAG_AD_LONG:
 	{
 	  /*
 	   * The allocation descriptor field is filled with long_ad's
@@ -174,20 +174,20 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 	  do {
 	    i_offset -= icblen;
 	    ad_offset = sizeof(udf_long_ad_t) * ad_num;
-	    if (ad_offset > uint32_from_le(p_udf_fe->i_alloc_descs)) {
+	    if (ad_offset > uint32_from_le(p_udf_fe->u_alloc_descs)) {
 	      cdio_warn("File offset out of bounds");
 	      return CDIO_INVALID_LBA;
 	    }
-	    p_icb = (udf_long_ad_t *) 
-	      GETICB( uint32_from_le(p_udf_fe->i_extended_attr)
+	    p_icb = (udf_long_ad_t *)
+	      GETICB( uint32_from_le(p_udf_fe->u_extended_attr)
 		      + ad_offset );
 	    icblen = p_icb->len;
 	    ad_num++;
 	  } while(i_offset >= icblen);
-	
+
 	  lsector = (i_offset / UDF_BLOCKSIZE) +
 	    uint32_from_le(((udf_long_ad_t *)(p_icb))->loc.lba);
-	  
+
 	  *pi_max_size = p_icb->len;
 	}
 	break;
@@ -232,7 +232,7 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
   It is the caller's responsibility to ensure that count is less
   than the number of blocks recorded via p_udf_dirent.
 
-  If there is an error, cast the result to driver_return_code_t for 
+  If there is an error, cast the result to driver_return_code_t for
   the specific error code.
 */
 ssize_t
@@ -243,14 +243,14 @@ udf_read_block(const udf_dirent_t *p_udf_dirent, void * buf, size_t count)
     driver_return_code_t ret;
     uint32_t i_max_size=0;
     udf_t *p_udf = p_udf_dirent->p_udf;
-    lba_t i_lba = offset_to_lba(p_udf_dirent, p_udf->i_position, &i_lba, 
+    lba_t i_lba = offset_to_lba(p_udf_dirent, p_udf->i_position, &i_lba,
 				&i_max_size);
     if (i_lba != CDIO_INVALID_LBA) {
       uint32_t i_max_blocks = CEILING(i_max_size, UDF_BLOCKSIZE);
       if ( i_max_blocks < count ) {
 	  cdio_warn("read count %u is larger than %u extent size.",
 		  (unsigned int)count, i_max_blocks);
-	  cdio_warn("read count truncated to %u", (unsigned int)count);
+	  cdio_warn("read count truncated to %u", i_max_blocks);
 	  count = i_max_blocks;
       }
       ret = udf_read_sectors(p_udf, buf, i_lba, count);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2005-2006, 2008, 2011, 2013-2014, 2017
+  Copyright (C) 2005-2006, 2008, 2011, 2013-2014, 2017, 2024
   Rocky Bernstein <rocky@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -161,15 +161,19 @@ bool
 udf_get_lba(const udf_file_entry_t *p_udf_fe,
 	    /*out*/ uint32_t *start, /*out*/ uint32_t *end)
 {
-  if (! p_udf_fe->i_alloc_descs)
+  if (! p_udf_fe->u_alloc_descs)
     return false;
+
+  // check the validity of the u_extended_attr member
+  if (p_udf_fe->u_extended_attr > UINT32_MAX - sizeof(udf_short_ad_t))
+	return false;
 
   switch (p_udf_fe->icb_tag.flags & ICBTAG_FLAG_AD_MASK) {
   case ICBTAG_FLAG_AD_SHORT:
     {
       /* The allocation descriptor field is filled with short_ad's. */
       udf_short_ad_t *p_ad = (udf_short_ad_t *)
-	(p_udf_fe->u.ext_attr + uint32_from_le(p_udf_fe->i_extended_attr));
+	(p_udf_fe->u.ext_attr + uint32_from_le(p_udf_fe->u_extended_attr));
 
       *start = uint32_from_le(p_ad->pos);
       *end = *start +
@@ -181,7 +185,7 @@ udf_get_lba(const udf_file_entry_t *p_udf_fe,
     {
       /* The allocation descriptor field is filled with long_ad's */
       udf_long_ad_t *p_ad = (udf_long_ad_t *)
-	(p_udf_fe->u.ext_attr + uint32_from_le(p_udf_fe->i_extended_attr));
+	(p_udf_fe->u.ext_attr + uint32_from_le(p_udf_fe->u_extended_attr));
 
       *start = uint32_from_le(p_ad->loc.lba); /* ignore partition number */
       *end = *start +
@@ -192,7 +196,7 @@ udf_get_lba(const udf_file_entry_t *p_udf_fe,
   case ICBTAG_FLAG_AD_EXTENDED:
     {
       udf_ext_ad_t *p_ad = (udf_ext_ad_t *)
-	(p_udf_fe->u.ext_attr + uint32_from_le(p_udf_fe->i_extended_attr));
+	(p_udf_fe->u.ext_attr + uint32_from_le(p_udf_fe->u_extended_attr));
 
       *start = uint32_from_le(p_ad->ext_loc.lba); /* ignore partition number */
       *end = *start +
@@ -279,7 +283,7 @@ udf_fopen(udf_dirent_t *p_udf_root, const char *psz_name)
    The returned string is allocated and must be freed by the caller
 */
 static char*
-unicode16_decode(const uint8_t *data, int i_len)
+unicode16_decode(const uint8_t *data, unsigned int u_len)
 {
   int i;
   char* r = NULL;
@@ -287,14 +291,14 @@ unicode16_decode(const uint8_t *data, int i_len)
   switch (data[0])
   {
   case 8:
-    r = (char*)calloc(i_len, 1);
+    r = (char*)calloc(u_len, 1);
     if (r == NULL)
       return r;
-    for (i=0; i<i_len-1; i++)
+    for (i=0; i<u_len-1; i++)
       r[i] = data[i+1];
     return r;
   case 16:
-    cdio_charset_to_utf8((char*)&data[1], i_len-1, &r, "UCS-2BE");
+    cdio_charset_to_utf8((char*)&data[1], u_len-1, &r, "UCS-2BE");
     return r;
   default:
     /* Empty string, as some existing sections can't take a NULL pointer */
@@ -475,7 +479,7 @@ udf_get_volume_id(udf_t *p_udf, /*out*/ char *psz_volid, unsigned int i_volid)
 
   volid_len = strlen(r)+1;     /* +1 for NUL terminator */
   if (psz_volid != NULL) {
-    strncpy(psz_volid, r, MIN(volid_len, i_volid));
+    strncpy(psz_volid, r, i_volid);
     psz_volid[i_volid-1] = 0;  /* strncpy does not always terminate the dest */
   }
   free(r);
@@ -541,7 +545,7 @@ udf_get_logical_volume_id(udf_t *p_udf, /*out*/ char *psz_logvolid, unsigned int
 
   logvolid_len = strlen(r)+1;  /* +1 for NUL terminator */
   if (psz_logvolid != NULL) {
-    strncpy(psz_logvolid, r, MIN(logvolid_len, i_logvolid));
+    strncpy(psz_logvolid, r, i_logvolid);
     psz_logvolid[i_logvolid-1] = 0;    /* strncpy does not always terminate the dest */
   }
   free(r);
@@ -738,7 +742,7 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
 	(p_udf_dirent->fid->file_characteristics & UDF_FILE_PARENT) != 0;
 
       {
-	const unsigned int i_len = p_udf_dirent->fid->i_file_id;
+	const unsigned int u_len = p_udf_dirent->fid->i_file_id;
 
 	if (DRIVER_OP_SUCCESS != udf_read_sectors(p_udf, &p_udf_dirent->fe, p_udf->i_part_start
 			 + uint32_from_le(p_udf_dirent->fid->icb.loc.lba), 1)) {
@@ -748,7 +752,7 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
 
        free_and_null(p_udf_dirent->psz_name);
        p = (uint8_t*)p_udf_dirent->fid->u.imp_use.data + p_udf_dirent->fid->u.i_imp_use;
-       p_udf_dirent->psz_name = unicode16_decode(p, i_len);
+       p_udf_dirent->psz_name = unicode16_decode(p, u_len);
       }
       return p_udf_dirent;
     }
@@ -771,15 +775,19 @@ udf_dirent_free(udf_dirent_t *p_udf_dirent)
   return true;
 }
 
-/*!
-  Seek to a specific offset in a UDF file. Must be a multiple of UDF_BLOCKSIZE.
-*/
+/**
+ * Seek to a specific offset in a UDF file.
+ * The offset *must* be a multiple of UDF_BLOCKSIZE.
+ * Returns true if the position was successfully changed, or false on
+ * any error condition (such as offset out of range or not aligned to
+ * UDF_BLOCKSIZE).
+ */
 bool
 udf_setpos(udf_dirent_t* p_udf_dirent, off_t offset)
 {
     if (!p_udf_dirent)
 	return false;
-    if (offset % UDF_BLOCKSIZE || offset > uint64_from_le(p_udf_dirent->fe.info_len))
+    if (offset % UDF_BLOCKSIZE || offset < 0 || offset > uint64_from_le(p_udf_dirent->fe.info_len))
 	return false;
     p_udf_dirent->p_udf->i_position = offset;
     return true;

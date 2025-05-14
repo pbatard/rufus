@@ -288,7 +288,7 @@ bool cdio_charset_from_utf8(cdio_utf8_t * src, char ** dst,
   wchar_t* le_dst;
   size_t i, len;
 
-  if (src == NULL || dst == NULL || dst_len == NULL || dst_charset == NULL || strcmp(dst_charset, "UTF-8") != 0)
+  if (src == NULL || dst == NULL || dst_len == NULL || dst_charset == NULL || strcmp(dst_charset, "UCS-2BE") != 0)
     return false;
 
   /* Eliminate empty strings */
@@ -314,37 +314,79 @@ bool cdio_charset_from_utf8(cdio_utf8_t * src, char ** dst,
 bool cdio_charset_to_utf8(const char *src, size_t src_len, cdio_utf8_t **dst,
                           const char *src_charset)
   {
-  wchar_t* le_src;
-  int i;
+  int codepage = 0;
+  wchar_t* wstr = NULL;
+  int i, size = 0;
 
-  if (src == NULL || dst == NULL || src_charset == NULL || strcmp(src_charset, "UCS-2BE") != 0)
+  if (src == NULL || dst == NULL || src_charset == NULL)
     return false;
 
-  /* Compute UCS-2 src length */
-  if (src_len == (size_t)-1) {
-    for (src_len = 0; ((uint16_t*)src)[src_len] !=0; src_len++);
-  } else {
-    src_len >>=1;
+  /* Convert big endian to little endian */
+  if (strcmp(src_charset, "UCS-2BE") == 0) {
+    /* Compute UCS-2 src length */
+    if (src_len == (size_t)-1) {
+      for (src_len = 0; ((uint16_t*)src)[src_len] !=0; src_len++);
+    } else {
+      src_len >>=1;
+    }
+
+    /* Eliminate empty strings */
+    if ((src_len < 1) || ((src[0] == 0) && (src[1] == 0))) {
+      *dst = NULL;
+      return false;
+    }
+
+    /* Perform byte reversal */
+    wstr = (wchar_t*)calloc(src_len+1, sizeof(wchar_t));
+    cdio_assert(wstr != NULL);
+    for (i=0; i<src_len; i++) {
+      ((char*)wstr)[2*i] = src[2*i+1];
+      ((char*)wstr)[2*i+1] = src[2*i];
+    }
+    wstr[src_len] = 0;
   }
 
-  /* Eliminate empty strings */
-  if ((src_len < 1) || ((src[0] == 0) && (src[1] == 0))) {
-    *dst = NULL;
-    return false;
+  /* Convert multi-byte to wide string */
+  if (strcmp(src_charset, "ASCII") == 0 || strcmp(src_charset, "ISO-8859-1") == 0) {
+    codepage = 28591;
+  } else if (strcmp(src_charset, "SHIFT_JIS") == 0) {
+    codepage = 932;
   }
 
-  /* Perform byte reversal */
-  le_src = (wchar_t*)malloc(2*src_len+2);
-  cdio_assert(le_src != NULL);
-  for (i=0; i<src_len; i++) {
-    ((char*)le_src)[2*i] = src[2*i+1];
-    ((char*)le_src)[2*i+1] = src[2*i];
-  }
-  le_src[src_len] = 0;
-  *dst = cdio_wchar_to_utf8(le_src);
-  free(le_src);
+  if (codepage != 0) {
+    /* Compute src length */
+    if (src_len == (size_t)-1) {
+      for (src_len = 0; src[src_len] != 0; src_len++);
+    }
 
-  return (*dst != NULL);
+    /* Eliminate empty strings */
+    if ((src_len < 1) || (src[0] == 0)) {
+      *dst = NULL;
+      return false;
+    }
+
+    /* Find out the size we need to allocate for our converted string */
+    size = MultiByteToWideChar(codepage, 0, src, -1, NULL, 0);
+    if (size <= 1) /* An empty string would be size 1 */
+      return false;
+
+    if ((wstr = (wchar_t*)calloc(size, sizeof(wchar_t))) == NULL)
+      return false;
+
+    if (MultiByteToWideChar(CP_UTF8, 0, src, -1, wstr, size) != size) {
+      free(wstr);
+      return false;
+    }
+  }
+
+  /* Convert wide string to UTF-8 */
+  if (wstr != NULL) {
+    *dst = cdio_wchar_to_utf8(wstr);
+    free(wstr);
+    return (*dst != NULL);
+  }
+
+  return false;
 }
 #else
 # error "The iconv library is needed to build drivers, but it is not detected"

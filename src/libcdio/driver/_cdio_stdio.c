@@ -210,6 +210,13 @@ _stdio_read(void *user_data, void *buf, size_t count)
   _UserData *const ud = user_data;
   long read_count;
 
+  // Define a safe buffer size for _stdio_read
+  const size_t MAX_ALLOWED_COUNT = 0x100000;
+  if (count > MAX_ALLOWED_COUNT) {
+      cdio_error("Requested count exceeds maximum allowed value.\n");
+      return 0;
+  }
+
   read_count = fread(buf, 1, count, ud->fd);
 
   if (read_count != count)

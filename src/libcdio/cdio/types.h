@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2008, 2012, 2017 2019
+    Copyright (C) 2002-2008, 2012, 2017, 2019, 2024
                   Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -30,6 +30,8 @@ extern "C" {
 #else
 # include <stdbool.h>
 #endif /* __cplusplus */
+
+#include <stddef.h>
 
 /* If <sys/types.h> is not available on your platform please
    contact the libcdio mailing list so that we can fix it! */
@@ -130,6 +132,9 @@ typedef uint8_t ubyte;
 #define GNUC_CONST
 #define GNUC_UNUSED
 #define GNUC_PACKED
+#ifdef _MSC_VER
+#define __PRETTY_FUNCTION__ __FUNCSIG__
+#endif
 #endif  /* !__GNUC__ */
 
 #if defined(__MINGW32__) || (defined( __clang_major__) && __clang_major__ > 9)
@@ -159,10 +164,6 @@ typedef uint8_t ubyte;
 #else
 # define GNUC_LIKELY(x)   (x)
 # define GNUC_UNLIKELY(x) (x)
-#endif
-
-#ifndef NULL
-# define NULL ((void*) 0)
 #endif
 
   /** Provide a notice for deprecated elements. Before gcc 4.5 'deprecated'

@@ -381,7 +381,7 @@ iso9660_set_ltime_with_timezone(const struct tm *p_tm,
 
   if (!p_tm) return;
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__DARWIN_C_ANSI)
 #pragma GCC diagnostic ignored "-Wformat-truncation"
 #endif
   snprintf(_pvd_date, 17,

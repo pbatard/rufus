@@ -252,7 +252,7 @@ iso9660_open_ext (const char *psz_path,
   contained in a file format that libiso9660 doesn't know natively
   (or knows imperfectly.)
 
-  Some tolerence allowed for positioning the ISO 9660 image. We scan
+  Some tolerance allowed for positioning the ISO 9660 image. We scan
   for STANDARD_ID and use that to set the eventual offset to adjust
   by (as long as that is <= i_fuzz).
 
@@ -267,7 +267,7 @@ iso9660_open_fuzzy (const char *psz_path, uint16_t i_fuzz /*, mode*/)
 }
 
 /*!
-  Open an ISO 9660 image for reading with some tolerence for positioning
+  Open an ISO 9660 image for reading with some tolerance for positioning
   of the ISO9660 image. We scan for ISO_STANDARD_ID and use that to set
   the eventual offset to adjust by (as long as that is <= i_fuzz).
 
@@ -341,7 +341,7 @@ get_member_id(iso9660_t *p_iso, cdio_utf8_t **p_psz_member_id,
   }
 #ifdef HAVE_JOLIET
   if (p_iso->u_joliet_level) {
-    /* Translate USC-2 string from Secondary Volume Descriptor */
+    /* Translate UCS-2 string from Secondary Volume Descriptor */
     if (cdio_charset_to_utf8(svd_member, max_size,
                             p_psz_member_id, "UCS-2BE")) {
       /* NB: *p_psz_member_id is never NULL on success. */
@@ -437,7 +437,7 @@ bool iso9660_ifs_get_publisher_id(iso9660_t *p_iso,
 }
 
 /*!
-   Return a string containing the PVD's publisher id with trailing
+   Return a string containing the PVD's system id with trailing
    blanks removed.
 */
 bool iso9660_ifs_get_system_id(iso9660_t *p_iso,
@@ -450,7 +450,7 @@ bool iso9660_ifs_get_system_id(iso9660_t *p_iso,
 }
 
 /*!
-   Return a string containing the PVD's publisher id with trailing
+   Return a string containing the PVD's volume id with trailing
    blanks removed.
 */
 bool iso9660_ifs_get_volume_id(iso9660_t *p_iso,
@@ -463,7 +463,7 @@ bool iso9660_ifs_get_volume_id(iso9660_t *p_iso,
 }
 
 /*!
-   Return a string containing the PVD's publisher id with trailing
+   Return a string containing the PVD's volumeset id with trailing
    blanks removed.
 */
 bool iso9660_ifs_get_volumeset_id(iso9660_t *p_iso,
@@ -522,7 +522,7 @@ iso9660_ifs_read_superblock (iso9660_t *p_iso,
 
   p_iso->u_joliet_level = 0;
 
-  /* There may be multiple Secondary Volume Descriptors (eg. El Torito + Joliet) */
+  /* There may be multiple Secondary Volume Descriptors (e.g. El Torito + Joliet) */
   for (i=1; (0 != iso9660_iso_seek_read (p_iso, &p_svd, ISO_PVD_SECTOR+i, 1)); i++) {
     if (ISO_VD_END == from_711(p_svd.type) ) /* Last SVD */
       break;
@@ -991,7 +991,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
 
     if (i_rr_fname > 0) {
       if (i_rr_fname > i_fname) {
-	/* realloc gives valgrind errors */
+	/* realloc gives Valgrind errors */
 	iso9660_stat_t *p_stat_new =
 	  calloc(1, sizeof(iso9660_stat_t)+i_rr_fname+2);
 	if (!p_stat_new) {
@@ -1124,7 +1124,7 @@ _fs_stat_root (CdIo_t *p_cdio)
     if (!p_env->u_joliet_level)
       iso_extension_mask &= ~ISO_EXTENSION_JOLIET;
 
-    /* FIXME try also with Joliet.*/
+    /* FIXME: try also with Joliet.*/
     if ( !iso9660_fs_read_superblock (p_cdio, iso_extension_mask) ) {
       cdio_warn("Could not read ISO-9660 Superblock.");
       return NULL;
@@ -1439,7 +1439,7 @@ typedef iso9660_stat_t * (stat_traverse_t)
   Get file status for psz_path into stat. NULL is returned on error.
   pathname version numbers in the ISO 9660
   name are dropped, i.e. ;1 is removed and if level 1 ISO-9660 names
-  are lowercased.
+  are downcased.
  */
 static iso9660_stat_t *
 fs_stat_translate (void *p_image, stat_root_t stat_root,
@@ -1467,7 +1467,7 @@ fs_stat_translate (void *p_image, stat_root_t stat_root,
 /*!
   Return file status for path name psz_path. NULL is returned on error.
   pathname version numbers in the ISO 9660 name are dropped, i.e. ;1
-  is removed and if level 1 ISO-9660 names are lowercased.
+  is removed and if level 1 ISO-9660 names are downcased.
 
   @param p_cdio the CD object to read from
 
@@ -1492,7 +1492,7 @@ iso9660_fs_stat_translate (CdIo_t *p_cdio, const char psz_path[])
 
   @return file status for path name psz_path. NULL is returned on
   error.  pathname version numbers in the ISO 9660 name are dropped,
-  i.e. ;1 is removed and if level 1 ISO-9660 names are lowercased.
+  i.e. ;1 is removed and if level 1 ISO-9660 names are downcased.
   The caller must free the returned result using iso9660_stat_free().
  */
 iso9660_stat_t *
@@ -1581,6 +1581,12 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[])
   iso9660_stat_t *p_iso9660_stat = NULL;
   iso9660_stat_t *p_stat;
 
+  unsigned offset = 0;
+  uint8_t *_dirbuf = NULL;
+  uint32_t blocks;
+  CdioISO9660DirList_t *retval;
+  bool skip_following_extents = false;
+
   if (!p_cdio)   return NULL;
   if (!psz_path) return NULL;
 
@@ -1594,64 +1600,76 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[])
     return NULL;
   }
 
-  {
-    unsigned offset = 0;
-    uint8_t *_dirbuf = NULL;
-    uint32_t blocks = CDIO_EXTENT_BLOCKS(p_stat->total_size);
-    CdioISO9660DirList_t *retval = _cdio_list_new ();
-    bool skip_following_extents = false;
+  /* Check for overflow on 32-bit systems.
+     uint32_t has a limited maximum value, and if p_stat->total_size (the total
+     size of the directory) is very large, the calculation might exceed this limit.
+  */
+  if (p_stat->total_size > SIZE_MAX / ISO_BLOCKSIZE) {
+    cdio_warn("Total size is too large");
+    iso9660_stat_free(p_stat);
+    return NULL;
+  }
 
-    _dirbuf = calloc(1, blocks * ISO_BLOCKSIZE);
-    if (!_dirbuf)
-      {
+  blocks = CDIO_EXTENT_BLOCKS(p_stat->total_size);
+  retval = _cdio_list_new ();
+
+  /* Check for potential integer overflow when calculating total blocks */
+  if (blocks > (SIZE_MAX / ISO_BLOCKSIZE)) {
+    cdio_warn("Total size is too large");
+    iso9660_stat_free(p_stat);
+    return NULL;
+  }
+
+  _dirbuf = calloc(1, blocks * ISO_BLOCKSIZE);
+  if (!_dirbuf)
+    {
       cdio_warn("Couldn't calloc(1, %d)", blocks * ISO_BLOCKSIZE);
-      iso9660_stat_free(p_stat);
-      iso9660_dirlist_free(retval);
-      return NULL;
-      }
-
-    if (cdio_read_data_sectors (p_cdio, _dirbuf, p_stat->lsn,
-				ISO_BLOCKSIZE, blocks)) {
       iso9660_stat_free(p_stat);
       iso9660_dirlist_free(retval);
       return NULL;
     }
 
-    while (offset < (blocks * ISO_BLOCKSIZE))
-      {
-	p_iso9660_dir = (void *) &_dirbuf[offset];
+  if (cdio_read_data_sectors (p_cdio, _dirbuf, p_stat->lsn,
+			      ISO_BLOCKSIZE, blocks)) {
+    iso9660_stat_free(p_stat);
+    iso9660_dirlist_free(retval);
+    return NULL;
+  }
 
-	if (iso9660_check_dir_block_end(p_iso9660_dir, &offset))
-  	  continue;
+  while (offset < (blocks * ISO_BLOCKSIZE))
+    {
+      p_iso9660_dir = (void *) &_dirbuf[offset];
 
-	if (skip_following_extents) {
-	  /* Do not register remaining extents of ill file */
-	  p_iso9660_stat = NULL;
-	} else {
-	  p_iso9660_stat = _iso9660_dir_to_statbuf(p_iso9660_dir,
-						   p_iso9660_stat, p_cdio,
-						   dunno, p_env->u_joliet_level);
-	  if (NULL == p_iso9660_stat)
-	    skip_following_extents = true; /* Start ill file mode */
-	}
-	if ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0)
-	  skip_following_extents = false; /* Ill or not: The file ends now */
+      if (iso9660_check_dir_block_end(p_iso9660_dir, &offset))
+	continue;
 
-	if ((p_iso9660_stat) &&
-	    ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0)) {
-	  _cdio_list_append (retval, p_iso9660_stat);
-	  p_iso9660_stat = NULL;
-	}
+      if (skip_following_extents) {
+	/* Do not register remaining extents of ill file */
+	p_iso9660_stat = NULL;
+      } else {
+	p_iso9660_stat = _iso9660_dir_to_statbuf(p_iso9660_dir,
+						 p_iso9660_stat, p_cdio,
+						 dunno, p_env->u_joliet_level);
+	if (NULL == p_iso9660_stat)
+	  skip_following_extents = true; /* Start ill file mode */
+      }
+      if ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0)
+	skip_following_extents = false; /* Ill or not: The file ends now */
 
-	offset += iso9660_get_dir_len(p_iso9660_dir);
+      if ((p_iso9660_stat) &&
+	  ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0)) {
+	_cdio_list_append (retval, p_iso9660_stat);
+	p_iso9660_stat = NULL;
       }
 
-    cdio_assert (offset == (blocks * ISO_BLOCKSIZE));
+      offset += iso9660_get_dir_len(p_iso9660_dir);
+    }
 
-    free(_dirbuf);
-    iso9660_stat_free(p_stat);
-    return retval;
-  }
+  cdio_assert (offset == (blocks * ISO_BLOCKSIZE));
+
+  free(_dirbuf);
+  iso9660_stat_free(p_stat);
+  return retval;
 }
 
 /*!
@@ -1666,6 +1684,14 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
   iso9660_stat_t *p_iso9660_stat = NULL;
   iso9660_stat_t *p_stat;
 
+  long int ret;
+  unsigned offset = 0;
+  uint8_t *_dirbuf = NULL;
+  uint32_t blocks;
+  CdioList_t *retval;
+  size_t dirbuf_len;
+  bool skip_following_extents = false;
+
   if (!p_iso)    return NULL;
   if (!psz_path) return NULL;
 
@@ -1673,7 +1699,7 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
   if (p_iso->boot_img[0].lsn != 0) {
     const char* path = (psz_path[0] == '/') ? &psz_path[1] : psz_path;
     if (_cdio_strnicmp(path, "[BOOT]", 6) == 0 && (path[6] == '\0' || path[6] == '/')) {
-      CdioList_t* retval = _cdio_list_new();
+      retval = _cdio_list_new();
       for (i = 0; i < MAX_BOOT_IMAGES && p_iso->boot_img[i].lsn != 0; i++) {
 	p_iso9660_stat = calloc(1, sizeof(iso9660_stat_t) + 18);
 	if (!p_iso9660_stat) {
@@ -1701,97 +1727,102 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
     return NULL;
   }
 
-  {
-    long int ret;
-    unsigned offset = 0;
-    uint8_t *_dirbuf = NULL;
-    uint32_t blocks = CDIO_EXTENT_BLOCKS(p_stat->total_size);
-    CdioList_t *retval = _cdio_list_new ();
-    const size_t dirbuf_len = blocks * ISO_BLOCKSIZE;
-    bool skip_following_extents = false;
+  /* Check for overflow on 32-bit systems.
+     uint32_t has a limited maximum value, and if p_stat->total_size (the total
+     size of the directory) is very large, the calculation might exceed this limit.
+  */
 
-    /* Add the virtual El-Torito "[BOOT]" directory to root */
-    if (p_iso->boot_img[0].lsn != 0) {
-      if (psz_path[0] == '\0' || (psz_path[0] == '/' && psz_path[1] == '\0')) {
-	p_iso9660_stat = calloc(1, sizeof(iso9660_stat_t) + 7);
-	if (p_iso9660_stat) {
-	  strcpy(p_iso9660_stat->filename, "[BOOT]");
-	  p_iso9660_stat->type = _STAT_DIR;
-	  p_iso9660_stat->lsn = ISO_PVD_SECTOR + 1;
-	  iso9660_get_ltime(&p_iso->pvd.creation_date, &p_iso9660_stat->tm);
-	  _cdio_list_append(retval, p_iso9660_stat);
-	  p_iso9660_stat = NULL;
-	}
-      }
-    }
-
-    if (!dirbuf_len)
-      {
-        cdio_warn("Invalid directory buffer sector size %u", blocks);
-	iso9660_stat_free(p_stat);
-	_cdio_list_free (retval, true, NULL);
-        return NULL;
-      }
-
-    _dirbuf = calloc(1, dirbuf_len);
-    if (!_dirbuf)
-      {
-        cdio_warn("Couldn't calloc(1, %lu)", (unsigned long)dirbuf_len);
-	iso9660_stat_free(p_stat);
-	_cdio_list_free (retval, true, NULL);
-        return NULL;
-      }
-
-    ret = iso9660_iso_seek_read (p_iso, _dirbuf, p_stat->lsn, blocks);
-    if (ret != dirbuf_len) 	  {
-      _cdio_list_free (retval, true, NULL);
-      iso9660_stat_free(p_stat);
-      free (_dirbuf);
-      return NULL;
-    }
-
-    while (offset < (dirbuf_len))
-      {
-	p_iso9660_dir = (void *) &_dirbuf[offset];
-
-	if (iso9660_check_dir_block_end(p_iso9660_dir, &offset))
-	  continue;
-
-	if (skip_following_extents) {
-	  /* Do not register remaining extents of ill file */
-	  p_iso9660_stat = NULL;
-	} else {
-	  p_iso9660_stat = _iso9660_dir_to_statbuf(p_iso9660_dir,
-						   p_iso9660_stat,
-						   p_iso,
-						   p_iso->b_xa,
-						   p_iso->u_joliet_level);
-	  if (NULL == p_iso9660_stat)
-	    skip_following_extents = true; /* Start ill file mode */
-	  else if (p_iso9660_stat->rr.u_su_fields & ISO_ROCK_SUF_RE)
-	    continue; /* Ignore RE entries */
-	}
-	if ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0)
-	  skip_following_extents = false; /* Ill or not: The file ends now */
-	if ((p_iso9660_stat) &&
-	    ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0)) {
-	  _cdio_list_append(retval, p_iso9660_stat);
-	  p_iso9660_stat = NULL;
-	}
-
-	offset += iso9660_get_dir_len(p_iso9660_dir);
-      }
-
-    free (_dirbuf);
+  if (p_stat->total_size > SIZE_MAX / ISO_BLOCKSIZE) {
+    cdio_warn("Total size is too large");
     iso9660_stat_free(p_stat);
+    return NULL;
+  }
 
-    if (offset != dirbuf_len) {
-      _cdio_list_free (retval, true, (CdioDataFree_t) iso9660_stat_free);
+  blocks = CDIO_EXTENT_BLOCKS(p_stat->total_size);
+  dirbuf_len = blocks * ISO_BLOCKSIZE;
+  retval = _cdio_list_new ();
+
+  /* Add the virtual El-Torito "[BOOT]" directory to root */
+  if (p_iso->boot_img[0].lsn != 0) {
+    if (psz_path[0] == '\0' || (psz_path[0] == '/' && psz_path[1] == '\0')) {
+      p_iso9660_stat = calloc(1, sizeof(iso9660_stat_t) + 7);
+      if (p_iso9660_stat) {
+	strcpy(p_iso9660_stat->filename, "[BOOT]");
+	p_iso9660_stat->type = _STAT_DIR;
+	p_iso9660_stat->lsn = ISO_PVD_SECTOR + 1;
+	iso9660_get_ltime(&p_iso->pvd.creation_date, &p_iso9660_stat->tm);
+	_cdio_list_append(retval, p_iso9660_stat);
+	 p_iso9660_stat = NULL;
+      }
+    }
+  }
+
+  if (!dirbuf_len)
+    {
+      cdio_warn("Invalid directory buffer sector size %u", blocks);
+      iso9660_stat_free(p_stat);
+      _cdio_list_free (retval, true, NULL);
       return NULL;
     }
 
-    return retval;
+  _dirbuf = calloc(1, dirbuf_len);
+  if (!_dirbuf)
+    {
+      cdio_warn("Couldn't calloc(1, %lu)", (unsigned long)dirbuf_len);
+      iso9660_stat_free(p_stat);
+      _cdio_list_free (retval, true, NULL);
+      return NULL;
+    }
+
+  ret = iso9660_iso_seek_read (p_iso, _dirbuf, p_stat->lsn, blocks);
+  if (ret != dirbuf_len) {
+    _cdio_list_free (retval, true, NULL);
+    iso9660_stat_free(p_stat);
+    free (_dirbuf);
+    return NULL;
   }
+
+  while (offset < (dirbuf_len))
+    {
+      p_iso9660_dir = (void *) &_dirbuf[offset];
+
+      if (iso9660_check_dir_block_end(p_iso9660_dir, &offset))
+	continue;
+
+      if (skip_following_extents) {
+	/* Do not register remaining extents of ill file */
+	p_iso9660_stat = NULL;
+      } else {
+	p_iso9660_stat = _iso9660_dir_to_statbuf(p_iso9660_dir,
+						 p_iso9660_stat,
+						 p_iso,
+						 p_iso->b_xa,
+						 p_iso->u_joliet_level);
+	if (NULL == p_iso9660_stat)
+	  skip_following_extents = true; /* Start ill file mode */
+	else if (p_iso9660_stat->rr.u_su_fields & ISO_ROCK_SUF_RE)
+	  continue; /* Ignore RE entries */
+      }
+      if ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0)
+	skip_following_extents = false; /* Ill or not: The file ends now */
+      if ((p_iso9660_stat) &&
+	  ((p_iso9660_dir->file_flags & ISO_MULTIEXTENT) == 0)) {
+	_cdio_list_append(retval, p_iso9660_stat);
+	p_iso9660_stat = NULL;
+      }
+
+      offset += iso9660_get_dir_len(p_iso9660_dir);
+    }
+
+  free (_dirbuf);
+  iso9660_stat_free(p_stat);
+
+  if (offset != dirbuf_len) {
+    _cdio_list_free (retval, true, (CdioDataFree_t) iso9660_stat_free);
+    return NULL;
+  }
+
+  return retval;
 }
 
 typedef CdioISO9660FileList_t * (iso9660_readdir_t)
@@ -1902,6 +1933,12 @@ iso9660_fs_find_lsn(CdIo_t *p_cdio, lsn_t i_lsn)
     free(psz_full_filename);
   return p_statbuf;
 }
+iso9660_stat_t *
+#if defined(__GNUC__) && !defined(__DARWIN_C_ANSI)
+iso9660_find_fs_lsn(CdIo_t *p_cdio, lsn_t i_lsn) __attribute__ ((alias ("iso9660_fs_find_lsn")));
+#else
+iso9660_find_fs_lsn(CdIo_t *p_cdio, lsn_t i_lsn);
+#endif
 
 /*!
    Given a directory pointer, find the filesystem entry that contains
@@ -2056,7 +2093,7 @@ iso9660_dirlist_free(CdioISO9660DirList_t *p_filelist) {
 
 
 /*!
-  Return true if ISO 9660 image has extended attrributes (XA).
+  Return true if ISO 9660 image has extended attributes (XA).
 */
 bool
 iso9660_ifs_is_xa (const iso9660_t * p_iso)
@@ -2143,7 +2180,7 @@ iso_have_rr_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
 
   @param p_iso the ISO-9660 file image to get data from
 
-  @param u_file_limit the maximimum number of (non-rock-ridge) files
+  @param u_file_limit the maximum number of (non-rock-ridge) files
   to consider before giving up and returning "dunno".
 
   "dunno" can also be returned if there was some error encountered

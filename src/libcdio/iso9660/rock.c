@@ -68,7 +68,7 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
     p_stat->rr.i_symlink_max = i_max;
     return (NULL != p_stat->rr.psz_symlink);
   } else {
-    unsigned int i_needed = p_stat->rr.i_symlink + i_grow ;
+    unsigned int i_needed = p_stat->rr.i_symlink + i_grow * 2; // Allocate enough space for growth and additional buffer
     if ( i_needed <= p_stat->rr.i_symlink_max)
       return true;
     else {

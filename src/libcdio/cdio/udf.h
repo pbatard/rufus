@@ -190,6 +190,13 @@ extern "C" {
     bool udf_get_lba(const udf_file_entry_t *p_udf_fe, 
                      /*out*/ uint32_t *start, /*out*/ uint32_t *end);
 
+    /**
+     * Seek to a specific offset in a UDF file.
+     * The offset *must* be a multiple of UDF_BLOCKSIZE.
+     * Returns true if the position was successfully changed, or false on
+     * any error condition (such as offset out of range or not aligned to
+     * UDF_BLOCKSIZE).
+     */
     bool udf_setpos(udf_dirent_t* p_udf_dirent, off_t offset);
 
 #ifdef __cplusplus

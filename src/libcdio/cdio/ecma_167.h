@@ -1,5 +1,5 @@
-/* 
-    Copyright (c) 2005, 2006, 2008, 2012 Rocky Bernstein <rocky@cpan.org>
+/*
+    Copyright (c) 2005, 2006, 2008, 2012, 2024 Rocky Bernstein <rocky@gnu.org>
     Copyright (c) 2001-2002  Ben Fennema <bfennema@falcon.csc.calpoly.edu>
 
     This program is free software: you can redistribute it and/or modify
@@ -59,7 +59,7 @@
    distinct values of an enum.
 */
 typedef enum {
-  VSD_STD_ID_SIZE    =    5, /** Volume Structure Descriptor (ECMA 167r3 
+  VSD_STD_ID_SIZE    =    5, /** Volume Structure Descriptor (ECMA 167r3
                                 2/9.1) */
   UDF_REGID_ID_SIZE  =   23, /**< See identifier (ECMA 167r3 1/7.4) */
   UDF_VOLID_SIZE     =   32,
@@ -105,7 +105,7 @@ typedef enum {
 
   CHARSPEC_TYPE_CS8 = 0x08,     /**< Section 1/7.2.10 */
 } udf_charspec_enum_t;
-  
+
 typedef uint8_t  udf_Uint8_t;  /*! Section 1/7/1.1 */
 typedef uint16_t udf_Uint16_t; /*! Section 1/7.1.3 */
 typedef uint32_t udf_Uint32_t; /*! Section 1/7.1.5 */
@@ -142,12 +142,12 @@ struct udf_timestamp_s
 
 typedef struct udf_timestamp_s udf_timestamp_t;
 
-/** Type and Time Zone (ECMA 167r3 1/7.3.1) 
+/** Type and Time Zone (ECMA 167r3 1/7.3.1)
 
     Imagine the below enum values as \#define'd values rather than
     distinct values of an enum.
 */
-typedef enum { 
+typedef enum {
   TIMESTAMP_TYPE_CUT        =   0x0000,
   TIMESTAMP_TYPE_LOCAL      =   0x1000,
   TIMESTAMP_TYPE_AGREEMENT  =   0x2000,
@@ -213,7 +213,7 @@ extern const char VSD_STD_ID_TEA01[sizeof("TEA01")-1];
 #define VSD_STD_ID_BOOT2                "BOOT2" /**< ECMA-167 2/9.4 */
 #define VSD_STD_ID_CD001                "CD001" /**< ECMA-119 */
 #define VSD_STD_ID_CDW02                "CDW02" /**< ECMA-168 */
-#define VSD_STD_ID_NSR02                "NSR02" /**< ECMA-167, 3/9.1 
+#define VSD_STD_ID_NSR02                "NSR02" /**< ECMA-167, 3/9.1
                                                NOTE: ECMA-167, 2nd edition */
 #define VSD_STD_ID_NSR03                "NSR03" /**< ECMA-167 3/9.1 */
 #define VSD_STD_ID_TEA01                "TEA01" /**< ECMA-168 2/9.3 */
@@ -469,7 +469,7 @@ struct generic_partition_map1
 struct generic_partition_map2
 {
   udf_Uint8_t   partition_map_type;
-  udf_Uint8_t   partition_map_length; 
+  udf_Uint8_t   partition_map_length;
   udf_Uint8_t   partition_id[62];
 } GNUC_PACKED;
 
@@ -478,7 +478,7 @@ struct unalloc_space_desc_s
 {
   udf_tag_t       tag;
   udf_Uint32_t    vol_desc_seq_num;
-  udf_Uint32_t    i_alloc_descs;
+  udf_Uint32_t    u_alloc_descs;
   udf_extent_ad_t allocDescs[0];
 } GNUC_PACKED;
 
@@ -605,7 +605,7 @@ struct udf_fileid_desc_s
 
 typedef struct udf_fileid_desc_s udf_fileid_desc_t;
 
-/** File Characteristics (ECMA 167r3 4/14.4.3) 
+/** File Characteristics (ECMA 167r3 4/14.4.3)
 
     Imagine the below enumeration values are \#defines to be used in a
     bitmask rather than distinct values of an enum.
@@ -623,7 +623,7 @@ struct allocExtDesc
 {
   udf_tag_t    tag;
   udf_Uint32_t previous_alloc_ext_loc;
-  udf_Uint32_t i_alloc_descs;
+  udf_Uint32_t u_alloc_descs;
 } GNUC_PACKED;
 
 /** ICB Tag (ECMA 167r3 4/14.6) */
@@ -647,7 +647,7 @@ typedef struct udf_icbtag_s udf_icbtag_t;
 
 /** Strategy Type (ECMA 167r3 4/14.6.2) which helpfully points
     largely to 4/A.x */
-#define ICBTAG_STRATEGY_TYPE_UNDEF 0x0000 
+#define ICBTAG_STRATEGY_TYPE_UNDEF 0x0000
 #define ICBTAG_STRATEGY_TYPE_1     0x0001 /**< 4/A.2 Direct entries Uint16 */
 #define ICBTAG_STRATEGY_TYPE_2     0x0002 /**< 4/A.3 List of ICB direct entries */
 #define ICBTAG_STRATEGY_TYPE_3     0x0003 /**< 4/A.4 */
@@ -656,7 +656,7 @@ typedef struct udf_icbtag_s udf_icbtag_t;
                                            This is what's most often used.
                                           */
 
-/** File Type (ECMA 167r3 4/14.6.6) 
+/** File Type (ECMA 167r3 4/14.6.6)
 
    Imagine the below enum values as \#define'd values rather than
    distinct values of an enum.
@@ -711,7 +711,7 @@ typedef enum {
   ICBTAG_FLAG_MULTIVERSIONS  =  0x1000,
   ICBTAG_FLAG_STREAM =          0x2000
 } icbtag_flag_enum_t;
-  
+
 /** Indirect Entry (ECMA 167r3 4/14.7) */
 struct indirect_entry_s
 {
@@ -730,30 +730,30 @@ struct terminal_entry_s
 /** File Entry (ECMA 167r3 4/14.9) */
 struct udf_file_entry_s
 {
-  udf_tag_t       tag;                   
+  udf_tag_t       tag;
   udf_icbtag_t    icb_tag;                /**< 4/14.9.2 */
   udf_Uint32_t    uid;                    /**< 4/14.9.3 */
   udf_Uint32_t    gid;                    /**< 4/14.9.4 */
   udf_Uint32_t    permissions;            /**< 4/14.9.5 */
   udf_Uint16_t    link_count;             /**< 4/14.9.6 */
-  udf_Uint8_t     rec_format;             /**< 4/14.9.7 */ 
+  udf_Uint8_t     rec_format;             /**< 4/14.9.7 */
   udf_Uint8_t     rec_disp_attr;          /**< 4/14.9.8 */
   udf_Uint32_t    rec_len;                /**< 4/14.9.9 */
   udf_Uint64_t    info_len;               /**< 4/14.9.10 */
   udf_Uint64_t    logblks_recorded;       /**< 4/14.9.11 */
-  udf_timestamp_t access_time;            /**< 4/14.9.12 - last access to 
-                                           any stream of file prior to 
+  udf_timestamp_t access_time;            /**< 4/14.9.12 - last access to
+                                           any stream of file prior to
                                            recording file entry */
-  udf_timestamp_t modification_time;      /**< 4/14.9.13 - last access to 
-                                             modification to any stream of 
+  udf_timestamp_t modification_time;      /**< 4/14.9.13 - last access to
+                                             modification to any stream of
                                              file */
   udf_timestamp_t attribute_time;
   udf_Uint32_t    checkpoint;
   udf_long_ad_t   ext_attr_ICB;
   udf_regid_t     imp_id;
   udf_Uint64_t    unique_ID;
-  udf_Uint32_t    i_extended_attr;
-  udf_Uint32_t    i_alloc_descs;
+  udf_Uint32_t    u_extended_attr;
+  udf_Uint32_t    u_alloc_descs;
   /* The following union allows file entry reuse without worrying
      about overflows, by ensuring the struct is always the
      maximum possible size allowed by the specs: one UDF block. */
@@ -969,7 +969,7 @@ struct partitionIntegrityEntry
 /** Extended Allocation Descriptor (ECMA 167r3 4/14.14.3) */
 
 /** Logical Volume Header Descriptor (ECMA 167r3 4/14.15) */
-struct logical_vol_header_desc_s 
+struct logical_vol_header_desc_s
 {
   udf_Uint64_t  uniqueID;
   udf_Uint8_t   reserved[24];
@@ -1001,14 +1001,14 @@ struct extended_file_entry
   udf_Uint64_t    info_len;                /**< 4/14.17.10 & 4/14.9.10 */
   udf_Uint64_t    object_size;             /**< 4/14.17.11 */
   udf_Uint64_t    logblks_recorded;        /**< 4/14.17.12 & 4/14.9.11 */
-  udf_timestamp_t access_time;             /**< 4/14.17.13 & 4/14.9.12 - last 
+  udf_timestamp_t access_time;             /**< 4/14.17.13 & 4/14.9.12 - last
                                               access to any stream of file */
   udf_timestamp_t modification_time;       /**< 4/14.17.14 & 4/14.9.13 - last
-                                              modification to any stream of 
+                                              modification to any stream of
                                               file*/
   udf_timestamp_t create_time;             /**< 4/14.17.15 */
-  udf_timestamp_t attribute_time;          /**< 4/14.17.16 & 4/14.9.14 - 
-                                              most recent create or modify 
+  udf_timestamp_t attribute_time;          /**< 4/14.17.16 & 4/14.9.14 -
+                                              most recent create or modify
                                               time */
   udf_Uint32_t    checkpoint;
   udf_Uint32_t    reserved;                /**< #00 bytes */
@@ -1038,5 +1038,5 @@ extern icbtag_file_type_enum_t  debug_icbtag_file_type_enum;
 extern icbtag_flag_enum_t       debug_flag_enum;
 extern ecma_167_enum1_t         debug_ecma_167_enum1;
 extern ecma_167_timezone_enum_t debug_ecma_167_timezone_enum;
-  
+
 #endif /* CDIO_ECMA_167_H */
