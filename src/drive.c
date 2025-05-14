@@ -33,6 +33,7 @@
 #endif
 
 #include "rufus.h"
+#include "ntdll.h"
 #include "missing.h"
 #include "resource.h"
 #include "settings.h"
@@ -65,8 +66,6 @@ const IID IID_IVdsAdvancedDisk = { 0x6e6f6b40, 0x977c, 0x4069, { 0xbd, 0xdd, 0xa
 const IID IID_IVdsVolume = { 0x88306BB2, 0xE71F, 0x478C, { 0x86, 0xA2, 0x79, 0xDA, 0x20, 0x0A, 0x0F, 0x11} };
 const IID IID_IVdsVolumeMF3 = { 0x6788FAF9, 0x214E, 0x4B85, { 0xBA, 0x59, 0x26, 0x69, 0x53, 0x61, 0x6E, 0x09 } };
 #endif
-
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryVolumeInformationFile, (HANDLE, PIO_STATUS_BLOCK, PVOID, ULONG, FS_INFORMATION_CLASS));
 
 /*
  * Globals
@@ -1097,14 +1096,12 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 	HANDLE hDrive = INVALID_HANDLE_VALUE, hPhysical = INVALID_HANDLE_VALUE;
 	UINT _drive_type;
 	IO_STATUS_BLOCK io_status_block;
-	FILE_FS_DEVICE_INFORMATION file_fs_device_info;
+	FILE_FS_DEVICE_INFORMATION file_fs_device_info = { 0 };
 	BYTE geometry[256] = { 0 };
 	PDISK_GEOMETRY_EX DiskGeometry = (PDISK_GEOMETRY_EX)(void*)geometry;
 	int i = 0, drives_found = 0, drive_number;
 	char *drive, drives[26*4 + 1];	/* "D:\", "E:\", etc., plus one NUL */
 	char logical_drive[] = "\\\\.\\#:";
-
-	PF_INIT(NtQueryVolumeInformationFile, Ntdll);
 
 	if (drive_letters != NULL)
 		drive_letters[0] = 0;
@@ -1156,8 +1153,7 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 		}
 
 		// Eliminate floppy drives
-		if ((pfNtQueryVolumeInformationFile != NULL) &&
-			(pfNtQueryVolumeInformationFile(hDrive, &io_status_block, &file_fs_device_info,
+		if ((NtQueryVolumeInformationFile(hDrive, &io_status_block, &file_fs_device_info,
 				sizeof(file_fs_device_info), FileFsDeviceInformation) == NO_ERROR) &&
 			(file_fs_device_info.Characteristics & FILE_FLOPPY_DISKETTE) ) {
 				continue;

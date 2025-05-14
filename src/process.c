@@ -32,26 +32,12 @@
 
 #include "rufus.h"
 #include "drive.h"
-#include "process.h"
+#include "ntdll.h"
 #include "missing.h"
 #include "msapi_utf8.h"
 
-PF_TYPE_DECL(NTAPI, PVOID, RtlCreateHeap, (ULONG, PVOID, SIZE_T, SIZE_T, PVOID, PRTL_HEAP_PARAMETERS));
-PF_TYPE_DECL(NTAPI, PVOID, RtlDestroyHeap, (PVOID));
-PF_TYPE_DECL(NTAPI, PVOID, RtlAllocateHeap, (PVOID, ULONG, SIZE_T));
-PF_TYPE_DECL(NTAPI, BOOLEAN, RtlFreeHeap, (PVOID, ULONG, PVOID));
-
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtQuerySystemInformation, (SYSTEM_INFORMATION_CLASS, PVOID, ULONG, PULONG));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryInformationFile, (HANDLE, PIO_STATUS_BLOCK, PVOID, ULONG, FILE_INFORMATION_CLASS));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryInformationProcess, (HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtWow64QueryInformationProcess64, (HANDLE, ULONG, PVOID, ULONG, PULONG));
 PF_TYPE_DECL(NTAPI, NTSTATUS, NtWow64ReadVirtualMemory64, (HANDLE, ULONGLONG, PVOID, ULONG64, PULONG64));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtQueryObject, (HANDLE, OBJECT_INFORMATION_CLASS, PVOID, ULONG, PULONG));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtDuplicateObject, (HANDLE, HANDLE, HANDLE, PHANDLE, ACCESS_MASK, ULONG, ULONG));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcess, (PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, CLIENT_ID*));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenProcessToken, (HANDLE, ACCESS_MASK, PHANDLE));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtAdjustPrivilegesToken, (HANDLE, BOOLEAN, PTOKEN_PRIVILEGES, ULONG, PTOKEN_PRIVILEGES, PULONG));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtClose, (HANDLE));
 
 static PVOID PhHeapHandle = NULL;
 static HANDLE hSearchProcessThread = NULL;
@@ -118,13 +104,10 @@ static NTSTATUS PhCreateHeap(VOID)
 	if (PhHeapHandle != NULL)
 		return STATUS_ALREADY_COMPLETE;
 
-	PF_INIT_OR_SET_STATUS(RtlCreateHeap, Ntdll);
-	
-	if (NT_SUCCESS(status)) {
-		PhHeapHandle = pfRtlCreateHeap(HEAP_NO_SERIALIZE | HEAP_GROWABLE, NULL, 2 * MB, 1 * MB, NULL, NULL);
-		if (PhHeapHandle == NULL)
-			status = STATUS_UNSUCCESSFUL;
-	}
+
+	PhHeapHandle = RtlCreateHeap(HEAP_NO_SERIALIZE | HEAP_GROWABLE, NULL, 2 * MB, 1 * MB, NULL, NULL);
+	if (PhHeapHandle == NULL)
+		status = STATUS_UNSUCCESSFUL;
 
 	return status;
 }
@@ -136,14 +119,10 @@ static NTSTATUS PhDestroyHeap(VOID)
 	if (PhHeapHandle == NULL)
 		return STATUS_ALREADY_COMPLETE;
 
-	PF_INIT_OR_SET_STATUS(RtlDestroyHeap, Ntdll);
-
-	if (NT_SUCCESS(status)) {
-		if (pfRtlDestroyHeap(PhHeapHandle) == NULL) {
-			PhHeapHandle = NULL;
-		} else {
-			status = STATUS_UNSUCCESSFUL;
-		}
+	if (RtlDestroyHeap(PhHeapHandle) == NULL) {
+		PhHeapHandle = NULL;
+	} else {
+		status = STATUS_UNSUCCESSFUL;
 	}
 
 	return status;
@@ -161,11 +140,7 @@ static PVOID PhAllocate(SIZE_T Size)
 	if (PhHeapHandle == NULL)
 		return NULL;
 
-	PF_INIT(RtlAllocateHeap, Ntdll);
-	if (pfRtlAllocateHeap == NULL)
-		return NULL;
-
-	return pfRtlAllocateHeap(PhHeapHandle, 0, Size);
+	return RtlAllocateHeap(PhHeapHandle, 0, Size);
 }
 
 /**
@@ -178,9 +153,7 @@ static VOID PhFree(PVOID Memory)
 	if (PhHeapHandle == NULL)
 		return;
 
-	PF_INIT(RtlFreeHeap, Ntdll);
-	if (pfRtlFreeHeap != NULL)
-		pfRtlFreeHeap(PhHeapHandle, 0, Memory);
+	RtlFreeHeap(PhHeapHandle, 0, Memory);
 }
 
 /**
@@ -198,16 +171,12 @@ NTSTATUS PhEnumHandlesEx(PSYSTEM_HANDLE_INFORMATION_EX *Handles)
 	PVOID buffer;
 	ULONG bufferSize;
 
-	PF_INIT_OR_SET_STATUS(NtQuerySystemInformation, Ntdll);
-	if (!NT_SUCCESS(status))
-		return status;
-
 	bufferSize = initialBufferSize;
 	buffer = PhAllocate(bufferSize);
 	if (buffer == NULL)
 		return STATUS_NO_MEMORY;
 
-	while ((status = pfNtQuerySystemInformation(SystemExtendedHandleInformation,
+	while ((status = NtQuerySystemInformation(SystemExtendedHandleInformation,
 		buffer, bufferSize, NULL)) == STATUS_INFO_LENGTH_MISMATCH) {
 		PhFree(buffer);
 		bufferSize *= 2;
@@ -253,15 +222,11 @@ NTSTATUS PhOpenProcess(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, HANDLE 
 		return 0;
 	}
 
-	PF_INIT_OR_SET_STATUS(NtOpenProcess, Ntdll);
-	if (!NT_SUCCESS(status))
-		return status;
-
 	clientId.UniqueProcess = ProcessId;
 	clientId.UniqueThread = NULL;
 
 	InitializeObjectAttributes(&objectAttributes, NULL, 0, NULL, NULL);
-	status = pfNtOpenProcess(ProcessHandle, DesiredAccess, &objectAttributes, &clientId);
+	status = NtOpenProcess(ProcessHandle, DesiredAccess, &objectAttributes, &clientId);
 
 	return status;
 }
@@ -283,16 +248,12 @@ NTSTATUS PhQueryProcessesUsingVolumeOrFile(HANDLE VolumeOrFileHandle,
 	ULONG bufferSize;
 	IO_STATUS_BLOCK isb;
 
-	PF_INIT_OR_SET_STATUS(NtQueryInformationFile, NtDll);
-	if (!NT_SUCCESS(status))
-		return status;
-
 	bufferSize = initialBufferSize;
 	buffer = PhAllocate(bufferSize);
 	if (buffer == NULL)
 		return STATUS_INSUFFICIENT_RESOURCES;
 
-	while ((status = pfNtQueryInformationFile(VolumeOrFileHandle, &isb, buffer, bufferSize,
+	while ((status = NtQueryInformationFile(VolumeOrFileHandle, &isb, buffer, bufferSize,
 		FileProcessIdsUsingFileInformation)) == STATUS_INFO_LENGTH_MISMATCH) {
 		PhFree(buffer);
 		bufferSize *= 2;
@@ -390,9 +351,7 @@ static PWSTR GetProcessCommandLine(HANDLE hProcess)
 		PBYTE* params;
 		UNICODE_STRING* ucmdline;
 
-		PF_INIT_OR_OUT(NtQueryInformationProcess, NtDll);
-
-		status = pfNtQueryInformationProcess(hProcess, 0, &pbi, sizeof(pbi), NULL);
+		status = NtQueryInformationProcess(hProcess, 0, &pbi, sizeof(pbi), NULL);
 		if (!NT_SUCCESS(status))
 			goto out;
 
@@ -453,10 +412,6 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 	uint64_t start_time;
 	char cmdline[MAX_PATH] = { 0 }, tmp[64];
 	int cur_pid, j, nHandles = 0;
-
-	PF_INIT_OR_OUT(NtQueryObject, Ntdll);
-	PF_INIT_OR_OUT(NtDuplicateObject, NtDll);
-	PF_INIT_OR_OUT(NtClose, NtDll);
 
 	// Initialize the blocking process struct
 	memset(&blocking_process, 0, sizeof(blocking_process));
@@ -558,7 +513,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 			if ((dupHandle != NULL) && (processHandle != NtCurrentProcess())) {
 				TRY_AND_HANDLE(
 					EXCEPTION_ACCESS_VIOLATION,
-					{ pfNtClose(dupHandle); },
+					{ NtClose(dupHandle); },
 					{ continue; }
 				);
 				dupHandle = NULL;
@@ -605,7 +560,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 				// Close the previous handle
 				if (processHandle != NULL) {
 					if (processHandle != NtCurrentProcess())
-						pfNtClose(processHandle);
+						NtClose(processHandle);
 					processHandle = NULL;
 				}
 			}
@@ -646,7 +601,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 			// Now duplicate this handle onto our own process, so that we can access its properties
 			if (processHandle == NtCurrentProcess())
 				continue;
-			status = pfNtDuplicateObject(processHandle, (HANDLE)handleInfo->HandleValue,
+			status = NtDuplicateObject(processHandle, (HANDLE)handleInfo->HandleValue,
 				NtCurrentProcess(), &dupHandle, 0, 0, 0);
 			if (!NT_SUCCESS(status))
 				continue;
@@ -659,7 +614,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 			do {
 				ULONG returnSize;
 				// TODO: We might potentially still need a timeout on ObjectName queries, as PH does...
-				status = pfNtQueryObject(dupHandle, ObjectNameInformation, buffer, bufferSize, &returnSize);
+				status = NtQueryObject(dupHandle, ObjectNameInformation, buffer, bufferSize, &returnSize);
 				if (status == STATUS_BUFFER_OVERFLOW || status == STATUS_INFO_LENGTH_MISMATCH ||
 					status == STATUS_BUFFER_TOO_SMALL) {
 					bufferSize = returnSize;
@@ -893,15 +848,12 @@ static BOOL IsProcessRunning(uint64_t pid)
 	BOOL ret = FALSE;
 	NTSTATUS status;
 
-	PF_INIT_OR_OUT(NtClose, NtDll);
-
 	status = PhOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, (HANDLE)(uintptr_t)pid);
 	if (!NT_SUCCESS(status) || (hProcess == NULL))
 		return FALSE;
 	if (GetExitCodeProcess(hProcess, &dwExitCode))
 		ret = (dwExitCode == STILL_ACTIVE);
-	pfNtClose(hProcess);
-out:
+	NtClose(hProcess);
 	return ret;
 }
 
@@ -1039,11 +991,7 @@ BOOL EnablePrivileges(void)
 	NTSTATUS status = STATUS_NOT_IMPLEMENTED;
 	HANDLE tokenHandle;
 
-	PF_INIT_OR_OUT(NtClose, NtDll);
-	PF_INIT_OR_OUT(NtOpenProcessToken, NtDll);
-	PF_INIT_OR_OUT(NtAdjustPrivilegesToken, NtDll);
-
-	status = pfNtOpenProcessToken(NtCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &tokenHandle);
+	status = NtOpenProcessToken(NtCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &tokenHandle);
 
 	if (NT_SUCCESS(status)) {
 		CHAR privilegesBuffer[FIELD_OFFSET(TOKEN_PRIVILEGES, Privileges) +
@@ -1060,12 +1008,11 @@ BOOL EnablePrivileges(void)
 			privileges->Privileges[0].Luid.LowPart = requestedPrivileges[i];
 		}
 
-		status = pfNtAdjustPrivilegesToken(tokenHandle, FALSE, privileges, 0, NULL, NULL);
+		status = NtAdjustPrivilegesToken(tokenHandle, FALSE, privileges, 0, NULL, NULL);
 
-		pfNtClose(tokenHandle);
+		NtClose(tokenHandle);
 	}
 
-out:
 	if (!NT_SUCCESS(status))
 		ubprintf("NOTE: Could not set process privileges: %s", NtStatusError(status));
 	return NT_SUCCESS(status);

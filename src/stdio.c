@@ -35,6 +35,7 @@
 #include <math.h>
 
 #include "rufus.h"
+#include "ntdll.h"
 #include "missing.h"
 #include "settings.h"
 #include "resource.h"
@@ -697,9 +698,7 @@ DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds)
 #define NtCurrentPeb()					(NtCurrentTeb()->ProcessEnvironmentBlock)
 #define RtlGetProcessHeap()				(NtCurrentPeb()->Reserved4[1]) // NtCurrentPeb()->ProcessHeap, mangled due to deficiencies in winternl.h
 
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtCreateFile, (PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PIO_STATUS_BLOCK, PLARGE_INTEGER, ULONG, ULONG, ULONG, ULONG, PVOID, ULONG));
 PF_TYPE_DECL(NTAPI, BOOLEAN, RtlDosPathNameToNtPathNameW, (PCWSTR, PUNICODE_STRING, PWSTR*, PVOID));
-PF_TYPE_DECL(NTAPI, BOOLEAN, RtlFreeHeap, (PVOID, ULONG, PVOID));
 PF_TYPE_DECL(NTAPI, VOID, RtlSetLastWin32ErrorAndNtStatusFromNtStatus, (NTSTATUS));
 
 HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
@@ -714,9 +713,7 @@ HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
 	LARGE_INTEGER allocationSize;
 	NTSTATUS status = STATUS_SUCCESS;
 
-	PF_INIT_OR_SET_STATUS(NtCreateFile, Ntdll);
 	PF_INIT_OR_SET_STATUS(RtlDosPathNameToNtPathNameW, Ntdll);
-	PF_INIT_OR_SET_STATUS(RtlFreeHeap, Ntdll);
 	PF_INIT_OR_SET_STATUS(RtlSetLastWin32ErrorAndNtStatusFromNtStatus, Ntdll);
 
 	if (!NT_SUCCESS(status)) {
@@ -813,10 +810,10 @@ HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
 	allocationSize.QuadPart = fileSize;
 
 	// Call NtCreateFile
-	status = pfNtCreateFile(&fileHandle, dwDesiredAccess, &objectAttributes, &ioStatusBlock,
+	status = NtCreateFile(&fileHandle, dwDesiredAccess, &objectAttributes, &ioStatusBlock,
 		&allocationSize, fileAttributes, dwShareMode, dwCreationDisposition, flags, NULL, 0);
 
-	pfRtlFreeHeap(RtlGetProcessHeap(), 0, ntPath.Buffer);
+	RtlFreeHeap(RtlGetProcessHeap(), 0, ntPath.Buffer);
 	wfree(lpFileName);
 	pfRtlSetLastWin32ErrorAndNtStatusFromNtStatus(status);
 

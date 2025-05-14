@@ -161,7 +161,7 @@
     <ClInclude Include="..\src\db.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\process.h">
+    <ClInclude Include="..\src\ntdll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ui.h">

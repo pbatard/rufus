@@ -1,10 +1,10 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Process search functionality
+ * ntdll definitions & process search functionality
  *
  * Modified from System Informer (a.k.a. Process Hacker):
  *   https://github.com/winsiderss/systeminformer
- * Copyright © 2017-2023 Pete Batard <pete@akeo.ie>
+ * Copyright © 2017-2025 Pete Batard <pete@akeo.ie>
  * Copyright © 2017 dmex
  * Copyright © 2009-2016 wj32
  *
@@ -318,3 +318,122 @@ typedef struct {
 	ProcessEntry Process[MAX_BLOCKING_PROCESSES];	// Fixed size process list
 	uint32_t nPass;			// Incremental counter of how many passes we ran
 } BlockingProcess;
+
+#if !defined(__MINGW32__)
+typedef enum _FSINFOCLASS {
+	FileFsVolumeInformation = 1,
+	FileFsLabelInformation,
+	FileFsSizeInformation,
+	FileFsDeviceInformation,
+	FileFsAttributeInformation,
+	FileFsControlInformation,
+	FileFsFullSizeInformation,
+	FileFsObjectIdInformation,
+	FileFsDriverPathInformation,
+	FileFsVolumeFlagsInformation,
+	FileFsMaximumInformation
+} FS_INFORMATION_CLASS, *PFS_INFORMATION_CLASS;
+#endif
+
+NTSYSAPI PVOID NTAPI RtlCreateHeap(
+	IN ULONG Flags,
+	IN PVOID HeapBase OPTIONAL,
+	IN SIZE_T ReserveSize OPTIONAL,
+	IN SIZE_T CommitSize OPTIONAL,
+	IN PVOID Lock OPTIONAL,
+	IN PRTL_HEAP_PARAMETERS Parameters OPTIONAL);
+
+NTSYSAPI PVOID NTAPI RtlAllocateHeap(
+	IN HANDLE HeapHandle,
+	IN ULONG Flags OPTIONAL,
+	IN SIZE_T Size);
+
+NTSYSAPI BOOLEAN NTAPI RtlFreeHeap(
+	IN PVOID HeapHandle,
+	IN ULONG Flags OPTIONAL,
+	IN PVOID BaseAddress);
+
+NTSYSAPI PVOID NTAPI RtlDestroyHeap(
+	IN PVOID HeapHandle);
+
+NTSYSAPI NTSTATUS NTAPI NtOpenProcess(
+	OUT PHANDLE ProcessHandle,
+	IN ACCESS_MASK AccessMask,
+	IN POBJECT_ATTRIBUTES ObjectAttributes,
+	IN CLIENT_ID* ClientId);
+
+NTSYSCALLAPI NTSTATUS NTAPI NtOpenProcessToken(
+	IN HANDLE ProcessHandle,
+	IN ACCESS_MASK DesiredAccess,
+	OUT PHANDLE TokenHandle);
+
+NTSYSAPI NTSTATUS NTAPI NtAdjustPrivilegesToken(
+	IN HANDLE TokenHandle,
+	IN BOOLEAN DisableAllPrivileges,
+	IN PTOKEN_PRIVILEGES TokenPrivileges,
+	IN ULONG PreviousPrivilegesLength,
+	OUT PTOKEN_PRIVILEGES PreviousPrivileges OPTIONAL,
+	OUT PULONG RequiredLength OPTIONAL);
+
+NTSYSAPI NTSTATUS NTAPI NtDuplicateObject(
+	IN HANDLE SourceProcessHandle,
+	IN PHANDLE SourceHandle,
+	IN HANDLE TargetProcessHandle,
+	OUT PHANDLE TargetHandle,
+	IN ACCESS_MASK DesiredAccess OPTIONAL,
+	IN BOOLEAN InheritHandle,
+	IN ULONG Options);
+
+NTSYSCALLAPI NTSTATUS NTAPI NtQueryInformationFile(
+	IN HANDLE FileHandle,
+	OUT PIO_STATUS_BLOCK IoStatusBlock,
+	OUT PVOID FileInformation,
+	IN ULONG Length,
+	IN FILE_INFORMATION_CLASS FileInformationClass);
+
+NTSYSAPI NTSTATUS NTAPI NtQueryVolumeInformationFile(
+	IN HANDLE FileHandle,
+	OUT PIO_STATUS_BLOCK IoStatusBlock,
+	OUT PVOID FsInformation,
+	IN ULONG Length,
+	IN FS_INFORMATION_CLASS FsInformationClass);
+
+NTSYSAPI NTSTATUS NTAPI NtReadFile(IN HANDLE FileHandle,
+	IN HANDLE Event OPTIONAL,
+	IN PIO_APC_ROUTINE ApcRoutine OPTIONAL,
+	IN PVOID ApcContext OPTIONAL,
+	OUT PIO_STATUS_BLOCK IoStatusBlock,
+	OUT PVOID Buffer,
+	IN ULONG Length,
+	IN PLARGE_INTEGER ByteOffset OPTIONAL,
+	IN PULONG Key OPTIONAL);
+
+NTSYSAPI NTSTATUS NTAPI NtWriteFile(IN HANDLE FileHandle,
+	IN HANDLE Event OPTIONAL,
+	IN PIO_APC_ROUTINE ApcRoutine OPTIONAL,
+	IN PVOID ApcContext OPTIONAL,
+	OUT PIO_STATUS_BLOCK IoStatusBlock,
+	IN PVOID Buffer,
+	IN ULONG Length,
+	IN PLARGE_INTEGER ByteOffset OPTIONAL,
+	IN PULONG Key OPTIONAL);
+
+NTSYSAPI NTSTATUS NTAPI NtFlushBuffersFile(
+	IN HANDLE FileHandle,
+	OUT PIO_STATUS_BLOCK IoStatusBlock);
+
+NTSYSAPI NTSTATUS NTAPI NtFsControlFile(
+	IN HANDLE FileHandle,
+	IN HANDLE Event,
+	IN PIO_APC_ROUTINE  ApcRoutine,
+	IN PVOID ApcContext,
+	OUT PIO_STATUS_BLOCK IoStatusBlock,
+	IN ULONG FsControlCode,
+	IN PVOID InputBuffer,
+	IN ULONG InputBufferLength,
+	OUT PVOID OutputBuffer,
+	IN ULONG OutputBufferLength);
+
+NTSYSAPI NTSTATUS NTAPI NtDelayExecution(
+	IN BOOLEAN Alertable,
+	IN PLARGE_INTEGER DelayInterval);

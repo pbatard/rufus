@@ -61,22 +61,6 @@
 
 #define VDS_SET_ERROR(hr) do { if (hr != S_OK) { SetLastError((DWORD)hr); ErrorStatus = RUFUS_ERROR(ERROR_GEN_FAILURE); } } while(0)
 
-#if !defined(__MINGW32__)
-typedef enum _FSINFOCLASS {
-	FileFsVolumeInformation = 1,
-	FileFsLabelInformation,
-	FileFsSizeInformation,
-	FileFsDeviceInformation,
-	FileFsAttributeInformation,
-	FileFsControlInformation,
-	FileFsFullSizeInformation,
-	FileFsObjectIdInformation,
-	FileFsDriverPathInformation,
-	FileFsVolumeFlagsInformation,
-	FileFsMaximumInformation
-} FS_INFORMATION_CLASS, *PFS_INFORMATION_CLASS;
-#endif
-
 /* We need a redef of these MS structure */
 typedef struct {
 	DWORD DeviceType;

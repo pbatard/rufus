@@ -28,20 +28,11 @@
 #include "config.h"
 #include "ext2fs.h"
 #include "rufus.h"
+#include "ntdll.h"
 #include "msapi_utf8.h"
 
 extern char* NtStatusError(NTSTATUS Status);
 static DWORD LastWinError = 0;
-
-PF_TYPE_DECL(NTAPI, ULONG, RtlNtStatusToDosError, (NTSTATUS));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtClose, (HANDLE));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtOpenFile, (PHANDLE, ACCESS_MASK, POBJECT_ATTRIBUTES, PIO_STATUS_BLOCK, ULONG, ULONG));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtFlushBuffersFile, (HANDLE, PIO_STATUS_BLOCK));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtReadFile, (HANDLE, HANDLE, PIO_APC_ROUTINE, PVOID, PIO_STATUS_BLOCK, PVOID, ULONG, PLARGE_INTEGER, PULONG));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtWriteFile, (HANDLE, HANDLE, PIO_APC_ROUTINE, PVOID, PIO_STATUS_BLOCK, PVOID, ULONG, PLARGE_INTEGER, PULONG));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtDeviceIoControlFile, (HANDLE, HANDLE, PIO_APC_ROUTINE, PVOID, PIO_STATUS_BLOCK, ULONG, PVOID, ULONG, PVOID, ULONG));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtFsControlFile, (HANDLE, HANDLE, PIO_APC_ROUTINE, PVOID, PIO_STATUS_BLOCK, ULONG, PVOID, ULONG, PVOID, ULONG));
-PF_TYPE_DECL(NTAPI, NTSTATUS, NtDelayExecution, (BOOLEAN, PLARGE_INTEGER));
 
 #define ARGUMENT_PRESENT(ArgumentPointer)   ((CHAR *)((ULONG_PTR)(ArgumentPointer)) != (CHAR *)(NULL))
 
@@ -173,8 +164,7 @@ static unsigned _MapDosError(IN ULONG WinError)
 // Map NT status to dos error.
 static __inline unsigned _MapNtStatus(IN NTSTATUS Status)
 {
-	PF_INIT(RtlNtStatusToDosError, Ntdll);
-	return (pfRtlNtStatusToDosError == NULL) ? EFAULT: _MapDosError(pfRtlNtStatusToDosError(Status));
+	return _MapDosError(RtlNtStatusToDosError(Status));
 }
 
 // Return the last Windows Error
@@ -193,8 +183,6 @@ static NTSTATUS _OpenNtName(IN PCSTR Name, IN BOOLEAN Readonly, OUT PHANDLE Hand
 	NTSTATUS Status = EFAULT;
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK IoStatusBlock;
-	PF_INIT(NtDelayExecution, Ntdll);
-	PF_INIT_OR_OUT(NtOpenFile, Ntdll);
 
 	// Make Unicode name from input string
 	utf8_to_wchar_no_alloc(Name, Buffer, ARRAYSIZE(Buffer));
@@ -209,16 +197,16 @@ static NTSTATUS _OpenNtName(IN PCSTR Name, IN BOOLEAN Readonly, OUT PHANDLE Hand
 	if (ARGUMENT_PRESENT(OpenedReadonly))
 		*OpenedReadonly = Readonly;
 
-	Status = pfNtOpenFile(Handle, SYNCHRONIZE | FILE_READ_DATA | (Readonly ? 0 : FILE_WRITE_DATA),
+	Status = NtOpenFile(Handle, SYNCHRONIZE | FILE_READ_DATA | (Readonly ? 0 : FILE_WRITE_DATA),
 			      &ObjectAttributes, &IoStatusBlock, FILE_SHARE_WRITE | FILE_SHARE_READ,
 			      FILE_SYNCHRONOUS_IO_NONALERT);
 	if (!NT_SUCCESS(Status)) {
 		// Maybe was just mounted? wait 0.5 sec and retry.
 		LARGE_INTEGER Interval;
 		Interval.QuadPart = -5000000; // 0.5 sec. from now
-		pfNtDelayExecution(FALSE, &Interval);
+		NtDelayExecution(FALSE, &Interval);
 
-		Status = pfNtOpenFile(Handle, SYNCHRONIZE | FILE_READ_DATA | (Readonly ? 0 : FILE_WRITE_DATA),
+		Status = NtOpenFile(Handle, SYNCHRONIZE | FILE_READ_DATA | (Readonly ? 0 : FILE_WRITE_DATA),
 				      &ObjectAttributes, &IoStatusBlock, FILE_SHARE_WRITE | FILE_SHARE_READ,
 				      FILE_SYNCHRONOUS_IO_NONALERT);
 
@@ -227,13 +215,12 @@ static NTSTATUS _OpenNtName(IN PCSTR Name, IN BOOLEAN Readonly, OUT PHANDLE Hand
 			if (ARGUMENT_PRESENT(OpenedReadonly))
 				*OpenedReadonly = TRUE;
 
-			Status = pfNtOpenFile(Handle, SYNCHRONIZE | FILE_READ_DATA, &ObjectAttributes,
+			Status = NtOpenFile(Handle, SYNCHRONIZE | FILE_READ_DATA, &ObjectAttributes,
 					      &IoStatusBlock, FILE_SHARE_WRITE | FILE_SHARE_READ,
 					      FILE_SYNCHRONOUS_IO_NONALERT);
 		}
 	}
 
-out:
 	return Status;
 }
 
@@ -247,45 +234,38 @@ static NTSTATUS _OpenDriveLetter(IN CHAR Letter, IN BOOLEAN ReadOnly, OUT PHANDL
 static __inline NTSTATUS _FlushDrive(IN HANDLE Handle)
 {
 	IO_STATUS_BLOCK IoStatusBlock;
-	PF_INIT(NtFlushBuffersFile, NtDll);
-	return (pfNtFlushBuffersFile == NULL) ? STATUS_DLL_NOT_FOUND : pfNtFlushBuffersFile(Handle, &IoStatusBlock);
+	return NtFlushBuffersFile(Handle, &IoStatusBlock);
 }
 
 
 static __inline NTSTATUS _LockDrive(IN HANDLE Handle)
 {
 	IO_STATUS_BLOCK IoStatusBlock;
-	PF_INIT(NtFsControlFile, NtDll);
-	return (pfNtFsControlFile == NULL) ? STATUS_DLL_NOT_FOUND : pfNtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_LOCK_VOLUME, 0, 0, 0, 0);
+	return NtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_LOCK_VOLUME, 0, 0, 0, 0);
 }
 
 
 static __inline NTSTATUS _UnlockDrive(IN HANDLE Handle)
 {
 	IO_STATUS_BLOCK IoStatusBlock;
-	PF_INIT(NtFsControlFile, NtDll);
-	return (pfNtFsControlFile == NULL) ? STATUS_DLL_NOT_FOUND : pfNtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_UNLOCK_VOLUME, 0, 0, 0, 0);
+	return NtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_UNLOCK_VOLUME, 0, 0, 0, 0);
 }
 
 static __inline NTSTATUS _DismountDrive(IN HANDLE Handle)
 {
 	IO_STATUS_BLOCK IoStatusBlock;
-	PF_INIT(NtFsControlFile, NtDll);
-	return (pfNtFsControlFile == NULL) ? STATUS_DLL_NOT_FOUND : pfNtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_DISMOUNT_VOLUME, 0, 0, 0, 0);
+	return NtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_DISMOUNT_VOLUME, 0, 0, 0, 0);
 }
 
 static __inline BOOLEAN _IsMounted(IN HANDLE Handle)
 {
 	IO_STATUS_BLOCK IoStatusBlock;
-	PF_INIT(NtFsControlFile, NtDll);
-	return (pfNtFsControlFile == NULL) ? FALSE :
-		(BOOLEAN)(pfNtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_IS_VOLUME_MOUNTED, 0, 0, 0, 0) == STATUS_SUCCESS);
+	return (BOOLEAN)(NtFsControlFile(Handle, 0, 0, 0, &IoStatusBlock, FSCTL_IS_VOLUME_MOUNTED, 0, 0, 0, 0) == STATUS_SUCCESS);
 }
 
 static __inline NTSTATUS _CloseDisk(IN HANDLE Handle)
 {
-	PF_INIT(NtClose, Ntdll);
-	return (pfNtClose == NULL) ? STATUS_DLL_NOT_FOUND : pfNtClose(Handle);
+	return NtClose(Handle);
 }
 
 static PCSTR _NormalizeDeviceName(IN PCSTR Device, IN PSTR NormalizedDeviceNameBuffer, OUT __u64 *Offset, OUT __u64 *Size)
@@ -320,12 +300,9 @@ static VOID _GetDeviceSize(IN HANDLE h, OUT unsigned __int64 *FsSize)
 	LARGE_INTEGER li;
 
 	*FsSize = 0;
-	PF_INIT(NtDeviceIoControlFile, NtDll);
-	if (pfNtDeviceIoControlFile == NULL)
-		return;
 
 	RtlZeroMemory(&pi, sizeof(pi));
-	Status = pfNtDeviceIoControlFile(h, NULL, NULL, NULL, &IoStatusBlock,
+	Status = NtDeviceIoControlFile(h, NULL, NULL, NULL, &IoStatusBlock,
 					 IOCTL_DISK_GET_PARTITION_INFO_EX,
 					 &pi, sizeof(pi), &pi, sizeof(pi));
 	if (NT_SUCCESS(Status)) {
@@ -334,7 +311,7 @@ static VOID _GetDeviceSize(IN HANDLE h, OUT unsigned __int64 *FsSize)
 		// No partitions: Try a drive geometry request
 		RtlZeroMemory(&gi, sizeof(gi));
 
-		Status = pfNtDeviceIoControlFile(h, NULL, NULL, NULL, &IoStatusBlock,
+		Status = NtDeviceIoControlFile(h, NULL, NULL, NULL, &IoStatusBlock,
 						 IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
 						 &gi, sizeof(gi), &gi, sizeof(gi));
 
@@ -389,8 +366,6 @@ static BOOLEAN _BlockIo(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Byte
 {
 	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status = STATUS_DLL_NOT_FOUND;
-	PF_INIT_OR_OUT(NtReadFile, NtDll);
-	PF_INIT_OR_OUT(NtWriteFile, NtDll);
 
 	// Should be aligned
 	assert((Bytes % 512) == 0);
@@ -399,14 +374,13 @@ static BOOLEAN _BlockIo(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Byte
 	LastWinError = 0;
 	// Perform io
 	if(Read) {
-		Status = pfNtReadFile(Handle, NULL, NULL, NULL,
+		Status = NtReadFile(Handle, NULL, NULL, NULL,
 			&IoStatusBlock, Buffer, Bytes, &Offset, NULL);
 	} else	{
-		Status = pfNtWriteFile(Handle, NULL, NULL, NULL,
+		Status = NtWriteFile(Handle, NULL, NULL, NULL,
 			&IoStatusBlock, Buffer, Bytes, &Offset, NULL);
 	}
 
-out:
 	if (!NT_SUCCESS(Status)) {
 		if (ARGUMENT_PRESENT(Errno))
 			*Errno = _MapNtStatus(Status);
@@ -431,10 +405,7 @@ static BOOLEAN _RawRead(IN HANDLE Handle, IN LARGE_INTEGER Offset, IN ULONG Byte
 static BOOLEAN _SetPartType(IN HANDLE Handle, IN UCHAR Type)
 {
 	IO_STATUS_BLOCK IoStatusBlock;
-	PF_INIT(NtDeviceIoControlFile, NtDll);
-	if (pfNtDeviceIoControlFile == NULL)
-		return FALSE;
-	return NT_SUCCESS(pfNtDeviceIoControlFile(Handle, NULL, NULL, NULL, &IoStatusBlock,
+	return NT_SUCCESS(NtDeviceIoControlFile(Handle, NULL, NULL, NULL, &IoStatusBlock,
 						  IOCTL_DISK_SET_PARTITION_INFO, &Type, sizeof(Type), NULL, 0));
 }
 
