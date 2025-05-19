@@ -366,9 +366,11 @@ enum EFI_BOOT_TYPE {
 #define HAS_WINPE(r)        (((r.winpe & WINPE_I386) == WINPE_I386)||((r.winpe & WINPE_AMD64) == WINPE_AMD64)||((r.winpe & WINPE_MININT) == WINPE_MININT))
 #define HAS_WINDOWS(r)      (HAS_BOOTMGR(r) || (r.uses_minint) || HAS_WINPE(r))
 #define HAS_WIN7_EFI(r)     ((r.has_efi == 1) && HAS_WININST(r))
+#define HAS_FATLESS_GRUB(r) ((r.has_grub2 & 0x80) && !(r.has_grub2_fs & 0x1))
+#define HAS_NTFSLESS_GRUB(r)((r.has_grub2 & 0x80) && !(r.has_grub2_fs & 0x4))
 #define IS_WINDOWS_1X(r)    (r.has_bootmgr_efi && (r.win_version.major >= 10))
 #define IS_WINDOWS_11(r)    (r.has_bootmgr_efi && (r.win_version.major >= 11))
-#define IS_FAT32_COMPAT(r)  ((r.has_4GB_file == 0 || (r.has_4GB_file == 0x81 && allow_dual_uefi_bios)) && !r.needs_ntfs)
+#define IS_FAT32_COMPAT(r)  (((r.has_4GB_file == 0 && !HAS_FATLESS_GRUB(r)) || (r.has_4GB_file == 0x81 && allow_dual_uefi_bios)) && !r.needs_ntfs)
 #define HAS_EFI_IMG(r)      (r.efi_img_path[0] != 0)
 #define IS_DD_BOOTABLE(r)   (r.is_bootable_img > 0)
 #define IS_DD_ONLY(r)       ((r.is_bootable_img > 0) && (!r.is_iso || r.disable_iso))
@@ -448,6 +450,7 @@ typedef struct {
 	BOOLEAN has_efi_syslinux;
 	BOOLEAN has_grub4dos;
 	uint8_t has_grub2;
+	uint8_t has_grub2_fs;
 	BOOLEAN has_compatresources_dll;
 	BOOLEAN has_panther_unattend;
 	BOOLEAN has_kolibrios;
@@ -709,6 +712,7 @@ typedef struct {
 #define STRARRAY_EMPTY { NULL, 0, 0 };
 extern void StrArrayCreate(StrArray* arr, uint32_t initial_size);
 extern int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL);
+extern int32_t StrArrayAddUnique(StrArray* arr, const char* str, BOOL);
 extern int32_t StrArrayFind(StrArray* arr, const char* str);
 extern void StrArrayClear(StrArray* arr);
 extern void StrArrayDestroy(StrArray* arr);

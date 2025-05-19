@@ -127,7 +127,7 @@ static const int64_t old_c32_threshold[NB_OLD_C32] = OLD_C32_THRESHOLD;
 static uint8_t joliet_level = 0;
 static uint32_t md5sum_size = 0;
 static BOOL scan_only = FALSE;
-static StrArray config_path, isolinux_path;
+static StrArray config_path, isolinux_path, grub_filesystems;
 static char symlinked_syslinux[MAX_PATH], *md5sum_data = NULL, *md5sum_pos = NULL;
 
 // Ensure filenames do not contain invalid FAT32 or NTFS characters
@@ -1035,7 +1035,7 @@ out:
 	return r;
 }
 
-void GetGrubVersion(char* buf, size_t buf_size)
+void GetGrubVersion(char* buf, size_t buf_size, const char* source)
 {
 	// In typical "I'll make my own Open Source... with blackjack and hookers!" fashion,
 	// IBM/Red-Hat/Fedora took it upon themselves to "fix" the double space typo from the
@@ -1047,6 +1047,7 @@ void GetGrubVersion(char* buf, size_t buf_size)
 	const char* grub_version_str[] = { "GRUB  version %s", "GRUB version %s" };
 	const char* grub_debug_is_enabled_str = "grub_debug_is_enabled";
 	const size_t max_string_size = 32;	// The strings above *MUST* be no longer than this value
+	char grub_version[192] = { 0 };
 	size_t i, j;
 	BOOL has_grub_debug_is_enabled = FALSE;
 
@@ -1055,14 +1056,19 @@ void GetGrubVersion(char* buf, size_t buf_size)
 		for (i = 0; i < buf_size - max_string_size; i++) {
 			for (j = 0; j < ARRAYSIZE(grub_version_str); j++) {
 				if (memcmp(&buf[i], grub_version_str[j], strlen(grub_version_str[j]) + 1) == 0)
-					static_strcpy(img_report.grub2_version, &buf[i + strlen(grub_version_str[j]) + 1]);
+					static_strcpy(grub_version, &buf[i + strlen(grub_version_str[j]) + 1]);
 			}
 			if (memcmp(&buf[i], grub_debug_is_enabled_str, strlen(grub_debug_is_enabled_str)) == 0)
 				has_grub_debug_is_enabled = TRUE;
 		}
 	}
 
-	uprintf("  Reported Grub version: %s", img_report.grub2_version);
+	uprintf("  Detected GRUB version: %s (from '%s')", grub_version, source);
+
+	if (img_report.grub2_version[0] != 0)
+		return;
+
+	static_strcpy(img_report.grub2_version, grub_version);
 
 	// <Shakes fist angrily> "KASPERSKYYYYYY!!!..." (https://github.com/pbatard/rufus/issues/467)
 	// But seriously, these guys should know better than "security" through obscurity...
@@ -1104,7 +1110,7 @@ void GetGrubVersion(char* buf, size_t buf_size)
 		// Make sure we append '-nonstandard' and '-gdie' before the sanitized label.
 		BOOL append_label = (safe_strcmp(img_report.grub2_version, "2.06") == 0);
 		// Must be in the same order as we have on the server
-		if (img_report.has_grub2 > 1)
+		if ((img_report.has_grub2 & 0x7f) > 1)
 			safe_strcat(img_report.grub2_version, sizeof(img_report.grub2_version), "-nonstandard");
 		if (has_grub_debug_is_enabled)
 			safe_strcat(img_report.grub2_version, sizeof(img_report.grub2_version), "-gdie");
@@ -1116,13 +1122,30 @@ void GetGrubVersion(char* buf, size_t buf_size)
 	}
 }
 
+void GetGrubFs(char* buf, size_t buf_size)
+{
+	const char* grub_fshelp_str = "fshelp";
+	const size_t max_string_size = 32;
+	size_t i;
+
+	if (buf_size > max_string_size) {
+		for (i = 0; i < buf_size - max_string_size; i++) {
+			if (memcmp(&buf[i], grub_fshelp_str, strlen(grub_fshelp_str) + 1) == 0) {
+				if (buf[i + strlen(grub_fshelp_str) + 1] != 0 && strlen(&buf[i + strlen(grub_fshelp_str) + 1]) < 12) {
+					StrArrayAddUnique(&grub_filesystems, &buf[i + strlen(grub_fshelp_str) + 1], TRUE);
+				}
+			}
+		}
+	}
+}
+
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 {
 	const char* basedir[] = { "i386", "amd64", "minint" };
-	const char* tmp_sif = ".\\txtsetup.sif~";
 	int k, r = 1;
-	char *tmp, *buf = NULL, *ext, *spacing = "  ";
+	char *tmp, *ext, *spacing = "  ";
 	char path[MAX_PATH], path2[16];
+	uint8_t* buf = NULL;
 	uint16_t sl_version;
 	size_t i, j, size, sl_index = 0;
 	FILE* fd;
@@ -1150,6 +1173,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		// String array of all isolinux/syslinux locations
 		StrArrayCreate(&config_path, 8);
 		StrArrayCreate(&isolinux_path, 8);
+		StrArrayCreate(&grub_filesystems, 8);
 		PrintInfo(0, MSG_202);
 	} else {
 		uprintf("Extracting files...");
@@ -1237,7 +1261,9 @@ try_iso:
 out:
 	iso_blocking_status = -1;
 	if (scan_only) {
+		const char* fs_name[] = { "fat", "exfat", "ntfs" };
 		struct __stat64 stat;
+		char fses[256] = { 0 };
 		// Find if there is a mismatch between the ISO size, as reported by the PVD, and the actual file size
 		if ((iso9660_ifs_read_pvd(p_iso, &pvd)) && (_stat64U(src_iso, &stat) == 0))
 			img_report.mismatch_size = (int64_t)(iso9660_get_pvd_space_size(&pvd)) * ISO_BLOCKSIZE - stat.st_size;
@@ -1277,10 +1303,8 @@ out:
 			uprintf("  Will use '%s' for Syslinux", img_report.cfg_path);
 			// Extract all of the isolinux.bin files we found to identify their versions
 			for (i = 0; i < isolinux_path.Index; i++) {
-				char isolinux_tmp[MAX_PATH];
-				static_sprintf(isolinux_tmp, "%sisolinux.tmp", temp_dir);
-				size = (size_t)ExtractISOFile(src_iso, isolinux_path.String[i], isolinux_tmp, FILE_ATTRIBUTE_NORMAL);
-				if ((size == 0) || (read_file(isolinux_tmp, (uint8_t**)&buf) != size)) {
+				size = (size_t)ReadISOFileToBuffer(src_iso, isolinux_path.String[i], &buf);
+				if (size == 0) {
 					uprintf("  Could not access %s", isolinux_path.String[i]);
 				} else {
 					sl_version = GetSyslinuxVersion(buf, size, &ext);
@@ -1289,7 +1313,7 @@ out:
 						img_report.sl_version = sl_version;
 						sl_index = i;
 					} else if ((img_report.sl_version != sl_version) || (safe_strcmp(img_report.sl_version_ext, ext) != 0)) {
-						uprintf("  Found conflicting isolinux versions:\r\n  '%s' (%d.%02d%s) vs '%s' (%d.%02d%s)",
+						uprintf("  Found conflicting Isolinux versions:\r\n  '%s' (%d.%02d%s) vs '%s' (%d.%02d%s)",
 							isolinux_path.String[sl_index], SL_MAJOR(img_report.sl_version), SL_MINOR(img_report.sl_version),
 							img_report.sl_version_ext, isolinux_path.String[i], SL_MAJOR(sl_version), SL_MINOR(sl_version), ext);
 						// Workaround for Antergos and other ISOs, that have multiple Syslinux versions.
@@ -1303,7 +1327,6 @@ out:
 					}
 					safe_free(buf);
 				}
-				DeleteFileU(isolinux_tmp);
 			}
 			if (img_report.sl_version != 0) {
 				static_sprintf(img_report.sl_version_str, "%d.%02d",
@@ -1330,17 +1353,17 @@ out:
 			// during scan, to see if /minint was provided for OsLoadOptions, as it decides
 			// whether we should use 0x80 or 0x81 as the disk ID in the MBR
 			static_sprintf(path, "/%s/txtsetup.sif",
-				basedir[((img_report.winpe&WINPE_I386) == WINPE_I386)?0:((img_report.winpe&WINPE_AMD64) == WINPE_AMD64?1:2)]);
-			ExtractISOFile(src_iso, path, tmp_sif, FILE_ATTRIBUTE_NORMAL);
-			tmp = get_token_data_file("OsLoadOptions", tmp_sif);
+				basedir[((img_report.winpe & WINPE_I386) == WINPE_I386) ? 0 : ((img_report.winpe & WINPE_AMD64) == WINPE_AMD64 ? 1 : 2)]);
+			size = (size_t)ReadISOFileToBuffer(src_iso, path, &buf);
+			tmp = get_token_data_buffer("OsLoadOptions", 1, buf, size);
 			if (tmp != NULL) {
 				for (i = 0; i < strlen(tmp); i++)
 					tmp[i] = (char)tolower(tmp[i]);
 				uprintf("  Checking txtsetup.sif:\r\n  OsLoadOptions = %s", tmp);
 				img_report.uses_minint = (strstr(tmp, "/minint") != NULL);
+				safe_free(tmp);
 			}
-			DeleteFileU(tmp_sif);
-			safe_free(tmp);
+			safe_free(buf);
 		}
 		if (HAS_WININST(img_report)) {
 			static_sprintf(path, "%s|%s", image_path, &img_report.wininst_path[0][2]);
@@ -1348,26 +1371,48 @@ out:
 		}
 		if (img_report.has_grub2) {
 			char grub_path[128];
-			static_sprintf(grub_path, "%s/normal.mod", &grub_dirname[img_report.has_grub2 - 1][1]);
+			static_sprintf(grub_path, "/%s/normal.mod", &grub_dirname[img_report.has_grub2 - 1][1]);
 			// In case we have a GRUB2 based iso, we extract boot/grub/i386-pc/normal.mod to parse its version
 			img_report.grub2_version[0] = 0;
-			// coverity[swapped_arguments]
-			if (GetTempFileNameU(temp_dir, APPLICATION_NAME, 0, path) != 0) {
-				size = (size_t)ExtractISOFile(src_iso, grub_path, path, FILE_ATTRIBUTE_NORMAL);
-				if ((size == 0) || (read_file(path, (uint8_t**)&buf) != size))
-					uprintf("  Could not read Grub version from '%s'", grub_path);
-				else
-					GetGrubVersion(buf, size);
-				safe_free(buf);
-				DeleteFileU(path);
-			}
+			size = (size_t)ReadISOFileToBuffer(src_iso, grub_path, &buf);
+			if (size == 0)
+				uprintf("  Could not read Grub version from '%s'", grub_path);
+			else
+				GetGrubVersion(buf, size, grub_path);
+			safe_free(buf);
 			if (img_report.grub2_version[0] == 0) {
 				uprintf("  Could not detect Grub version");
-				img_report.has_grub2 = 0;
+				img_report.has_grub2 &= 0x80;
 			}
 		}
+		for (j = 0; j < ARRAYSIZE(img_report.efi_boot_entry); j++) {
+			if (img_report.efi_boot_entry[j].type == EBT_GRUB) {
+
+				size = (size_t)ReadISOFileToBuffer(src_iso, img_report.efi_boot_entry[j].path, &buf);
+				if (size == 0) {
+					uprintf("  Could not read Grub version from '%s'", img_report.efi_boot_entry[j].path);
+				} else {
+					img_report.has_grub2 |= 0x80;
+					GetGrubVersion(buf, size, img_report.efi_boot_entry[j].path);
+					GetGrubFs(buf, size);
+				}
+				safe_free(buf);
+			}
+		}
+		for (i = 0; i < (int)grub_filesystems.Index; i++) {
+			if (i != 0)
+				static_strcat(fses, ", ");
+			static_strcat(fses, grub_filesystems.String[i]);
+			for (j = 0; j < ARRAYSIZE(fs_name); j++)
+				if (stricmp(grub_filesystems.String[i], fs_name[j]) == 0)
+					img_report.has_grub2_fs |= (1 << j);
+		}
+		if (*fses)
+			uprintf("  Supported GRUB filesystems: %s", fses);
+
 		StrArrayDestroy(&config_path);
 		StrArrayDestroy(&isolinux_path);
+		StrArrayDestroy(&grub_filesystems);
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 	} else {
 		// Solus and other ISOs only provide EFI boot files in a FAT efi.img
@@ -1494,7 +1539,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 	file_handle = CreateFileU(dest_file, GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ, NULL, CREATE_ALWAYS, attributes, NULL);
 	if (file_handle == INVALID_HANDLE_VALUE) {
-		uprintf("  Could not create file %s: %s", dest_file, WindowsErrorString());
+		uprintf("Could not create file %s: %s", dest_file, WindowsErrorString());
 		goto out;
 	}
 
@@ -1523,7 +1568,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 		}
 		buf_size = (DWORD)MIN(file_length, (int64_t)read_size);
 		if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
-			uprintf("  Error writing file %s: %s", dest_file, WindowsErrorString());
+			uprintf("Error writing file %s: %s", dest_file, WindowsErrorString());
 			goto out;
 		}
 		file_length -= buf_size;
@@ -1551,12 +1596,12 @@ try_iso:
 		memset(buf, 0, ISO_BLOCKSIZE);
 		lsn = p_statbuf->lsn + (lsn_t)i;
 		if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {
-			uprintf("  Error reading ISO9660 file %s at LSN %lu", iso_file, (long unsigned int)lsn);
+			uprintf("Error reading ISO9660 file %s at LSN %lu", iso_file, (long unsigned int)lsn);
 			goto out;
 		}
 		buf_size = (DWORD)MIN(file_length, ISO_BLOCKSIZE);
 		if (!WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES)) {
-			uprintf("  Error writing file %s: %s", dest_file, WindowsErrorString());
+			uprintf("Error writing file %s: %s", dest_file, WindowsErrorString());
 			goto out;
 		}
 		file_length -= buf_size;

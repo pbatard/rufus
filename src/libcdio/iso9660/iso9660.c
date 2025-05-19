@@ -753,6 +753,7 @@ iso9660_dir_add_entry_su(void *dir,
     unsigned int ofs_last_rec = 0;
 
     offset = 0;
+    // coverity[tainted_data]
     while (offset < dsize)
       {
         if (!dir8[offset])

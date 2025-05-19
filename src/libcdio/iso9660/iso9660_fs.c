@@ -1272,11 +1272,9 @@ _fs_stat_traverse (const CdIo_t *p_cdio, const iso9660_stat_t *_root,
 	return ret_stat;
       }
 
+skip_to_next_record:
       iso9660_stat_free(p_iso9660_stat);
       p_iso9660_stat = NULL;
-
-skip_to_next_record:;
-
       offset += iso9660_get_dir_len(p_iso9660_dir);
     }
 
@@ -1387,6 +1385,7 @@ _fs_iso_stat_traverse (iso9660_t *p_iso, const iso9660_stat_t *_root,
   cdio_assert (offset == (blocks * ISO_BLOCKSIZE));
 
   /* not found */
+  iso9660_stat_free(p_stat);
   free (_dirbuf);
   return NULL;
 }
@@ -1583,7 +1582,7 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[])
 
   unsigned offset = 0;
   uint8_t *_dirbuf = NULL;
-  uint32_t blocks;
+  uint64_t blocks;
   CdioISO9660DirList_t *retval;
   bool skip_following_extents = false;
 
@@ -1614,7 +1613,6 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[])
   retval = _cdio_list_new ();
 
   /* Check for potential integer overflow when calculating total blocks */
-  // coverity[dead_error_condition]
   if (blocks > (SIZE_MAX / ISO_BLOCKSIZE)) {
     cdio_warn("Total size is too large");
     iso9660_stat_free(p_stat);
@@ -1624,7 +1622,7 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[])
   _dirbuf = calloc(1, blocks * ISO_BLOCKSIZE);
   if (!_dirbuf)
     {
-      cdio_warn("Couldn't calloc(1, %d)", blocks * ISO_BLOCKSIZE);
+      cdio_warn("Couldn't calloc(1, %lld)", blocks * ISO_BLOCKSIZE);
       iso9660_stat_free(p_stat);
       iso9660_dirlist_free(retval);
       return NULL;
@@ -1670,6 +1668,7 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[])
 
   free(_dirbuf);
   iso9660_stat_free(p_stat);
+  iso9660_stat_free(p_iso9660_stat);
   return retval;
 }
 
@@ -1714,7 +1713,6 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
 	p_iso9660_stat->total_size = p_iso->boot_img[i].num_sectors * VIRTUAL_SECTORSIZE;
 	iso9660_get_ltime(&p_iso->pvd.creation_date, &p_iso9660_stat->tm);
 	_cdio_list_append(retval, p_iso9660_stat);
-	p_iso9660_stat = NULL;
       }
       return retval;
     }
@@ -1823,6 +1821,7 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
     return NULL;
   }
 
+  iso9660_stat_free(p_iso9660_stat);
   return retval;
 }
 

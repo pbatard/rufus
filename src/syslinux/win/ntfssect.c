@@ -60,7 +60,7 @@ DWORD M_NTFSSECT_API NtfsSectGetFileVcnExtent(
       return ERROR_INVALID_PARAMETER;
 
     input.StartingVcn = *Vcn;
-    DeviceIoControl(
+    (void)DeviceIoControl(
         File,
         FSCTL_GET_RETRIEVAL_POINTERS,
         &input,

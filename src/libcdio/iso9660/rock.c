@@ -188,6 +188,7 @@ repeat:
     int sig;
     int rootflag;
 
+    // coverity[tainted_data]
     while (len > 1){ /* There may be one byte for padding somewhere */
       rr = (iso_extension_record_t *) chr;
       sig = *chr+(*(chr+1) << 8);

@@ -752,6 +752,7 @@ udf_readdir(udf_dirent_t *p_udf_dirent)
 
        free_and_null(p_udf_dirent->psz_name);
        p = (uint8_t*)p_udf_dirent->fid->u.imp_use.data + p_udf_dirent->fid->u.i_imp_use;
+       // coverity[tainted_data]
        p_udf_dirent->psz_name = unicode16_decode(p, u_len);
       }
       return p_udf_dirent;

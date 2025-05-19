@@ -187,7 +187,8 @@ static void SetAllowedFileSystems(void)
 		allowed_filesystem[FS_FAT32] = TRUE;
 		break;
 	case BT_IMAGE:
-		allowed_filesystem[FS_NTFS] = TRUE;
+		if ((image_path == NULL) || !HAS_NTFSLESS_GRUB(img_report))
+			allowed_filesystem[FS_NTFS] = TRUE;
 		// Don't allow anything besides NTFS if the image is not compatible
 		if ((image_path != NULL) && !IS_FAT32_COMPAT(img_report))
 			break;
@@ -1104,7 +1105,7 @@ static void DisplayISOProps(void)
 	PRINT_ISO_PROP(img_report.has_deep_directories, "  Has a Rock Ridge deep directory");
 	PRINT_ISO_PROP(HAS_SYSLINUX(img_report), "  Uses: Syslinux/Isolinux v%s", img_report.sl_version_str);
 	if (HAS_SYSLINUX(img_report) && (SL_MAJOR(img_report.sl_version) < 5)) {
-		for (i = 0; i<NB_OLD_C32; i++) {
+		for (i = 0; i < NB_OLD_C32; i++) {
 			PRINT_ISO_PROP(img_report.has_old_c32[i], "    With an old %s", old_c32_name[i]);
 		}
 	}
@@ -1258,6 +1259,15 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		"^Rocky-[8-9].*",			// Rocky Linux 8.x and 9.x
 		"^MIRACLE-LINUX-[8-9].*",	// MIRACLE LINUX 8.x and 9.x
 	};
+	// As expected, SUSE maintainers DO NOT care about making the lives of SUSE users easier
+	// by applying simple changes. On the other hand, boy are they caring about making their
+	// *own* lives easier, and angrily dismissing anything that dares challenges that...
+	// See: https://bugzilla.suse.com/show_bug.cgi?id=1243236.
+	const char* suse_derivative[] = {
+		"Install-SUSE",
+		"Install-LEAP",
+		"openSUSE-Tumbleweed"
+	};
 	int i, len;
 	uint8_t arch;
 	char tmp_path[MAX_PATH], tmp_str[64];
@@ -1345,6 +1355,20 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 				img_report.rh8_derivative = TRUE;
 				break;
 			}
+		}
+
+		for (i = 0; i < ARRAYSIZE(suse_derivative); i++) {
+			if (strncmp(img_report.label, suse_derivative[i], strlen(suse_derivative[i])) == 0) {
+				img_report.disable_iso = TRUE;
+				break;
+			}
+		}
+
+		// If we have EFI GRUB, detect whether we have FAT, exFAT or NTFS support (with exFAT
+		// or NTFS support being mandatory if we have a file that is larger than 4 GB)
+		if (img_report.has_grub2 & 0x80) {
+			if (!(img_report.has_grub2_fs & 0x7) || (img_report.has_4GB_file && !(img_report.has_grub2_fs & 0x6)))
+				img_report.disable_iso = TRUE;
 		}
 
 		// If we have an ISOHybrid, but without an ISO method we support, disable ISO support altogether

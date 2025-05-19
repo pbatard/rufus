@@ -575,11 +575,17 @@ int32_t StrArrayFind(StrArray* arr, const char* str)
 	uint32_t i;
 	if ((str == NULL) || (arr == NULL) || (arr->String == NULL))
 		return -1;
-	for (i = 0; i<arr->Index; i++) {
+	for (i = 0; i < arr->Index; i++) {
 		if (strcmp(arr->String[i], str) == 0)
 			return (int32_t)i;
 	}
 	return -1;
+}
+
+int32_t StrArrayAddUnique(StrArray* arr, const char* str, BOOL duplicate)
+{
+	int32_t i = StrArrayFind(arr, str);
+	return (i < 0) ? StrArrayAdd(arr, str, duplicate) : i;
 }
 
 void StrArrayClear(StrArray* arr)
