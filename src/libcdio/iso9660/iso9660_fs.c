@@ -1614,6 +1614,7 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[])
   retval = _cdio_list_new ();
 
   /* Check for potential integer overflow when calculating total blocks */
+  // coverity[dead_error_condition]
   if (blocks > (SIZE_MAX / ISO_BLOCKSIZE)) {
     cdio_warn("Total size is too large");
     iso9660_stat_free(p_stat);

@@ -178,6 +178,7 @@ cdio_get_track(const CdIo_t *p_cdio, lsn_t lsn)
 
   {
     track_t i_low_track   = cdio_get_first_track_num(p_cdio);
+    // coverity[overflow_const]
     track_t i_high_track  = cdio_get_last_track_num(p_cdio)+1;
     track_t i_lead_track  = i_high_track;
 

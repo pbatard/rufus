@@ -321,8 +321,19 @@ bool cdio_charset_to_utf8(const char *src, size_t src_len, cdio_utf8_t **dst,
   if (src == NULL || dst == NULL || src_charset == NULL)
     return false;
 
-  /* Convert big endian to little endian */
   if (strcmp(src_charset, "UCS-2BE") == 0) {
+    codepage = -1;
+  } else if (strcmp(src_charset, "ASCII") == 0 || strcmp(src_charset, "ISO-8859-1") == 0) {
+    codepage = 28591;
+  } else if (strcmp(src_charset, "SHIFT_JIS") == 0) {
+    codepage = 932;
+  } else {
+    cdio_warn("Conversion from %s to UTF-8 is not implemented", src_charset);
+    return false;
+  }
+
+  switch (codepage) {
+  case -1: /* Convert big endian to little endian */
     /* Compute UCS-2 src length */
     if (src_len == (size_t)-1) {
       for (src_len = 0; ((uint16_t*)src)[src_len] !=0; src_len++);
@@ -344,16 +355,8 @@ bool cdio_charset_to_utf8(const char *src, size_t src_len, cdio_utf8_t **dst,
       ((char*)wstr)[2*i+1] = src[2*i];
     }
     wstr[src_len] = 0;
-  }
-
-  /* Convert multi-byte to wide string */
-  if (strcmp(src_charset, "ASCII") == 0 || strcmp(src_charset, "ISO-8859-1") == 0) {
-    codepage = 28591;
-  } else if (strcmp(src_charset, "SHIFT_JIS") == 0) {
-    codepage = 932;
-  }
-
-  if (codepage != 0) {
+    break;
+  default:  /* Convert multi-byte to wide string */
     /* Compute src length */
     if (src_len == (size_t)-1) {
       for (src_len = 0; src[src_len] != 0; src_len++);
@@ -377,6 +380,7 @@ bool cdio_charset_to_utf8(const char *src, size_t src_len, cdio_utf8_t **dst,
       free(wstr);
       return false;
     }
+    break;
   }
 
   /* Convert wide string to UTF-8 */

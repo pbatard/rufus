@@ -168,6 +168,7 @@ int syslinux_patch(const sector_t *sectp, int nsectors,
 #endif
 
     /* -1 for the pointer in the boot sector, -2 for the two ADVs */
+    // coverity[tainted_data]
     generate_extents(ex, nptrs, sectp, nsect-1-2);
 
     /* ADV pointers */

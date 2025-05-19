@@ -108,7 +108,7 @@ int libfat_dumpdir(struct libfat_filesystem *fs, libfat_dirpos_t *dp,
     di->name[ARRAYSIZE(di->name) - 1] = 0;
 
     if (di->name[0] == 0) {
-	for (i = 0, j = 0; i < 12; i++) {
+	for (i = 0, j = 0; i < 11; i++) {
 	    if ((i >= 8) && (dep->name[i] == ' '))
 		break;
 	    if (i == 8)

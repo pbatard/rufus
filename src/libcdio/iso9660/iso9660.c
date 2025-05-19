@@ -258,9 +258,9 @@ iso9660_get_dtime (const iso9660_dtime_t *idr_date, bool b_localtime,
     errno = 0;                                                          \
     tmp = strtol(num,                                                   \
                  (char **)NULL, 10);                                    \
-    if ( tmp < INT_MIN || tmp > INT_MAX ||                              \
-         ((unsigned long)tmp + ADD_CONSTANT) > INT_MAX ||               \
-         (tmp + ADD_CONSTANT) < INT_MIN )                               \
+    if ( tmp == LONG_MIN || tmp == LONG_MAX ||                          \
+         ((unsigned long)tmp + ADD_CONSTANT) == LONG_MAX ||             \
+         (tmp + ADD_CONSTANT) == LONG_MIN )                             \
       return false;                                                     \
     p_tm->TM_FIELD = tmp + ADD_CONSTANT;                                \
   }
