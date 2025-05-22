@@ -969,7 +969,7 @@ static INT_PTR CALLBACK ProgressCallback(HWND hCtrl, UINT message, WPARAM wParam
 		COLORREF cInvText = PROGRESS_BAR_INVERTED_TEXT_COLOR;
 		COLORREF cBorder = PROGRESS_BAR_BOX_COLOR;
 		if (IsDarkModeEnabled()) {
-			cBg = GetControlBackgroundColor();
+			cBg = GetCtrlBackgroundColor();
 			cText = PROGRESS_BAR_INVERTED_TEXT_COLOR;
 			cInvText = PROGRESS_BAR_NORMAL_TEXT_COLOR;
 			cBorder = GetEdgeColor();
