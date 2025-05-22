@@ -354,12 +354,12 @@ COLORREF GetDisabledTextColor(void)
 	return 0x808080;
 }
 
-static COLORREF GetBackgroundColor(void)
+static COLORREF GetDlgBackgroundColor(void)
 {
 	return 0x202020;
 }
 
-COLORREF GetControlBackgroundColor(void)
+COLORREF GetCtrlBackgroundColor(void)
 {
 	return 0x383838;
 }
@@ -379,18 +379,18 @@ static COLORREF GetHotEdgeColor(void)
 	return 0x9B9B9B;
 }
 
-static HBRUSH GetBackgroundBrush(void)
+static HBRUSH GetDlgBackgroundBrush(void)
 {
 	if (hbrBackground == NULL) {
-		hbrBackground = CreateSolidBrush(GetBackgroundColor());
+		hbrBackground = CreateSolidBrush(GetDlgBackgroundColor());
 	}
 	return hbrBackground;
 }
 
-static HBRUSH GetControlBackgroundBrush(void)
+static HBRUSH GetCtrlBackgroundBrush(void)
 {
 	if (hbrBackgroundControl == NULL) {
-		hbrBackgroundControl = CreateSolidBrush(GetControlBackgroundColor());
+		hbrBackgroundControl = CreateSolidBrush(GetCtrlBackgroundColor());
 	}
 	return hbrBackgroundControl;
 }
@@ -437,16 +437,26 @@ void DestroyDarkModeGDIObjects(void)
 }
 
 /*
- * Button section, checkbox, radio, and groupbox style buttons
+ * Paint round rect helpers
  */
-static void PaintRoundFrameRect(HDC hdc, const RECT rect, const HPEN hpen, int width, int height)
+
+static void PaintRoundRect(HDC hdc, const RECT rect, HPEN hpen, HBRUSH hBrush, int width, int height)
 {
-	HBRUSH holdBrush = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
+	HBRUSH holdBrush = (HBRUSH)SelectObject(hdc, hBrush);
 	HPEN holdPen = (HPEN)SelectObject(hdc, hpen);
 	RoundRect(hdc, rect.left, rect.top, rect.right, rect.bottom, width, height);
 	SelectObject(hdc, holdBrush);
 	SelectObject(hdc, holdPen);
 }
+
+static void PaintRoundFrameRect(HDC hdc, const RECT rect, HPEN hpen, int width, int height)
+{
+	PaintRoundRect(hdc, rect, hpen, GetStockObject(NULL_BRUSH), width, height);
+}
+
+/*
+ * Button section, checkbox, radio, and groupbox style buttons
+ */
 
 typedef struct _ButtonData {
 	HTHEME hTheme;
@@ -465,19 +475,18 @@ static void RenderButton(HWND hWnd, HDC hdc, HTHEME hTheme, int iPartID, int iSt
 	LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
 
 	HFONT hFont = NULL;
-	HFONT hOldFont = NULL;
-	HFONT hCreatedFont = NULL;
+	BOOL isFontCreated = FALSE;
 	LOGFONT lf;
 	if (SUCCEEDED(GetThemeFont(hTheme, hdc, iPartID, iStateID, TMT_FONT, &lf))) {
-		hCreatedFont = CreateFontIndirect(&lf);
-		hFont = hCreatedFont;
+		hFont = CreateFontIndirect(&lf);
+		isFontCreated = TRUE;
 	}
 
 	if (!hFont) {
 		hFont = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
 	}
 
-	hOldFont = (HFONT)SelectObject(hdc, hFont);
+	HFONT holdFont = (HFONT)SelectObject(hdc, hFont);
 
 	DWORD dtFlags = DT_LEFT; // DT_LEFT is 0
 	dtFlags |= (nStyle & BS_MULTILINE) ? DT_WORDBREAK : DT_SINGLELINE;
@@ -492,10 +501,10 @@ static void RenderButton(HWND hWnd, HDC hdc, HTHEME hTheme, int iPartID, int iSt
 	GetClientRect(hWnd, &rcClient);
 	GetWindowText(hWnd, szText, _countof(szText));
 
-	SIZE szBox = { 13, 13 };
+	SIZE szBox = { 0 };
 	GetThemePartSize(hTheme, hdc, iPartID, iStateID, NULL, TS_DRAW, &szBox);
 
-	RECT rcText = rcClient;
+	RECT rcText = { 0 };
 	GetThemeBackgroundContentRect(hTheme, hdc, iPartID, iStateID, &rcClient, &rcText);
 
 	RECT rcBackground = rcClient;
@@ -513,7 +522,7 @@ static void RenderButton(HWND hWnd, HDC hdc, HTHEME hTheme, int iPartID, int iSt
 	ZeroMemory(&dtto, sizeof(DTTOPTS));
 	dtto.dwSize = sizeof(DTTOPTS);
 	dtto.dwFlags = DTT_TEXTCOLOR;
-	dtto.crText = ((nStyle & WS_DISABLED) == WS_DISABLED) ? GetDisabledTextColor() : GetTextColorForDarkMode();
+	dtto.crText = !IsWindowEnabled(hWnd) ? GetDisabledTextColor() : GetTextColorForDarkMode();
 
 	DrawThemeTextEx(hTheme, hdc, iPartID, iStateID, szText, -1, dtFlags, &rcText, &dtto);
 
@@ -522,35 +531,48 @@ static void RenderButton(HWND hWnd, HDC hdc, HTHEME hTheme, int iPartID, int iSt
 		dtto.dwFlags |= DTT_CALCRECT;
 		DrawThemeTextEx(hTheme, hdc, iPartID, iStateID, szText, -1, dtFlags | DT_CALCRECT, &rcTextOut, &dtto);
 		RECT rcFocus = rcTextOut;
-		rcFocus.bottom++;
-		rcFocus.left--;
-		rcFocus.right++;
+		++rcFocus.bottom;
+		--rcFocus.left;
+		++rcFocus.right;
 		DrawFocusRect(hdc, &rcFocus);
 	}
 
-	if (hCreatedFont) {
-		DeleteObject(hCreatedFont);
+	SelectObject(hdc, holdFont);
+	if (isFontCreated) {
+		DeleteObject(hFont);
 	}
-	SelectObject(hdc, hOldFont);
 }
 
 static void PaintButton(HWND hWnd, HDC hdc, ButtonData buttonData)
 {
 	DWORD nState = (DWORD)SendMessage(hWnd, BM_GETSTATE, 0, 0);
 	const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
-	const LONG_PTR nButtonStyle = nStyle & BS_TYPEMASK;
+	const LONG_PTR nBtnStyle = nStyle & BS_TYPEMASK;
 
 	int iPartID = BP_CHECKBOX;
 
-	if (nButtonStyle == BS_CHECKBOX ||
-		nButtonStyle == BS_AUTOCHECKBOX ||
-		nButtonStyle == BS_3STATE ||
-		nButtonStyle == BS_AUTO3STATE) {
+	switch (nBtnStyle)
+	{
+	case BS_CHECKBOX:
+	case BS_AUTOCHECKBOX:
+	case BS_3STATE:
+	case BS_AUTO3STATE:
+	{
 		iPartID = BP_CHECKBOX;
+		break;
 	}
-	else if (nButtonStyle == BS_RADIOBUTTON ||
-		nButtonStyle == BS_AUTORADIOBUTTON) {
+
+	case BS_RADIOBUTTON:
+	case BS_AUTORADIOBUTTON:
+	{
 		iPartID = BP_RADIOBUTTON;
+		break;
+	}
+
+	default:
+	{
+		break;
+	}
 	}
 
 	// states of BP_CHECKBOX and BP_RADIOBUTTON are the same
@@ -612,14 +634,6 @@ static LRESULT CALLBACK ButtonSubclass(
 
 	switch (uMsg)
 	{
-	case WM_UPDATEUISTATE:
-	{
-		if (HIWORD(wParam) & (UISF_HIDEACCEL | UISF_HIDEFOCUS)) {
-			InvalidateRect(hWnd, NULL, FALSE);
-		}
-		break;
-	}
-
 	case WM_NCDESTROY:
 	{
 		RemoveWindowSubclass(hWnd, ButtonSubclass, uIdSubclass);
@@ -638,14 +652,6 @@ static LRESULT CALLBACK ButtonSubclass(
 
 		if (pButtonData->hTheme) {
 			return TRUE;
-		}
-		break;
-	}
-
-	case WM_THEMECHANGED:
-	{
-		if (pButtonData->hTheme) {
-			CloseThemeData(pButtonData->hTheme);
 		}
 		break;
 	}
@@ -675,6 +681,14 @@ static LRESULT CALLBACK ButtonSubclass(
 		return 0;
 	}
 
+	case WM_THEMECHANGED:
+	{
+		if (pButtonData->hTheme) {
+			CloseThemeData(pButtonData->hTheme);
+		}
+		break;
+	}
+
 	case WM_SIZE:
 	case WM_DESTROY:
 	{
@@ -689,6 +703,14 @@ static LRESULT CALLBACK ButtonSubclass(
 		InvalidateRect(hWnd, NULL, FALSE);
 		return lr;
 	}
+
+	case WM_UPDATEUISTATE:
+	{
+		if (HIWORD(wParam) & (UISF_HIDEACCEL | UISF_HIDEFOCUS)) {
+			InvalidateRect(hWnd, NULL, FALSE);
+		}
+		break;
+	}
 	}
 	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
 }
@@ -696,17 +718,36 @@ static LRESULT CALLBACK ButtonSubclass(
 static void SubclassButtonControl(HWND hWnd)
 {
 	if (GetWindowSubclass(hWnd, ButtonSubclass, g_buttonSubclassID, NULL) == FALSE) {
-		DWORD_PTR pButtonData = (DWORD_PTR)calloc(0, sizeof(ButtonData));
+		DWORD_PTR pButtonData = (DWORD_PTR)calloc(1, sizeof(ButtonData));
 		SetWindowSubclass(hWnd, ButtonSubclass, g_buttonSubclassID, pButtonData);
 	}
 }
 
 static void PaintGroupbox(HWND hWnd, HDC hdc, ButtonData buttonData)
 {
-	const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
-	BOOL isDisabled = (nStyle & WS_DISABLED) == WS_DISABLED;
+	BOOL isDisabled = !IsWindowEnabled(hWnd);
 	int iPartID = BP_GROUPBOX;
 	int iStateID = isDisabled ? GBS_DISABLED : GBS_NORMAL;
+
+	HFONT hFont = NULL;
+	BOOL isFontCreated = FALSE;
+	LOGFONT lf;
+	if (SUCCEEDED(GetThemeFont(buttonData.hTheme, hdc, iPartID, iStateID, TMT_FONT, &lf))) {
+		hFont = CreateFontIndirect(&lf);
+		isFontCreated = TRUE;
+	}
+
+	if (!hFont) {
+		hFont = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
+	}
+
+	HFONT holdFont = (HFONT)SelectObject(hdc, hFont);
+
+	wchar_t buffer[256] = { '\0' };
+	GetWindowText(hWnd, buffer, _countof(buffer));
+
+	const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
+	const BOOL isCenter = (nStyle & BS_CENTER) == BS_CENTER;
 
 	RECT rcClient = { 0 };
 	GetClientRect(hWnd, &rcClient);
@@ -715,44 +756,23 @@ static void PaintGroupbox(HWND hWnd, HDC hdc, ButtonData buttonData)
 
 	RECT rcText = rcClient;
 	RECT rcBackground = rcClient;
+	if (buffer[0]) {
+		SIZE szText = { 0 };
+		GetTextExtentPoint32(hdc, buffer, (int)wcslen(buffer), &szText);
 
-	HFONT hFont = NULL;
-	HFONT hOldFont = NULL;
-	HFONT hCreatedFont = NULL;
-	LOGFONT lf;
-	if (SUCCEEDED(GetThemeFont(buttonData.hTheme, hdc, iPartID, iStateID, TMT_FONT, &lf))) {
-		hCreatedFont = CreateFontIndirect(&lf);
-		hFont = hCreatedFont;
-	}
+		const int centerPosX = isCenter ? ((rcClient.right - rcClient.left - szText.cx) / 2) : 7;
 
-	if (!hFont) {
-		hFont = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
-	}
-
-	hOldFont = (HFONT)SelectObject(hdc, hFont);
-
-	wchar_t szText[256] = { '\0' };
-	GetWindowText(hWnd, szText, _countof(szText));
-
-	BOOL isCenter = (nStyle & BS_CENTER) == BS_CENTER;
-
-	if (szText[0]) {
-		SIZE textSize = { 0 };
-		GetTextExtentPoint32(hdc, szText, (int)wcslen(szText), &textSize);
-
-		int centerPosX = isCenter ? ((rcClient.right - rcClient.left - textSize.cx) / 2) : 7;
-
-		rcBackground.top += textSize.cy / 2;
+		rcBackground.top += szText.cy / 2;
 		rcText.left += centerPosX;
-		rcText.bottom = rcText.top + textSize.cy;
-		rcText.right = rcText.left + textSize.cx + 4;
+		rcText.bottom = rcText.top + szText.cy;
+		rcText.right = rcText.left + szText.cx + 4;
 
 		ExcludeClipRect(hdc, rcText.left, rcText.top, rcText.right, rcText.bottom);
 	}
 	else {
-		SIZE textSize = { 0 };
-		GetTextExtentPoint32(hdc, L"M", 1, &textSize);
-		rcBackground.top += textSize.cy / 2;
+		SIZE szText = { 0 };
+		GetTextExtentPoint32(hdc, L"M", 1, &szText);
+		rcBackground.top += szText.cy / 2;
 	}
 
 	RECT rcContent = rcBackground;
@@ -763,9 +783,8 @@ static void PaintGroupbox(HWND hWnd, HDC hdc, ButtonData buttonData)
 
 	SelectClipRgn(hdc, NULL);
 
-	if (szText[0]) {
-		rcText.right -= 2;
-		rcText.left += 2;
+	if (buffer[0]) {
+		InflateRect(&rcText, -2, 0);
 
 		DTTOPTS dtto;
 		ZeroMemory(&dtto, sizeof(DTTOPTS));
@@ -779,11 +798,12 @@ static void PaintGroupbox(HWND hWnd, HDC hdc, ButtonData buttonData)
 			textFlags |= DT_HIDEPREFIX;
 		}
 
-		DrawThemeTextEx(buttonData.hTheme, hdc, BP_GROUPBOX, iStateID, szText, -1, textFlags | DT_SINGLELINE, &rcText, &dtto);
+		DrawThemeTextEx(buttonData.hTheme, hdc, BP_GROUPBOX, iStateID, buffer, -1, textFlags | DT_SINGLELINE, &rcText, &dtto);
 	}
 
-	if (hCreatedFont) DeleteObject(hCreatedFont);
-	SelectObject(hdc, hOldFont);
+	SelectObject(hdc, holdFont);
+	if (isFontCreated)
+		DeleteObject(hFont);
 }
 
 static LRESULT CALLBACK GroupboxSubclass(
@@ -820,14 +840,6 @@ static LRESULT CALLBACK GroupboxSubclass(
 		break;
 	}
 
-	case WM_THEMECHANGED:
-	{
-		if (pButtonData->hTheme) {
-			CloseThemeData(pButtonData->hTheme);
-		}
-		break;
-	}
-
 	case WM_PRINTCLIENT:
 	case WM_PAINT:
 	{
@@ -851,6 +863,14 @@ static LRESULT CALLBACK GroupboxSubclass(
 		}
 
 		return 0;
+	}
+
+	case WM_THEMECHANGED:
+	{
+		if (pButtonData->hTheme) {
+			CloseThemeData(pButtonData->hTheme);
+		}
+		break;
 	}
 
 	case WM_ENABLE:
@@ -879,47 +899,39 @@ static UINT_PTR g_windowNotifySubclassID = 42;
 static LRESULT DarkToolBarNotifyCustomDraw(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	LPNMTBCUSTOMDRAW lpnmtbcd = (LPNMTBCUSTOMDRAW)lParam;
-	static int roundCornerValue = 0;
+	static int roundness = 0;
 
 	switch (lpnmtbcd->nmcd.dwDrawStage) {
 	case CDDS_PREPAINT:
 	{
 		if (IsAtLeastWin11()) {
-			roundCornerValue = 5;
+			roundness = 5;
 		}
 
-		FillRect(lpnmtbcd->nmcd.hdc, &lpnmtbcd->nmcd.rc, GetBackgroundBrush());
+		FillRect(lpnmtbcd->nmcd.hdc, &lpnmtbcd->nmcd.rc, GetDlgBackgroundBrush());
 		return CDRF_NOTIFYITEMDRAW;
 	}
 
 	case CDDS_ITEMPREPAINT:
 	{
-		lpnmtbcd->hbrMonoDither = GetBackgroundBrush();
+		lpnmtbcd->hbrMonoDither = GetDlgBackgroundBrush();
 		lpnmtbcd->hbrLines = GetEdgeBrush();
 		lpnmtbcd->hpenLines = GetEdgePen();
 		lpnmtbcd->clrText = GetTextColorForDarkMode();
 		lpnmtbcd->clrTextHighlight = GetTextColorForDarkMode();
-		lpnmtbcd->clrBtnFace = GetBackgroundColor();
-		lpnmtbcd->clrBtnHighlight = GetControlBackgroundColor();
+		lpnmtbcd->clrBtnFace = GetDlgBackgroundColor();
+		lpnmtbcd->clrBtnHighlight = GetCtrlBackgroundColor();
 		lpnmtbcd->clrHighlightHotTrack = GetHotBackgroundColor();
 		lpnmtbcd->nStringBkMode = TRANSPARENT;
 		lpnmtbcd->nHLStringBkMode = TRANSPARENT;
 
 		if ((lpnmtbcd->nmcd.uItemState & CDIS_HOT) == CDIS_HOT) {
-			HBRUSH holdBrush = (HBRUSH)SelectObject(lpnmtbcd->nmcd.hdc, GetHotBackgroundBrush());
-			HPEN holdPen = (HPEN)SelectObject(lpnmtbcd->nmcd.hdc, GetHotEdgePen());
-			RoundRect(lpnmtbcd->nmcd.hdc, lpnmtbcd->nmcd.rc.left, lpnmtbcd->nmcd.rc.top, lpnmtbcd->nmcd.rc.right, lpnmtbcd->nmcd.rc.bottom, roundCornerValue, roundCornerValue);
-			SelectObject(lpnmtbcd->nmcd.hdc, holdBrush);
-			SelectObject(lpnmtbcd->nmcd.hdc, holdPen);
+			PaintRoundRect(lpnmtbcd->nmcd.hdc, lpnmtbcd->nmcd.rc, GetHotEdgePen(), GetHotBackgroundBrush(), roundness, roundness);
 
 			lpnmtbcd->nmcd.uItemState &= ~(CDIS_CHECKED | CDIS_HOT);
 		}
 		else if ((lpnmtbcd->nmcd.uItemState & CDIS_CHECKED) == CDIS_CHECKED) {
-			HBRUSH holdBrush = (HBRUSH)SelectObject(lpnmtbcd->nmcd.hdc, GetControlBackgroundBrush());
-			HPEN holdPen = (HPEN)SelectObject(lpnmtbcd->nmcd.hdc, GetEdgePen());
-			RoundRect(lpnmtbcd->nmcd.hdc, lpnmtbcd->nmcd.rc.left, lpnmtbcd->nmcd.rc.top, lpnmtbcd->nmcd.rc.right, lpnmtbcd->nmcd.rc.bottom, roundCornerValue, roundCornerValue);
-			SelectObject(lpnmtbcd->nmcd.hdc, holdBrush);
-			SelectObject(lpnmtbcd->nmcd.hdc, holdPen);
+			PaintRoundRect(lpnmtbcd->nmcd.hdc, lpnmtbcd->nmcd.rc, GetEdgePen(), GetCtrlBackgroundBrush(), roundness, roundness);
 
 			lpnmtbcd->nmcd.uItemState &= ~CDIS_CHECKED;
 		}
@@ -953,7 +965,7 @@ static LRESULT DarkTrackBarNotifyCustomDraw(HWND hWnd, UINT uMsg, WPARAM wParam,
 		case TBCD_THUMB:
 		{
 			if ((lpnmcd->uItemState & CDIS_SELECTED) == CDIS_SELECTED) {
-				FillRect(lpnmcd->hdc, &lpnmcd->rc, GetControlBackgroundBrush());
+				FillRect(lpnmcd->hdc, &lpnmcd->rc, GetCtrlBackgroundBrush());
 				return CDRF_SKIPDEFAULT;
 			}
 			break;
@@ -962,11 +974,11 @@ static LRESULT DarkTrackBarNotifyCustomDraw(HWND hWnd, UINT uMsg, WPARAM wParam,
 		case TBCD_CHANNEL:
 		{
 			if (IsWindowEnabled(lpnmcd->hdr.hwndFrom) == FALSE) {
-				FillRect(lpnmcd->hdc, &lpnmcd->rc, GetBackgroundBrush());
+				FillRect(lpnmcd->hdc, &lpnmcd->rc, GetDlgBackgroundBrush());
 				PaintRoundFrameRect(lpnmcd->hdc, lpnmcd->rc, GetEdgePen(), 0, 0);
 			}
 			else {
-				FillRect(lpnmcd->hdc, &lpnmcd->rc, GetControlBackgroundBrush());
+				FillRect(lpnmcd->hdc, &lpnmcd->rc, GetCtrlBackgroundBrush());
 			}
 			return CDRF_SKIPDEFAULT;
 		}
@@ -1003,11 +1015,11 @@ static LRESULT CALLBACK WindowNotifySubclass(
 
 	case WM_NOTIFY:
 	{
-		LPNMHDR nmhdr = (LPNMHDR)lParam;
+		LPNMHDR lpnmhdr = (LPNMHDR)lParam;
 		WCHAR str[32] = { 0 };
-		GetClassName(nmhdr->hwndFrom, str, ARRAYSIZE(str));
+		GetClassName(lpnmhdr->hwndFrom, str, ARRAYSIZE(str));
 
-		switch (nmhdr->code) {
+		switch (lpnmhdr->code) {
 		case NM_CUSTOMDRAW:
 		{
 			if (_wcsicmp(str, TOOLBARCLASSNAME) == 0) {
@@ -1061,7 +1073,7 @@ static void PaintStatusBar(HWND hWnd, HDC hdc, StatusBarData statusBarData)
 	SetBkMode(hdc, TRANSPARENT);
 	SetTextColor(hdc, GetTextColorForDarkMode());
 
-	FillRect(hdc, &rcClient, GetBackgroundBrush());
+	FillRect(hdc, &rcClient, GetDlgBackgroundBrush());
 
 	int nParts = (int)SendMessage(hWnd, SB_GETPARTS, 0, 0);
 	RECT rcPart = { 0 };
@@ -1081,7 +1093,7 @@ static void PaintStatusBar(HWND hWnd, HDC hdc, StatusBarData statusBarData)
 		}
 
 		DWORD cchText = LOWORD(SendMessage(hWnd, SB_GETTEXTLENGTH, i, 0));
-		LPWSTR buffer = (LPWSTR)calloc(cchText, sizeof(WCHAR));
+		LPWSTR buffer = (LPWSTR)calloc((size_t)cchText + 1, sizeof(WCHAR));
 		LRESULT lr = SendMessage(hWnd, SB_GETTEXT, i, (LPARAM)buffer);
 		BOOL ownerDraw = FALSE;
 		if (cchText == 0 && (lr & ~(SBT_NOBORDERS | SBT_POPOUT | SBT_RTLREADING)) != 0) {
@@ -1136,11 +1148,19 @@ static LRESULT CALLBACK StatusBarSubclass(
 	StatusBarData* pStatusBarData = (StatusBarData*)dwRefData;
 
 	switch (uMsg) {
+	case WM_NCDESTROY:
+	{
+		RemoveWindowSubclass(hWnd, StatusBarSubclass, uIdSubclass);
+		if (pStatusBarData->hFont != NULL) {
+			DeleteObject(pStatusBarData->hFont);
+			pStatusBarData->hFont = NULL;
+		}
+		free(pStatusBarData);
+		break;
+	}
+
 	case WM_ERASEBKGND:
 	{
-		RECT rcClient = { 0 };
-		GetClientRect(hWnd, &rcClient);
-		FillRect((HDC)wParam, &rcClient, GetBackgroundBrush());
 		return TRUE;
 	}
 
@@ -1153,17 +1173,6 @@ static LRESULT CALLBACK StatusBarSubclass(
 
 		EndPaint(hWnd, &ps);
 		return 0;
-	}
-
-	case WM_NCDESTROY:
-	{
-		RemoveWindowSubclass(hWnd, StatusBarSubclass, uIdSubclass);
-		if (pStatusBarData->hFont != NULL) {
-			DeleteObject(pStatusBarData->hFont);
-			pStatusBarData->hFont = NULL;
-		}
-		free(pStatusBarData);
-		break;
 	}
 
 	case WM_THEMECHANGED:
@@ -1182,10 +1191,7 @@ static LRESULT CALLBACK StatusBarSubclass(
 			pStatusBarData->hFont = CreateFontIndirect(&lf);
 		}
 
-		if (uMsg != WM_THEMECHANGED) {
-			return 0;
-		}
-		break;
+		return 0;
 	}
 	}
 	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
@@ -1227,20 +1233,19 @@ const UINT_PTR g_progressBarSubclassID = 42;
 
 static void GetProgressBarRects(HWND hWnd, RECT* rcEmpty, RECT* rcFilled)
 {
-	int pos = (int)SendMessage(hWnd, PBM_GETPOS, 0, 0);
+	const int pos = (int)SendMessage(hWnd, PBM_GETPOS, 0, 0);
 
 	PBRANGE range = { 0, 0 };
 	SendMessage(hWnd, PBM_GETRANGE, TRUE, (LPARAM)&range);
-	int min = range.iLow;
-	int max = range.iHigh;
+	const int iMin = range.iLow;
 
-	int currPos = pos - min;
+	const int currPos = pos - iMin;
 	if (currPos != 0) {
 		int totalWidth = rcEmpty->right - rcEmpty->left;
 		rcFilled->left = rcEmpty->left;
 		rcFilled->top = rcEmpty->top;
 		rcFilled->bottom = rcEmpty->bottom;
-		rcFilled->right = rcEmpty->left + (int)((double)(currPos) / (max - min) * totalWidth);
+		rcFilled->right = rcEmpty->left + (int)((double)(currPos) / (range.iHigh - iMin) * totalWidth);
 
 		rcEmpty->left = rcFilled->right; // to avoid painting under filled part
 	}
@@ -1259,7 +1264,7 @@ static void PaintProgressBar(HWND hWnd, HDC hdc, ProgressBarData progressBarData
 	RECT rcFill = { 0 };
 	GetProgressBarRects(hWnd, &rcClient, &rcFill);
 	DrawThemeBackground(progressBarData.hTheme, hdc, PP_FILL, progressBarData.iStateID, &rcFill, NULL);
-	FillRect(hdc, &rcClient, GetControlBackgroundBrush());
+	FillRect(hdc, &rcClient, GetCtrlBackgroundBrush());
 }
 
 static LRESULT CALLBACK ProgressBarSubclass(
@@ -1296,6 +1301,26 @@ static LRESULT CALLBACK ProgressBarSubclass(
 		break;
 	}
 
+	case WM_PAINT:
+	{
+		if (pProgressBarData->hTheme == NULL) {
+			pProgressBarData->hTheme = OpenThemeData(hWnd, VSCLASS_PROGRESS);
+			if (pProgressBarData->hTheme == NULL) {
+				break;
+			}
+		}
+
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hWnd, &ps);
+
+		PaintProgressBar(hWnd, hdc, *pProgressBarData);
+
+		EndPaint(hWnd, &ps);
+
+		return 0;
+
+	}
+
 	case WM_THEMECHANGED:
 	{
 		if (pProgressBarData->hTheme) {
@@ -1319,26 +1344,6 @@ static LRESULT CALLBACK ProgressBarSubclass(
 			break;
 		}
 		break;
-	}
-
-	case WM_PAINT:
-	{
-		if (pProgressBarData->hTheme == NULL) {
-			pProgressBarData->hTheme = OpenThemeData(hWnd, VSCLASS_PROGRESS);
-			if (pProgressBarData->hTheme == NULL) {
-				break;
-			}
-		}
-
-		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint(hWnd, &ps);
-
-		PaintProgressBar(hWnd, hdc, *pProgressBarData);
-
-		EndPaint(hWnd, &ps);
-
-		return 0;
-
 	}
 	}
 	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
@@ -1418,11 +1423,11 @@ static void SubclassStaticText(HWND hWnd)
 
 const UINT_PTR g_WindowCtlColorSubclassID = 42;
 
-static LRESULT OnCtlColor(HDC hdc)
+static LRESULT OnCtlColorDlg(HDC hdc)
 {
 	SetTextColor(hdc, GetTextColorForDarkMode());
-	SetBkColor(hdc, GetBackgroundColor());
-	return (LRESULT)GetBackgroundBrush();
+	SetBkColor(hdc, GetDlgBackgroundColor());
+	return (LRESULT)GetDlgBackgroundBrush();
 }
 
 static LRESULT OnCtlColorStatic(WPARAM wParam, LPARAM lParam)
@@ -1443,19 +1448,19 @@ static LRESULT OnCtlColorStatic(WPARAM wParam, LPARAM lParam)
 					cText = GetDisabledTextColor();
 			}
 			SetTextColor(hdc, cText);
-			SetBkColor(hdc, GetBackgroundColor());
-			return (LRESULT)GetBackgroundBrush();
+			SetBkColor(hdc, GetDlgBackgroundColor());
+			return (LRESULT)GetDlgBackgroundBrush();
 		}
 	}
 	// read-only WC_EDIT
-	return OnCtlColor(hdc);
+	return OnCtlColorDlg(hdc);
 }
 
-static LRESULT OnCtlColorControl(HDC hdc)
+static LRESULT OnCtlColorCtrl(HDC hdc)
 {
 	SetTextColor(hdc, GetTextColorForDarkMode());
-	SetBkColor(hdc, GetControlBackgroundColor());
-	return (LRESULT)GetControlBackgroundBrush();
+	SetBkColor(hdc, GetCtrlBackgroundColor());
+	return (LRESULT)GetCtrlBackgroundBrush();
 }
 
 
@@ -1467,9 +1472,9 @@ static INT_PTR OnCtlColorListbox(WPARAM wParam, LPARAM lParam)
 	const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
 	BOOL isComboBox = (nStyle & LBS_COMBOBOX) == LBS_COMBOBOX;
 	if ((!isComboBox || !isDarkEnabled) && IsWindowEnabled(hWnd)) {
-		return (INT_PTR)OnCtlColorControl(hdc);
+		return (INT_PTR)OnCtlColorCtrl(hdc);
 	}
-	return (INT_PTR)OnCtlColor(hdc);
+	return (INT_PTR)OnCtlColorDlg(hdc);
 }
 
 static LRESULT CALLBACK WindowCtlColorSubclass(
@@ -1484,14 +1489,6 @@ static LRESULT CALLBACK WindowCtlColorSubclass(
 	(void)dwRefData;
 
 	switch (uMsg) {
-	case WM_ERASEBKGND:
-	{
-		RECT rcClient = { 0 };
-		GetClientRect(hWnd, &rcClient);
-		FillRect((HDC)wParam, &rcClient, GetBackgroundBrush());
-		return TRUE;
-	}
-
 	case WM_NCDESTROY:
 	{
 		RemoveWindowSubclass(hWnd, WindowCtlColorSubclass, uIdSubclass);
@@ -1500,7 +1497,7 @@ static LRESULT CALLBACK WindowCtlColorSubclass(
 
 	case WM_CTLCOLOREDIT:
 	{
-		return OnCtlColorControl((HDC)wParam);
+		return OnCtlColorCtrl((HDC)wParam);
 	}
 
 	case WM_CTLCOLORLISTBOX:
@@ -1510,7 +1507,7 @@ static LRESULT CALLBACK WindowCtlColorSubclass(
 
 	case WM_CTLCOLORDLG:
 	{
-		return OnCtlColor((HDC)wParam);
+		return OnCtlColorDlg((HDC)wParam);
 	}
 
 	case WM_CTLCOLORSTATIC:
@@ -1615,7 +1612,7 @@ static BOOL CALLBACK DarkModeForChildCallback(HWND hWnd, LPARAM lParam)
 		const LONG_PTR nExStyle = GetWindowLongPtr(hWnd, GWL_EXSTYLE);
 
 		BOOL hasStaticEdge = (nExStyle & WS_EX_STATICEDGE) == WS_EX_STATICEDGE;
-		COLORREF cBg = (hasStaticEdge ? GetControlBackgroundColor() : GetBackgroundColor());
+		COLORREF cBg = (hasStaticEdge ? GetCtrlBackgroundColor() : GetDlgBackgroundColor());
 
 		CHARFORMATW cf;
 		ZeroMemory(&cf, sizeof(CHARFORMATW));

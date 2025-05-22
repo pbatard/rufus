@@ -31,7 +31,7 @@ BOOL InitAccentColor(void);
 BOOL ChangeIconColor(HICON* hIcon, COLORREF newColor);
 COLORREF GetTextColorForDarkMode(void);
 COLORREF GetDisabledTextColor(void);
-COLORREF GetControlBackgroundColor(void);
+COLORREF GetCtrlBackgroundColor(void);
 COLORREF GetEdgeColor(void);
 void DestroyDarkModeGDIObjects(void);
 void SubclassCtlColor(HWND hWnd);
