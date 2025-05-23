@@ -133,12 +133,12 @@
       <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;uxtheme.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;uxtheme.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <AdditionalOptions>/BREPRO /DEPENDENTLOADFLAG:0x800 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ResourceCompile>
@@ -163,12 +163,12 @@
       <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;uxtheme.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.15063.0\um\arm</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;uxtheme.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <AdditionalOptions>/BREPRO /DEPENDENTLOADFLAG:0x800 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ResourceCompile>
@@ -195,12 +195,12 @@
       <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;uxtheme.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.16299.0\um\arm64</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;uxtheme.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <AdditionalOptions>/BREPRO /DEPENDENTLOADFLAG:0x800 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ResourceCompile>
@@ -232,12 +232,12 @@
       <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;uxtheme.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
-      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;uxtheme.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
       <AdditionalOptions>/BREPRO /DEPENDENTLOADFLAG:0x800 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ResourceCompile>
@@ -264,13 +264,13 @@
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;uxtheme.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalOptions>/BREPRO /DEPENDENTLOADFLAG:0x800 %(AdditionalOptions)</AdditionalOptions>
-      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;uxtheme.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -296,13 +296,13 @@
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;uxtheme.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.15063.0\um\arm</AdditionalLibraryDirectories>
       <AdditionalOptions>/BREPRO /DEPENDENTLOADFLAG:0x800 %(AdditionalOptions)</AdditionalOptions>
-      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;uxtheme.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -330,13 +330,13 @@
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;ole32.lib;advapi32.lib;gdi32.lib;shell32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;uxtheme.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.16299.0\um\arm64</AdditionalLibraryDirectories>
       <AdditionalOptions>/BREPRO /DEPENDENTLOADFLAG:0x800 %(AdditionalOptions)</AdditionalOptions>
-      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;uxtheme.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -367,13 +367,13 @@
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;uxtheme.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalOptions>/BREPRO /DEPENDENTLOADFLAG:0x800 %(AdditionalOptions)</AdditionalOptions>
-      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;uxtheme.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -385,6 +385,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\badblocks.c" />
+    <ClCompile Include="..\src\darkmode.c" />
     <ClCompile Include="..\src\dos_locale.c" />
     <ClCompile Include="..\src\drive.c" />
     <ClCompile Include="..\src\format.c" />
@@ -418,6 +419,7 @@
     <ClInclude Include="..\res\grub\grub_version.h" />
     <ClInclude Include="..\src\badblocks.h" />
     <ClInclude Include="..\src\bled\bled.h" />
+    <ClInclude Include="..\src\darkmode.h" />
     <ClInclude Include="..\src\drive.h" />
     <ClInclude Include="..\src\efi.h" />
     <ClInclude Include="..\src\format.h" />
