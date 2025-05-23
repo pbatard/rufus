@@ -400,8 +400,9 @@ out:
 uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext)
 {
 	size_t i, j, k;
-	char *p;
-	uint16_t version;
+	char *p = NULL;
+	unsigned long version_ul[2];
+	uint16_t version = 0;
 	const char LINUX[] = { 'L', 'I', 'N', 'U', 'X', ' ' };
 	static char* nullstr = "";
 	char unauthorized[] = {'<', '>', ':', '|', '*', '?', '\\', '/'};
@@ -418,10 +419,17 @@ uint16_t GetSyslinuxVersion(char* buf, size_t buf_size, char** ext)
 			    || ((buf[i - 3] == 'S') && (buf[i - 2] == 'Y') && (buf[i - 1] == 'S')) ))
 			  continue;
 			i += sizeof(LINUX);
-			version = (((uint8_t)strtoul(&buf[i], &p, 10)) << 8) + (uint8_t)strtoul(&p[1], &p, 10);
+			version_ul[0] = strtoul(&buf[i], &p, 10);
 			// Our buffer is either from our internal legit syslinux (i.e. with a NUL terminated
 			// version string) or from a buffer that has been NUL-terminated through read_file(),
 			// so the string we work with in p is always NUL terminated at this stage.
+			assert(version_ul[0] < 256);
+			if (version_ul[0] < 256) {
+				version_ul[1] = strtoul(&p[1], &p, 10);
+				assert(version_ul[1] < 256);
+				if (version_ul[1] < 256)
+					version = (uint16_t)((version_ul[0] << 8) + version_ul[1]);
+			}
 			if (version == 0)
 				continue;
 			// Ensure that our extra version string starts with a slash
