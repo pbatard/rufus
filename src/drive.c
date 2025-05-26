@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2025 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2299,7 +2299,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		// CHS sizes that IBM imparted upon us. Long story short, we now align to a
 		// cylinder size that is itself aligned to the cluster size.
 		// If this actually breaks old systems, please send your complaints to IBM.
-		SelectedDrive.Partition[pi].Offset = HI_ALIGN_X_TO_Y(bytes_per_track, ClusterSize);
+		SelectedDrive.Partition[pi].Offset = CEILING_ALIGN(bytes_per_track, ClusterSize);
 		// GRUB2 no longer fits in the usual 31½ KB that the above computation provides
 		// so just unconditionally double that size and get on with it.
 		SelectedDrive.Partition[pi].Offset *= 2;
@@ -2316,9 +2316,9 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		SelectedDrive.Partition[pi].Size = esp_size;
 		SelectedDrive.Partition[pi + 1].Offset = SelectedDrive.Partition[pi].Offset + SelectedDrive.Partition[pi].Size;
 		// Align next partition to track and cluster
-		SelectedDrive.Partition[pi + 1].Offset = HI_ALIGN_X_TO_Y(SelectedDrive.Partition[pi + 1].Offset, bytes_per_track);
+		SelectedDrive.Partition[pi + 1].Offset = CEILING_ALIGN(SelectedDrive.Partition[pi + 1].Offset, bytes_per_track);
 		if (ClusterSize % SelectedDrive.SectorSize == 0)
-			SelectedDrive.Partition[pi + 1].Offset = LO_ALIGN_X_TO_Y(SelectedDrive.Partition[pi + 1].Offset, ClusterSize);
+			SelectedDrive.Partition[pi + 1].Offset = FLOOR_ALIGN(SelectedDrive.Partition[pi + 1].Offset, ClusterSize);
 		assert(SelectedDrive.Partition[pi + 1].Offset >= SelectedDrive.Partition[pi].Offset + SelectedDrive.Partition[pi].Size);
 		pi++;
 		// Clear the extra partition we processed
@@ -2331,9 +2331,9 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		wcscpy(SelectedDrive.Partition[pi].Name, L"Microsoft Reserved Partition");
 		SelectedDrive.Partition[pi].Size = 128 * MB;
 		SelectedDrive.Partition[pi + 1].Offset = SelectedDrive.Partition[pi].Offset + SelectedDrive.Partition[pi].Size;
-		SelectedDrive.Partition[pi + 1].Offset = HI_ALIGN_X_TO_Y(SelectedDrive.Partition[pi + 1].Offset, bytes_per_track);
+		SelectedDrive.Partition[pi + 1].Offset = CEILING_ALIGN(SelectedDrive.Partition[pi + 1].Offset, bytes_per_track);
 		if (ClusterSize % SelectedDrive.SectorSize == 0)
-			SelectedDrive.Partition[pi + 1].Offset = LO_ALIGN_X_TO_Y(SelectedDrive.Partition[pi + 1].Offset, ClusterSize);
+			SelectedDrive.Partition[pi + 1].Offset = FLOOR_ALIGN(SelectedDrive.Partition[pi + 1].Offset, ClusterSize);
 		assert(SelectedDrive.Partition[pi + 1].Offset >= SelectedDrive.Partition[pi].Offset + SelectedDrive.Partition[pi].Size);
 		pi++;
 		extra_partitions &= ~(XP_MSR);
@@ -2352,16 +2352,16 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			assert(persistence_size != 0);
 			partition_index[PI_CASPER] = pi;
 			wcscpy(SelectedDrive.Partition[pi].Name, L"Linux Persistence");
-			SelectedDrive.Partition[pi++].Size = HI_ALIGN_X_TO_Y(persistence_size, bytes_per_track);
+			SelectedDrive.Partition[pi++].Size = CEILING_ALIGN(persistence_size, bytes_per_track);
 		}
 		if (extra_partitions & XP_ESP) {
 			partition_index[PI_ESP] = pi;
 			wcscpy(SelectedDrive.Partition[pi].Name, L"EFI System Partition");
-			SelectedDrive.Partition[pi++].Size = HI_ALIGN_X_TO_Y(esp_size, bytes_per_track);
+			SelectedDrive.Partition[pi++].Size = CEILING_ALIGN(esp_size, bytes_per_track);
 		} else if (extra_partitions & XP_UEFI_NTFS) {
 			partition_index[PI_UEFI_NTFS] = pi;
 			wcscpy(SelectedDrive.Partition[pi].Name, L"UEFI:NTFS");
-			SelectedDrive.Partition[pi++].Size = HI_ALIGN_X_TO_Y(uefi_ntfs_size, bytes_per_track);
+			SelectedDrive.Partition[pi++].Size = CEILING_ALIGN(uefi_ntfs_size, bytes_per_track);
 		} else if (extra_partitions & XP_COMPAT) {
 			wcscpy(SelectedDrive.Partition[pi].Name, L"BIOS Compatibility");
 			SelectedDrive.Partition[pi++].Size = bytes_per_track;	// One track for the extra partition
@@ -2377,13 +2377,13 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		last_offset -= 33ULL * SelectedDrive.SectorSize;
 	for (i = pi - 1; i > mi; i--) {
 		assert(SelectedDrive.Partition[i].Size < last_offset);
-		SelectedDrive.Partition[i].Offset = LO_ALIGN_X_TO_Y(last_offset - SelectedDrive.Partition[i].Size, bytes_per_track);
+		SelectedDrive.Partition[i].Offset = FLOOR_ALIGN(last_offset - SelectedDrive.Partition[i].Size, bytes_per_track);
 		last_offset = SelectedDrive.Partition[i].Offset;
 	}
 
 	// With the above, Compute the main partition size (which we align to a track)
 	assert(last_offset > SelectedDrive.Partition[mi].Offset);
-	SelectedDrive.Partition[mi].Size = LO_ALIGN_X_TO_Y(last_offset - SelectedDrive.Partition[mi].Offset, bytes_per_track);
+	SelectedDrive.Partition[mi].Size = FLOOR_ALIGN(last_offset - SelectedDrive.Partition[mi].Offset, bytes_per_track);
 	// Try to make sure that the main partition size is a multiple of the cluster size
 	// This can be especially important when trying to capture an NTFS partition as FFU, as, when
 	// the NTFS partition is aligned to cluster size, the FFU capture parses the NTFS allocated
@@ -2391,7 +2391,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	// a full sector by sector scan of the NTFS partition and records any non-zero garbage, which
 	// may include garbage leftover data from a previous reformat...
 	if (ClusterSize % SelectedDrive.SectorSize == 0)
-		SelectedDrive.Partition[mi].Size = LO_ALIGN_X_TO_Y(SelectedDrive.Partition[mi].Size, ClusterSize);
+		SelectedDrive.Partition[mi].Size = FLOOR_ALIGN(SelectedDrive.Partition[mi].Size, ClusterSize);
 	if (SelectedDrive.Partition[mi].Size <= 0) {
 		uprintf("Error: Invalid %S size", SelectedDrive.Partition[mi].Name);
 		return FALSE;

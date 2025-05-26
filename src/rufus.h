@@ -436,6 +436,7 @@ typedef struct {
 	BOOLEAN rh8_derivative;
 	uint16_t winpe;
 	uint16_t has_efi;
+	uint8_t has_secureboot_bootloader;
 	uint8_t has_md5sum;
 	uint8_t wininst_index;
 	uint8_t has_symlinks;
@@ -519,12 +520,6 @@ typedef struct {
 	uint32_t* address;	// 32-bit will do, as we're not dealing with >4GB DLLs...
 } dll_resolver_t;
 
-/* SBAT entry */
-typedef struct {
-	char* product;
-	uint32_t version;
-} sbat_entry_t;
-
 /* Alignment macro */
 #if defined(__GNUC__)
 #define ALIGNED(m) __attribute__ ((__aligned__(m)))
@@ -575,6 +570,18 @@ typedef void hash_final_t(HASH_CONTEXT* ctx);
 extern hash_init_t* hash_init[HASH_MAX];
 extern hash_write_t* hash_write[HASH_MAX];
 extern hash_final_t* hash_final[HASH_MAX];
+
+/* SBAT entry */
+typedef struct {
+	char* product;
+	uint32_t version;
+} sbat_entry_t;
+
+/* Certificate thumbprint list */
+typedef struct {
+	uint32_t count;
+	uint8_t list[0][SHA1_HASHSIZE];
+} thumbprint_list_t;
 
 #ifndef __VA_GROUP__
 #define __VA_GROUP__(...)  __VA_ARGS__
@@ -741,6 +748,7 @@ extern const int nb_steps[FS_MAX];
 extern float fScale;
 extern windows_version_t WindowsVersion;
 extern sbat_entry_t* sbat_entries;
+extern thumbprint_list_t *sb_active_certs, *sb_revoked_certs;
 extern int dialog_showing, force_update, fs_type, boot_type, partition_type, target_type;
 extern unsigned long syslinux_ldlinux_len[2];
 extern char ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
@@ -886,6 +894,7 @@ extern HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAcce
 	DWORD dwFlagsAndAttributes, LONGLONG fileSize);
 extern uint32_t ResolveDllAddress(dll_resolver_t* resolver);
 extern sbat_entry_t* GetSbatEntries(char* sbatlevel);
+extern thumbprint_list_t* GetThumbprintEntries(char* thumbprints_txt);
 extern uint16_t GetPeArch(uint8_t* buf);
 extern uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len);
 extern uint8_t* GetPeSignatureData(uint8_t* buf);

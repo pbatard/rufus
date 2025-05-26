@@ -1372,9 +1372,9 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 
 			// 2. WriteFile fails unless the size is a multiple of sector size
 			if (read_size[read_bufnum] % SelectedDrive.SectorSize != 0) {
-				if_not_assert(HI_ALIGN_X_TO_Y(read_size[read_bufnum], SelectedDrive.SectorSize) <= buf_size)
+				if_not_assert(CEILING_ALIGN(read_size[read_bufnum], SelectedDrive.SectorSize) <= buf_size)
 					goto out;
-				read_size[read_bufnum] = HI_ALIGN_X_TO_Y(read_size[read_bufnum], SelectedDrive.SectorSize);
+				read_size[read_bufnum] = CEILING_ALIGN(read_size[read_bufnum], SelectedDrive.SectorSize);
 			}
 
 			// 3. Switch to the next reading buffer

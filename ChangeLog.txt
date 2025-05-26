@@ -1,3 +1,15 @@
+o Version 4.8 (2025.06.??)
+    Switch to wimlib for all WIM image processing:
+      - Greatly speeds up image analysis when opening Windows ISOs
+      - Can speed up Windows To Go drive creation (But won't do miracles if you have a crap drive)
+      - Might help with Parallels limitations on Mac (But Rufus on Parallels is still UNSUPPORTED)
+      - Enables the splitting of >4GB files with Alt-E (But still WAY SLOWER than using UEFI:NTFS)
+    Switch to using Visual Studio binaries everywhere, due to MinGW DLL delay-loading limitations
+    Add more exceptions for Linux ISOs that restrict themselves to DD mode (Nobara, openSUSE, ...)
+    Improve reporting of UEFI bootloaders in the log, with info on the Secure Boot status
+    Fix an issue with size limitations when writing an uncompressed VHD back to the same drive
+    Fix a crash when opening the log with the 32-bit MinGW compiled version
+
 o Version 4.7 (2025.04.09)
     Add a mechanism to detect and download updated DBXs from the official UEFI repository
     Add ztsd compression support for disk images

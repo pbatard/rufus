@@ -1055,8 +1055,12 @@ void GetGrubVersion(char* buf, size_t buf_size, const char* source)
 	if (buf_size > max_string_size) {
 		for (i = 0; i < buf_size - max_string_size; i++) {
 			for (j = 0; j < ARRAYSIZE(grub_version_str); j++) {
-				if (memcmp(&buf[i], grub_version_str[j], strlen(grub_version_str[j]) + 1) == 0)
+				if (memcmp(&buf[i], grub_version_str[j], strlen(grub_version_str[j])) == 0) {
+					// For CentOS, who decided to add a '\n' after "GRUB  version %s"
+					if (buf[i + strlen(grub_version_str[j]) + 1] == '\0')
+						i++;
 					static_strcpy(grub_version, &buf[i + strlen(grub_version_str[j]) + 1]);
+				}
 			}
 			if (memcmp(&buf[i], grub_debug_is_enabled_str, strlen(grub_debug_is_enabled_str)) == 0)
 				has_grub_debug_is_enabled = TRUE;
@@ -1133,6 +1137,37 @@ void GetGrubFs(char* buf, size_t buf_size)
 			if (memcmp(&buf[i], grub_fshelp_str, strlen(grub_fshelp_str) + 1) == 0) {
 				if (buf[i + strlen(grub_fshelp_str) + 1] != 0 && strlen(&buf[i + strlen(grub_fshelp_str) + 1]) < 12) {
 					StrArrayAddUnique(&grub_filesystems, &buf[i + strlen(grub_fshelp_str) + 1], TRUE);
+				}
+			}
+		}
+	}
+}
+
+void GetEfiBootInfo(char* buf, size_t buf_size, const char* source)
+{
+	// Data to help us identify the EFI bootloader type
+	const struct {
+		const char* label;
+		const char* search_string;
+	} boot_info[] = {
+		{ "Shim", "UEFI SHIM\n$Version: "},
+		// NB: There's also an ID=systemd-boot\nVERSION="x.y.z" footer
+		// in the Arch systemd-boot EFI binary, but I'm not sure if we
+		// can count on this metadata footer to always be present...
+		{ "systemd-boot", "#### LoaderInfo: systemd-boot " },
+	};
+	const size_t max_string_size = 64;
+	size_t i, j, k;
+
+	if (buf_size > max_string_size) {
+		for (i = 0; i < buf_size - max_string_size; i++) {
+			for (j = 0; j < ARRAYSIZE(boot_info); j++) {
+				if (memcmp(&buf[i], boot_info[j].search_string, strlen(boot_info[j].search_string)) == 0) {
+					i += strlen(boot_info[j].search_string);
+					for (k = 0; k < 32 && i + k < buf_size - 1 && !isspace(buf[i + k]); k++);
+					buf[i + k] = '\0';
+					uprintf("  Detected %s version: %s (from '%s')", boot_info[j].label, &buf[i], source);
+					return;
 				}
 			}
 		}
@@ -1386,8 +1421,9 @@ out:
 			}
 		}
 		for (j = 0; j < ARRAYSIZE(img_report.efi_boot_entry); j++) {
+			if (!img_report.efi_boot_entry[j].path[0])
+				continue;
 			if (img_report.efi_boot_entry[j].type == EBT_GRUB) {
-
 				size = (size_t)ReadISOFileToBuffer(src_iso, img_report.efi_boot_entry[j].path, &buf);
 				if (size == 0) {
 					uprintf("  Could not read Grub version from '%s'", img_report.efi_boot_entry[j].path);
@@ -1395,6 +1431,14 @@ out:
 					img_report.has_grub2 |= 0x80;
 					GetGrubVersion(buf, size, img_report.efi_boot_entry[j].path);
 					GetGrubFs(buf, size);
+				}
+				safe_free(buf);
+			} else if (img_report.efi_boot_entry[j].type == EBT_MAIN) {
+				size = (size_t)ReadISOFileToBuffer(src_iso, img_report.efi_boot_entry[j].path, &buf);
+				if (size == 0) {
+					uprintf("  Could not parse '%s'", img_report.efi_boot_entry[j].path);
+				} else {
+					GetEfiBootInfo(buf, size, img_report.efi_boot_entry[j].path);
 				}
 				safe_free(buf);
 			}

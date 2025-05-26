@@ -46,7 +46,7 @@
 
 /* Globals */
 extern BOOL is_x86_64, appstore_version;
-extern char unattend_username[MAX_USERNAME_LENGTH], *sbat_level_txt;
+extern char unattend_username[MAX_USERNAME_LENGTH], *sbat_level_txt, *sb_active_txt, *sb_revoked_txt;
 extern HICON hSmallIcon, hBigIcon;
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
@@ -1404,15 +1404,35 @@ static DWORD WINAPI CheckForFidoThread(LPVOID param)
 	safe_free(fido_url);
 	safe_free(sbat_entries);
 	safe_free(sbat_level_txt);
+	safe_free(sb_active_txt);
+	safe_free(sb_revoked_txt);
 
 	// Get the latest sbat_level.txt data while we're poking the network for Fido.
 	len = DownloadToFileOrBuffer(RUFUS_URL "/sbat_level.txt", NULL, (BYTE**)&sbat_level_txt, NULL, FALSE);
-	if (len != 0 && len < 512) {
+	if (len != 0 && len < 1 * KB) {
 		sbat_entries = GetSbatEntries(sbat_level_txt);
-		if (sbat_entries != 0) {
+		if (sbat_entries != NULL) {
 			for (i = 0; sbat_entries[i].product != NULL; i++);
 			if (i > 0)
 				uprintf("Found %d additional UEFI revocation filters from remote SBAT", i);
+		}
+	}
+
+	// Get the active Secure Boot certificate thumbprints
+	len = DownloadToFileOrBuffer(RUFUS_URL "/sb_active.txt", NULL, (BYTE**)&sb_active_txt, NULL, FALSE);
+	if (len != 0 && len < 1 * KB) {
+		sb_active_certs = GetThumbprintEntries(sb_active_txt);
+		if (sb_active_certs != NULL) {
+			uprintf("Found %d active Secure Boot certificate entries from remote", sb_active_certs->count);
+		}
+	}
+
+	// Get the revoked Secure Boot certificate thumbprints
+	len = DownloadToFileOrBuffer(RUFUS_URL "/sb_revoked.txt", NULL, (BYTE**)&sb_revoked_txt, NULL, FALSE);
+	if (len != 0 && len < 1 * KB) {
+		sb_revoked_certs = GetThumbprintEntries(sb_revoked_txt);
+		if (sb_revoked_certs != NULL) {
+			uprintf("Found %d revoked Secure Boot certificate entries from remote", sb_revoked_certs->count);
 		}
 	}
 

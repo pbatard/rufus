@@ -30,10 +30,14 @@
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
-#define LO_ALIGN_X_TO_Y(x, y) (((x) / (y)) * (y))
-#define HI_ALIGN_X_TO_Y(x, y) ((((x) + (y) - 1) / (y)) * (y))
+#define MAP_BIT(bit) do { map[_log2(bit)] = b; b <<= 1; } while(0)
+
+#define FLOOR_ALIGN(x, y) (((x) / (y)) * (y))
+#define CEILING_ALIGN(x, y) ((((x) + (y) - 1) / (y)) * (y))
 
 #define IS_HEXASCII(c) (((c) >= '0' && (c) <= '9') || ((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
+#define FROM_HEXASCII(c) (((c) >= '0' && (c) <= '9') ? (c) - '0' : (((c) >= 'A' && (c) <= 'Z') ? (c) - 'A' + 10 : \
+	(((c) >= 'a' && (c) <= 'z') ? (c) - 'a' + 10 : 0 )))
 
 /*
  * Prefetch 64 bytes at address m, for read-only operation
