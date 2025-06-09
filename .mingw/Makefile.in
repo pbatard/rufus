@@ -377,7 +377,7 @@ all: crypt32-delaylib.lib dwmapi-delaylib.lib setupapi-delaylib.lib version-dela
 	$(AM_V_DLLTOOL) --input-def $< --output-delaylib $@ --dllname $(basename $<).dll
 
 clean:
-	$(RM) -rf *.lib
+	$(RM) -f $(CURDIR)/*.lib
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

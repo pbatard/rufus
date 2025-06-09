@@ -29,4 +29,4 @@ all: crypt32-delaylib.lib dwmapi-delaylib.lib setupapi-delaylib.lib version-dela
 	$(AM_V_DLLTOOL) --input-def $< --output-delaylib $@ --dllname $(basename $<).dll
 
 clean:
-	$(RM) -rf *.lib
+	$(RM) -f $(CURDIR)/*.lib
