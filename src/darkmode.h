@@ -20,7 +20,7 @@
 #pragma once
 
 // WinAPI
-#include <Windows.h>
+#include <windows.h>
 
 BOOL IsDarkModeEnabled(void);
 BOOL GetDarkModeFromReg(void);

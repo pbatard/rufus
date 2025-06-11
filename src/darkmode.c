@@ -19,21 +19,34 @@
 
 #include "darkmode.h"
 #include "rufus.h"
+
 #include <dwmapi.h>
-#include <math.h>
 #include <richedit.h>
-#include <Shlwapi.h>
-#include <Uxtheme.h>
-#include <VersionHelpers.h>
+#include <uxtheme.h>
+#include <versionhelpers.h>
 #include <vssym32.h>
 
+#include <math.h>
 
-#define WIN10_22H2 19045 // Windows 10 22H2 (Last)
-#define WIN11_21H2 22000 // Windows 11 first "stable" build
+
+typedef enum _WindowsBuild {
+	WIN10_22H2 = 19045,  // Windows 10 22H2 (Last)
+	WIN11_21H2 = 22000   // Windows 11 first "stable" build
+} WindowsBuild;
 
 #define TOOLBAR_ICON_COLOR      RGB(0x29, 0x80, 0xB9) // from "ui.h"
 #define TOOLBAR_ICON_COLOR_GOLD RGB(0xFF, 0xD7, 0x00) // gold
-static COLORREF cAccent = TOOLBAR_ICON_COLOR;
+static COLORREF g_cAccent = TOOLBAR_ICON_COLOR;
+
+typedef enum _SubclassID {
+	ButtonSubclassID = 42,
+	GroupboxSubclassID,
+	WindowNotifySubclassID,
+	StatusBarSubclassID,
+	ProgressBarSubclassID,
+	StaticTextSubclassID,
+	WindowCtlColorSubclassID
+} SubclassID;
 
 typedef enum _PreferredAppMode {
 	Default,
@@ -86,7 +99,7 @@ PF_TYPE_DECL(WINAPI, PreferredAppMode, SetPreferredAppMode, (PreferredAppMode));
 PF_TYPE_DECL(WINAPI, VOID, FlushMenuThemes, (VOID));
 PF_TYPE_DECL(WINAPI, BOOL, SetWindowCompositionAttribute, (HWND, WINDOWCOMPOSITIONATTRIBDATA*));
 
-static BOOL isDarkEnabled = FALSE;
+static BOOL g_isDarkEnabled = FALSE;
 
 static BOOL IsAtLeastWin10Build(DWORD buildNumber)
 {
@@ -100,6 +113,7 @@ static BOOL IsAtLeastWin10Build(DWORD buildNumber)
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEXW));
 	osvi.dwOSVersionInfoSize = sizeof(osvi);
 	osvi.dwBuildNumber = buildNumber;
+
 	return VerifyVersionInfoW(&osvi, VER_BUILDNUMBER, mask);
 }
 
@@ -126,7 +140,7 @@ static BOOL IsHighContrast(void)
 
 BOOL IsDarkModeEnabled(void)
 {
-	return isDarkEnabled;
+	return g_isDarkEnabled;
 }
 
 BOOL GetDarkModeFromReg(void)
@@ -138,20 +152,20 @@ BOOL GetDarkModeFromReg(void)
 
 	LSTATUS result = RegGetValueW(HKEY_CURRENT_USER, lpSubKey, lpValue, RRF_RT_REG_DWORD, NULL, &data, &dwBufSize);
 	if (result != ERROR_SUCCESS) {
-		isDarkEnabled = FALSE;
-		return isDarkEnabled;
+		g_isDarkEnabled = FALSE;
+		return g_isDarkEnabled;
 	}
 
 	// dark mode is 0, light mode is 1
-	isDarkEnabled = (data == 0) ? TRUE : FALSE;
-	return isDarkEnabled;
+	g_isDarkEnabled = (data == 0) ? TRUE : FALSE;
+	return g_isDarkEnabled;
 }
 
 
 void InitDarkMode(HWND hWnd)
 {
 	if (!IsAtLeastWin10() || IsHighContrast()) {
-		isDarkEnabled = FALSE;
+		g_isDarkEnabled = FALSE;
 		return;
 	}
 
@@ -168,7 +182,7 @@ void InitDarkMode(HWND hWnd)
 	return;
 
 out:
-	isDarkEnabled = FALSE;
+	g_isDarkEnabled = FALSE;
 }
 
 void SetDarkTitleBar(HWND hWnd)
@@ -186,7 +200,7 @@ void SetDarkTitleBar(HWND hWnd)
 	}
 	else {
 out:
-		isDarkEnabled = FALSE;
+		g_isDarkEnabled = FALSE;
 	}
 }
 
@@ -209,17 +223,17 @@ static double LinearValue(double colorChannel)
 	return pow((colorChannel + 0.055) / 1.055, 2.4);
 }
 
-static double CalculatePerceivedLightness(COLORREF c)
+static double CalculatePerceivedLightness(COLORREF clr)
 {
-	double r = LinearValue((double)GetRValue(c));
-	double g = LinearValue((double)GetGValue(c));
-	double b = LinearValue((double)GetBValue(c));
+	double r = LinearValue((double)GetRValue(clr));
+	double g = LinearValue((double)GetGValue(clr));
+	double b = LinearValue((double)GetBValue(clr));
 
-	double luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+	double luminance = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
 
 	double lightness = (luminance <= 216.0 / 24389.0) ?
 		(luminance * 24389.0 / 27.0) :
-		(pow(luminance, 1.0 / 3.0) * 116.0 - 16.0);
+		((pow(luminance, 1.0 / 3.0) * 116.0) - 16.0);
 
 	return lightness;
 }
@@ -227,31 +241,32 @@ static double CalculatePerceivedLightness(COLORREF c)
 BOOL InitAccentColor(void)
 {
 	BOOL opaque = TRUE;
-	if (SUCCEEDED(DwmGetColorizationColor(&cAccent, &opaque))) {
-		cAccent = RGB(GetBValue(cAccent), GetGValue(cAccent), GetRValue(cAccent));
+	if (SUCCEEDED(DwmGetColorizationColor(&g_cAccent, &opaque))) {
+		g_cAccent = RGB(GetBValue(g_cAccent), GetGValue(g_cAccent), GetRValue(g_cAccent));
 		// check if accent color is too dark
 		static double lightnessTreshold = 50.0 - 4.0;
-		if (CalculatePerceivedLightness(cAccent) < lightnessTreshold) {
-			cAccent = TOOLBAR_ICON_COLOR_GOLD;
+		if (CalculatePerceivedLightness(g_cAccent) < lightnessTreshold) {
+			g_cAccent = TOOLBAR_ICON_COLOR_GOLD;
 			return FALSE;
 		}
 		return TRUE;
 	}
-	cAccent = TOOLBAR_ICON_COLOR;
+	g_cAccent = TOOLBAR_ICON_COLOR;
 	return FALSE;
 }
 
 static COLORREF GetAccentColor(void)
 {
-	return cAccent;
+	return g_cAccent;
 }
 
 // Rufus has only icons with one color, so changing color is easy
 BOOL ChangeIconColor(HICON* hIcon, COLORREF newColor) {
-	HDC hdcScreen, hdcBitmap = NULL;
+	HDC hdcScreen = NULL;
+	HDC hdcBitmap = NULL;
 	HBITMAP hbm = NULL;
-	BITMAP bm;
-	ZeroMemory(&bm, sizeof(BITMAP));
+	BITMAP bmp;
+	ZeroMemory(&bmp, sizeof(BITMAP));
 	ICONINFO ii;
 	HICON hIconNew = NULL;
 	RGBQUAD* pixels = NULL;
@@ -268,18 +283,18 @@ BOOL ChangeIconColor(HICON* hIcon, COLORREF newColor) {
 	hdcScreen = GetDC(NULL);
 	if (hdcScreen) {
 		if (hdcBitmap) {
-			if (GetIconInfo(*hIcon, &ii) && GetObject(ii.hbmColor, sizeof(BITMAP), &bm)) {
+			if (GetIconInfo(*hIcon, &ii) && GetObject(ii.hbmColor, sizeof(BITMAP), &bmp)) {
 				BITMAPINFO bmi = { 0 };
 				bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-				bmi.bmiHeader.biWidth = bm.bmWidth;
-				bmi.bmiHeader.biHeight = -bm.bmHeight;
+				bmi.bmiHeader.biWidth = bmp.bmWidth;
+				bmi.bmiHeader.biHeight = -bmp.bmHeight;
 				bmi.bmiHeader.biPlanes = 1;
 				bmi.bmiHeader.biBitCount = 32;
 				bmi.bmiHeader.biCompression = BI_RGB;
 
-				pixels = (RGBQUAD*)malloc((size_t)bm.bmWidth * bm.bmHeight * sizeof(RGBQUAD));
-				if (pixels && GetDIBits(hdcBitmap, ii.hbmColor, 0, bm.bmHeight, pixels, &bmi, DIB_RGB_COLORS)) {
-					for (int i = 0; i < bm.bmWidth * bm.bmHeight; i++) {
+				pixels = (RGBQUAD*)malloc((size_t)bmp.bmWidth * bmp.bmHeight * sizeof(RGBQUAD));
+				if (pixels && GetDIBits(hdcBitmap, ii.hbmColor, 0, bmp.bmHeight, pixels, &bmi, DIB_RGB_COLORS)) {
+					for (int i = 0; i < bmp.bmWidth * bmp.bmHeight; i++) {
 						if (pixels[i].rgbReserved != 0) {
 							pixels[i].rgbRed = GetRValue(newColor);
 							pixels[i].rgbGreen = GetGValue(newColor);
@@ -287,9 +302,9 @@ BOOL ChangeIconColor(HICON* hIcon, COLORREF newColor) {
 						}
 					}
 
-					hbm = CreateCompatibleBitmap(hdcScreen, bm.bmWidth, bm.bmHeight);
+					hbm = CreateCompatibleBitmap(hdcScreen, bmp.bmWidth, bmp.bmHeight);
 					if (hbm) {
-						SetDIBits(hdcBitmap, hbm, 0, bm.bmHeight, pixels, &bmi, DIB_RGB_COLORS);
+						SetDIBits(hdcBitmap, hbm, 0, bmp.bmHeight, pixels, &bmi, DIB_RGB_COLORS);
 
 						if (ii.hbmColor) {
 							DeleteObject(ii.hbmColor);
@@ -312,7 +327,7 @@ BOOL ChangeIconColor(HICON* hIcon, COLORREF newColor) {
 
 				free(pixels);
 				pixels = NULL;
-				if (hbm) DeleteObject(hbm);
+				if (hbm) { DeleteObject(hbm); }
 				DeleteObject(ii.hbmColor);
 				DeleteObject(ii.hbmMask);
 			}
@@ -337,12 +352,18 @@ BOOL ChangeIconColor(HICON* hIcon, COLORREF newColor) {
  * Dark mode custom colors
  */
 
-static HBRUSH hbrBackground = NULL;
-static HBRUSH hbrBackgroundControl = NULL;
-static HBRUSH hbrBackgroundHot = NULL;
-static HBRUSH hbrEdge = NULL;
-static HPEN hpnEdge = NULL;
-static HPEN hpnEdgeHot = NULL;
+typedef struct _ThemeResources {
+	HBRUSH hbrBackground;
+	HBRUSH hbrBackgroundControl;
+	HBRUSH hbrBackgroundHot;
+	HBRUSH hbrEdge;
+	HPEN hpnEdge;
+	HPEN hpnEdgeHot;
+} ThemeResources;
+
+static ThemeResources g_themeResources = {
+	NULL, NULL, NULL, NULL, NULL, NULL
+};
 
 COLORREF GetTextColorForDarkMode(void)
 {
@@ -381,59 +402,59 @@ static COLORREF GetHotEdgeColor(void)
 
 static HBRUSH GetDlgBackgroundBrush(void)
 {
-	if (hbrBackground == NULL) {
-		hbrBackground = CreateSolidBrush(GetDlgBackgroundColor());
+	if (g_themeResources.hbrBackground == NULL) {
+		g_themeResources.hbrBackground = CreateSolidBrush(GetDlgBackgroundColor());
 	}
-	return hbrBackground;
+	return g_themeResources.hbrBackground;
 }
 
 static HBRUSH GetCtrlBackgroundBrush(void)
 {
-	if (hbrBackgroundControl == NULL) {
-		hbrBackgroundControl = CreateSolidBrush(GetCtrlBackgroundColor());
+	if (g_themeResources.hbrBackgroundControl == NULL) {
+		g_themeResources.hbrBackgroundControl = CreateSolidBrush(GetCtrlBackgroundColor());
 	}
-	return hbrBackgroundControl;
+	return g_themeResources.hbrBackgroundControl;
 }
 
 static HBRUSH GetHotBackgroundBrush(void)
 {
-	if (hbrBackgroundHot == NULL) {
-		hbrBackgroundHot = CreateSolidBrush(GetHotBackgroundColor());
+	if (g_themeResources.hbrBackgroundHot == NULL) {
+		g_themeResources.hbrBackgroundHot = CreateSolidBrush(GetHotBackgroundColor());
 	}
-	return hbrBackgroundHot;
+	return g_themeResources.hbrBackgroundHot;
 }
 
 static HBRUSH GetEdgeBrush(void)
 {
-	if (hbrEdge == NULL) {
-		hbrEdge = CreateSolidBrush(GetEdgeColor());
+	if (g_themeResources.hbrEdge == NULL) {
+		g_themeResources.hbrEdge = CreateSolidBrush(GetEdgeColor());
 	}
-	return hbrEdge;
+	return g_themeResources.hbrEdge;
 }
 
 static HPEN GetEdgePen(void)
 {
-	if (hpnEdge == NULL) {
-		hpnEdge = CreatePen(PS_SOLID, 1, GetEdgeColor());
+	if (g_themeResources.hpnEdge == NULL) {
+		g_themeResources.hpnEdge = CreatePen(PS_SOLID, 1, GetEdgeColor());
 	}
-	return hpnEdge;
+	return g_themeResources.hpnEdge;
 }
 static HPEN GetHotEdgePen(void)
 {
-	if (hpnEdgeHot == NULL) {
-		hpnEdgeHot = CreatePen(PS_SOLID, 1, GetHotEdgeColor());
+	if (g_themeResources.hpnEdgeHot == NULL) {
+		g_themeResources.hpnEdgeHot = CreatePen(PS_SOLID, 1, GetHotEdgeColor());
 	}
-	return hpnEdgeHot;
+	return g_themeResources.hpnEdgeHot;
 }
 
 void DestroyDarkModeGDIObjects(void)
 {
-	safe_delete_object(hbrBackground);
-	safe_delete_object(hbrBackgroundControl);
-	safe_delete_object(hbrBackgroundHot);
-	safe_delete_object(hbrEdge);
-	safe_delete_object(hpnEdge);
-	safe_delete_object(hpnEdgeHot);
+	safe_delete_object(g_themeResources.hbrBackground);
+	safe_delete_object(g_themeResources.hbrBackgroundControl);
+	safe_delete_object(g_themeResources.hbrBackgroundHot);
+	safe_delete_object(g_themeResources.hbrEdge);
+	safe_delete_object(g_themeResources.hpnEdge);
+	safe_delete_object(g_themeResources.hpnEdgeHot);
 }
 
 /*
@@ -463,17 +484,8 @@ typedef struct _ButtonData {
 	int iStateID;
 } ButtonData;
 
-const UINT_PTR g_buttonSubclassID = 42;
-const UINT_PTR g_groupboxSubclassID = 42;
-
 static void RenderButton(HWND hWnd, HDC hdc, HTHEME hTheme, int iPartID, int iStateID)
 {
-	RECT rcClient = { 0 };
-	wchar_t szText[256] = { '\0' };
-	DWORD nState = (DWORD)SendMessage(hWnd, BM_GETSTATE, 0, 0);
-	DWORD uiState = (DWORD)SendMessage(hWnd, WM_QUERYUISTATE, 0, 0);
-	LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
-
 	HFONT hFont = NULL;
 	BOOL isFontCreated = FALSE;
 	LOGFONT lf;
@@ -488,18 +500,54 @@ static void RenderButton(HWND hWnd, HDC hdc, HTHEME hTheme, int iPartID, int iSt
 
 	HFONT holdFont = (HFONT)SelectObject(hdc, hFont);
 
-	DWORD dtFlags = DT_LEFT; // DT_LEFT is 0
-	dtFlags |= (nStyle & BS_MULTILINE) ? DT_WORDBREAK : DT_SINGLELINE;
-	dtFlags |= ((nStyle & BS_CENTER) == BS_CENTER) ? DT_CENTER : (nStyle & BS_RIGHT) ? DT_RIGHT : 0;
-	dtFlags |= ((nStyle & BS_VCENTER) == BS_VCENTER) ? DT_VCENTER : (nStyle & BS_BOTTOM) ? DT_BOTTOM : 0;
-	dtFlags |= (uiState & UISF_HIDEACCEL) ? DT_HIDEPREFIX : 0;
+	LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
+	const BOOL isMultiline = (nStyle & BS_MULTILINE) == BS_MULTILINE;
+	const BOOL isTop = (nStyle & BS_TOP) == BS_TOP;
+	const BOOL isBottom = (nStyle & BS_BOTTOM) == BS_BOTTOM;
+	const BOOL isCenter = (nStyle & BS_CENTER) == BS_CENTER;
+	const BOOL isRight = (nStyle & BS_RIGHT) == BS_RIGHT;
+	const BOOL isVCenter = (nStyle & BS_VCENTER) == BS_VCENTER;
 
-	if (!(nStyle & BS_MULTILINE) && !(nStyle & BS_BOTTOM) && !(nStyle & BS_TOP)) {
-		dtFlags |= DT_VCENTER;
+	DWORD dtFlags = DT_LEFT; // DT_LEFT is 0
+	if (isMultiline)
+	{
+		dtFlags |= DT_WORDBREAK;
+	}
+	else
+	{
+		dtFlags |= DT_SINGLELINE;
 	}
 
+	if (isCenter)
+	{
+		dtFlags |= DT_CENTER;
+	}
+	else if (isRight)
+	{
+		dtFlags |= DT_RIGHT;
+	}
+
+	if (isVCenter || (!isMultiline && !isBottom && !isTop))
+	{
+		dtFlags |= DT_VCENTER;
+	}
+	else if (isBottom)
+	{
+		dtFlags |= DT_BOTTOM;
+	}
+
+	DWORD uiState = (DWORD)SendMessage(hWnd, WM_QUERYUISTATE, 0, 0);
+	const BOOL hidePrefix = (uiState & UISF_HIDEACCEL) == UISF_HIDEACCEL;
+	if (hidePrefix)
+	{
+		dtFlags |= DT_HIDEPREFIX;
+	}
+
+	RECT rcClient = { 0 };
 	GetClientRect(hWnd, &rcClient);
-	GetWindowText(hWnd, szText, _countof(szText));
+
+	WCHAR buffer[MAX_PATH] = { '\0' };
+	GetWindowText(hWnd, buffer, _countof(buffer));
 
 	SIZE szBox = { 0 };
 	GetThemePartSize(hTheme, hdc, iPartID, iStateID, NULL, TS_DRAW, &szBox);
@@ -508,7 +556,7 @@ static void RenderButton(HWND hWnd, HDC hdc, HTHEME hTheme, int iPartID, int iSt
 	GetThemeBackgroundContentRect(hTheme, hdc, iPartID, iStateID, &rcClient, &rcText);
 
 	RECT rcBackground = rcClient;
-	if ((dtFlags & DT_SINGLELINE) == DT_SINGLELINE) {
+	if (!isMultiline) {
 		rcBackground.top += (rcText.bottom - rcText.top - szBox.cy) / 2;
 	}
 	rcBackground.bottom = rcBackground.top + szBox.cy;
@@ -524,13 +572,13 @@ static void RenderButton(HWND hWnd, HDC hdc, HTHEME hTheme, int iPartID, int iSt
 	dtto.dwFlags = DTT_TEXTCOLOR;
 	dtto.crText = !IsWindowEnabled(hWnd) ? GetDisabledTextColor() : GetTextColorForDarkMode();
 
-	DrawThemeTextEx(hTheme, hdc, iPartID, iStateID, szText, -1, dtFlags, &rcText, &dtto);
+	DrawThemeTextEx(hTheme, hdc, iPartID, iStateID, buffer, -1, dtFlags, &rcText, &dtto);
 
+	const DWORD nState = (DWORD)SendMessage(hWnd, BM_GETSTATE, 0, 0);
 	if (((nState & BST_FOCUS) == BST_FOCUS) && ((uiState & UISF_HIDEFOCUS) != UISF_HIDEFOCUS)) {
-		RECT rcTextOut = rcText;
 		dtto.dwFlags |= DTT_CALCRECT;
-		DrawThemeTextEx(hTheme, hdc, iPartID, iStateID, szText, -1, dtFlags | DT_CALCRECT, &rcTextOut, &dtto);
-		RECT rcFocus = rcTextOut;
+		DrawThemeTextEx(hTheme, hdc, iPartID, iStateID, buffer, -1, dtFlags | DT_CALCRECT, &rcText, &dtto);
+		RECT rcFocus = rcText;
 		++rcFocus.bottom;
 		--rcFocus.left;
 		++rcFocus.right;
@@ -543,9 +591,9 @@ static void RenderButton(HWND hWnd, HDC hdc, HTHEME hTheme, int iPartID, int iSt
 	}
 }
 
-static void PaintButton(HWND hWnd, HDC hdc, ButtonData buttonData)
+static void PaintButton(HWND hWnd, HDC hdc, ButtonData* pButtonData)
 {
-	DWORD nState = (DWORD)SendMessage(hWnd, BM_GETSTATE, 0, 0);
+	const DWORD nState = (DWORD)SendMessage(hWnd, BM_GETSTATE, 0, 0);
 	const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
 	const LONG_PTR nBtnStyle = nStyle & BS_TYPEMASK;
 
@@ -578,11 +626,11 @@ static void PaintButton(HWND hWnd, HDC hdc, ButtonData buttonData)
 	// states of BP_CHECKBOX and BP_RADIOBUTTON are the same
 	int iStateID = RBS_UNCHECKEDNORMAL;
 
-	if (nStyle & WS_DISABLED)		iStateID = RBS_UNCHECKEDDISABLED;
-	else if (nState & BST_PUSHED)	iStateID = RBS_UNCHECKEDPRESSED;
-	else if (nState & BST_HOT)		iStateID = RBS_UNCHECKEDHOT;
+	if (!IsWindowEnabled(hWnd))     { iStateID = RBS_UNCHECKEDDISABLED; }
+	else if (nState & BST_PUSHED)   { iStateID = RBS_UNCHECKEDPRESSED; }
+	else if (nState & BST_HOT)      { iStateID = RBS_UNCHECKEDHOT; }
 
-	if (nState & BST_CHECKED)		iStateID += 4;
+	if (nState & BST_CHECKED)       { iStateID += 4; }
 
 	if (BufferedPaintRenderAnimation(hWnd, hdc)) {
 		return;
@@ -592,8 +640,8 @@ static void PaintButton(HWND hWnd, HDC hdc, ButtonData buttonData)
 	ZeroMemory(&animParams, sizeof(BP_ANIMATIONPARAMS));
 	animParams.cbSize = sizeof(BP_ANIMATIONPARAMS);
 	animParams.style = BPAS_LINEAR;
-	if (iStateID != buttonData.iStateID) {
-		GetThemeTransitionDuration(buttonData.hTheme, iPartID, buttonData.iStateID, iStateID, TMT_TRANSITIONDURATIONS, &animParams.dwDuration);
+	if (iStateID != pButtonData->iStateID) {
+		GetThemeTransitionDuration(pButtonData->hTheme, iPartID, pButtonData->iStateID, iStateID, TMT_TRANSITIONDURATIONS, &animParams.dwDuration);
 	}
 
 	RECT rcClient = { 0 };
@@ -604,20 +652,20 @@ static void PaintButton(HWND hWnd, HDC hdc, ButtonData buttonData)
 	HANIMATIONBUFFER hbpAnimation = BeginBufferedAnimation(hWnd, hdc, &rcClient, BPBF_COMPATIBLEBITMAP, NULL, &animParams, &hdcFrom, &hdcTo);
 	if (hbpAnimation) {
 		if (hdcFrom) {
-			RenderButton(hWnd, hdcFrom, buttonData.hTheme, iPartID, buttonData.iStateID);
+			RenderButton(hWnd, hdcFrom, pButtonData->hTheme, iPartID, pButtonData->iStateID);
 		}
 		if (hdcTo) {
-			RenderButton(hWnd, hdcTo, buttonData.hTheme, iPartID, iStateID);
+			RenderButton(hWnd, hdcTo, pButtonData->hTheme, iPartID, iStateID);
 		}
 
-		buttonData.iStateID = iStateID;
+		pButtonData->iStateID = iStateID;
 
 		EndBufferedAnimation(hbpAnimation, TRUE);
 	}
 	else {
-		RenderButton(hWnd, hdc, buttonData.hTheme, iPartID, iStateID);
+		RenderButton(hWnd, hdc, pButtonData->hTheme, iPartID, iStateID);
 
-		buttonData.iStateID = iStateID;
+		pButtonData->iStateID = iStateID;
 	}
 }
 
@@ -672,7 +720,7 @@ static LRESULT CALLBACK ButtonSubclass(
 			hdc = BeginPaint(hWnd, &ps);
 		}
 
-		PaintButton(hWnd, hdc, *pButtonData);
+		PaintButton(hWnd, hdc, pButtonData);
 
 		if (ps.hdc) {
 			EndPaint(hWnd, &ps);
@@ -717,20 +765,20 @@ static LRESULT CALLBACK ButtonSubclass(
 
 static void SubclassButtonControl(HWND hWnd)
 {
-	if (GetWindowSubclass(hWnd, ButtonSubclass, g_buttonSubclassID, NULL) == FALSE) {
+	if (GetWindowSubclass(hWnd, ButtonSubclass, (UINT_PTR)ButtonSubclassID, NULL) == FALSE) {
 		DWORD_PTR pButtonData = (DWORD_PTR)calloc(1, sizeof(ButtonData));
-		SetWindowSubclass(hWnd, ButtonSubclass, g_buttonSubclassID, pButtonData);
+		SetWindowSubclass(hWnd, ButtonSubclass, (UINT_PTR)ButtonSubclassID, pButtonData);
 	}
 }
 
 static void PaintGroupbox(HWND hWnd, HDC hdc, ButtonData buttonData)
 {
-	BOOL isDisabled = !IsWindowEnabled(hWnd);
-	int iPartID = BP_GROUPBOX;
-	int iStateID = isDisabled ? GBS_DISABLED : GBS_NORMAL;
+	const BOOL isDisabled = !IsWindowEnabled(hWnd);
+	const int iPartID = BP_GROUPBOX;
+	const int iStateID = isDisabled ? GBS_DISABLED : GBS_NORMAL;
 
-	HFONT hFont = NULL;
 	BOOL isFontCreated = FALSE;
+	HFONT hFont = NULL;
 	LOGFONT lf;
 	if (SUCCEEDED(GetThemeFont(buttonData.hTheme, hdc, iPartID, iStateID, TMT_FONT, &lf))) {
 		hFont = CreateFontIndirect(&lf);
@@ -739,11 +787,12 @@ static void PaintGroupbox(HWND hWnd, HDC hdc, ButtonData buttonData)
 
 	if (!hFont) {
 		hFont = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
+		isFontCreated = FALSE;
 	}
 
 	HFONT holdFont = (HFONT)SelectObject(hdc, hFont);
 
-	wchar_t buffer[256] = { '\0' };
+	WCHAR buffer[MAX_PATH] = { '\0' };
 	GetWindowText(hWnd, buffer, _countof(buffer));
 
 	const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
@@ -802,8 +851,9 @@ static void PaintGroupbox(HWND hWnd, HDC hdc, ButtonData buttonData)
 	}
 
 	SelectObject(hdc, holdFont);
-	if (isFontCreated)
+	if (isFontCreated) {
 		DeleteObject(hFont);
+	}
 }
 
 static LRESULT CALLBACK GroupboxSubclass(
@@ -884,9 +934,9 @@ static LRESULT CALLBACK GroupboxSubclass(
 
 static void SubclassGroupboxControl(HWND hWnd)
 {
-	if (GetWindowSubclass(hWnd, GroupboxSubclass, g_groupboxSubclassID, NULL) == FALSE) {
+	if (GetWindowSubclass(hWnd, GroupboxSubclass, (UINT_PTR)GroupboxSubclassID, NULL) == FALSE) {
 		DWORD_PTR pButtonData = (DWORD_PTR)calloc(1, sizeof(ButtonData));
-		SetWindowSubclass(hWnd, GroupboxSubclass, g_groupboxSubclassID, pButtonData);
+		SetWindowSubclass(hWnd, GroupboxSubclass, (UINT_PTR)GroupboxSubclassID, pButtonData);
 	}
 }
 
@@ -894,7 +944,6 @@ static void SubclassGroupboxControl(HWND hWnd)
  * Toolbar section
  */
 
-static UINT_PTR g_windowNotifySubclassID = 42;
 
 static LRESULT DarkToolBarNotifyCustomDraw(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -1025,7 +1074,8 @@ static LRESULT CALLBACK WindowNotifySubclass(
 			if (_wcsicmp(str, TOOLBARCLASSNAME) == 0) {
 				return DarkToolBarNotifyCustomDraw(hWnd, uMsg, wParam, lParam);
 			}
-			else if (_wcsicmp(str, TRACKBAR_CLASS) == 0) {
+
+			if (_wcsicmp(str, TRACKBAR_CLASS) == 0) {
 				return DarkTrackBarNotifyCustomDraw(hWnd, uMsg, wParam, lParam);
 			}
 		}
@@ -1039,8 +1089,8 @@ static LRESULT CALLBACK WindowNotifySubclass(
 
 void SubclassNotifyCustomDraw(HWND hWnd)
 {
-	if (GetWindowSubclass(hWnd, WindowNotifySubclass, g_windowNotifySubclassID, NULL) == FALSE) {
-		SetWindowSubclass(hWnd, WindowNotifySubclass, g_windowNotifySubclassID, 0);
+	if (GetWindowSubclass(hWnd, WindowNotifySubclass, (UINT_PTR)WindowNotifySubclassID, NULL) == FALSE) {
+		SetWindowSubclass(hWnd, WindowNotifySubclass, (UINT_PTR)WindowNotifySubclassID, 0);
 	}
 }
 
@@ -1052,7 +1102,7 @@ typedef struct _StatusBarData {
 	HFONT hFont;
 } StatusBarData;
 
-const UINT_PTR g_statusBarSubclassID = 42;
+
 
 static void PaintStatusBar(HWND hWnd, HDC hdc, StatusBarData statusBarData)
 {
@@ -1064,27 +1114,28 @@ static void PaintStatusBar(HWND hWnd, HDC hdc, StatusBarData statusBarData)
 	ZeroMemory(&borders, sizeof(borders));
 	SendMessage(hWnd, SB_GETBORDERS, 0, (LPARAM)&borders);
 
-	RECT rcClient = { 0 };
-	GetClientRect(hWnd, &rcClient);
-
 	HPEN holdPen = (HPEN)SelectObject(hdc, GetEdgePen());
 	HFONT holdFont = (HFONT)SelectObject(hdc, statusBarData.hFont);
 
 	SetBkMode(hdc, TRANSPARENT);
 	SetTextColor(hdc, GetTextColorForDarkMode());
 
+	RECT rcClient = { 0 };
+	GetClientRect(hWnd, &rcClient);
+
 	FillRect(hdc, &rcClient, GetDlgBackgroundBrush());
 
-	int nParts = (int)SendMessage(hWnd, SB_GETPARTS, 0, 0);
+	const int nParts = (int)SendMessage(hWnd, SB_GETPARTS, 0, 0);
 	RECT rcPart = { 0 };
 	RECT rcIntersect = { 0 };
+	const int iLastDiv = nParts - 1;
 	for (int i = 0; i < nParts; ++i) {
 		SendMessage(hWnd, SB_GETRECT, i, (LPARAM)&rcPart);
 		if (IntersectRect(&rcIntersect, &rcPart, &rcClient) == FALSE) {
 			continue;
 		}
 
-		if (i < nParts - 1) {
+		if (i < iLastDiv) {
 			POINT edges[] = {
 				{rcPart.right - borders.between, rcPart.top + 1},
 				{rcPart.right - borders.between, rcPart.bottom - 3}
@@ -1092,18 +1143,16 @@ static void PaintStatusBar(HWND hWnd, HDC hdc, StatusBarData statusBarData)
 			Polyline(hdc, edges, _countof(edges));
 		}
 
-		DWORD cchText = LOWORD(SendMessage(hWnd, SB_GETTEXTLENGTH, i, 0));
-		LPWSTR buffer = (LPWSTR)calloc((size_t)cchText + 1, sizeof(WCHAR));
-		LRESULT lr = SendMessage(hWnd, SB_GETTEXT, i, (LPARAM)buffer);
-		BOOL ownerDraw = FALSE;
-		if (cchText == 0 && (lr & ~(SBT_NOBORDERS | SBT_POPOUT | SBT_RTLREADING)) != 0) {
-			ownerDraw = TRUE;
-		}
-
 		rcPart.left += borders.between;
 		rcPart.right -= borders.vertical;
 
-		if (ownerDraw) {
+		const LRESULT retValLen = SendMessage(hWnd, SB_GETTEXTLENGTH, i, 0);
+		const DWORD cchText = LOWORD(retValLen);
+
+		LPWSTR buffer = (LPWSTR)calloc((size_t)cchText + 1, sizeof(WCHAR));
+		const LRESULT retValText = SendMessage(hWnd, SB_GETTEXT, i, (LPARAM)buffer);
+
+		if (cchText == 0 && (HIWORD(retValLen) & SBT_OWNERDRAW)) {
 			UINT id = GetDlgCtrlID(hWnd);
 			DRAWITEMSTRUCT dis = {
 				0
@@ -1114,7 +1163,7 @@ static void PaintStatusBar(HWND hWnd, HDC hdc, StatusBarData statusBarData)
 				, hWnd
 				, hdc
 				, rcPart
-				, (ULONG_PTR)lr
+				, (ULONG_PTR)retValText
 			};
 
 			SendMessage(GetParent(hWnd), WM_DRAWITEM, id, (LPARAM)&dis);
@@ -1200,7 +1249,7 @@ static LRESULT CALLBACK StatusBarSubclass(
 void SubclassStatusBar(HWND hWnd)
 {
 	if (IsDarkModeEnabled() &&
-		GetWindowSubclass(hWnd, StatusBarSubclass, g_statusBarSubclassID, NULL) == FALSE)
+		GetWindowSubclass(hWnd, StatusBarSubclass, (UINT_PTR)StatusBarSubclassID, NULL) == FALSE)
 	{
 		StatusBarData* statusBarData = (StatusBarData*)malloc(sizeof(StatusBarData));
 		if (statusBarData == NULL) {
@@ -1216,7 +1265,7 @@ void SubclassStatusBar(HWND hWnd)
 			statusBarData->hFont = CreateFontIndirect(&lf);
 		}
 		DWORD_PTR pStatusBarData = (DWORD_PTR)statusBarData;
-		SetWindowSubclass(hWnd, StatusBarSubclass, g_statusBarSubclassID, pStatusBarData);
+		SetWindowSubclass(hWnd, StatusBarSubclass, (UINT_PTR)StatusBarSubclassID, pStatusBarData);
 	}
 }
 
@@ -1228,8 +1277,6 @@ typedef struct _ProgressBarData {
 	HTHEME hTheme;
 	int iStateID;
 } ProgressBarData;
-
-const UINT_PTR g_progressBarSubclassID = 42;
 
 static void GetProgressBarRects(HWND hWnd, RECT* rcEmpty, RECT* rcFilled)
 {
@@ -1352,9 +1399,9 @@ static LRESULT CALLBACK ProgressBarSubclass(
 void SubclassProgressBarControl(HWND hWnd)
 {
 	if (IsDarkModeEnabled() &&
-		GetWindowSubclass(hWnd, ProgressBarSubclass, g_progressBarSubclassID, NULL) == FALSE) {
+		GetWindowSubclass(hWnd, ProgressBarSubclass, (UINT_PTR)ProgressBarSubclassID, NULL) == FALSE) {
 		DWORD_PTR pProgressBarData = (DWORD_PTR)calloc(1, sizeof(ProgressBarData));
-		SetWindowSubclass(hWnd, ProgressBarSubclass, g_progressBarSubclassID, pProgressBarData);
+		SetWindowSubclass(hWnd, ProgressBarSubclass, (UINT_PTR)ProgressBarSubclassID, pProgressBarData);
 	}
 }
 
@@ -1365,8 +1412,6 @@ void SubclassProgressBarControl(HWND hWnd)
 typedef struct _StaticTextData {
 	BOOL isDisabled;
 } StaticTextData;
-
-const UINT_PTR g_staticTextSubclassID = 42;
 
 static LRESULT CALLBACK StaticTextSubclass(
 	HWND hWnd,
@@ -1392,16 +1437,18 @@ static LRESULT CALLBACK StaticTextSubclass(
 		pStaticTextData->isDisabled = (wParam == FALSE);
 
 		const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
-		if (pStaticTextData->isDisabled)
+		if (pStaticTextData->isDisabled) {
 			SetWindowLongPtr(hWnd, GWL_STYLE, nStyle & ~WS_DISABLED);
+		}
 
 		RECT rcClient = { 0 };
 		GetClientRect(hWnd, &rcClient);
 		MapWindowPoints(hWnd, GetParent(hWnd), (LPPOINT)&rcClient, 2);
 		RedrawWindow(GetParent(hWnd), &rcClient, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
-		if (pStaticTextData->isDisabled)
+		if (pStaticTextData->isDisabled) {
 			SetWindowLongPtr(hWnd, GWL_STYLE, nStyle | WS_DISABLED);
+		}
 
 		return 0;
 	}
@@ -1411,17 +1458,15 @@ static LRESULT CALLBACK StaticTextSubclass(
 
 static void SubclassStaticText(HWND hWnd)
 {
-	if (GetWindowSubclass(hWnd, StaticTextSubclass, g_staticTextSubclassID, NULL) == FALSE) {
+	if (GetWindowSubclass(hWnd, StaticTextSubclass, (UINT_PTR)StaticTextSubclassID, NULL) == FALSE) {
 		DWORD_PTR pStaticTextData = (DWORD_PTR)calloc(1, sizeof(StaticTextData));
-		SetWindowSubclass(hWnd, StaticTextSubclass, g_staticTextSubclassID, pStaticTextData);
+		SetWindowSubclass(hWnd, StaticTextSubclass, (UINT_PTR)StaticTextSubclassID, pStaticTextData);
 	}
 }
 
 /*
  * Ctl color messages section
  */
-
-const UINT_PTR g_WindowCtlColorSubclassID = 42;
 
 static LRESULT OnCtlColorDlg(HDC hdc)
 {
@@ -1441,11 +1486,12 @@ static LRESULT OnCtlColorStatic(WPARAM wParam, LPARAM lParam)
 		const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
 		if ((nStyle & SS_NOTIFY) == SS_NOTIFY) {
 			DWORD_PTR dwRefData = 0;
-			COLORREF cText = cAccent;
-			if (GetWindowSubclass(hWnd, StaticTextSubclass, g_staticTextSubclassID, &dwRefData) == TRUE) {
-				StaticTextData* pStaticTextData = (StaticTextData*)dwRefData;
-				if (pStaticTextData->isDisabled)
+			COLORREF cText = g_cAccent;
+			if (GetWindowSubclass(hWnd, StaticTextSubclass, (UINT_PTR)StaticTextSubclassID, &dwRefData) == TRUE) {
+				const StaticTextData* pStaticTextData = (StaticTextData*)dwRefData;
+				if (pStaticTextData->isDisabled) {
 					cText = GetDisabledTextColor();
+				}
 			}
 			SetTextColor(hdc, cText);
 			SetBkColor(hdc, GetDlgBackgroundColor());
@@ -1471,7 +1517,7 @@ static INT_PTR OnCtlColorListbox(WPARAM wParam, LPARAM lParam)
 
 	const LONG_PTR nStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
 	BOOL isComboBox = (nStyle & LBS_COMBOBOX) == LBS_COMBOBOX;
-	if ((!isComboBox || !isDarkEnabled) && IsWindowEnabled(hWnd)) {
+	if ((!isComboBox || !g_isDarkEnabled) && IsWindowEnabled(hWnd)) {
 		return (INT_PTR)OnCtlColorCtrl(hdc);
 	}
 	return (INT_PTR)OnCtlColorDlg(hdc);
@@ -1525,8 +1571,8 @@ static LRESULT CALLBACK WindowCtlColorSubclass(
 
 void SubclassCtlColor(HWND hWnd)
 {
-	if (GetWindowSubclass(hWnd, WindowCtlColorSubclass, g_WindowCtlColorSubclassID, NULL) == FALSE) {
-		SetWindowSubclass(hWnd, WindowCtlColorSubclass, g_WindowCtlColorSubclassID, 0);
+	if (GetWindowSubclass(hWnd, WindowCtlColorSubclass, (UINT_PTR)WindowCtlColorSubclassID, NULL) == FALSE) {
+		SetWindowSubclass(hWnd, WindowCtlColorSubclass, (UINT_PTR)WindowCtlColorSubclassID, 0);
 	}
 }
 
