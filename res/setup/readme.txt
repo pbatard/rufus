@@ -33,11 +33,11 @@ and can be validated to not have been tampered through SHA-256 validation (Since
 produce SHA-256 hashes during the build process per:
 https://github.com/pbatard/rufus/blob/master/.github/workflows/setup.yml).
 
-Per the https://github.com/pbatard/rufus/actions/runs/11195726475 GitHub Actions
+Per the https://github.com/pbatard/rufus/actions/runs/15539519674 GitHub Actions
 workflow run, the SHA-256 for the executables (before signature was applied) were:
-* 4e99f49b456781c92d2010a626706557df69334c6fc71ac129625f41fa311dd8 *./setup_x64.exe
-* a0d7dea2228415eb5afe34419a31eeda90f9b51338f47bc8a5ef591054277f4b *./setup_arm64.exe
+* bea9a68e73b53820ea9c3fcdda70b1615f7453ad483dd3aa06e0385fd28f004e *./setup_x64.exe
+* f024aed61b1f215a3b684bbb2fd176893fc61f92243708a0d9334671df1cdb61 *./setup_arm64.exe
 
 You will also find the VirusTotal reports for the current signed executable at:
-* https://www.virustotal.com/gui/file/a74dbfc0e2a5b2e3fd4ad3f9fdaea0060c5d29a16151b9a570a9bd653db966a7/detection
-* https://www.virustotal.com/gui/file/629fdda27e200ec98703a7606ca4e2d0e44c578341779e4d5c447d45fc860c69/detection
+* https://www.virustotal.com/gui/file/41037f63f20f5984e5ca1dab12c033d795966e80bd8b76a39c1dc42a3dc33594/detection
+* https://www.virustotal.com/gui/file/cc9cb4f4080db352d9a82ef926fc290d62a8d67a45a5557f46fa924a7b9bdbe3/detection
