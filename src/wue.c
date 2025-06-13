@@ -500,7 +500,7 @@ BOOL PopulateWindowsVersion(void)
 		goto out;
 	}
 
-	PopulateWindowsVersionFromXml(xml, xml_len, 1);
+	PopulateWindowsVersionFromXml(xml, xml_len, 0);
 
 out:
 	free(xml);
@@ -621,7 +621,7 @@ int SetWinToGoIndex(void)
 		wintogo_index = atoi(version_index.String[i - 1]);
 	if (i > 0) {
 		// re-populate the version data from the selected XML index
-		PopulateWindowsVersionFromXml(xml, xml_len, i);
+		PopulateWindowsVersionFromXml(xml, xml_len, i - 1);
 		// If we couldn't obtain the major and build, we have a problem
 		if (img_report.win_version.major == 0 || img_report.win_version.build == 0)
 			uprintf("Warning: Could not obtain version information from XML index (Nonstandard Windows image?)");
