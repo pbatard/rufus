@@ -1,3 +1,7 @@
+o Version 4.9 (2021.06.15) [BUGFIX RELEASE]
+    Fix downloads from https://rufus.ie no longer working due to recent GitHub server changes
+    Fix unofficial Windows ISOs, with single index WIMs, not presenting the WUE dialog
+
 o Version 4.8 (2025.06.11)
     Switch to wimlib for all WIM image processing:
       - Greatly speeds up image analysis when opening Windows ISOs

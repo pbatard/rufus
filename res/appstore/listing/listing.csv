@@ -114,17 +114,8 @@
 • Trang web chính thức: https://rufus.ie
 • Mã nguồn: https://github.com/pbatard/rufus
 • Nhật ký thay đổi: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt"
-"ReleaseNotes","3","Text","• Switch to wimlib for all WIM image processing:
-  - Greatly speeds up image analysis when opening Windows ISOs
-  - Can speed up Windows To Go drive creation (But won't do miracles if you have a crap drive)
-  - Might help with Parallels limitations on Mac (But Rufus on Parallels is still UNSUPPORTED)
-  - Enables the splitting of >4GB files with Alt-E (But still WAY SLOWER than using UEFI:NTFS)
-• Switch to using Visual Studio binaries everywhere, due to MinGW DLL delay-loading limitations
-• Add more exceptions for Linux ISOs that restrict themselves to DD mode (Nobara, openSUSE, ...)
-• Improve reporting of UEFI bootloaders in the log, with info on the Secure Boot status
-• Fix an issue with size limitations when writing an uncompressed VHD back to the same drive
-• Fix a crash when opening the log with the 32-bit MinGW compiled version
-• Fix commandline parameters not being forwared to original Windows setup.exe",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"ReleaseNotes","3","Text","• Fix downloads from https://rufus.ie no longer working due to recent GitHub server changes
+• Fix unofficial Windows ISOs, with single index WIMs, not presenting the WUE dialog",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "Title","4","Text","Rufus",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "ShortTitle","5","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "SortTitle","6","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
