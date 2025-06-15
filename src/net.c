@@ -59,7 +59,6 @@ extern BOOL is_x86_64;
 extern USHORT NativeMachine;
 static DWORD error_code, fido_len = 0;
 static BOOL force_update_check = FALSE;
-static const char* request_headers[2] = { "Accept-Encoding: none", "Accept-Encoding: gzip, deflate" };
 extern const char* efi_archname[ARCH_MAX];
 
 #if defined(__MINGW32__)
@@ -175,7 +174,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	const char* short_name;
 	unsigned char buf[DOWNLOAD_BUFFER_SIZE];
 	char hostname[64], urlpath[128], strsize[32];
-	BOOL r = FALSE, use_github_api;
+	BOOL r = FALSE;
 	DWORD dwSize, dwWritten, dwDownloaded;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
@@ -227,18 +226,16 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 		goto out;
 	}
 
-	// If we are querying the GitHub API, we need to enable raw content and
-	// set 'Accept-Encoding' to 'none' to get the data length.
-	use_github_api = (strstr(url, "api.github.com") != NULL);
-	if (use_github_api && !HttpAddRequestHeadersA(hRequest, "Accept: application/vnd.github.v3.raw",
-		(DWORD)-1, HTTP_ADDREQ_FLAG_ADD)) {
+	// If we are querying the GitHub API, we need to enable raw content
+	if (strstr(url, "api.github.com") != NULL && !HttpAddRequestHeadersA(hRequest,
+		"Accept: application/vnd.github.v3.raw", (DWORD)-1, HTTP_ADDREQ_FLAG_ADD)) {
 		uprintf("Unable to enable raw content from GitHub API: %s", WindowsErrorString());
 		goto out;
 	}
-	if (!HttpSendRequestA(hRequest, request_headers[use_github_api ? 0 : 1], -1L, NULL, 0)) {
-		uprintf("Unable to send request: %s", WindowsErrorString());
-		goto out;
-	}
+	// Must use "Accept-Encoding: identity" to get the file size
+	// This is needed for GitHub as the Microsoft HTTP APIs can't seem to read content-length for
+	// compressed content from GitHub, and using "identity" disables compression.
+	HttpSendRequestA(hRequest, "Accept-Encoding: identity", -1L, NULL, 0);
 
 	// Get the file size
 	dwSize = sizeof(DownloadStatus);
@@ -643,10 +640,12 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 				INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
 				INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_HYPERLINK |
 				((UrlParts.nScheme == INTERNET_SCHEME_HTTPS) ? INTERNET_FLAG_SECURE : 0), (DWORD_PTR)NULL);
-			if ((hRequest == NULL) || (!HttpSendRequestA(hRequest, request_headers[1], -1L, NULL, 0))) {
+			if (hRequest == NULL) {
 				uprintf("Unable to send request: %s", WindowsErrorString());
 				goto out;
 			}
+			// Must use "Accept-Encoding: identity" to get the file size
+			HttpSendRequestA(hRequest, "Accept-Encoding: identity", -1L, NULL, 0);
 
 			// Ensure that we get a text file
 			dwSize = sizeof(dwStatus);
@@ -1010,8 +1009,8 @@ BOOL IsDownloadable(const char* url)
 	if (hRequest == NULL)
 		goto out;
 
-	if (!HttpSendRequestA(hRequest, request_headers[1], -1L, NULL, 0))
-		goto out;
+	// Must use "Accept-Encoding: identity" to get the file size
+	HttpSendRequestA(hRequest, "Accept-Encoding: identity", -1L, NULL, 0);
 
 	// Get the file size
 	dwSize = sizeof(DownloadStatus);
