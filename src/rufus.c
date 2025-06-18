@@ -2514,6 +2514,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_FILE_SYSTEM:
 			if ((HIWORD(wParam) != CBN_SELCHANGE) && (HIWORD(wParam) != CBN_SELCHANGE_INTERNAL))
 				break;
+			if (!IsWindowEnabled(hFileSystem))
+				break;
 			set_selected_fs = (HIWORD(wParam) == CBN_SELCHANGE);
 			fs_type = (int)ComboBox_GetCurItemData(hFileSystem);
 			SetClusterSizes(fs_type);

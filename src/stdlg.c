@@ -951,8 +951,8 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, dh, 0, 0, 1.0f);
 		ResizeButtonHeight(hDlg, IDOK);
 		ResizeButtonHeight(hDlg, IDCANCEL);
-		return (INT_PTR)TRUE;
 		SetDarkModeForChild(hDlg);
+		return (INT_PTR)TRUE;
 	case WM_CTLCOLORSTATIC:
 		// Change the background colour for static text and icon
 		SetBkMode((HDC)wParam, TRANSPARENT);

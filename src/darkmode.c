@@ -386,10 +386,12 @@ static void RenderButton(HWND hWnd, HDC hdc, HTHEME hTheme, int iPartID, int iSt
 	dtto.dwFlags = DTT_TEXTCOLOR;
 	dtto.crText = !IsWindowEnabled(hWnd) ? DARKMODE_DISABLED_TEXT_COLOR : DARKMODE_NORMAL_TEXT_COLOR;
 
+	// coverity[negative_returns]
 	DrawThemeTextEx(hTheme, hdc, iPartID, iStateID, buffer, -1, flags, &rcText, &dtto);
 
 	if (((SendMessage(hWnd, BM_GETSTATE, 0, 0) & BST_FOCUS) == BST_FOCUS) && ((ui_state & UISF_HIDEFOCUS) != UISF_HIDEFOCUS)) {
 		dtto.dwFlags |= DTT_CALCRECT;
+		// coverity[negative_returns]
 		DrawThemeTextEx(hTheme, hdc, iPartID, iStateID, buffer, -1, flags | DT_CALCRECT, &rcText, &dtto);
 		rcFocus = rcText;
 		rcFocus.bottom++;
@@ -582,6 +584,7 @@ static void PaintGroupbox(HWND hWnd, HDC hdc, ButtonData buttonData)
 		dtto.crText = IsWindowEnabled(hWnd) ? DARKMODE_NORMAL_TEXT_COLOR : DARKMODE_DISABLED_TEXT_COLOR;
 		if (SendMessage(hWnd, WM_QUERYUISTATE, 0, 0) != (LRESULT)NULL)
 			flags |= DT_HIDEPREFIX;
+		// coverity[negative_returns]
 		DrawThemeTextEx(buttonData.hTheme, hdc, BP_GROUPBOX, iStateID, buffer, -1, flags | DT_SINGLELINE, &rcText, &dtto);
 	}
 
@@ -893,7 +896,10 @@ static void GetProgressBarRects(HWND hWnd, RECT* rcEmpty, RECT* rcFilled)
 		rcFilled->left = rcEmpty->left;
 		rcFilled->top = rcEmpty->top;
 		rcFilled->bottom = rcEmpty->bottom;
-		rcFilled->right = rcEmpty->left + (int)((double)(cur_pos) / (range.iHigh - min) * totalWidth);
+		if (range.iHigh - min != 0)
+			rcFilled->right = rcEmpty->left + (int)((double)(cur_pos) / (range.iHigh - min) * totalWidth);
+		else
+			rcFilled->right = rcEmpty->right;
 		rcEmpty->left = rcFilled->right; // To avoid painting under filled part
 	}
 }

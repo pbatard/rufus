@@ -1657,7 +1657,7 @@ thumbprint_list_t* GetThumbprintEntries(char* thumbprints_txt)
 		if (thumbprints_txt[i] == '\n')
 			num_entries++;
 
-	thumbprints = malloc(sizeof(thumbprint_list_t) + num_entries * SHA1_HASHSIZE);
+	thumbprints = calloc(sizeof(thumbprint_list_t) + num_entries * SHA1_HASHSIZE, 1);
 	if (thumbprints == NULL)
 		return NULL;
 	thumbprints->count = 0;

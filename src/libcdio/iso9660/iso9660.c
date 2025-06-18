@@ -256,11 +256,10 @@ iso9660_get_dtime (const iso9660_dtime_t *idr_date, bool b_localtime,
     memcpy(num, p_ldate->LT_FIELD, sizeof(p_ldate->LT_FIELD));          \
     num[sizeof(p_ldate->LT_FIELD)] = '\0';                              \
     errno = 0;                                                          \
-    tmp = strtol(num,                                                   \
-                 (char **)NULL, 10);                                    \
+    tmp = strtol(num, (char **)NULL, 10);                               \
     if ( tmp == LONG_MIN || tmp == LONG_MAX ||                          \
-         ((unsigned long)tmp + ADD_CONSTANT) == LONG_MAX ||             \
-         (tmp + ADD_CONSTANT) == LONG_MIN )                             \
+         (uint64_t)tmp + ADD_CONSTANT >= (uint64_t)LONG_MAX ||          \
+         (uint64_t)tmp + ADD_CONSTANT <= (uint64_t)LONG_MIN )           \
       return false;                                                     \
     p_tm->TM_FIELD = tmp + ADD_CONSTANT;                                \
   }

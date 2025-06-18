@@ -1815,14 +1815,10 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
 
   free (_dirbuf);
   iso9660_stat_free(p_stat);
-
-  if (offset != dirbuf_len) {
+  if (offset != dirbuf_len)
     _cdio_list_free (retval, true, (CdioDataFree_t) iso9660_stat_free);
-    return NULL;
-  }
-
   iso9660_stat_free(p_iso9660_stat);
-  return retval;
+  return (offset == dirbuf_len) ? retval : NULL;
 }
 
 typedef CdioISO9660FileList_t * (iso9660_readdir_t)
