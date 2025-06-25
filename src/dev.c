@@ -419,8 +419,8 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
 #define FORCED_VID 0x04E8
-#define FORCED_PID 0x61ED
-#define FORCED_NAME "Samsung uSD Card Reader USB Device"
+#define FORCED_PID 0x6300
+#define FORCED_NAME "Samsung Type-C USB Device"
 #endif
 
 void ClearDrives(void)
@@ -929,7 +929,7 @@ BOOL GetDevices(DWORD devnum)
 					((score = IsHDD(drive_index, (uint16_t)props.vid, (uint16_t)props.pid, buffer)) > 0)) {
 					uprintf("Device eliminated because it was detected as a Hard Drive (score %d > 0)", score);
 					if (!list_non_usb_removable_drives)
-						uprintf("If this device is not a Hard Drive, please e-mail the author of this application");
+						uprintf("If this device is not a Hard Drive or SSD, please e-mail the author of this application");
 					uprintf("NOTE: You can enable the listing of Hard Drives under 'advanced drive properties'");
 					safe_free(devint_detail_data);
 					break;

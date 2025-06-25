@@ -11,9 +11,6 @@
 #include "bb_archive.h"
 
 #define XZ_EXTERN static
-// We get XZ_OPTIONS_ERROR in xz_dec_stream if this is not defined
-#define XZ_DEC_ANY_CHECK
-
 #define XZ_BUFSIZE BB_BUFSIZE
 
 #include "xz_dec_bcj.c"
@@ -89,7 +86,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 
 #ifdef XZ_DEC_ANY_CHECK
 		if (ret == XZ_UNSUPPORTED_CHECK) {
-			bb_error_msg("unsupported check; not verifying file integrity");
+//			bb_error_msg("unsupported check; not verifying file integrity");
 			continue;
 		}
 #endif

@@ -493,7 +493,7 @@ static void CheckForDBXUpdates(int verbose)
 			continue;
 		t.tm_year -= 1900;
 		t.tm_mon -= 1;
-		timestamp = _mktime64(&t);
+		timestamp = _mkgmtime64(&t);
 		vuprintf("DBX update timestamp is %" PRId64, timestamp);
 		static_sprintf(reg_name, "DBXTimestamp_%s", efi_archname[i + 1]);
 		// Check if we have an external DBX that is newer than embedded/last downloaded

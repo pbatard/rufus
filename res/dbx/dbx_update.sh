@@ -9,7 +9,7 @@ get_commit_date() {
   if [[ "${url}" =~ ^"${github_url}" ]]; then
     parts=($(awk -F'contents/' '{ for(i=1;i<=NF;i++) print $i }' <<< ${url}))
     date_url="${parts[0]}commits?path=${parts[1]//\//%2F}&page=1&per_page=1"
-    epoch="$(curl -s -L ${date_url} | python -m json.tool | grep -m1 \"date\": | sed -e 's/^.*\"date\":.*\"\(.*\)\".*/\1/' | date -f - +%s)"
+    epoch="$(curl -s -L ${date_url} | python -m json.tool | grep -m1 \"date\": | sed -e 's/^.*\"date\":.*\"\(.*\)\".*/\1/' | date -u -f - +%s)"
   fi
   echo ${epoch:-0}
 }

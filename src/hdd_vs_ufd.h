@@ -250,6 +250,7 @@ static vidpid_score_t vidpid_score[] = {
 	{ 0x04e8, 0x0101, -20 },	// Connect3D Flash Drive
 	{ 0x04e8, 0x1a23, -20 },	// 2 GB UFD
 	{ 0x04e8, 0x5120, -20 },	// 4 GB UFD
+	{ 0x04e8, 0x6300, -20 },	// 256 GB UFD (MUF-256DA/APC)
 	{ 0x04e8, 0x6818, -20 },	// 8 GB UFD
 	{ 0x04e8, 0x6845, -20 },	// 16 GB UFD
 	{ 0x04e8, 0x685E, -20 },	// 16 GB UFD

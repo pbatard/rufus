@@ -10,11 +10,18 @@
 #ifndef XZ_CONFIG_H
 #define XZ_CONFIG_H
 
+// We get XZ_OPTIONS_ERROR in xz_dec_stream if this is not defined
+#define XZ_DEC_ANY_CHECK
+
 /* Uncomment as needed to enable BCJ filter decoders. */
+#if defined(_M_AMD64) || defined(__x86_64__) || defined(_M_IX86) || defined(__i386__)
 #define XZ_DEC_X86
+#endif
 /* #define XZ_DEC_POWERPC */
 /* #define XZ_DEC_IA64 */
-/* #define XZ_DEC_ARM */
+#if defined (_M_ARM) || defined(__arm__) || defined (_M_ARM64) || defined(__aarch64__)
+#define XZ_DEC_ARM
+#endif
 /* #define XZ_DEC_ARMTHUMB */
 /* #define XZ_DEC_SPARC */
 
