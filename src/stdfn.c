@@ -28,8 +28,8 @@
 #include <accctrl.h>
 #include <aclapi.h>
 
-#include "re.h"
 #include "rufus.h"
+#include "cregex.h"
 #include "missing.h"
 #include "resource.h"
 #include "msapi_utf8.h"
@@ -796,21 +796,20 @@ DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc)
 
 // Run a console command, with optional redirection of stdout and stderr to our log
 // as well as optional progress reporting if msg is not 0.
-DWORD RunCommandWithProgress(const char* cmd, const char* dir, BOOL log, int msg)
+DWORD RunCommandWithProgress(const char* cmd, const char* dir, BOOL log, int msg, const char* pattern)
 {
-	DWORD i, ret, dwRead, dwAvail, dwPipeSize = 4096;
+	DWORD ret, dwRead, dwAvail, dwPipeSize = 4096;
 	STARTUPINFOA si = { 0 };
 	PROCESS_INFORMATION pi = { 0 };
 	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
 	HANDLE hOutputRead = INVALID_HANDLE_VALUE, hOutputWrite = INVALID_HANDLE_VALUE;
-	int match_length;
 	static char* output;
-	// For detecting typical dism.exe commandline progress report of type:
-	// "\r[====                       8.0%                           ]\r\n"
-	re_t pattern = re_compile("\\s*\\[[= ]+[\\d\\.]+%[= ]+\\]\\s*");
+	cregex_node_t* node = NULL;
+	cregex_program_t* program = NULL;
+	char* matches[REGEX_VM_MAX_MATCHES];
 
 	si.cb = sizeof(si);
-	if (log) {
+	if (msg != 0 || log) {
 		// NB: The size of a pipe is a suggestion, NOT an absolute guarantee
 		// This means that you may get a pipe of 4K even if you requested 1K
 		if (!CreatePipe(&hOutputRead, &hOutputWrite, &sa, dwPipeSize)) {
@@ -831,8 +830,18 @@ DWORD RunCommandWithProgress(const char* cmd, const char* dir, BOOL log, int msg
 		goto out;
 	}
 
-	if (log || msg != 0) {
-		if (msg != 0)
+	if (msg != 0) {
+		node = cregex_parse(pattern);
+		if (node != NULL) {
+			program = cregex_compile_node(node);
+			cregex_parse_free(node);
+		}
+		if (node == NULL || program == NULL)
+			uprintf("Internal error: Failed to parse '%s'", pattern);
+	}
+
+	if (program != NULL || log) {
+		if (program != NULL)
 			UpdateProgressWithInfoInit(NULL, FALSE);
 		while (1) {
 			// Check for user cancel
@@ -859,24 +868,15 @@ DWORD RunCommandWithProgress(const char* cmd, const char* dir, BOOL log, int msg
 					output = malloc(dwAvail + 1);
 					if ((output != NULL) && (ReadFile(hOutputRead, output, dwAvail, &dwRead, NULL)) && (dwRead != 0)) {
 						output[dwAvail] = 0;
-						// Process a commandline progress bar into a percentage
-						if ((msg != 0) && (re_matchp(pattern, output, &match_length) != -1)) {
+						// Process a commandline progress into a percentage
+						if (program != NULL && cregex_program_run(program, output, (const char**)matches, ARRAYSIZE(matches)) > 0 &&
+							matches[2] != NULL && matches[3] != NULL) {
+							// matches[2] is for the first group
+							// matches[3] is for the end of the first group
+							matches[3][0] = '\0';
 							float f = 0.0f;
-							i = 0;
-next_progress_line:
-							for (; (i < dwAvail) && (output[i] < '0' || output[i] > '9'); i++);
-							IGNORE_RETVAL(sscanf(&output[i], "%f*", &f));
+							IGNORE_RETVAL(sscanf(matches[2], "%f", &f));
 							UpdateProgressWithInfo(OP_FORMAT, msg, (uint64_t)(f * 100.0f), 100 * 100ULL);
-							// Go to next line
-							while ((++i < dwAvail) && (output[i] != '\n') && (output[i] != '\r'));
-							while ((++i < dwAvail) && ((output[i] == '\n') || (output[i] == '\r')));
-							// Print additional lines, if any
-							if (i < dwAvail) {
-								// Might have two consecutive progress lines in our buffer
-								if (re_matchp(pattern, &output[i], &match_length) != -1)
-									goto next_progress_line;
-								uprintf("%s", &output[i]);
-							}
 						} else if (log) {
 							// output may contain a '%' so don't feed it as a naked format string
 							uprintf("%s", output);
@@ -889,6 +889,7 @@ next_progress_line:
 				break;
 			Sleep(100);
 		};
+		cregex_compile_free(program);
 	} else {
 		// TODO: Detect user cancellation here?
 		switch (WaitForSingleObject(pi.hProcess, 1800000)) {

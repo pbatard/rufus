@@ -158,9 +158,9 @@ const char* additional_copyrights =
 "Dark Mode support by ozone10\\line\n"
 "https://github.com/ozone10\\line\n"
 "\\line\n"
-"Regular Expression handling from tiny-regex-c by kokke:\\line\n"
-"https://github.com/kokke/tiny-regex-c\\line\n"
-"Public Domain\\line\n"
+"Regular Expression parser from tiny-regex-c by Jim Huang (jserv):\\line\n"
+"https://github.com/jserv/cregex\\line\n"
+"BSD 2-Clause\\line\n"
 "\\line\n"
 "All other references can be found in the source.\\line\n}";
 

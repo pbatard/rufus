@@ -87,9 +87,6 @@
     <ClCompile Include="..\src\format_fat32.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\re.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\wue.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -97,6 +94,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\darkmode.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cregex_compile.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cregex_parse.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cregex_vm.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -182,9 +188,6 @@
     <ClInclude Include="..\src\winio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\re.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\res\grub\grub_version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -210,6 +213,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\darkmode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\cregex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

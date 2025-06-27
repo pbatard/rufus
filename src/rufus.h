@@ -816,8 +816,8 @@ extern char* FileDialog(BOOL save, char* path, const ext_t* ext, UINT* selected_
 extern BOOL FileIO(enum file_io_type io_type, char* path, char** buffer, DWORD* size);
 extern uint8_t* GetResource(HMODULE module, char* name, char* type, const char* desc, DWORD* len, BOOL duplicate);
 extern DWORD GetResourceSize(HMODULE module, char* name, char* type, const char* desc);
-extern DWORD RunCommandWithProgress(const char* cmdline, const char* dir, BOOL log, int msg);
-#define RunCommand(cmd, dir, log) RunCommandWithProgress(cmd, dir, log, 0)
+extern DWORD RunCommandWithProgress(const char* cmdline, const char* dir, BOOL log, int msg, const char* pattern);
+#define RunCommand(cmd, dir, log) RunCommandWithProgress(cmd, dir, log, 0, NULL)
 extern BOOL CompareGUID(const GUID *guid1, const GUID *guid2);
 extern BOOL MountRegistryHive(const HKEY key, const char* pszHiveName, const char* pszHivePath);
 extern BOOL UnmountRegistryHive(const HKEY key, const char* pszHiveName);

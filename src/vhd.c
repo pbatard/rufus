@@ -563,7 +563,9 @@ static DWORD WINAPI FfuSaveImageThread(void* param)
 		"/Name:\"%s\" /Description:\"Created by %s (%s)\"",
 		img_save->DevicePath, img_save->ImagePath, label, APPLICATION_NAME, RUFUS_URL);
 	uprintf("Running command: '%s", cmd);
-	r = RunCommandWithProgress(cmd, sysnative_dir, TRUE, MSG_261);
+	// For detecting typical dism.exe commandline progress report of type:
+	// "\r[====                       8.0%                           ]"
+	r = RunCommandWithProgress(cmd, sysnative_dir, TRUE, MSG_261, ".*\r\\[[= ]+([0-9\\.]+%)[= ]+\\].*");
 	if (r != 0 && !IS_ERROR(ErrorStatus)) {
 		SetLastError(r);
 		uprintf("Failed to capture FFU image: %s", WindowsErrorString());

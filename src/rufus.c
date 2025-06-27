@@ -47,10 +47,10 @@
 #include "localization.h"
 
 #include "ui.h"
-#include "re.h"
 #include "vhd.h"
 #include "wue.h"
 #include "drive.h"
+#include "cregex.h"
 #include "settings.h"
 #include "darkmode.h"
 #include "bled/bled.h"
@@ -1308,9 +1308,12 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		"Install-LEAP",
 		"openSUSE-Tumbleweed"
 	};
-	int i, len;
+	int i;
 	uint8_t arch;
 	char tmp_path[MAX_PATH], tmp_str[64];
+	const char* matches[REGEX_VM_MAX_MATCHES];
+	cregex_node_t* node = NULL;
+	cregex_program_t* program = NULL;
 
 	// We may mount an ISO during the lookup of the Windows version, which
 	// produces DBT_DEVNODES_CHANGED messages that lead to unwanted device
@@ -1391,11 +1394,20 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		GetBootladerInfo();
 		DisplayISOProps();
 
-		for (i = 0; i < ARRAYSIZE(redhat8_derivative); i++) {
-			if (re_match(redhat8_derivative[i], img_report.label, &len) >= 0) {
-				img_report.rh8_derivative = TRUE;
+		for (i = 0; i < ARRAYSIZE(redhat8_derivative) && !img_report.rh8_derivative; i++) {
+			node = cregex_parse(redhat8_derivative[i]);
+			if (node != NULL) {
+				program = cregex_compile_node(node);
+				cregex_parse_free(node);
+			}
+			if (node == NULL || program == NULL) {
+				uprintf("Internal error: Failed to parse '%s'", redhat8_derivative[i]);
 				break;
 			}
+			if (cregex_program_run(program, img_report.label, matches, ARRAYSIZE(matches)) > 0)
+				img_report.rh8_derivative = TRUE;
+			cregex_compile_free(program);
+			program = NULL;
 		}
 
 		for (i = 0; i < ARRAYSIZE(suse_derivative); i++) {

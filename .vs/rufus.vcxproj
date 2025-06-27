@@ -385,6 +385,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\badblocks.c" />
+    <ClCompile Include="..\src\cregex_compile.c" />
+    <ClCompile Include="..\src\cregex_parse.c" />
+    <ClCompile Include="..\src\cregex_vm.c" />
     <ClCompile Include="..\src\darkmode.c" />
     <ClCompile Include="..\src\dos_locale.c" />
     <ClCompile Include="..\src\drive.c" />
@@ -399,7 +402,6 @@
     <ClCompile Include="..\src\parser.c" />
     <ClCompile Include="..\src\pki.c" />
     <ClCompile Include="..\src\process.c" />
-    <ClCompile Include="..\src\re.c" />
     <ClCompile Include="..\src\rufus.c" />
     <ClCompile Include="..\src\hash.c" />
     <ClCompile Include="..\src\smart.c" />
@@ -419,6 +421,7 @@
     <ClInclude Include="..\res\grub\grub_version.h" />
     <ClInclude Include="..\src\badblocks.h" />
     <ClInclude Include="..\src\bled\bled.h" />
+    <ClInclude Include="..\src\cregex.h" />
     <ClInclude Include="..\src\darkmode.h" />
     <ClInclude Include="..\src\drive.h" />
     <ClInclude Include="..\src\efi.h" />
@@ -429,7 +432,6 @@
     <ClInclude Include="..\src\missing.h" />
     <ClInclude Include="..\src\msvc-missing\unistd.h" />
     <ClInclude Include="..\src\ntdll.h" />
-    <ClInclude Include="..\src\re.h" />
     <ClInclude Include="..\src\settings.h" />
     <ClInclude Include="..\src\libcdio\cdio\cdio.h" />
     <ClInclude Include="..\src\libcdio\cdio\iso9660.h" />
