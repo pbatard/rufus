@@ -2006,7 +2006,7 @@ out:
 }
 
 // TODO: If we can't get save to ISO from virtdisk, we might as well drop this
-static DWORD WINAPI IsoSaveImageThread(void* param)
+static DWORD WINAPI OpticalDiscSaveImageThread(void* param)
 {
 	BOOL s;
 	DWORD rSize, wSize;
@@ -2112,7 +2112,7 @@ out:
 	ExitThread(0);
 }
 
-void IsoSaveImage(void)
+void OpticalDiscSaveImage(void)
 {
 	static IMG_SAVE img_save = { 0 };
 	char filename[33] = "disc_image.iso";
@@ -2143,7 +2143,7 @@ void IsoSaveImage(void)
 	// Disable all controls except cancel
 	EnableControls(FALSE, FALSE);
 	InitProgress(TRUE);
-	format_thread = CreateThread(NULL, 0, IsoSaveImageThread, &img_save, 0, NULL);
+	format_thread = CreateThread(NULL, 0, OpticalDiscSaveImageThread, &img_save, 0, NULL);
 	if (format_thread != NULL) {
 		uprintf("\r\nSave to ISO operation started");
 		PrintInfo(0, -1);
@@ -2154,4 +2154,34 @@ void IsoSaveImage(void)
 		safe_free(img_save.ImagePath);
 		PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 	}
+}
+
+// Create an ISO image from the currently selected drive, using oscdimg.exe
+DWORD WINAPI IsoSaveImageThread(void* param)
+{
+	DWORD r;
+	IMG_SAVE* img_save = (IMG_SAVE*)param;
+	char cmd[2 * MAX_PATH], letters[27], * label;
+
+	if (!GetDriveLabel(SelectedDrive.DeviceNumber, letters, &label, TRUE) || letters[0] == '\0')
+		ExitThread(ERROR_NOT_FOUND);
+	// Save to UDF only, as Microsoft's implementation of ISO-9660 doesn't support multiextent
+	// and produces BROKEN images if you try to add files larger than 4 GB.
+	// Plus ISO-9660/Joliet limits labels to 16 characters and has issues with long paths.
+	static_sprintf(cmd, "%s\\%s\\oscdimg.exe -g -h -k -l\"%s\" -m -u2 -udfver102 %c:\\ %s",
+		app_data_dir, FILES_DIR, label, letters[0], img_save->ImagePath);
+	uprintf("Running command: '%s'", cmd);
+	// For detecting typical oscdimg commandline progress report of type: "\r15.5% complete"
+	r = RunCommandWithProgress(cmd, sysnative_dir, FALSE, MSG_261, ".*\r([0-9\\.]+)% complete.*");
+	if (r != 0 && !IS_ERROR(ErrorStatus)) {
+		SetLastError(r);
+		uprintf("Failed to write ISO image: %s", WindowsErrorString());
+		ErrorStatus = RUFUS_ERROR(SCODE_CODE(r));
+	}
+	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
+	if (!IS_ERROR(ErrorStatus))
+		uprintf("Saved '%s'", img_save->ImagePath);
+	safe_free(img_save->DevicePath);
+	safe_free(img_save->ImagePath);
+	ExitThread(r);
 }

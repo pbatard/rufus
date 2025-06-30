@@ -1926,9 +1926,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		if (_accessU(tmp, 0) != -1) {
 			uprintf("Will reuse '%s' for MS-DOS installation", tmp);
 		} else {
-			r = MessageBoxExU(hMainDialog, lmprintf(MSG_337), lmprintf(MSG_115),
-				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid);
-			if (r != IDYES)
+			if (MessageBoxExU(hMainDialog, lmprintf(MSG_337, "diskcopy.dll"), lmprintf(MSG_115),
+				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
 				goto out;
 			IGNORE_RETVAL(_chdirU(app_data_dir));
 			IGNORE_RETVAL(_mkdir(FILES_DIR));
@@ -2679,7 +2678,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			break;
 		case IDC_SAVE:
-			VhdSaveImage();
+			SaveImage();
 			break;
 		case IDM_SELECT:
 		case IDM_DOWNLOAD:
@@ -4029,7 +4028,7 @@ extern int TestHashes(void);
 			}
 			// Alt-O => Save from Optical drive to ISO
 			if ((msg.message == WM_SYSKEYDOWN) && (msg.wParam == 'O')) {
-				IsoSaveImage();
+				OpticalDiscSaveImage();
 				continue;
 			}
 			// Alt-P => Toggle GPT ESP to and from Basic Data type (Windows 10 or later)

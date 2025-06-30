@@ -889,7 +889,6 @@ DWORD RunCommandWithProgress(const char* cmd, const char* dir, BOOL log, int msg
 				break;
 			Sleep(100);
 		};
-		cregex_compile_free(program);
 	} else {
 		// TODO: Detect user cancellation here?
 		switch (WaitForSingleObject(pi.hProcess, 1800000)) {
@@ -911,6 +910,7 @@ DWORD RunCommandWithProgress(const char* cmd, const char* dir, BOOL log, int msg
 	CloseHandle(pi.hThread);
 
 out:
+	cregex_compile_free(program);
 	safe_closehandle(hOutputWrite);
 	safe_closehandle(hOutputRead);
 	return ret;

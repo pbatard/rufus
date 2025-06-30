@@ -135,6 +135,15 @@
 #define DISKCOPY_SIZE               0x16ee00
 #define DISKCOPY_IMAGE_OFFSET       0x66d8
 #define DISKCOPY_IMAGE_SIZE         0x168000
+#if defined(_M_AMD64)
+#define OSCDIMG_URL                 "https://msdl.microsoft.com/download/symbols/oscdimg.exe/688CABB065000/oscdimg.exe"
+#elif defined(_M_IX86)
+#define OSCDIMG_URL                 "https://msdl.microsoft.com/download/symbols/oscdimg.exe/704FD1B760000/oscdimg.exe"
+#elif defined(_M_ARM64)
+#define OSCDIMG_URL                 "https://msdl.microsoft.com/download/symbols/oscdimg.exe/02633D8D66000/oscdimg.exe"
+#elif defined(_M_ARM)
+#define OSCDIMG_URL                 "https://msdl.microsoft.com/download/symbols/oscdimg.exe/9CD825745F000/oscdimg.exe"
+#endif
 #define SYMBOL_SERVER_USER_AGENT    "Microsoft-Symbol-Server/10.0.22621.755"
 #define DEFAULT_ESP_MOUNT_POINT     "S:\\"
 #define IS_POWER_OF_2(x)            ((x != 0) && (((x) & ((x) - 1)) == 0))

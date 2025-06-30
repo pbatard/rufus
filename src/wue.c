@@ -478,7 +478,7 @@ BOOL PopulateWindowsVersion(void)
 	char wim_path[MAX_PATH] = "";
 	wchar_t* xml = NULL;
 	size_t xml_len;
-	WIMStruct* wim;
+	WIMStruct* wim = NULL;
 
 	memset(&img_report.win_version, 0, sizeof(img_report.win_version));
 

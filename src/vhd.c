@@ -562,33 +562,33 @@ static DWORD WINAPI FfuSaveImageThread(void* param)
 	static_sprintf(cmd, "dism /Capture-Ffu /CaptureDrive:%s /ImageFile:\"%s\" "
 		"/Name:\"%s\" /Description:\"Created by %s (%s)\"",
 		img_save->DevicePath, img_save->ImagePath, label, APPLICATION_NAME, RUFUS_URL);
-	uprintf("Running command: '%s", cmd);
+	uprintf("Running command: '%s'", cmd);
 	// For detecting typical dism.exe commandline progress report of type:
 	// "\r[====                       8.0%                           ]"
-	r = RunCommandWithProgress(cmd, sysnative_dir, TRUE, MSG_261, ".*\r\\[[= ]+([0-9\\.]+%)[= ]+\\].*");
+	r = RunCommandWithProgress(cmd, sysnative_dir, TRUE, MSG_261, ".*\r\\[[= ]+([0-9\\.]+)%[= ]+\\].*");
 	if (r != 0 && !IS_ERROR(ErrorStatus)) {
 		SetLastError(r);
 		uprintf("Failed to capture FFU image: %s", WindowsErrorString());
 		ErrorStatus = RUFUS_ERROR(SCODE_CODE(r));
 	}
-	safe_free(img_save->DevicePath);
-	safe_free(img_save->ImagePath);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
 	if (!IS_ERROR(ErrorStatus))
 		uprintf("Saved '%s'", img_save->ImagePath);
+	safe_free(img_save->DevicePath);
+	safe_free(img_save->ImagePath);
 	ExitThread(r);
 }
 
-void VhdSaveImage(void)
+void SaveImage(void)
 {
 	UINT i;
 	static IMG_SAVE img_save;
-	char filename[128];
-	char path[MAX_PATH];
+	char filename[128], letters[27], path[MAX_PATH];
 	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
-	enum { image_type_vhd = 1, image_type_vhdx = 2, image_type_ffu = 3 };
-	static EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhd", "*.vhdx", "*.ffu"),
-		__VA_GROUP__(lmprintf(MSG_343), lmprintf(MSG_342), lmprintf(MSG_344)));
+	enum { image_type_vhd = 1, image_type_vhdx = 2, image_type_ffu = 3, image_type_iso = 4 };
+	// Add a non-printable zero-width space to UDF *.iso extension to differentiate it from ISO-9660
+	static EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhd", "*.vhdx", "*.ffu", "*.iso"),
+		__VA_GROUP__(lmprintf(MSG_343), lmprintf(MSG_342), lmprintf(MSG_344), lmprintf(MSG_355)));
 	ULARGE_INTEGER free_space;
 
 	memset(&img_save, 0, sizeof(IMG_SAVE));
@@ -598,21 +598,31 @@ void VhdSaveImage(void)
 	static_sprintf(filename, "%s", rufus_drive[DriveIndex].label);
 	img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
 	img_save.DevicePath = GetPhysicalName(img_save.DeviceNum);
+	img_ext.count = 2;
 	// FFU support requires GPT
-	img_ext.count = (!has_ffu_support || SelectedDrive.PartitionStyle != PARTITION_STYLE_GPT) ? 2 : 3;
-	for (i = 1; i <= (UINT)img_ext.count && (safe_strcmp(save_image_type , &_img_ext_x[i - 1][2]) != 0); i++);
+	if (has_ffu_support && SelectedDrive.PartitionStyle == PARTITION_STYLE_GPT) {
+		img_ext.count += 1;
+	} else {
+		// Move the ISO extension one place down
+		img_ext.extension[2] = img_ext.extension[3];
+		img_ext.description[2] = img_ext.description[3];
+	}
+	// ISO support requires a mounted file system
+	if (GetDriveLetters(SelectedDrive.DeviceNumber, letters) && letters[0] != '\0')
+		img_ext.count += 1;
+	for (i = 1; i <= (UINT)img_ext.count && (safe_strcmp(save_image_type, &img_ext.extension[i - 1][2]) != '\0'); i++);
 	if (i > (UINT)img_ext.count)
 		i = image_type_vhdx;
 	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, &i);
 	if (img_save.ImagePath == NULL)
 		goto out;
 	// Start from the end of our extension array, since '.vhd' would match for '.vhdx' otherwise
-	for (i = (UINT)img_ext.count; (i > 0) && (strstr(img_save.ImagePath, &_img_ext_x[i - 1][1]) == NULL); i--);
+	for (i = (UINT)img_ext.count; (i > 0) && (strstr(img_save.ImagePath, &img_ext.extension[i - 1][1]) == NULL); i--);
 	if (i == 0) {
 		uprintf("Warning: Can not determine image type from extension - Saving to uncompressed VHD.");
 		i = image_type_vhd;
 	} else {
-		save_image_type = (char*)&_img_ext_x[i - 1][2];
+		save_image_type = (char*)&img_ext.extension[i - 1][2];
 		WriteSettingStr(SETTING_PREFERRED_SAVE_IMAGE_TYPE, save_image_type);
 	}
 	switch (i) {
@@ -621,6 +631,20 @@ void VhdSaveImage(void)
 		break;
 	case image_type_ffu:
 		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_FFU;
+		break;
+	case image_type_iso:
+		// ISO requires oscdimg.exe. If not already present, attempt to download it.
+		static_sprintf(path, "%s\\%s\\oscdimg.exe", app_data_dir, FILES_DIR);
+		if (!PathFileExistsU(path)) {
+			if (MessageBoxExU(hMainDialog, lmprintf(MSG_337, "oscdimg.exe"), lmprintf(MSG_115),
+				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
+				goto out;
+			IGNORE_RETVAL(_chdirU(app_data_dir));
+			IGNORE_RETVAL(_mkdir(FILES_DIR));
+			if (DownloadToFileOrBufferEx(OSCDIMG_URL, path, SYMBOL_SERVER_USER_AGENT, NULL, hMainDialog, FALSE) < 64 * KB)
+				goto out;
+		}
+		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_ISO;
 		break;
 	default:
 		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_VHDX;
@@ -648,13 +672,14 @@ void VhdSaveImage(void)
 		ErrorStatus = 0;
 		InitProgress(TRUE);
 		format_thread = CreateThread(NULL, 0, img_save.Type == VIRTUAL_STORAGE_TYPE_DEVICE_FFU ?
-			FfuSaveImageThread : VhdSaveImageThread, &img_save, 0, NULL);
+			FfuSaveImageThread : (img_save.Type == VIRTUAL_STORAGE_TYPE_DEVICE_ISO ? IsoSaveImageThread : VhdSaveImageThread),
+			&img_save, 0, NULL);
 		if (format_thread != NULL) {
-			uprintf("\r\nSave to VHD operation started");
+			uprintf("\r\nSave to image operation started");
 			PrintInfo(0, -1);
 			SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 		} else {
-			uprintf("Unable to start VHD save thread");
+			uprintf("Unable to start image save thread");
 			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
 			PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 		}

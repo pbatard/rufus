@@ -1674,8 +1674,8 @@ DWORD WINAPI FormatThread(void* param)
 			physical = GetPhysicalName(SelectedDrive.DeviceNumber);
 			static_sprintf(cmd, "dism /Apply-Ffu /ApplyDrive:%s /ImageFile:\"%s\"", physical, image_path);
 			safe_free(physical);
-			uprintf("Running command: '%s", cmd);
-			cr = RunCommandWithProgress(cmd, sysnative_dir, TRUE, MSG_261, ".*\r\\[[= ]+([0-9\\.]+%)[= ]+\\].*");
+			uprintf("Running command: '%s'", cmd);
+			cr = RunCommandWithProgress(cmd, sysnative_dir, TRUE, MSG_261, ".*\r\\[[= ]+([0-9\\.]+)%[= ]+\\].*");
 			if (cr != 0 && !IS_ERROR(ErrorStatus)) {
 				SetLastError(cr);
 				uprintf("Failed to apply FFU image: %s", WindowsErrorString());
