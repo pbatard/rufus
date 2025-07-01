@@ -111,6 +111,6 @@ extern int8_t IsBootableImage(const char* path);
 extern char* VhdMountImageAndGetSize(const char* path, uint64_t* disksize);
 #define VhdMountImage(path) VhdMountImageAndGetSize(path, NULL)
 extern void VhdUnmountImage(void);
-extern void SaveImage(void);
+extern BOOL SaveImage(void);
 extern void OpticalDiscSaveImage(void);
 extern DWORD WINAPI IsoSaveImageThread(void* param);

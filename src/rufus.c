@@ -130,7 +130,7 @@ BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, n
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32;
 BOOL usb_debug, use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
-BOOL write_as_image = FALSE, write_as_esp = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
+BOOL write_as_image = FALSE, write_as_esp = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE, save_image = FALSE;
 BOOL appstore_version = FALSE, is_vds_available = TRUE, persistent_log = FALSE, has_ffu_support = FALSE;
 BOOL expert_mode = FALSE, use_rufus_mbr = TRUE;
 float fScale = 1.0f;
@@ -1522,6 +1522,23 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			MessageBoxExU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
 		}
+
+		// Display an alert if any of the UEFI bootloaders have been revoked
+		if (img_report.has_secureboot_bootloader & 0xfe) {
+			switch (img_report.has_secureboot_bootloader & 0xfe) {
+			case 4:
+				msg = lmprintf(MSG_341, "Error code: 0xc0000428");
+				break;
+			default:
+				msg = lmprintf(MSG_340);
+				break;
+			}
+			r = MessageBoxExU(hMainDialog, lmprintf(MSG_339, msg), lmprintf(MSG_338),
+				MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+			if (r == IDCANCEL)
+				goto out;
+		}
+
 		if (IS_DD_BOOTABLE(img_report)) {
 			if (!img_report.is_iso) {
 				// Pure DD images are fine at this stage
@@ -1686,22 +1703,6 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				unattend_xml_mask |= i;
 				WriteSetting32(SETTING_WUE_OPTIONS, (UNATTEND_DEFAULT_MASK << 16) | unattend_xml_mask);
 			}
-		}
-
-		// Display an alert if any of the UEFI bootloaders have been revoked
-		if (img_report.has_secureboot_bootloader & 0xfe) {
-			switch (img_report.has_secureboot_bootloader & 0xfe) {
-			case 4:
-				msg = lmprintf(MSG_341, "Error code: 0xc0000428");
-				break;
-			default:
-				msg = lmprintf(MSG_340);
-				break;
-			}
-			r = MessageBoxExU(hMainDialog, lmprintf(MSG_339, msg), lmprintf(MSG_338),
-				MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
-			if (r == IDCANCEL)
-				goto out;
 		}
 
 		if ((img_report.projected_size < MAX_ISO_TO_ESP_SIZE) && HAS_REGULAR_EFI(img_report) &&
@@ -2678,7 +2679,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			break;
 		case IDC_SAVE:
-			SaveImage();
+			save_image = SaveImage();
 			break;
 		case IDM_SELECT:
 		case IDM_DOWNLOAD:
@@ -3026,6 +3027,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			goto aborted_start;
 		// All subsequent aborts below translate to a user cancellation
 		wParam = BOOTCHECK_CANCEL;
+		save_image = FALSE;
 
 		if ((partition_type == PARTITION_STYLE_MBR) && (SelectedDrive.DiskSize > 2 * TB)) {
 			if (MessageBoxExU(hMainDialog, lmprintf(MSG_134, SizeToHumanReadable(SelectedDrive.DiskSize - 2 * TB, FALSE, FALSE)),
@@ -3120,10 +3122,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		SendMessage(FindWindowA(MAKEINTRESOURCEA(32770), lmprintf(MSG_049)), WM_COMMAND, IDYES, 0);
 		EnableWindow(GetDlgItem(hMainDialog, IDCANCEL), TRUE);
 		EnableControls(TRUE, FALSE);
-		if (wParam) {
+		if (wParam && !save_image) {
 			uprintf("\r\n");
 			GetDevices(DeviceNum);
 		}
+		save_image = FALSE;
 		if (!IS_ERROR(ErrorStatus)) {
 			SendMessage(hProgress, PBM_SETPOS, MAX_PROGRESS, 0);
 			SetTaskbarProgressState(TASKBAR_NOPROGRESS);
@@ -3580,9 +3583,19 @@ skip_args_processing:
 	// Look for a .ini file in the current app directory
 	static_sprintf(ini_path, "%srufus.ini", app_dir);
 	fd = fopenU(ini_path, ini_flags);	// Will create the file if portable mode is requested
+#if !defined(ALPHA)
 	// Using the string directly in safe_strcmp() would call GetSignatureName() twice
-	tmp = GetSignatureName(NULL, NULL, FALSE);
+	tmp = GetSignatureName(NULL, NULL, NULL, FALSE);
 	vc |= (safe_strcmp(tmp, cert_name[0]) == 0);
+#else
+	// So as not to multiply user prompts, as well as officialize our own GitHub builds,
+	// we sign ALPHAs using disposable (non Authenticode) self-signed credentials.
+	static const uint8_t github_thumbprint[SHA1_HASHSIZE] =
+	{ 0xc9, 0x00, 0x1c, 0x67, 0x25, 0x16, 0x83, 0x2b, 0x1a, 0x61, 0xf4, 0x5f, 0x1a, 0x26, 0xd5, 0x76, 0xda, 0xab, 0x06, 0xdf };
+	uint8_t thumbprint[SHA1_HASHSIZE] = { 0 };
+	tmp = GetSignatureName(NULL, NULL, thumbprint, FALSE);
+	vc |= (safe_strcmp(tmp, "Rufus - GitHub Official Build") == 0) && (memcmp(thumbprint, github_thumbprint, SHA1_HASHSIZE) == 0);
+#endif
 	if (fd != NULL) {
 		ini_file = ini_path;
 		// In portable mode, use the app directory for all local storage

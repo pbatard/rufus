@@ -261,7 +261,7 @@ const char* WinPKIErrorString(void)
 }
 
 // Mostly from https://support.microsoft.com/en-us/kb/323809
-char* GetSignatureName(const char* path, const char* country_code, BOOL bSilent)
+char* GetSignatureName(const char* path, const char* country_code, uint8_t* thumbprint, BOOL bSilent)
 {
 	static char szSubjectName[128];
 	char szCountry[3] = "__";
@@ -338,6 +338,16 @@ char* GetSignatureName(const char* path, const char* country_code, BOOL bSilent)
 	if (!pCertContext) {
 		uprintf("PKI: Failed to locate signer certificate in store: %s", WinPKIErrorString());
 		goto out;
+	}
+
+	// Get the thumbprint if requested
+	if (thumbprint != NULL) {
+		dwSize = SHA1_HASHSIZE;
+		if (!CryptHashCertificate(0, CALG_SHA1, 0, pCertContext->pbCertEncoded,
+			pCertContext->cbCertEncoded, thumbprint, &dwSize)) {
+			uprintf("PKI: Failed to compute the thumbprint: %s", WinPKIErrorString());
+			goto out;
+		}
 	}
 
 	// If a country code is provided, validate that the certificate we have is for the same country
@@ -728,7 +738,7 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	// Check the signature name. Make it specific enough (i.e. don't simply check for "Akeo")
 	// so that, besides hacking our server, it'll place an extra hurdle on any malicious entity
 	// into also fooling a C.A. to issue a certificate that passes our test.
-	signature_name = GetSignatureName(path, cert_country, (hDlg == INVALID_HANDLE_VALUE));
+	signature_name = GetSignatureName(path, cert_country, NULL, (hDlg == INVALID_HANDLE_VALUE));
 	if (signature_name == NULL) {
 		uprintf("PKI: Could not get signature name");
 		if (hDlg != INVALID_HANDLE_VALUE)

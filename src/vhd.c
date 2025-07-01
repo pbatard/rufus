@@ -579,7 +579,7 @@ static DWORD WINAPI FfuSaveImageThread(void* param)
 	ExitThread(r);
 }
 
-void SaveImage(void)
+BOOL SaveImage(void)
 {
 	UINT i;
 	static IMG_SAVE img_save;
@@ -593,7 +593,7 @@ void SaveImage(void)
 
 	memset(&img_save, 0, sizeof(IMG_SAVE));
 	if ((DriveIndex < 0) || (format_thread != NULL))
-		return;
+		return FALSE;
 
 	static_sprintf(filename, "%s", rufus_drive[DriveIndex].label);
 	img_save.DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, DriveIndex);
@@ -689,4 +689,5 @@ out:
 		safe_free(img_save.DevicePath);
 		safe_free(img_save.ImagePath);
 	}
+	return (format_thread != NULL);
 }

@@ -85,6 +85,23 @@ jobs:
         strip ./${{ matrix.exe }}
         upx --lzma --best ./${{ matrix.exe }}
 
+    - name: Prepare to sign ALPHA
+      if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      shell: bash
+      # NB: The Base64 encoded variable should not have line breaks or this will fail!
+      run: echo ${{ secrets.RUFUS_GITHUB_OFFICIAL_BUILD }} | base64 -di > ./sign.pfx
+
+    - name: Add signtool to path
+      if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      uses: KamaranL/add-signtool-action@v1
+
+    - name: Sign ALPHA
+      if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      shell: cmd
+      run: |
+        signtool sign /v /f sign.pfx /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 rufus_${{ matrix.TARGET_PLATFORM }}.exe
+        del sign.pfx
+
     - name: Display SHA-256
       run: sha256sum ./${{ matrix.exe }}
 

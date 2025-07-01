@@ -807,11 +807,12 @@ BOOL SetProcessSearch(DWORD DeviceNum)
 		wHandleName[nHandles++] = utf8_to_wchar(DevPath);
 	free(PhysicalPath);
 	// Logical drive(s) handle name(s)
-	GetDriveLetters(DeviceNum, drive_letter);
-	for (i = 0; nHandles < MAX_NUM_HANDLES && drive_letter[i]; i++) {
-		drive_name[0] = drive_letter[i];
-		if (QueryDosDeviceA(drive_name, DevPath, sizeof(DevPath)) != 0)
-			wHandleName[nHandles++] = utf8_to_wchar(DevPath);
+	if (GetDriveLetters(DeviceNum, drive_letter)) {
+		for (i = 0; nHandles < MAX_NUM_HANDLES && drive_letter[i]; i++) {
+			drive_name[0] = drive_letter[i];
+			if (QueryDosDeviceA(drive_name, DevPath, sizeof(DevPath)) != 0)
+				wHandleName[nHandles++] = utf8_to_wchar(DevPath);
+		}
 	}
 	if (WaitForSingleObject(blocking_process.hLock, SEARCH_PROCESS_LOCK_TIMEOUT) != WAIT_OBJECT_0) {
 		uprintf("Could not obtain process search lock");
