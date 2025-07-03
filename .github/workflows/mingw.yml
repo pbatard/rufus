@@ -99,7 +99,7 @@ jobs:
       if: ${{ !startsWith(github.ref, 'refs/tags/') }}
       shell: cmd
       run: |
-        signtool sign /v /f sign.pfx /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 rufus_${{ matrix.TARGET_PLATFORM }}.exe
+        signtool sign /v /f sign.pfx /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 ${{ matrix.exe }}
         del sign.pfx
 
     - name: Display SHA-256
