@@ -98,6 +98,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	STARTUPINFOA si = { 0 };
 	PROCESS_INFORMATION pi = { 0 };
 	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
+	WCHAR *wc, wPath[MAX_PATH] = { 0 };
+
+	// If invoked from a different directory, cd to where this executable resides
+	if (GetModuleFileName(NULL, wPath, ARRAYSIZE(wPath)) != 0 && (wc = wcsrchr(wPath, L'\\')) != NULL) {
+		*wc = L'\0';
+		SetCurrentDirectory(wPath);
+	}
 
 	// Make sure we have 'setup.dll' in the same directory
 	dwAttrib = GetFileAttributesA("setup.dll");
