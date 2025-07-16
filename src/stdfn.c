@@ -83,7 +83,7 @@ BOOL htab_create(uint32_t nel, htab_table* htab)
 		return FALSE;
 	}
 	if_not_assert(htab->table == NULL) {
-		uprintf("Warning: htab_create() was called with a non empty table");
+		uprintf("WARNING: htab_create() was called with a non empty table");
 		return FALSE;
 	}
 

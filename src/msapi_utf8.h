@@ -644,9 +644,8 @@ static __inline BOOL GetTextExtentPointU(HDC hdc, const char* lpString, LPSIZE l
 	return ret;
 }
 
-// A UTF-8 alternative to MS GetCurrentDirectory() since the latter is useless for
-// apps installed from the App Store...
-static __inline DWORD GetCurrentDirectoryU(DWORD nBufferLength, char* lpBuffer)
+// Gets the directory where the executable resises, through GetModuleFileName()
+static __inline DWORD GetAppDirectoryU(DWORD nBufferLength, char* lpBuffer)
 {
 	DWORD i, ret = 0, err = ERROR_INVALID_DATA;
 	// coverity[returned_null]

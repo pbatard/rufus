@@ -2031,7 +2031,7 @@ static DWORD WINAPI OpticalDiscSaveImageThread(void* param)
 	// In case someone poked the disc before us
 	li.QuadPart = 0;
 	if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
-		uprintf("Warning: Unable to rewind device position - wrong data might be copied!");
+		uprintf("WARNING: Unable to rewind device position - wrong data might be copied!");
 	hDestImage = CreateFileU(img_save->ImagePath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL,
 		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDestImage == INVALID_HANDLE_VALUE) {
@@ -2058,7 +2058,7 @@ static DWORD WINAPI OpticalDiscSaveImageThread(void* param)
 		// Optical drives do not appear to increment the sectors to read automatically
 		li.QuadPart = wb;
 		if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
-			uprintf("Warning: Unable to set device position - wrong data might be copied!");
+			uprintf("WARNING: Unable to set device position - wrong data might be copied!");
 		s = ReadFile(hPhysicalDrive, buffer,
 			(DWORD)MIN(img_save->BufSize, img_save->DeviceSize - wb), &rSize, NULL);
 		if (!s) {

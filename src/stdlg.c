@@ -700,7 +700,7 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		SetDarkModeForDlg(hDlg);
 		// Don't overflow our max radio button
 		if (nDialogItems > (IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1 + 1)) {
-			uprintf("Warning: Too many options requested for Selection (%d vs %d)",
+			uprintf("WARNING: Too many options requested for Selection (%d vs %d)",
 				nDialogItems, IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1);
 			nDialogItems = IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1;
 		}
@@ -895,7 +895,7 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		SetDarkModeForDlg(hDlg);
 		// Don't overflow our max radio button
 		if (nDialogItems > (IDC_LIST_ITEMMAX - IDC_LIST_ITEM1 + 1)) {
-			uprintf("Warning: Too many items requested for List (%d vs %d)",
+			uprintf("WARNING: Too many items requested for List (%d vs %d)",
 				nDialogItems, IDC_LIST_ITEMMAX - IDC_LIST_ITEM1);
 			nDialogItems = IDC_LIST_ITEMMAX - IDC_LIST_ITEM1;
 		}
@@ -1034,7 +1034,7 @@ INT_PTR CALLBACK TooltipCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 #ifdef _DEBUG
 	// comctl32 causes issues if the tooltips are not being manipulated from the same thread as their parent controls
 	if (GetCurrentThreadId() != MainThreadId)
-		uprintf("Warning: Tooltip callback is being called from wrong thread");
+		uprintf("WARNING: Tooltip callback is being called from wrong thread");
 #endif
 	return CallWindowProc(ttlist[i].original_proc, hDlg, message, wParam, lParam);
 }
@@ -2023,11 +2023,11 @@ void SetAlertPromptMessages(void)
 		// 4126 = "Format disk" (button)
 		if (LoadStringU(hMui, 4125, title_str[0], sizeof(title_str[0])) <= 0) {
 			static_strcpy(title_str[0], "Microsoft Windows");
-			uprintf("Warning: Could not locate localized format prompt title string in '%s': %s", mui_path, WindowsErrorString());
+			uprintf("WARNING: Could not locate localized format prompt title string in '%s': %s", mui_path, WindowsErrorString());
 		}
 		if (LoadStringU(hMui, 4126, button_str, sizeof(button_str)) <= 0) {
 			static_strcpy(button_str, "Format disk");
-			uprintf("Warning: Could not locate localized format prompt button string in '%s': %s", mui_path, WindowsErrorString());
+			uprintf("WARNING: Could not locate localized format prompt button string in '%s': %s", mui_path, WindowsErrorString());
 		}
 		FreeLibrary(hMui);
 	}

@@ -618,7 +618,7 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 	// Need to get the current file pointer in case we need to retry
 	readFilePointer = SetFilePointerEx(hFile, liZero, &liFilePointer, FILE_CURRENT);
 	if (!readFilePointer)
-		uprintf("Warning: Could not read file pointer %s", WindowsErrorString());
+		uprintf("WARNING: Could not read file pointer %s", WindowsErrorString());
 
 	if (nNumRetries == 0)
 		nNumRetries = 1;
@@ -634,7 +634,7 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 				return TRUE;
 			// Some large drives return 0, even though all the data was written - See github #787 */
 			if (large_drive && (*lpNumberOfBytesWritten == 0)) {
-				uprintf("Warning: Possible short write");
+				uprintf("WARNING: Possible short write");
 				return TRUE;
 			}
 			uprintf("Wrote %d bytes but requested %d", *lpNumberOfBytesWritten, nNumberOfBytesToWrite);

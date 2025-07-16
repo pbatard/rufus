@@ -745,7 +745,7 @@ static BOOL ClearMBRGPT(HANDLE hPhysicalDrive, LONGLONG DiskSize, DWORD SectorSi
 	}
 	liFilePointer.QuadPart = 0ULL;
 	if (!SetFilePointerEx(hPhysicalDrive, liFilePointer, &liFilePointer, FILE_BEGIN) || (liFilePointer.QuadPart != 0ULL))
-		uprintf("Warning: Could not reset disk position");
+		uprintf("WARNING: Could not reset disk position");
 	if (!WriteFileWithRetry(hPhysicalDrive, pZeroBuf, (DWORD)(SectorSize * num_sectors_to_clear), NULL, WRITE_RETRIES))
 		goto out;
 	CHECK_FOR_USER_CANCEL;
@@ -807,7 +807,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		if (buffer[0x1c2] == 0x0e) {
 			uprintf("Partition is already FAT16 LBA...");
 		} else if ((buffer[0x1c2] != 0x04) && (buffer[0x1c2] != 0x06)) {
-			uprintf("Warning: converting a non FAT16 partition to FAT16 LBA: FS type=0x%02x", buffer[0x1c2]);
+			uprintf("WARNING: converting a non FAT16 partition to FAT16 LBA: FS type=0x%02x", buffer[0x1c2]);
 		}
 		buffer[0x1c2] = 0x0e;
 		break;
@@ -815,7 +815,7 @@ static BOOL WriteMBR(HANDLE hPhysicalDrive)
 		if (buffer[0x1c2] == 0x0c) {
 			uprintf("Partition is already FAT32 LBA...");
 		} else if (buffer[0x1c2] != 0x0b) {
-			uprintf("Warning: converting a non FAT32 partition to FAT32 LBA: FS type=0x%02x", buffer[0x1c2]);
+			uprintf("WARNING: converting a non FAT32 partition to FAT32 LBA: FS type=0x%02x", buffer[0x1c2]);
 		}
 		buffer[0x1c2] = 0x0c;
 		break;
@@ -1170,7 +1170,7 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 	// We poked the MBR and other stuff, so we need to rewind
 	li.QuadPart = 0;
 	if (!SetFilePointerEx(hPhysicalDrive, li, NULL, FILE_BEGIN))
-		uprintf("Warning: Unable to rewind image position - wrong data might be copied!");
+		uprintf("WARNING: Unable to rewind image position - wrong data might be copied!");
 	UpdateProgressWithInfoInit(NULL, FALSE);
 
 	if (bZeroDrive) {
@@ -1532,7 +1532,7 @@ DWORD WINAPI FormatThread(void* param)
 	safe_unlockclose(hPhysicalDrive);
 	PrintInfo(0, MSG_239, lmprintf(MSG_307));
 	if (!is_vds_available || !DeletePartition(DriveIndex, 0, TRUE)) {
-		uprintf("Warning: Could not delete partition(s): %s", is_vds_available ? WindowsErrorString() : "VDS is not available");
+		uprintf("WARNING: Could not delete partition(s): %s", is_vds_available ? WindowsErrorString() : "VDS is not available");
 		SetLastError(ErrorStatus);
 		ErrorStatus = 0;
 		// If we couldn't delete partitions, Windows give us trouble unless we
@@ -1845,7 +1845,7 @@ DWORD WINAPI FormatThread(void* param)
 	// the name we proposed, and we require an exact label, to patch config files.
 	if ((fs_type < FS_EXT2) && !GetVolumeInformationU(drive_name, img_report.usb_label,
 		ARRAYSIZE(img_report.usb_label), NULL, NULL, NULL, NULL, 0)) {
-		uprintf("Warning: Failed to refresh label: %s", WindowsErrorString());
+		uprintf("WARNING: Failed to refresh label: %s", WindowsErrorString());
 	} else if (IS_EXT(fs_type)) {
 		const char* ext_label = GetExtFsLabel(DriveIndex, 0);
 		if (ext_label != NULL)
@@ -1944,7 +1944,7 @@ DWORD WINAPI FormatThread(void* param)
 					uprintf("Installing: %s (KolibriOS loader)", kolibri_dst);
 					if (ExtractISOFile(image_path, "HD_Load/USB_Boot/MTLD_F32", kolibri_dst,
 						FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM) == 0) {
-						uprintf("Warning: loader installation failed - KolibriOS will not boot!");
+						uprintf("WARNING: Loader installation failed - KolibriOS will not boot!");
 					}
 				}
 				// EFI mode selected, with no 'boot###.efi' but Windows 7 x64's 'bootmgr.efi' (bit #0)
@@ -2004,7 +2004,7 @@ DWORD WINAPI FormatThread(void* param)
 		UpdateProgress(OP_EXTRACT_ZIP, 0.0f);
 		drive_name[2] = 0;
 		if (archive_path != NULL && fs_type < FS_EXT2 && !ExtractZip(archive_path, drive_name) && !IS_ERROR(ErrorStatus))
-			uprintf("Warning: Could not copy additional files");
+			uprintf("WARNING: Could not copy additional files");
 	}
 
 out:

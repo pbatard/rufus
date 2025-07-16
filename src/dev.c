@@ -1015,7 +1015,7 @@ BOOL GetDevices(DWORD devnum)
 				}
 				num_drives++;
 				if (num_drives >= MAX_DRIVES)
-					uprintf("Warning: Found more than %d drives - ignoring remaining ones...", MAX_DRIVES);
+					uprintf("WARNING: Found more than %d drives - ignoring remaining ones...", MAX_DRIVES);
 				safe_free(devint_detail_data);
 				break;
 			}

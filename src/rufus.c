@@ -192,8 +192,13 @@ static void SetAllowedFileSystems(void)
 		if ((image_path == NULL) || !HAS_NTFSLESS_GRUB(img_report))
 			allowed_filesystem[FS_NTFS] = TRUE;
 		// Don't allow anything besides NTFS if the image is not compatible
-		if ((image_path != NULL) && !IS_FAT32_COMPAT(img_report))
-			break;
+		if ((image_path != NULL) && !IS_FAT32_COMPAT(img_report)) {
+			// Only disable FAT32 if we have NTFS enabled
+			if (allowed_filesystem[FS_NTFS])
+				break;
+			// Else, print a warning
+			uprintf("WARNING: FAT32 has been forcefully enabled, but this image may not work with FAT32.");
+		}
 		if (!HAS_WINDOWS(img_report) || (target_type != TT_BIOS) || allow_dual_uefi_bios) {
 			if (!HAS_WINTOGO(img_report) || (ComboBox_GetCurItemData(hImageOption) != IMOP_WIN_TO_GO)) {
 				allowed_filesystem[FS_FAT16] = TRUE;
@@ -2112,7 +2117,7 @@ static void InitDialog(HWND hDlg)
 		len = 0;
 		buf = (char*)GetResource(hMainInstance, resource[i], _RT_RCDATA, "ldlinux_sys", &len, TRUE);
 		if (buf == NULL) {
-			uprintf("Warning: could not read embedded Syslinux v%d version", i + 4);
+			uprintf("WARNING: could not read embedded Syslinux v%d version", i + 4);
 		} else {
 			embedded_sl_version[i] = GetSyslinuxVersion(buf, len, &ext);
 			static_sprintf(embedded_sl_version_str[i], "%d.%02d", SL_MAJOR(embedded_sl_version[i]), SL_MINOR(embedded_sl_version[i]));
@@ -3351,7 +3356,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	is_x86_64 = (strcmp(APPLICATION_ARCH, "x64") == 0);
 
 	// Retrieve various app & system directories.
-	if (GetCurrentDirectoryU(sizeof(app_dir), app_dir) == 0) {
+	if (GetAppDirectoryU(sizeof(app_dir), app_dir) == 0) {
 		uprintf("Could not get application directory: %s", WindowsErrorString());
 		static_strcpy(app_dir, ".\\");
 	} else {
@@ -3362,7 +3367,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		static_strcat(app_dir, "\\");
 	}
 
-	// In the wonderful world of Microsoft Windows, GetCurrentDirectory() returns the
+	// In the wonderful world of Microsoft Windows, GetCurrentDirectory() may return the
 	// directory where the application resides, instead of the real current directory
 	// so we need another method to resolve the *ACTUAL* current directory.
 	static_strcpy(cur_dir, ".\\");
@@ -3821,7 +3826,7 @@ relaunch:
 	// Set the hook to automatically close Windows' "You need to format the disk in drive..." prompt
 	SetAlertPromptMessages();
 	if (!SetAlertPromptHook())
-		uprintf("Warning: Could not set alert prompt hook");
+		uprintf("WARNING: Could not set alert prompt hook");
 
 	ShowWindow(hDlg, SW_SHOWNORMAL);
 	UpdateWindow(hDlg);

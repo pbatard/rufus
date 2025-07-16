@@ -619,7 +619,7 @@ BOOL SaveImage(void)
 	// Start from the end of our extension array, since '.vhd' would match for '.vhdx' otherwise
 	for (i = (UINT)img_ext.count; (i > 0) && (strstr(img_save.ImagePath, &img_ext.extension[i - 1][1]) == NULL); i--);
 	if (i == 0) {
-		uprintf("Warning: Can not determine image type from extension - Saving to uncompressed VHD.");
+		uprintf("WARNING: Can not determine image type from extension - Saving to uncompressed VHD.");
 		i = image_type_vhd;
 	} else {
 		save_image_type = (char*)&img_ext.extension[i - 1][2];

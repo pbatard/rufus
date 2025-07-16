@@ -514,7 +514,7 @@ static void CheckForDBXUpdates(int verbose)
 			WriteSetting64(reg_name, timestamp);
 			uprintf("Saved %s as 'dbx_%s.bin'", dbx_info[i].url, efi_archname[i + 1]);
 		} else
-			uprintf("Warning: Failed to download %s", dbx_info[i].url);
+			uprintf("WARNING: Failed to download %s", dbx_info[i].url);
 	}
 }
 

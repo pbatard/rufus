@@ -166,7 +166,7 @@ static HANDLE GetHandle(char* Path, BOOL bLockDrive, BOOL bWriteAccess, BOOL bWr
 			uprintf("Waiting for access on %s...", Path);
 		} else if (!bWriteShare && (i > DRIVE_ACCESS_RETRIES/3)) {
 			// If we can't seem to get a hold of the drive for some time, try to enable FILE_SHARE_WRITE...
-			uprintf("Warning: Could not obtain exclusive rights. Retrying with write sharing enabled...");
+			uprintf("WARNING: Could not obtain exclusive rights. Retrying with write sharing enabled...");
 			bWriteShare = TRUE;
 			// Try to report the process that is locking the drive
 			access_mask = GetProcessSearch(SEARCH_PROCESS_TIMEOUT, 0x07, FALSE);
@@ -362,7 +362,7 @@ char* GetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrail
 		// NB: We need to re-add DRIVE_INDEX_MIN for this call since CheckDriveIndex() subtracted it
 		ret = AltGetLogicalName(DriveIndex + DRIVE_INDEX_MIN, PartitionOffset, bKeepTrailingBackslash, bSilent);
 		if ((ret != NULL) && (strchr(ret, ' ') != NULL))
-			uprintf("Warning: Using physical device to access partition data");
+			uprintf("WARNING: Using physical device to access partition data");
 	}
 
 out:
@@ -1148,7 +1148,7 @@ static BOOL _GetDriveLettersAndType(DWORD DriveIndex, char* drive_letters, UINT*
 				NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL, 3000);
 		if (hDrive == INVALID_HANDLE_VALUE) {
 			if (GetLastError() == WAIT_TIMEOUT)
-				uprintf("Warning: Time-out while trying to query drive %c", toupper(drive[0]));
+				uprintf("WARNING: Time-out while trying to query drive %c", toupper(drive[0]));
 			continue;
 		}
 
@@ -1883,7 +1883,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 	SelectedDrive.SectorSize = DiskGeometry->Geometry.BytesPerSector;
 	SelectedDrive.FirstDataSector = MAXDWORD;
 	if (SelectedDrive.SectorSize < 512) {
-		suprintf("Warning: Drive 0x%02x reports a sector size of %d - Correcting to 512 bytes.",
+		suprintf("WARNING: Drive 0x%02x reports a sector size of %d - Correcting to 512 bytes.",
 			DriveIndex, SelectedDrive.SectorSize);
 		SelectedDrive.SectorSize = 512;
 	}
@@ -2126,7 +2126,7 @@ BOOL MountVolume(char* drive_name, char *volume_name)
 			}
 			uprintf("Retrying after dismount...");
 			if (!DeleteVolumeMountPointA(drive_name))
-				uprintf("Warning: Could not delete volume mountpoint '%s': %s", drive_name, WindowsErrorString());
+				uprintf("WARNING: Could not delete volume mountpoint '%s': %s", drive_name, WindowsErrorString());
 			if (SetVolumeMountPointA(drive_name, volume_name))
 				return TRUE;
 			if ((GetLastError() == ERROR_DIR_NOT_EMPTY) &&

@@ -294,8 +294,8 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	if (i > 0)
 		img_report.cfg_path[i] = '/';
 	if (w < 0) {
-		uprintf("Could not patch Syslinux files.");
-		uprintf("WARNING: This could be caused by your firewall having modified downloaded content, such as 'ldlinux.sys'...");
+		uprintf("WARNING: Could not patch Syslinux files.");
+		uprintf("This could be caused by your firewall having modified downloaded content, such as 'ldlinux.sys'...");
 		goto out;
 	}
 

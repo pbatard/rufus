@@ -601,14 +601,14 @@ int SetWinToGoIndex(void)
 		// If we are parsing such an ISO, try to fall back to using DESCRIPTION.
 		if (StrArrayAdd(&version_name, ezxml_child_val(image, "DISPLAYNAME"), TRUE) < 0) {
 			if (StrArrayAdd(&version_name, ezxml_child_val(image, "DESCRIPTION"), TRUE) < 0) {
-				uprintf("Warning: Could not find a description for image index %d", i + 1);
+				uprintf("WARNING: Could not find a description for image index %d", i + 1);
 				StrArrayAdd(&version_name, "Unknown Windows Version", TRUE);
 			}
 			bNonStandard = TRUE;
 		}
 	}
 	if (bNonStandard)
-		uprintf("Warning: Nonstandard Windows image (missing <DISPLAYNAME> entries)");
+		uprintf("WARNING: Nonstandard Windows image (missing <DISPLAYNAME> entries)");
 
 	if (i > 1)
 		// NB: _log2 returns -2 if SelectionDialog() returns negative (user cancelled)
@@ -624,7 +624,7 @@ int SetWinToGoIndex(void)
 		PopulateWindowsVersionFromXml(xml, xml_len, i - 1);
 		// If we couldn't obtain the major and build, we have a problem
 		if (img_report.win_version.major == 0 || img_report.win_version.build == 0)
-			uprintf("Warning: Could not obtain version information from XML index (Nonstandard Windows image?)");
+			uprintf("WARNING: Could not obtain version information from XML index (Nonstandard Windows image?)");
 		uprintf("Will use '%s' (Build: %d, Index %s) for Windows To Go",
 			version_name.String[i - 1], img_report.win_version.build, version_index.String[i - 1]);
 		// Need Windows 10 Creator Update or later for boot on REMOVABLE to work
@@ -953,7 +953,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			// (provided that the registry key creation was the only item for this pass)
 			if ((flags & UNATTEND_WINPE_SETUP_MASK) == UNATTEND_SECUREBOOT_TPM_MINRAM) {
 				if (replace_in_token_data(unattend_xml_path, "<settings", "windowsPE", "disabled", FALSE) == NULL)
-					uprintf("Warning: Could not disable 'windowsPE' pass from unattend.xml");
+					uprintf("WARNING: Could not disable 'windowsPE' pass from unattend.xml");
 				// Remove the flags, since we accomplished the registry creation outside of unattend.
 				flags &= ~UNATTEND_SECUREBOOT_TPM_MINRAM;
 			} else {

@@ -697,7 +697,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 
 out:
 	if (!bInitSuccess)
-		uprintf("Warning: Could not start process handle enumerator!");
+		uprintf("WARNING: Could not start process handle enumerator!");
 
 	if (wHandleName != NULL) {
 		for (j = 0; j < nHandles; j++)
