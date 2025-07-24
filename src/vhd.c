@@ -477,6 +477,8 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 	VIRTUAL_DISK_PROGRESS vprogress = { 0 };
 	OVERLAPPED overlapped = { 0 };
 	DWORD r = ERROR_NOT_FOUND, flags;
+	DWORD dwBytesRead = 0;
+	BOOL bResult = FALSE;
 
 	if_not_assert(img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD ||
 		img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHDX)
@@ -530,6 +532,20 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 			goto out;
 		}
 	}
+
+	bResult = GetOverlappedResult(handle,
+		&overlapped,
+		&dwBytesRead,
+		FALSE);
+
+	if (!bResult) {
+		if (GetLastError() == ERROR_DISK_FULL)
+			ErrorStatus = RUFUS_ERROR(ERROR_FILE_TOO_LARGE);
+
+		uprintf("Could not save virtual disk: %s", WindowsErrorString());
+		goto out;
+	}
+
 
 	r = 0;
 	UpdateProgressWithInfo(OP_FORMAT, MSG_261, SelectedDrive.DiskSize, SelectedDrive.DiskSize);
