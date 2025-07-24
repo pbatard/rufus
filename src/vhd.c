@@ -476,7 +476,7 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 	STOPGAP_CREATE_VIRTUAL_DISK_PARAMETERS vparams = { 0 };
 	VIRTUAL_DISK_PROGRESS vprogress = { 0 };
 	OVERLAPPED overlapped = { 0 };
-	DWORD r = ERROR_NOT_FOUND, flags;
+	DWORD r = ERROR_NOT_FOUND, flags, bytes_read = 0;
 
 	if_assert_fails(img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD ||
 		img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHDX)
@@ -529,6 +529,13 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 			uprintf("Could not save virtual disk: %s", WindowsErrorString());
 			goto out;
 		}
+	}
+
+	if (!GetOverlappedResult(handle, &overlapped, &bytes_read, FALSE)) {
+		if (GetLastError() == ERROR_DISK_FULL)
+			ErrorStatus = RUFUS_ERROR(ERROR_FILE_TOO_LARGE);
+		uprintf("Could not save virtual disk: %s", WindowsErrorString());
+		goto out;
 	}
 
 	r = 0;
