@@ -81,7 +81,15 @@ static inline void filedes_invalidate(struct filedes *fd)
 static inline bool
 filedes_valid(const struct filedes *fd)
 {
+#ifdef _MSC_VER
+	// The current wimlib code makes repeated attempts to close stdin (0) when a
+	// WIM cannot be opened, which doesn't sit too well with MSFT's _close() as
+	// it invokes the exception handler and can make the application crash...
+	// So we declare stdin as invalid for use with Visual Studio compiled apps.
+	return (fd->fd != -1 && fd->fd != 0);
+#else
 	return fd->fd != -1;
+#endif
 }
 
 #endif /* _WIMLIB_FILE_IO_H */

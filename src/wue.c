@@ -475,15 +475,17 @@ static void PopulateWindowsVersionFromXml(const wchar_t* xml, size_t xml_len, in
 BOOL PopulateWindowsVersion(void)
 {
 	int r;
-	char wim_path[MAX_PATH] = "";
+	char wim_path[4 * MAX_PATH] = "";
 	wchar_t* xml = NULL;
 	size_t xml_len;
 	WIMStruct* wim = NULL;
 
 	memset(&img_report.win_version, 0, sizeof(img_report.win_version));
 
+	assert(safe_strlen(image_path) + 1 < ARRAYSIZE(wim_path));
 	static_strcpy(wim_path, image_path);
 	if (!img_report.is_windows_img) {
+		assert(safe_strlen(image_path) + safe_strlen(&img_report.wininst_path[0][3]) + 1 < ARRAYSIZE(wim_path));
 		static_strcat(wim_path, "|");
 		static_strcat(wim_path, &img_report.wininst_path[0][3]);
 	}
@@ -545,7 +547,7 @@ int SetWinToGoIndex(void)
 	int i, r;
 	WIMStruct* wim = NULL;
 	char* install_names[MAX_WININST];
-	wchar_t wim_path[MAX_PATH] = L"", *xml = NULL;
+	wchar_t wim_path[4 * MAX_PATH] = L"", *xml = NULL;
 	size_t xml_len;
 	StrArray version_name = { 0 }, version_index = { 0 };
 	BOOL bNonStandard = FALSE;
@@ -568,9 +570,11 @@ int SetWinToGoIndex(void)
 			wininst_index = 0;
 	}
 
+	assert(utf8_to_wchar_get_size(image_path) <= ARRAYSIZE(wim_path));
 	utf8_to_wchar_no_alloc(image_path, wim_path, ARRAYSIZE(wim_path));
 	if (!img_report.is_windows_img) {
 		wcscat(wim_path, L"|");
+		assert(utf8_to_wchar_get_size(image_path) + utf8_to_wchar_get_size(&img_report.wininst_path[wininst_index][2]) <= ARRAYSIZE(wim_path));
 		utf8_to_wchar_no_alloc(&img_report.wininst_path[wininst_index][2],
 			&wim_path[wcslen(wim_path)], (int)ARRAYSIZE(wim_path) - wcslen(wim_path));
 	}
@@ -663,7 +667,7 @@ out:
 /// <returns>TRUE on success, FALSE on error.</returns>
 BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 {
-	char *ms_efi = NULL, wim_path[MAX_PATH], cmd[MAX_PATH];
+	char *ms_efi = NULL, wim_path[4 * MAX_PATH], cmd[MAX_PATH];
 	ULONG cluster_size;
 
 	uprintf("Windows To Go mode selected");
@@ -673,8 +677,10 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		return FALSE;
 	}
 
+	assert(safe_strlen(image_path) < ARRAYSIZE(wim_path));
 	static_strcpy(wim_path, image_path);
 	if (!img_report.is_windows_img) {
+		assert(safe_strlen(image_path) + safe_strlen(&img_report.wininst_path[wininst_index][3]) + 1 < ARRAYSIZE(wim_path));
 		static_strcat(wim_path, "|");
 		static_strcat(wim_path, &img_report.wininst_path[wininst_index][3]);
 	}

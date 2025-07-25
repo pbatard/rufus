@@ -890,13 +890,13 @@ DWORD RunCommandWithProgress(const char* cmd, const char* dir, BOOL log, int msg
 			Sleep(100);
 		};
 	} else {
-		// TODO: Detect user cancellation here?
 		switch (WaitForSingleObject(pi.hProcess, 1800000)) {
 		case WAIT_TIMEOUT:
 			uprintf("Command did not terminate within timeout duration");
 			break;
 		case WAIT_OBJECT_0:
-			uprintf("Command was terminated by user");
+			if (IS_ERROR(ErrorStatus) && (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED))
+				uprintf("Command was terminated by user");
 			break;
 		default:
 			uprintf("Error while waiting for command to be terminated: %s", WindowsErrorString());

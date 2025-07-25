@@ -246,7 +246,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 	const char* psz_fullpath, EXTRACT_PROPS *props)
 {
 	size_t i, j, k, len;
-	char bootloader_name[32], path[MAX_PATH];
+	char bootloader_name[32];
 
 	// Check for an isolinux/syslinux config file anywhere
 	memset(props, 0, sizeof(EXTRACT_PROPS));
@@ -298,6 +298,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		if (file_length >= 4 * GB && psz_dirname != NULL && IS_FAT(fs_type) && img_report.has_4GB_file == 0x81) {
 			if (safe_stricmp(&psz_dirname[max(0, ((int)safe_strlen(psz_dirname)) -
 				((int)strlen(sources_str)))], sources_str) == 0) {
+				char wim_path[4 * MAX_PATH];
 				for (i = 0; i < ARRAYSIZE(wininst_name) - 1; i++) {
 					if (safe_stricmp(psz_basename, wininst_name[i]) == 0 && file_length >= 4 * GB) {
 						print_split_file((char*)psz_fullpath, file_length);
@@ -305,8 +306,9 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 						dst[strlen(dst) - 3] = 's';
 						dst[strlen(dst) - 2] = 'w';
 						dst[strlen(dst) - 1] = 'm';
-						static_sprintf(path, "%s|%s/%s", image_path, psz_dirname, psz_basename);
-						WimSplitFile(path, dst);
+						assert(safe_strlen(image_path) + safe_strlen(psz_dirname) + safe_strlen(psz_basename) + 2 < ARRAYSIZE(wim_path));
+						static_sprintf(wim_path, "%s|%s/%s", image_path, psz_dirname, psz_basename);
+						WimSplitFile(wim_path, dst);
 						free(dst);
 						return TRUE;
 					}
@@ -1401,8 +1403,10 @@ out:
 			safe_free(buf);
 		}
 		if (HAS_WININST(img_report)) {
-			static_sprintf(path, "%s|%s", image_path, &img_report.wininst_path[0][2]);
-			img_report.wininst_version = GetWimVersion(path);
+			char wim_path[4 * MAX_PATH];
+			assert(safe_strlen(image_path) + safe_strlen(&img_report.wininst_path[0][2]) + 2 < ARRAYSIZE(wim_path));
+			static_sprintf(wim_path, "%s|%s", image_path, &img_report.wininst_path[0][2]);
+			img_report.wininst_version = GetWimVersion(wim_path);
 		}
 		if (img_report.has_grub2) {
 			char grub_path[128];

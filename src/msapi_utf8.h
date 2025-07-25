@@ -56,8 +56,12 @@ extern "C" {
 
 #define wchar_to_utf8_no_alloc(wsrc, dest, dest_size) \
 	WideCharToMultiByte(CP_UTF8, 0, wsrc, -1, dest, (int)(dest_size), NULL, NULL)
+#define wchar_to_utf8_get_size(wsrc) \
+	WideCharToMultiByte(CP_UTF8, 0, wsrc, -1, NULL, 0, NULL, NULL)
 #define utf8_to_wchar_no_alloc(src, wdest, wdest_size) \
 	MultiByteToWideChar(CP_UTF8, 0, src, -1, wdest, (int)(wdest_size))
+#define utf8_to_wchar_get_size(src) \
+	MultiByteToWideChar(CP_UTF8, 0, src, -1, NULL, 0)
 #define Edit_ReplaceSelU(hCtrl, str) ((void)SendMessageLU(hCtrl, EM_REPLACESEL, (WPARAM)FALSE, str))
 #define ComboBox_AddStringU(hCtrl, str) ((int)(DWORD)SendMessageLU(hCtrl, CB_ADDSTRING, (WPARAM)FALSE, str))
 #define ComboBox_InsertStringU(hCtrl, index, str) ((int)(DWORD)SendMessageLU(hCtrl, CB_INSERTSTRING, (WPARAM)index, str))
