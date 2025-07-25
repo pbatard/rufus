@@ -279,11 +279,11 @@ char* GetLogicalName(DWORD DriveIndex, uint64_t PartitionOffset, BOOL bKeepTrail
 
 		// Sanity checks
 		len = safe_strlen(volume_name);
-		if_not_assert(len > 4)
+		if_assert_fails(len > 4)
 			continue;
-		if_not_assert(safe_strnicmp(volume_name, volume_start, 4) == 0)
+		if_assert_fails(safe_strnicmp(volume_name, volume_start, 4) == 0)
 			continue;
-		if_not_assert(volume_name[len - 1] == '\\')
+		if_assert_fails(volume_name[len - 1] == '\\')
 			continue;
 
 		drive_type = GetDriveTypeA(volume_name);

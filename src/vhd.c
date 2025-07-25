@@ -478,7 +478,7 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 	OVERLAPPED overlapped = { 0 };
 	DWORD r = ERROR_NOT_FOUND, flags;
 
-	if_not_assert(img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD ||
+	if_assert_fails(img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD ||
 		img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHDX)
 		return ERROR_INVALID_PARAMETER;
 

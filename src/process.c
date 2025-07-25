@@ -449,7 +449,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 		// Work on our own copy of the handle names so we don't have to hold the
 		// mutex for string comparison. Update only if the version has changed.
 		if (blocking_process.nVersion[0] != blocking_process.nVersion[1]) {
-			if_not_assert(blocking_process.wHandleName != NULL && blocking_process.nHandles != 0) {
+			if_assert_fails(blocking_process.wHandleName != NULL && blocking_process.nHandles != 0) {
 				ReleaseMutex(hLock);
 				goto out;
 			}
@@ -883,7 +883,7 @@ BYTE GetProcessSearch(uint32_t timeout, uint8_t access_mask, BOOL bIgnoreStalePr
 		return 0;
 	}
 
-	if_not_assert(blocking_process.hLock != NULL)
+	if_assert_fails(blocking_process.hLock != NULL)
 		return 0;
 
 retry:

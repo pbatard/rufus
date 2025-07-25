@@ -205,7 +205,8 @@ static __inline void static_repchr(char* p, char s, char r) {
 }
 #define to_unix_path(str) static_repchr(str, '\\', '/')
 #define to_windows_path(str) static_repchr(str, '/', '\\')
-#define if_not_assert(cond) assert(cond); if (!(cond))
+#define if_assert_fails(cond) assert(cond); if (!(cond))
+#define if_assert_succeeds(cond) assert(cond); if ((cond))
 
 extern void uprintf(const char *format, ...);
 extern void uprintfs(const char *str);

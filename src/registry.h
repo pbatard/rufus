@@ -37,9 +37,9 @@ static __inline BOOL DeleteRegistryKey(HKEY key_root, const char* key_name)
 	HKEY hSoftware = NULL;
 	LONG s;
 
-	if_not_assert(key_root == REGKEY_HKCU)
+	if_assert_fails(key_root == REGKEY_HKCU)
 		return FALSE;
-	if_not_assert(key_name != NULL)
+	if_assert_fails(key_name != NULL)
 		return FALSE;
 
 	if (RegOpenKeyExA(key_root, "SOFTWARE", 0, KEY_READ|KEY_CREATE_SUB_KEY, &hSoftware) != ERROR_SUCCESS)
@@ -133,12 +133,12 @@ static __inline BOOL _SetRegistryKey(HKEY key_root, const char* key_name, DWORD 
 	HKEY hRoot = NULL, hApp = NULL;
 	DWORD dwDisp, dwType = reg_type;
 
-	if_not_assert(key_name != NULL)
+	if_assert_fails(key_name != NULL)
 		return FALSE;
-	if_not_assert(key_root == REGKEY_HKCU)
+	if_assert_fails(key_root == REGKEY_HKCU)
 		return FALSE;
 	// Validate that we are always dealing with a short key
-	if_not_assert(strchr(key_name, '\\') == NULL)
+	if_assert_fails(strchr(key_name, '\\') == NULL)
 		return FALSE;
 
 	if (RegOpenKeyExA(key_root, NULL, 0, KEY_READ|KEY_CREATE_SUB_KEY, &hRoot) != ERROR_SUCCESS) {

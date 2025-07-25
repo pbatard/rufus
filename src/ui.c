@@ -579,7 +579,7 @@ void SetSectionHeaders(HWND hDlg, HFONT* hFont)
 		memset(wtmp, 0, sizeof(wtmp));
 		GetWindowTextW(hCtrl, wtmp, ARRAYSIZE(wtmp) - 4);
 		wlen = wcslen(wtmp);
-		if_not_assert(wlen < ARRAYSIZE(wtmp) - 2)
+		if_assert_fails(wlen < ARRAYSIZE(wtmp) - 2)
 			break;
 		wtmp[wlen++] = L' ';
 		wtmp[wlen++] = L' ';

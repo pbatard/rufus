@@ -969,7 +969,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			// If we have a windowsPE section, copy the answer files to the root of boot.wim as
 			// Autounattend.xml. This also results in that file being automatically copied over
 			// to %WINDIR%\Panther\unattend.xml for later passes processing.
-			if_not_assert(update_boot_wim)
+			if_assert_fails(update_boot_wim)
 				goto out;
 			wuc[wuc_index].op = WIMLIB_UPDATE_OP_ADD;
 			wuc[wuc_index].add.fs_source_path = utf8_to_wchar(unattend_xml_path);
@@ -1003,7 +1003,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 		StrArray files;
 		char tmp_dir2[MAX_PATH], *rep;
 		const char* efi_ex_path = "Windows\\Boot\\EFI_EX";
-		if_not_assert(update_boot_wim)
+		if_assert_fails(update_boot_wim)
 			goto out;
 		if (GetTempDirNameU(temp_dir, APPLICATION_NAME, 0, tmp_dir[1]) == 0) {
 			uprintf("WARNING: Could not create temp dir for 2023 signed UEFI bootloaders");

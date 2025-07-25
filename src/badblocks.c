@@ -549,7 +549,7 @@ static unsigned int test_rw(HANDLE hDrive, blk64_t last_block, size_t block_size
 				if (memcmp(read_buffer + i * block_size,
 					   buffer + i * block_size,
 					   block_size)) {
-					if_not_assert(currently_testing * block_size < 1 * PB) 
+					if_assert_fails(currently_testing * block_size < 1 * PB) 
 						goto out;
 					// coverity[overflow_const]
 					bb_count += bb_output(currently_testing+i-got, CORRUPTION_ERROR);

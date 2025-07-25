@@ -82,7 +82,7 @@ BOOL htab_create(uint32_t nel, htab_table* htab)
 	if (htab == NULL) {
 		return FALSE;
 	}
-	if_not_assert(htab->table == NULL) {
+	if_assert_fails(htab->table == NULL) {
 		uprintf("WARNING: htab_create() was called with a non empty table");
 		return FALSE;
 	}
@@ -198,7 +198,7 @@ uint32_t htab_hash(char* str, htab_table* htab)
 	// Not found => New entry
 
 	// If the table is full return an error
-	if_not_assert(htab->filled < htab->size) {
+	if_assert_fails(htab->filled < htab->size) {
 		uprintf("Hash table is full (%d entries)", htab->size);
 		return 0;
 	}
@@ -1216,7 +1216,7 @@ BOOL MountRegistryHive(const HKEY key, const char* pszHiveName, const char* pszH
 	LSTATUS status;
 	HANDLE token = INVALID_HANDLE_VALUE;
 
-	if_not_assert((key == HKEY_LOCAL_MACHINE) || (key == HKEY_USERS))
+	if_assert_fails((key == HKEY_LOCAL_MACHINE) || (key == HKEY_USERS))
 		return FALSE;
 
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token)) {
@@ -1248,7 +1248,7 @@ BOOL UnmountRegistryHive(const HKEY key, const char* pszHiveName)
 {
 	LSTATUS status;
 
-	if_not_assert((key == HKEY_LOCAL_MACHINE) || (key == HKEY_USERS))
+	if_assert_fails((key == HKEY_LOCAL_MACHINE) || (key == HKEY_USERS))
 		return FALSE;
 
 	status = RegUnLoadKeyA(key, pszHiveName);
