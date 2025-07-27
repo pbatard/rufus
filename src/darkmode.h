@@ -25,6 +25,8 @@
 extern BOOL is_darkmode_enabled;
 
 typedef enum _WindowsBuild {
+	WIN10_1809 = 17763, // first build to support dark mode
+	WIN10_1903 = 18362,
 	WIN10_22H2 = 19045,
 	WIN11_21H2 = 22000,
 } WindowsBuild;

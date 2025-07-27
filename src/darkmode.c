@@ -58,7 +58,7 @@ static inline BOOL IsAtLeastWin10Build(DWORD buildNumber)
 
 static inline BOOL IsAtLeastWin10(void)
 {
-	return IsAtLeastWin10Build(WIN10_22H2);
+	return IsAtLeastWin10Build(WIN10_1809);
 }
 
 static inline BOOL IsAtLeastWin11(void)
@@ -78,13 +78,22 @@ static inline BOOL IsHighContrast(void)
 
 BOOL GetDarkModeFromRegistry(void)
 {
+	is_darkmode_enabled = FALSE;
+
+	// allow dark mode only for x64 and arm64 Rufus builds
+#if (defined(__x86_64__) || defined(_M_X64) \
+	|| defined(__aarch64__) || defined(_M_ARM64))
+
+	if (!IsAtLeastWin10() || IsHighContrast())
+		return is_darkmode_enabled;
+
 	DWORD data = 0, size = sizeof(data);
 
-	is_darkmode_enabled = FALSE;
 	if (RegGetValueW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
 		L"AppsUseLightTheme", RRF_RT_REG_DWORD, NULL, &data, &size) == ERROR_SUCCESS)
 		// Dark mode is 0, light mode is 1
 		is_darkmode_enabled = (data == 0);
+#endif
 	return is_darkmode_enabled;
 }
 
@@ -112,10 +121,15 @@ void SetDarkTitleBar(HWND hWnd)
 		DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &is_darkmode_enabled, sizeof(is_darkmode_enabled));
 		return;
 	}
-	if (IsAtLeastWin10()) {
+	if (IsAtLeastWin10Build(WIN10_1903)) {
 		PF_INIT_OR_OUT(SetWindowCompositionAttribute, user32);
 		WINDOWCOMPOSITIONATTRIBDATA data = { WCA_USEDARKMODECOLORS, &is_darkmode_enabled, sizeof(is_darkmode_enabled) };
 		pfSetWindowCompositionAttribute(hWnd, &data);
+		return;
+	}
+	// only for Windows 10 1809 build 17763
+	if (IsAtLeastWin10()) {
+		SetPropW(hWnd, L"UseImmersiveDarkModeColors", (HANDLE)(intptr_t)is_darkmode_enabled);
 		return;
 	}
 
