@@ -2,10 +2,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-04-29 04:19+0900\n"
-"PO-Revision-Date: 2024-04-29 05:50+0900\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"POT-Creation-Date: 2025-08-26 05:39+0900\n"
+"PO-Revision-Date: 2025-08-26 13:56+0900\n"
+"Last-Translator: VenusGirl <venusgirl@outlook.com>\n"
+"Language-Team: 비너스걸 <https://venusgirls.tistory.com/>\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Korean (한국어)\n"
 "X-Rufus-LCID: 0x0412\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.7\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -133,7 +133,7 @@ msgstr "예"
 #. • IDD_NOTIFICATION → IDNO
 #. • MSG_009
 msgid "No"
-msgstr "아니오"
+msgstr "아니요"
 
 #. • IDD_LOG → IDD_LOG
 msgid "Log"
@@ -574,7 +574,7 @@ msgstr ""
 "\n"
 "Rufus는 이 문제를 해결하기 위해 최신 버전을 다운로드할 수 있습니다:\n"
 "- 인터넷에 연결하고 파일을 다운로드하려면 '예'를 선택합니다\n"
-"- 기존 ISO 파일을 수정하지 않은 상태로 두려면 '아니오'를 선택합니다\n"
+"- 기존 ISO 파일을 수정하지 않은 상태로 두려면 '아니요'를 선택합니다\n"
 "무엇을 해야 할지 모르면 '예'를 선택해야 합니다.\n"
 "\n"
 "참고: 새 파일이 현재 디렉터리에 다운로드되고 '%s'가 있으면 자동으로 재사용됩니다."
@@ -701,7 +701,7 @@ msgstr ""
 "\n"
 "Rufus가 누락된 파일을 다운로드할 수 있습니다:\n"
 "- 인터넷에 연결하고 파일을 다운로드하려면 '예'를 선택합니다\n"
-"- 나중에 드라이브에 이 파일을 수동으로 복사하려면 '아니오'를 선택합니다\n"
+"- 나중에 드라이브에 이 파일을 수동으로 복사하려면 '아니요'를 선택합니다\n"
 "\n"
 "참고: 파일이 현재 디렉터리에 다운로드되고 '%s'가 있으면 자동으로 재사용됩니다."
 
@@ -711,7 +711,7 @@ msgid ""
 "If you are sure you want to cancel, click YES. Otherwise, click NO."
 msgstr ""
 "취소하면 장치를 사용할 수 없는 상태가 될 수 있습니다.\n"
-"취소하려면 예를 클릭합니다. 그렇지 않으면 아니오를 클릭합니다."
+"취소하려면 예를 클릭합니다. 그렇지 않으면 아니요를 클릭합니다."
 
 #. • MSG_106
 msgid "Please select folder"
@@ -748,7 +748,7 @@ msgstr "호환되지 않는 클러스터 크기"
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "대용량 UDF 볼륨을 포맷하는 데 많은 시간이 걸릴 수 있습니다. USB 2.0 속도에서 예상 포맷 지속 시간은 %d:%02d이며, 이 기간 동안 진행률 표시줄이 고정된 것처럼 보입니다. 기다려주십시오!"
+msgstr "대용량 UDF 볼륨을 포맷하는 데 많은 시간이 걸릴 수 있습니다. USB 2.0 속도에서 예상 포맷 지속 시간은 %d:%02d이며, 이 기간 동안 진행률 표시줄이 고정된 것처럼 보입니다. 기다려주세요!"
 
 #. • MSG_113
 msgid "Large UDF volume"
@@ -768,7 +768,7 @@ msgstr ""
 "\n"
 "새 버전의 Syslinux는 서로 호환되지 않으므로 Rufus가 모두 포함할 수 없으므로 인터넷에서 두 개의 추가 파일 ('ldlinux.sys' 및 'ldlinux.bss')을 다운로드해야 합니다:\n"
 "- 인터넷에 연결하고 이러한 파일을 다운로드하려면 '예'를 선택합니다\n"
-"- 작업을 취소하려면 '아니오'를 선택합니다\n"
+"- 작업을 취소하려면 '아니요'를 선택합니다\n"
 "\n"
 "참고: 파일은 현재 응용 프로그램 디렉터리에 다운로드되며 있는 경우 자동으로 재사용됩니다."
 
@@ -794,7 +794,7 @@ msgstr ""
 "\n"
 "다른 버전의 Grub은 서로 호환되지 않을 수 있으며, 모두 포함할 수 없기 때문에 Rufus는 이미지에서 일치하는 Grub 설치 파일 ('core.img')의 버전을 찾으려고 시도합니다:\n"
 "- 인터넷에 연결하고 다운로드하려면 '예'를 선택합니다\n"
-"- Rufus의 기본 버전을 사용하려면 '아니오'를 선택합니다\n"
+"- Rufus의 기본 버전을 사용하려면 '아니요'를 선택합니다\n"
 "- 작업을 중단하려면 '취소'를 선택합니다\n"
 "\n"
 "참고: 파일은 현재 응용 프로그램 디렉터리에 다운로드되며 있는 경우 자동으로 재사용됩니다. 일치하는 항목을 온라인으로 찾을 수 없는 경우 기본 버전이 사용됩니다."
@@ -940,7 +940,7 @@ msgstr "뒤로"
 
 #. • MSG_142
 msgid "Please wait..."
-msgstr "기다려주십시오..."
+msgstr "기다려주세요..."
 
 #. • MSG_143
 msgid "Download using a browser"
@@ -1199,7 +1199,7 @@ msgstr "이 플랫폼에서는 이 기능을 사용할 수 없습니다."
 
 #. • MSG_201
 msgid "Cancelling - Please wait..."
-msgstr "취소 중 - 잠시 기다려 주십시오..."
+msgstr "취소 중 - 잠시 기다려 주세요..."
 
 #. • MSG_202
 msgid "Scanning image..."
@@ -1354,7 +1354,7 @@ msgstr "Win7 EFI 부팅 설정 (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
-msgstr "마무리 중, 기다려 주십시오..."
+msgstr "마무리 중, 기다려 주세요..."
 
 #. • MSG_234
 #.
@@ -1845,15 +1845,15 @@ msgstr "영구 로그"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"MS-DOS를 설치하려면 Microsoft에서 추가 파일 ('diskcopy.dll')을 다운로드해야 합니다:\n"
+"이 기능을 사용하려면 Microsoft에서 추가 파일('%s')을 다운로드해야 합니다:\n"
 "- 인터넷에 연결하여 다운로드하려면 '예'를 선택합니다\n"
-"- 작업을 취소하려면 '아니오'를 선택합니다\n"
+"- 작업을 취소하려면 '아니요'를 선택합니다\n"
 "\n"
 "참고: 해당 파일은 응용 프로그램의 디렉터리에 다운로드되며 존재하는 경우 자동으로 재사용됩니다."
 
@@ -1901,7 +1901,7 @@ msgid ""
 msgstr ""
 "이 기능을 사용하려면 Microsoft에서 몇 가지 추가 데이터를 다운로드해야 합니다:\n"
 "- 인터넷에 연결하여 다운로드하려면 '예'를 선택합니다\n"
-"- 작업을 취소하려면 '아니오'를 선택합니다"
+"- 작업을 취소하려면 '아니요'를 선택합니다"
 
 #. • MSG_346
 msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
@@ -1946,7 +1946,7 @@ msgid ""
 "See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
 msgstr ""
 "이 응용 프로그램은 GNU Public License (GPL) 버전 3의 조건에 따라 라이선스가 부여됩니다.\n"
-"자세한 내용은 https://www.gnu.org/licenses/gpl-3.0.html 을 참조하십시오."
+"자세한 내용은 https://www.gnu.org/licenses/gpl-3.0.html 을 참조하세요."
 
 #. • MSG_905
 #.
