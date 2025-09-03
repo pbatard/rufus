@@ -2823,11 +2823,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 #if defined(ALPHA)
 		// Add a VERY ANNOYING popup for Alpha releases, so that people don't start redistributing them
 		MessageBoxA(NULL, "This is an Alpha version of " APPLICATION_NAME " - It is meant to be used for "
-			"testing ONLY and should NOT be distributed as a release.", "ALPHA VERSION", MSG_INFO);
+			"testing ONLY and should NOT be distributed as a release.", "ALPHA VERSION", MB_ICONINFORMATION);
 #elif defined(TEST)
 		// Same thing for Test releases
 		MessageBoxA(NULL, "This is a Test version of " APPLICATION_NAME " - It is meant to be used for "
-			"testing ONLY and should NOT be distributed as a release.", "TEST VERSION", MSG_INFO);
+			"testing ONLY and should NOT be distributed as a release.", "TEST VERSION", MB_ICONINFORMATION);
 #endif
 		SetDarkModeForChild(hDlg);
 		SubclassStatusBar(hStatus);
@@ -3022,7 +3022,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		break;
 
 	case UM_NO_UPDATE:
-		Notification(MSG_INFO, NULL, NULL, lmprintf(MSG_243), lmprintf(MSG_247));
+		Notification(MB_ICONINFORMATION | MB_CLOSE, lmprintf(MSG_243), lmprintf(MSG_247));
 		// Need to manually set focus back to "Check Now" for tabbing to work
 		SendMessage(hUpdatesDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hUpdatesDlg, IDC_CHECK_NOW), TRUE);
 		break;
@@ -3061,7 +3061,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if (GetProcessSearch(SEARCH_PROCESS_TIMEOUT, 0x06, TRUE)) {
 			char title[128];
 			ComboBox_GetTextU(hDeviceList, title, sizeof(title));
-			if (!Notification(MSG_WARNING_QUESTION, NULL, NULL, title, lmprintf(MSG_132)))
+			if (Notification(MB_ICONWARNING | MB_YESNO, title, lmprintf(MSG_132)) != IDYES)
 				goto aborted_start;
 		}
 		PrintStatus(0, MSG_142);
@@ -3142,7 +3142,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
 			PrintInfo(0, MSG_211);
-			Notification(MSG_INFO, NULL, NULL, lmprintf(MSG_211), lmprintf(MSG_041));
+			Notification(MB_ICONINFORMATION | MB_CLOSE, lmprintf(MSG_211), lmprintf(MSG_041));
 		} else {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
@@ -3190,7 +3190,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 						CyclePort(index);
 					}
 				}
-				Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_042), lmprintf(MSG_043, StrError(ErrorStatus, FALSE)));
+				Notification(MB_ICONERROR | MB_CLOSE, lmprintf(MSG_042), lmprintf(MSG_043, StrError(ErrorStatus, FALSE)));
 			}
 		}
 		ErrorStatus = 0;

@@ -56,7 +56,7 @@ static char **szDialogItem;
 static int nDialogItems;
 static HWND hUpdatesDlg;
 static const SETTEXTEX friggin_microsoft_unicode_amateurs = { ST_DEFAULT, CP_UTF8 };
-static BOOL notification_is_question;
+static int notification_type;
 static const notification_info* notification_more_info;
 static const char* notification_dont_display_setting;
 static WNDPROC update_original_proc = NULL;
@@ -464,6 +464,59 @@ INT_PTR CreateAboutBox(void)
 	return r;
 }
 
+// The warning icon from the OS is *BROKEN* in dark mode at 200% scaling (one of the
+// pixels that should be transparent is set to white), so we fix it. Thanks Microsoft!
+HICON FixWarningIcon(HICON hIcon)
+{
+	void* bits = NULL;
+	ICONINFO info, new_info;
+	BITMAP bmp;
+	BITMAPINFO bmi = { 0 };
+	HBITMAP dib, src_obj, dst_obj;
+	HDC hdc, src_dc, dst_dc;
+	DWORD* pixels;
+
+	GetIconInfo(hIcon, &info);
+	GetObject(info.hbmColor, sizeof(bmp), &bmp);
+	bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bmi.bmiHeader.biWidth = bmp.bmWidth;
+	bmi.bmiHeader.biHeight = -bmp.bmHeight;
+	bmi.bmiHeader.biPlanes = 1;
+	bmi.bmiHeader.biBitCount = 32;
+	bmi.bmiHeader.biCompression = BI_RGB;
+
+	hdc = GetDC(NULL);
+	dib = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &bits, NULL, 0);
+	ReleaseDC(NULL, hdc);
+	if (dib == NULL)
+		return hIcon;
+	src_dc = CreateCompatibleDC(NULL);
+	dst_dc = CreateCompatibleDC(NULL);
+	src_obj = SelectObject(src_dc, info.hbmColor);
+	dst_obj = SelectObject(dst_dc, dib);
+
+	BitBlt(dst_dc, 0, 0, bmp.bmWidth, bmp.bmHeight, src_dc, 0, 0, SRCCOPY);
+
+	SelectObject(src_dc, src_obj);
+	SelectObject(dst_dc, dst_obj);
+	DeleteDC(src_dc);
+	DeleteDC(dst_dc);
+	pixels = (DWORD*)bits;
+	// Set the problematic pixel, at (13,2), to transparent
+	pixels[2 * bmp.bmWidth + 13] = 0x00000000;
+
+	new_info.fIcon = TRUE;
+	new_info.xHotspot = info.xHotspot;
+	new_info.yHotspot = info.yHotspot;
+	new_info.hbmMask = info.hbmMask;
+	new_info.hbmColor = dib;
+
+	hIcon = CreateIconIndirect(&new_info);
+	DeleteObject(info.hbmColor);
+	DeleteObject(info.hbmMask);
+	return hIcon;
+}
+
 /*
  * We use our own MessageBox for notifications to have greater control (center, no close button, etc)
  */
@@ -512,21 +565,55 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		background_brush = GetSysColorBrush(COLOR_WINDOW);
 		separator_brush = GetSysColorBrush(COLOR_3DLIGHT);
 		buttonface_brush = GetSysColorBrush(COLOR_BTNFACE);
-		SetTitleBarIcon(hDlg);
+		SetTitleBarIcon(hDlg);	 // ??? This doesn't seem to work here
 		CenterDialog(hDlg, NULL);
 		// Change the default icon
-		if (Static_SetIcon(GetDlgItem(hDlg, IDC_NOTIFICATION_ICON), hMessageIcon) == 0) {
-			uprintf("Could not set dialog icon\n");
+		switch (notification_type & 0xF0) {
+		case MB_ICONERROR:
+			hMessageIcon = LoadIcon(NULL, IDI_ERROR);
+			break;
+		case MB_ICONWARNING:
+			hMessageIcon = LoadIcon(NULL, IDI_WARNING);
+			// I really have no idea at what scaling factors Microsoft switches icons.
+			// However, the 200% icon has a jarring white pixel in dark mode, because
+			// Microsoft forgot to set that pixel to transparent, that we need to fix.
+			if (fScale > 1.75f && fScale < 2.5f)
+				hMessageIcon = FixWarningIcon(hMessageIcon);
+			break;
+		case MB_ICONQUESTION:
+			hMessageIcon = LoadIcon(NULL, IDI_QUESTION);
+			break;
+		default:
+			hMessageIcon = LoadIcon(NULL, IDI_INFORMATION);
+			break;
 		}
+		if (Static_SetIcon(GetDlgItem(hDlg, IDC_NOTIFICATION_ICON), hMessageIcon) == 0)
+			uprintf("Could not set the notification dialog icon");
 		// Set the dialog title
-		if (szMessageTitle != NULL) {
+		if (szMessageTitle != NULL)
 			SetWindowTextU(hDlg, szMessageTitle);
-		}
 		// Enable/disable the buttons and set text
-		if (!notification_is_question) {
-			SetWindowTextU(GetDlgItem(hDlg, IDNO), lmprintf(MSG_006));
-		} else {
+		switch (notification_type & 0x0F) {
+		case MB_OKCANCEL:
+			SetWindowTextU(GetDlgItem(hDlg, IDYES), "OK");
+			SetWindowTextU(GetDlgItem(hDlg, IDNO), lmprintf(MSG_007));
 			ShowWindow(GetDlgItem(hDlg, IDYES), SW_SHOW);
+			break;
+		case MB_YESNO:
+			SetWindowTextU(GetDlgItem(hDlg, IDYES), lmprintf(MSG_008));
+			SetWindowTextU(GetDlgItem(hDlg, IDNO), lmprintf(MSG_009));
+			ShowWindow(GetDlgItem(hDlg, IDYES), SW_SHOW);
+			break;
+		case MB_OK:
+			SetWindowTextU(GetDlgItem(hDlg, IDYES), "OK");
+			break;
+		case MB_ABORTRETRYIGNORE:
+			// TODO: Look at the standard Abort/Retry/Ignore MessageBox and replicate that
+			assert(FALSE);
+			break;
+		default:	// One single 'Close' button
+			SetWindowTextU(GetDlgItem(hDlg, IDNO), lmprintf(MSG_006));
+			break;
 		}
 		hCtrl = GetDlgItem(hDlg, IDC_DONT_DISPLAY_AGAIN);
 		if (notification_dont_display_setting != NULL) {
@@ -572,12 +659,10 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 	case WM_CTLCOLORSTATIC:
 		// Change the background colour for static text and icon
 		SetBkMode((HDC)wParam, TRANSPARENT);
-		if ((HWND)lParam == GetDlgItem(hDlg, IDC_NOTIFICATION_LINE)) {
+		if ((HWND)lParam == GetDlgItem(hDlg, IDC_NOTIFICATION_LINE))
 			return (INT_PTR)separator_brush;
-		}
-		if ((HWND)lParam == GetDlgItem(hDlg, IDC_DONT_DISPLAY_AGAIN)) {
+		if ((HWND)lParam == GetDlgItem(hDlg, IDC_DONT_DISPLAY_AGAIN))
 			return (INT_PTR)buttonface_brush;
-		}
 		return (INT_PTR)background_brush;
 	case WM_NCHITTEST:
 		// Check coordinates to prevent resize actions
@@ -592,14 +677,23 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		safe_delete_object(hDlgFont);
 		break;
 	case WM_COMMAND:
+		// TODO: This is brittle... and I don't think we use it anyway
+		if (LOWORD(wParam) != IDC_MORE_INFO && IsDlgButtonChecked(hDlg, IDC_DONT_DISPLAY_AGAIN) == BST_CHECKED)
+			WriteSettingBool(SETTING_DISABLE_SECURE_BOOT_NOTICE, TRUE);
 		switch (LOWORD(wParam)) {
-		case IDOK:
-		case IDCANCEL:
 		case IDYES:
+			// Return IDOK for calls that expect it
+			if ((notification_type & 0x0F) == MB_OKCANCEL || (notification_type & 0x0F) == MB_OK)
+				wParam = IDOK;
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
 		case IDNO:
-			if (IsDlgButtonChecked(hDlg, IDC_DONT_DISPLAY_AGAIN) == BST_CHECKED) {
-				WriteSettingBool(SETTING_DISABLE_SECURE_BOOT_NOTICE, TRUE);
-			}
+			// Return IDCANCEL for calls that expect it
+			if ((notification_type & 0x0F) == MB_OKCANCEL)
+				wParam = IDCANCEL;
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		case IDRETRY:	// TODO: implement this or drop the one call that requests it
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDC_MORE_INFO:
@@ -622,9 +716,9 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 /*
  * Display a custom notification
  */
-BOOL Notification(int type, const char* dont_display_setting, const notification_info* more_info,  char* title, char* format, ...)
+INT_PTR NotificationEx(int type, const char* dont_display_setting, const notification_info* more_info,  char* title, char* format, ...)
 {
-	BOOL ret;
+	INT_PTR ret;
 	va_list args;
 
 	dialog_showing++;
@@ -639,29 +733,9 @@ BOOL Notification(int type, const char* dont_display_setting, const notification
 	va_end(args);
 	szMessageText[LOC_MESSAGE_SIZE - 1] = 0;
 	notification_more_info = more_info;
-	notification_is_question = FALSE;
+	notification_type = type;
 	notification_dont_display_setting = dont_display_setting;
-
-	switch(type) {
-	case MSG_WARNING_QUESTION:
-		notification_is_question = TRUE;
-		// Fall through
-	case MSG_WARNING:
-		hMessageIcon = LoadIcon(NULL, IDI_WARNING);
-		break;
-	case MSG_ERROR:
-		hMessageIcon = LoadIcon(NULL, IDI_ERROR);
-		break;
-	case MSG_QUESTION:
-		hMessageIcon = LoadIcon(NULL, IDI_QUESTION);
-		notification_is_question = TRUE;
-		break;
-	case MSG_INFO:
-	default:
-		hMessageIcon = LoadIcon(NULL, IDI_INFORMATION);
-		break;
-	}
-	ret = (MyDialogBox(hMainInstance, IDD_NOTIFICATION, hMainDialog, NotificationCallback) == IDYES);
+	ret = MyDialogBox(hMainInstance, IDD_NOTIFICATION, hMainDialog, NotificationCallback);
 	safe_free(szMessageText);
 	safe_free(szMessageTitle);
 	dialog_showing--;
@@ -1533,7 +1607,7 @@ BOOL SetUpdateCheck(void)
 #endif
 			more_info.id = IDD_UPDATE_POLICY;
 			more_info.callback = UpdateCallback;
-			enable_updates = Notification(MSG_QUESTION, NULL, &more_info, lmprintf(MSG_004), lmprintf(MSG_005));
+			enable_updates = (NotificationEx(MB_ICONQUESTION | MB_YESNO, NULL, &more_info, lmprintf(MSG_004), lmprintf(MSG_005)) == IDYES);
 #if !defined(_DEBUG)
 		}
 #endif

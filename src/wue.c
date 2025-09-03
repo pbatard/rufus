@@ -642,7 +642,7 @@ int SetWinToGoIndex(void)
 			notification_info more_info;
 			more_info.id = MORE_INFO_URL;
 			more_info.url = WPPRECORDER_MORE_INFO_URL;
-			Notification(MSG_INFO, NULL, &more_info, lmprintf(MSG_128, "Windows To Go"), lmprintf(MSG_133));
+			NotificationEx(MB_ICONINFORMATION | MB_CLOSE, NULL, &more_info, lmprintf(MSG_128, "Windows To Go"), lmprintf(MSG_133));
 		}
 	}
 

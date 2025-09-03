@@ -244,13 +244,7 @@ enum user_message_type {
 };
 
 /* Custom notifications */
-enum notification_type {
-	MSG_INFO,
-	MSG_WARNING,
-	MSG_ERROR,
-	MSG_QUESTION,
-	MSG_WARNING_QUESTION
-};
+#define MB_CLOSE 0x0F
 typedef INT_PTR (CALLBACK *Callback_t)(HWND, UINT, WPARAM, LPARAM);
 typedef struct {
 	WORD id;
@@ -805,7 +799,8 @@ extern INT_PTR CreateAboutBox(void);
 extern BOOL CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
-extern BOOL Notification(int type, const char* dont_display_setting, const notification_info* more_info, char* title, char* format, ...);
+extern INT_PTR NotificationEx(int type, const char* dont_display_setting, const notification_info* more_info, char* title, char* format, ...);
+#define Notification(type, ...) NotificationEx(type, NULL, NULL, __VA_ARGS__)
 extern int CustomSelectionDialog(int style, char* title, char* message, char** choices, int size, int mask, int username_index);
 #define SelectionDialog(title, message, choices, size) CustomSelectionDialog(BS_AUTORADIOBUTTON, title, message, choices, size, 1, -1)
 extern void ListDialog(char* title, char* message, char** items, int size);

@@ -931,10 +931,10 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 				SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 				if (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
 					uprintf("Download cancelled by user");
-					Notification(MSG_INFO, NULL, NULL, lmprintf(MSG_211), lmprintf(MSG_041));
+					Notification(MB_ICONINFORMATION | MB_CLOSE, lmprintf(MSG_211), lmprintf(MSG_041));
 					PrintInfo(0, MSG_211);
 				} else {
-					Notification(MSG_ERROR, NULL, NULL, lmprintf(MSG_194, GetShortName(url)), lmprintf(MSG_043, WindowsErrorString()));
+					Notification(MB_ICONERROR | MB_CLOSE, lmprintf(MSG_194, GetShortName(url)), lmprintf(MSG_043, WindowsErrorString()));
 					PrintInfo(0, MSG_212);
 				}
 			} else {
