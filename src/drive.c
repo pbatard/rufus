@@ -1894,7 +1894,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		(SelectedDrive.MediaType == FixedMedia) ? "FIXED" : "Removable",
 		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, TRUE), SelectedDrive.SectorSize);
 	suprintf("Cylinders: %" PRIi64 ", Tracks per cylinder: %d, Sectors per track: %d",
-		DiskGeometry->Geometry.Cylinders, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
+		DiskGeometry->Geometry.Cylinders.QuadPart, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
 	assert(SelectedDrive.SectorSize != 0);
 
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL );
@@ -1997,7 +1997,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			suprintf("  ID: %s\r\n  Size: %s (%" PRIi64 " bytes)\r\n  Start Sector: %" PRIi64 ", Attributes: 0x%016" PRIX64,
 				GuidToString(&DriveLayout->PartitionEntry[i].Gpt.PartitionId, TRUE),
 				SizeToHumanReadable(DriveLayout->PartitionEntry[i].PartitionLength.QuadPart, TRUE, FALSE),
-				DriveLayout->PartitionEntry[i].PartitionLength,
+				DriveLayout->PartitionEntry[i].PartitionLength.QuadPart,
 				DriveLayout->PartitionEntry[i].StartingOffset.QuadPart / SelectedDrive.SectorSize,
 				DriveLayout->PartitionEntry[i].Gpt.Attributes);
 			SelectedDrive.FirstDataSector = min(SelectedDrive.FirstDataSector,
@@ -2477,7 +2477,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	// We need to write the UEFI:NTFS partition before we refresh the disk
 	if (extra_partitions & XP_UEFI_NTFS) {
 		LARGE_INTEGER li;
-		uprintf("Writing UEFI:NTFS data...", SelectedDrive.Partition[partition_index[PI_UEFI_NTFS]].Name);
+		uprintf("Writing UEFI:NTFS data...");
 		li.QuadPart = SelectedDrive.Partition[partition_index[PI_UEFI_NTFS]].Offset;
 		if (!SetFilePointerEx(hDrive, li, NULL, FILE_BEGIN)) {
 			uprintf("  Could not set position");

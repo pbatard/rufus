@@ -706,7 +706,7 @@ uint64_t GetSignatureTimeStamp(const char* path)
 		uprintf("Note: '%s' has nested timestamp %s", (path==NULL)?mpath:path, TimestampToHumanReadable(nested_timestamp));
 	if ((timestamp != 0ULL) && (nested_timestamp != 0ULL)) {
 		if (_abs64(nested_timestamp - timestamp) > 100) {
-			uprintf("PKI: Signature timestamp and nested timestamp differ by more than a minute. "
+			uprintf("PKI: Signature timestamp (%lld) and nested timestamp (%lld) differ by more than a minute. "
 				"This could indicate something very nasty...", timestamp, nested_timestamp);
 			timestamp = 0ULL;
 		}

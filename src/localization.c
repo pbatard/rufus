@@ -227,7 +227,7 @@ BOOL dispatch_loc_cmd(loc_cmd* lcmd)
 			lcmd->ctrl_id = MSG_000 + atoi(&(lcmd->txt[0][4]));
 			if (lcmd->ctrl_id == MSG_000) {
 				// Conversion could not be performed
-				luprintf("failed to convert the numeric value in '%'\n", lcmd->txt[0]);
+				luprintf("failed to convert the numeric value in '%s'\n", lcmd->txt[0]);
 				goto err;
 			}
 			add_message_command(lcmd);

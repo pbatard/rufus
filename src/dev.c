@@ -768,7 +768,7 @@ BOOL GetDevices(DWORD devnum)
 					uuprintf("  Matched with (GP) ID[%03d]: %s", j, device_id);
 				}
 				if ((uintptr_t)htab_devid.table[j].data > 0) {
-					uuprintf("  Matched with Hub[%d]: '%s'", (uintptr_t)htab_devid.table[j].data,
+					uuprintf("  Matched with Hub[%llu]: '%s'", (uintptr_t)htab_devid.table[j].data,
 							dev_if_path.String[(uintptr_t)htab_devid.table[j].data]);
 					if (GetUSBProperties(dev_if_path.String[(uintptr_t)htab_devid.table[j].data], device_id, &props)) {
 						method_str = "";
@@ -927,7 +927,7 @@ BOOL GetDevices(DWORD devnum)
 				}
 				if ((!enable_HDDs) && (!props.is_VHD) && (!props.is_CARD) &&
 					((score = IsHDD(drive_index, (uint16_t)props.vid, (uint16_t)props.pid, buffer)) > 0)) {
-					uprintf("Device eliminated because it was detected as a Hard Drive (score %d > 0)", score);
+					uprintf("Device eliminated because it was detected as a Hard Drive or SSD (score %d > 0)", score);
 					if (!list_non_usb_removable_drives)
 						uprintf("If this device is not a Hard Drive or SSD, please e-mail the author of this application");
 					uprintf("NOTE: You can enable the listing of Hard Drives under 'advanced drive properties'");

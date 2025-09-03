@@ -1552,7 +1552,7 @@ out:
 				if (MoveFileA(path, dst_path))
 					uprintf("Moved: %s → %s", path, dst_path);
 				else
-					uprintf("Could not move %s → %s", path, dst_path, WindowsErrorString());
+					uprintf("Could not move %s → %s: %s", path, dst_path, WindowsErrorString());
 			}
 		}
 		if (fd_md5sum != NULL) {
