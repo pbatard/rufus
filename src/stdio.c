@@ -908,8 +908,7 @@ uint32_t ResolveDllAddress(dll_resolver_t* resolver)
 	}
 
 	// Download the PDB from Microsoft's symbol servers
-	if (MessageBoxExU(hMainDialog, lmprintf(MSG_345), lmprintf(MSG_115),
-		MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
+	if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_115), lmprintf(MSG_345)) != IDYES)
 		goto out;
 	static_sprintf(path, "%s\\%s", temp_dir, info->PdbName);
 	static_sprintf(url, "http://msdl.microsoft.com/download/symbols/%s/%s%x/%s",

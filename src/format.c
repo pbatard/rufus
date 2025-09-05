@@ -1639,8 +1639,7 @@ DWORD WINAPI FormatThread(void* param)
 				fprintf(log_fd, APPLICATION_NAME " bad blocks check ended on: %04d.%02d.%02d %02d:%02d:%02d",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 				fclose(log_fd);
-				r = MessageBoxExU(hMainDialog, lmprintf(MSG_012, bb_msg, logfile),
-					lmprintf(MSG_010), MB_ABORTRETRYIGNORE | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+				r = Notification(MB_ABORTRETRYIGNORE | MB_ICONWARNING, lmprintf(MSG_010), lmprintf(MSG_012, bb_msg, logfile));
 			} else {
 				// We didn't get any errors => delete the log file
 				fclose(log_fd);

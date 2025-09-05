@@ -643,8 +643,7 @@ BOOL SaveImage(void)
 		// ISO requires oscdimg.exe. If not already present, attempt to download it.
 		static_sprintf(path, "%s\\%s\\oscdimg.exe", app_data_dir, FILES_DIR);
 		if (!PathFileExistsU(path)) {
-			if (MessageBoxExU(hMainDialog, lmprintf(MSG_337, "oscdimg.exe"), lmprintf(MSG_115),
-				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
+			if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_115), lmprintf(MSG_337, "oscdimg.exe")) != IDYES)
 				goto out;
 			IGNORE_RETVAL(_chdirU(app_data_dir));
 			IGNORE_RETVAL(_mkdir(FILES_DIR));

@@ -633,8 +633,7 @@ int SetWinToGoIndex(void)
 			version_name.String[i - 1], img_report.win_version.build, version_index.String[i - 1]);
 		// Need Windows 10 Creator Update or later for boot on REMOVABLE to work
 		if ((img_report.win_version.build < 15000) && (SelectedDrive.MediaType != FixedMedia)) {
-			if (MessageBoxExU(hMainDialog, lmprintf(MSG_098), lmprintf(MSG_190),
-				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
+			if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_190), lmprintf(MSG_098)) != IDYES)
 				wintogo_index = -2;
 		}
 		// Display a notice about WppRecorder.sys for 1809 ISOs

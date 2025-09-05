@@ -33,7 +33,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDD_DIALOG DIALOGEX 12, 12, 232, 326
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES
-CAPTION "Rufus 4.10.2273"
+CAPTION "Rufus 4.10.2274"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
 BEGIN
     LTEXT           "Drive Properties",IDS_DRIVE_PROPERTIES_TXT,8,6,53,12,NOT WS_GROUP
@@ -145,6 +145,7 @@ BEGIN
     PUSHBUTTON      "Yes",IDYES,148,53,50,14,NOT WS_VISIBLE
     CONTROL         "Do not show this message again",IDC_DONT_DISPLAY_AGAIN,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,39,248,10,WS_EX_TRANSPARENT
+    PUSHBUTTON      "Abort",IDABORT,91,53,50,14,NOT WS_VISIBLE
 END
 
 IDD_SELECTION DIALOGEX 0, 0, 312, 71
@@ -407,8 +408,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,10,2273,0
- PRODUCTVERSION 4,10,2273,0
+ FILEVERSION 4,10,2274,0
+ PRODUCTVERSION 4,10,2274,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -426,13 +427,13 @@ BEGIN
             VALUE "Comments", "https://rufus.ie"
             VALUE "CompanyName", "Akeo Consulting"
             VALUE "FileDescription", "Rufus"
-            VALUE "FileVersion", "4.10.2273"
+            VALUE "FileVersion", "4.10.2274"
             VALUE "InternalName", "Rufus"
             VALUE "LegalCopyright", "© 2011-2025 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "https://www.gnu.org/licenses/gpl-3.0.html"
             VALUE "OriginalFilename", "rufus-4.10.exe"
             VALUE "ProductName", "Rufus"
-            VALUE "ProductVersion", "4.10.2273"
+            VALUE "ProductVersion", "4.10.2274"
         END
     END
     BLOCK "VarFileInfo"

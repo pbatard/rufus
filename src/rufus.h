@@ -799,8 +799,8 @@ extern INT_PTR CreateAboutBox(void);
 extern BOOL CreateTooltip(HWND hControl, const char* message, int duration);
 extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
-extern INT_PTR NotificationEx(int type, const char* dont_display_setting, const notification_info* more_info, char* title, char* format, ...);
-#define Notification(type, ...) NotificationEx(type, NULL, NULL, __VA_ARGS__)
+extern int NotificationEx(int type, const char* dont_display_setting, const notification_info* more_info, const char* title, const char* format, ...);
+#define Notification(type, title, ...) NotificationEx(type, NULL, NULL, title, __VA_ARGS__)
 extern int CustomSelectionDialog(int style, char* title, char* message, char** choices, int size, int mask, int username_index);
 #define SelectionDialog(title, message, choices, size) CustomSelectionDialog(BS_AUTORADIOBUTTON, title, message, choices, size, 1, -1)
 extern void ListDialog(char* title, char* message, char** items, int size);

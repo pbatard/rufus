@@ -397,8 +397,7 @@ out:
 	if ((bPromptOnError) && (DownloadStatus != 200)) {
 		PrintInfo(0, MSG_242);
 		SetLastError(error_code);
-		MessageBoxExU(hMainDialog, IS_ERROR(ErrorStatus) ? StrError(ErrorStatus, FALSE) : WindowsErrorString(),
-			lmprintf(MSG_044), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+		Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_044), IS_ERROR(ErrorStatus) ? StrError(ErrorStatus, FALSE) : WindowsErrorString());
 	}
 	safe_closehandle(hFile);
 	free(url_sig);
@@ -500,8 +499,7 @@ static void CheckForDBXUpdates(int verbose)
 		if (timestamp <= MAX(dbx_info[i].timestamp, (uint64_t)ReadSetting64(reg_name)))
 			continue;
 		if (!already_prompted) {
-			r = MessageBoxExU(hMainDialog, lmprintf(MSG_354), lmprintf(MSG_353),
-				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+			r = Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_353), lmprintf(MSG_354));
 			already_prompted = TRUE;
 			if (r != IDYES)
 				break;

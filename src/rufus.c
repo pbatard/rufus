@@ -1072,8 +1072,7 @@ static void CALLBACK BlockingTimer(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 			// A write or close operation hasn't made any progress since our last check
 			user_notified = TRUE;
 			uprintf("Blocking I/O operation detected\n");
-			MessageBoxExU(hMainDialog, lmprintf(MSG_080), lmprintf(MSG_048),
-				MB_OK|MB_ICONINFORMATION|MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONINFORMATION, lmprintf(MSG_048), lmprintf(MSG_080));
 		} else {
 			last_iso_blocking_status = iso_blocking_status;
 		}
@@ -1101,8 +1100,8 @@ static void DisplayISOProps(void)
 	if (img_report.mismatch_size > 0) {
 		uprintf("  ERROR: Detected that file on disk has been truncated by %s!",
 			SizeToHumanReadable(img_report.mismatch_size, FALSE, FALSE));
-		MessageBoxExU(hMainDialog, lmprintf(MSG_298, SizeToHumanReadable(img_report.mismatch_size, FALSE, FALSE)),
-			lmprintf(MSG_297), MB_ICONWARNING | MB_IS_RTL, selected_langid);
+		Notification(MB_OK | MB_ICONWARNING, lmprintf(MSG_297),
+			lmprintf(MSG_298, SizeToHumanReadable(img_report.mismatch_size, FALSE, FALSE)));
 	} else if (img_report.mismatch_size < 0) {
 		// Not an error (ISOHybrid?), but we report it just in case
 		uprintf("  Note: File on disk is larger than reported ISO size by %s...",
@@ -1341,9 +1340,9 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		(!img_report.is_iso && (img_report.is_bootable_img <= 0) && !img_report.is_windows_img)) {
 		// Failed to scan image
 		if (img_report.is_bootable_img < 0)
-			MessageBoxExU(hMainDialog, lmprintf(MSG_322, image_path), lmprintf(MSG_042), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_042), lmprintf(MSG_322, image_path));
 		else
-			MessageBoxExU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONINFORMATION, lmprintf(MSG_081), lmprintf(MSG_082));
 		// Make sure to relinquish image_path before we call UpdateImage
 		// otherwise the boot selection dropdown won't be properly reset.
 		safe_free(image_path);
@@ -1432,8 +1431,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		// If we have an ISOHybrid, but without an ISO method we support, disable ISO support altogether
 		if (IS_DD_BOOTABLE(img_report) && (img_report.disable_iso ||
 				(!IS_BIOS_BOOTABLE(img_report) && !IS_EFI_BOOTABLE(img_report)))) {
-			MessageBoxExU(hMainDialog, lmprintf(MSG_321), lmprintf(MSG_274, "ISOHybrid"),
-				MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONINFORMATION, lmprintf(MSG_274, "ISOHybrid"), lmprintf(MSG_321));
 			uprintf("Note: DD image mode enforced since this ISOHybrid is not ISO mode compatible.");
 			img_report.is_iso = FALSE;
 		}
@@ -1443,7 +1441,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		// No boot method that we support
 		PrintInfo(0, MSG_081);
 		safe_free(image_path);
-		MessageBoxExU(hMainDialog, lmprintf(MSG_082), lmprintf(MSG_081), MB_OK | MB_ICONINFORMATION | MB_IS_RTL, selected_langid);
+		Notification(MB_OK | MB_ICONINFORMATION, lmprintf(MSG_081), lmprintf(MSG_082));
 		PrintStatus(0, MSG_086);
 		EnableControls(TRUE, FALSE);
 	} else {
@@ -1524,7 +1522,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			goto out;
 		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 			// This ISO image is too big for the selected target
-			MessageBoxExU(hMainDialog, lmprintf(MSG_089), lmprintf(MSG_088), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_088), lmprintf(MSG_089));
 			goto out;
 		}
 
@@ -1538,8 +1536,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				msg = lmprintf(MSG_340);
 				break;
 			}
-			r = MessageBoxExU(hMainDialog, lmprintf(MSG_339, msg), lmprintf(MSG_338),
-				MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+			r = Notification(MB_OKCANCEL | MB_ICONWARNING, lmprintf(MSG_338), lmprintf(MSG_339, msg));
 			if (r == IDCANCEL)
 				goto out;
 		}
@@ -1581,21 +1578,21 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		if (is_windows_to_go) {
 			if (fs_type != FS_NTFS) {
 				// Windows To Go only works for NTFS
-				MessageBoxExU(hMainDialog, lmprintf(MSG_097, "Windows To Go"), lmprintf(MSG_092), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+				Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_092), lmprintf(MSG_097, "Windows To Go"));
 				goto out;
 			}
 			if (SelectedDrive.MediaType != FixedMedia) {
 				if ((target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT) && (WindowsVersion.BuildNumber < 15000)) {
 					// Up to Windows 10 Creators Update (1703), we were screwed, since we need access to 2 partitions at the same time.
 					// Thankfully, the newer Windows allow mounting multiple partitions on the same REMOVABLE drive.
-					MessageBoxExU(hMainDialog, lmprintf(MSG_198), lmprintf(MSG_190), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+					Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_190), lmprintf(MSG_198));
 					goto out;
 				}
 			}
 			// If multiple versions are available, asks the user to select one before we commit to format the drive
 			switch(SetWinToGoIndex()) {
 			case -1:
-				MessageBoxExU(hMainDialog, lmprintf(MSG_073), lmprintf(MSG_291), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+				Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_291), lmprintf(MSG_073));
 				// fall through
 			case -2:
 				goto out;
@@ -1641,7 +1638,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		} else if (target_type == TT_UEFI) {
 			if (!IS_EFI_BOOTABLE(img_report)) {
 				// Unsupported ISO
-				MessageBoxExU(hMainDialog, lmprintf(MSG_091), lmprintf(MSG_090), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+				Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_090), lmprintf(MSG_091));
 				goto out;
 			}
 		} else if ( ((fs_type == FS_NTFS) && !HAS_WINDOWS(img_report) && !HAS_GRUB(img_report) && 
@@ -1650,16 +1647,16 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					 (!HAS_REACTOS(img_report)) && !HAS_KOLIBRIOS(img_report) && (!HAS_GRUB(img_report)))
 				 || ((IS_FAT(fs_type)) && (HAS_WINDOWS(img_report) || HAS_WININST(img_report)) && (!allow_dual_uefi_bios)) ) {
 			// Incompatible FS and ISO
-			MessageBoxExU(hMainDialog, lmprintf(MSG_096), lmprintf(MSG_092), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_092), lmprintf(MSG_096));
 			goto out;
 		} else if ((fs_type == FS_FAT16) && HAS_KOLIBRIOS(img_report)) {
 			// KolibriOS doesn't support FAT16
-			MessageBoxExU(hMainDialog, lmprintf(MSG_189), lmprintf(MSG_099), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_099), lmprintf(MSG_189));
 			goto out;
 		}
 		if (IS_FAT(fs_type) && !IS_FAT32_COMPAT(img_report)) {
 			// This ISO image contains a file larger than 4GB file (FAT32)
-			MessageBoxExU(hMainDialog, lmprintf(MSG_100), lmprintf(MSG_099), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_099), lmprintf(MSG_100));
 			goto out;
 		}
 		if ((WindowsVersion.Version >= WINDOWS_8) && IS_WINDOWS_1X(img_report) && (!is_windows_to_go)) {
@@ -1752,8 +1749,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				}
 				fclose(fd);
 			} else {
-				r = MessageBoxExU(hMainDialog, lmprintf(MSG_116, img_report.grub2_version, GRUB2_PACKAGE_VERSION),
-					lmprintf(MSG_115), MB_YESNOCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+				r = Notification(MB_YESNOCANCEL | MB_ICONWARNING, lmprintf(MSG_115),
+					lmprintf(MSG_116, img_report.grub2_version, GRUB2_PACKAGE_VERSION));
 				if (r == IDCANCEL)
 					goto out;
 				else if (r == IDYES) {
@@ -1809,8 +1806,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 							use_own_c32[i] = TRUE;
 						} else {
 							PrintInfo(0, MSG_204, old_c32_name[i]);
-							if (MessageBoxExU(hMainDialog, lmprintf(MSG_084, old_c32_name[i], old_c32_name[i]),
-									lmprintf(MSG_083, old_c32_name[i]), MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDYES) {
+							if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_083, old_c32_name[i]),
+								lmprintf(MSG_084, old_c32_name[i], old_c32_name[i])) == IDYES) {
 								static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[0]);
 								IGNORE_RETVAL(_mkdir(tmp));
 								static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, syslinux, embedded_sl_version_str[0], old_c32_name[i]);
@@ -1848,9 +1845,9 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 						ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], app_data_dir, FILES_DIR, syslinux,
 						img_report.sl_version_str, img_report.sl_version_ext);
 				} else {
-					r = MessageBoxExU(hMainDialog, lmprintf(MSG_114, img_report.sl_version_str, img_report.sl_version_ext,
-						embedded_sl_version_str[1], embedded_sl_version_ext[1]),
-						lmprintf(MSG_115), MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+					r = Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_115),
+						lmprintf(MSG_114, img_report.sl_version_str, img_report.sl_version_ext,
+							embedded_sl_version_str[1], embedded_sl_version_ext[1]));
 					if (r != IDYES)
 						goto out;
 					for (i = 0; i < 2; i++) {
@@ -1908,8 +1905,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[2]);
 			PrintInfo(0, MSG_206, tmp);
 			// MSG_104: "Syslinux v5.0 or later requires a '%s' file to be installed"
-			r = MessageBoxExU(hMainDialog, lmprintf(MSG_104, "Syslinux v5.0", tmp, "Syslinux v5+", tmp),
-				lmprintf(MSG_103, tmp), MB_YESNOCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+			r = Notification(MB_YESNOCANCEL | MB_ICONWARNING, lmprintf(MSG_103, tmp),
+				lmprintf(MSG_104, "Syslinux v5.0", tmp, "Syslinux v5+", tmp));
 			if (r == IDCANCEL)
 				goto out;
 			if (r == IDYES) {
@@ -1925,15 +1922,14 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	} else if (boot_type == BT_MSDOS) {
 		if ((size_check) && (ComboBox_GetCurItemData(hClusterSize) >= 65536)) {
 			// MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size
-			MessageBoxExU(hMainDialog, lmprintf(MSG_110), lmprintf(MSG_111), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_111), lmprintf(MSG_110));
 			goto out;
 		}
 		static_sprintf(tmp, "%s\\%s\\diskcopy.dll", app_data_dir, FILES_DIR);
 		if (_accessU(tmp, 0) != -1) {
 			uprintf("Will reuse '%s' for MS-DOS installation", tmp);
 		} else {
-			if (MessageBoxExU(hMainDialog, lmprintf(MSG_337, "diskcopy.dll"), lmprintf(MSG_115),
-				MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
+			if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_115), lmprintf(MSG_337, "diskcopy.dll")) != IDYES)
 				goto out;
 			IGNORE_RETVAL(_chdirU(app_data_dir));
 			IGNORE_RETVAL(_mkdir(FILES_DIR));
@@ -1956,8 +1952,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		} else {
 			static_sprintf(tmp, "grldr");
 			PrintInfo(0, MSG_206, tmp);
-			r = MessageBoxExU(hMainDialog, lmprintf(MSG_104, "Grub4DOS 0.4", tmp, "Grub4DOS", tmp),
-				lmprintf(MSG_103, tmp), MB_YESNOCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid);
+			r = Notification(MB_YESNOCANCEL | MB_ICONWARNING, lmprintf(MSG_103, tmp),
+				lmprintf(MSG_104, "Grub4DOS 0.4", tmp, "Grub4DOS", tmp));
 			if (r == IDCANCEL)
 				goto out;
 			if (r == IDYES) {
@@ -1976,7 +1972,7 @@ uefi_target:
 	if (boot_type == BT_UEFI_NTFS) {
 		fs_type = (int)ComboBox_GetCurItemData(hFileSystem);
 		if (fs_type != FS_NTFS && fs_type != FS_EXFAT) {
-			MessageBoxExU(hMainDialog, lmprintf(MSG_097, "UEFI:NTFS"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_092), lmprintf(MSG_097, "UEFI:NTFS"));
 			goto out;
 		}
 	}
@@ -2288,8 +2284,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDCANCEL:
 			EnableWindow(GetDlgItem(hDlg, IDCANCEL), FALSE);
 			if (format_thread != NULL) {
-				if ((no_confirmation_on_cancel) || (MessageBoxExU(hMainDialog, lmprintf(MSG_105), lmprintf(MSG_049),
-					MB_YESNO|MB_ICONWARNING|MB_IS_RTL, selected_langid) == IDYES)) {
+				if ((no_confirmation_on_cancel) || (Notification(MB_YESNO | MB_ICONWARNING,
+					lmprintf(MSG_049), lmprintf(MSG_105)) == IDYES)) {
 					// Operation may have completed in the meantime
 					if (format_thread != NULL) {
 						ErrorStatus = RUFUS_ERROR(ERROR_CANCELLED);
@@ -3035,8 +3031,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		save_image = FALSE;
 
 		if ((partition_type == PARTITION_STYLE_MBR) && (SelectedDrive.DiskSize > 2 * TB)) {
-			if (MessageBoxExU(hMainDialog, lmprintf(MSG_134, SizeToHumanReadable(SelectedDrive.DiskSize - 2 * TB, FALSE, FALSE)),
-				lmprintf(MSG_128, "MBR"), MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES)
+			if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_128, "MBR"),
+				lmprintf(MSG_134, SizeToHumanReadable(SelectedDrive.DiskSize - 2 * TB, FALSE, FALSE))) != IDYES)
 				goto aborted_start;
 		}
 
@@ -3046,8 +3042,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (dur_secs > UDF_FORMAT_WARN) {
 				dur_mins = dur_secs / 60;
 				dur_secs -= dur_mins * 60;
-				MessageBoxExU(hMainDialog, lmprintf(MSG_112, dur_mins, dur_secs), lmprintf(MSG_113),
-					MB_OK | MB_ICONASTERISK | MB_IS_RTL, selected_langid);
+				Notification(MB_OK | MB_ICONINFORMATION, lmprintf(MSG_113), lmprintf(MSG_112, dur_mins, dur_secs));
 			} else {
 				dur_secs = 0;
 				dur_mins = 0;
@@ -3067,15 +3062,12 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		PrintStatus(0, MSG_142);
 
 		GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
-		if (MessageBoxExU(hMainDialog, lmprintf(MSG_003, tmp),
-			APPLICATION_NAME, MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDCANCEL)
+		if (Notification(MB_OKCANCEL | MB_ICONWARNING, APPLICATION_NAME, lmprintf(MSG_003, tmp)) != IDOK)
 			goto aborted_start;
-		if ((SelectedDrive.nPartitions > 1) && (MessageBoxExU(hMainDialog, lmprintf(MSG_093),
-			lmprintf(MSG_094), MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDCANCEL))
+		if ((SelectedDrive.nPartitions > 1) && (Notification(MB_OKCANCEL | MB_ICONWARNING, lmprintf(MSG_094), lmprintf(MSG_093)) != IDOK))
 			goto aborted_start;
 		if ((!zero_drive) && (boot_type != BT_NON_BOOTABLE) && (SelectedDrive.SectorSize != 512) &&
-			(MessageBoxExU(hMainDialog, lmprintf(MSG_196, SelectedDrive.SectorSize),
-				lmprintf(MSG_197), MB_OKCANCEL | MB_ICONWARNING | MB_IS_RTL, selected_langid) == IDCANCEL))
+			(Notification(MB_OKCANCEL | MB_ICONWARNING, lmprintf(MSG_197), lmprintf(MSG_196, SelectedDrive.SectorSize)) != IDOK))
 			goto aborted_start;
 
 		nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
@@ -3667,7 +3659,7 @@ skip_args_processing:
 			// If we don't have a working temp API, forget it
 			uprintf("FATAL: Unable to create temp loc file: %s", WindowsErrorString());
 			MessageBoxA(NULL, "Unable to create temporary localization file. This application will now exit.",
-				"Fatal error", MB_ICONSTOP | MB_SYSTEMMODAL);
+				"Fatal error", MB_ICONERROR | MB_SYSTEMMODAL);
 			goto out;
 		}
 
@@ -3677,7 +3669,7 @@ skip_args_processing:
 			uprintf("FATAL: Unable to extract loc file '%s': %s", loc_file, WindowsErrorString());
 			safe_closehandle(hFile);
 			MessageBoxA(NULL, "Unable to extract localization file. This application will now exit.",
-				"Fatal error", MB_ICONSTOP | MB_SYSTEMMODAL);
+				"Fatal error", MB_ICONERROR | MB_SYSTEMMODAL);
 			goto out;
 		}
 		uprintf("localization: extracted data to '%s'", loc_file);
@@ -3692,7 +3684,7 @@ skip_args_processing:
 	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid, TRUE):get_locale_from_name(locale_name, TRUE))) == NULL) ) {
 		uprintf("FATAL: Could not access locale!");
 		MessageBoxA(NULL, "The locale data is missing or invalid. This application will now exit.",
-			"Fatal error", MB_ICONSTOP|MB_SYSTEMMODAL);
+			"Fatal error", MB_ICONERROR | MB_SYSTEMMODAL);
 		goto out;
 	}
 	selected_langid = get_language_id(selected_locale);
@@ -3710,11 +3702,10 @@ skip_args_processing:
 		get_loc_data_file(loc_file, selected_locale);
 		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
 		// Set MB_SYSTEMMODAL to prevent Far Manager from stealing focus...
-		MessageBoxExU(NULL,
-			lmprintf(MSG_294,
+		MessageBoxExU(NULL, lmprintf(MSG_294,
 				(WindowsVersion.Version == WINDOWS_7) ? 3 : 2,
 				(WindowsVersion.Version == WINDOWS_7) ? 22 : 18),
-			lmprintf(MSG_293), MB_ICONSTOP | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
+			lmprintf(MSG_293), MB_ICONERROR | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
 		goto out;
 	}
 
@@ -3725,7 +3716,7 @@ skip_args_processing:
 		// Load the translation before we print the error
 		get_loc_data_file(loc_file, selected_locale);
 		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
-		MessageBoxExU(NULL, lmprintf(MSG_289), lmprintf(MSG_288), MB_ICONSTOP | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
+		MessageBoxExU(NULL, lmprintf(MSG_289), lmprintf(MSG_288), MB_ICONERROR | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
 		goto out;
 	}
 
@@ -3744,7 +3735,8 @@ skip_args_processing:
 		get_loc_data_file(loc_file, selected_locale);
 		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
 		// Set MB_SYSTEMMODAL to prevent Far Manager from stealing focus...
-		MessageBoxExU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP|MB_IS_RTL|MB_SYSTEMMODAL, selected_langid);
+		MessageBoxExU(NULL, lmprintf(MSG_002), lmprintf(MSG_001),
+			MB_ICONERROR | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
 		goto out;
 	}
 
@@ -3811,7 +3803,7 @@ relaunch:
 	hDlg = MyCreateDialog(hInstance, IDD_DIALOG, NULL, MainCallback);
 	if (hDlg == NULL) {
 		MessageBoxExU(NULL, "Could not create Window", "DialogBox failure",
-			MB_ICONSTOP|MB_IS_RTL|MB_SYSTEMMODAL, selected_langid);
+			MB_OK | MB_ICONERROR | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
 		goto out;
 	}
 	if ((relaunch_rc.left > -65536) && (relaunch_rc.top > -65536))

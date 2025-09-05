@@ -557,6 +557,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		if (bh != 0) {
 			ResizeButtonHeight(hDlg, IDC_MORE_INFO);
+			ResizeButtonHeight(hDlg, IDABORT);
 			ResizeButtonHeight(hDlg, IDYES);
 			ResizeButtonHeight(hDlg, IDNO);
 		}
@@ -565,9 +566,8 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		background_brush = GetSysColorBrush(COLOR_WINDOW);
 		separator_brush = GetSysColorBrush(COLOR_3DLIGHT);
 		buttonface_brush = GetSysColorBrush(COLOR_BTNFACE);
-		SetTitleBarIcon(hDlg);	 // ??? This doesn't seem to work here
 		CenterDialog(hDlg, NULL);
-		// Change the default icon
+		// Change the default message icon
 		switch (notification_type & 0xF0) {
 		case MB_ICONERROR:
 			hMessageIcon = LoadIcon(NULL, IDI_ERROR);
@@ -605,11 +605,28 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			ShowWindow(GetDlgItem(hDlg, IDYES), SW_SHOW);
 			break;
 		case MB_OK:
-			SetWindowTextU(GetDlgItem(hDlg, IDYES), "OK");
+			SetWindowTextU(GetDlgItem(hDlg, IDNO), "OK");
 			break;
 		case MB_ABORTRETRYIGNORE:
-			// TODO: Look at the standard Abort/Retry/Ignore MessageBox and replicate that
-			assert(FALSE);
+			HMODULE hMui;
+			char mui_path[MAX_PATH], button_str[3][64];
+			// Load the localized button text from user32.dll.mui. 802 = Abort, 803 = Retry, 804 = Ignore
+			static_sprintf(mui_path, "%s\\%s\\user32.dll.mui", sysnative_dir, ToLocaleName(GetUserDefaultUILanguage()));
+			hMui = LoadLibraryU(mui_path);
+			if (hMui != NULL) {
+				if (LoadStringU(hMui, 802, button_str[0], sizeof(button_str[0])) > 0)
+					static_strcpy(button_str[0], "&Abort");
+				if (LoadStringU(hMui, 803, button_str[1], sizeof(button_str[1])) <= 0)
+					static_strcpy(button_str[0], "&Retry");
+				if (LoadStringU(hMui, 804, button_str[2], sizeof(button_str[2])) <= 0)
+					static_strcpy(button_str[0], "&Ignore");
+				FreeLibrary(hMui);
+			}
+			SetWindowTextU(GetDlgItem(hDlg, IDABORT), button_str[0]);
+			SetWindowTextU(GetDlgItem(hDlg, IDYES), button_str[1]);
+			SetWindowTextU(GetDlgItem(hDlg, IDNO), button_str[2]);
+			ShowWindow(GetDlgItem(hDlg, IDABORT), SW_SHOW);
+			ShowWindow(GetDlgItem(hDlg, IDYES), SW_SHOW);
 			break;
 		default:	// One single 'Close' button
 			SetWindowTextU(GetDlgItem(hDlg, IDNO), lmprintf(MSG_006));
@@ -651,6 +668,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_LINE), 0, dh, 0, 0, 1.0f);
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_DONT_DISPLAY_AGAIN), 0, dh, 0, 0, 1.0f);
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_MORE_INFO), 0, dh - cbh, 0, 0, 1.0f);
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDABORT), 0, dh - cbh, 0, 0, 1.0f);
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDYES), 0, dh -cbh, 0, 0, 1.0f);
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDNO), 0, dh -cbh, 0, 0, 1.0f);
 		}
@@ -682,18 +700,33 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			WriteSettingBool(SETTING_DISABLE_SECURE_BOOT_NOTICE, TRUE);
 		switch (LOWORD(wParam)) {
 		case IDYES:
-			// Return IDOK for calls that expect it
-			if ((notification_type & 0x0F) == MB_OKCANCEL || (notification_type & 0x0F) == MB_OK)
+			// Return IDOK/IDRETRY for calls that expect it
+			switch (notification_type & 0x0F) {
+			case MB_OKCANCEL:
 				wParam = IDOK;
+				break;
+			case MB_ABORTRETRYIGNORE:
+				wParam = IDRETRY;
+				break;
+			}
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDNO:
-			// Return IDCANCEL for calls that expect it
-			if ((notification_type & 0x0F) == MB_OKCANCEL)
+			// Return IDCANCEL/IDOK/IDIGNORE for calls that expect it
+			switch (notification_type & 0x0F) {
+			case MB_OKCANCEL:
 				wParam = IDCANCEL;
+				break;
+			case MB_OK:
+				wParam = IDOK;
+				break;
+			case MB_ABORTRETRYIGNORE:
+				wParam = IDIGNORE;
+				break;
+			}
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
-		case IDRETRY:	// TODO: implement this or drop the one call that requests it
+		case IDABORT:
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDC_MORE_INFO:
@@ -716,7 +749,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 /*
  * Display a custom notification
  */
-INT_PTR NotificationEx(int type, const char* dont_display_setting, const notification_info* more_info,  char* title, char* format, ...)
+int NotificationEx(int type, const char* dont_display_setting, const notification_info* more_info, const char* title, const char* format, ...)
 {
 	INT_PTR ret;
 	va_list args;
@@ -739,7 +772,7 @@ INT_PTR NotificationEx(int type, const char* dont_display_setting, const notific
 	safe_free(szMessageText);
 	safe_free(szMessageTitle);
 	dialog_showing--;
-	return ret;
+	return (int)ret;
 }
 
 // We only ever display one selection dialog, so set some params as globals

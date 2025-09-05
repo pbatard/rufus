@@ -742,7 +742,7 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	if (signature_name == NULL) {
 		uprintf("PKI: Could not get signature name");
 		if (hDlg != INVALID_HANDLE_VALUE)
-			MessageBoxExU(hDlg, lmprintf(MSG_284), lmprintf(MSG_283), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_283), lmprintf(MSG_284));
 		return TRUST_E_NOSIGNATURE;
 	}
 	for (i = 0; i < ARRAYSIZE(cert_name); i++) {
@@ -751,9 +751,8 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 	}
 	if (i >= ARRAYSIZE(cert_name)) {
 		uprintf("PKI: Signature '%s' is unexpected...", signature_name);
-		if ((hDlg == INVALID_HANDLE_VALUE) || (MessageBoxExU(hDlg,
-			lmprintf(MSG_285, signature_name), lmprintf(MSG_283),
-			MB_YESNO | MB_ICONWARNING | MB_IS_RTL, selected_langid) != IDYES))
+		if ((hDlg == INVALID_HANDLE_VALUE) || (Notification(MB_YESNO | MB_ICONWARNING,
+			lmprintf(MSG_283), lmprintf(MSG_285, signature_name)) != IDYES))
 			return TRUST_E_EXPLICIT_DISTRUST;
 	}
 
@@ -802,18 +801,18 @@ LONG ValidateSignature(HWND hDlg, const char* path)
 			}
 		}
 		if ((r != ERROR_SUCCESS) && (force_update < 2))
-			MessageBoxExU(hDlg, lmprintf(MSG_300), lmprintf(MSG_299), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_299), lmprintf(MSG_300));
 		break;
 	case TRUST_E_NOSIGNATURE:
 		// Should already have been reported, but since we have a custom message for it...
 		uprintf("PKI: File does not appear to be signed: %s", WinPKIErrorString());
 		if (hDlg != INVALID_HANDLE_VALUE)
-			MessageBoxExU(hDlg, lmprintf(MSG_284), lmprintf(MSG_283), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_283), lmprintf(MSG_284));
 		break;
 	default:
 		uprintf("PKI: Failed to validate signature: %s", WinPKIErrorString());
 		if (hDlg != INVALID_HANDLE_VALUE)
-			MessageBoxExU(hDlg, lmprintf(MSG_240), lmprintf(MSG_283), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_283), lmprintf(MSG_240));
 		break;
 	}
 
