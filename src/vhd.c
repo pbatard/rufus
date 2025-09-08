@@ -532,8 +532,7 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 	}
 
 	if (!GetOverlappedResult(handle, &overlapped, &bytes_read, FALSE)) {
-		if (GetLastError() == ERROR_DISK_FULL)
-			ErrorStatus = RUFUS_ERROR(ERROR_FILE_TOO_LARGE);
+		r = GetLastError();
 		uprintf("Could not save virtual disk: %s", WindowsErrorString());
 		goto out;
 	}
@@ -550,6 +549,8 @@ out:
 	safe_free(img_save->DevicePath);
 	safe_free(img_save->ImagePath);
 	PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)TRUE, 0);
+	if (r != 0 && !IS_ERROR(ErrorStatus))
+		ErrorStatus = RUFUS_ERROR(SCODE_CODE(r));
 	ExitThread(r);
 }
 

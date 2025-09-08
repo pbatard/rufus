@@ -609,17 +609,14 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			break;
 		case MB_ABORTRETRYIGNORE:
 			HMODULE hMui;
-			char mui_path[MAX_PATH], button_str[3][64];
+			char mui_path[MAX_PATH], button_str[3][64] = { "&Abort", "&Retry", "&Ignore" };
 			// Load the localized button text from user32.dll.mui. 802 = Abort, 803 = Retry, 804 = Ignore
 			static_sprintf(mui_path, "%s\\%s\\user32.dll.mui", sysnative_dir, ToLocaleName(GetUserDefaultUILanguage()));
 			hMui = LoadLibraryU(mui_path);
 			if (hMui != NULL) {
-				if (LoadStringU(hMui, 802, button_str[0], sizeof(button_str[0])) > 0)
-					static_strcpy(button_str[0], "&Abort");
-				if (LoadStringU(hMui, 803, button_str[1], sizeof(button_str[1])) <= 0)
-					static_strcpy(button_str[0], "&Retry");
-				if (LoadStringU(hMui, 804, button_str[2], sizeof(button_str[2])) <= 0)
-					static_strcpy(button_str[0], "&Ignore");
+				LoadStringU(hMui, 802, button_str[0], sizeof(button_str[0]));
+				LoadStringU(hMui, 803, button_str[1], sizeof(button_str[1]));
+				LoadStringU(hMui, 804, button_str[2], sizeof(button_str[2]));
 				FreeLibrary(hMui);
 			}
 			SetWindowTextU(GetDlgItem(hDlg, IDABORT), button_str[0]);

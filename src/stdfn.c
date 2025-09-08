@@ -1116,10 +1116,10 @@ BOOL SetThreadAffinity(DWORD_PTR* thread_affinity, size_t num_threads)
 			thread_affinity[i] |= affinity & (-1LL * affinity);
 			affinity ^= affinity & (-1LL * affinity);
 		}
-		uuprintf("  thr_%z:\t%s", i, printbitslz(thread_affinity[i]));
+		uuprintf("  thr_%llu:\t%s", i, printbitslz(thread_affinity[i]));
 		thread_affinity[num_threads - 1] ^= thread_affinity[i];
 	}
-	uuprintf("  thr_%z:\t%s", i, printbitslz(thread_affinity[i]));
+	uuprintf("  thr_%llu:\t%s", i, printbitslz(thread_affinity[i]));
 	return TRUE;
 }
 
