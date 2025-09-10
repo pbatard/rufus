@@ -1685,11 +1685,11 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
 				StrArrayAdd(&options, lmprintf(MSG_335), TRUE);
 				MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
+				if (img_report.win_version.build >= 26200) {
+					StrArrayAdd(&options, lmprintf(MSG_350), TRUE);
+					MAP_BIT(UNATTEND_USE_MS2023_BOOTLOADERS);
+				}
 				if (expert_mode) {
-					if (!appstore_version && img_report.win_version.build >= 26100) {
-						StrArrayAdd(&options, lmprintf(MSG_350), TRUE);
-						MAP_BIT(UNATTEND_USE_MS2023_BOOTLOADERS);
-					}
 					StrArrayAdd(&options, lmprintf(MSG_346), TRUE);
 					MAP_BIT(UNATTEND_FORCE_S_MODE);
 				}

@@ -682,7 +682,7 @@ typedef struct {
 #define UNATTEND_FORCE_S_MODE               0x00100
 #define UNATTEND_USE_MS2023_BOOTLOADERS     0x00200
 #define UNATTEND_FULL_MASK                  0x003FF
-#define UNATTEND_DEFAULT_MASK               0x000FF
+#define UNATTEND_DEFAULT_MASK               0x002FF		// Mask of values that are persisted
 #define UNATTEND_WINDOWS_TO_GO              0x10000		// Special flag for Windows To Go
 
 #define UNATTEND_WINPE_SETUP_MASK           (UNATTEND_SECUREBOOT_TPM_MINRAM)
