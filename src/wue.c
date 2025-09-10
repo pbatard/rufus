@@ -164,49 +164,47 @@ char* CreateUnattendXml(int arch, int flags)
 					free(tzstr);
 				}
 			}
-			if (flags & UNATTEND_SET_USER || flags & UNATTEND_USE_MS2023_BOOTLOADERS) {
-				if (flags & UNATTEND_SET_USER) {
-					for (i = 0; (i < ARRAYSIZE(unallowed_account_names)) && (stricmp(unattend_username, unallowed_account_names[i]) != 0); i++);
-					if (i < ARRAYSIZE(unallowed_account_names)) {
-						uprintf("WARNING: '%s' is not allowed as local account name - Option ignored", unattend_username);
-					} else if (unattend_username[0] != 0) {
-						uprintf("• Use '%s' for local account name", unattend_username);
-						// If we create a local account in unattend.xml, then we can get Windows 11
-						// 22H2 to skip MSA even if the network is connected during installation.
-						fprintf(fd, "      <UserAccounts>\n");
-						fprintf(fd, "        <LocalAccounts>\n");
-						fprintf(fd, "          <LocalAccount wcm:action=\"add\">\n");
-						fprintf(fd, "            <Name>%s</Name>\n", unattend_username);
-						fprintf(fd, "            <DisplayName>%s</DisplayName>\n", unattend_username);
-						fprintf(fd, "            <Group>Administrators;Power Users</Group>\n");
-						// Sets an empty password for the account (which, in Microsoft's convoluted ways,
-						// needs to be initialized to the Base64 encoded UTF-16 string "Password").
-						// The use of an empty password has both the advantage of not having to ask users
-						// to type in a password in Rufus (which they might be weary of) as well as allowing
-						// automated logon during setup.
-						fprintf(fd, "            <Password>\n");
-						fprintf(fd, "              <Value>UABhAHMAcwB3AG8AcgBkAA==</Value>\n");
-						fprintf(fd, "              <PlainText>false</PlainText>\n");
-						fprintf(fd, "            </Password>\n");
-						fprintf(fd, "          </LocalAccount>\n");
-						fprintf(fd, "        </LocalAccounts>\n");
-						fprintf(fd, "      </UserAccounts>\n");
-						// Since we set a blank password, we'll ask the user to change it at next logon.
-						// NB: In case you wanna try, please be aware that Microsoft doesn't let you have multiple
-						// <FirstLogonCommands> sections in unattend.xml. Don't ask me how I know... :(
-						fprintf(fd, "      <FirstLogonCommands>\n");
-						fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
-						fprintf(fd, "          <Order>%d</Order>\n", order++);
-						fprintf(fd, "          <CommandLine>net user &quot;%s&quot; /logonpasswordchg:yes</CommandLine>\n", unattend_username);
-						fprintf(fd, "        </SynchronousCommand>\n");
-						// Some people report that using the `net user` command above might reset the password expiration to 90 days...
-						// To alleviate that, blanket set passwords on the target machine to never expire.
-						fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
-						fprintf(fd, "          <Order>%d</Order>\n", order++);
-						fprintf(fd, "          <CommandLine>net accounts /maxpwage:unlimited</CommandLine>\n");
-						fprintf(fd, "        </SynchronousCommand>\n");
-						fprintf(fd, "      </FirstLogonCommands>\n");
-					}
+			if (flags & UNATTEND_SET_USER) {
+				for (i = 0; (i < ARRAYSIZE(unallowed_account_names)) && (stricmp(unattend_username, unallowed_account_names[i]) != 0); i++);
+				if (i < ARRAYSIZE(unallowed_account_names)) {
+					uprintf("WARNING: '%s' is not allowed as local account name - Option ignored", unattend_username);
+				} else if (unattend_username[0] != 0) {
+					uprintf("• Use '%s' for local account name", unattend_username);
+					// If we create a local account in unattend.xml, then we can get Windows 11
+					// 22H2 to skip MSA even if the network is connected during installation.
+					fprintf(fd, "      <UserAccounts>\n");
+					fprintf(fd, "        <LocalAccounts>\n");
+					fprintf(fd, "          <LocalAccount wcm:action=\"add\">\n");
+					fprintf(fd, "            <Name>%s</Name>\n", unattend_username);
+					fprintf(fd, "            <DisplayName>%s</DisplayName>\n", unattend_username);
+					fprintf(fd, "            <Group>Administrators;Power Users</Group>\n");
+					// Sets an empty password for the account (which, in Microsoft's convoluted ways,
+					// needs to be initialized to the Base64 encoded UTF-16 string "Password").
+					// The use of an empty password has both the advantage of not having to ask users
+					// to type in a password in Rufus (which they might be weary of) as well as allowing
+					// automated logon during setup.
+					fprintf(fd, "            <Password>\n");
+					fprintf(fd, "              <Value>UABhAHMAcwB3AG8AcgBkAA==</Value>\n");
+					fprintf(fd, "              <PlainText>false</PlainText>\n");
+					fprintf(fd, "            </Password>\n");
+					fprintf(fd, "          </LocalAccount>\n");
+					fprintf(fd, "        </LocalAccounts>\n");
+					fprintf(fd, "      </UserAccounts>\n");
+					// Since we set a blank password, we'll ask the user to change it at next logon.
+					// NB: In case you wanna try, please be aware that Microsoft doesn't let you have multiple
+					// <FirstLogonCommands> sections in unattend.xml. Don't ask me how I know... :(
+					fprintf(fd, "      <FirstLogonCommands>\n");
+					fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
+					fprintf(fd, "          <Order>%d</Order>\n", order++);
+					fprintf(fd, "          <CommandLine>net user &quot;%s&quot; /logonpasswordchg:yes</CommandLine>\n", unattend_username);
+					fprintf(fd, "        </SynchronousCommand>\n");
+					// Some people report that using the `net user` command above might reset the password expiration to 90 days...
+					// To alleviate that, blanket set passwords on the target machine to never expire.
+					fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
+					fprintf(fd, "          <Order>%d</Order>\n", order++);
+					fprintf(fd, "          <CommandLine>net accounts /maxpwage:unlimited</CommandLine>\n");
+					fprintf(fd, "        </SynchronousCommand>\n");
+					fprintf(fd, "      </FirstLogonCommands>\n");
 				}
 			}
 			fprintf(fd, "    </component>\n");
