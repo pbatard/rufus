@@ -1,0 +1,22 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Rufus Linux Port
+GenericName=USB Formatting Utility
+Comment=Create bootable USB drives from ISOs and format USB drives
+Icon=usb-creator-gtk
+Exec=rufus-linux-gui
+Terminal=false
+Categories=System;Utility;
+Keywords=USB;ISO;bootable;format;disk;utility;
+MimeType=application/x-cd-image;application/x-iso9660-image;
+StartupNotify=true
+StartupWMClass=rufus-linux-gui
+
+# Require root privileges
+X-GNOME-UsesNotifications=true
+Actions=cli;
+
+[Desktop Action cli]
+Name=Command Line Interface
+Exec=x-terminal-emulator -e "sudo rufus-linux"
