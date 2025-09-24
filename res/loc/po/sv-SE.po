@@ -2,10 +2,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-04-26 00:51+0200\n"
-"PO-Revision-Date: 2024-04-26 14:23+0100\n"
+"POT-Creation-Date: 2025-09-23 20:25+0100\n"
+"PO-Revision-Date: 2025-09-23 20:25+0100\n"
 "Last-Translator: \n"
-"Language-Team: Sopor <sopor@users.noreply.github.com>\n"
+"Language-Team: \n"
 "Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Swedish (Svenska)\n"
 "X-Rufus-LCID: 0x041d, 0x081d\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.7\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -62,7 +62,7 @@ msgstr "Aktivera runtime UEFI-mediavalidering"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
-msgstr "Formateringsinställningar"
+msgstr "Formatalternativ"
 
 #. • IDD_DIALOG → IDS_FILE_SYSTEM_TXT
 msgid "File system"
@@ -1134,7 +1134,7 @@ msgstr ""
 
 #. • MSG_187
 msgid "Invalid image for selected boot option"
-msgstr "Ogiltig avbild för vald startinställning"
+msgstr "Ogiltig avbild för valt startalternativ"
 
 #. • MSG_188
 msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
@@ -1846,13 +1846,13 @@ msgstr "Bestående logg"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"En fil (diskcopy.dll) måste laddas ner från Microsoft för att installera MS-DOS:\n"
+"En fil (%s) måste laddas ner från Microsoft för att använda den här funktionen:\n"
 "- Välj \"Ja\" för att ansluta till Internet och ladda ner den\n"
 "- Välj \"Nej\" för att avbryta operationen\n"
 "\n"

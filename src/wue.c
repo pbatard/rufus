@@ -875,8 +875,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 0, PATCH_PROGRESS_TOTAL);
 		// We only need to alter boot.wim if we have windowsPE data to deal with.
 		// If not, we can just copy our unattend.xml in \sources\$OEM$\$$\Panther\.
-		// We also need to do so if we use the 'Windows UEFI CA 2023' signed bootloaders.
-		if (flags & UNATTEND_WINPE_SETUP_MASK || flags & UNATTEND_USE_MS2023_BOOTLOADERS) {
+		if (flags & UNATTEND_WINPE_SETUP_MASK) {
 			if (validate_md5sum)
 				md5sum_totalbytes -= _filesizeU(boot_wim_path);
 			// Some "unofficial" ISOs have a modified boot.wim that doesn't have Windows Setup at index 2...

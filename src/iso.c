@@ -494,14 +494,23 @@ static void fix_config(const char* psz_fullpath, const char* psz_path, const cha
 				if ((props->is_grub_cfg) && replace_in_token_data(src, "linux",
 					"maybe-ubiquity", "", TRUE))
 					uprintf("  Removed 'maybe-ubiquity' kernel option");
+			} else if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
+				"boot=casper", "boot=casper persistent", TRUE) != NULL) {
+				// Linux Mint uses "boot=casper". Oh and we want this replacement to happen BEFORE
+				// the "linux /casper/vmlinuz" one, because Mint (Why is it ALWAYS them?) also use
+				// "linux /casper/vmlinuz" and "kernel /casper/vmlinuz" in their config, and even
+				// do so in a SUPER INCONSISTENT manner in their Syslinux' live.cfg, so we want to
+				// make sure we don't have to do extra work to fix their inconsistency.
+				uprintf("  Added 'persistent' kernel option");
+				modified = TRUE;
 			} else if (replace_in_token_data(src, "linux", "/casper/vmlinuz",
 				"/casper/vmlinuz persistent", TRUE) != NULL) {
 				// Ubuntu 23.04 and 24.04 use GRUB only with the above and don't use "maybe-ubiquity"
 				uprintf("  Added 'persistent' kernel option");
 				modified = TRUE;
-			} else if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",
-				"boot=casper", "boot=casper persistent", TRUE) != NULL) {
-				// Linux Mint uses boot=casper.
+			} else if (replace_in_token_data(src, "kernel", "/casper/vmlinuz",
+				"/casper/vmlinuz persistent", TRUE) != NULL) {
+				// Some people might use "kernel" in their Syslinux config instead of "linux"
 				uprintf("  Added 'persistent' kernel option");
 				modified = TRUE;
 			} else if (replace_in_token_data(src, props->is_grub_cfg ? "linux" : "append",

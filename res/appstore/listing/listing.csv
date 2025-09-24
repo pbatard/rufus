@@ -110,12 +110,18 @@
 • Sürüm Notları https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus це утиліта, яка допомагає форматувати та створювати завантажувальні флешки, картки пам'яті, тощо.
 • Офіційний сайт: https://rufus.ie
 • Сирцевий код: https://github.com/pbatard/rufus
-• Список змін: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus là một tiện ích giúp định dạng và tạo khả năng khởi động cho USB, chẳng hạn như thẻ USB/đĩa di động, thẻ nhớ, vv.
+• Список змін: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt","Rufus là một tiện ích giúp định dạng và tạo khả năng khởi động cho các thiết bị USB, ví dụ như thẻ USB/đĩa di động, thẻ nhớ, v.v...
 • Trang web chính thức: https://rufus.ie
 • Mã nguồn: https://github.com/pbatard/rufus
 • Nhật ký thay đổi: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt"
-"ReleaseNotes","3","Text","• Fix downloads from https://rufus.ie no longer working due to recent GitHub server changes
-• Fix unofficial Windows ISOs, with single index WIMs, not presenting the WUE dialog",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"ReleaseNotes","3","Text","• Add Dark Mode support (courtesy of @ozone10)
+• Add support for creating Windows CA 2023 compatible media (requires a Windows 11 25H2 ISO)
+• Add support for saving an existing drive to ISO (UDF only)
+• Improve error reporting when saving to VHD/VHDX (with thanks to @Kazkans)
+• Improve persistence support for Linux Mint
+• Fix UEFI DBX updates being reported in some timezones, even when there are none
+• Fix a situation where no file system can be selected in ISO mode
+• Fix a crash when trying to process Windows ISOs with very long paths",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "Title","4","Text","Rufus",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "ShortTitle","5","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "SortTitle","6","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -142,7 +148,7 @@ További információ: https://www.gnu.org/licenses/gpl-3.0.html.","Aplikasi ini
 Lihat https://www.gnu.org/licenses/gpl-3.0.html untuk detail lebih lanjut.","Questa applicazione è rilasciata sotto i termini della GNU Public License (GPL) versione 3.
 Vedere https://www.gnu.org/licenses/gpl-3.0.html per dettagli.","このアプリケーションはGNU Public License (GPL) version 3でライセンスされています。
 詳細は https://www.gnu.org/licenses/gpl-3.0.ja.html をご覧ください。","이 응용 프로그램은 GNU Public License (GPL) 버전 3의 조건에 따라 라이선스가 부여됩니다.
-자세한 내용은 https://www.gnu.org/licenses/gpl-3.0.html 을 참조하십시오.","Šai programmai ir licences noteikumi, kā GNU Public License (GPL) version 3.
+자세한 내용은 https://www.gnu.org/licenses/gpl-3.0.html 을 참조하세요.","Šai programmai ir licences noteikumi, kā GNU Public License (GPL) version 3.
 Papildinformācijai skatīt https://www.gnu.org/licenses/gpl-3.0.html.","Ši programa yra licencijuota pagal GNU viešosios licencijos (GPL) 3 versijos sąlygas.
 Daugiau informacijos rasite https://www.gnu.org/licenses/gpl-3.0.html.","Permohonan ini dilesenkan di bawah syarat-syarat Lesen Awam GNU (GPL) versi 3.
 Lihat https://www.gnu.org/licenses/gpl-3.0.html untuk butiran.","Dette programmet er lisensiert under GNU Public Licence (GPL) versjon 3.

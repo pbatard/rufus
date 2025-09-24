@@ -1,9 +1,10 @@
-o Version 4.10 (2025.09.??)
+o Version 4.10 (2025.09.24)
     Add Dark Mode support (courtesy of @ozone10)
     Add support for creating Windows CA 2023 compatible media (requires a Windows 11 25H2 ISO)
     Add support for saving an existing drive to ISO (UDF only)
     Improve error reporting when saving to VHD/VHDX (with thanks to @Kazkans)
-    Fix DBX updates being reported in some timezones, even when there are none
+    Improve persistence support for Linux Mint
+    Fix UEFI DBX updates being reported in some timezones, even when there are none
     Fix a situation where no file system can be selected in ISO mode
     Fix a crash when trying to process Windows ISOs with very long paths
 
