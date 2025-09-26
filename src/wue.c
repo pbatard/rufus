@@ -264,6 +264,9 @@ char* CreateUnattendXml(int arch, int flags)
 		fprintf(fd, "  </settings>\n");
 	}
 
+	if (flags & UNATTEND_USE_MS2023_BOOTLOADERS)
+		uprintf("• Use 'Windows CA 2023' signed bootloaders");
+
 	fprintf(fd, "</unattend>\n");
 	fclose(fd);
 	return path;
@@ -875,7 +878,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 0, PATCH_PROGRESS_TOTAL);
 		// We only need to alter boot.wim if we have windowsPE data to deal with.
 		// If not, we can just copy our unattend.xml in \sources\$OEM$\$$\Panther\.
-		if (flags & UNATTEND_WINPE_SETUP_MASK) {
+		if (flags & UNATTEND_WINPE_SETUP_MASK || flags & UNATTEND_USE_MS2023_BOOTLOADERS) {
 			if (validate_md5sum)
 				md5sum_totalbytes -= _filesizeU(boot_wim_path);
 			// Some "unofficial" ISOs have a modified boot.wim that doesn't have Windows Setup at index 2...
