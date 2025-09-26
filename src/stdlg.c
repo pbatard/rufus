@@ -604,6 +604,13 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			SetWindowTextU(GetDlgItem(hDlg, IDNO), lmprintf(MSG_009));
 			ShowWindow(GetDlgItem(hDlg, IDYES), SW_SHOW);
 			break;
+		case MB_YESNOCANCEL:
+			SetWindowTextU(GetDlgItem(hDlg, IDABORT), lmprintf(MSG_008));
+			SetWindowTextU(GetDlgItem(hDlg, IDYES), lmprintf(MSG_009));
+			SetWindowTextU(GetDlgItem(hDlg, IDNO), lmprintf(MSG_007));
+			ShowWindow(GetDlgItem(hDlg, IDYES), SW_SHOW);
+			ShowWindow(GetDlgItem(hDlg, IDABORT), SW_SHOW);
+			break;
 		case MB_OK:
 			SetWindowTextU(GetDlgItem(hDlg, IDNO), "OK");
 			break;
@@ -705,6 +712,9 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			case MB_ABORTRETRYIGNORE:
 				wParam = IDRETRY;
 				break;
+			case MB_YESNOCANCEL:
+				wParam = IDNO;
+				break;
 			}
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
@@ -720,10 +730,15 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			case MB_ABORTRETRYIGNORE:
 				wParam = IDIGNORE;
 				break;
+			case MB_YESNOCANCEL:
+				wParam = IDCANCEL;
+				break;
 			}
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDABORT:
+			if ((notification_type & 0x0F) == MB_YESNOCANCEL)
+				wParam = IDYES;
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDC_MORE_INFO:
