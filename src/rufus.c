@@ -94,7 +94,7 @@ static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], u
 extern HANDLE update_check_thread;
 extern HIMAGELIST hUpImageList, hDownImageList;
 extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes, is_bootloader_revoked;
-extern BOOL validate_md5sum, cpu_has_sha1_accel, cpu_has_sha256_accel;
+extern BOOL validate_md5sum, cpu_has_sha1_accel, cpu_has_sha256_accel, toggle_dark_mode;
 extern BYTE* fido_script;
 extern HWND hFidoDlg;
 extern uint8_t* grub2_buf;
@@ -4140,6 +4140,15 @@ extern int TestHashes(void);
 			}
 
 			// Other hazardous cheat modes require Ctrl + Alt
+			// Ctrl-Alt-D => Toggle dark mode and restart
+			if ((msg.message == WM_KEYDOWN) && (msg.wParam == 'D') &&
+				(GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {
+				toggle_dark_mode = TRUE;
+				selected_fs = (int)ComboBox_GetCurItemData(hFileSystem);
+				relaunch = TRUE;
+				PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0);
+				continue;
+			}
 			// Ctrl-Alt-E => Expert Mode
 			if ((msg.message == WM_KEYDOWN) && (msg.wParam == 'E') &&
 				(GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {

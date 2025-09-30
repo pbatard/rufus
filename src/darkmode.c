@@ -40,7 +40,7 @@ PF_TYPE_DECL(WINAPI, PreferredAppMode, SetPreferredAppMode, (PreferredAppMode));
 PF_TYPE_DECL(WINAPI, VOID, FlushMenuThemes, (VOID));
 PF_TYPE_DECL(WINAPI, BOOL, SetWindowCompositionAttribute, (HWND, WINDOWCOMPOSITIONATTRIBDATA*));
 
-BOOL is_darkmode_enabled = FALSE;
+BOOL is_darkmode_enabled = FALSE, toggle_dark_mode = FALSE;
 
 static COLORREF color_accent = TOOLBAR_ICON_COLOR;
 
@@ -86,6 +86,11 @@ BOOL GetDarkModeFromRegistry(void)
 
 	if (ReadSettingBool(SETTING_DISABLE_DARK_MODE))
 		return FALSE;
+
+	if (toggle_dark_mode) {
+		toggle_dark_mode = FALSE;
+		return !is_darkmode_enabled;
+	}
 
 	if (RegGetValueA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
 		"AppsUseLightTheme", RRF_RT_REG_DWORD, NULL, &data, &size) == ERROR_SUCCESS)
