@@ -150,8 +150,8 @@ static const char db_sb_revoked_txt[] =
  * Use as fallback when https://rufus.ie/sbat_level.txt cannot be accessed.
  */
 static const char db_sbat_level_txt[] =
-	"sbat,1,2024010900\n"
+	"sbat,1,2025051000\n"
 	"shim,4\n"
-	"grub,3\n"
-	"grub.debian,4\n"
-	"BOOTMGRSECURITYVERSIONNUMBER,0x30000";
+	"grub,5\n"
+	"grub.proxmox,2\n"
+	"BOOTMGRSECURITYVERSIONNUMBER,0x70000";

@@ -2198,8 +2198,11 @@ static BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 		if (entry.version == 0)
 			continue;
 		for (j = 0; sbat_entries[j].product != NULL; j++) {
-			if (strcmp(entry.product, sbat_entries[j].product) == 0 && entry.version < sbat_entries[j].version)
+			if (strcmp(entry.product, sbat_entries[j].product) == 0 && entry.version < sbat_entries[j].version) {
+				uprintf("  SBAT version for '%s' (%d) is lower than required minimum SBAT version (%d)!",
+					entry.product, entry.version, sbat_entries[j].version);
 				return TRUE;
+			}
 		}
 	}
 
@@ -2306,8 +2309,11 @@ static BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 				svn_ver = (uint32_t*)RvaToPhysical(buf, rsrc_rva);
 				if (svn_ver != NULL) {
 					uuprintf("  SVN version: %d.%d", *svn_ver >> 16, *svn_ver & 0xffff);
-					if (*svn_ver < sbat_entries[i].version)
+					if (*svn_ver < sbat_entries[i].version) {
+						uprintf("  SVN version %d.%d is lower than required minimum SVN version %d.%d!",
+							*svn_ver >> 16, *svn_ver & 0xffff, sbat_entries[i].version >> 16, sbat_entries[i].version & 0xffff);
 						return TRUE;
+					}
 				}
 			} else {
 				uprintf("  Warning: Unexpected Secure Version Number size");
@@ -2394,42 +2400,43 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 	// Get the signer/issuer info
 	cert = GetPeSignatureData(buf);
 	r = GetIssuerCertificateInfo(cert, &info);
-	if (r == 0)
+	if (r == 0) {
 		uprintf("  (Unsigned Bootloader)");
-	else if (r > 0)
+	} else if (r > 0) {
 		uprintf("  Signed by '%s'", info.name);
+		// Only perform revocation checks on signed bootloaders
+		if (!PE256Buffer(buf, len, hash))
+			return -1;
+		// Check for UEFI DBX revocation
+		if (IsRevokedByDbx(hash, buf, len))
+			revoked = 1;
+		// Check for Microsoft SSP revocation
+		for (i = 0; revoked == 0 && i < pe256ssp_size * SHA256_HASHSIZE; i += SHA256_HASHSIZE)
+			if (memcmp(hash, &pe256ssp[i], SHA256_HASHSIZE) == 0)
+				revoked = 2;
+		// Check for Linux SBAT revocation
+		if (revoked == 0 && IsRevokedBySbat(buf, len))
+			revoked = 3;
+		// Check for Microsoft SVN revocation
+		if (revoked == 0 && IsRevokedBySvn(buf, len))
+			revoked = 4;
+		// Check for UEFI DBX certificate revocation
+		if (revoked == 0 && IsRevokedByCert(&info))
+			revoked = 5;
 
-	if (!PE256Buffer(buf, len, hash))
-		return -1;
-	// Check for UEFI DBX revocation
-	if (IsRevokedByDbx(hash, buf, len))
-		revoked = 1;
-	// Check for Microsoft SSP revocation
-	for (i = 0; revoked == 0 && i < pe256ssp_size * SHA256_HASHSIZE; i += SHA256_HASHSIZE)
-		if (memcmp(hash, &pe256ssp[i], SHA256_HASHSIZE) == 0)
-			revoked = 2;
-	// Check for Linux SBAT revocation
-	if (revoked == 0 && IsRevokedBySbat(buf, len))
-		revoked =  3;
-	// Check for Microsoft SVN revocation
-	if (revoked == 0 && IsRevokedBySvn(buf, len))
-		revoked = 4;
-	// Check for UEFI DBX certificate revocation
-	if (revoked == 0 && IsRevokedByCert(&info))
-		revoked = 5;
-
-	// If signed and not revoked, print the various Secure Boot "gotchas"
-	if (r > 0 && revoked == 0) {
-		if (strcmp(info.name, "Microsoft Windows Production PCA 2011") == 0) {
-			uprintf("  Note: This bootloader may fail Secure Boot validation on systems that");
-			uprintf("  have been updated to use the 'Windows UEFI CA 2023' certificate.");
-		} else if (strcmp(info.name, "Windows UEFI CA 2023") == 0) {
-			uprintf("  Note: This bootloader will fail Secure Boot validation on systems that");
-			uprintf("  have not been updated to use the latest Secure Boot certificates");
-		} else if (strcmp(info.name, "Microsoft Corporation UEFI CA 2011") == 0 ||
-			strcmp(info.name, "Microsoft UEFI CA 2023") == 0) {
-			uprintf("  Note: This bootloader may fail Secure Boot validation on *some* systems,");
-			uprintf("  unless you enable \"Microsoft 3rd-party UEFI CA\" in your 'BIOS'.");
+		// If signed and not revoked, print the various Secure Boot "gotchas"
+		if (revoked == 0) {
+			if (strcmp(info.name, "Microsoft Windows Production PCA 2011") == 0) {
+				uprintf("  Note: This bootloader may fail Secure Boot validation on systems that");
+				uprintf("  have been updated to use the 'Windows UEFI CA 2023' certificate.");
+			} else if (strcmp(info.name, "Windows UEFI CA 2023") == 0) {
+				uprintf("  Note: This bootloader will fail Secure Boot validation on systems that");
+				uprintf("  have not been updated to use the latest Secure Boot certificates");
+			} else if (strcmp(info.name, "Microsoft Corporation UEFI CA 2011") == 0 ||
+				strcmp(info.name, "Microsoft UEFI CA 2023") == 0) {
+				uprintf("  Note: This bootloader may fail Secure Boot validation on *some* systems,");
+				uprintf("  unless you enable \"Microsoft 3rd-party UEFI CA\" in your 'BIOS'.");
+			}
 		}
 	}
 
