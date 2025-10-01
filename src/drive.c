@@ -668,6 +668,7 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 
 			// List disks
 			while (IEnumVdsObject_Next(pEnumDisk, 1, &pDiskUnk, &ulFetched) == S_OK) {
+				BOOL r;
 				VDS_DISK_PROP prop;
 				IVdsDisk* pDisk;
 
@@ -686,13 +687,13 @@ static BOOL GetVdsDiskInterface(DWORD DriveIndex, const IID* InterfaceIID, void*
 					suprintf("Could not query VDS Disk Properties: %s", VdsErrorString(hr));
 					break;
 				}
+				hr = S_OK;
 
-				// Check if we are on the target disk
-				// uprintf("GetVdsDiskInterface: Seeking %S found %S", wPhysicalName, prop.pwszName);
-				hr = (HRESULT)_wcsicmp(wPhysicalName, prop.pwszName);
-				CoTaskMemFree(prop.pwszName);
-				if (hr != S_OK) {
-					hr = S_OK;
+				// Check if we are on the target disk. Note that prop.pwszName can be NULL on failed disks.
+				r = (prop.pwszName != NULL) && (_wcsicmp(wPhysicalName, prop.pwszName) == 0);
+				CoTaskMemFree(prop.pwszName);	// NB: Per MS docs, CoTaskMemFree() accepts NULL.
+				if (!r) {
+					IVdsDisk_Release(pDisk);
 					continue;
 				}
 
