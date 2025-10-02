@@ -1646,7 +1646,6 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
  * Parse a list of SHA-1 certificate hexascii thumbprints.
  * List must be freed by the caller.
  */
-
 thumbprint_list_t* GetThumbprintEntries(char* thumbprints_txt)
 {
 	uint32_t i, j, num_entries;

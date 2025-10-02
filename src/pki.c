@@ -455,7 +455,8 @@ int GetIssuerCertificateInfo(uint8_t* cert, cert_info_t* info)
 	// Build a certificate chain to get the issuer (CA) certificate.
 	memset(&chainPara, 0, sizeof(chainPara));
 	chainPara.cbSize = sizeof(CERT_CHAIN_PARA);
-	if (!CertGetCertificateChain(NULL, pCertContext[0], NULL, hStore, &chainPara, 0, NULL, &pChainContext)) {
+	if (!CertGetCertificateChain(NULL, pCertContext[0], NULL, hStore, &chainPara,
+		CERT_CHAIN_CACHE_ONLY_URL_RETRIEVAL | CERT_CHAIN_REVOCATION_CHECK_CACHE_ONLY, NULL, &pChainContext)) {
 		uprintf("PKI: Failed to build certificate chain. Error code: %s", WinPKIErrorString());
 		goto out;
 	}

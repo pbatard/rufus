@@ -114,14 +114,12 @@
 • Trang web chính thức: https://rufus.ie
 • Mã nguồn: https://github.com/pbatard/rufus
 • Nhật ký thay đổi: https://github.com/pbatard/rufus/blob/master/ChangeLog.txt"
-"ReleaseNotes","3","Text","• Add Dark Mode support (courtesy of @ozone10)
-• Add support for creating Windows CA 2023 compatible media (requires a Windows 11 25H2 ISO)
-• Add support for saving an existing drive to ISO (UDF only)
-• Improve error reporting when saving to VHD/VHDX (with thanks to @Kazkans)
-• Improve persistence support for Linux Mint
-• Fix UEFI DBX updates being reported in some timezones, even when there are none
-• Fix a situation where no file system can be selected in ISO mode
-• Fix a crash when trying to process Windows ISOs with very long paths",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"ReleaseNotes","3","Text","• Add a cheat mode to toggle between Light and Dark mode
+• Improve WUE option text relating to the CA 2023 option
+• Update Linux SBAT / Microsoft SVN Secure Boot revocation values to latest
+• Fix some GRUB/Syslinux download dialogs showing only the 'Close' button
+• Fix an assert being triggered when using the WUE CA 2023 option on its own
+• Fix an application crash on systems that have a failed dynamic disk",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "Title","4","Text","Rufus",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "ShortTitle","5","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 "SortTitle","6","Text","",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

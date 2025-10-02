@@ -1,3 +1,11 @@
+o Version 4.11 (2025.10.02)
+    Add a cheat mode to toggle between Light and Dark mode
+    Improve WUE option text relating to the CA 2023 option
+    Update Linux SBAT / Microsoft SVN Secure Boot revocation values to latest
+    Fix some GRUB/Syslinux download dialogs showing only the 'Close' button
+    Fix an assert being triggered when using the WUE CA 2023 option on its own
+    Fix an application crash on systems that have a failed dynamic disk
+
 o Version 4.10 (2025.09.24)
     Add Dark Mode support (courtesy of @ozone10)
     Add support for creating Windows CA 2023 compatible media (requires a Windows 11 25H2 ISO)

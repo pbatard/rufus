@@ -594,9 +594,8 @@ BOOL SaveImage(void)
 	char filename[128], letters[27], path[MAX_PATH];
 	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
 	enum { image_type_vhd = 1, image_type_vhdx = 2, image_type_ffu = 3, image_type_iso = 4 };
-	// Add a non-printable zero-width space to UDF *.iso extension to differentiate it from ISO-9660
 	static EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhd", "*.vhdx", "*.ffu", "*.iso"),
-		__VA_GROUP__(lmprintf(MSG_343), lmprintf(MSG_342), lmprintf(MSG_344), lmprintf(MSG_355)));
+		__VA_GROUP__(lmprintf(MSG_343), lmprintf(MSG_342), lmprintf(MSG_344), lmprintf(MSG_036)));
 	ULARGE_INTEGER free_space;
 
 	memset(&img_save, 0, sizeof(IMG_SAVE));
