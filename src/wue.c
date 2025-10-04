@@ -1000,7 +1000,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 	}
 
 	if (flags & UNATTEND_USE_MS2023_BOOTLOADERS) {
-		if_assert_fails(update_boot_wim)
+		if_assert_fails(!update_boot_wim)
 			goto out;
 		if (GetTempDirNameU(temp_dir, APPLICATION_NAME, 0, tmp_path[1]) == 0) {
 			uprintf("WARNING: Could not create temp dir for 2023 signed UEFI bootloaders");
