@@ -2181,7 +2181,7 @@ DWORD WINAPI IsoSaveImageThread(void* param)
 	// Save to UDF only, as Microsoft's implementation of ISO-9660 doesn't support multiextent
 	// and produces BROKEN images if you try to add files larger than 4 GB.
 	// Plus ISO-9660/Joliet limits labels to 16 characters and has issues with long paths.
-	static_sprintf(cmd, "%s\\%s\\oscdimg.exe -g -h -k -l\"%s\" -m -u2 -udfver102 %c:\\ %s",
+	static_sprintf(cmd, "%s\\%s\\oscdimg.exe -g -h -k -l\"%s\" -m -u2 -udfver102 %c:\\ \"%s\"",
 		app_data_dir, FILES_DIR, label, letters[0], img_save->ImagePath);
 	uprintf("Running command: '%s'", cmd);
 	// For detecting typical oscdimg commandline progress report of type: "\r15.5% complete"
