@@ -104,6 +104,7 @@ const char* efi_bootname[3] = { "boot", "grub", "mm" };
 const char* efi_archname[ARCH_MAX] = { "", "ia32", "x64", "arm", "aa64", "ia64", "riscv64", "loongarch64", "ebc" };
 static const char* sources_str = "/sources";
 static const char* wininst_name[] = { "install.wim", "install.esd", "install.swm" };
+_STATIC_ASSERT(ARRAYSIZE(wininst_name) < 4);	// Must fit as 4 bit position flag
 // We only support GRUB/BIOS (x86) that uses a standard config dir (/boot/grub/i386-pc/)
 // If the disc was mastered properly, GRUB/EFI will take care of itself
 static const char* grub_dirname[] = { "/boot/grub/i386-pc", "/boot/grub2/i386-pc" };
@@ -295,7 +296,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		}
 
 		// Split a >4GB install.wim if the target filesystem is FAT
-		if (file_length >= 4 * GB && psz_dirname != NULL && IS_FAT(fs_type) && img_report.has_4GB_file == 0x81) {
+		if (file_length >= 4 * GB && psz_dirname != NULL && IS_FAT(fs_type) && img_report.has_4GB_file == 0x11) {
 			if (safe_stricmp(&psz_dirname[max(0, ((int)safe_strlen(psz_dirname)) -
 				((int)strlen(sources_str)))], sources_str) == 0) {
 				char wim_path[4 * MAX_PATH];
@@ -427,7 +428,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 								"?:%s", psz_fullpath);
 							img_report.wininst_index++;
 							if (file_length >= 4 * GB)
-								img_report.has_4GB_file |= 0x80;
+								img_report.has_4GB_file |= (0x10 << i);
 						}
 					}
 				}
@@ -457,7 +458,7 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			if (props->is_old_c32[i])
 				img_report.has_old_c32[i] = TRUE;
 		}
-		if (file_length >= 4 * GB)
+		if (file_length >= 4 * GB && (img_report.has_4GB_file & 0x0f) != 0x0f)
 			img_report.has_4GB_file++;
 		// Compute projected size needed (NB: ISO_BLOCKSIZE = UDF_BLOCKSIZE)
 		if (file_length != 0)

@@ -374,7 +374,7 @@ enum EFI_BOOT_TYPE {
 #define HAS_NTFSLESS_GRUB(r)((r.has_grub2 & 0x80) && !(r.has_grub2_fs & 0x4))
 #define IS_WINDOWS_1X(r)    (r.has_bootmgr_efi && (r.win_version.major >= 10))
 #define IS_WINDOWS_11(r)    (r.has_bootmgr_efi && (r.win_version.major >= 11))
-#define IS_FAT32_COMPAT(r)  (((r.has_4GB_file == 0 && !HAS_FATLESS_GRUB(r)) || (r.has_4GB_file == 0x81 && allow_dual_uefi_bios)) && !r.needs_ntfs)
+#define IS_FAT32_COMPAT(r)  (((r.has_4GB_file == 0 && !HAS_FATLESS_GRUB(r)) || (r.has_4GB_file == 0x11 && allow_dual_uefi_bios)) && !r.needs_ntfs)
 #define HAS_EFI_IMG(r)      (r.efi_img_path[0] != 0)
 #define IS_DD_BOOTABLE(r)   (r.is_bootable_img > 0)
 #define IS_DD_ONLY(r)       ((r.is_bootable_img > 0) && (!r.is_iso || r.disable_iso))
