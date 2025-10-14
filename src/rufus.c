@@ -4140,10 +4140,11 @@ extern int TestHashes(void);
 			}
 
 			// Other hazardous cheat modes require Ctrl + Alt
-			// Ctrl-Alt-D => Toggle dark mode and restart
+			// Ctrl-Alt-D => Toggle dark mode and restart. Note that if you enable this, then
+			// unless you *MANUALLY* delete the registry key, Rufus always forces the mode.
 			if ((msg.message == WM_KEYDOWN) && (msg.wParam == 'D') &&
 				(GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {
-				toggle_dark_mode = TRUE;
+				WriteSetting32(SETTING_DARK_MODE, is_darkmode_enabled ? 2 : 1);
 				selected_fs = (int)ComboBox_GetCurItemData(hFileSystem);
 				relaunch = TRUE;
 				PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0);

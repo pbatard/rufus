@@ -40,7 +40,7 @@ PF_TYPE_DECL(WINAPI, PreferredAppMode, SetPreferredAppMode, (PreferredAppMode));
 PF_TYPE_DECL(WINAPI, VOID, FlushMenuThemes, (VOID));
 PF_TYPE_DECL(WINAPI, BOOL, SetWindowCompositionAttribute, (HWND, WINDOWCOMPOSITIONATTRIBDATA*));
 
-BOOL is_darkmode_enabled = FALSE, toggle_dark_mode = FALSE;
+BOOL is_darkmode_enabled = FALSE;
 
 static COLORREF color_accent = TOOLBAR_ICON_COLOR;
 
@@ -84,20 +84,19 @@ BOOL GetDarkModeFromRegistry(void)
 	if (!IsAtLeastWin10() || IsHighContrast())
 		return FALSE;
 
-	if (ReadSettingBool(SETTING_DISABLE_DARK_MODE))
+	// 0 = follow system, 1 = dark mode always, anything else = light mode always
+	switch (ReadSetting32(SETTING_DARK_MODE)) {
+	case 0:
+		if (RegGetValueA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+			"AppsUseLightTheme", RRF_RT_REG_DWORD, NULL, &data, &size) == ERROR_SUCCESS)
+			// Dark mode is 0, light mode is 1
+			return (data == 0);
 		return FALSE;
-
-	if (toggle_dark_mode) {
-		toggle_dark_mode = FALSE;
-		return !is_darkmode_enabled;
+	case 1:
+		return TRUE;
+	default:
+		return FALSE;
 	}
-
-	if (RegGetValueA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-		"AppsUseLightTheme", RRF_RT_REG_DWORD, NULL, &data, &size) == ERROR_SUCCESS)
-		// Dark mode is 0, light mode is 1
-		return (data == 0);
-
-	return FALSE;
 }
 
 void InitDarkMode(HWND hWnd)
