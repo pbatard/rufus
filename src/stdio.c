@@ -641,13 +641,14 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 		} else {
 			uprintf("Write error %s", WindowsErrorString());
 			LastWriteError = RUFUS_ERROR(GetLastError());
+			if (LastWriteError == RUFUS_ERROR(ERROR_DISK_FULL))
+				break;
 		}
 		// If we can't reposition for the next run, just abort
 		if (!readFilePointer)
 			break;
 		if (nTry < nNumRetries) {
 			uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
-			// TODO: Call GetProcessSearch() here?
 			Sleep(WRITE_TIMEOUT);
 		}
 	}

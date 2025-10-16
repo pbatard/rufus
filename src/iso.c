@@ -739,7 +739,9 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 						hash_write[HASH_MD5](&ctx, buf, buf_size);
 					ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
 					if (!r || (wr_size != buf_size)) {
-						uprintf("  Error writing file: %s", r ? "Short write detected" : WindowsErrorString());
+						if (r)
+							SetLastError(ERROR_WRITE_FAULT);
+						uprintf("  Error writing file: %s", WindowsErrorString());
 						goto out;
 					}
 					file_length -= wr_size;
@@ -776,6 +778,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 	return 0;
 
 out:
+	if (GetLastError() != ERROR_SUCCESS)
+		ErrorStatus = RUFUS_ERROR(GetLastError());
 	udf_dirent_free(p_udf_dirent);
 	ISO_BLOCKING(safe_closehandle(file_handle));
 	safe_free(psz_sanpath);
@@ -1004,7 +1008,9 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 							hash_write[HASH_MD5](&ctx, buf, buf_size);
 						ISO_BLOCKING(r = WriteFileWithRetry(file_handle, buf, buf_size, &wr_size, WRITE_RETRIES));
 						if (!r || wr_size != buf_size) {
-							uprintf("  Error writing file: %s", r ? "Short write detected" : WindowsErrorString());
+							if (r)
+								SetLastError(ERROR_WRITE_FAULT);
+							uprintf("  Error writing file: %s", WindowsErrorString());
 							goto out;
 						}
 						file_length -= wr_size;
@@ -1039,6 +1045,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	r = 0;
 
 out:
+	if (r != 0 && GetLastError() != ERROR_SUCCESS)
+		ErrorStatus = RUFUS_ERROR(GetLastError());
 	ISO_BLOCKING(safe_closehandle(file_handle));
 	if (p_entlist != NULL)
 		iso9660_filelist_free(p_entlist);

@@ -537,7 +537,7 @@ static BOOL SetFileSystemAndClusterSize(char* fs_name)
 
 	if (SelectedDrive.DiskSize < 256 * TB) {
 		// NTFS
-		SelectedDrive.ClusterSize[FS_NTFS].Allowed = 0x0001FE00;
+		SelectedDrive.ClusterSize[FS_NTFS].Allowed = 0x0001F000;
 		for (i = 16; i <= 256; i <<= 1) {			// 7 MB -> 256 TB
 			if (SelectedDrive.DiskSize < i * TB) {
 				SelectedDrive.ClusterSize[FS_NTFS].Default = ((ULONG)i / 4) * KB;
