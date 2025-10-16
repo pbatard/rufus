@@ -1326,7 +1326,9 @@ out:
 		for (k = (int)safe_strlen(img_report.label) - 1; ((k > 0) && (isspaceU(img_report.label[k]))); k--)
 			img_report.label[k] = 0;
 		// We use the fact that UDF_BLOCKSIZE and ISO_BLOCKSIZE are the same here
-		img_report.projected_size = total_blocks * ISO_BLOCKSIZE;
+		// Also, we add 1% extra requirement, on account that we most likely use a 4k or higher cluster size
+		// whereas ISO_BLOCKSIZE is 2k, which means we'll need extra spaces if there are many small files.
+		img_report.projected_size = (uint64_t)((double)total_blocks * ISO_BLOCKSIZE * 1.01f);
 		// We will link the existing isolinux.cfg from a syslinux.cfg we create
 		// If multiple config files exist, choose the one with the shortest path
 		// (so that a '/syslinux.cfg' is preferred over a '/isolinux/isolinux.cfg')

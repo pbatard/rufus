@@ -1893,7 +1893,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 
 	suprintf("Disk type: %s, Disk size: %s, Sector size: %d bytes",
 		(SelectedDrive.MediaType == FixedMedia) ? "FIXED" : "Removable",
-		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, TRUE), SelectedDrive.SectorSize);
+		SizeToHumanReadable(SelectedDrive.DiskSize, FALSE, FALSE), SelectedDrive.SectorSize);
 	suprintf("Cylinders: %" PRIi64 ", Tracks per cylinder: %d, Sectors per track: %d",
 		DiskGeometry->Geometry.Cylinders.QuadPart, DiskGeometry->Geometry.TracksPerCylinder, DiskGeometry->Geometry.SectorsPerTrack);
 	assert(SelectedDrive.SectorSize != 0);

@@ -7,8 +7,8 @@ struct {
 	char* url;
 	uint64_t timestamp;
 } dbx_info[] = {
-	{ "https://api.github.com/repos/microsoft/secureboot_objects/contents/PostSignedObjects/DBX/x86/DBXUpdate.bin", 1740428422 },
-	{ "https://api.github.com/repos/microsoft/secureboot_objects/contents/PostSignedObjects/DBX/amd64/DBXUpdate.bin", 1749602743 },
+	{ "https://api.github.com/repos/microsoft/secureboot_objects/contents/PostSignedObjects/DBX/x86/DBXUpdate.bin", 1760555920 },
+	{ "https://api.github.com/repos/microsoft/secureboot_objects/contents/PostSignedObjects/DBX/amd64/DBXUpdate.bin", 1760555920 },
 	{ "https://api.github.com/repos/microsoft/secureboot_objects/contents/PostSignedObjects/DBX/arm/DBXUpdate.bin", 1740428422 },
 	{ "https://api.github.com/repos/microsoft/secureboot_objects/contents/PostSignedObjects/DBX/arm64/DBXUpdate.bin", 1740428422 },
 	{ "https://api.github.com/repos/microsoft/secureboot_objects/contents/PostSignedObjects/DBX/ia64/DBXUpdate.bin", 0 },
