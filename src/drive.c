@@ -2456,8 +2456,10 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 				// lest the Microsoft Windows installer errors out at "Copying Windows Files"
 				// because it just can't handle 2 ESPs on one system. The horror! The horror!
 				DriveLayoutEx.PartitionEntry[i].Gpt.PartitionType = PARTITION_MICROSOFT_DATA;
-				// Prevent a drive letter from being assigned to the UEFI:NTFS partition
-				DriveLayoutEx.PartitionEntry[i].Gpt.Attributes = GPT_BASIC_DATA_ATTRIBUTE_NO_DRIVE_LETTER;
+				// When declaring an EFI system partition type, "no drive letter" attribute works as expected.
+				// Now that we declare it as a Microsoft Basic Data partition, that attribute does not work consistently (i.e. drive letter is ALWAYS assigned).
+				// Set the "hidden" attribute, which will ALWAYS prevent a drive letter from being assigned to the UEFI:NTFS partition
+				DriveLayoutEx.PartitionEntry[i].Gpt.Attributes = GPT_BASIC_DATA_ATTRIBUTE_HIDDEN;
 #if !defined(_DEBUG)
 				// Also make the partition read-only for release versions
 				DriveLayoutEx.PartitionEntry[i].Gpt.Attributes += GPT_BASIC_DATA_ATTRIBUTE_READ_ONLY;
