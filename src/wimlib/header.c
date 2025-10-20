@@ -90,7 +90,7 @@ read_wim_header(WIMStruct *wim, struct wim_header *hdr)
 			 * actually reading from a pipe.  */
 			if (!in_fd->is_pipe) {
 				ret = WIMLIB_ERR_READ;
-				if (-1 == lseek(in_fd->fd, -WIM_HEADER_DISK_SIZE, SEEK_END))
+				if (-1 == _lseeki64(in_fd->fd, -WIM_HEADER_DISK_SIZE, SEEK_END))
 					goto read_error;
 				ret = full_read(in_fd, &disk_hdr, sizeof(disk_hdr));
 				if (ret)

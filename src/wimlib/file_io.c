@@ -346,7 +346,7 @@ off_t filedes_seek(struct filedes *fd, off_t offset)
 		return -1;
 	}
 	if (fd->offset != offset) {
-		if (lseek(fd->fd, offset, SEEK_SET) == -1)
+		if (_lseeki64(fd->fd, offset, SEEK_SET) == -1)
 			return -1;
 		fd->offset = offset;
 	}
@@ -360,5 +360,5 @@ bool filedes_is_seekable(struct filedes *fd)
 	if (fd->is_udf || fd->is_iso)
 		return false;
 #endif
-	return !fd->is_pipe && lseek(fd->fd, 0, SEEK_CUR) != -1;
+	return !fd->is_pipe && _lseeki64(fd->fd, 0, SEEK_CUR) != -1;
 }
