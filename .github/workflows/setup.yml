@@ -36,7 +36,7 @@ jobs:
       run: sha256sum ./setup_${{ matrix.TARGET_PLATFORM }}.exe
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ matrix.TARGET_PLATFORM }}
         path: ./*.exe
@@ -46,7 +46,7 @@ jobs:
     needs: VS2022-Build
     steps:
       - name: Merge Artifacts
-        uses: actions/upload-artifact/merge@v4
+        uses: actions/upload-artifact/merge@v5
         with:
           name: setup
           delete-merged: true
