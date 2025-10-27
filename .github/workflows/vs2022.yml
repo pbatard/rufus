@@ -113,7 +113,7 @@ jobs:
         curl --request POST --url https://www.virustotal.com/api/v3/monitor/items --header 'x-apikey: ${{ secrets.VIRUSTOTAL_API_KEY }}' --form path='/rufus_${{ matrix.TARGET_PLATFORM }}.exe' --form file=@./rufus_${{ matrix.TARGET_PLATFORM }}.exe
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: ${{ github.event_name == 'push' }}
       with:
         name: ${{ matrix.TARGET_PLATFORM }}
@@ -126,7 +126,7 @@ jobs:
     needs: VS2022-Build
     steps:
       - name: Merge Artifacts
-        uses: actions/upload-artifact/merge@v4
+        uses: actions/upload-artifact/merge@v5
         if: ${{ github.event_name == 'push' }}
         with:
           name: VS2022
