@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-04-26 11:11+0200\n"
-"PO-Revision-Date: 2024-04-26 11:48+0200\n"
+"POT-Creation-Date: 2025-11-12 17:32+0000\n"
+"PO-Revision-Date: 2025-11-12 17:32+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: German (Deutsch)\n"
 "X-Rufus-LCID: 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.8\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -308,7 +308,7 @@ msgstr ""
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr ""
 
@@ -846,7 +846,7 @@ msgstr "Keine Persistenz"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "Größe der persistenten Partition des Live-USB-Systems. Eine Größe von 0 deaktiviert die Persistenz."
 
@@ -867,7 +867,7 @@ msgid ""
 "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
-"Sie haben gerade ein Medium erstellt, das den UEFI:NTFS-Bootloader verwendet. Bitte denken Sie daran, dass Sie zum Starten dieses Mediums SECURE BOOT DEAKTIVIEREN müssen.\n"
+"Sie haben gerade ein Medium erstellt, welches das UEFI:NTFS-Startprogramm verwendet. Bitte denken Sie daran, dass Sie zum Starten dieses Mediums SECURE BOOT DEAKTIVIEREN müssen.\n"
 "Nach dem Abschluss des Vorgangs sollten Sie SECURE BOOT wieder aktivieren.\n"
 "Weitere Informationen, warum dies notwendig ist, finden Sie über die Schaltfläche \"Weitere Informationen\"."
 
@@ -1039,11 +1039,11 @@ msgstr "Image-Datei oder Download auswählen..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
-msgstr "Wählen Sie diese Option, um die Anzeige internationaler Bezeichnungen zu ermöglichen und ein Gerätesymbol zu erzeugen (autorun.inf)"
+msgstr "Wählen Sie diese Option, um die Anzeige internationaler Bezeichnungen zu ermöglichen und ein Gerätesymbol zu erzeugen (autorun.inf)."
 
 #. • MSG_167
 msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
-msgstr "Ein UEFI Startprogramm installieren, das eine MD5Sum Dateiüberprüfung auf dem Datenträger durchführt"
+msgstr "Ein UEFI-Startprogramm installieren, das eine MD5Sum-Dateiüberprüfung auf dem Datenträger durchführt"
 
 #. • MSG_169
 msgid ""
@@ -1181,7 +1181,7 @@ msgid ""
 "Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
 "Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
 msgstr ""
-"WICHTIG: DIESES LAUFWERK HAT EINE NICHT STANDARDISIERTE SEKTORGRÖSSE!\n"
+"WICHTIG: DIESES LAUFWERK HAT EINE NICHT STANDARDISIERTE SEKTORGRÖẞE!\n"
 "\n"
 "Herkömmliche Laufwerke nutzen eine Sektorgröße von 512 Byte, aber dieses Laufwerk nutzt %d Byte. Höchstwahrscheinlich können Sie von diesem Laufwerk NICHT starten.\n"
 "Rufus kann versuchen, ein startfähiges Laufwerk zu erstellen, aber es gibt KEINE GARANTIE, dass es funktionieren wird."
@@ -1431,7 +1431,7 @@ msgstr "Es wurde keine neue Version von Rufus gefunden"
 
 #. • MSG_248
 msgid "Application registry keys successfully deleted"
-msgstr "Anwendungeinstellungen in der Registrierdatenbank erfolgreich gelöscht"
+msgstr "Anwendungseinstellungen in der Registrierdatenbank erfolgreich gelöscht"
 
 #. • MSG_249
 msgid "Failed to delete application registry keys"
@@ -1740,13 +1740,13 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"Das ausgewählte ISO-Image verwendet UEFI und ist klein genug, um auf eine EFI System-Partition (ESP) geschrieben zu werden. Es auf eine ESP- anstelle einer normalen Partition zu schrieben, kann für bestimmte Installationsarten vorteilhaft sein.\n"
+"Das ausgewählte ISO-Image verwendet UEFI und ist klein genug, um auf eine EFI-Systempartition (ESP) geschrieben zu werden. Es auf eine ESP anstelle einer normalen Partition zu schreiben, die die gesamte Festplatte belegt, kann für bestimmte Installationsarten vorteilhaft sein.\n"
 "\n"
 "Bitte wählen Sie einen Modus aus:"
 
 #. • MSG_311
 msgid "Use %s (in the main application window) to enable."
-msgstr "Verwende %s (Hauptfenster der Anwendung) zum aktivieren."
+msgstr "Verwende %s (Hauptfenster der Anwendung) zum Aktivieren."
 
 #. • MSG_312
 msgid "Extra hashes (SHA512)"
@@ -1789,7 +1789,7 @@ msgid ""
 "The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
 "As a result, DD image writing mode will be enforced."
 msgstr ""
-"Das ausgewählte Image ist vom Typ ISOHybrid, aber der Ersteller hat es nicht mit dem ISO/Datei Kopier-Modus kompatibel gemacht.\n"
+"Das ausgewählte Image ist vom Typ ISOHybrid, aber der Ersteller hat es nicht mit dem ISO/Dateikopiermodus kompatibel gemacht.\n"
 "Deswegen wird der DD-Schreibmodus verwendet."
 
 #. • MSG_322
@@ -1798,7 +1798,7 @@ msgstr "'%' kann nicht geöffnet/gelesen werden"
 
 #. • MSG_325
 msgid "Applying Windows customization: %s"
-msgstr "Windows Anpassungen anwenden: %s"
+msgstr "Windows-Anpassungen anwenden: %s"
 
 #. • MSG_326
 msgid "Applying user options..."
@@ -1806,7 +1806,7 @@ msgstr "Benutzereinstellungen anwenden..."
 
 #. • MSG_327
 msgid "Windows User Experience"
-msgstr "Windows Benutzererfahrung"
+msgstr "Windows-Benutzererfahrung"
 
 #. • MSG_328
 msgid "Customize Windows installation?"
@@ -1818,7 +1818,7 @@ msgstr "Anforderung für 4GB+ RAM, Secure Boot und TPM 2.0 entfernen"
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
-msgstr "Anforderung für Online Microsoft Konto entfernen"
+msgstr "Anforderung für Online-Microsoft-Konto entfernen"
 
 #. • MSG_331
 msgid "Disable data collection (Skip privacy questions)"
@@ -1846,21 +1846,21 @@ msgstr "Dauerhaftes Protokoll"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"Eine zusätzliche Datei ('diskcopy.dll') muss von Microsoft heruntergeladen werden um MS-DOS zu installieren:\n"
-"- 'Ja' um eine Verbindung mit dem Internet herzustellen und die Datei herunterzuladen\n"
-"- 'Nein' um den Vorgang abzubrechen\n"
+"Eine zusätzliche Datei ('%s') muss von Microsoft heruntergeladen werden, um diese Funktion zu nutzen:\n"
+"- Wählen Sie 'Ja', um eine Verbindung mit dem Internet herzustellen und die Datei herunterzuladen\n"
+"- Wählen Sie 'Nein', um den Vorgang abzubrechen\n"
 "\n"
 "Hinweis: Die Datei wird ins Programmverzeichnis heruntergeladen und bei Bedarf wiederverwendet."
 
 #. • MSG_338
 msgid "Revoked UEFI bootloader detected"
-msgstr "Zurückgezogenes UEFI Startprogramm erkannt"
+msgstr "Zurückgezogenes UEFI-Startprogramm erkannt"
 
 #. • MSG_339
 msgid ""
@@ -1869,10 +1869,10 @@ msgid ""
 "- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
 "- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
 msgstr ""
-"Rufus hat erkannt, dass das gewählte ISO-Image ein UEFI-Startprogramm enthält, dass zurückgezogen wurde und das führt zu %s, wenn das UEFI-System aktuell ist und Secure Boot aktiv ist.\n"
+"Rufus hat erkannt, dass das gewählte ISO-Image ein UEFI-Startprogramm enthält, das zurückgezogen wurde. Das führt zu %s, wenn das UEFI-System aktuell ist und Secure Boot aktiv ist.\n"
 "\n"
 "- Wenn Sie das ISO-Image aus einer unzuverlässigen Quelle haben, sollten Sie in Betracht ziehen, dass es UEFI-Schadcode enthält und es deshalb nicht verwenden.\n"
-"- Wenn Sie es aus einer vertrauenswürdigen Quelle haben, sollten Sie versuchen eine aktuellere Version zu bekommen, die dieses problem nicht hat."
+"- Wenn Sie es aus einer vertrauenswürdigen Quelle haben, sollten Sie versuchen, eine aktuellere Version zu bekommen, die dieses Problem nicht hat."
 
 #. • MSG_340
 msgid "a \"Security Violation\" screen"
@@ -1880,19 +1880,19 @@ msgstr "ein Bildschirm \"Sicherheitsverletzung\""
 
 #. • MSG_341
 msgid "a Windows Recovery Screen (BSOD) with '%s'"
-msgstr "ein Windows Wiederherstellung-Bildschirm (BSOD) mit '%s'"
+msgstr "ein Windows-Wiederherstellungsbildschirm (BSOD) mit '%s'"
 
 #. • MSG_342
 msgid "Compressed VHDX Image"
-msgstr "Komprimiertes VHDX Image"
+msgstr "Komprimiertes VHDX-Image"
 
 #. • MSG_343
 msgid "Uncompressed VHD Image"
-msgstr "Unkomprimiertes VHD Image"
+msgstr "Unkomprimiertes VHD-Image"
 
 #. • MSG_344
 msgid "Full Flash Update Image"
-msgstr "Full Flash Update Image"
+msgstr "Vollständiges Flash-Update-Image"
 
 #. • MSG_345
 msgid ""
@@ -1901,8 +1901,8 @@ msgid ""
 "- Select 'No' to cancel the operation"
 msgstr ""
 "Einige weitere Daten müssen von Microsoft heruntergeladen werden, um diese Funktion zu verwenden:\n"
-"- 'Ja' um eine Verbindung mit dem Internet herzustellen und diese herunterzuladen\n"
-"- 'Nein' um den Vorgang abzubrechen"
+"- Wählen Sie 'Ja', um eine Verbindung mit dem Internet herzustellen und diese herunterzuladen\n"
+"- Wählen Sie 'Nein', um den Vorgang abzubrechen"
 
 #. • MSG_346
 msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
@@ -1910,11 +1910,11 @@ msgstr "Windows im S-Modus (nicht kompatibel mit Online Konto-Umgehung)"
 
 #. • MSG_347
 msgid "Expert Mode"
-msgstr "Experten-Modus"
+msgstr "Expertenmodus"
 
 #. • MSG_348
 msgid "Extracting archive files: %s"
-msgstr "Archiv-Datei extrahieren: %s"
+msgstr "Archivdatei extrahieren: %s"
 
 #. • MSG_349
 msgid "Use Rufus MBR"
@@ -1924,7 +1924,7 @@ msgstr "Rufus MBR verwenden"
 #.
 #. The following messages are for the Windows Store listing only and are not used by the application
 msgid "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."
-msgstr "Rufus ist ein Werkzeug, welches dabei hilft, bootfähige USB-Laufwerke zu erstellen, wie beispielweise USB-Keys, Speichersticks usw."
+msgstr "Rufus ist ein Werkzeug, das beim Formatieren und Erstellen bootfähiger USB-Flash-Laufwerke wie USB-Sticks, Speichersticks usw. hilft."
 
 #. • MSG_901
 msgid "Official site: %s"
@@ -1967,7 +1967,7 @@ msgstr "FreeDOS-bootfähige USB-Laufwerke erstellen"
 
 #. • MSG_912
 msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
-msgstr "Erstellen bootfähiger Laufwerke aus bootfähigen ISOs (Windows, Linux, etc.)"
+msgstr "Erstellen bootfähiger Laufwerke aus bootfähigen ISOs (Windows, Linux etc.)"
 
 #. • MSG_913
 msgid "Create bootable drives from bootable disk images, including compressed ones"
@@ -1979,7 +1979,7 @@ msgstr "Erstellen von BIOS- oder UEFI-bootfähigen Laufwerken, einschließlich U
 
 #. • MSG_915
 msgid "Create 'Windows To Go' drives"
-msgstr "Erstellen von \"Windows To Go\"-Laufwerken"
+msgstr "Erstellen von 'Windows To Go'-Laufwerken"
 
 #. • MSG_916
 msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
@@ -1995,7 +1995,7 @@ msgstr "VHD/DD-Images des ausgewählten Laufwerks erstellen"
 
 #. • MSG_919
 msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
-msgstr "Berechnung von MD5-, SHA-1-, SHA-256- und SHA-512-Prüfsummen für das ausgewählte Bild"
+msgstr "Berechnung von MD5-, SHA-1-, SHA-256- und SHA-512-Prüfsummen für das ausgewählte Image"
 
 #. • MSG_920
 msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
