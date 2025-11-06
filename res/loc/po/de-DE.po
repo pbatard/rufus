@@ -867,7 +867,7 @@ msgid ""
 "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
-"Sie haben gerade ein Medium erstellt, das das UEFI:NTFS-Startprogramm verwendet. Bitte denken Sie daran, dass Sie zum Starten dieses Mediums SECURE BOOT DEAKTIVIEREN müssen.\n"
+"Sie haben gerade ein Medium erstellt, welches das UEFI:NTFS-Startprogramm verwendet. Bitte denken Sie daran, dass Sie zum Starten dieses Mediums SECURE BOOT DEAKTIVIEREN müssen.\n"
 "Nach dem Abschluss des Vorgangs sollten Sie SECURE BOOT wieder aktivieren.\n"
 "Weitere Informationen, warum dies notwendig ist, finden Sie über die Schaltfläche \"Weitere Informationen\"."
 
