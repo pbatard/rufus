@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 3.22\n"
+"Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2023-10-19 09:51+0300\n"
-"PO-Revision-Date: 2024-04-26 02:06+0300\n"
-"Last-Translator: Dmitry Yerokhin <erodim@mail.ru>\n"
+"PO-Revision-Date: 2025-11-11 03:03+0500\n"
+"Last-Translator: Valdemar Rampage <hollqa@yandex.ru>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Russian (Русский)\n"
 "X-Rufus-LCID: 0x0419, 0x0819\n"
-"X-Generator: Poedit 1.5.7\n"
+"X-Generator: Poedit 3.7\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -559,7 +559,7 @@ msgstr ""
 "времени, особенно для больших файлов.\n"
 "\n"
 "Чтобы избежать повреждения устройства, дождитесь, пока Windows закончит. Но "
-"если вам надоест ждать, можете просто отключить устройство..."
+"если Вам надоест ждать, можете просто отключить устройство..."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -655,7 +655,7 @@ msgstr ""
 "ВАЖНО: НА ЭТОМ ДИСКЕ НЕСКОЛЬКО РАЗДЕЛОВ!!\n"
 "\n"
 "Этот диск может содержать разделы/тома, которые отсутствуют в списке или "
-"даже не видны в Windows. В случае продолжения вы несёте ответственность за "
+"даже не видны в Windows. В случае продолжения Вы несёте ответственность за "
 "любую потерю данных на этих разделах."
 
 #. • MSG_094
@@ -768,7 +768,7 @@ msgid ""
 "If you are sure you want to cancel, click YES. Otherwise, click NO."
 msgstr ""
 "При отмене устройство может оказаться в НЕРАБОЧЕМ состоянии.\n"
-"Если вы уверены, что хотите отменить операцию, нажмите 'Да'. Иначе - нажмите "
+"Если Вы уверены, что хотите отменить операцию, нажмите 'Да'. Иначе - нажмите "
 "'Нет'."
 
 #. • MSG_106
@@ -971,7 +971,7 @@ msgid ""
 "Please select the image you wish to use for this installation:"
 msgstr ""
 "Этот файл ISO содержит несколько образов Windows.\n"
-"Выберите образ, который вы хотите использовать для этой установки:"
+"Выберите образ, который Вы хотите использовать для этой установки:"
 
 #. • MSG_132
 msgid ""
@@ -1178,18 +1178,6 @@ msgid ""
 "media"
 msgstr "Установить загрузчик UEFI, который проверит файл MD5Sum на носителе"
 
-#. • MSG_168
-msgid ""
-"Try to masquerade first bootable USB drive (usually 0x80) as a different "
-"disk.\n"
-"This should only be necessary if you install Windows XP and have more than "
-"one disk."
-msgstr ""
-"Попробуйте замаскировать первый загрузочный \n"
-"USB-диск (обычно 0x80) как другой диск.\n"
-"Это необходимо только для установки Windows XP,\n"
-"если у вас несколько дисков."
-
 #. • MSG_169
 msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
@@ -1254,12 +1242,12 @@ msgid ""
 "If you choose to allow this program to check for application updates, you "
 "agree that the following information may be collected on our server(s):"
 msgstr ""
-"Разрешая проверку обновлений, вы соглашаетесь, что на наших серверах может "
+"Разрешая проверку обновлений, Вы соглашаетесь, что на наших серверах может "
 "собираться следующая информация:"
 
 #. • MSG_181
 msgid "Your operating system's architecture and version"
-msgstr "Версия и архитектура вашей операционной системы"
+msgstr "Версия и архитектура Вашей операционной системы"
 
 #. • MSG_182
 msgid "The version of the application you use"
@@ -1353,7 +1341,7 @@ msgstr ""
 "ВАЖНО: НА ЭТОМ ДИСКЕ СЕКТОРЫ НЕСТАНДАРТНОГО РАЗМЕРА!\n"
 "\n"
 "Обычные накопители используют секторы размером 512 байт, а на этом диске они "
-"%d-байтовые. Во многих случаях это означает, что вы НЕ СМОЖЕТЕ загрузиться с "
+"%d-байтовые. Во многих случаях это означает, что Вы НЕ СМОЖЕТЕ загрузиться с "
 "этого диска.\n"
 "Rufus попытается создать загрузочный диск, но БЕЗ ГАРАНТИИ, что он будет "
 "работать."
@@ -1368,7 +1356,7 @@ msgid ""
 "the FIXED attribute set. The current drive was not detected as FIXED."
 msgstr ""
 "Windows To Go может быть установлена на диск с разделом GPT только в том "
-"случае, если у диска есть атрибут FIXED (несъёмный). У выбранного диск "
+"случае, если у диска есть атрибут FIXED (несъёмный). У выбранного диска "
 "такого атрибута не обнаружено."
 
 #. • MSG_199
@@ -1577,7 +1565,7 @@ msgid ""
 "The download will be deleted. Please check the log for more details."
 msgstr ""
 "Невозможно проверить подпись загруженного обновления. Это может означать, "
-"что ваша система неправильно настроена для проверки подписей, либо что было "
+"что Ваша система неправильно настроена для проверки подписей, либо было "
 "загружено вредоносное ПО.\n"
 "\n"
 "Обновление будет удалено. См. подробности в файле-журнале."
@@ -1868,7 +1856,7 @@ msgstr ""
 "Выбранный образ ISO не соответствует заявленному размеру: %s данных "
 "отсутствует!\n"
 "\n"
-"Если вы скачали этот файл из Интернета, загрузите его снова и проверьте, "
+"Если Вы скачали этот файл из Интернета, загрузите его снова и проверьте, "
 "совпадают ли контрольные суммы MD5 или SHA.\n"
 "\n"
 "Чтобы вычислить MD5 или SHA в Rufus, нажмите кнопку (✓)."
@@ -1913,7 +1901,7 @@ msgid ""
 "Use this option to indicate if you plan to install Windows to a different "
 "disk, or if you want to run Windows directly from this drive (Windows To Go)."
 msgstr ""
-"Используйте эту опцию, если вы хотите установить Windows на другой диск или "
+"Используйте эту опцию, если Вы хотите установить Windows на другой диск или "
 "запускать Windows прямо с этого диска (Windows To Go)."
 
 #. • MSG_306
@@ -2090,9 +2078,9 @@ msgstr ""
 "Выбранный образ ISO содержит отозванный загрузчик UEFI, который выдаёт %s, "
 "когда безопасная загрузка включена в полностью обновленной системе UEFI.\n"
 "\n"
-"- Если вы получили этот образ ISO из ненадёжного источника, учтите, что он "
+"- Если Вы получили этот образ ISO из ненадёжного источника, учтите, что он "
 "может содержать вредоносное ПО UEFI, и не загружайтесь с него.\n"
-"- Если вы получили его из надёжного источника, попробуйте найти более новую "
+"- Если Вы получили его из надёжного источника, попробуйте найти более новую "
 "версию, которая не будет выдавать это предупреждение."
 
 #. • MSG_340
@@ -2142,6 +2130,26 @@ msgstr "Распаковка архивов: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Использовать MBR Rufus"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (requires a compatible target PC)"
+msgstr "Использовать подписанные загрузчики 'Windows CA 2023' (требуется совместимый ПК)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "Проверка отзыва загрузчика UEFI..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "Проверка обновлений UEFI DBX..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "Доступно обновление DBX"
+
+#. • MSG_355
+msgid "ISO Image"
+msgstr "ISO-образ"
 
 #. • MSG_900
 #.
