@@ -2133,7 +2133,7 @@ msgstr "Использовать MBR Rufus"
 
 #. • MSG_350
 msgid "Use 'Windows CA 2023' signed bootloaders (requires a compatible target PC)"
-msgstr "Использовать подписанные загрузчики 'Windows CA 2023' (требуется совместимый ПК)"
+msgstr "Использовать загрузчики, подписанные 'Windows CA 2023' (требуется совместимый ПК)"
 
 #. • MSG_351
 msgid "Checking for UEFI bootloader revocation..."
