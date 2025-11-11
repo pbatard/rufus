@@ -35,7 +35,7 @@ o Version 4.8 (2025.06.11)
 
 o Version 4.7 (2025.04.09)
     Add a mechanism to detect and download updated DBXs from the official UEFI repository
-    Add ztsd compression support for disk images
+    Add zstd compression support for disk images
     Add a new exclusion feature in the settings, to ignore disks with a specific GPT GUID
     Improve detection for compressed VHD images that are too large to fit the target drive
     Fix commandline hogger not being deleted when running Rufus from a different directory
