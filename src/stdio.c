@@ -582,13 +582,13 @@ HANDLE CreateFileWithTimeout(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwS
 			CancelSynchronousIo(hThread);
 			switch (WaitForSingleObject(hThread, 30000)) {
 			case WAIT_TIMEOUT:
-				uprintf("File was not created within timeout duration");
+				uprintf("Could not open file or device within timeout duration");
 				break;
 			case WAIT_OBJECT_0:
-				uprintf("File creation aborted by user");
+				uprintf("Operation aborted by user");
 				break;
 			default:
-				uprintf("Error while waiting for file to ne created: %s", WindowsErrorString());
+				uprintf("Error while waiting for file or device to be opened: %s", WindowsErrorString());
 				break;
 			}
 			params.dwError = WAIT_TIMEOUT;

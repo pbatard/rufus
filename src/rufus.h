@@ -87,7 +87,7 @@
 #define MAX_IGNORE_USB              8			// Maximum number of USB drives we want to ignore
 #define MAX_ISO_TO_ESP_SIZE         (1 * GB)	// Maximum size we allow for the ISO → ESP option
 #define MAX_DEFAULT_LIST_CARD_SIZE  (500 * GB)	// Size above which we don't list a card without enable HDD or Alt-F
-#define MAX_SECTORS_TO_CLEAR        128			// nb sectors to zap when clearing the MBR/GPT (must be >34)
+#define MAX_SECTORS_TO_CLEAR        (8 * MB / 512)	// Sectors to zap when clearing the MBR/GPT (must be >34)
 #define MAX_USERNAME_LENGTH         128			// Maximum size we'll accept for a WUE specified username
 #define MAX_WININST                 4			// Max number of install[.wim|.esd] we can handle on an image
 #define MAX_MARKER                  80.0f		// Max number of '+' signs we display for progress
