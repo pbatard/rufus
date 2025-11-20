@@ -1438,7 +1438,7 @@ out:
 DWORD WINAPI FormatThread(void* param)
 {
 	int r;
-	BOOL ret, use_large_fat32, windows_to_go, actual_lock_drive = lock_drive, write_as_ext = FALSE;
+	BOOL ret, windows_to_go, actual_lock_drive = lock_drive, write_as_ext = FALSE;
 	// Windows 11 and VDS (which I suspect is what fmifs.dll's FormatEx() is now calling behind the scenes)
 	// require us to unlock the physical drive to format the drive, else access denied is returned.
 	BOOL need_logical = FALSE, must_unlock_physical = (use_vds || WindowsVersion.Version >= WINDOWS_11);
@@ -1456,7 +1456,6 @@ DWORD WINAPI FormatThread(void* param)
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
 
-	use_large_fat32 = (fs_type == FS_FAT32) && ((SelectedDrive.DiskSize > LARGE_FAT32_SIZE) || (force_large_fat32));
 	windows_to_go = (image_options & IMOP_WINTOGO) && (boot_type == BT_IMAGE) && HAS_WINTOGO(img_report) &&
 		(ComboBox_GetCurItemData(hImageOption) == IMOP_WIN_TO_GO);
 	large_drive = (SelectedDrive.DiskSize > (1*TB));

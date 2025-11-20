@@ -13,11 +13,11 @@ o Secure Boot signed NTFS UEFI drivers, derived from ntfs-3g [1].
   ARM driver (ntfs_arm.efi) is not Secure Boot signed.
 
 o Non Secure Boot signed exFAT UEFI drivers from EfiFs [2].
-  These drivers are the exact same as the binaries from EfiFs release 1.9 but,
+  These drivers are the exact same as the binaries from EfiFs release 1.11 but,
   because they are licensed under GPLv3, cannot be Secure Boot signed.
 
 o Secure Boot signed UEFI:NTFS bootloader binaries [3].
-  These drivers are the exact same as the binaries from release 2.3, except for
+  These drivers are the exact same as the binaries from release 2.6, except for
   the addition of Microsoft's Secure Boot signature.
   Note that, per Microsoft's current Secure Boot signing policies, the 32-bit
   ARM bootloader (bootarm.efi) is not Secure Boot signed.
