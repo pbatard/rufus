@@ -40,7 +40,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
         submodules: recursive
@@ -54,6 +54,15 @@ jobs:
       uses: crazy-max/ghaction-upx@v3
       with:
         install-only: true
+
+    - name: Set version
+      id: set_version
+      shell: bash
+      run: |
+        version=$(git describe --tags)
+        version=${version:1}
+        version=${version%%-*}
+        echo "version=$version" >> $GITHUB_OUTPUT
 
     - name: Set ALPHA
       id: set_alpha
@@ -81,10 +90,6 @@ jobs:
         move .\${{ matrix.TARGET_PLATFORM }}\Release\rufus.exe .\rufus_${{ matrix.TARGET_PLATFORM }}.exe
         move .\${{ matrix.TARGET_PLATFORM }}\Release\rufus.pdb .\rufus_${{ matrix.TARGET_PLATFORM }}.pdb
 
-    - name: Compress executables
-      if: ${{ matrix.TARGET_PLATFORM != 'arm64' }}
-      run: upx --lzma --best rufus_${{ matrix.TARGET_PLATFORM }}.exe
-
     - name: Prepare to sign ALPHA
       if: ${{ !startsWith(github.ref, 'refs/tags/') }}
       shell: bash
@@ -101,6 +106,14 @@ jobs:
       run: |
         signtool sign /v /f sign.pfx /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 rufus_${{ matrix.TARGET_PLATFORM }}.exe
         del sign.pfx
+
+    - name: Create standalone release executables
+      if: ${{ startsWith(github.ref, 'refs/tags/') }}
+      shell: cmd
+      run: |
+        copy rufus_${{ matrix.TARGET_PLATFORM }}.exe rufus-${{ steps.set_version.outputs.version }}_${{ matrix.TARGET_PLATFORM }}.exe
+        if exist rufus-${{ steps.set_version.outputs.version }}_x64.exe ( ren rufus-${{ steps.set_version.outputs.version }}_x64.exe rufus-${{ steps.set_version.outputs.version }}.exe )
+        if not ${{ matrix.TARGET_PLATFORM }}==arm64 ( upx --lzma --best rufus-*.exe )
 
     - name: Display SHA-256
       run: sha256sum ./rufus_${{ matrix.TARGET_PLATFORM }}.exe

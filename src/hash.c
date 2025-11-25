@@ -2199,7 +2199,7 @@ static BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 			continue;
 		for (j = 0; sbat_entries[j].product != NULL; j++) {
 			if (strcmp(entry.product, sbat_entries[j].product) == 0 && entry.version < sbat_entries[j].version) {
-				uprintf("  SBAT version for '%s' (%d) is lower than required minimum SBAT version (%d)!",
+				uprintf("  SBAT version for '%s' (%d) is lower than the current minimum SBAT version (%d)!",
 					entry.product, entry.version, sbat_entries[j].version);
 				return TRUE;
 			}
