@@ -164,14 +164,3 @@ jobs:
           files: |
             ./release-files/rufus-*.exe
 
-  # --- The Merge Artifacts step is now mostly redundant/moved to Release Job ---
-  Extra-Step-To-Merge-Artifacts-Thanks-To-Upload-Artifact-v4-Breaking-Backwards-Compatibility:
-    runs-on: windows-latest
-    needs: VS2022-Build
-    steps:
-      - name: Merge Artifacts
-        uses: actions/upload-artifact/merge@v5
-        if: ${{ github.event_name == 'push' }}
-        with:
-          name: VS2022
-          delete-merged: true
