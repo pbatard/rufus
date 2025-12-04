@@ -44,6 +44,13 @@ jobs:
       with:
         fetch-depth: 0
         submodules: recursive
+        
+        # --- NEW CLEANUP STEP ADDED HERE ---
+    - name: Clean previous artifacts and build files
+      shell: powershell
+      run: |
+        Remove-Item -Path ".\rufus_*.exe", ".\rufus_*.pdb", ".\rufus-*.exe" -ErrorAction SilentlyContinue
+        Remove-Item -Path ".\x64", ".\x86", ".\arm64" -Recurse -Force -ErrorAction SilentlyContinue
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
