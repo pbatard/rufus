@@ -79,13 +79,7 @@ jobs:
         
         # Apply UPX compression (unless ARM64)
         if not ${{ matrix.TARGET_PLATFORM }}==arm64 (
-          if not exist upx.exe ( ^
-            curl -L https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-win64.zip -o upx.zip ^
-            && 7z x upx.zip -o. ^
-            && move upx-4.2.4-win64\upx.exe . ^
-            && del upx.zip ^
-            && rmdir /s /q upx-4.2.4-win64 ^
-          )
+          if not exist upx.exe ( curl -L https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-win64.zip -o upx.zip && 7z x upx.zip upx.exe )
           upx.exe --lzma --best rufus.exe
         )
 
