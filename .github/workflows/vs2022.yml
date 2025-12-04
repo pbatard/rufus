@@ -156,7 +156,7 @@ jobs:
           ./rufus-*.exe
         retention-days: 1 # Added to follow v5 best practices
 
-  # --- NEW JOB: Creates the actual GitHub Release page ---
+# --- UPDATED JOB: Fixed path for uploading release files ---
   Release:
     runs-on: ubuntu-latest
     needs: VS2022-Build
@@ -173,12 +173,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          # This sets the release tag to whatever tag triggered the workflow (e.g., v4.4)
           tag_name: ${{ github.ref }}
-          # Use the tag name for the release title
           name: Release ${{ github.ref_name }}
-          # Set pre-release if it contains 'BETA'
           prerelease: ${{ contains(github.ref, 'BETA') }}
-          # Attach all downloaded executables as release assets
+          # FIX: Use '**/' to recursively search ALL subdirectories under ./release-files/
           files: |
-            ./release-files/rufus-*.exe
+            ./release-files/**/rufus-*.exe
