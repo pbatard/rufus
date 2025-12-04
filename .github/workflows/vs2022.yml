@@ -13,7 +13,8 @@ on:
       - '**.sh'
       - '**.txt'
       - '**.xml'
-      tags:
+    # Trigger release on tags
+    tags:
       - 'v[0-9]+.[0-9]+'
   pull_request:
     branches: [master]
@@ -27,7 +28,8 @@ on:
       - '**.sh'
       - '**.txt'
       - '**.xml'
-      
+  # Also allow manual runs for testing
+  workflow_dispatch:
 
 env:
   SOLUTION_FILE_PATH: ./rufus.sln
@@ -52,59 +54,45 @@ jobs:
       uses: microsoft/setup-msbuild@v2
       with:
         msbuild-architecture: x64
+
+    - name: Get Version Number (from Git Tag)
+      id: set_version
+      shell: bash
+      run: |
+        # Get the tag name (e.g., v4.11) and remove the 'v'
+        TAG_NAME="${{ github.ref_name }}"
+        VERSION="${TAG_NAME#v}"
         
-    # Assuming the MSBuild step is here and successfully produces rufus.exe
-    
-    # New step to handle file finalization and compression
-    - name: Finalize, Rename and Compress Executable
-      id: finalize # <-- Added ID to retrieve outputs
-      # The failure was "upx: rufus.exe: FileNotFoundException". This block ensures
-      # the executable is moved to the current directory and compressed correctly.
+        # Set output for subsequent steps
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Build
       shell: cmd
       run: |
-        rem Path to the built executable from the log: D:\a\rufus\rufus\x64\Release\rufus.exe
-        rem Using the build folder relative to the solution file's location.
-        set BUILD_DIR=D:\a\rufus\rufus\${{ matrix.TARGET_PLATFORM }}\Release\
-        set ORIGINAL_EXE_NAME=rufus.exe
+        msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ matrix.TARGET_PLATFORM }}
+        move .\\res\\${{ matrix.TARGET_PLATFORM }}\\Release\\rufus.exe .\\rufus_${{ matrix.TARGET_PLATFORM }}.exe
         
-        rem 1. Move the built executable to the root of the working directory
-        move "%BUILD_DIR%%ORIGINAL_EXE_NAME%" .
-
-        rem 2. Get version number 
-        set CURRENT_VERSION=
-        for /f %%i in ('git describe --tags --always --long --dirty') do set CURRENT_VERSION=%%i
-        set CURRENT_VERSION=%CURRENT_VERSION:v=%
-        
-        rem 3. Rename the executable to its final versioned name (e.g., rufus-4.4_x64.exe)
-        set RENAMED_EXE_NAME=rufus-%CURRENT_VERSION%_${{ matrix.TARGET_PLATFORM }}.exe
-        ren "%ORIGINAL_EXE_NAME%" "%RENAMED_EXE_NAME%"
-        
-        rem Output the renamed file name for use in subsequent YAML steps
-        echo RENAMED_EXE_NAME=%RENAMED_EXE_NAME%>>%GITHUB_OUTPUT%
-
-        rem 4. Run UPX compression on the renamed file (for x64/x86). 
-        if not ${{ matrix.TARGET_PLATFORM }}==arm64 ( 
-          upx --lzma --best "%RENAMED_EXE_NAME%" 
+        # Rename the x64 binary to the generic name, which is common for Rufus
+        if ${{ matrix.TARGET_PLATFORM }}==x64 (
+          ren rufus_x64.exe rufus.exe
         )
         
-        rem 5. Create the simplified name for artifact upload (e.g., rufus_x64.exe)
-        rem This file is used in the subsequent SHA-256 and Upload steps.
-        copy "%RENAMED_EXE_NAME%" rufus_${{ matrix.TARGET_PLATFORM }}.exe
-
-    - name: Upload Release Asset (On Tag Push)
-      # Only runs if the push event is a tag (e.g., refs/tags/v4.4)
-      if: ${{ startsWith(github.ref, 'refs/tags/') }}
-      # Use PowerShell for GitHub CLI on Windows runner
-      shell: pwsh
-      run: |
-        # Use the GitHub CLI to upload the asset to the release associated with the tag
-        gh release upload ${{ github.ref_name }} ./${{ steps.finalize.outputs.RENAMED_EXE_NAME }} --clobber
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Required for gh CLI authentication
+        # Apply UPX compression (unless ARM64)
+        if not ${{ matrix.TARGET_PLATFORM }}==arm64 (
+          if not exist upx.exe ( ^
+            curl -L https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-win64.zip -o upx.zip ^
+            && 7z x upx.zip -o. ^
+            && move upx-4.2.4-win64\upx.exe . ^
+            && del upx.zip ^
+            && rmdir /s /q upx-4.2.4-win64 ^
+          )
+          upx.exe --lzma --best rufus.exe
+        )
 
     - name: Display SHA-256
       run: sha256sum ./rufus_${{ matrix.TARGET_PLATFORM }}.exe
 
+    # Note: I'm keeping the VirusTotal checks as they were in the original files
     - name: Upload to VirusTotal
       continue-on-error: true
       if: ${{ github.event_name == 'push' }}
@@ -116,7 +104,66 @@ jobs:
       uses: actions/upload-artifact@v5
       if: ${{ github.event_name == 'push' }}
       with:
-        name: ${{ matrix.TARGET_PLATFORM }}
+        # Renaming the x64 artifact to 'rufus-generic' for the release job
+        name: ${{ matrix.TARGET_PLATFORM == 'x64' && 'rufus-generic' || matrix.TARGET_PLATFORM }}
         path: |
-          ./rufus_${{ matrix.TARGET_PLATFORM }}.exe
-          ./rufus.exe
+          ./rufus*.exe
+          ./rufus_*.exe
+
+  # New Job: Release Process
+  release_files:
+    # Only run this if we are pushing a tag
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs: VS2022-Build # Must wait for all builds to finish
+
+    steps:
+      - name: Get Tag Name
+        id: vars
+        run: echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+      
+      - name: Download All Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          # Download all artifacts created by the previous job
+          path: artifacts
+
+      - name: Prepare Files for Release
+        run: |
+          # Move all executables to the root directory for zipping
+          # Renames them from the artifact name structure to the final release names
+          mv artifacts/x86/rufus_x86.exe rufus_32bit.exe
+          mv artifacts/arm64/rufus_arm64.exe rufus_arm64.exe
+          mv artifacts/rufus-generic/rufus.exe rufus.exe # The generic x64 version
+
+          # List files to confirm
+          ls -l
+          
+          # Zip the main executable
+          zip -j rufus.zip rufus.exe
+
+          # Zip the 32bit and arm64 versions for separate downloads
+          zip -j rufus_32bit.zip rufus_32bit.exe
+          zip -j rufus_arm64.zip rufus_arm64.exe
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Rufus Release ${{ steps.vars.outputs.TAG_NAME }}
+          files: |
+            rufus.zip
+            rufus_32bit.zip
+            rufus_arm64.zip
+          draft: false
+          prerelease: false
+          body: |
+            ## Automated Release
+            
+            This release contains the Windows x64 (generic), x86 (32-bit), and ARM64 versions built using the Visual Studio toolchain.
+            
+            **Included Files:**
+            - `rufus.zip` (x64/Default)
+            - `rufus_32bit.zip` (x86)
+            - `rufus_arm64.zip` (ARM64)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
