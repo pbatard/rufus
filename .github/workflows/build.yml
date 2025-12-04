@@ -1,0 +1,94 @@
+name: Build and Release Rufus
+
+on:
+  push:
+    # Runs the workflow when a new tag is pushed (e.g., v4.11)
+    tags:
+      - 'v[0-9]+.[0-9]+'
+  # Allows manual triggering from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    # Use Ubuntu for reliable cross-compilation environment
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch all history and tags for release process
+          fetch-depth: 0
+
+      - name: Install Build Dependencies (Autotools & MinGW)
+        run: |
+          # Install Autotools, C compiler, and 64-bit cross-compiler for Windows
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake libtool make build-essential
+          sudo apt-get install -y mingw-w64
+
+      - name: Prepare Build Environment (Bootstrap)
+        run: |
+          # Run the bootstrap script to generate the 'configure' script
+          # The presence of 'bootstrap.sh' suggests this is the intended way to start
+          ./bootstrap.sh
+
+      - name: Configure and Build (Windows 64-bit)
+        run: |
+          # Configure for x86_64-w64-mingw32 (64-bit Windows)
+          ./configure --host=x86_64-w64-mingw32
+          make
+
+      - name: Identify Output Files and Tag
+        id: vars
+        shell: bash
+        run: |
+          # The output executable is usually named 'rufus.exe'
+          EXECUTABLE_PATH=$(find . -name "rufus.exe" | head -n 1)
+          
+          # Get the tag name (e.g., v4.11) to use in the release name
+          TAG_NAME=${{ github.ref_name }}
+          
+          # Set outputs for subsequent steps
+          echo "EXECUTABLE_PATH=$EXECUTABLE_PATH" >> $GITHUB_OUTPUT
+          echo "RELEASE_NAME=Rufus-${TAG_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Create Release Artifact (ZIP)
+        id: package
+        run: |
+          # Create a consistent ZIP filename
+          ZIP_FILENAME="${{ steps.vars.outputs.RELEASE_NAME }}.zip"
+          
+          # Package the executable into a ZIP file
+          zip -j $ZIP_FILENAME "${{ steps.vars.outputs.EXECUTABLE_PATH }}"
+          
+          echo "ZIP_FILENAME=$ZIP_FILENAME" >> $GITHUB_OUTPUT
+
+      - name: Upload Artifact (For all builds)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.vars.outputs.RELEASE_NAME }}
+          path: ${{ steps.package.outputs.ZIP_FILENAME }}
+          
+      # This step only runs if the workflow was triggered by pushing a tag
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          # Use the tag name for the release version
+          name: ${{ steps.vars.outputs.RELEASE_NAME }}
+          # Attach the built ZIP file to the release
+          files: ${{ steps.package.outputs.ZIP_FILENAME }}
+          draft: false # Set to true if you want to review it before publishing
+          prerelease: false
+          body: |
+            ## Automated Build Release
+            
+            This is an automated build of Rufus based on tag ${{ github.ref_name }}.
+            
+            **File Included:**
+            - ${{ steps.package.outputs.ZIP_FILENAME }}
+            
+            Thanks for checking out the fork!
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
