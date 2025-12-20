@@ -798,7 +798,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	BOOL is_symlink, is_identical, create_file, free_p_statbuf = FALSE;
 	int length, r = 1;
 	char psz_fullpath[MAX_PATH], *psz_basename = NULL, *psz_sanpath = NULL;
-	char tmp[128], target_path[256];
+	char tmp[128], target_path[256], *last_slash;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
 	_Static_assert(ISO_BUFFER_SIZE % ISO_BLOCKSIZE == 0,
 		"ISO_BUFFER_SIZE is not a multiple of ISO_BLOCKSIZE");
@@ -974,6 +974,21 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (create_file) {
 				file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
 					FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
+				if (file_handle == INVALID_HANDLE_VALUE && GetLastError() == ERROR_PATH_NOT_FOUND) {
+					// Some folks (umbrelos) managed to master their ISOs in a manner where some
+					// directories don't exist (or don't have _STAT_DIR) but still have files,
+					// in which case our approach, that expects a sane layout with directories
+					// properly declared before the files they contain, breaks. Therefore:
+					last_slash = strrchr(psz_sanpath, '/');
+					if (last_slash != NULL) {
+						*last_slash = '\0';
+						uprintf("WARNING: Directory '%s/' was improperly mastered on the source image!", &psz_sanpath[2]);
+						_mkdirExU(psz_sanpath);
+						*last_slash = '/';
+						file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
+							FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
+					}
+				}
 				if (file_handle == INVALID_HANDLE_VALUE) {
 					err = GetLastError();
 					uprintf("  Unable to create file: %s", WindowsErrorString());
