@@ -418,9 +418,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x04E8
-#define FORCED_PID 0x6300
-#define FORCED_NAME "Samsung Type-C USB Device"
+#define FORCED_VID 0x0781
+#define FORCED_PID 0x55A9
+#define FORCED_NAME " USB  SanDisk 3.2Gen1 UAS Device"
 #endif
 
 void ClearDrives(void)

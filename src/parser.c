@@ -1305,6 +1305,23 @@ char* replace_char(const char* src, const char c, const char* rep)
 }
 
 /*
+ * Replace all characters from string 'str' that are present in the array of chars 'rem'
+ * to the 'rep' character.
+ */
+void filter_chars(char* str, const char* rem, const char rep)
+{
+	char *p, *q;
+
+	if (str == NULL || rem == NULL)
+		return;
+	for (p = str; *p != '\0'; p++) {
+		for (q = (char*)rem; *q != '\0'; q++)
+			if (*p == *q)
+				*p = rep;
+	}
+}
+
+/*
  * Remove all instances of substring 'sub' form string 'src.
  * The returned string is allocated and must be freed by the caller.
  */

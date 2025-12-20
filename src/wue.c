@@ -64,7 +64,7 @@ extern const char* efi_archname[ARCH_MAX];
 char* CreateUnattendXml(int arch, int flags)
 {
 	const static char* xml_arch_names[5] = { "x86", "amd64", "arm", "arm64" };
-	const static char* unallowed_account_names[] = { "Administrator", "Guest", "KRBTGT", "Local" };
+	const static char* unallowed_account_names[] = { "Administrator", "Guest", "KRBTGT", "Local", "NONE" };
 	static char path[MAX_PATH];
 	char* tzstr;
 	FILE* fd;
@@ -169,7 +169,14 @@ char* CreateUnattendXml(int arch, int flags)
 				if (i < ARRAYSIZE(unallowed_account_names)) {
 					uprintf("WARNING: '%s' is not allowed as local account name - Option ignored", unattend_username);
 				} else if (unattend_username[0] != 0) {
+					char* org_username = safe_strdup(unattend_username);
+					// Per https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-shell-setup-useraccounts-localaccounts-localaccount-name
+					// Add '.' to the list because some folks also reported an issue with local accounts that have dots...
+					filter_chars(unattend_username, "/\\[]:|<>+=;,?*%@.", '_');
 					uprintf("• Use '%s' for local account name", unattend_username);
+					if (strcmp(org_username, unattend_username) != 0)
+						uprintf("WARNING: Local account name contained unallowed characters and has been sanitized");
+					free(org_username);
 					// If we create a local account in unattend.xml, then we can get Windows 11
 					// 22H2 to skip MSA even if the network is connected during installation.
 					fprintf(fd, "      <UserAccounts>\n");
