@@ -1654,7 +1654,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_099), lmprintf(MSG_189));
 			goto out;
 		}
-		if (IS_FAT(fs_type) && !IS_FAT32_COMPAT(img_report)) {
+		if (IS_FAT(fs_type) && img_report.has_4GB_file != 0 && img_report.has_4GB_file != 0x11){
 			// This ISO image contains a file larger than 4GB file (FAT32)
 			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_099), lmprintf(MSG_100));
 			goto out;
