@@ -1832,7 +1832,7 @@ msgstr "Définir les options régionales avec les mêmes valeurs que celles de c
 
 #. • MSG_335
 msgid "Disable BitLocker automatic device encryption"
-msgstr "Désactiver le cryptage automatique BitLocker"
+msgstr "Désactiver le chiffrement automatique BitLocker"
 
 #. • MSG_336
 msgid "Persistent log"
