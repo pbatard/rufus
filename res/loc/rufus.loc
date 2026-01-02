@@ -4800,7 +4800,7 @@ t MSG_331 "Désactiver la collecte de données (Supprime les questions de confid
 t MSG_332 "Empêcher Windows To Go d'accéder aux disques internes"
 t MSG_333 "Créer un compte local sous le nom de :"
 t MSG_334 "Définir les options régionales avec les mêmes valeurs que celles de cet utilisateur"
-t MSG_335 "Désactiver le cryptage automatique BitLocker"
+t MSG_335 "Désactiver le chiffrement automatique BitLocker"
 t MSG_336 "Log persistent"
 t MSG_337 "Un fichier supplémentaire ('%s') doit être téléchargé depuis Microsoft pour utiliser cette fonctionalité :\n- Sélectionnez 'Oui' pour vous connecter à Internet et le télécharger\n- Sélectionnez 'Non' pour annuler l’opération\n\nNote : Ce fichier sera téléchargé dans le répertoire de l'application et réutilisé automatiquement s'il est présent."
 t MSG_338 "Bootloader UEFI révoqué détecté"
