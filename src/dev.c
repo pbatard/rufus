@@ -293,7 +293,9 @@ static __inline BOOL IsVHD(const char* buffer)
 		"VMware__VMware_Virtual_S"	// Enabled through a cheat mode, as this lists primary disks on VMWare instances
 	};
 
-	for (i = 0; i < (int)(ARRAYSIZE(vhd_name)-(enable_vmdk?0:1)); i++)
+	if (buffer == NULL || buffer[0] == '\0')
+		return FALSE;
+	for (i = 0; i < (int)(ARRAYSIZE(vhd_name) - (enable_vmdk ? 0 : 1)); i++)
 		if (safe_strstr(buffer, vhd_name[i]) != NULL)
 			return TRUE;
 	return FALSE;
@@ -492,7 +494,7 @@ BOOL GetDevices(DWORD devnum)
 	LONG maxwidth = 0;
 	int s, u, v, score, drive_number, remove_drive, num_drives = 0;
 	char drive_letters[27], *device_id, *devid_list = NULL, display_msg[128];
-	char *p, *label, *display_name, buffer[MAX_PATH], str[MAX_PATH], device_instance_id[MAX_PATH], *method_str, *hub_path;
+	char *p, *label, *display_name, buffer[4 * KB], str[MAX_PATH], device_instance_id[MAX_PATH], *method_str, *hub_path;
 	uint32_t ignore_vid_pid[MAX_IGNORE_USB];
 	uint64_t drive_size = 0;
 	usb_device_props props;
@@ -663,8 +665,13 @@ BOOL GetDevices(DWORD devnum)
 		// We can't use the friendly name to find if a drive is a VHD, as friendly name string gets translated
 		// according to your locale, so we poke the Hardware ID
 		memset(buffer, 0, sizeof(buffer));
-		props.is_VHD = SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_HARDWAREID,
-			&data_type, (LPBYTE)buffer, sizeof(buffer), &size) && IsVHD(buffer);
+		r = SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_HARDWAREID,
+			&data_type, (LPBYTE)buffer, sizeof(buffer), &size);
+		// We should always be able to get a Hardware ID for disk devices, so report an error in debug if we don't
+		if (!r && usb_debug)
+			uprintf("  Error: %s", WindowsErrorString());
+		props.is_VHD = IsVHD(buffer);
+		if (!props.is_VHD)
 		// Additional detection for SCSI card readers
 		if ((!props.is_CARD) && (safe_strnicmp(buffer, scsi_disk_prefix, sizeof(scsi_disk_prefix)-1) == 0)) {
 			for (j = 0; j < ARRAYSIZE(scsi_card_name); j++) {
