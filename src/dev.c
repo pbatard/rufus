@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device detection and enumeration
- * Copyright © 2014-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -562,7 +562,7 @@ BOOL GetDevices(DWORD devnum)
 	// Build a single list of Device IDs from all the storage enumerators we know of
 	full_list_size = 0;
 	ulFlags = CM_GETIDLIST_FILTER_SERVICE | CM_GETIDLIST_FILTER_PRESENT;
-	for (s=0; s<ARRAYSIZE(usbstor_name); s++) {
+	for (s = 0; s < ARRAYSIZE(usbstor_name); s++) {
 		// Get a list of device IDs for all USB storage devices
 		// This will be used to find if a device is UASP
 		// Also compute the uasp_start index
@@ -629,6 +629,7 @@ BOOL GetDevices(DWORD devnum)
 	for (i = 0; num_drives < MAX_DRIVES && SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
 		memset(buffer, 0, sizeof(buffer));
 		memset(&props, 0, sizeof(props));
+		props.vid = -1; props.pid = -1;
 		method_str = "";
 		hub_path = NULL;
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_ENUMERATOR_NAME,
@@ -738,7 +739,7 @@ BOOL GetDevices(DWORD devnum)
 				method_str = "";
 
 				// If we're not dealing with the USBSTOR part of our list, then this is an UASP device
-				props.is_UASP = ((((uintptr_t)device_id)+2) >= ((uintptr_t)devid_list)+list_start[uasp_start]);
+				props.is_UASP = ((((uintptr_t)device_id) + 2) >= ((uintptr_t)devid_list) + list_start[uasp_start]);
 				// Now get the properties of the device, and its Device ID, which we need to populate the properties
 				ToUpper(device_id);
 				j = htab_hash(device_id, &htab_devid);
@@ -746,19 +747,23 @@ BOOL GetDevices(DWORD devnum)
 
 				// Try to parse the current device_id string for VID:PID
 				// We'll use that if we can't get anything better
-				for (k = 0, l = 0; (k<strlen(device_id)) && (l<2); k++) {
+				for (k = 0, l = 0; (k < strlen(device_id)) && (l < 2); k++) {
 					// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
 					if (device_id[k] == '\\')
 						post_backslash = TRUE;
 					if (!post_backslash)
 						continue;
 					if (device_id[k] == '_') {
-						props.pid = (uint16_t)strtoul(&device_id[k + 1], NULL, 16);
+						props.pid = (uint16_t)strtoul(&device_id[k + 1], &p, 16);
+						if (p != &device_id[k + 5]) {
+							uuprintf("  WARNING: Could not read PID:VID from string");
+							break;
+						}
 						if (l++ == 0)
 							props.vid = props.pid;
 					}
 				}
-				if (props.vid != 0)
+				if (props.vid != -1 && props.pid != -1)
 					method_str = "[ID]";
 
 				// If the hash didn't match a populated string in dev_if_path[] (htab_devid.table[j].data > 0),
@@ -812,7 +817,7 @@ BOOL GetDevices(DWORD devnum)
 			}
 			uprintf("Found non-USB removable device '%s'", buffer);
 		} else {
-			if ((props.vid == 0) && (props.pid == 0)) {
+			if (props.vid == -1 || props.pid == -1) {
 				if (!props.is_USB) {
 					// If we have a non removable SCSI drive and couldn't get a VID:PID,
 					// we are most likely dealing with a system drive => eliminate it!
