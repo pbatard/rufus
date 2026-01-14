@@ -4,7 +4,7 @@
  *
  * Modified from System Informer (a.k.a. Process Hacker):
  *   https://github.com/winsiderss/systeminformer
- * Copyright © 2017-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2017-2026 Pete Batard <pete@akeo.ie>
  * Copyright © 2017 dmex
  * Copyright © 2009-2016 wj32
  *
@@ -120,15 +120,15 @@ typedef struct _OBJECT_TYPES_INFORMATION
 	ULONG NumberOfTypes;
 } OBJECT_TYPES_INFORMATION, *POBJECT_TYPES_INFORMATION;
 
-typedef struct _PROCESS_BASIC_INFORMATION_WOW64
+typedef struct _PROCESS_BASIC_INFORMATION_INTERNAL
 {
-	PVOID Reserved1[2];
-	// MinGW32 screws us with a sizeof(PVOID64) of 4 instead of 8 => Use ULONGLONG instead
-	ULONGLONG PebBaseAddress;
-	PVOID Reserved2[4];
-	ULONG_PTR UniqueProcessId[2];
-	PVOID Reserved3[2];
-} PROCESS_BASIC_INFORMATION_WOW64;
+	NTSTATUS ExitStatus;
+	ULONG_PTR PebBaseAddress;
+	ULONG_PTR AffinityMask;
+	KPRIORITY BasePriority;
+	ULONG_PTR UniqueProcessId;
+	ULONG_PTR InheritedFromUniqueProcessId;
+} PROCESS_BASIC_INFORMATION_INTERNAL;
 
 typedef struct _UNICODE_STRING_WOW64
 {
@@ -305,7 +305,7 @@ typedef struct {
 	uint64_t pid;			// PID of the process
 	uint8_t access_rights;	// rwx access rights
 	uint32_t seen_on_pass;	// nPass value of when this process was last detected
-	char cmdline[MAX_PATH];	// Command line for the process
+	char cmdline[2 * KB];	// Command line for the process
 } ProcessEntry;
 
 typedef struct {
