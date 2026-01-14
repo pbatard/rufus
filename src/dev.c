@@ -838,7 +838,8 @@ BOOL GetDevices(DWORD devnum)
 				}
 				// Also ignore USB devices that have been specifically flagged by the user
 				for (s = 0; s < ARRAYSIZE(ignore_vid_pid); s++) {
-					if ((props.vid == (ignore_vid_pid[s] >> 16)) && (props.pid == (ignore_vid_pid[s] & 0xffff))) {
+					if (ignore_vid_pid[s] != 0 && (props.vid == (ignore_vid_pid[s] >> 16)) &&
+						(props.pid == (ignore_vid_pid[s] & 0xffff))) {
 						uprintf("Ignoring '%s' (%s), per user settings", buffer, str);
 						break;
 					}

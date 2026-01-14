@@ -2200,10 +2200,16 @@ DWORD WINAPI IsoSaveImageThread(void* param)
 {
 	DWORD r;
 	IMG_SAVE* img_save = (IMG_SAVE*)param;
-	char cmd[2 * MAX_PATH], letters[27], * label;
+	char cmd[2 * KB], letters[27], *label;
 
 	if (!GetDriveLabel(SelectedDrive.DeviceNumber, letters, &label, TRUE) || letters[0] == '\0')
 		ExitThread(ERROR_NOT_FOUND);
+
+	// UDF labels cannot be more than 32 characters (and if we have more than 32 chars we are
+	// using the static modifiable char buffer from GetDriveLabel(), so we can alter it).
+	if (strlen(label) > 32)
+		label[32] = '\0';
+
 	// Save to UDF only, as Microsoft's implementation of ISO-9660 doesn't support multiextent
 	// and produces BROKEN images if you try to add files larger than 4 GB.
 	// Plus ISO-9660/Joliet limits labels to 16 characters and has issues with long paths.

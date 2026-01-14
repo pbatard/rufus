@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Virtual Disk Handling functions
- * Copyright © 2013-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -564,7 +564,7 @@ static DWORD WINAPI FfuSaveImageThread(void* param)
 {
 	DWORD r;
 	IMG_SAVE* img_save = (IMG_SAVE*)param;
-	char cmd[MAX_PATH + 128], letters[27], *label;
+	char cmd[2 * KB], letters[27], *label;
 
 	GetDriveLabel(SelectedDrive.DeviceNumber, letters, &label, TRUE);
 	static_sprintf(cmd, "dism /Capture-Ffu /CaptureDrive:%s /ImageFile:\"%s\" "
@@ -593,9 +593,10 @@ BOOL SaveImage(void)
 	static IMG_SAVE img_save;
 	char filename[128], letters[27], path[MAX_PATH];
 	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
-	enum { image_type_vhd = 1, image_type_vhdx = 2, image_type_ffu = 3, image_type_iso = 4 };
+	enum { image_type_none = 0, image_type_vhd, image_type_vhdx, image_type_ffu, image_type_iso };
 	static EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhd", "*.vhdx", "*.ffu", "*.iso"),
 		__VA_GROUP__(lmprintf(MSG_343), lmprintf(MSG_342), lmprintf(MSG_344), lmprintf(MSG_036)));
+	int i_to_type[5] = { image_type_none, image_type_vhd, image_type_vhdx, image_type_ffu, image_type_iso };
 	ULARGE_INTEGER free_space;
 
 	memset(&img_save, 0, sizeof(IMG_SAVE));
@@ -611,8 +612,10 @@ BOOL SaveImage(void)
 		img_ext.count += 1;
 	} else {
 		// Move the ISO extension one place down
-		img_ext.extension[2] = img_ext.extension[3];
-		img_ext.description[2] = img_ext.description[3];
+		img_ext.extension[image_type_ffu - 1] = img_ext.extension[image_type_iso - 1];
+		img_ext.description[image_type_ffu - 1] = img_ext.description[image_type_iso - 1];
+		i_to_type[image_type_ffu] = image_type_iso;
+		i_to_type[image_type_iso] = image_type_none;
 	}
 	// ISO support requires a mounted file system
 	if (GetDriveLetters(SelectedDrive.DeviceNumber, letters) && letters[0] != '\0')
@@ -632,7 +635,8 @@ BOOL SaveImage(void)
 		save_image_type = (char*)&img_ext.extension[i - 1][2];
 		WriteSettingStr(SETTING_PREFERRED_SAVE_IMAGE_TYPE, save_image_type);
 	}
-	switch (i) {
+	assert(i < ARRAYSIZE(i_to_type));
+	switch (i_to_type[i]) {
 	case image_type_vhd:
 		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
 		break;
