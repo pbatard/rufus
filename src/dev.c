@@ -473,6 +473,7 @@ BOOL GetDevices(DWORD devnum)
 	};
 	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0", "USB 3.1" };
 	const char* windows_sandbox_vhd_label = "PortableBaseLayer";
+	const char* bitdefender_label = "Bitdefender Partition";
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
 	htab_table htab_devid = HTAB_EMPTY;
 	StrArray dev_if_path = STRARRAY_EMPTY;
@@ -963,6 +964,12 @@ BOOL GetDevices(DWORD devnum)
 				// Windows 10 19H1 mounts a 'PortableBaseLayer' for its Windows Sandbox feature => unlist those
 				if (safe_strcmp(label, windows_sandbox_vhd_label) == 0) {
 					uprintf("Device eliminated because it is a Windows Sandbox VHD");
+					safe_free(devint_detail_data);
+					break;
+				}
+				// Bitdefender now uses a special 32 MB VHD
+				if (props.is_VHD && safe_strcmp(label, bitdefender_label) == 0 && GetDriveSize(drive_index) <= 32 * MB) {
+					uprintf("Device eliminated because it is a Bitdefender VHD");
 					safe_free(devint_detail_data);
 					break;
 				}
