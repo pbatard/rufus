@@ -1682,7 +1682,7 @@ try_clear:
 				goto out;
 			safe_unlockclose(hPhysicalDrive);
 			physical = GetPhysicalName(SelectedDrive.DeviceNumber);
-			static_sprintf(cmd, "dism /Apply-Ffu /ApplyDrive:%s /ImageFile:\"%s\"", physical, image_path);
+			static_sprintf(cmd, "%s\\dism.exe /Apply-Ffu /ApplyDrive:%s /ImageFile:\"%s\"", sysnative_dir, physical, image_path);
 			safe_free(physical);
 			uprintf("Running command: '%s'", cmd);
 			cr = RunCommandWithProgress(cmd, sysnative_dir, TRUE, MSG_261, ".*\r\\[[= ]+([0-9\\.]+)%[= ]+\\].*");

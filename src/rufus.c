@@ -2658,7 +2658,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			MyDialogBox(hMainInstance, IDD_UPDATE_POLICY, hDlg, UpdateCallback);
 			break;
 		case IDC_HASH:
-			// TODO: Move this as a fn call in hash.c?
 			if ((format_thread == NULL) && (image_path != NULL)) {
 				ErrorStatus = 0;
 				no_confirmation_on_cancel = TRUE;
@@ -2680,7 +2679,15 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			break;
 		case IDC_SAVE:
-			save_image = SaveImage();
+			if (format_thread == NULL && (ComboBox_GetCurSel(hDeviceList) >= 0)) {
+				save_image = SaveImage();
+				if (!save_image) {
+					uprintf("Unable to start image save thread");
+					if (!IS_ERROR(ErrorStatus))
+						ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
+					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+				}
+			}
 			break;
 		case IDM_SELECT:
 		case IDM_DOWNLOAD:
@@ -3142,6 +3149,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			MessageBeep(MB_ICONERROR);
 			FlashTaskbar(dialog_handle);
 			GetProcessSearch(0, 0x07, TRUE);
+			// TODO: Fix/Improve this
 			if (BlockingProcessList.Index > 0) {
 				ListDialog(lmprintf(MSG_042), lmprintf(MSG_055), BlockingProcessList.String, BlockingProcessList.Index);
 			} else {
