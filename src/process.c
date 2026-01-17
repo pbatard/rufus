@@ -940,6 +940,12 @@ retry:
 //		for (pid = (DWORD)blocking_process.Process[i].pid; pid != 0 && pid != rufus_pid; pid = GetPPID(pid));
 //		if (pid == rufus_pid)
 //			continue;
+		// Ignore read-only access from explorer.exe, as it's usually no big deal
+		if (blocking_process.Process[i].access_rights == 0x1 &&
+			// NB: We are not bothering with nonstandard system drives here
+			_stricmp(blocking_process.Process[i].cmdline, "C:\\Windows\\explorer.exe") == 0) {
+			continue;
+		}
 		returned_mask |= blocking_process.Process[i].access_rights;
 		static_sprintf(tmp, "● [%llu] %s (%s)", blocking_process.Process[i].pid, blocking_process.Process[i].cmdline,
 			access_rights_str[blocking_process.Process[i].access_rights & 0x7]);
