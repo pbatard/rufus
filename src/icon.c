@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Extract icon from executable and set autorun.inf
- * Copyright © 2012-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ BOOL ExtractAppIcon(const char* path, BOOL bSilent)
 	if (icondir == NULL || icondir->idCount > 64)
 		goto out;
 
-	hFile = CreateFileU(path, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ,
+	hFile = CreateFileU(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
 			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
 		uprintf("Unable to create icon '%s': %s.", path, WindowsErrorString());

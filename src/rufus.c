@@ -3671,7 +3671,7 @@ skip_args_processing:
 			goto out;
 		}
 
-		hFile = CreateFileU(loc_file, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ,
+		hFile = CreateFileU(loc_file, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
 			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if ((hFile == INVALID_HANDLE_VALUE) || (!WriteFileWithRetry(hFile, loc_data, loc_size, &size, WRITE_RETRIES))) {
 			uprintf("FATAL: Unable to extract loc file '%s': %s", loc_file, WindowsErrorString());
@@ -3689,7 +3689,8 @@ skip_args_processing:
 	}
 
 	if ( (!get_supported_locales(loc_file))
-	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid, TRUE):get_locale_from_name(locale_name, TRUE))) == NULL) ) {
+	  || ((selected_locale = ((locale_name == NULL) ?
+		  get_locale_from_lcid(lcid, TRUE) : get_locale_from_name(locale_name, TRUE))) == NULL) ) {
 		uprintf("FATAL: Could not access locale!");
 		MessageBoxA(NULL, "The locale data is missing or invalid. This application will now exit.",
 			"Fatal error", MB_ICONERROR | MB_SYSTEMMODAL);

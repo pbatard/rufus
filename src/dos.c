@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * DOS boot file extraction, from the FAT12 floppy image in diskcopy.dll
  * (MS WinME DOS) or from the embedded FreeDOS resource files
- * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -292,14 +292,14 @@ static BOOL ExtractMSDOS(const char* path)
 	BOOL r = FALSE;
 	DWORD size = DISKCOPY_SIZE;
 	HANDLE dll_handle = INVALID_HANDLE_VALUE;
-	uint8_t* diskcopy_buffer = malloc(DISKCOPY_SIZE);
+	uint8_t* diskcopy_buffer;
 	char locale_path[MAX_PATH];
 	char diskcopy_dll_path[MAX_PATH];
 	char* extractlist[] = { "MSDOS   SYS", "COMMAND COM", "IO      SYS", "MODE    COM",
 		"KEYB    COM", "KEYBOARDSYS", "KEYBRD2 SYS", "KEYBRD3 SYS", "KEYBRD4 SYS",
 		"DISPLAY SYS", "EGA     CPI", "EGA2    CPI", "EGA3    CPI" };
 
-	if (path == NULL || diskcopy_buffer == NULL)
+	if (path == NULL || (diskcopy_buffer = malloc(DISKCOPY_SIZE)) == NULL)
 		return FALSE;
 
 	// There should be a diskcopy.dll in the user's AppData directory.

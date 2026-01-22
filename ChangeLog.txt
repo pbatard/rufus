@@ -1,3 +1,18 @@
+o Version 4.12 (2026.01.??)
+    Filter out the new Bitdefender VHDs
+    Filter disallowed characters in local account names
+    Improve Microsoft Dev Drive detection (courtesy of Martin Kuschnik)
+    Improve the pre-formatting partition cleanup code
+    Improve error reporting on ISO extraction issues
+    Improve detection of drives with long hardware IDs (typically SSDs)
+    Improve conflicting process reporting
+    Improve support for Nutanix and umbrelOS ISOs
+    Fix a TOCTOU vulnerability in Fido script execution (CVE-2026-2398, reported by @independent-arg)
+    Fix replacement vulnerabilities for diskcopy.dll and oscdimg.exe
+    Fix FFU image creation being erroneously invocated, when trying to save an ISO image
+    Fix saving of ISO images to paths that contain spaces
+    Update UEFI:NTFS and UEFI DBXs to latest
+
 o Version 4.11 (2025.10.02)
     Add a cheat mode to toggle between Light and Dark mode
     Improve WUE option text relating to the CA 2023 option
