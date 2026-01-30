@@ -1085,7 +1085,7 @@ msgstr "버전 %d.%d (빌드 %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "한국어 번역:\\line• 세상사는이야기-나두 <mailto:ho82.kr@gmail.com>\\line• Uk-Jin Jang <mailto:doublestat@gmail.com>\\line• 비너스걸 (VᴇɴᴜsGɪʀʟ♥) <mailto:venusgirl@outlook.com>"
+msgstr "한국어 번역:\\line• 비너스걸 (VᴇɴᴜsGɪʀʟ♥) <mailto:venusgirl@outlook.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
