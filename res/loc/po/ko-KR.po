@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 4.5\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2025-08-26 05:39+0900\n"
-"PO-Revision-Date: 2025-08-26 13:56+0900\n"
+"PO-Revision-Date: 2026-01-28 21:33+0000\n"
 "Last-Translator: VenusGirl <venusgirl@outlook.com>\n"
 "Language-Team: 비너스걸 <https://venusgirls.tistory.com/>\n"
 "Language: ko_KR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Korean (한국어)\n"
 "X-Rufus-LCID: 0x0412\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 3.8\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -1085,7 +1085,7 @@ msgstr "버전 %d.%d (빌드 %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "한국어 번역:\\line• 비너스걸 (VᴇɴᴜsGɪʀʟ♥) <mailto:venusgirl@outlook.com>"
+msgstr "한국어 번역:\\line• 세상사는이야기-나두 <mailto:ho82.kr@gmail.com>\\line• Uk-Jin Jang <mailto:doublestat@gmail.com>\\line• 비너스걸 (VᴇɴᴜsGɪʀʟ♥) <mailto:venusgirl@outlook.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"

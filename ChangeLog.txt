@@ -1,4 +1,4 @@
-o Version 4.12 (2026.01.??)
+o Version 4.12 (2026.01.30)
     Filter out the new Bitdefender VHDs
     Filter disallowed characters in local account names
     Improve Microsoft Dev Drive detection (courtesy of Martin Kuschnik)
