@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|ARM">
-      <Configuration>Debug</Configuration>
-      <Platform>ARM</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|ARM64">
       <Configuration>Debug</Configuration>
       <Platform>ARM64</Platform>
@@ -16,10 +12,6 @@
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|ARM">
-      <Configuration>Release</Configuration>
-      <Platform>ARM</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|ARM64">
       <Configuration>Release</Configuration>
@@ -39,46 +31,30 @@
     <ProjectGuid>{731858A7-0303-4988-877B-9C0DD6471864}</ProjectGuid>
     <RootNamespace>rufus</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v143</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v143</PlatformToolset>
-    <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
     <UseDebugLibraries>true</UseDebugLibraries>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
-    <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
-    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
     <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
     <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
@@ -86,21 +62,17 @@
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
     <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(SolutionDir)arm\$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(SolutionDir)arm\$(Configuration)\$(ProjectName)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(SolutionDir)arm\$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(SolutionDir)arm\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(SolutionDir)arm64\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">$(SolutionDir)arm64\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">$(SolutionDir)arm64\$(Configuration)\</OutDir>
@@ -113,9 +85,11 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)x64\$(Configuration)\$(ProjectName)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)x64\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)x64\$(Configuration)\$(ProjectName)\</IntDir>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -143,38 +117,6 @@
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ResourceCompile>
-    <PreBuildEvent>
-      <Command>type $(SolutionDir)res\loc\rufus.loc | findstr /v MSG_9 &gt; $(SolutionDir)res\loc\embedded.loc</Command>
-      <Message>Generating 'embedded.loc' file</Message>
-    </PreBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <BuildLog />
-    <ClCompile>
-      <PreprocessorDefinitions>_RUFUS;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\src\wimlib;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <CompileAs>CompileAsC</CompileAs>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <ExceptionHandling>Async</ExceptionHandling>
-      <DisableSpecificWarnings>4091;5255;28251;28252;28253;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;uxtheme.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.15063.0\um\arm</AdditionalLibraryDirectories>
-      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;uxtheme.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
-      <AdditionalOptions>/BREPRO /DEPENDENTLOADFLAG:0x800 %(AdditionalOptions)</AdditionalOptions>
-    </Link>
-    <ResourceCompile>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>
-      </Culture>
     </ResourceCompile>
     <PreBuildEvent>
       <Command>type $(SolutionDir)res\loc\rufus.loc | findstr /v MSG_9 &gt; $(SolutionDir)res\loc\embedded.loc</Command>
@@ -274,40 +216,6 @@
     </Link>
     <ResourceCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ResourceCompile>
-    <PreBuildEvent>
-      <Command>type $(SolutionDir)res\loc\rufus.loc | findstr /v MSG_9 &gt; $(SolutionDir)res\loc\embedded.loc</Command>
-      <Message>Generating 'embedded.loc' file</Message>
-    </PreBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <BuildLog />
-    <ClCompile>
-      <PreprocessorDefinitions>_RUFUS;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;COBJMACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\src;..\src\msvc-missing;..\src\ms-sys\inc;..\src\syslinux\libinstaller;..\src\syslinux\libfat;..\src\syslinux\win;..\src\libcdio;..\src\getopt;..\src\wimlib;..\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <CompileAs>CompileAsC</CompileAs>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <ExceptionHandling>Async</ExceptionHandling>
-      <DisableSpecificWarnings>4091;5255;28251;28252;28253;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <UndefinePreprocessorDefinitions>NDEBUG</UndefinePreprocessorDefinitions>
-      <AdditionalOptions>/utf-8 /std:clatest $(ExternalCompilerOptions) %(AdditionalOptions)</AdditionalOptions>
-      <StringPooling>true</StringPooling>
-    </ClCompile>
-    <Link>
-      <AdditionalDependencies>advapi32.lib;comctl32.lib;crypt32.lib;gdi32.lib;ole32.lib;dwmapi.lib;setupapi.lib;shell32.lib;ntdll.lib;shlwapi.lib;uxtheme.lib;version.lib;virtdisk.lib;wininet.lib;wintrust.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.15063.0\um\arm</AdditionalLibraryDirectories>
-      <AdditionalOptions>/BREPRO /DEPENDENTLOADFLAG:0x800 %(AdditionalOptions)</AdditionalOptions>
-      <DelayLoadDLLs>advapi32.dll;comctl32.dll;crypt32.dll;gdi32.dll;ole32.dll;dwmapi.dll;setupapi.dll;shell32.dll;shlwapi.dll;uxtheme.dll;version.dll;virtdisk.dll;wininet.dll;wintrust.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
-    </Link>
-    <ResourceCompile>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>
-      </Culture>
     </ResourceCompile>
     <PreBuildEvent>
       <Command>type $(SolutionDir)res\loc\rufus.loc | findstr /v MSG_9 &gt; $(SolutionDir)res\loc\embedded.loc</Command>

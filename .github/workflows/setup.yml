@@ -10,7 +10,7 @@ env:
   BUILD_CONFIGURATION: Release
 
 jobs:
-  VS2022-Build:
+  VS2026-Build:
     runs-on: windows-latest
 
     strategy:
@@ -43,7 +43,7 @@ jobs:
 
   Extra-Step-To-Merge-Artifacts-Thanks-To-Upload-Artifact-v4-Breaking-Backwards-Compatibility:
     runs-on: windows-latest
-    needs: VS2022-Build
+    needs: VS2026-Build
     steps:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v7
