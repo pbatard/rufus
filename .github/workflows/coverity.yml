@@ -14,6 +14,18 @@ on:
       - '**.sh'
       - '**.txt'
       - '**.xml'
+  pull_request:
+    branches: [master]
+    paths-ignore:
+      - '.gitignore'
+      - '.gitattributes'
+      - 'res/**'
+      - '**.cmd'
+      - '**.md'
+      - '**.rc'
+      - '**.sh'
+      - '**.txt'
+      - '**.xml'
 
 env:
   SOLUTION_FILE_PATH: ./rufus.sln
@@ -24,7 +36,7 @@ env:
 
 jobs:
   Coverity-Build:
-    runs-on: windows-latest
+    runs-on: windows-2025-vs2026
 
     steps:
     - name: Checkout repository
@@ -46,11 +58,15 @@ jobs:
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
+      with:
+        msbuild-architecture: x64
+        vs-version: '[18.0,19.0)'
 
     - name: Build with Coverity
+      shell: cmd
       run: | 
         cov-configure --msvc
-        cov-build.exe --dir cov-int msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ env.TARGET_PLATFORM }}
+        cov-build.exe --dir cov-int msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ env.TARGET_PLATFORM }},PlatformToolset=v145
 
     - name: Publish Coverity artifacts
       uses: actions/upload-artifact@v6
@@ -62,4 +78,3 @@ jobs:
       run: |
         7z a -r cov-int.zip cov-int
         curl --form email=${{ env.EMAIL }} --form token=${{ secrets.COVERITY_SCAN_TOKEN }} --form file=@cov-int.zip --form version="${{ env.GITHUB_SHA }}" --form description="Automated build" https://scan.coverity.com/builds?project=${{ env.COVERITY_PROJECT_NAME }}
-

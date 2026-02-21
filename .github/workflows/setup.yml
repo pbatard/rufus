@@ -10,8 +10,8 @@ env:
   BUILD_CONFIGURATION: Release
 
 jobs:
-  VS2022-Build:
-    runs-on: windows-latest
+  VS2026-Build:
+    runs-on: windows-2025-vs2026
 
     strategy:
       matrix:
@@ -25,11 +25,12 @@ jobs:
       uses: microsoft/setup-msbuild@v2
       with:
         msbuild-architecture: x64
+        vs-version: '[18.0,19.0)'
 
     - name: Build
       shell: cmd
       run: |
-        msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ matrix.TARGET_PLATFORM }}
+        msbuild ${{ env.SOLUTION_FILE_PATH }} /m /p:Configuration=${{ env.BUILD_CONFIGURATION }},Platform=${{ matrix.TARGET_PLATFORM }},PlatformToolset=v145
         move .\res\setup\${{ matrix.TARGET_PLATFORM }}\Release\setup.exe .\setup_${{ matrix.TARGET_PLATFORM }}.exe
 
     - name: Display SHA-256
@@ -42,11 +43,11 @@ jobs:
         path: ./*.exe
 
   Extra-Step-To-Merge-Artifacts-Thanks-To-Upload-Artifact-v4-Breaking-Backwards-Compatibility:
-    runs-on: windows-latest
-    needs: VS2022-Build
+    runs-on: windows-2025-vs2026
+    needs: VS2026-Build
     steps:
       - name: Merge Artifacts
-        uses: actions/upload-artifact/merge@v5
+        uses: actions/upload-artifact/merge@v6
         with:
           name: setup
           delete-merged: true
