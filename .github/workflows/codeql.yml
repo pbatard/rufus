@@ -34,7 +34,7 @@ env:
 
 jobs:
   CodeQL-Build:
-    runs-on: windows-latest
+    runs-on: windows-2025-vs2026
 
     permissions:
       security-events: write
@@ -44,7 +44,7 @@ jobs:
       uses: actions/checkout@v6
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v4
+      uses: github/codeql-action/init@v3
       with:
         languages: cpp
 
@@ -52,9 +52,11 @@ jobs:
       uses: microsoft/setup-msbuild@v2
       with:
         msbuild-architecture: x64
+        vs-version: '[18.0,19.0)'
 
     - name: Build 
-      run: msbuild ${{env.SOLUTION_FILE_PATH}} /m /p:Configuration=${{ env.BUILD_CONFIGURATION}},Platform=${{ env.TARGET_PLATFORM }}
+      shell: cmd
+      run: msbuild ${{env.SOLUTION_FILE_PATH}} /m /p:Configuration=${{ env.BUILD_CONFIGURATION}},Platform=${{ env.TARGET_PLATFORM }},PlatformToolset=v145
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v4
+      uses: github/codeql-action/analyze@v3
