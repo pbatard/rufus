@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Windows function calls
- * Copyright © 2013-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -803,7 +803,7 @@ DWORD RunCommandWithProgress(const char* cmd, const char* dir, BOOL log, int msg
 	PROCESS_INFORMATION pi = { 0 };
 	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
 	HANDLE hOutputRead = INVALID_HANDLE_VALUE, hOutputWrite = INVALID_HANDLE_VALUE;
-	static char* output;
+	static char *output, *p;
 	cregex_node_t* node = NULL;
 	cregex_program_t* program = NULL;
 	char* matches[REGEX_VM_MAX_MATCHES];
@@ -880,6 +880,9 @@ DWORD RunCommandWithProgress(const char* cmd, const char* dir, BOOL log, int msg
 						} else if (log) {
 							// output may contain a '%' so don't feed it as a naked format string
 							uprintf("%s", output);
+						} else if ((p = strstr(output, "ERROR:")) != NULL) {
+							// Mostly for oscdimg.exe errors
+							uprintf("%s", p);
 						}
 					}
 					free(output);

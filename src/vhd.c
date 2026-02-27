@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Virtual Disk Handling functions
- * Copyright © 2013-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2013-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -564,11 +564,11 @@ static DWORD WINAPI FfuSaveImageThread(void* param)
 {
 	DWORD r;
 	IMG_SAVE* img_save = (IMG_SAVE*)param;
-	char cmd[MAX_PATH + 128], letters[27], *label;
+	char cmd[2 * KB], letters[27], *label;
 
 	GetDriveLabel(SelectedDrive.DeviceNumber, letters, &label, TRUE);
-	static_sprintf(cmd, "dism /Capture-Ffu /CaptureDrive:%s /ImageFile:\"%s\" "
-		"/Name:\"%s\" /Description:\"Created by %s (%s)\"",
+	static_sprintf(cmd, "%s\\dism.exe /Capture-Ffu /CaptureDrive:%s /ImageFile:\"%s\" "
+		"/Name:\"%s\" /Description:\"Created by %s (%s)\"", sysnative_dir,
 		img_save->DevicePath, img_save->ImagePath, label, APPLICATION_NAME, RUFUS_URL);
 	uprintf("Running command: '%s'", cmd);
 	// For detecting typical dism.exe commandline progress report of type:
@@ -593,13 +593,15 @@ BOOL SaveImage(void)
 	static IMG_SAVE img_save;
 	char filename[128], letters[27], path[MAX_PATH];
 	int DriveIndex = ComboBox_GetCurSel(hDeviceList);
-	enum { image_type_vhd = 1, image_type_vhdx = 2, image_type_ffu = 3, image_type_iso = 4 };
+	enum { image_type_none = 0, image_type_vhd, image_type_vhdx, image_type_ffu, image_type_iso };
 	static EXT_DECL(img_ext, filename, __VA_GROUP__("*.vhd", "*.vhdx", "*.ffu", "*.iso"),
 		__VA_GROUP__(lmprintf(MSG_343), lmprintf(MSG_342), lmprintf(MSG_344), lmprintf(MSG_036)));
+	int i_to_type[5] = { image_type_none, image_type_vhd, image_type_vhdx, image_type_ffu, image_type_iso };
 	ULARGE_INTEGER free_space;
 
 	memset(&img_save, 0, sizeof(IMG_SAVE));
-	if ((DriveIndex < 0) || (format_thread != NULL))
+	// Should have been validated prior to calling SaveImage()
+	if_assert_fails((DriveIndex >= 0) && (format_thread == NULL))
 		return FALSE;
 
 	static_sprintf(filename, "%s", rufus_drive[DriveIndex].label);
@@ -611,8 +613,10 @@ BOOL SaveImage(void)
 		img_ext.count += 1;
 	} else {
 		// Move the ISO extension one place down
-		img_ext.extension[2] = img_ext.extension[3];
-		img_ext.description[2] = img_ext.description[3];
+		img_ext.extension[image_type_ffu - 1] = img_ext.extension[image_type_iso - 1];
+		img_ext.description[image_type_ffu - 1] = img_ext.description[image_type_iso - 1];
+		i_to_type[image_type_ffu] = image_type_iso;
+		i_to_type[image_type_iso] = image_type_none;
 	}
 	// ISO support requires a mounted file system
 	if (GetDriveLetters(SelectedDrive.DeviceNumber, letters) && letters[0] != '\0')
@@ -621,8 +625,10 @@ BOOL SaveImage(void)
 	if (i > (UINT)img_ext.count)
 		i = image_type_vhdx;
 	img_save.ImagePath = FileDialog(TRUE, NULL, &img_ext, &i);
-	if (img_save.ImagePath == NULL)
+	if (img_save.ImagePath == NULL) {
+		ErrorStatus = RUFUS_ERROR(ERROR_CANCELLED);
 		goto out;
+	}
 	// Start from the end of our extension array, since '.vhd' would match for '.vhdx' otherwise
 	for (i = (UINT)img_ext.count; (i > 0) && (strstr(img_save.ImagePath, &img_ext.extension[i - 1][1]) == NULL); i--);
 	if (i == 0) {
@@ -632,7 +638,8 @@ BOOL SaveImage(void)
 		save_image_type = (char*)&img_ext.extension[i - 1][2];
 		WriteSettingStr(SETTING_PREFERRED_SAVE_IMAGE_TYPE, save_image_type);
 	}
-	switch (i) {
+	assert(i < ARRAYSIZE(i_to_type));
+	switch (i_to_type[i]) {
 	case image_type_vhd:
 		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_VHD;
 		break;
@@ -641,14 +648,18 @@ BOOL SaveImage(void)
 		break;
 	case image_type_iso:
 		// ISO requires oscdimg.exe. If not already present, attempt to download it.
-		static_sprintf(path, "%s\\%s\\oscdimg.exe", app_data_dir, FILES_DIR);
+		static_sprintf(path, "%s\\%s\\oscdimg_%s.exe", app_data_dir, FILES_DIR, APPLICATION_ARCH);
 		if (!PathFileExistsU(path)) {
-			if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_115), lmprintf(MSG_337, "oscdimg.exe")) != IDYES)
+			if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_115), lmprintf(MSG_337, "oscdimg.exe")) != IDYES) {
+				ErrorStatus = RUFUS_ERROR(ERROR_CANCELLED);
 				goto out;
+			}
 			IGNORE_RETVAL(_chdirU(app_data_dir));
 			IGNORE_RETVAL(_mkdir(FILES_DIR));
-			if (DownloadToFileOrBufferEx(OSCDIMG_URL, path, SYMBOL_SERVER_USER_AGENT, NULL, hMainDialog, FALSE) < 64 * KB)
+			if (DownloadToFileOrBufferEx(OSCDIMG_URL, path, SYMBOL_SERVER_USER_AGENT, NULL, hMainDialog, FALSE) < 64 * KB) {
+				ErrorStatus = GetLastError();
 				goto out;
+			}
 		}
 		img_save.Type = VIRTUAL_STORAGE_TYPE_DEVICE_ISO;
 		break;
@@ -669,7 +680,6 @@ BOOL SaveImage(void)
 				&& ((LONGLONG)free_space.QuadPart < (SelectedDrive.DiskSize + 512))) {
 				uprintf("The VHD size is too large for the target drive");
 				ErrorStatus = RUFUS_ERROR(ERROR_FILE_TOO_LARGE);
-				PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 				goto out;
 			}
 		}
@@ -684,10 +694,6 @@ BOOL SaveImage(void)
 			uprintf("\r\nSave to image operation started");
 			PrintInfo(0, -1);
 			SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
-		} else {
-			uprintf("Unable to start image save thread");
-			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
-			PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
 		}
 	}
 out:

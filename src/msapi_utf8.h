@@ -6,7 +6,7 @@
  *
  * See also: https://utf8everywhere.org
  *
- * Copyright © 2010-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2010-2026 Pete Batard <pete@akeo.ie>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <io.h>
+#include <sddl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <psapi.h>
@@ -510,6 +511,22 @@ static __inline HANDLE CreateFileU(const char* lpFileName, DWORD dwDesiredAccess
 	wfree(lpFileName);
 	SetLastError(err);
 	return ret;
+}
+
+// CreateFile() that restricts file access to Admin and System only
+static __inline HANDLE CreateFileRestrictedU(const char* lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
+								   DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes)
+{
+	// Restrict access to Admin (BA) and System (SY) only
+	const char* sddl = "D:P(A;;FA;;;BA)(A;;FA;;;SY)(A;;FR;;;WD)";
+	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, FALSE };
+	HANDLE h;
+
+	if (!ConvertStringSecurityDescriptorToSecurityDescriptorA(sddl, 1, &sa.lpSecurityDescriptor, NULL))
+		return INVALID_HANDLE_VALUE;
+	h = CreateFileU(lpFileName, dwDesiredAccess, dwShareMode, &sa, dwCreationDisposition, dwFlagsAndAttributes, NULL);
+	LocalFree(sa.lpSecurityDescriptor);
+	return h;
 }
 
 static __inline BOOL CreateDirectoryU(const char* lpPathName, LPSECURITY_ATTRIBUTES lpSecurityAttributes)

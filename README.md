@@ -56,6 +56,7 @@ easily accessible log, or through the [Windows debug facility](https://docs.micr
 
 * [__Official Website__](https://rufus.ie)
 * [FAQ](https://github.com/pbatard/rufus/wiki/FAQ)
+* [Security and safety measures](https://github.com/pbatard/rufus/wiki/Security)
 
 Enhancements/Bugs
 -----------------

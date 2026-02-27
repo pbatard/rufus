@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1654,7 +1654,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_099), lmprintf(MSG_189));
 			goto out;
 		}
-		if (IS_FAT(fs_type) && !IS_FAT32_COMPAT(img_report)) {
+		if (IS_FAT(fs_type) && img_report.has_4GB_file != 0 && img_report.has_4GB_file != 0x11){
 			// This ISO image contains a file larger than 4GB file (FAT32)
 			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_099), lmprintf(MSG_100));
 			goto out;
@@ -2658,7 +2658,6 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			MyDialogBox(hMainInstance, IDD_UPDATE_POLICY, hDlg, UpdateCallback);
 			break;
 		case IDC_HASH:
-			// TODO: Move this as a fn call in hash.c?
 			if ((format_thread == NULL) && (image_path != NULL)) {
 				ErrorStatus = 0;
 				no_confirmation_on_cancel = TRUE;
@@ -2680,7 +2679,15 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			}
 			break;
 		case IDC_SAVE:
-			save_image = SaveImage();
+			if (format_thread == NULL && (ComboBox_GetCurSel(hDeviceList) >= 0)) {
+				save_image = SaveImage();
+				if (!save_image) {
+					uprintf("Unable to start image save thread");
+					if (!IS_ERROR(ErrorStatus))
+						ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
+					PostMessage(hMainDialog, UM_FORMAT_COMPLETED, (WPARAM)FALSE, 0);
+				}
+			}
 			break;
 		case IDM_SELECT:
 		case IDM_DOWNLOAD:
@@ -3141,7 +3148,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			PrintInfo(0, MSG_212);
 			MessageBeep(MB_ICONERROR);
 			FlashTaskbar(dialog_handle);
-			GetProcessSearch(0, 0x07, FALSE);
+			GetProcessSearch(0, 0x07, TRUE);
+			// TODO: Fix/Improve this
 			if (BlockingProcessList.Index > 0) {
 				ListDialog(lmprintf(MSG_042), lmprintf(MSG_055), BlockingProcessList.String, BlockingProcessList.Index);
 			} else {
@@ -3663,7 +3671,7 @@ skip_args_processing:
 			goto out;
 		}
 
-		hFile = CreateFileU(loc_file, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ,
+		hFile = CreateFileU(loc_file, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
 			NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if ((hFile == INVALID_HANDLE_VALUE) || (!WriteFileWithRetry(hFile, loc_data, loc_size, &size, WRITE_RETRIES))) {
 			uprintf("FATAL: Unable to extract loc file '%s': %s", loc_file, WindowsErrorString());
@@ -3681,7 +3689,8 @@ skip_args_processing:
 	}
 
 	if ( (!get_supported_locales(loc_file))
-	  || ((selected_locale = ((locale_name == NULL)?get_locale_from_lcid(lcid, TRUE):get_locale_from_name(locale_name, TRUE))) == NULL) ) {
+	  || ((selected_locale = ((locale_name == NULL) ?
+		  get_locale_from_lcid(lcid, TRUE) : get_locale_from_name(locale_name, TRUE))) == NULL) ) {
 		uprintf("FATAL: Could not access locale!");
 		MessageBoxA(NULL, "The locale data is missing or invalid. This application will now exit.",
 			"Fatal error", MB_ICONERROR | MB_SYSTEMMODAL);

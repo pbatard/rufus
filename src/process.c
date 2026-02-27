@@ -4,7 +4,7 @@
  *
  * Modified from System Informer (a.k.a. Process Hacker):
  *   https://github.com/winsiderss/systeminformer
- * Copyright © 2017-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2017-2026 Pete Batard <pete@akeo.ie>
  * Copyright © 2017 dmex
  * Copyright © 2009-2016 wj32
  *
@@ -276,6 +276,31 @@ NTSTATUS PhQueryProcessesUsingVolumeOrFile(HANDLE VolumeOrFileHandle,
 }
 
 /**
+ * Return the parent PID of a process
+ *
+ * \param pid The PID of the process to look up the parent PID.
+ *
+ * \return The parent PID or 0 on error.
+ */
+DWORD GetPPID(DWORD pid)
+{
+	ULONG_PTR ppid = 0;
+	HANDLE hProcess = NULL;
+	PROCESS_BASIC_INFORMATION_INTERNAL pbi = { 0 };
+
+	hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+	if (hProcess == NULL)
+		goto out;
+
+	if (NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), NULL)))
+		ppid = pbi.InheritedFromUniqueProcessId;
+
+out:
+	safe_closehandle(hProcess);
+	return (DWORD)ppid;
+}
+
+/**
  * Query the full commandline that was used to create a process.
  * This can be helpful to differentiate between service instances (svchost.exe).
  * Taken from: https://stackoverflow.com/a/14012919/1069307
@@ -293,6 +318,7 @@ static PWSTR GetProcessCommandLine(HANDLE hProcess)
 	NTSTATUS status = STATUS_SUCCESS;
 	SYSTEM_INFO si;
 	PBYTE peb = NULL, pp = NULL;
+	PROCESS_BASIC_INFORMATION_INTERNAL pbi = { 0 };
 
 	// Determine if 64 or 32-bit processor
 	GetNativeSystemInfo(&si);
@@ -315,14 +341,13 @@ static PWSTR GetProcessCommandLine(HANDLE hProcess)
 	IsWow64Process(GetCurrentProcess(), &wow);
 	if (wow) {
 		// 32-bit process running on a 64-bit OS
-		PROCESS_BASIC_INFORMATION_WOW64 pbi = { 0 };
 		ULONGLONG params;
 		UNICODE_STRING_WOW64* ucmdline;
 
 		PF_INIT_OR_OUT(NtWow64QueryInformationProcess64, NtDll);
 		PF_INIT_OR_OUT(NtWow64ReadVirtualMemory64, NtDll);
 
-		status = pfNtWow64QueryInformationProcess64(hProcess, 0, &pbi, sizeof(pbi), NULL);
+		status = pfNtWow64QueryInformationProcess64(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), NULL);
 		if (!NT_SUCCESS(status))
 			goto out;
 
@@ -347,16 +372,15 @@ static PWSTR GetProcessCommandLine(HANDLE hProcess)
 		}
 	} else {
 		// 32-bit process on a 32-bit OS, or 64-bit process on a 64-bit OS
-		PROCESS_BASIC_INFORMATION pbi = { 0 };
 		PBYTE* params;
 		UNICODE_STRING* ucmdline;
 
-		status = NtQueryInformationProcess(hProcess, 0, &pbi, sizeof(pbi), NULL);
+		status = NtQueryInformationProcess(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), NULL);
 		if (!NT_SUCCESS(status))
 			goto out;
 
 		// Read PEB
-		if (!ReadProcessMemory(hProcess, pbi.PebBaseAddress, peb, pp_offset + 8, NULL))
+		if (!ReadProcessMemory(hProcess, (LPCVOID)pbi.PebBaseAddress, peb, pp_offset + 8, NULL))
 			goto out;
 
 		// Read Process Parameters
@@ -367,7 +391,7 @@ static PWSTR GetProcessCommandLine(HANDLE hProcess)
 		ucmdline = (UNICODE_STRING*)(pp + cmd_offset);
 		// In the absolute, someone could craft a process with dodgy attributes to try to cause an overflow
 		// coverity[cast_overflow]
-		ucmdline->Length = min(ucmdline->Length, (USHORT)512);
+		ucmdline->Length = min(ucmdline->Length, (USHORT)2 * KB);
 		wcmdline = (PWSTR)calloc(ucmdline->Length + 1, sizeof(WCHAR));
 		if (!ReadProcessMemory(hProcess, ucmdline->Buffer, wcmdline, ucmdline->Length, NULL)) {
 			safe_free(wcmdline);
@@ -410,7 +434,7 @@ static DWORD WINAPI SearchProcessThread(LPVOID param)
 	DWORD size;
 	wchar_t wexe_path[MAX_PATH], *wcmdline;
 	uint64_t start_time;
-	char cmdline[MAX_PATH] = { 0 }, tmp[64];
+	char cmdline[2 * KB] = { 0 }, tmp[64];
 	int cur_pid, j, nHandles = 0;
 
 	// Initialize the blocking process struct
@@ -872,10 +896,11 @@ static BOOL IsProcessRunning(uint64_t pid)
 BYTE GetProcessSearch(uint32_t timeout, uint8_t access_mask, BOOL bIgnoreStaleProcesses)
 {
 	const char* access_rights_str[8] = { "n", "r", "w", "rw", "x", "rx", "wx", "rwx" };
-	char tmp[MAX_PATH];
+	char tmp[2 * KB];
 	int i, j;
 	uint32_t elapsed = 0;
 	BYTE returned_mask = 0;
+//	DWORD pid, rufus_pid = GetCurrentProcessId();
 
 	StrArrayClear(&BlockingProcessList);
 	if (hSearchProcessThread == NULL) {
@@ -912,6 +937,15 @@ retry:
 			continue;
 		if (bIgnoreStaleProcesses && !IsProcessRunning(blocking_process.Process[i].pid))
 			continue;
+//		for (pid = (DWORD)blocking_process.Process[i].pid; pid != 0 && pid != rufus_pid; pid = GetPPID(pid));
+//		if (pid == rufus_pid)
+//			continue;
+		// Ignore read-only access from explorer.exe, as it's usually no big deal
+		if (blocking_process.Process[i].access_rights == 0x1 &&
+			// NB: We are not bothering with nonstandard system drives here
+			_stricmp(blocking_process.Process[i].cmdline, "C:\\Windows\\explorer.exe") == 0) {
+			continue;
+		}
 		returned_mask |= blocking_process.Process[i].access_rights;
 		static_sprintf(tmp, "● [%llu] %s (%s)", blocking_process.Process[i].pid, blocking_process.Process[i].cmdline,
 			access_rights_str[blocking_process.Process[i].access_rights & 0x7]);

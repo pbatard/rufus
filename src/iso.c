@@ -798,7 +798,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	BOOL is_symlink, is_identical, create_file, free_p_statbuf = FALSE;
 	int length, r = 1;
 	char psz_fullpath[MAX_PATH], *psz_basename = NULL, *psz_sanpath = NULL;
-	char tmp[128], target_path[256];
+	char tmp[128], target_path[256], *last_slash;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
 	_Static_assert(ISO_BUFFER_SIZE % ISO_BLOCKSIZE == 0,
 		"ISO_BUFFER_SIZE is not a multiple of ISO_BLOCKSIZE");
@@ -974,6 +974,21 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (create_file) {
 				file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
 					FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
+				if (file_handle == INVALID_HANDLE_VALUE && GetLastError() == ERROR_PATH_NOT_FOUND) {
+					// Some folks (umbrelos) managed to master their ISOs in a manner where some
+					// directories don't exist (or don't have _STAT_DIR) but still have files,
+					// in which case our approach, that expects a sane layout with directories
+					// properly declared before the files they contain, breaks. Therefore:
+					last_slash = strrchr(psz_sanpath, '/');
+					if (last_slash != NULL) {
+						*last_slash = '\0';
+						uprintf("WARNING: Directory '%s/' was improperly mastered on the source image!", &psz_sanpath[2]);
+						_mkdirExU(psz_sanpath);
+						*last_slash = '/';
+						file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
+							FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
+					}
+				}
 				if (file_handle == INVALID_HANDLE_VALUE) {
 					err = GetLastError();
 					uprintf("  Unable to create file: %s", WindowsErrorString());
@@ -2183,20 +2198,44 @@ void OpticalDiscSaveImage(void)
 // Create an ISO image from the currently selected drive, using oscdimg.exe
 DWORD WINAPI IsoSaveImageThread(void* param)
 {
-	DWORD r;
+	DWORD r = ERROR_NOT_FOUND;
+	HANDLE exe = INVALID_HANDLE_VALUE;
 	IMG_SAVE* img_save = (IMG_SAVE*)param;
-	char cmd[2 * MAX_PATH], letters[27], * label;
+	char cmd[2 * KB], letters[27], *label;
 
 	if (!GetDriveLabel(SelectedDrive.DeviceNumber, letters, &label, TRUE) || letters[0] == '\0')
-		ExitThread(ERROR_NOT_FOUND);
+		goto out;
+
+	// Get a lock and validate that the oscdimg.exe has not been tampered with
+	static_sprintf(cmd, "%s\\%s\\oscdimg_%s.exe", app_data_dir, FILES_DIR, APPLICATION_ARCH);
+	exe = CreateFileU(cmd, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (exe == INVALID_HANDLE_VALUE) {
+		uprintf("ERROR: Could not lock 'oscdimg.exe'");
+		r = GetLastError();
+		goto out;
+	}
+	if (!FileMatchesHash(cmd, OSCDIMG_HASH)) {
+		uprintf("ERROR: Existing 'oscdimg.exe' hash does not match expected value!");
+		r = ERROR_INVALID_IMAGE_HASH;
+		goto out;
+	}
+
+	// UDF labels cannot be more than 32 characters (and if we have more than 32 chars we are
+	// using the static modifiable char buffer from GetDriveLabel(), so we can alter it).
+	if (strlen(label) > 32)
+		label[32] = '\0';
+
 	// Save to UDF only, as Microsoft's implementation of ISO-9660 doesn't support multiextent
 	// and produces BROKEN images if you try to add files larger than 4 GB.
 	// Plus ISO-9660/Joliet limits labels to 16 characters and has issues with long paths.
-	static_sprintf(cmd, "%s\\%s\\oscdimg.exe -g -h -k -l\"%s\" -m -u2 -udfver102 %c:\\ \"%s\"",
-		app_data_dir, FILES_DIR, label, letters[0], img_save->ImagePath);
+	static_sprintf(cmd, "\"%s\\%s\\oscdimg_%s.exe\" -g -h -k -l\"%s\" -m -u2 -udfver102 %c:\\ \"%s\"",
+		app_data_dir, FILES_DIR, APPLICATION_ARCH, label, letters[0], img_save->ImagePath);
 	uprintf("Running command: '%s'", cmd);
 	// For detecting typical oscdimg commandline progress report of type: "\r15.5% complete"
 	r = RunCommandWithProgress(cmd, sysnative_dir, FALSE, MSG_261, ".*\r([0-9\\.]+)% complete.*");
+
+out:
+	safe_closehandle(exe);
 	if (r != 0 && !IS_ERROR(ErrorStatus)) {
 		SetLastError(r);
 		uprintf("Failed to write ISO image: %s", WindowsErrorString());

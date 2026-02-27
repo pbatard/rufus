@@ -67,6 +67,10 @@ const IID IID_IVdsVolume = { 0x88306BB2, 0xE71F, 0x478C, { 0x86, 0xA2, 0x79, 0xD
 const IID IID_IVdsVolumeMF3 = { 0x6788FAF9, 0x214E, 0x4B85, { 0xBA, 0x59, 0x26, 0x69, 0x53, 0x61, 0x6E, 0x09 } };
 #endif
 
+#ifndef PERSISTENT_VOLUME_STATE_DEV_VOLUME
+#define PERSISTENT_VOLUME_STATE_DEV_VOLUME (0x00002000)
+#endif
+
 /*
  * Globals
  */
@@ -2608,40 +2612,30 @@ const char* GetGPTPartitionType(const GUID* guid)
 }
 
 /*
- * Detect Microsoft Dev Drives, which are VHDs consisting of a small MSR followed by a large
- * (50 GB or more) ReFS partition. See https://learn.microsoft.com/en-us/windows/dev-drive/.
- * NB: Despite the option being proposed, I have *NOT* been able to create MBR-based Dev Drives.
+ * Detect Microsoft Dev Drives. See https://learn.microsoft.com/en-us/windows/dev-drive/.
  */
 BOOL IsMsDevDrive(DWORD DriveIndex)
 {
-	BOOL r, ret = FALSE;
+	BOOL ret = FALSE;
 	DWORD size = 0;
-	HANDLE hPhysical = INVALID_HANDLE_VALUE;
-	BYTE layout[4096] = { 0 };
-	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
+	HANDLE hLogical = INVALID_HANDLE_VALUE;
+	FILE_FS_PERSISTENT_VOLUME_INFORMATION data = { 0 };
 
-	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE, TRUE);
-	if (hPhysical == INVALID_HANDLE_VALUE)
-		goto out;
-
-	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL);
-	if (!r || size <= 0)
+	hLogical = GetLogicalHandle(DriveIndex, 0, FALSE, FALSE, FALSE);
+	if (hLogical == INVALID_HANDLE_VALUE)
 		goto out;
 
-	if (DriveLayout->PartitionStyle != PARTITION_STYLE_GPT)
+	data.FlagMask = PERSISTENT_VOLUME_STATE_DEV_VOLUME;
+	data.Version = 1;
+
+	if (!DeviceIoControl(hLogical, FSCTL_QUERY_PERSISTENT_VOLUME_STATE, &data, sizeof(data),
+		&data, sizeof(data), &size, NULL))
 		goto out;
-	if (DriveLayout->PartitionCount != 2)
-		goto out;
-	if (!CompareGUID(&DriveLayout->PartitionEntry[0].Gpt.PartitionType, &PARTITION_MICROSOFT_RESERVED))
-		goto out;
-	if (!CompareGUID(&DriveLayout->PartitionEntry[1].Gpt.PartitionType, &PARTITION_MICROSOFT_DATA))
-		goto out;
-	if (DriveLayout->PartitionEntry[1].PartitionLength.QuadPart < 20 * GB)
-		goto out;
-	ret = (strcmp(GetFsName(hPhysical, DriveLayout->PartitionEntry[1].StartingOffset), "ReFS") == 0);
+
+	ret = data.VolumeFlags & PERSISTENT_VOLUME_STATE_DEV_VOLUME;
 
 out:
-	safe_closehandle(hPhysical);
+	safe_closehandle(hLogical);
 	return ret;
 }
 

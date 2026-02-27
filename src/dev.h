@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device detection and enumeration
- * Copyright © 2014-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@
 
 /* List of the properties we are interested in */
 typedef struct usb_device_props {
-	uint32_t  vid;
-	uint32_t  pid;
+	int32_t  vid;
+	int32_t  pid;
 	uint32_t  speed;
 	uint32_t  lower_speed;
 	uint32_t  port;

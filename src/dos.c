@@ -2,7 +2,7 @@
  * Rufus: The Reliable USB Formatting Utility
  * DOS boot file extraction, from the FAT12 floppy image in diskcopy.dll
  * (MS WinME DOS) or from the embedded FreeDOS resource files
- * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -290,21 +290,25 @@ static BOOL ExtractMSDOS(const char* path)
 {
 	int i, j;
 	BOOL r = FALSE;
-	uint8_t* diskcopy_buffer = NULL;
+	DWORD size = DISKCOPY_SIZE;
+	HANDLE dll_handle = INVALID_HANDLE_VALUE;
+	uint8_t* diskcopy_buffer;
 	char locale_path[MAX_PATH];
 	char diskcopy_dll_path[MAX_PATH];
 	char* extractlist[] = { "MSDOS   SYS", "COMMAND COM", "IO      SYS", "MODE    COM",
 		"KEYB    COM", "KEYBOARDSYS", "KEYBRD2 SYS", "KEYBRD3 SYS", "KEYBRD4 SYS",
 		"DISPLAY SYS", "EGA     CPI", "EGA2    CPI", "EGA3    CPI" };
 
-	if (path == NULL)
+	if (path == NULL || (diskcopy_buffer = malloc(DISKCOPY_SIZE)) == NULL)
 		return FALSE;
 
 	// There should be a diskcopy.dll in the user's AppData directory.
-	// Since we're working with a known copy of diskcopy.dll, just load it
-	// in memory and point to the known disk image resource buffer.
+	// Since we're working with a known copy of diskcopy.dll, just load it in memory
+	// (after locking and validating it) and point to the known disk image resource buffer.
 	static_sprintf(diskcopy_dll_path, "%s\\%s\\diskcopy.dll", app_data_dir, FILES_DIR);
-	if (read_file(diskcopy_dll_path, &diskcopy_buffer) != DISKCOPY_SIZE) {
+	dll_handle = CreateFileU(diskcopy_dll_path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (dll_handle == INVALID_HANDLE_VALUE || !ReadFile(dll_handle, diskcopy_buffer, size, &size, NULL) ||
+		size != DISKCOPY_SIZE || !BufferMatchesHash(diskcopy_buffer, size, DISKCOPY_HASH)) {
 		uprintf("'diskcopy.dll' was either not found or is invalid");
 		goto out;
 	}
@@ -331,6 +335,7 @@ static BOOL ExtractMSDOS(const char* path)
 		r = SetDOSLocale(path, FALSE);
 
 out:
+	safe_closehandle(dll_handle);
 	safe_free(diskcopy_buffer);
 	return r;
 }

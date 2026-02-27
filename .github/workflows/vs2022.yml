@@ -1,6 +1,6 @@
 name: VS2022
 
-on:
+on: 
   push:
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/**'
@@ -45,12 +45,6 @@ jobs:
         fetch-depth: 0
         submodules: recursive
 
-    - name: Clean previous artifacts and build files
-      shell: powershell
-      run: |
-        Remove-Item -Path ".\rufus_*.exe", ".\rufus_*.pdb", ".\rufus-*.exe" -ErrorAction SilentlyContinue
-        Remove-Item -Path ".\x64", ".\x86", ".\arm64" -Recurse -Force -ErrorAction SilentlyContinue
-
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
       with:
@@ -74,6 +68,7 @@ jobs:
       id: set_alpha
       shell: bash
       if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      # This ONLY works if the shell is bash or if using $env:GITHUB_OUTPUT
       run: |
         echo "option=/DALPHA" >> $GITHUB_OUTPUT
         sed -b -i 's/VALUE "InternalName", "Rufus"/VALUE "InternalName", "Rufus (ALPHA)"/' ./src/rufus.rc
@@ -82,6 +77,7 @@ jobs:
       id: set_beta
       shell: bash
       if: ${{ startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'BETA') }}
+      # This ONLY works if the shell is bash or if using $env:GITHUB_OUTPUT
       run: |
         echo "option=/DBETA" >> $GITHUB_OUTPUT
         sed -b -i 's/VALUE "InternalName", "Rufus"/VALUE "InternalName", "Rufus (BETA)"/' ./src/rufus.rc
@@ -97,6 +93,7 @@ jobs:
     - name: Prepare to sign ALPHA
       if: ${{ !startsWith(github.ref, 'refs/tags/') }}
       shell: bash
+      # NB: The Base64 encoded variable should not have line breaks or this will fail!
       run: echo ${{ secrets.RUFUS_GITHUB_OFFICIAL_BUILD }} | base64 -di > ./sign.pfx
 
     - name: Add signtool to path
@@ -112,19 +109,10 @@ jobs:
 
     - name: Create standalone release executables
       if: ${{ startsWith(github.ref, 'refs/tags/') }}
-      id: prepare_release
       shell: cmd
       run: |
         copy rufus_${{ matrix.TARGET_PLATFORM }}.exe rufus-${{ steps.set_version.outputs.version }}_${{ matrix.TARGET_PLATFORM }}.exe
-        
-        REM Logic to rename x64 to the default name for the official release
-        if exist rufus-${{ steps.set_version.outputs.version }}_x64.exe ( 
-          ren rufus-${{ steps.set_version.outputs.version }}_x64.exe rufus-${{ steps.set_version.outputs.version }}.exe 
-          echo "release_file_name=rufus-${{ steps.set_version.outputs.version }}.exe" >> $GITHUB_OUTPUT
-        ) else (
-          echo "release_file_name=rufus-${{ steps.set_version.outputs.version }}_${{ matrix.TARGET_PLATFORM }}.exe" >> $GITHUB_OUTPUT
-        )
-        
+        if exist rufus-${{ steps.set_version.outputs.version }}_x64.exe ( ren rufus-${{ steps.set_version.outputs.version }}_x64.exe rufus-${{ steps.set_version.outputs.version }}.exe )
         if not ${{ matrix.TARGET_PLATFORM }}==arm64 ( upx --lzma --best rufus-*.exe )
 
     - name: Display SHA-256
@@ -138,44 +126,21 @@ jobs:
         curl --request POST --url https://www.virustotal.com/api/v3/monitor/items --header 'x-apikey: ${{ secrets.VIRUSTOTAL_API_KEY }}' --form path='/rufus_${{ matrix.TARGET_PLATFORM }}.exe' --form file=@./rufus_${{ matrix.TARGET_PLATFORM }}.exe
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       if: ${{ github.event_name == 'push' }}
       with:
-        name: raw-build-${{ matrix.TARGET_PLATFORM }}
+        name: ${{ matrix.TARGET_PLATFORM }}
         path: |
           ./*.exe
           ./*.pdb
 
-    - name: Upload Release Artifacts for Release Job
-      if: ${{ startsWith(github.ref, 'refs/tags/') && github.event_name == 'push' }}
-      uses: actions/upload-artifact@v5
-      with:
-        # Unique name for each platform
-        name: final-release-executables-${{ matrix.TARGET_PLATFORM }}
-        path: |
-          ./rufus-*.exe
-        retention-days: 1 # Added to follow v5 best practices
-
-# --- UPDATED JOB: Fixed path for uploading release files ---
-  Release:
-    runs-on: ubuntu-latest
+  Extra-Step-To-Merge-Artifacts-Thanks-To-Upload-Artifact-v4-Breaking-Backwards-Compatibility:
+    runs-on: windows-latest
     needs: VS2022-Build
-    # Only runs when a tag is pushed
-    if: ${{ startsWith(github.ref, 'refs/tags/') && github.event_name == 'push' }}
     steps:
-      - name: Download all release executables
-        uses: actions/download-artifact@v4
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v6
+        if: ${{ github.event_name == 'push' }}
         with:
-          # Wildcard pattern to download all unique artifacts
-          pattern: final-release-executables-*
-          path: ./release-files/
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref }}
-          name: Release ${{ github.ref_name }}
-          prerelease: ${{ contains(github.ref, 'BETA') }}
-          # FIX: Use '**/' to recursively search ALL subdirectories under ./release-files/
-          files: |
-            ./release-files/**/rufus-*.exe
+          name: VS2022
+          delete-merged: true

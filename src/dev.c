@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Device detection and enumeration
- * Copyright © 2014-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -293,7 +293,9 @@ static __inline BOOL IsVHD(const char* buffer)
 		"VMware__VMware_Virtual_S"	// Enabled through a cheat mode, as this lists primary disks on VMWare instances
 	};
 
-	for (i = 0; i < (int)(ARRAYSIZE(vhd_name)-(enable_vmdk?0:1)); i++)
+	if (buffer == NULL || buffer[0] == '\0')
+		return FALSE;
+	for (i = 0; i < (int)(ARRAYSIZE(vhd_name) - (enable_vmdk ? 0 : 1)); i++)
 		if (safe_strstr(buffer, vhd_name[i]) != NULL)
 			return TRUE;
 	return FALSE;
@@ -418,9 +420,9 @@ BOOL GetOpticalMedia(IMG_SAVE* img_save)
 /* For debugging user reports of HDDs vs UFDs */
 //#define FORCED_DEVICE
 #ifdef FORCED_DEVICE
-#define FORCED_VID 0x04E8
-#define FORCED_PID 0x6300
-#define FORCED_NAME "Samsung Type-C USB Device"
+#define FORCED_VID 0x0781
+#define FORCED_PID 0x55A9
+#define FORCED_NAME " USB  SanDisk 3.2Gen1 UAS Device"
 #endif
 
 void ClearDrives(void)
@@ -471,6 +473,7 @@ BOOL GetDevices(DWORD devnum)
 	};
 	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0", "USB 3.1" };
 	const char* windows_sandbox_vhd_label = "PortableBaseLayer";
+	const char* bitdefender_label = "Bitdefender Partition";
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
 	htab_table htab_devid = HTAB_EMPTY;
 	StrArray dev_if_path = STRARRAY_EMPTY;
@@ -492,7 +495,7 @@ BOOL GetDevices(DWORD devnum)
 	LONG maxwidth = 0;
 	int s, u, v, score, drive_number, remove_drive, num_drives = 0;
 	char drive_letters[27], *device_id, *devid_list = NULL, display_msg[128];
-	char *p, *label, *display_name, buffer[MAX_PATH], str[MAX_PATH], device_instance_id[MAX_PATH], *method_str, *hub_path;
+	char *p, *label, *display_name, buffer[4 * KB], str[MAX_PATH], device_instance_id[MAX_PATH], *method_str, *hub_path;
 	uint32_t ignore_vid_pid[MAX_IGNORE_USB];
 	uint64_t drive_size = 0;
 	usb_device_props props;
@@ -560,7 +563,7 @@ BOOL GetDevices(DWORD devnum)
 	// Build a single list of Device IDs from all the storage enumerators we know of
 	full_list_size = 0;
 	ulFlags = CM_GETIDLIST_FILTER_SERVICE | CM_GETIDLIST_FILTER_PRESENT;
-	for (s=0; s<ARRAYSIZE(usbstor_name); s++) {
+	for (s = 0; s < ARRAYSIZE(usbstor_name); s++) {
 		// Get a list of device IDs for all USB storage devices
 		// This will be used to find if a device is UASP
 		// Also compute the uasp_start index
@@ -627,6 +630,7 @@ BOOL GetDevices(DWORD devnum)
 	for (i = 0; num_drives < MAX_DRIVES && SetupDiEnumDeviceInfo(dev_info, i, &dev_info_data); i++) {
 		memset(buffer, 0, sizeof(buffer));
 		memset(&props, 0, sizeof(props));
+		props.vid = -1; props.pid = -1;
 		method_str = "";
 		hub_path = NULL;
 		if (!SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_ENUMERATOR_NAME,
@@ -663,8 +667,13 @@ BOOL GetDevices(DWORD devnum)
 		// We can't use the friendly name to find if a drive is a VHD, as friendly name string gets translated
 		// according to your locale, so we poke the Hardware ID
 		memset(buffer, 0, sizeof(buffer));
-		props.is_VHD = SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_HARDWAREID,
-			&data_type, (LPBYTE)buffer, sizeof(buffer), &size) && IsVHD(buffer);
+		r = SetupDiGetDeviceRegistryPropertyA(dev_info, &dev_info_data, SPDRP_HARDWAREID,
+			&data_type, (LPBYTE)buffer, sizeof(buffer), &size);
+		// We should always be able to get a Hardware ID for disk devices, so report an error in debug if we don't
+		if (!r && usb_debug)
+			uprintf("  Error: %s", WindowsErrorString());
+		props.is_VHD = IsVHD(buffer);
+		if (!props.is_VHD)
 		// Additional detection for SCSI card readers
 		if ((!props.is_CARD) && (safe_strnicmp(buffer, scsi_disk_prefix, sizeof(scsi_disk_prefix)-1) == 0)) {
 			for (j = 0; j < ARRAYSIZE(scsi_card_name); j++) {
@@ -731,7 +740,7 @@ BOOL GetDevices(DWORD devnum)
 				method_str = "";
 
 				// If we're not dealing with the USBSTOR part of our list, then this is an UASP device
-				props.is_UASP = ((((uintptr_t)device_id)+2) >= ((uintptr_t)devid_list)+list_start[uasp_start]);
+				props.is_UASP = ((((uintptr_t)device_id) + 2) >= ((uintptr_t)devid_list) + list_start[uasp_start]);
 				// Now get the properties of the device, and its Device ID, which we need to populate the properties
 				ToUpper(device_id);
 				j = htab_hash(device_id, &htab_devid);
@@ -739,19 +748,23 @@ BOOL GetDevices(DWORD devnum)
 
 				// Try to parse the current device_id string for VID:PID
 				// We'll use that if we can't get anything better
-				for (k = 0, l = 0; (k<strlen(device_id)) && (l<2); k++) {
+				for (k = 0, l = 0; (k < strlen(device_id)) && (l < 2); k++) {
 					// The ID is in the form USB_VENDOR_BUSID\VID_xxxx&PID_xxxx\...
 					if (device_id[k] == '\\')
 						post_backslash = TRUE;
 					if (!post_backslash)
 						continue;
 					if (device_id[k] == '_') {
-						props.pid = (uint16_t)strtoul(&device_id[k + 1], NULL, 16);
+						props.pid = (uint16_t)strtoul(&device_id[k + 1], &p, 16);
+						if (p != &device_id[k + 5]) {
+							uuprintf("  WARNING: Could not read PID:VID from string");
+							break;
+						}
 						if (l++ == 0)
 							props.vid = props.pid;
 					}
 				}
-				if (props.vid != 0)
+				if (props.vid != -1 && props.pid != -1)
 					method_str = "[ID]";
 
 				// If the hash didn't match a populated string in dev_if_path[] (htab_devid.table[j].data > 0),
@@ -805,7 +818,7 @@ BOOL GetDevices(DWORD devnum)
 			}
 			uprintf("Found non-USB removable device '%s'", buffer);
 		} else {
-			if ((props.vid == 0) && (props.pid == 0)) {
+			if (props.vid == -1 || props.pid == -1) {
 				if (!props.is_USB) {
 					// If we have a non removable SCSI drive and couldn't get a VID:PID,
 					// we are most likely dealing with a system drive => eliminate it!
@@ -826,7 +839,8 @@ BOOL GetDevices(DWORD devnum)
 				}
 				// Also ignore USB devices that have been specifically flagged by the user
 				for (s = 0; s < ARRAYSIZE(ignore_vid_pid); s++) {
-					if ((props.vid == (ignore_vid_pid[s] >> 16)) && (props.pid == (ignore_vid_pid[s] & 0xffff))) {
+					if (ignore_vid_pid[s] != 0 && (props.vid == (ignore_vid_pid[s] >> 16)) &&
+						(props.pid == (ignore_vid_pid[s] & 0xffff))) {
 						uprintf("Ignoring '%s' (%s), per user settings", buffer, str);
 						break;
 					}
@@ -950,6 +964,12 @@ BOOL GetDevices(DWORD devnum)
 				// Windows 10 19H1 mounts a 'PortableBaseLayer' for its Windows Sandbox feature => unlist those
 				if (safe_strcmp(label, windows_sandbox_vhd_label) == 0) {
 					uprintf("Device eliminated because it is a Windows Sandbox VHD");
+					safe_free(devint_detail_data);
+					break;
+				}
+				// Bitdefender now uses a special 32 MB VHD
+				if (props.is_VHD && safe_strcmp(label, bitdefender_label) == 0 && GetDriveSize(drive_index) <= 32 * MB) {
+					uprintf("Device eliminated because it is a Bitdefender VHD");
 					safe_free(devint_detail_data);
 					break;
 				}

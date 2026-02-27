@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Networking functionality (web file download, check for update, etc.)
- * Copyright © 2012-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2012-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -786,7 +786,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	uint64_t uncompressed_size;
 	int64_t size = -1;
 	BYTE *compressed = NULL, *sig = NULL;
-	HANDLE hFile, hPipe;
+	HANDLE hFile = INVALID_HANDLE_VALUE, hPipe = INVALID_HANDLE_VALUE;
 	DWORD dwExitCode = 99, dwCompressedSize, dwSize, dwAvail, dwPipeSize = 4096;
 	GUID guid;
 
@@ -854,10 +854,18 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	}
 	PrintInfo(0, MSG_148);
 
-	assert((fido_script != NULL) && (fido_len != 0));
+	if_assert_fails((fido_script != NULL) && (fido_len != 0))
+		goto out;
 
+	// Why oh why does PowerShell refuse to open read-only files that haven't been closed?
+	// Because of this limitation, we can't fully prevent TOCTOUs on the file we create, and therefore we:
+	// - Create the file with a "random" non-guessable name => TOCTOUs require a permanently running script/exe
+	// - Create the file in the user's AppData temp directory => TOCTOUs can't be enacted by a different user
+	// - Create the file with Administrator access only => TOCTOUs require elevated privileges (in which case
+	// the machine is already compromised anyway, so TOCTOU attacks become entirely moot)
+	// See https://github.com/pbatard/rufus/security/advisories/GHSA-hcx5-hrhj-xhq9 and CVE-2026-23988.
 	static_sprintf(script_path, "%s%s.ps1", temp_dir, GuidToString(&guid, TRUE));
-	hFile = CreateFileU(script_path, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_READONLY, NULL);
+	hFile = CreateFileRestrictedU(script_path, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, FILE_ATTRIBUTE_READONLY);
 	if (hFile == INVALID_HANDLE_VALUE) {
 		uprintf("Unable to create download script '%s': %s", script_path, WindowsErrorString());
 		goto out;
@@ -866,8 +874,6 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		uprintf("Unable to write download script '%s': %s", script_path, WindowsErrorString());
 		goto out;
 	}
-	// Why oh why does PowerShell refuse to open read-only files that haven't been closed?
-	// Because of this limitation, we can't use LockFileEx() on the file we create...
 	safe_closehandle(hFile);
 #endif
 	static_sprintf(powershell_path, "%s\\WindowsPowerShell\\v1.0\\powershell.exe", system_dir);
@@ -885,13 +891,17 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 		goto out;
 	}
 
-	static_sprintf(cmdline, "\"%s\" -NonInteractive -Sta -NoProfile –ExecutionPolicy Bypass "
+	// Ideally, since our script is signed, we'd have '-ExecutionPolicy AllSigned' below.
+	// Except that, in the myriad of execution policy options they provide, Microsoft chose
+	// not to add an option that allows signed scripts that validate up to the root of trust,
+	// but aren't in Trusted Publishers, to be validated:
+	// https://old.reddit.com/r/PowerShell/comments/kpwi5r/powershell_script_signing_trusted_publisher_prompt/gzi10oc/
+	static_sprintf(cmdline, "\"%s\" -NonInteractive -Sta -NoProfile -ExecutionPolicy Bypass "
 		"-File \"%s\" -PipeName %s -LocData \"%s\" -Icon \"%s\" -AppTitle \"%s\" -PlatformArch \"%s\"",
 		powershell_path, script_path, &pipe[9], locale_str, icon_path, lmprintf(MSG_149), GetArchName(NativeMachine));
 
 #ifndef RUFUS_TEST
-	// For extra security, even after we validated that the LZMA download is properly
-	// signed, we also validate the Authenticode signature of the local script.
+	// Because we can't force PowerShell to do it, we validate the signature of the local script.
 	if (ValidateSignature(INVALID_HANDLE_VALUE, script_path) != NO_ERROR) {
 		uprintf("FATAL: Script signature is invalid ✗");
 		ErrorStatus = RUFUS_ERROR(APPERR(ERROR_BAD_SIGNATURE));
@@ -945,10 +955,12 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	}
 
 out:
-	if (icon_path[0] != 0)
+	safe_closehandle(hPipe);
+	safe_closehandle(hFile);
+	if (icon_path[0] != '\0')
 		DeleteFileU(icon_path);
 #if !defined(RUFUS_TEST)
-	if (script_path[0] != 0) {
+	if (script_path[0] != '\0') {
 		SetFileAttributesU(script_path, FILE_ATTRIBUTE_NORMAL);
 		DeleteFileU(script_path);
 	}
