@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Drive access function calls
- * Copyright © 2011-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1546,7 +1546,7 @@ static BOOL StoreEspInfo(GUID* guid)
 	return WriteSettingStr(key_name[1], GuidToString(guid, TRUE));
 }
 
-static GUID* GetEspGuid(uint8_t index)
+static GUID GetEspGuid(uint8_t index)
 {
 	char key_name[16];
 
@@ -1574,7 +1574,7 @@ BOOL ToggleEsp(DWORD DriveIndex, uint64_t PartitionOffset)
 	HANDLE hPhysical;
 	DWORD dl_size, size, offset;
 	BYTE layout[4096] = { 0 }, buf[512];
-	GUID *guid = NULL, *stored_guid = NULL, mbr_guid;
+	GUID *guid = NULL, stored_guid = { 0 }, mbr_guid;
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 	typedef struct {
 		const uint8_t mbr_type;
@@ -1650,7 +1650,7 @@ BOOL ToggleEsp(DWORD DriveIndex, uint64_t PartitionOffset)
 			// Basic Data -> ESP
 			for (i = 1; i <= MAX_ESP_TOGGLE && esp_index < 0; i++) {
 				stored_guid = GetEspGuid((uint8_t)i);
-				if (stored_guid != NULL) {
+				if (!CompareGUID(&stored_guid, &GUID_NULL)) {
 					for (j = 0; j < (int)DriveLayout->PartitionCount && esp_index < 0; j++) {
 						if (DriveLayout->PartitionStyle == PARTITION_STYLE_GPT) {
 							guid = &DriveLayout->PartitionEntry[j].Gpt.PartitionId;
@@ -1660,7 +1660,7 @@ BOOL ToggleEsp(DWORD DriveIndex, uint64_t PartitionOffset)
 							*((uint64_t*)&mbr_guid.Data4) = DriveLayout->PartitionEntry[j].StartingOffset.QuadPart;
 							guid = &mbr_guid;
 						}
-						if (CompareGUID(stored_guid, guid)) {
+						if (CompareGUID(&stored_guid, guid)) {
 							esp_index = j;
 							delete_data = TRUE;
 							if (DriveLayout->PartitionStyle == PARTITION_STYLE_GPT)
@@ -2606,9 +2606,8 @@ const char* GetMBRPartitionType(const uint8_t type)
 
 const char* GetGPTPartitionType(const GUID* guid)
 {
-	int i;
-	for (i = 0; (i < ARRAYSIZE(gpt_type)) && !CompareGUID(guid, gpt_type[i].guid); i++);
-	return (i < ARRAYSIZE(gpt_type)) ? gpt_type[i].name : GuidToString(guid, TRUE);
+	const char* desc = gpt_type_desc(guid);
+	return desc != NULL ? desc : GuidToString(guid, TRUE);
 }
 
 /*
@@ -2653,7 +2652,7 @@ BOOL IsFilteredDrive(DWORD DriveIndex)
 	HANDLE hPhysical = INVALID_HANDLE_VALUE;
 	BYTE layout[4096] = { 0 };
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
-	GUID* DiskGuid;
+	GUID DiskGuid;
 
 	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, FALSE, TRUE);
 	if (hPhysical == INVALID_HANDLE_VALUE)
@@ -2669,8 +2668,8 @@ BOOL IsFilteredDrive(DWORD DriveIndex)
 	for (i = 1; i <= MAX_IGNORE_USB; i++) {
 		static_sprintf(setting_name, "IgnoreDisk%02d", i);
 		DiskGuid = StringToGuid(ReadSettingStr(setting_name));
-		if (CompareGUID(&DriveLayout->Gpt.DiskId, DiskGuid)) {
-			uprintf("Device eliminated because it matches Disk GUID %s", GuidToString(DiskGuid, TRUE));
+		if (CompareGUID(&DriveLayout->Gpt.DiskId, &DiskGuid)) {
+			uprintf("Device eliminated because it matches Disk GUID %s", GuidToString(&DiskGuid, TRUE));
 			ret = TRUE;
 			goto out;
 		}

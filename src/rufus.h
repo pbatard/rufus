@@ -1,6 +1,6 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
- * Copyright © 2011-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -784,7 +784,7 @@ extern void _UpdateProgressWithInfo(int op, int msg, uint64_t processed, uint64_
 #define UpdateProgressWithInfoInit(hProgressDialog, bNoAltMode) UpdateProgressWithInfo(OP_INIT, (int)bNoAltMode, (uint64_t)(uintptr_t)hProgressDialog, 0);
 extern const char* StrError(DWORD error_code, BOOL use_default_locale);
 extern char* GuidToString(const GUID* guid, BOOL bDecorated);
-extern GUID* StringToGuid(const char* str);
+extern GUID StringToGuid(const char* str);
 extern char* SizeToHumanReadable(uint64_t size, BOOL copy_to_log, BOOL fake_units);
 extern char* TimestampToHumanReadable(uint64_t ts);
 extern HWND MyCreateDialog(HINSTANCE hInstance, int Dialog_ID, HWND hWndParent, DLGPROC lpDialogFunc);
