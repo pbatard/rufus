@@ -1979,7 +1979,6 @@ try_clear:
 						}
 					}
 				}
-				CopySKUSiPolicy(drive_name);
 				if ( (target_type == TT_BIOS) && HAS_WINPE(img_report) ) {
 					// Apply WinPE fixup
 					if (!SetupWinPE(drive_name[0]))

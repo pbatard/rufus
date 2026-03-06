@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * PKI functions (code signing, etc.)
- * Copyright © 2015-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2015-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -260,7 +260,7 @@ const char* WinPKIErrorString(void)
 	}
 }
 
-// Mostly from https://support.microsoft.com/en-us/kb/323809
+// Mostly from https://support.microsoft.com/kb/323809
 char* GetSignatureName(const char* path, const char* country_code, uint8_t* thumbprint, BOOL bSilent)
 {
 	static char szSubjectName[128];
@@ -898,122 +898,5 @@ out:
 		CryptDestroyHash(hHash);
 	if (hProv)
 		CryptReleaseContext(hProv, 0);
-	return r;
-}
-
-// The following SkuSiPolicy.p7b parsing code is derived from:
-// https://gist.github.com/mattifestation/92e545bf1ee5b68eeb71d254cec2f78e
-// by Matthew Graeber, with contributions by James Forshaw.
-BOOL ParseSKUSiPolicy(void)
-{
-	char path[MAX_PATH];
-	wchar_t* wpath = NULL;
-	BOOL r = FALSE;
-	DWORD i, dwEncoding, dwContentType, dwFormatType;
-	DWORD dwPolicySize = 0, dwBaseIndex = 0, dwSizeCount;
-	HCRYPTMSG hMsg = NULL;
-	CRYPT_DATA_BLOB pkcsData = { 0 };
-	DWORD* pdwEkuRules;
-	BYTE* pbRule;
-	CIHeader* Header;
-	CIFileRuleHeader* FileRuleHeader;
-	CIFileRuleData* FileRuleData;
-
-	pe256ssp_size = 0;
-	safe_free(pe256ssp);
-	// Must use sysnative for WOW
-	static_sprintf(path, "%s\\SecureBootUpdates\\SKUSiPolicy.p7b", sysnative_dir);
-	wpath = utf8_to_wchar(path);
-	if (wpath == NULL)
-		goto out;
-
-	r = CryptQueryObject(CERT_QUERY_OBJECT_FILE, wpath, CERT_QUERY_CONTENT_FLAG_ALL,
-		CERT_QUERY_FORMAT_FLAG_ALL, 0, &dwEncoding, &dwContentType, &dwFormatType, NULL,
-		&hMsg, NULL);
-	if (!r || dwContentType != CERT_QUERY_CONTENT_PKCS7_SIGNED)
-		goto out;
-
-	r = CryptMsgGetParam(hMsg, CMSG_CONTENT_PARAM, 0, NULL, &pkcsData.cbData);
-	if (!r || pkcsData.cbData == 0) {
-		uprintf("ParseSKUSiPolicy: Failed to retreive CMSG_CONTENT_PARAM size: %s", WindowsErrorString());
-		goto out;
-	}
-	pkcsData.pbData = malloc(pkcsData.cbData);
-	if (pkcsData.pbData == NULL)
-		goto out;
-	r = CryptMsgGetParam(hMsg, CMSG_CONTENT_PARAM, 0, pkcsData.pbData, &pkcsData.cbData);
-	if (!r) {
-		uprintf("ParseSKUSiPolicy: Failed to retreive CMSG_CONTENT_PARAM: %s", WindowsErrorString());
-		goto out;
-	}
-
-	// Now process the actual Security Policy content
-	if (pkcsData.pbData[0] == 4) {
-		dwPolicySize = pkcsData.pbData[1];
-		dwBaseIndex = 2;
-		if ((dwPolicySize & 0x80) == 0x80) {
-			dwSizeCount = dwPolicySize & 0x7F;
-			dwBaseIndex += dwSizeCount;
-			dwPolicySize = 0;
-			for (i = 0; i < dwSizeCount; i++) {
-				dwPolicySize = dwPolicySize << 8;
-				dwPolicySize = dwPolicySize | pkcsData.pbData[2 + i];
-			}
-		}
-	}
-
-	// Sanity checks
-	Header = (CIHeader*)&pkcsData.pbData[dwBaseIndex];
-	if (Header->HeaderLength + sizeof(uint32_t) != sizeof(CIHeader)) {
-		uprintf("ParseSKUSiPolicy: Unexpected Code Integrity Header size (0x%02x)", Header->HeaderLength);
-		goto out;
-	}
-	if (!CompareGUID(&Header->PolicyTypeGUID, &SKU_CODE_INTEGRITY_POLICY)) {
-		uprintf("ParseSKUSiPolicy: Unexpected Policy Type GUID %s", GuidToString(&Header->PolicyTypeGUID, TRUE));
-		goto out;
-	}
-
-	// Skip the EKU Rules
-	pdwEkuRules = (DWORD*) &pkcsData.pbData[dwBaseIndex + sizeof(CIHeader)];
-	for (i = 0; i < Header->EKURuleEntryCount; i++)
-		pdwEkuRules = &pdwEkuRules[(*pdwEkuRules + (2 * sizeof(DWORD) - 1)) / sizeof(DWORD)];
-
-	// Process the Files Rules
-	pbRule = (BYTE*)pdwEkuRules;
-	pe256ssp = malloc(Header->FileRuleEntryCount * PE256_HASHSIZE);
-	if (pe256ssp == NULL)
-		goto out;
-	for (i = 0; i < Header->FileRuleEntryCount; i++) {
-		FileRuleHeader = (CIFileRuleHeader*)pbRule;
-		pbRule = &pbRule[sizeof(CIFileRuleHeader)];
-		if (FileRuleHeader->FileNameLength != 0) {
-//			uprintf("%S", FileRuleHeader->FileName);
-			pbRule = &pbRule[((FileRuleHeader->FileNameLength + sizeof(DWORD) - 1) / sizeof(DWORD)) * sizeof(DWORD)];
-		}
-		FileRuleData = (CIFileRuleData*)pbRule;
-		if (FileRuleData->HashLength > 0x80) {
-			uprintf("ParseSKUSiPolicy: Unexpected hash length for entry %d (0x%02x)", i, FileRuleData->HashLength);
-			// We're probably screwed, so bail out
-			break;
-		}
-		//  We are only interested in 'DENY' type with PE256 hashes
-		if (FileRuleHeader->Type == CI_DENY && FileRuleData->HashLength == PE256_HASHSIZE) {
-			// Microsoft has the bad habit of duplicating entries - only add a hash if it's different from previous entry
-			if ((pe256ssp_size == 0) ||
-				(memcmp(&pe256ssp[(pe256ssp_size - 1) * PE256_HASHSIZE], FileRuleData->Hash, PE256_HASHSIZE) != 0)) {
-				memcpy(&pe256ssp[pe256ssp_size * PE256_HASHSIZE], FileRuleData->Hash, PE256_HASHSIZE);
-				pe256ssp_size++;
-			}
-		}
-		pbRule = &pbRule[sizeof(CIFileRuleData) + ((FileRuleData->HashLength + sizeof(DWORD) - 1) / sizeof(DWORD)) * sizeof(DWORD)];
-	}
-
-	r = TRUE;
-
-out:
-	if (hMsg != NULL)
-		CryptMsgClose(hMsg);
-	free(pkcsData.pbData);
-	free(wpath);
 	return r;
 }

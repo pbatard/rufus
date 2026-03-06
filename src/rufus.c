@@ -93,7 +93,7 @@ static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], u
 
 extern HANDLE update_check_thread;
 extern HIMAGELIST hUpImageList, hDownImageList;
-extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes, is_bootloader_revoked;
+extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes;
 extern BOOL validate_md5sum, cpu_has_sha1_accel, cpu_has_sha256_accel, toggle_dark_mode;
 extern BYTE* fido_script;
 extern HWND hFidoDlg;
@@ -1505,7 +1505,6 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	char tmp[MAX_PATH], tmp2[MAX_PATH], c;
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
-	is_bootloader_revoked = FALSE;
 	safe_free(grub2_buf);
 
 	if (ComboBox_GetCurSel(hDeviceList) == CB_ERR)
@@ -1688,6 +1687,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				if (img_report.win_version.build >= 26200) {
 					StrArrayAdd(&options, lmprintf(MSG_350), TRUE);
 					MAP_BIT(UNATTEND_USE_MS2023_BOOTLOADERS);
+					StrArrayAdd(&options, lmprintf(MSG_324), TRUE);
+					MAP_BIT(UNATTEND_APPLY_SKUSIPOLICY);
 				}
 				if (expert_mode) {
 					StrArrayAdd(&options, lmprintf(MSG_346), TRUE);

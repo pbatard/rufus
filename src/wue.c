@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Windows User Experience
- * Copyright © 2022-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2022-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,6 @@ const char* bypass_name[] = { "BypassTPMCheck", "BypassSecureBootCheck", "Bypass
 int unattend_xml_flags = 0, wintogo_index = -1, wininst_index = 0;
 int unattend_xml_mask = UNATTEND_DEFAULT_SELECTION_MASK;
 char *unattend_xml_path = NULL, unattend_username[MAX_USERNAME_LENGTH];
-BOOL is_bootloader_revoked = FALSE;
 
 extern BOOL validate_md5sum;
 extern uint64_t md5sum_totalbytes;
@@ -65,7 +64,7 @@ char* CreateUnattendXml(int arch, int flags)
 {
 	const static char* xml_arch_names[5] = { "x86", "amd64", "arm", "arm64" };
 	const static char* unallowed_account_names[] = { "Administrator", "Guest", "KRBTGT", "Local", "NONE" };
-	static char path[MAX_PATH];
+	static char path[MAX_PATH], tmp[MAX_PATH];
 	char* tzstr;
 	FILE* fd;
 	TIME_ZONE_INFORMATION tz_info;
@@ -140,7 +139,8 @@ char* CreateUnattendXml(int arch, int flags)
 	}
 
 	if (flags & UNATTEND_OOBE_MASK) {
-		order = 1;
+		StrArray first_logon_commands = STRARRAY_EMPTY;
+		StrArrayCreate(&first_logon_commands, 8);
 		fprintf(fd, "  <settings pass=\"oobeSystem\">\n");
 		if (flags & UNATTEND_OOBE_SHELL_SETUP_MASK) {
 			fprintf(fd, "    <component name=\"Microsoft-Windows-Shell-Setup\" processorArchitecture=\"%s\" language=\"neutral\" "
@@ -200,20 +200,40 @@ char* CreateUnattendXml(int arch, int flags)
 					// Since we set a blank password, we'll ask the user to change it at next logon.
 					// NB: In case you wanna try, please be aware that Microsoft doesn't let you have multiple
 					// <FirstLogonCommands> sections in unattend.xml. Don't ask me how I know... :(
-					fprintf(fd, "      <FirstLogonCommands>\n");
-					fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
-					fprintf(fd, "          <Order>%d</Order>\n", order++);
-					fprintf(fd, "          <CommandLine>net user &quot;%s&quot; /logonpasswordchg:yes</CommandLine>\n", unattend_username);
-					fprintf(fd, "        </SynchronousCommand>\n");
-					// Some people report that using the `net user` command above might reset the password expiration to 90 days...
+					static_sprintf(tmp, "net user &quot;%s&quot; /logonpasswordchg:yes", unattend_username);
+					StrArrayAdd(&first_logon_commands, tmp, TRUE);
+					// The `net user` command above might reset the password expiration to 90 days...
 					// To alleviate that, blanket set passwords on the target machine to never expire.
-					fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
-					fprintf(fd, "          <Order>%d</Order>\n", order++);
-					fprintf(fd, "          <CommandLine>net accounts /maxpwage:unlimited</CommandLine>\n");
-					fprintf(fd, "        </SynchronousCommand>\n");
-					fprintf(fd, "      </FirstLogonCommands>\n");
+					StrArrayAdd(&first_logon_commands, "net accounts /maxpwage:unlimited", TRUE);
 				}
 			}
+
+			// Apply SkuSiPolicy.p7b, if the user requested it and we're not creating a Windows To Go drive.
+			// See https://support.microsoft.com/kb/5042562. We do it post install, on first logon, because
+			// we'd have to patch tons of files otherwise. And we *ALWAYS* use the installed system's
+			// SkuSiPolicy.p7b instead of the host system's, even if the latter might be more recent, on
+			// account that the bootloaders from the installed system might be trailing behind, and wills
+			// produce the 0xc0000428 signature validation error on (re)boot if the system hasn't gone
+			// through a full Windows Update cycle.
+			if (flags & UNATTEND_APPLY_SKUSIPOLICY) {
+				StrArrayAdd(&first_logon_commands, "cmd /c mountvol S: /S &amp;&amp; "
+					"copy %WINDIR%\\system32\\SecureBootUpdates\\SkuSiPolicy.p7b S:\\EFI\\Microsoft\\Boot &amp;&amp; "
+					"mountvol S: /D", TRUE);
+			}
+
+			// Now that we have all the commands to run, create the FirstLogonCommands section.
+			for (order = 1; order <= (int)first_logon_commands.Index; order++) {
+				if (order == 1)
+					fprintf(fd, "      <FirstLogonCommands>\n");
+				fprintf(fd, "        <SynchronousCommand wcm:action=\"add\">\n");
+				fprintf(fd, "          <Order>%d</Order>\n", order);
+				fprintf(fd, "          <CommandLine>%s</CommandLine>\n", first_logon_commands.String[order - 1]);
+				fprintf(fd, "        </SynchronousCommand>\n");
+				if (order == first_logon_commands.Index)
+					fprintf(fd, "      </FirstLogonCommands>\n");
+			}
+			StrArrayDestroy(&first_logon_commands);
+
 			fprintf(fd, "    </component>\n");
 		}
 		if (flags & UNATTEND_OOBE_INTERNATIONAL_MASK) {
@@ -510,31 +530,6 @@ out:
 	return ((img_report.win_version.major != 0) && (img_report.win_version.build != 0));
 }
 
-// Copy this system's SkuSiPolicy.p7b to the target drive so that UEFI bootloaders
-// revoked by Windows through WDAC policy do get flagged as revoked.
-BOOL CopySKUSiPolicy(const char* drive_name)
-{
-	BOOL r = FALSE;
-	char src[MAX_PATH], dst[MAX_PATH];
-	struct __stat64 stat64 = { 0 };
-
-	// Only copy SkuPolicy if we warned about the bootloader being revoked.
-	if ((target_type != TT_UEFI) || !IS_WINDOWS_1X(img_report) ||
-		(pe256ssp_size == 0) || !is_bootloader_revoked)
-		return r;
-
-	static_sprintf(src, "%s\\SecureBootUpdates\\SKUSiPolicy.p7b", system_dir);
-	static_sprintf(dst, "%s\\EFI\\Microsoft\\Boot\\SKUSiPolicy.p7b", drive_name);
-	if ((_stat64U(dst, &stat64) != 0) && (_stat64U(src, &stat64) == 0)) {
-		uprintf("Copying: %s (%s) (from %s)", dst, SizeToHumanReadable(stat64.st_size, FALSE, FALSE), src);
-		r = CopyFileU(src, dst, TRUE);
-		if (!r)
-			uprintf("  Error writing file: %s", WindowsErrorString());
-	}
-
-	return r;
-}
-
 /// <summary>
 /// Checks which versions of Windows are available in an install image
 /// to set our extraction index. Asks the user to select one if needed.
@@ -738,8 +733,6 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		uprintf("Failed to enable boot");
 		ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_EXTRACT));
 	}
-
-	CopySKUSiPolicy((use_esp) ? ms_efi : drive_name);
 
 	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, 99, 100);
 

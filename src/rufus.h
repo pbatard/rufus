@@ -685,8 +685,9 @@ typedef struct {
 #define UNATTEND_DISABLE_BITLOCKER          0x00080
 #define UNATTEND_FORCE_S_MODE               0x00100
 #define UNATTEND_USE_MS2023_BOOTLOADERS     0x00200
-#define UNATTEND_FULL_MASK                  0x003FF
-#define UNATTEND_DEFAULT_MASK               0x002FF		// Mask of values that are persisted
+#define UNATTEND_APPLY_SKUSIPOLICY          0x00400
+#define UNATTEND_FULL_MASK                  0x007FF
+#define UNATTEND_DEFAULT_MASK               0x006FF		// Mask of values that are persisted
 #define UNATTEND_WINDOWS_TO_GO              0x10000		// Special flag for Windows To Go
 
 #define UNATTEND_WINPE_SETUP_MASK           (UNATTEND_SECUREBOOT_TPM_MINRAM)
@@ -815,7 +816,6 @@ extern BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan);
 extern BOOL ExtractZip(const char* src_zip, const char* dest_dir);
 extern int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes);
 extern uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** buf);
-extern BOOL CopySKUSiPolicy(const char* drive_name);
 extern BOOL HasEfiImgBootLoaders(void);
 extern BOOL DumpFatDir(const char* path, int32_t cluster);
 extern BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int fs);
@@ -866,7 +866,6 @@ extern int GetIssuerCertificateInfo(uint8_t* cert, cert_info_t* info);
 extern uint64_t GetSignatureTimeStamp(const char* path);
 extern LONG ValidateSignature(HWND hDlg, const char* path);
 extern BOOL ValidateOpensslSignature(BYTE* pbBuffer, DWORD dwBufferLen, BYTE* pbSignature, DWORD dwSigLen);
-extern BOOL ParseSKUSiPolicy(void);
 extern BOOL IsFontAvailable(const char* font_name);
 extern BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries);
