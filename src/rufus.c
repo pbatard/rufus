@@ -2626,6 +2626,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				return (INT_PTR)TRUE;
 			// Just in case
 			boot_type = (int)ComboBox_GetCurItemData(hBootType);
+			// Prevent asserting if hStart somehow became enabled without an image
+			if ((boot_type == BT_IMAGE) && (image_path == NULL)) {
+				EnableControls(TRUE, FALSE);
+				return (INT_PTR)TRUE;
+			}
 			partition_type = (int)ComboBox_GetCurItemData(hPartitionScheme);
 			target_type = (int)ComboBox_GetCurItemData(hTargetSystem);
 			fs_type = (int)ComboBox_GetCurItemData(hFileSystem);
