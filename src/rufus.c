@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Rufus: The Reliable USB Formatting Utility
  * Copyright © 2011-2026 Pete Batard <pete@akeo.ie>
  *
@@ -2971,6 +2971,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 					img_provided = TRUE;
 					// Simulate image selection click
 					SendMessage(hDlg, WM_COMMAND, IDC_SELECT, 0);
+				} else {
+					EnableControls(TRUE, FALSE);
 				}
 		}
 		break;
