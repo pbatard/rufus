@@ -735,7 +735,6 @@ typedef struct {
 	uint32_t Index;		// Current array size
 	uint32_t Max;		// Maximum array size
 } StrArray;
-#define STRARRAY_EMPTY { NULL, 0, 0 };
 extern void StrArrayCreate(StrArray* arr, uint32_t initial_size);
 extern int32_t StrArrayAdd(StrArray* arr, const char* str, BOOL);
 extern int32_t StrArrayAddUnique(StrArray* arr, const char* str, BOOL);

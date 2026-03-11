@@ -1944,7 +1944,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 					if (buf != NULL) {
 						if (SetFilePointerEx(hPhysical, DriveLayout->PartitionEntry[i].StartingOffset, NULL, FILE_BEGIN) &&
 							ReadFile(hPhysical, buf, SelectedDrive.SectorSize, &size, NULL)) {
-							isUefiNtfs = (strncmp(&buf[0x2B], "UEFI_NTFS", 9) == 0);
+							isUefiNtfs = (strncmp(&buf[0x2B], "UEFI_NTFS", 9) == 0) || (strncmp(&buf[0x2B], "RUFUS_BOOT", 10) == 0);
 						}
 						free(buf);
 					}

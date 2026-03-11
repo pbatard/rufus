@@ -115,8 +115,7 @@ char* CreateUnattendXml(int arch, int flags)
 	TIME_ZONE_INFORMATION tz_info;
 	int i, order;
 	unattend_xml_flags = flags;
-	StrArray commands = STRARRAY_EMPTY;
-	StrArrayCreate(&commands, 8);
+	StrArray commands = { 0 };
 	if (arch < ARCH_X86_32 || arch > ARCH_ARM_64 || flags == 0) {
 		uprintf("Note: No Windows User Experience options selected");
 		return NULL;
@@ -133,6 +132,7 @@ char* CreateUnattendXml(int arch, int flags)
 	fprintf(fd, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 	fprintf(fd, "<unattend xmlns=\"urn:schemas-microsoft-com:unattend\">\n");
 
+	StrArrayCreate(&commands, 8);
 	if (flags & UNATTEND_WINPE_SETUP_MASK) {
 		fprintf(fd, "  <settings pass=\"windowsPE\">\n");
 		fprintf(fd, "    <component name=\"Microsoft-Windows-Setup\" processorArchitecture=\"%s\" language=\"neutral\" "
@@ -1018,7 +1018,6 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 	DWORD dwDisp, dwVal = 1, dwSize;
 	FILE* fd_md5sum;
 	WIMStruct* wim = NULL;
-	StrArray files;
 	struct wimlib_update_command wuc[2] = { 0 };
 
 	assert(unattend_xml_path != NULL);
@@ -1246,6 +1245,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 				WIMLIB_EXTRACT_FLAG_NO_ACLS | WIMLIB_EXTRACT_FLAG_NO_PRESERVE_DIR_STRUCTURE) != 0) {
 			uprintf("Could not extract 2023 signed UEFI bootloaders - Ignoring option");
 		} else {
+			StrArray files;
 			len = (uint32_t)strlen(tmp_path[1]);
 			tmp_dir_end = &tmp_path[1][len];
 

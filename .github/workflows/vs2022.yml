@@ -51,7 +51,7 @@ jobs:
         msbuild-architecture: x64
 
     - name: Install UPX
-      uses: crazy-max/ghaction-upx@v3
+      uses: crazy-max/ghaction-upx@v4
       with:
         install-only: true
 

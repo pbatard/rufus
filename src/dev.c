@@ -476,7 +476,7 @@ BOOL GetDevices(DWORD devnum)
 	const char* bitdefender_label = "Bitdefender Partition";
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
 	htab_table htab_devid = HTAB_EMPTY;
-	StrArray dev_if_path = STRARRAY_EMPTY;
+	StrArray dev_if_path = { 0 };
 	char letter_name[] = " (?:)";
 	char drive_name[] = "?:\\";
 	char setting_name[32];
