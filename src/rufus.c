@@ -1490,7 +1490,7 @@ out:
 // Likewise, boot check will block message processing => use a thread
 static DWORD WINAPI BootCheckThread(LPVOID param)
 {
-	int i, r, username_index = -1;
+	int i, r;
 	FILE *fd;
 	uint32_t len;
 	WPARAM ret = BOOTCHECK_CANCEL;
@@ -1503,6 +1503,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	const char* syslinux = "syslinux";
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
 	char tmp[MAX_PATH], tmp2[MAX_PATH], c;
+	selection_dialog_options_t selection_options = { 0, -1, -1, -1 };
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	safe_free(grub2_buf);
@@ -1610,7 +1611,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
 				}
 				StrArrayAdd(&options, lmprintf(MSG_333), TRUE);
-				username_index = _log2(b);
+				selection_options.username_index = _log2(b);
 				MAP_BIT(UNATTEND_SET_USER);
 				StrArrayAdd(&options, lmprintf(MSG_334), TRUE);
 				MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
@@ -1620,8 +1621,9 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					StrArrayAdd(&options, lmprintf(MSG_346), TRUE);
 					MAP_BIT(UNATTEND_FORCE_S_MODE);
 				}
+				selection_options.mask = remap16(unattend_xml_mask, map, FALSE);
 				i = CustomSelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
-					options.String, options.Index, remap16(unattend_xml_mask, map, FALSE), username_index);
+					options.String, options.Index, &selection_options);
 				StrArrayDestroy(&options);
 				if (i < 0)
 					goto out;
@@ -1676,26 +1678,35 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
 				}
 				StrArrayAdd(&options, lmprintf(MSG_333), TRUE);
-				username_index = _log2(b);
+				selection_options.username_index = _log2(b);
 				MAP_BIT(UNATTEND_SET_USER);
 				StrArrayAdd(&options, lmprintf(MSG_334), TRUE);
+				selection_options.regional_index = _log2(b);
 				MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
 				StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
 				MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
-				StrArrayAdd(&options, lmprintf(MSG_335), TRUE);
-				MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
+				if (IS_WINDOWS_11(img_report)) {
+					StrArrayAdd(&options, lmprintf(MSG_335), TRUE);
+					MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
+				}
 				if (img_report.win_version.build >= 26200) {
 					StrArrayAdd(&options, lmprintf(MSG_350), TRUE);
 					MAP_BIT(UNATTEND_USE_MS2023_BOOTLOADERS);
-					StrArrayAdd(&options, lmprintf(MSG_324), TRUE);
+					StrArrayAdd(&options, lmprintf(MSG_323), TRUE);
 					MAP_BIT(UNATTEND_APPLY_SKUSIPOLICY);
+				}
+				if (IS_WINDOWS_11(img_report)) {
+					StrArrayAdd(&options, lmprintf(MSG_324), TRUE);
+					selection_options.edition_index = _log2(b);
+					MAP_BIT(UNATTEND_SILENT_INSTALL);
 				}
 				if (expert_mode) {
 					StrArrayAdd(&options, lmprintf(MSG_346), TRUE);
 					MAP_BIT(UNATTEND_FORCE_S_MODE);
 				}
+				selection_options.mask = remap16(unattend_xml_mask, map, FALSE);
 				i = CustomSelectionDialog(BS_AUTOCHECKBOX, lmprintf(MSG_327), lmprintf(MSG_328),
-					options.String, options.Index, remap16(unattend_xml_mask, map, FALSE), username_index);
+					options.String, options.Index, &selection_options);
 				StrArrayDestroy(&options);
 				if (i < 0)
 					goto out;

@@ -507,6 +507,14 @@ typedef struct {
 	char* Label;
 } IMG_SAVE;
 
+// Options for the custom selection dialog
+typedef struct {
+	int mask;
+	int username_index;
+	int edition_index;
+	int regional_index;
+} selection_dialog_options_t;
+
 /*
  * Structure and macros used for the extensions specification of FileDialog()
  * You can use:
@@ -686,15 +694,17 @@ typedef struct {
 #define UNATTEND_FORCE_S_MODE               0x00100
 #define UNATTEND_USE_MS2023_BOOTLOADERS     0x00200
 #define UNATTEND_APPLY_SKUSIPOLICY          0x00400
-#define UNATTEND_FULL_MASK                  0x007FF
+#define UNATTEND_SILENT_INSTALL             0x00800
+#define UNATTEND_FULL_MASK                  0x00FFF
 #define UNATTEND_DEFAULT_MASK               0x006FF		// Mask of values that are persisted
 #define UNATTEND_WINDOWS_TO_GO              0x10000		// Special flag for Windows To Go
 
-#define UNATTEND_WINPE_SETUP_MASK           (UNATTEND_SECUREBOOT_TPM_MINRAM)
+#define UNATTEND_WINPE_SETUP_MASK           (UNATTEND_SECUREBOOT_TPM_MINRAM | UNATTEND_SILENT_INSTALL)
 #define UNATTEND_SPECIALIZE_DEPLOYMENT_MASK (UNATTEND_NO_ONLINE_ACCOUNT)
 #define UNATTEND_OOBE_SHELL_SETUP_MASK      (UNATTEND_NO_DATA_COLLECTION | UNATTEND_SET_USER | UNATTEND_DUPLICATE_LOCALE)
 #define UNATTEND_OOBE_INTERNATIONAL_MASK    (UNATTEND_DUPLICATE_LOCALE)
-#define UNATTEND_OOBE_MASK                  (UNATTEND_OOBE_SHELL_SETUP_MASK | UNATTEND_OOBE_INTERNATIONAL_MASK | UNATTEND_DISABLE_BITLOCKER | UNATTEND_USE_MS2023_BOOTLOADERS)
+#define UNATTEND_OOBE_MASK                  (UNATTEND_OOBE_SHELL_SETUP_MASK | UNATTEND_OOBE_INTERNATIONAL_MASK | UNATTEND_DISABLE_BITLOCKER | \
+                                             UNATTEND_USE_MS2023_BOOTLOADERS | UNATTEND_APPLY_SKUSIPOLICY)
 #define UNATTEND_OFFLINE_SERVICING_MASK     (UNATTEND_OFFLINE_INTERNAL_DRIVES | UNATTEND_FORCE_S_MODE)
 #define UNATTEND_DEFAULT_SELECTION_MASK     (UNATTEND_SECUREBOOT_TPM_MINRAM | UNATTEND_NO_ONLINE_ACCOUNT | UNATTEND_OFFLINE_INTERNAL_DRIVES)
 
@@ -769,6 +779,8 @@ extern StrArray modified_files;
  * Shared prototypes
  */
 extern void GetWindowsVersion(windows_version_t* WindowsVersion);
+extern const char* GetEditionName(DWORD ProductType);
+extern int GetEditions(StrArray* version_name, StrArray* version_index);
 extern version_t* GetExecutableVersion(const char* path);
 extern const char* WindowsErrorString(void);
 extern void DumpBufferHex(void *buf, size_t size);
@@ -806,8 +818,8 @@ extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern int NotificationEx(int type, const char* dont_display_setting, const notification_info* more_info, const char* title, const char* format, ...);
 #define Notification(type, title, ...) NotificationEx(type, NULL, NULL, title, __VA_ARGS__)
-extern int CustomSelectionDialog(int style, char* title, char* message, char** choices, int size, int mask, int username_index);
-#define SelectionDialog(title, message, choices, size) CustomSelectionDialog(BS_AUTORADIOBUTTON, title, message, choices, size, 1, -1)
+extern int CustomSelectionDialog(int style, char* title, char* message, char** choices, int size, selection_dialog_options_t* options);
+#define SelectionDialog(title, message, choices, size) CustomSelectionDialog(BS_AUTORADIOBUTTON, title, message, choices, size, NULL)
 extern void ListDialog(char* title, char* message, char** items, int size);
 extern SIZE GetTextSize(HWND hCtrl, char* txt);
 extern BOOL ExtractAppIcon(const char* filename, BOOL bSilent);

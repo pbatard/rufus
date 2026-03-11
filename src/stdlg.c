@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * Standard Dialog Routines (Browse for folder, About, etc)
- * Copyright © 2011-2025 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@
 /* Globals */
 extern BOOL is_x86_64, appstore_version;
 extern char unattend_username[MAX_USERNAME_LENGTH], *sbat_level_txt, *sb_active_txt, *sb_revoked_txt;
+extern int unattend_edition_index;
 extern HICON hSmallIcon, hBigIcon;
 static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
 static char* szMessageText = NULL;
@@ -787,8 +788,39 @@ int NotificationEx(int type, const char* dont_display_setting, const notificatio
 	return (int)ret;
 }
 
+static int GetComboBoxMinWidth(HWND hCtrl, StrArray* array)
+{
+	HDC hDC = GetDC(hCtrl);
+	HFONT hFont = (HFONT)SendMessage(hCtrl, WM_GETFONT, 0, 0);
+	HFONT hOldFont = (HFONT)SelectObject(hDC, hFont);
+	SIZE size;
+	uint32_t i;
+	int max_width = 0, arrow_width, padding;
+
+	if (array == NULL || array->String == NULL) {
+		ReleaseDC(hCtrl, hDC);
+		return 0;
+	}
+
+	for (i = 0; i < array->Index; i++) {
+		GetTextExtentPoint32A(hDC, array->String[i], (int)strlen(array->String[i]), &size);
+		if (size.cx > max_width)
+			max_width = size.cx;
+	}
+	SelectObject(hDC, hOldFont);
+	ReleaseDC(hCtrl, hDC);
+
+	// Add the dropdown arrow button width + some padding
+	arrow_width = GetSystemMetrics(SM_CXVSCROLL);
+	padding = GetSystemMetrics(SM_CXEDGE) * 4 + 8;
+
+	return max_width + arrow_width + padding;
+}
+
 // We only ever display one selection dialog, so set some params as globals
-static int selection_dialog_style, selection_dialog_mask, selection_dialog_username_index;
+static int selection_dialog_style;
+static selection_dialog_options_t* selection_options = NULL;
+static BOOL silent_install_checked = FALSE;
 
 /*
  * Custom dialog for radio button selection dialog
@@ -803,19 +835,22 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
 		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
 	static HBRUSH background_brush, separator_brush;
-	char username[128] = { 0 };
+	static HFONT hDlgFont = NULL;
+	char username[128] = { 0 }, str[MAX_PATH];
 	int i, m, dw, dh, r = -1, mw;
 	DWORD size = sizeof(username);
 	LRESULT loc;
 	// To use the system message font
 	NONCLIENTMETRICS ncm;
 	RECT rc, rc2;
-	static HFONT hDlgFont = NULL;
 	HWND hCtrl;
 	HDC hDC;
 
 	switch (message) {
 	case WM_INITDIALOG:
+		StrArray version_name = { 0 }, version_index = { 0 };
+		StrArrayCreate(&version_name, 16);
+		StrArrayCreate(&version_index, 16);
 		SetDarkModeForDlg(hDlg);
 		// Don't overflow our max radio button
 		if (nDialogItems > (IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1 + 1)) {
@@ -852,23 +887,27 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		mw = rc.right - rc.left - ddw;	// ddw seems to work okay as a fudge
 		dw = mw;
 
+		r = GetEditions(&version_name, &version_index);
+
 		// Change the default icon and set the text
 		Static_SetIcon(GetDlgItem(hDlg, IDC_SELECTION_ICON), LoadIcon(NULL, IDI_QUESTION));
 		SetWindowTextU(hDlg, szMessageTitle);
 		SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007));
 		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_TEXT), szMessageText);
 		for (i = 0; i < nDialogItems; i++) {
-			char* str = szDialogItem[i];
+			static_strcpy(str, szDialogItem[i]);
 			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), str);
 			ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), SW_SHOW);
-			// Compute the maximum line's width (with some extra for the username field if needed)
-			if (i == selection_dialog_username_index) {
-				str = calloc(strlen(szDialogItem[i]) + strlen(base_username) + 8, 1);
-				sprintf(str, "%s __%s__", szDialogItem[i], base_username);
+			// Compute the maximum line's width (with some extra for the username and edition fields)
+			if (selection_options != NULL && i == selection_options->username_index) {
+				static_sprintf(str, "%s __%s__", szDialogItem[i], base_username);
+				mw = max(mw, GetTextSize(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), str).cx);
+			} else if (selection_options != NULL && i == selection_options->edition_index) {
+				mw = max(mw, GetTextSize(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), str).cx +
+					GetComboBoxMinWidth(GetDlgItem(hDlg, IDC_SELECTION_EDITION), &version_name));
+			} else {
+				mw = max(mw, GetTextSize(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), str).cx);
 			}
-			mw = max(mw, GetTextSize(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), str).cx);
-			if (i == selection_dialog_username_index)
-				free(str);
 		}
 		// If our maximum line's width is greater than the default, set a nonzero delta width
 		dw = (mw <= dw) ? 0 : mw - dw;
@@ -887,12 +926,12 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, dw, 0, 1.0f);
 
 		// If required, set up the the username edit box
-		if (selection_dialog_username_index != -1) {
+		if (selection_options != NULL && selection_options->username_index != -1) {
 			unattend_username[0] = 0;
-			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_dialog_username_index);
+			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->username_index);
 			GetClientRect(hCtrl, &rc);
 			ResizeMoveCtrl(hDlg, hCtrl, 0, 0,
-				(rc.left - rc.right) + GetTextSize(hCtrl, szDialogItem[selection_dialog_username_index]).cx + ddw, 0, 1.0f);
+				(rc.left - rc.right) + GetTextSize(hCtrl, szDialogItem[selection_options->username_index]).cx + ddw, 0, 1.0f);
 			GetWindowRect(hCtrl, &rc);
 			SetWindowPos(GetDlgItem(hDlg, IDC_SELECTION_USERNAME), hCtrl, rc.left, rc.top, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_USERNAME);
@@ -902,6 +941,25 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 			if (!GetUserNameU(username, &size) || username[0] == 0)
 				static_strcpy(username, "User");
 			SetWindowTextU(hCtrl, username);
+			ShowWindow(hCtrl, SW_SHOW);
+		}
+
+		// If required, set up the the edition combo box
+		if (selection_options != NULL && selection_options->edition_index != -1 && version_name.String != NULL && version_name.Index > 0) {
+			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->edition_index);
+			GetClientRect(hCtrl, &rc);
+			ResizeMoveCtrl(hDlg, hCtrl, 0, 0,
+				(rc.left - rc.right) + GetTextSize(hCtrl, szDialogItem[selection_options->edition_index]).cx + ddw, 0, 1.0f);
+			GetWindowRect(hCtrl, &rc);
+			SetWindowPos(GetDlgItem(hDlg, IDC_SELECTION_EDITION), hCtrl, rc.left, rc.top, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_EDITION);
+			GetWindowRect(hCtrl, &rc2);
+			ResizeMoveCtrl(hDlg, hCtrl, right_to_left_mode ? rc2.right - rc.left : rc.right - rc2.left, rc.top - rc2.top,
+				GetComboBoxMinWidth(hCtrl, &version_name), 0, 1.0f);
+			for (i = 0; i < (int)version_name.Index; i++)
+				IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, version_name.String[i]),
+					(LPARAM)atoi(version_index.String[i])));
+			IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, unattend_edition_index));
 			ShowWindow(hCtrl, SW_SHOW);
 		}
 
@@ -922,8 +980,17 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 
 		// Set the default selection
 		for (i = 0, m = 1; i < nDialogItems; i++, m <<= 1)
-			Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), (m & selection_dialog_mask) ? BST_CHECKED : BST_UNCHECKED);
+			Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i),
+				((selection_options == NULL && i == 0) || (selection_options != NULL && (m & selection_options->mask))) ? BST_CHECKED : BST_UNCHECKED);
+		if (selection_options != NULL && selection_options->username_index > 0 && selection_options->edition_index > 0) {
+			BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->username_index));
+			EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->edition_index), enable);
+			EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_EDITION), enable);
+		}
+
 		SetDarkModeForChild(hDlg);
+		StrArrayDestroy(&version_name);
+		StrArrayDestroy(&version_index);
 		return (INT_PTR)TRUE;
 	case WM_CTLCOLORSTATIC:
 		// Change the background colour for static text and icon
@@ -945,12 +1012,29 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		safe_delete_object(hDlgFont);
 		break;
 	case WM_COMMAND:
-		switch (LOWORD(wParam)) {
+		WORD command = LOWORD(wParam);
+		if (command >= IDC_SELECTION_CHOICE1 && command < IDC_SELECTION_CHOICEMAX) {
+			// Check if the local account name or regional settings checkbox was clicked and enable/disable the silent install option
+			if (selection_options != NULL && selection_options->username_index > 0 && selection_options->edition_index > 0 && selection_options->regional_index > 0 &&
+				(command - IDC_SELECTION_CHOICE1 == selection_options->username_index || command - IDC_SELECTION_CHOICE1 == selection_options->regional_index)) {
+				BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->username_index)) &&
+					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->regional_index));
+				hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->edition_index);
+				if (!enable && IsWindowEnabled(hCtrl)) {
+					silent_install_checked = (Button_GetCheck(hCtrl) == BST_CHECKED);
+					Button_SetCheck(hCtrl, FALSE);
+				} else if (enable && !IsWindowEnabled(hCtrl)) {
+					Button_SetCheck(hCtrl, silent_install_checked);
+				}
+				EnableWindow(hCtrl, enable);
+				EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_EDITION), enable);
+			}
+		} else switch (LOWORD(wParam)) {
 		case IDOK:
 			for (r = 0, i = 0, m = 1; i < nDialogItems; i++, m <<= 1)
 				if (Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)) == BST_CHECKED)
 					r += m;
-			if (selection_dialog_username_index != -1) {
+			if (selection_options != NULL && selection_options->username_index != -1) {
 				GetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_USERNAME), unattend_username, MAX_USERNAME_LENGTH);
 				// Perform string sanitization (NB: GetWindowTextU always terminates the string)
 				for (i = 0; unattend_username[i] != 0; i++) {
@@ -958,6 +1042,8 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 						unattend_username[i] = '_';
 				}
 			}
+			if (selection_options != NULL && selection_options->edition_index != -1)
+				unattend_edition_index = (int)ComboBox_GetCurItemData(GetDlgItem(hDlg, IDC_SELECTION_EDITION));
 			// Fall through
 		case IDNO:
 		case IDCANCEL:
@@ -972,7 +1058,7 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 /*
  * Display an item selection dialog
  */
-int CustomSelectionDialog(int style, char* title, char* message, char** choices, int size, int mask, int username_index)
+int CustomSelectionDialog(int style, char* title, char* message, char** choices, int size, selection_dialog_options_t* options)
 {
 	int ret;
 
@@ -981,10 +1067,9 @@ int CustomSelectionDialog(int style, char* title, char* message, char** choices,
 	szMessageText = message;
 	szDialogItem = choices;
 	nDialogItems = size;
+	selection_options = options;
 	selection_dialog_style = style;
-	selection_dialog_mask = mask;
-	selection_dialog_username_index = username_index;
-	assert(selection_dialog_style == BS_AUTORADIOBUTTON || selection_dialog_style == BS_AUTOCHECKBOX);
+	assert(style == BS_AUTORADIOBUTTON || style == BS_AUTOCHECKBOX);
 	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, CustomSelectionCallback);
 	dialog_showing--;
 
