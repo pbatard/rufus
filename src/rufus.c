@@ -1503,7 +1503,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	const char* syslinux = "syslinux";
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
 	char tmp[MAX_PATH], tmp2[MAX_PATH], c;
-	selection_dialog_options_t selection_options = { 0, -1, -1, -1 };
+	selection_dialog_options_t selection_options = { 0, -1, -1, -1, -1 };
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	safe_free(grub2_buf);
@@ -1684,21 +1684,22 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				selection_options.regional_index = _log2(b);
 				MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
 				StrArrayAdd(&options, lmprintf(MSG_331), TRUE);
+				selection_options.privacy_index = _log2(b);
 				MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
 				if (IS_WINDOWS_11(img_report)) {
 					StrArrayAdd(&options, lmprintf(MSG_335), TRUE);
 					MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
-				}
-				if (img_report.win_version.build >= 26200) {
-					StrArrayAdd(&options, lmprintf(MSG_350), TRUE);
-					MAP_BIT(UNATTEND_USE_MS2023_BOOTLOADERS);
-					StrArrayAdd(&options, lmprintf(MSG_323), TRUE);
-					MAP_BIT(UNATTEND_APPLY_SKUSIPOLICY);
-				}
-				if (IS_WINDOWS_11(img_report)) {
 					StrArrayAdd(&options, lmprintf(MSG_324), TRUE);
+					MAP_BIT(UNATTEND_QOL_ENHANCEMENTS);
+					StrArrayAdd(&options, lmprintf(MSG_355), TRUE);
 					selection_options.edition_index = _log2(b);
 					MAP_BIT(UNATTEND_SILENT_INSTALL);
+					if (img_report.win_version.build >= 26200) {
+						StrArrayAdd(&options, lmprintf(MSG_350), TRUE);
+						MAP_BIT(UNATTEND_USE_MS2023_BOOTLOADERS);
+						StrArrayAdd(&options, lmprintf(MSG_323), TRUE);
+						MAP_BIT(UNATTEND_APPLY_SKUSIPOLICY);
+					}
 				}
 				if (expert_mode) {
 					StrArrayAdd(&options, lmprintf(MSG_346), TRUE);

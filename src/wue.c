@@ -132,7 +132,7 @@ char* CreateUnattendXml(int arch, int flags)
 	fprintf(fd, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 	fprintf(fd, "<unattend xmlns=\"urn:schemas-microsoft-com:unattend\">\n");
 
-	StrArrayCreate(&commands, 8);
+	StrArrayCreate(&commands, 16);
 	if (flags & UNATTEND_WINPE_SETUP_MASK) {
 		fprintf(fd, "  <settings pass=\"windowsPE\">\n");
 		fprintf(fd, "    <component name=\"Microsoft-Windows-Setup\" processorArchitecture=\"%s\" language=\"neutral\" "
@@ -261,8 +261,22 @@ char* CreateUnattendXml(int arch, int flags)
 		// This part was picked from https://github.com/AveYo/MediaCreationTool.bat/blob/main/bypass11/AutoUnattend.xml
 		// NB: This is INCOMPATIBLE with S-Mode below
 		if (flags & UNATTEND_NO_ONLINE_ACCOUNT) {
-			StrArrayAdd(&commands, "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OOBE\" /v BypassNRO /t REG_DWORD /d 1 /f", TRUE);
+			StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\OOBE\" /v BypassNRO /t REG_DWORD /d 1 /f", TRUE);
 			uprintf("• Bypass online account requirement");
+		}
+		if (flags & UNATTEND_QOL_ENHANCEMENTS) {
+			uprintf("• QoL: Disable OneDrive and Outlook by default");
+			// Remove OneDrive
+			StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Policies\\Microsoft\\Windows\\OneDrive\" /v DisableFileSyncNGSC /t REG_DWORD /d 1 /f", TRUE);
+			StrArrayAdd(&commands, "PowerShell -NonInteractive -WindowStyle Hidden -Command "
+				"\"Remove-Item -Path $env:SystemRoot\\System32\\OneDriveSetup.exe -Force -Confirm:$false;"
+				"\"Remove-Item -Path $env:SystemRoot\\SysWOW64\\OneDriveSetup.exe -Force -Confirm:$false;", TRUE);
+			// Remove Outlook. How the frig is forcing Outlook on users legal when MS got pinned for bundling IE with Windows?
+			StrArrayAdd(&commands, "PowerShell -NonInteractive -WindowStyle Hidden -Command "
+				"\"Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -like '*OutlookForWindows*'} |"
+				" Remove-AppxProvisionedPackage -Online\"", TRUE);
+			StrArrayAdd(&commands, "PowerShell -NonInteractive -WindowStyle Hidden -Command "
+				"\"Get-AppxPackage -AllUsers *OutlookForWindows* | Remove-AppxPackage -AllUsers\"", TRUE);
 		}
 		// Now that we have all the commands to run, create the RunSynchronous section.
 		for (order = 1; order <= (int)commands.Index; order++) {
@@ -362,6 +376,51 @@ char* CreateUnattendXml(int arch, int flags)
 					"copy %WINDIR%\\system32\\SecureBootUpdates\\SkuSiPolicy.p7b S:\\EFI\\Microsoft\\Boot &amp;&amp; "
 					"mountvol S: /D", TRUE);
 			}
+			if (flags & UNATTEND_QOL_ENHANCEMENTS) {
+				uprintf("• QoL: Disable Fast Startup, Copilot, Recommendations, News and Teams by default");
+				// Disable Fast Startup 
+				StrArrayAdd(&commands, "reg add \"HKLM\\System\\CurrentControlSet\\Control\\Session Manager\\Power\" "
+					"/v HiberbootEnabled /t REG_DWORD /d 0 /f", TRUE);
+				// Disable Copilot and set search as an icon rather than the default real-estate gobbler
+				StrArrayAdd(&commands, "reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\" "
+					"/v ShowCopilotButton /t REG_DWORD /d 0 /f", TRUE);
+				StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Policies\\Microsoft\\Windows\\WindowsCopilot\" "
+					"/v TurnOffWindowsCopilot /t REG_DWORD /d 1 /f", TRUE);
+				StrArrayAdd(&commands, "reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search\" "
+					"/v SearchboxTaskbarMode /t REG_DWORD /d 1 /f", TRUE);
+				StrArrayAdd(&commands, "reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search\" "
+					"/v SearchboxTaskbarModeCache /t REG_DWORD /d 1 /f", TRUE);
+				// Disable Windows Phone and similarly pushed unwanted crap
+				StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Policies\\Microsoft\\Windows\\CloudContent\" "
+					"/v DisableWindowsConsumerFeatures /t REG_DWORD /d 1 /f", TRUE);
+				// Disable News
+				StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Policies\\Microsoft\\Dsh\" "
+					"/v AllowNewsAndInterests /t REG_DWORD /d 0 /f", TRUE);
+				StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Policies\\Microsoft\\Windows\\Windows Feeds\" "
+					"/v EnableFeeds /t REG_DWORD /d 0 /f", TRUE);
+				// Disable Teams
+				StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Communications\" "
+					"/v ConfigureChatAutoInstall /t REG_DWORD /d 0 /f", TRUE);
+				// Prevent frigging Outlook from being forced into the user's taskbar
+				StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Policies\\Microsoft\\Windows\\CloudContent\" "
+					"/v DisableCloudOptimizedContent /t REG_DWORD /d 1 /f", TRUE);
+				// Skip Edge's first run dialog
+				StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Policies\\Microsoft\\Edge\" "
+					"/v HideFirstRunExperience /t REG_DWORD /d 1 /f", TRUE);
+				uprintf("• QoL: More pins for the Start Menu and enable useful shortcuts");
+				// More pins by default on the Start Menu
+				// https://learn.microsoft.com/en-us/windows/apps/develop/settings/settings-windows-11
+				StrArrayAdd(&commands, "reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\" "
+					"/v Start_Layout /t REG_DWORD /d 1 /f", TRUE);
+				// Add Documents, Downloads, Network, Personal Folder, File Explorer and Settings as start menu shortcuts
+				// I wish there was a more transparent way of doing it, but Microsoft made it obscure. Oh, and for some
+				// reason, feeding the full hex string through 'reg add' doesn't create the key when ran through unattend
+				// (but doesn't produce an error and works post logon). PowerShell it is then...
+				StrArrayAdd(&commands, "PowerShell -NonInteractive -WindowStyle Hidden -Command "
+					"\"Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Start' "
+					"-Name 'VisiblePlaces' -Value $([convert]::FromBase64String('ztU0LVr6Q0WC8iLm6vd3PC+zZ+PeiVVDv85h83sYqTe8JIo"
+					"UDNaJQqCAbtm7okiCRIF1/g0IrkKL2jTtl7ZjlEqwvXRK+WhPi9ZDmAcdqLyGCHNSqlFDQp97J3ZYRlnU')) -Type 'Binary'\"", TRUE);
+			}
 			// Now that we have all the commands to run, create the FirstLogonCommands section.
 			for (order = 1; order <= (int)commands.Index; order++) {
 				if (order == 1)
@@ -395,7 +454,7 @@ char* CreateUnattendXml(int arch, int flags)
 			fprintf(fd, "    </component>\n");
 		}
 		if (flags & UNATTEND_DISABLE_BITLOCKER) {
-			uprintf("• Disable bitlocker");
+			uprintf("• Disable BitLocker");
 			fprintf(fd, "    <component name=\"Microsoft-Windows-SecureStartup-FilterDriver\" processorArchitecture=\"%s\" language=\"neutral\" "
 				"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);

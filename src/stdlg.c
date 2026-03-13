@@ -1014,11 +1014,13 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 	case WM_COMMAND:
 		WORD command = LOWORD(wParam);
 		if (command >= IDC_SELECTION_CHOICE1 && command < IDC_SELECTION_CHOICEMAX) {
-			// Check if the local account name or regional settings checkbox was clicked and enable/disable the silent install option
+			// Check if local account + regional settings + data collection checkboxes are clicked and enable/disable the silent install option
 			if (selection_options != NULL && selection_options->username_index > 0 && selection_options->edition_index > 0 && selection_options->regional_index > 0 &&
-				(command - IDC_SELECTION_CHOICE1 == selection_options->username_index || command - IDC_SELECTION_CHOICE1 == selection_options->regional_index)) {
+				(command - IDC_SELECTION_CHOICE1 == selection_options->username_index || command - IDC_SELECTION_CHOICE1 == selection_options->regional_index ||
+					command - IDC_SELECTION_CHOICE1 == selection_options->privacy_index)) {
 				BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->username_index)) &&
-					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->regional_index));
+					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->regional_index)) &&
+					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->privacy_index));
 				hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->edition_index);
 				if (!enable && IsWindowEnabled(hCtrl)) {
 					silent_install_checked = (Button_GetCheck(hCtrl) == BST_CHECKED);
@@ -1031,6 +1033,11 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 			}
 		} else switch (LOWORD(wParam)) {
 		case IDOK:
+			// Produce a big scary warning if the silent install option was selected
+			if (selection_options != NULL && selection_options->edition_index >= 0 &&
+				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->edition_index)) &&
+				Notification(MB_YESNO | MB_ICONWARNING, APPLICATION_NAME, lmprintf(MSG_356)) != IDYES)
+				break;
 			for (r = 0, i = 0, m = 1; i < nDialogItems; i++, m <<= 1)
 				if (Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)) == BST_CHECKED)
 					r += m;
