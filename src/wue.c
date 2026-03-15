@@ -734,8 +734,9 @@ int GetEditions(StrArray* version_name, StrArray* version_index)
 {
 	int i, r, n = -1;
 	WIMStruct* wim = NULL;
+	selection_dialog_options_t selection = { 0 };
 	const char* edition_suffix;
-	char *install_names[MAX_WININST], *edition_name;
+	char *edition_name;
 	wchar_t wim_path[4 * MAX_PATH] = L"", * xml = NULL;
 	size_t xml_len;
 	BOOL bNonStandard = FALSE;
@@ -743,9 +744,11 @@ int GetEditions(StrArray* version_name, StrArray* version_index)
 
 	// If we have multiple windows install images, ask the user the one to use
 	if (img_report.wininst_index > 1) {
+		StrArrayCreate(&selection.choices, 16);
 		for (i = 0; i < img_report.wininst_index; i++)
-			install_names[i] = &img_report.wininst_path[i][2];
-		wininst_index = _log2(SelectionDialog(lmprintf(MSG_130), lmprintf(MSG_131), install_names, img_report.wininst_index));
+			StrArrayAdd(&selection.choices, &img_report.wininst_path[i][2], TRUE);
+		wininst_index = _log2(SelectionDialog(lmprintf(MSG_130), lmprintf(MSG_131), &selection));
+		StrArrayDestroy(&selection.choices);
 		if (wininst_index < 0)
 			return -2;
 		if (wininst_index >= MAX_WININST)
@@ -820,12 +823,12 @@ int SetWinToGoIndex(void)
 {
 	int i, r;
 	WIMStruct* wim = NULL;
-	char* install_names[MAX_WININST];
 	wchar_t wim_path[4 * MAX_PATH] = L"", *xml = NULL;
 	size_t xml_len;
-	StrArray version_name = { 0 }, version_index = { 0 };
+	StrArray version_index = { 0 };
 	BOOL bNonStandard = FALSE;
 	ezxml_t index = NULL, image = NULL;
+	selection_dialog_options_t selection = { 0 };
 
 	// Sanity checks
 	wintogo_index = -1;
@@ -835,9 +838,11 @@ int SetWinToGoIndex(void)
 
 	// If we have multiple windows install images, ask the user the one to use
 	if (img_report.wininst_index > 1) {
+		StrArrayCreate(&selection.choices, 16);
 		for (i = 0; i < img_report.wininst_index; i++)
-			install_names[i] = &img_report.wininst_path[i][2];
-		wininst_index = _log2(SelectionDialog(lmprintf(MSG_130), lmprintf(MSG_131), install_names, img_report.wininst_index));
+			StrArrayAdd(&selection.choices, &img_report.wininst_path[i][2], TRUE);
+		wininst_index = _log2(SelectionDialog(lmprintf(MSG_130), lmprintf(MSG_131), &selection));
+		StrArrayDestroy(&selection.choices);
 		if (wininst_index < 0)
 			return -2;
 		if (wininst_index >= MAX_WININST)
@@ -864,7 +869,7 @@ int SetWinToGoIndex(void)
 		goto out;
 	}
 
-	StrArrayCreate(&version_name, 16);
+	StrArrayCreate(&selection.choices, 16);
 	StrArrayCreate(&version_index, 16);
 	index = ezxml_parse_str((char*)xml, xml_len);
 	if (index == NULL) {
@@ -877,10 +882,10 @@ int SetWinToGoIndex(void)
 		image = image->next, i++) {
 		// Some people are apparently creating *unofficial* Windows ISOs that don't have DISPLAYNAME elements.
 		// If we are parsing such an ISO, try to fall back to using DESCRIPTION.
-		if (StrArrayAdd(&version_name, ezxml_child_val(image, "DISPLAYNAME"), TRUE) < 0) {
-			if (StrArrayAdd(&version_name, ezxml_child_val(image, "DESCRIPTION"), TRUE) < 0) {
+		if (StrArrayAdd(&selection.choices, ezxml_child_val(image, "DISPLAYNAME"), TRUE) < 0) {
+			if (StrArrayAdd(&selection.choices, ezxml_child_val(image, "DESCRIPTION"), TRUE) < 0) {
 				uprintf("WARNING: Could not find a description for image index %d", i + 1);
-				StrArrayAdd(&version_name, "Unknown Windows Version", TRUE);
+				StrArrayAdd(&selection.choices, "Unknown Windows Version", TRUE);
 			}
 			bNonStandard = TRUE;
 		}
@@ -890,7 +895,7 @@ int SetWinToGoIndex(void)
 
 	if (i > 1)
 		// NB: _log2 returns -2 if SelectionDialog() returns negative (user cancelled)
-		i = _log2(SelectionDialog(lmprintf(MSG_291), lmprintf(MSG_292), version_name.String, i)) + 1;
+		i = _log2(SelectionDialog(lmprintf(MSG_291), lmprintf(MSG_292), &selection)) + 1;
 	if (i < 0)
 		wintogo_index = -2;	// Cancelled by the user
 	else if (i == 0)
@@ -904,7 +909,7 @@ int SetWinToGoIndex(void)
 		if (img_report.win_version.major == 0 || img_report.win_version.build == 0)
 			uprintf("WARNING: Could not obtain version information from XML index (Nonstandard Windows image?)");
 		uprintf("Will use '%s' (Build: %d, Index %s) for Windows To Go",
-			version_name.String[i - 1], img_report.win_version.build, version_index.String[i - 1]);
+			selection.choices.String[i - 1], img_report.win_version.build, version_index.String[i - 1]);
 		// Need Windows 10 Creator Update or later for boot on REMOVABLE to work
 		if ((img_report.win_version.build < 15000) && (SelectedDrive.MediaType != FixedMedia)) {
 			if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_190), lmprintf(MSG_098)) != IDYES)
@@ -920,7 +925,7 @@ int SetWinToGoIndex(void)
 	}
 
 out:
-	StrArrayDestroy(&version_name);
+	StrArrayDestroy(&selection.choices);
 	StrArrayDestroy(&version_index);
 	free(xml);
 	ezxml_free(index);

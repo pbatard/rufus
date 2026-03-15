@@ -507,15 +507,6 @@ typedef struct {
 	char* Label;
 } IMG_SAVE;
 
-// Options for the custom selection dialog
-typedef struct {
-	int mask;
-	int username_index;
-	int edition_index;
-	int regional_index;
-	int privacy_index;
-} selection_dialog_options_t;
-
 /*
  * Structure and macros used for the extensions specification of FileDialog()
  * You can use:
@@ -745,6 +736,17 @@ extern void StrArrayClear(StrArray* arr);
 extern void StrArrayDestroy(StrArray* arr);
 #define IsStrArrayEmpty(arr) (arr.Index == 0)
 
+// Options for the custom selection dialog
+typedef struct {
+	int style;
+	int mask;
+	int username_index;
+	int edition_index;
+	int regional_index;
+	int privacy_index;
+	StrArray choices;
+} selection_dialog_options_t;
+
 /*
  * Globals
  */
@@ -819,8 +821,7 @@ extern void DestroyTooltip(HWND hWnd);
 extern void DestroyAllTooltips(void);
 extern int NotificationEx(int type, const char* dont_display_setting, const notification_info* more_info, const char* title, const char* format, ...);
 #define Notification(type, title, ...) NotificationEx(type, NULL, NULL, title, __VA_ARGS__)
-extern int CustomSelectionDialog(int style, char* title, char* message, char** choices, int size, selection_dialog_options_t* options);
-#define SelectionDialog(title, message, choices, size) CustomSelectionDialog(BS_AUTORADIOBUTTON, title, message, choices, size, NULL)
+extern int SelectionDialog(char* title, char* message, selection_dialog_options_t* options);
 extern void ListDialog(char* title, char* message, char** items, int size);
 extern SIZE GetTextSize(HWND hCtrl, char* txt);
 extern BOOL ExtractAppIcon(const char* filename, BOOL bSilent);

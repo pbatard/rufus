@@ -50,21 +50,32 @@ extern BOOL is_x86_64, appstore_version;
 extern char unattend_username[MAX_USERNAME_LENGTH], *sbat_level_txt, *sb_active_txt, *sb_revoked_txt;
 extern int unattend_edition_index;
 extern HICON hSmallIcon, hBigIcon;
-static HICON hMessageIcon = (HICON)INVALID_HANDLE_VALUE;
-static char* szMessageText = NULL;
-static char* szMessageTitle = NULL;
-static char **szDialogItem;
-static int nDialogItems;
-static HWND hUpdatesDlg;
-static const SETTEXTEX friggin_microsoft_unicode_amateurs = { ST_DEFAULT, CP_UTF8 };
-static int notification_type;
-static const notification_info* notification_more_info;
-static const char* notification_dont_display_setting;
-static WNDPROC update_original_proc = NULL;
-static HWINEVENTHOOK ap_weh = NULL;
-static char title_str[2][128], button_str[128];
-HWND hFidoDlg = NULL;
+extern HWND hFidoDlg;
 
+static struct {
+	char* szMessageText;
+	char* szMessageTitle;
+	char **szDialogItem;
+	int nDialogItems;
+} list_data = { 0 };
+static struct {
+	char* szMessageText;
+	char* szMessageTitle;
+	selection_dialog_options_t* options;
+} selection_data = { 0 };
+static struct {
+	HICON hMessageIcon;
+	char* szMessageText;
+	char* szMessageTitle;
+	int type;
+	const notification_info* more_info;
+	const char* dont_display_setting;
+} notification_data = { 0 };
+static struct {
+	char title_str[2][128];
+	char button_str[128];
+	HWINEVENTHOOK weh;
+} alert_data = { 0 };
 static int update_settings_reposition_ids[] = {
 	IDI_ICON,
 	IDC_POLICY,
@@ -77,6 +88,8 @@ static int update_settings_reposition_ids[] = {
 	IDC_CHECK_NOW,
 	IDCANCEL,
 };
+static const SETTEXTEX friggin_microsoft_unicode_amateurs = { ST_DEFAULT, CP_UTF8 };
+static WNDPROC update_original_proc = NULL;
 
 /*
  * https://blogs.msdn.microsoft.com/oldnewthing/20040802-00/?p=38283/
@@ -569,32 +582,32 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		buttonface_brush = GetSysColorBrush(COLOR_BTNFACE);
 		CenterDialog(hDlg, NULL);
 		// Change the default message icon
-		switch (notification_type & 0xF0) {
+		switch (notification_data.type & 0xF0) {
 		case MB_ICONERROR:
-			hMessageIcon = LoadIcon(NULL, IDI_ERROR);
+			notification_data.hMessageIcon = LoadIcon(NULL, IDI_ERROR);
 			break;
 		case MB_ICONWARNING:
-			hMessageIcon = LoadIcon(NULL, IDI_WARNING);
+			notification_data.hMessageIcon = LoadIcon(NULL, IDI_WARNING);
 			// I really have no idea at what scaling factors Microsoft switches icons.
 			// However, the 200% icon has a jarring white pixel in dark mode, because
 			// Microsoft forgot to set that pixel to transparent, that we need to fix.
 			if (fScale > 1.75f && fScale < 2.5f)
-				hMessageIcon = FixWarningIcon(hMessageIcon);
+				notification_data.hMessageIcon = FixWarningIcon(notification_data.hMessageIcon);
 			break;
 		case MB_ICONQUESTION:
-			hMessageIcon = LoadIcon(NULL, IDI_QUESTION);
+			notification_data.hMessageIcon = LoadIcon(NULL, IDI_QUESTION);
 			break;
 		default:
-			hMessageIcon = LoadIcon(NULL, IDI_INFORMATION);
+			notification_data.hMessageIcon = LoadIcon(NULL, IDI_INFORMATION);
 			break;
 		}
-		if (Static_SetIcon(GetDlgItem(hDlg, IDC_NOTIFICATION_ICON), hMessageIcon) == 0)
+		if (Static_SetIcon(GetDlgItem(hDlg, IDC_NOTIFICATION_ICON), notification_data.hMessageIcon) == 0)
 			uprintf("Could not set the notification dialog icon");
 		// Set the dialog title
-		if (szMessageTitle != NULL)
-			SetWindowTextU(hDlg, szMessageTitle);
+		if (notification_data.szMessageTitle != NULL)
+			SetWindowTextU(hDlg, notification_data.szMessageTitle);
 		// Enable/disable the buttons and set text
-		switch (notification_type & 0x0F) {
+		switch (notification_data.type & 0x0F) {
 		case MB_OKCANCEL:
 			SetWindowTextU(GetDlgItem(hDlg, IDYES), "OK");
 			SetWindowTextU(GetDlgItem(hDlg, IDNO), lmprintf(MSG_007));
@@ -638,7 +651,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			break;
 		}
 		hCtrl = GetDlgItem(hDlg, IDC_DONT_DISPLAY_AGAIN);
-		if (notification_dont_display_setting != NULL) {
+		if (notification_data.dont_display_setting != NULL) {
 			SetWindowTextU(hCtrl, lmprintf(MSG_127));
 		} else {
 			// Remove the "Don't display again" checkbox
@@ -647,7 +660,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			MapWindowPoints(NULL, hDlg, (POINT*)&rc, 2);
 			cbh = rc.bottom - rc.top;
 		}
-		if ((notification_more_info != NULL) && (notification_more_info->callback != NULL)) {
+		if ((notification_data.more_info != NULL) && (notification_data.more_info->callback != NULL)) {
 			hCtrl = GetDlgItem(hDlg, IDC_MORE_INFO);
 			// Resize the 'More information' button
 			GetWindowRect(hCtrl, &rc);
@@ -657,14 +670,14 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			ShowWindow(hCtrl, SW_SHOW);
 		}
 		// Set the control text and resize the dialog if needed
-		if (szMessageText != NULL) {
+		if (notification_data.szMessageText != NULL) {
 			hCtrl = GetDlgItem(hDlg, IDC_NOTIFICATION_TEXT);
-			SetWindowTextU(hCtrl, szMessageText);
+			SetWindowTextU(hCtrl, notification_data.szMessageText);
 			hDC = GetDC(hCtrl);
 			SelectFont(hDC, hDlgFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
 			GetWindowRect(hCtrl, &rc);
 			dh = rc.bottom - rc.top;
-			DrawTextU(hDC, szMessageText, -1, &rc, DT_CALCRECT | DT_WORDBREAK);
+			DrawTextU(hDC, notification_data.szMessageText, -1, &rc, DT_CALCRECT | DT_WORDBREAK);
 			dh = max(rc.bottom - rc.top - dh + (int)(8.0f * fScale), 0);
 			safe_release_dc(hCtrl, hDC);
 			ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
@@ -706,7 +719,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 		switch (LOWORD(wParam)) {
 		case IDYES:
 			// Return IDOK/IDRETRY for calls that expect it
-			switch (notification_type & 0x0F) {
+			switch (notification_data.type & 0x0F) {
 			case MB_OKCANCEL:
 				wParam = IDOK;
 				break;
@@ -721,7 +734,7 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			return (INT_PTR)TRUE;
 		case IDNO:
 			// Return IDCANCEL/IDOK/IDIGNORE for calls that expect it
-			switch (notification_type & 0x0F) {
+			switch (notification_data.type & 0x0F) {
 			case MB_OKCANCEL:
 				wParam = IDCANCEL;
 				break;
@@ -738,18 +751,18 @@ INT_PTR CALLBACK NotificationCallback(HWND hDlg, UINT message, WPARAM wParam, LP
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDABORT:
-			if ((notification_type & 0x0F) == MB_YESNOCANCEL)
+			if ((notification_data.type & 0x0F) == MB_YESNOCANCEL)
 				wParam = IDYES;
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		case IDC_MORE_INFO:
-			if (notification_more_info != NULL) {
-				if_assert_fails(notification_more_info->callback != NULL)
+			if (notification_data.more_info != NULL) {
+				if_assert_fails(notification_data.more_info->callback != NULL)
 					return (INT_PTR)FALSE;
-				if (notification_more_info->id == MORE_INFO_URL) {
-					ShellExecuteA(hDlg, "open", notification_more_info->url, NULL, NULL, SW_SHOWNORMAL);
+				if (notification_data.more_info->id == MORE_INFO_URL) {
+					ShellExecuteA(hDlg, "open", notification_data.more_info->url, NULL, NULL, SW_SHOWNORMAL);
 				} else {
-					MyDialogBox(hMainInstance, notification_more_info->id, hDlg, notification_more_info->callback);
+					MyDialogBox(hMainInstance, notification_data.more_info->id, hDlg, notification_data.more_info->callback);
 				}
 			}
 			break;
@@ -768,22 +781,22 @@ int NotificationEx(int type, const char* dont_display_setting, const notificatio
 	va_list args;
 
 	dialog_showing++;
-	szMessageText = (char*)malloc(LOC_MESSAGE_SIZE);
-	if (szMessageText == NULL)
+	notification_data.szMessageText = (char*)malloc(LOC_MESSAGE_SIZE);
+	if (notification_data.szMessageText == NULL)
 		return FALSE;
-	szMessageTitle = safe_strdup(title);
-	if (szMessageTitle == NULL)
+	notification_data.szMessageTitle = safe_strdup(title);
+	if (notification_data.szMessageTitle == NULL)
 		return FALSE;
 	va_start(args, format);
-	safe_vsnprintf(szMessageText, LOC_MESSAGE_SIZE - 1, format, args);
+	safe_vsnprintf(notification_data.szMessageText, LOC_MESSAGE_SIZE - 1, format, args);
 	va_end(args);
-	szMessageText[LOC_MESSAGE_SIZE - 1] = 0;
-	notification_more_info = more_info;
-	notification_type = type;
-	notification_dont_display_setting = dont_display_setting;
+	notification_data.szMessageText[LOC_MESSAGE_SIZE - 1] = 0;
+	notification_data.more_info = more_info;
+	notification_data.type = type;
+	notification_data.dont_display_setting = dont_display_setting;
 	ret = MyDialogBox(hMainInstance, IDD_NOTIFICATION, hMainDialog, NotificationCallback);
-	safe_free(szMessageText);
-	safe_free(szMessageTitle);
+	safe_free(notification_data.szMessageText);
+	safe_free(notification_data.szMessageTitle);
 	dialog_showing--;
 	return (int)ret;
 }
@@ -817,11 +830,6 @@ static int GetComboBoxMinWidth(HWND hCtrl, StrArray* array)
 	return max_width + arrow_width + padding;
 }
 
-// We only ever display one selection dialog, so set some params as globals
-static int selection_dialog_style;
-static selection_dialog_options_t* selection_options = NULL;
-static BOOL silent_install_checked = FALSE;
-
 /*
  * Custom dialog for radio button selection dialog
  */
@@ -836,6 +844,7 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
 	static HBRUSH background_brush, separator_brush;
 	static HFONT hDlgFont = NULL;
+	static BOOL silent_install_checked = FALSE;
 	char username[128] = { 0 }, str[MAX_PATH];
 	int i, m, dw, dh, r = -1, mw;
 	DWORD size = sizeof(username);
@@ -845,6 +854,8 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 	RECT rc, rc2;
 	HWND hCtrl;
 	HDC hDC;
+	assert(selection_data.options != NULL);
+	int nDialogItems = selection_data.options->choices.Index;
 
 	switch (message) {
 	case WM_INITDIALOG:
@@ -860,7 +871,7 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		}
 		// Switch to checkboxes or some other style if requested
 		for (i = 0; i < nDialogItems; i++)
-			Button_SetStyle(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), selection_dialog_style, TRUE);
+			Button_SetStyle(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), selection_data.options->style, TRUE);
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
 		if (hDlgFont == NULL) {
 			ncm.cbSize = sizeof(ncm);
@@ -891,22 +902,23 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 
 		// Change the default icon and set the text
 		Static_SetIcon(GetDlgItem(hDlg, IDC_SELECTION_ICON), LoadIcon(NULL, IDI_QUESTION));
-		SetWindowTextU(hDlg, szMessageTitle);
+		SetWindowTextU(hDlg, selection_data.szMessageTitle);
 		SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007));
-		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_TEXT), szMessageText);
+		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_TEXT), selection_data.szMessageText);
 		for (i = 0; i < nDialogItems; i++) {
-			static_strcpy(str, szDialogItem[i]);
-			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), str);
-			ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), SW_SHOW);
+			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i);
+			static_strcpy(str, selection_data.options->choices.String[i]);
+			SetWindowTextU(hCtrl, str);
+			ShowWindow(hCtrl, SW_SHOW);
 			// Compute the maximum line's width (with some extra for the username and edition fields)
-			if (selection_options != NULL && i == selection_options->username_index) {
-				static_sprintf(str, "%s __%s__", szDialogItem[i], base_username);
-				mw = max(mw, GetTextSize(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), str).cx);
-			} else if (selection_options != NULL && i == selection_options->edition_index) {
-				mw = max(mw, GetTextSize(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), str).cx +
+			if (i == selection_data.options->username_index) {
+				static_sprintf(str, "%s __%s__", selection_data.options->choices.String[i], base_username);
+				mw = max(mw, GetTextSize(hCtrl, str).cx);
+			} else if (i == selection_data.options->edition_index) {
+				mw = max(mw, GetTextSize(hCtrl, str).cx +
 					GetComboBoxMinWidth(GetDlgItem(hDlg, IDC_SELECTION_EDITION), &version_name));
 			} else {
-				mw = max(mw, GetTextSize(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), str).cx);
+				mw = max(mw, GetTextSize(hCtrl, str).cx);
 			}
 		}
 		// If our maximum line's width is greater than the default, set a nonzero delta width
@@ -918,7 +930,7 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		SelectFont(hDC, hDlgFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
 		GetWindowRect(hCtrl, &rc);
 		dh = rc.bottom - rc.top;
-		DrawTextU(hDC, szMessageText, -1, &rc, DT_CALCRECT | DT_WORDBREAK);
+		DrawTextU(hDC, selection_data.szMessageText, -1, &rc, DT_CALCRECT | DT_WORDBREAK);
 		dh = rc.bottom - rc.top - dh;
 		safe_release_dc(hCtrl, hDC);
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
@@ -926,12 +938,12 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, dw, 0, 1.0f);
 
 		// If required, set up the the username edit box
-		if (selection_options != NULL && selection_options->username_index != -1) {
+		if (selection_data.options->username_index > 0) {
 			unattend_username[0] = 0;
-			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->username_index);
+			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->username_index);
 			GetClientRect(hCtrl, &rc);
 			ResizeMoveCtrl(hDlg, hCtrl, 0, 0,
-				(rc.left - rc.right) + GetTextSize(hCtrl, szDialogItem[selection_options->username_index]).cx + ddw, 0, 1.0f);
+				(rc.left - rc.right) + GetTextSize(hCtrl, selection_data.options->choices.String[selection_data.options->username_index]).cx + ddw, 0, 1.0f);
 			GetWindowRect(hCtrl, &rc);
 			SetWindowPos(GetDlgItem(hDlg, IDC_SELECTION_USERNAME), hCtrl, rc.left, rc.top, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_USERNAME);
@@ -945,11 +957,11 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		}
 
 		// If required, set up the the edition combo box
-		if (selection_options != NULL && selection_options->edition_index != -1 && version_name.String != NULL && version_name.Index > 0) {
-			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->edition_index);
+		if (selection_data.options->edition_index > 0 && version_name.String != NULL && version_name.Index > 0) {
+			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index);
 			GetClientRect(hCtrl, &rc);
 			ResizeMoveCtrl(hDlg, hCtrl, 0, 0,
-				(rc.left - rc.right) + GetTextSize(hCtrl, szDialogItem[selection_options->edition_index]).cx + ddw, 0, 1.0f);
+				(rc.left - rc.right) + GetTextSize(hCtrl, selection_data.options->choices.String[selection_data.options->edition_index]).cx + ddw, 0, 1.0f);
 			GetWindowRect(hCtrl, &rc);
 			SetWindowPos(GetDlgItem(hDlg, IDC_SELECTION_EDITION), hCtrl, rc.left, rc.top, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_EDITION);
@@ -981,10 +993,16 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		// Set the default selection
 		for (i = 0, m = 1; i < nDialogItems; i++, m <<= 1)
 			Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i),
-				((selection_options == NULL && i == 0) || (selection_options != NULL && (m & selection_options->mask))) ? BST_CHECKED : BST_UNCHECKED);
-		if (selection_options != NULL && selection_options->username_index > 0 && selection_options->edition_index > 0) {
-			BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->username_index));
-			EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->edition_index), enable);
+				(selection_data.options->mask == 0 && i == 0) ||
+				(selection_data.options->mask != 0 && (m & selection_data.options->mask) ? BST_CHECKED : BST_UNCHECKED));
+		// Set the default state of the silent install option if available
+		if (selection_data.options->edition_index > 0 && selection_data.options->username_index > 0 &&
+			selection_data.options->regional_index > 0 && selection_data.options->privacy_index > 0) {
+			// Should be the same condition as the one in WM_COMMAND
+			BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->username_index)) &&
+				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->regional_index)) &&
+				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->privacy_index));
+			EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index), enable);
 			EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_EDITION), enable);
 		}
 
@@ -1015,13 +1033,15 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		WORD command = LOWORD(wParam);
 		if (command >= IDC_SELECTION_CHOICE1 && command < IDC_SELECTION_CHOICEMAX) {
 			// Check if local account + regional settings + data collection checkboxes are clicked and enable/disable the silent install option
-			if (selection_options != NULL && selection_options->username_index > 0 && selection_options->edition_index > 0 && selection_options->regional_index > 0 &&
-				(command - IDC_SELECTION_CHOICE1 == selection_options->username_index || command - IDC_SELECTION_CHOICE1 == selection_options->regional_index ||
-					command - IDC_SELECTION_CHOICE1 == selection_options->privacy_index)) {
-				BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->username_index)) &&
-					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->regional_index)) &&
-					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->privacy_index));
-				hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->edition_index);
+			if (selection_data.options->edition_index > 0 && selection_data.options->username_index > 0 &&
+				selection_data.options->edition_index > 0 && selection_data.options->regional_index > 0 &&
+					(command - IDC_SELECTION_CHOICE1 == selection_data.options->username_index ||
+					 command - IDC_SELECTION_CHOICE1 == selection_data.options->regional_index ||
+					 command - IDC_SELECTION_CHOICE1 == selection_data.options->privacy_index)) {
+				BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->username_index)) &&
+					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->regional_index)) &&
+					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->privacy_index));
+				hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index);
 				if (!enable && IsWindowEnabled(hCtrl)) {
 					silent_install_checked = (Button_GetCheck(hCtrl) == BST_CHECKED);
 					Button_SetCheck(hCtrl, FALSE);
@@ -1034,14 +1054,14 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		} else switch (LOWORD(wParam)) {
 		case IDOK:
 			// Produce a big scary warning if the silent install option was selected
-			if (selection_options != NULL && selection_options->edition_index >= 0 &&
-				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_options->edition_index)) &&
+			if (selection_data.options->edition_index > 0 &&
+				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index)) &&
 				Notification(MB_YESNO | MB_ICONWARNING, APPLICATION_NAME, lmprintf(MSG_356)) != IDYES)
 				break;
 			for (r = 0, i = 0, m = 1; i < nDialogItems; i++, m <<= 1)
 				if (Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)) == BST_CHECKED)
 					r += m;
-			if (selection_options != NULL && selection_options->username_index != -1) {
+			if (selection_data.options->username_index > 0) {
 				GetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_USERNAME), unattend_username, MAX_USERNAME_LENGTH);
 				// Perform string sanitization (NB: GetWindowTextU always terminates the string)
 				for (i = 0; unattend_username[i] != 0; i++) {
@@ -1049,7 +1069,7 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 						unattend_username[i] = '_';
 				}
 			}
-			if (selection_options != NULL && selection_options->edition_index != -1)
+			if (selection_data.options->edition_index > 0)
 				unattend_edition_index = (int)ComboBox_GetCurItemData(GetDlgItem(hDlg, IDC_SELECTION_EDITION));
 			// Fall through
 		case IDNO:
@@ -1065,18 +1085,18 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 /*
  * Display an item selection dialog
  */
-int CustomSelectionDialog(int style, char* title, char* message, char** choices, int size, selection_dialog_options_t* options)
+int SelectionDialog(char* title, char* message, selection_dialog_options_t* options)
 {
 	int ret;
 
+	assert(options != NULL);
 	dialog_showing++;
-	szMessageTitle = title;
-	szMessageText = message;
-	szDialogItem = choices;
-	nDialogItems = size;
-	selection_options = options;
-	selection_dialog_style = style;
-	assert(style == BS_AUTORADIOBUTTON || style == BS_AUTOCHECKBOX);
+	selection_data.szMessageTitle = title;
+	selection_data.szMessageText = message;
+	selection_data.options = options;
+	if (options->style == 0)
+		options->style = BS_AUTORADIOBUTTON;
+	assert ((options->style == BS_AUTORADIOBUTTON || options->style == BS_AUTOCHECKBOX));
 	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, CustomSelectionCallback);
 	dialog_showing--;
 
@@ -1105,10 +1125,10 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	case WM_INITDIALOG:
 		SetDarkModeForDlg(hDlg);
 		// Don't overflow our max radio button
-		if (nDialogItems > (IDC_LIST_ITEMMAX - IDC_LIST_ITEM1 + 1)) {
+		if (list_data.nDialogItems > (IDC_LIST_ITEMMAX - IDC_LIST_ITEM1 + 1)) {
 			uprintf("WARNING: Too many items requested for List (%d vs %d)",
-				nDialogItems, IDC_LIST_ITEMMAX - IDC_LIST_ITEM1);
-			nDialogItems = IDC_LIST_ITEMMAX - IDC_LIST_ITEM1;
+				list_data.nDialogItems, IDC_LIST_ITEMMAX - IDC_LIST_ITEM1);
+			list_data.nDialogItems = IDC_LIST_ITEMMAX - IDC_LIST_ITEM1;
 		}
 		// Get the system message box font. See http://stackoverflow.com/a/6057761
 		if (hDlgFont == NULL) {
@@ -1119,7 +1139,7 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		// Set the dialog to use the system message box font
 		SendMessage(hDlg, WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDC_LIST_TEXT), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
-		for (i = 0; i < nDialogItems; i++)
+		for (i = 0; i < list_data.nDialogItems; i++)
 			SendMessage(GetDlgItem(hDlg, IDC_LIST_ITEM1 + i), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDYES), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
 		SendMessage(GetDlgItem(hDlg, IDNO), WM_SETFONT, (WPARAM)hDlgFont, MAKELPARAM(TRUE, 0));
@@ -1131,11 +1151,11 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		CenterDialog(hDlg, NULL);
 		// Change the default icon and set the text
 		Static_SetIcon(GetDlgItem(hDlg, IDC_LIST_ICON), LoadIcon(NULL, IDI_EXCLAMATION));
-		SetWindowTextU(hDlg, szMessageTitle);
+		SetWindowTextU(hDlg, list_data.szMessageTitle);
 		SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007));
-		SetWindowTextU(GetDlgItem(hDlg, IDC_LIST_TEXT), szMessageText);
-		for (i = 0; i < nDialogItems; i++) {
-			SetWindowTextU(GetDlgItem(hDlg, IDC_LIST_ITEM1 + i), szDialogItem[i]);
+		SetWindowTextU(GetDlgItem(hDlg, IDC_LIST_TEXT), list_data.szMessageText);
+		for (i = 0; i < list_data.nDialogItems; i++) {
+			SetWindowTextU(GetDlgItem(hDlg, IDC_LIST_ITEM1 + i), list_data.szDialogItem[i]);
 			ShowWindow(GetDlgItem(hDlg, IDC_LIST_ITEM1 + i), SW_SHOW);
 		}
 		// Move/Resize the controls as needed to fit our text
@@ -1144,15 +1164,15 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		SelectFont(hDC, hDlgFont);	// Yes, you *MUST* reapply the font to the DC, even after SetWindowText!
 		GetWindowRect(hCtrl, &rc);
 		dh = rc.bottom - rc.top;
-		DrawTextU(hDC, szMessageText, -1, &rc, DT_CALCRECT | DT_WORDBREAK);
+		DrawTextU(hDC, list_data.szMessageText, -1, &rc, DT_CALCRECT | DT_WORDBREAK);
 		dh = rc.bottom - rc.top - dh;
 		safe_release_dc(hCtrl, hDC);
 		ResizeMoveCtrl(hDlg, hCtrl, 0, 0, 0, dh, 1.0f);
-		for (i = 0; i < nDialogItems; i++)
+		for (i = 0; i < list_data.nDialogItems; i++)
 			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_LIST_ITEM1 + i), 0, dh, 0, 0, 1.0f);
-		if (nDialogItems > 1) {
+		if (list_data.nDialogItems > 1) {
 			GetWindowRect(GetDlgItem(hDlg, IDC_LIST_ITEM1), &rc);
-			GetWindowRect(GetDlgItem(hDlg, IDC_LIST_ITEM1 + nDialogItems - 1), &rc2);
+			GetWindowRect(GetDlgItem(hDlg, IDC_LIST_ITEM1 + list_data.nDialogItems - 1), &rc2);
 			dh += rc2.top - rc.top;
 		}
 		ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
@@ -1202,10 +1222,10 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 void ListDialog(char* title, char* message, char** items, int size)
 {
 	dialog_showing++;
-	szMessageTitle = title;
-	szMessageText = message;
-	szDialogItem = items;
-	nDialogItems = size;
+	list_data.szMessageTitle = title;
+	list_data.szMessageText = message;
+	list_data.szDialogItem = items;
+	list_data.nDialogItems = size;
 	MyDialogBox(hMainInstance, IDD_LIST, hMainDialog, ListCallback);
 	dialog_showing--;
 }
@@ -1503,6 +1523,7 @@ static void PositionControls(HWND hDlg)
  */
 INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	static BOOL resized_already = TRUE;
 	int i, dy;
 	RECT rect;
 	REQRESIZE* rsz;
@@ -1510,13 +1531,11 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 	static HWND hFrequency, hBeta;
 	int32_t freq;
 	char update_policy_text[4096];
-	static BOOL resized_already = TRUE;
 
 	switch (message) {
 	case WM_INITDIALOG:
 		SetDarkModeForDlg(hDlg);
 		resized_already = FALSE;
-		hUpdatesDlg = hDlg;
 		apply_localization(IDD_UPDATE_POLICY, hDlg);
 		PositionControls(hDlg);
 		SetTitleBarIcon(hDlg);
@@ -1584,7 +1603,6 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		case IDCANCEL:
 			reset_localization(IDD_UPDATE_POLICY);
 			EndDialog(hDlg, LOWORD(wParam));
-			hUpdatesDlg = NULL;
 			return (INT_PTR)TRUE;
 		case IDC_CHECK_NOW:
 			CheckForUpdates(TRUE);
@@ -2188,7 +2206,7 @@ static BOOL CALLBACK AlertPromptCallback(HWND hWnd, LPARAM lParam)
 
 	if (GetWindowTextU(hWnd, str, sizeof(str)) == 0)
 		return TRUE;
-	if (strcmp(str, button_str) == 0)
+	if (strcmp(str, alert_data.button_str) == 0)
 		*found = TRUE;
 	return TRUE;
 }
@@ -2202,14 +2220,14 @@ static void CALLBACK AlertPromptHook(HWINEVENTHOOK hWinEventHook, DWORD Event, H
 		if (GetWindowLongPtr(hWnd, GWL_STYLE) & WS_POPUPWINDOW) {
 			str[0] = 0;
 			GetWindowTextU(hWnd, str, sizeof(str));
-			if (strcmp(str, title_str[0]) == 0) {
+			if (strcmp(str, alert_data.title_str[0]) == 0) {
 				found = FALSE;
 				EnumChildWindows(hWnd, AlertPromptCallback, (LPARAM)&found);
 				if (found) {
 					SendMessage(hWnd, WM_COMMAND, (WPARAM)IDCANCEL, (LPARAM)0);
 					uprintf("Closed Windows format prompt");
 				}
-			} else if ((strcmp(str, title_str[1]) == 0) && (hWnd != hFidoDlg)) {
+			} else if ((strcmp(str, alert_data.title_str[1]) == 0) && (hWnd != hFidoDlg)) {
 				// A wild Fido dialog appeared! => Keep track of its handle and center it
 				hFidoDlg = hWnd;
 				CenterDialog(hWnd, hMainDialog);
@@ -2232,31 +2250,31 @@ void SetAlertPromptMessages(void)
 		// 4097 = "You need to format the disk in drive %c: before you can use it." (dialog text)
 		// 4125 = "Microsoft Windows" (dialog title)
 		// 4126 = "Format disk" (button)
-		if (LoadStringU(hMui, 4125, title_str[0], sizeof(title_str[0])) <= 0) {
-			static_strcpy(title_str[0], "Microsoft Windows");
+		if (LoadStringU(hMui, 4125, alert_data.title_str[0], sizeof(alert_data.title_str[0])) <= 0) {
+			static_strcpy(alert_data.title_str[0], "Microsoft Windows");
 			uprintf("WARNING: Could not locate localized format prompt title string in '%s': %s", mui_path, WindowsErrorString());
 		}
-		if (LoadStringU(hMui, 4126, button_str, sizeof(button_str)) <= 0) {
-			static_strcpy(button_str, "Format disk");
+		if (LoadStringU(hMui, 4126, alert_data.button_str, sizeof(alert_data.button_str)) <= 0) {
+			static_strcpy(alert_data.button_str, "Format disk");
 			uprintf("WARNING: Could not locate localized format prompt button string in '%s': %s", mui_path, WindowsErrorString());
 		}
 		FreeLibrary(hMui);
 	}
-	static_strcpy(title_str[1], lmprintf(MSG_149));
+	static_strcpy(alert_data.title_str[1], lmprintf(MSG_149));
 }
 
 BOOL SetAlertPromptHook(void)
 {
-	if (ap_weh != NULL)
+	if (alert_data.weh != NULL)
 		return TRUE;	// No need to set again if active
-	ap_weh = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, NULL,
+	alert_data.weh = SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, NULL,
 		AlertPromptHook, 0, 0, WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
-	return (ap_weh != NULL);
+	return (alert_data.weh != NULL);
 }
 
 void ClrAlertPromptHook(void) {
-	UnhookWinEvent(ap_weh);
-	ap_weh = NULL;
+	UnhookWinEvent(alert_data.weh);
+	alert_data.weh = NULL;
 }
 
 void FlashTaskbar(HANDLE handle)
