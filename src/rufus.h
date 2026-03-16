@@ -745,6 +745,7 @@ typedef struct {
 	int regional_index;
 	int privacy_index;
 	StrArray choices;
+	StrArray tooltips;
 } selection_dialog_options_t;
 
 /*

@@ -833,7 +833,7 @@ static int GetComboBoxMinWidth(HWND hCtrl, StrArray* array)
 /*
  * Custom dialog for radio button selection dialog
  */
-static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	// This "Mooo" is designed to give us enough space for a regular username length
 	static const char* base_username = "MOOOOOOOOOOO";	// 🐮
@@ -859,9 +859,9 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 
 	switch (message) {
 	case WM_INITDIALOG:
-		StrArray version_name = { 0 }, version_index = { 0 };
-		StrArrayCreate(&version_name, 16);
-		StrArrayCreate(&version_index, 16);
+		StrArray edition_name = { 0 }, edition_index = { 0 };
+		StrArrayCreate(&edition_name, 16);
+		StrArrayCreate(&edition_index, 16);
 		SetDarkModeForDlg(hDlg);
 		// Don't overflow our max radio button
 		if (nDialogItems > (IDC_SELECTION_CHOICEMAX - IDC_SELECTION_CHOICE1 + 1)) {
@@ -898,7 +898,7 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		mw = rc.right - rc.left - ddw;	// ddw seems to work okay as a fudge
 		dw = mw;
 
-		r = GetEditions(&version_name, &version_index);
+		r = GetEditions(&edition_name, &edition_index);
 
 		// Change the default icon and set the text
 		Static_SetIcon(GetDlgItem(hDlg, IDC_SELECTION_ICON), LoadIcon(NULL, IDI_QUESTION));
@@ -916,10 +916,13 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 				mw = max(mw, GetTextSize(hCtrl, str).cx);
 			} else if (i == selection_data.options->edition_index) {
 				mw = max(mw, GetTextSize(hCtrl, str).cx +
-					GetComboBoxMinWidth(GetDlgItem(hDlg, IDC_SELECTION_EDITION), &version_name));
+					GetComboBoxMinWidth(GetDlgItem(hDlg, IDC_SELECTION_EDITION), &edition_name));
 			} else {
 				mw = max(mw, GetTextSize(hCtrl, str).cx);
 			}
+			// Set tooltips, if any
+			if (i < (int)selection_data.options->tooltips.Index)
+				CreateTooltip(hCtrl, selection_data.options->tooltips.String[i], -1);
 		}
 		// If our maximum line's width is greater than the default, set a nonzero delta width
 		dw = (mw <= dw) ? 0 : mw - dw;
@@ -957,7 +960,7 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		}
 
 		// If required, set up the the edition combo box
-		if (selection_data.options->edition_index > 0 && version_name.String != NULL && version_name.Index > 0) {
+		if (selection_data.options->edition_index > 0 && edition_name.String != NULL && edition_name.Index > 0) {
 			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index);
 			GetClientRect(hCtrl, &rc);
 			ResizeMoveCtrl(hDlg, hCtrl, 0, 0,
@@ -967,10 +970,10 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_EDITION);
 			GetWindowRect(hCtrl, &rc2);
 			ResizeMoveCtrl(hDlg, hCtrl, right_to_left_mode ? rc2.right - rc.left : rc.right - rc2.left, rc.top - rc2.top,
-				GetComboBoxMinWidth(hCtrl, &version_name), 0, 1.0f);
-			for (i = 0; i < (int)version_name.Index; i++)
-				IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, version_name.String[i]),
-					(LPARAM)atoi(version_index.String[i])));
+				GetComboBoxMinWidth(hCtrl, &edition_name), 0, 1.0f);
+			for (i = 0; i < (int)edition_name.Index; i++)
+				IGNORE_RETVAL(ComboBox_SetItemData(hCtrl, ComboBox_AddStringU(hCtrl, edition_name.String[i]),
+					(LPARAM)atoi(edition_index.String[i])));
 			IGNORE_RETVAL(ComboBox_SetCurSel(hCtrl, unattend_edition_index));
 			ShowWindow(hCtrl, SW_SHOW);
 		}
@@ -1007,8 +1010,8 @@ static INT_PTR CALLBACK CustomSelectionCallback(HWND hDlg, UINT message, WPARAM 
 		}
 
 		SetDarkModeForChild(hDlg);
-		StrArrayDestroy(&version_name);
-		StrArrayDestroy(&version_index);
+		StrArrayDestroy(&edition_name);
+		StrArrayDestroy(&edition_index);
 		return (INT_PTR)TRUE;
 	case WM_CTLCOLORSTATIC:
 		// Change the background colour for static text and icon
@@ -1097,7 +1100,7 @@ int SelectionDialog(char* title, char* message, selection_dialog_options_t* opti
 	if (options->style == 0)
 		options->style = BS_AUTORADIOBUTTON;
 	assert ((options->style == BS_AUTORADIOBUTTON || options->style == BS_AUTOCHECKBOX));
-	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, CustomSelectionCallback);
+	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, SelectionCallback);
 	dialog_showing--;
 
 	return ret;

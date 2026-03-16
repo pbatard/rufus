@@ -822,10 +822,12 @@ out:
 int SetWinToGoIndex(void)
 {
 	int i, r;
+	const char* edition_suffix;
+	char* edition_name;
 	WIMStruct* wim = NULL;
 	wchar_t wim_path[4 * MAX_PATH] = L"", *xml = NULL;
 	size_t xml_len;
-	StrArray version_index = { 0 };
+	StrArray edition_index = { 0 };
 	BOOL bNonStandard = FALSE;
 	ezxml_t index = NULL, image = NULL;
 	selection_dialog_options_t selection = { 0 };
@@ -870,16 +872,25 @@ int SetWinToGoIndex(void)
 	}
 
 	StrArrayCreate(&selection.choices, 16);
-	StrArrayCreate(&version_index, 16);
+	StrArrayCreate(&edition_index, 16);
 	index = ezxml_parse_str((char*)xml, xml_len);
 	if (index == NULL) {
 		uprintf("Could not parse WIM XML");
 		goto out;
 	}
 
+	edition_suffix = GetEditionName(WindowsVersion.Edition);
+	unattend_edition_index = 1;
 	for (i = 0, image = ezxml_child(index, "IMAGE");
-		StrArrayAdd(&version_index, ezxml_attr(image, "INDEX"), TRUE) >= 0;
+		StrArrayAdd(&edition_index, ezxml_attr(image, "INDEX"), TRUE) >= 0;
 		image = image->next, i++) {
+		// Try to match this host's edition with an index from the image
+		edition_name = ezxml_child_val(image, "NAME");
+		if (edition_name != NULL) {
+			if (strlen(edition_name) > safe_strlen(edition_suffix) &&
+				stricmp(&edition_name[strlen(edition_name) - safe_strlen(edition_suffix)], edition_suffix) == 0)
+				unattend_edition_index = atoi(ezxml_attr(image, "INDEX")) - 1;
+		}
 		// Some people are apparently creating *unofficial* Windows ISOs that don't have DISPLAYNAME elements.
 		// If we are parsing such an ISO, try to fall back to using DESCRIPTION.
 		if (StrArrayAdd(&selection.choices, ezxml_child_val(image, "DISPLAYNAME"), TRUE) < 0) {
@@ -893,6 +904,7 @@ int SetWinToGoIndex(void)
 	if (bNonStandard)
 		uprintf("WARNING: Nonstandard Windows image (missing <DISPLAYNAME> entries)");
 
+	selection.mask = 1 << unattend_edition_index;
 	if (i > 1)
 		// NB: _log2 returns -2 if SelectionDialog() returns negative (user cancelled)
 		i = _log2(SelectionDialog(lmprintf(MSG_291), lmprintf(MSG_292), &selection)) + 1;
@@ -901,7 +913,7 @@ int SetWinToGoIndex(void)
 	else if (i == 0)
 		wintogo_index = 1;
 	else
-		wintogo_index = atoi(version_index.String[i - 1]);
+		wintogo_index = atoi(edition_index.String[i - 1]);
 	if (i > 0) {
 		// re-populate the version data from the selected XML index
 		PopulateWindowsVersionFromXml(xml, xml_len, i - 1);
@@ -909,7 +921,7 @@ int SetWinToGoIndex(void)
 		if (img_report.win_version.major == 0 || img_report.win_version.build == 0)
 			uprintf("WARNING: Could not obtain version information from XML index (Nonstandard Windows image?)");
 		uprintf("Will use '%s' (Build: %d, Index %s) for Windows To Go",
-			selection.choices.String[i - 1], img_report.win_version.build, version_index.String[i - 1]);
+			selection.choices.String[i - 1], img_report.win_version.build, edition_index.String[i - 1]);
 		// Need Windows 10 Creator Update or later for boot on REMOVABLE to work
 		if ((img_report.win_version.build < 15000) && (SelectedDrive.MediaType != FixedMedia)) {
 			if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_190), lmprintf(MSG_098)) != IDYES)
@@ -926,7 +938,7 @@ int SetWinToGoIndex(void)
 
 out:
 	StrArrayDestroy(&selection.choices);
-	StrArrayDestroy(&version_index);
+	StrArrayDestroy(&edition_index);
 	free(xml);
 	ezxml_free(index);
 	wimlib_free(wim);

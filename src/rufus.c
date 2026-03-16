@@ -1608,27 +1608,40 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				int arch = _log2(img_report.has_efi >> 1);
 				uint16_t map[16] = { 0 }, b = 1;
 				StrArrayCreate(&selection.choices, 8);
+				StrArrayCreate(&selection.tooltips, 8);
 				StrArrayAdd(&selection.choices, lmprintf(MSG_332), TRUE);
+				StrArrayAdd(&selection.tooltips, lmprintf(MSG_363), TRUE);
 				MAP_BIT(UNATTEND_OFFLINE_INTERNAL_DRIVES);
 				if (img_report.win_version.build >= 22500) {
 					StrArrayAdd(&selection.choices, lmprintf(MSG_330), TRUE);
+					StrArrayAdd(&selection.tooltips, lmprintf(MSG_361), TRUE);
 					MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
 				}
 				StrArrayAdd(&selection.choices, lmprintf(MSG_333), TRUE);
+				StrArrayAdd(&selection.tooltips, lmprintf(MSG_364), TRUE);
 				selection.username_index = _log2(b);
 				MAP_BIT(UNATTEND_SET_USER);
 				StrArrayAdd(&selection.choices, lmprintf(MSG_334), TRUE);
+				StrArrayAdd(&selection.tooltips, lmprintf(MSG_365), TRUE);
 				MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
 				StrArrayAdd(&selection.choices, lmprintf(MSG_331), TRUE);
+				StrArrayAdd(&selection.tooltips, lmprintf(MSG_362), TRUE);
 				MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
+				if (IS_WINDOWS_11(img_report)) {
+					StrArrayAdd(&selection.choices, lmprintf(MSG_324), TRUE);
+					StrArrayAdd(&selection.tooltips, lmprintf(MSG_370), TRUE);
+					MAP_BIT(UNATTEND_QOL_ENHANCEMENTS);
+				}
 				if (expert_mode) {
 					StrArrayAdd(&selection.choices, lmprintf(MSG_346), TRUE);
+					StrArrayAdd(&selection.tooltips, lmprintf(MSG_367), TRUE);
 					MAP_BIT(UNATTEND_FORCE_S_MODE);
 				}
 				selection.mask = remap16(unattend_xml_mask, map, FALSE);
 				selection.style = BS_AUTOCHECKBOX;
 				i = SelectionDialog(lmprintf(MSG_327), lmprintf(MSG_328), &selection);
 				StrArrayDestroy(&selection.choices);
+				StrArrayDestroy(&selection.tooltips);
 				if (i < 0)
 					goto out;
 				// Remap i to the correct bit positions before calling CreateUnattendXml()
@@ -1672,46 +1685,59 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				int arch = _log2(img_report.has_efi >> 1);
 				uint16_t map[16] = { 0 }, b = 1;
 				StrArrayCreate(&selection.choices, 16);
+				StrArrayCreate(&selection.tooltips, 16);
 				if (IS_WINDOWS_11(img_report)) {
 					StrArrayAdd(&selection.choices, lmprintf(MSG_329), TRUE);
+					StrArrayAdd(&selection.tooltips, lmprintf(MSG_360), TRUE);
 					MAP_BIT(UNATTEND_SECUREBOOT_TPM_MINRAM);
 				}
 				if (img_report.win_version.build >= 22500) {
 					StrArrayAdd(&selection.choices, lmprintf(MSG_330), TRUE);
+					StrArrayAdd(&selection.tooltips, lmprintf(MSG_361), TRUE);
 					MAP_BIT(UNATTEND_NO_ONLINE_ACCOUNT);
 				}
 				StrArrayAdd(&selection.choices, lmprintf(MSG_333), TRUE);
+				StrArrayAdd(&selection.tooltips, lmprintf(MSG_364), TRUE);
 				selection.username_index = _log2(b);
 				MAP_BIT(UNATTEND_SET_USER);
 				StrArrayAdd(&selection.choices, lmprintf(MSG_334), TRUE);
+				StrArrayAdd(&selection.tooltips, lmprintf(MSG_365), TRUE);
 				selection.regional_index = _log2(b);
 				MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
 				StrArrayAdd(&selection.choices, lmprintf(MSG_331), TRUE);
+				StrArrayAdd(&selection.tooltips, lmprintf(MSG_362), TRUE);
 				selection.privacy_index = _log2(b);
 				MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
 				if (IS_WINDOWS_11(img_report)) {
 					StrArrayAdd(&selection.choices, lmprintf(MSG_335), TRUE);
+					StrArrayAdd(&selection.tooltips, lmprintf(MSG_366), TRUE);
 					MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
 					StrArrayAdd(&selection.choices, lmprintf(MSG_324), TRUE);
+					StrArrayAdd(&selection.tooltips, lmprintf(MSG_370), TRUE);
 					MAP_BIT(UNATTEND_QOL_ENHANCEMENTS);
 					StrArrayAdd(&selection.choices, lmprintf(MSG_355), TRUE);
+					StrArrayAdd(&selection.tooltips, lmprintf(MSG_371), TRUE);
 					selection.edition_index = _log2(b);
 					MAP_BIT(UNATTEND_SILENT_INSTALL);
 					if (img_report.win_version.build >= 26200) {
 						StrArrayAdd(&selection.choices, lmprintf(MSG_350), TRUE);
+						StrArrayAdd(&selection.tooltips, lmprintf(MSG_368), TRUE);
 						MAP_BIT(UNATTEND_USE_MS2023_BOOTLOADERS);
 						StrArrayAdd(&selection.choices, lmprintf(MSG_323), TRUE);
+						StrArrayAdd(&selection.tooltips, lmprintf(MSG_369), TRUE);
 						MAP_BIT(UNATTEND_APPLY_SKUSIPOLICY);
 					}
 				}
 				if (expert_mode) {
 					StrArrayAdd(&selection.choices, lmprintf(MSG_346), TRUE);
+					StrArrayAdd(&selection.tooltips, lmprintf(MSG_367), TRUE);
 					MAP_BIT(UNATTEND_FORCE_S_MODE);
 				}
 				selection.mask = remap16(unattend_xml_mask, map, FALSE);
 				selection.style = BS_AUTOCHECKBOX;
 				i = SelectionDialog(lmprintf(MSG_327), lmprintf(MSG_328), &selection);
 				StrArrayDestroy(&selection.choices);
+				StrArrayDestroy(&selection.tooltips);
 				if (i < 0)
 					goto out;
 				i = remap16(i, map, TRUE);
