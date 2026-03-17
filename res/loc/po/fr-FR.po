@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2025-10-01 18:52+0100\n"
-"PO-Revision-Date: 2025-10-01 18:53+0100\n"
+"POT-Creation-Date: 2026-03-17 22:51+0000\n"
+"PO-Revision-Date: 2026-03-17 23:06+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: French (Français)\n"
 "X-Rufus-LCID: 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -309,7 +309,7 @@ msgstr "To"
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr "Po"
 
@@ -844,7 +844,7 @@ msgstr "Désactivée"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "Etablit la taille de la partition persistente pour media USB de type \"live\". Une taille de 0 désactive l’utilisation d’une partition persistente."
 
@@ -886,7 +886,7 @@ msgstr "Ce lecteur est utilisé par une autre application ou un autre processus.
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
@@ -1790,6 +1790,14 @@ msgstr ""
 msgid "Unable to open or read '%s'"
 msgstr "Impossible d'ouvrir ou de lire '%s'"
 
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "Appliquer SkuSiPolicy.p7b après installation (Consultez KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "Améliorations 'QoL' (Ne force pas Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+
 #. • MSG_325
 msgid "Applying Windows customization: %s"
 msgstr "Application des options de personnalisation de Windows: %s"
@@ -1819,8 +1827,8 @@ msgid "Disable data collection (Skip privacy questions)"
 msgstr "Désactiver la collecte de données (Supprime les questions de confidentialité)"
 
 #. • MSG_332
-msgid "Prevent Windows To Go from accessing internal disks"
-msgstr "Empêcher Windows To Go d'accéder aux disques internes"
+msgid "Prevent 'Windows To Go' from accessing internal disks"
+msgstr "Empêcher 'Windows To Go' d'accéder aux disques internes"
 
 #. • MSG_333
 msgid "Create a local account with username:"
@@ -1915,7 +1923,7 @@ msgid "Use Rufus MBR"
 msgstr "Utilisation du MBR Rufus"
 
 #. • MSG_350
-msgid "Use 'Windows CA 2023' signed bootloaders (requires a compatible target PC)"
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
 msgstr "Utiliser les bootloaders signés par 'Windows CA 2023' (nécessite un PC cible compatible)"
 
 #. • MSG_351
@@ -1943,6 +1951,88 @@ msgstr ""
 "- Sélectionnez 'Non' pour annuler l’opération\n"
 "\n"
 "Note : Ces fichiers seront téléchargés dans le répertoire de l'application et réutilisés automatiquement si ils sont présent."
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "Effacera le disque ⚠SILENCIEUSEMENT⚠ et installera:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No'to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"Vous avez sélectionné l'option d'installation de Windows dite \"silencieuse\".\n"
+"\n"
+"Il s'agit d'une option avancée, réservée à ceux qui souhaitent créer un média d'installation qui ne posera aucune question à l'utilisateur pendant l'installation de Windows et qui EFFACERA SANS CONDITION le premier disque détecté sur le système cible. Si vous n'y prenez pas garde, l'utilisation de cette option peut résulter en une PERTE DE DONNÉES IRREVERSIBLE !\n"
+"\n"
+"Si cela n'est pas ce que vous souhaitez veuillez sélectionner 'Non' pour revenir en arrière et désélectionner cette option.\n"
+"Sinon, si vous sélectionnez 'Oui', vous indiquez que toute perte de donnée en résultant sera entièrement VOTRE responsabilité."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "Placement d'image non supporté"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"Vous ne pouvez pas utiliser une image située sur le périphérique cible, puisque ce dernier va être complètement effacé. Cela revient au même qu'essayer de scier la branche sur laquelle vous êtes assis !\n"
+"\n"
+"Veuillez déplacer l'image sur un autre disque et réessayez."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "Vous pouvez laisser cette option activée même si vous avez une puce TPM ou plus de RAM, car l'option contourne simplement les prérequis du programme d'installation et n'empêche absolument pas Windows d'utiliser toutes ces ressources si disponibles."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "Pour que cette option fonctionne, vous DEVEZ déconnecter le réseau/Internet pendant l'installation !"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Répond automatiquement 'non' aux questions du programme d'installation de Windows en ce qui concerne l'autorisation du partage de données avec Microsoft, au lieu de demander à l'utilisateur."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "Laissez cette option activée à moins que vous acceptiez que 'Windows To Go' puisse accéder aux disques internes pour effectuer des mises à jour, silencieuses et irréversible, des systèmes de fichiers."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "Crée un compte local automatiquement, pour le nom spécifié, et avec un mot de passe vide qui devra être changé à la prochaine session."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "Réplique les options régionales de ce PC (clavier, fuseau horaire, monnaie), au lieu de demander à l'utilisateur."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "Ne chiffre pas le disque système, sauf si l'utilisateur le demande explicitement."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "Activez cette option seulement si vous savez ce qu'est S-Mode et comprenez que votre système pourra être restreint au S-Mode même si vous supprimez Windows et le réinstallez complètement."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Activez cette option si le système que vous installez utilise des certificats Secure Boot complètement à jour. Si nécessaire, vous pouvez utiliser 'Mosby' pour mettre votre système à jour."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "Activez cette option pour révoquer des bootloaders supplémentaires de Windows, mais avec le risque de ne plus pouvoir démarrer depuis des media Windows standard."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "Améliorations \"Quality of Life\" : Désactive la plupart des fonctionnalités que Microsoft essaie de pousser, contre leur gré, aux utilisateurs."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "Si vous utilisez cette option, veuillez-vous assurer que tous les disques, sauf celui sur lequel vous voulez installer Windows, est déconnecté du PC cible, et aussi que vous ne laisserez pas le média connecté sur un PC que vous ne voulez pas réinstaller."
 
 #. • MSG_900
 #.

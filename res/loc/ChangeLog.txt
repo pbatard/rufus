@@ -23,16 +23,21 @@ o v4.14 (2026.??.??)
   // From the WUE dialog with tooltip at MSG_371 and further description at MSG_356. This basically allows a fully unattended Windows installation, that will not prompt the user at all and therefore automatically (and SILENTLY)
   // erase all data on the first found disk on the PC on which the media is booted, before partitioning it and installing Windows. Because the media does not prompt before erasing all data on the first disk, it is obvioulsy a
   // very DANGEROUS option, hence the ⚠ signs and the extra dialog that shows for it, in MSG_356, to ensure that the user accepts the consequences of selecting it.
+  // In case it matters, the implied tense for the verb is FUTURE and indicates what the media/installer will do once booted. It does not indicate what Rufus itself does.
   - *NEW*      MSG_355 "⚠SILENTLY⚠ erase disk and install:"
   - *NEW*      MSG_356 "You have selected to use the \"silent\" Windows installation option (...)"
+  // The following two messages can be tested if you select an image (e.g. ISO) that is located on the drive you are trying to create
+  // If not directly relatable, the "saw the branch you are sitting on" idiom should be translated into a similar popular metaphor (for something that is so illogically bad that it will obviously end in disaster) in your language.
+  - *NEW*      MSG_358 "Unsupported image location"
+  - *NEW*      MSG_359 "You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on (...)"
   // Tooltip for WUE MSG_329
   - *NEW*      MSG_360 "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
   // Tooltip for WUE MSG_330
   - *NEW*      MSG_361 "For this option to work, network/Internet MUST be disconnected during installation!"
   // Tooltip for WUE MSG_331
-  - *NEW*      MSG_362 "Automatically answer 'no' to the sharing of data questions from Windows setup, instead of prompting the user."
-  // Tooltip for WUE MSG_332
-  - *NEW*      MSG_363 "Windows To Go may access existing disks and perform unwanted file system upgrades if this option is not selected."
+  - *NEW*      MSG_362 "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+  // Tooltip for WUE MSG_332. Please avoid translating 'Windows To Go'.
+  - *NEW*      MSG_363 "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
   // Tooltip for WUE MSG_333
   - *NEW*      MSG_364 "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
   // Tooltip for WUE MSG_334
@@ -42,9 +47,9 @@ o v4.14 (2026.??.??)
   // Tooltip for WUE MSG_346 (that requires "Expert Mode" to first be enabled with Ctrl-Alt-E)
   - *NEW*      MSG_367 "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
   // Tooltip for WUE MSG_350. Mosby refers to https://github.com/pbatard/Mosby.
-  - *NEW*      MSG_368 "Use this option only if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+  - *NEW*      MSG_368 "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
   // Tooltip for WUE MSG_323
-  - *NEW*      MSG_369 "Revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+  - *NEW*      MSG_369 "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
   // Tooltip for WUE MSG_324. Do not translate "Quality of Life", since it must match the QoL abbreviation from MSG_324 and it is meant to be known by the user (and is clarified by the rest of the message anyway)
   - *NEW*      MSG_370 "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
   // Tooltip for WUE MSG_355
@@ -84,7 +89,7 @@ o v3.22 (2023.03.25)
   - *NEW*      MSG_329 "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
   - *NEW*      MSG_330 "Remove requirement for an online Microsoft account"
   - *NEW*      MSG_331 "Disable data collection (Skip privacy questions)"
-  - *NEW*      MSG_332 "Prevent Windows To Go from accessing internal disks"
+  - *NEW*      MSG_332 "Prevent 'Windows To Go' from accessing internal disks"
   - *NEW*      MSG_333 "Create a local account with username:"
   - *NEW*      MSG_334 "Set regional options to the same values as this user's"
   - *NEW*      MSG_335 "Disable BitLocker automatic device encryption"

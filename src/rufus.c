@@ -1519,6 +1519,11 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	if (boot_type == BT_IMAGE) {
 		if_assert_fails(image_path != NULL)
 			goto out;
+		if (IsSourceImageLocatedOnTargetDrive((DWORD)ComboBox_GetItemData(hDeviceList, ComboBox_GetCurSel(hDeviceList)))) {
+			// You cannot use an image that is located on the target drive
+			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_358), lmprintf(MSG_359));
+			goto out;
+		}
 		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
 			// This ISO image is too big for the selected target
 			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_088), lmprintf(MSG_089));

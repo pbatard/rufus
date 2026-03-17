@@ -1211,6 +1211,21 @@ UINT GetDriveTypeFromIndex(DWORD DriveIndex)
 	return drive_type;
 }
 
+BOOL IsSourceImageLocatedOnTargetDrive(DWORD DriveIndex)
+{
+	size_t i;
+	char drive_letters[27] = { 0 };
+
+	if (boot_type != BT_IMAGE || !GetDriveLetters(DriveIndex, drive_letters) || drive_letters[0] == 0)
+		return FALSE;
+
+	for (i = 0; i < strlen(drive_letters); i++)
+		if ((PathGetDriveNumberU(image_path) + 'A') == drive_letters[i])
+			return TRUE;
+
+	return FALSE;
+}
+
 // Removes all drive letters associated with the specific drive, and return
 // either the first or last letter that was removed, according to bReturnLast.
 char RemoveDriveLetters(DWORD DriveIndex, BOOL bReturnLast, BOOL bSilent)
