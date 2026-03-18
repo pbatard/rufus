@@ -387,8 +387,11 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 			(safe_stricmp(&psz_basename[strlen(psz_basename) - 4], ".img") == 0))
 			static_strcpy(img_report.efi_img_path, psz_fullpath);
 
-		// Check for the EFI boot entries
-		if (safe_stricmp(psz_dirname, efi_dirname) == 0) {
+		// Check for the EFI boot entries. Note that because of Bazzite maintainers' disregard for end users
+		// (evidenced in https://github.com/ublue-os/bazzite/issues/4374) and Fedora's disregards for standards
+		// (evidenced in pushing for '/efi/fedora/' to store bootloaders, instead of sticking to '/efi/boot/')
+		// we check for anything starting with '/efi/' instead of just '/efi/boot/').
+		if (safe_strnicmp(psz_dirname, "/efi/", 5) == 0) {
 			for (k = 0; k < ARRAYSIZE(efi_bootname); k++) {
 				for (i = 0; i < ARRAYSIZE(efi_archname); i++) {
 					static_sprintf(bootloader_name, "%s%s.efi", efi_bootname[k], efi_archname[i]);

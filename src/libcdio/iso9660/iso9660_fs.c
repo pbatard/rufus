@@ -564,7 +564,7 @@ iso9660_ifs_read_superblock (iso9660_t *p_iso,
 		(next_lsn - p_iso->boot_img[j].lsn) >= 0x4000) {
 		p_iso->boot_img[j].num_sectors =
 		    (next_lsn - p_iso->boot_img[j].lsn) * 4;
-		cdio_warn("Auto-expanding the size of %d-Boot-NoEmul.img", j);
+//		cdio_warn("Auto-expanding the size of %d-Boot-NoEmul.img", j);
 	    }
 	  }
 	}
