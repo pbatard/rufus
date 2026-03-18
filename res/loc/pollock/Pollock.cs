@@ -1,7 +1,7 @@
 ﻿/*
  * Rufus: The Reliable USB Formatting Utility
  * Poedit <-> rufus.loc conversion utility
- * Copyright © 2018-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2018-2026 Pete Batard <pete@akeo.ie>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ using System.Windows.Forms;
 [assembly: AssemblyProduct("Pollock")]
 [assembly: AssemblyCopyright("Copyright © 2018-2024 Pete Batard <pete@akeo.ie>")]
 [assembly: AssemblyTrademark("GNU GPLv3")]
-[assembly: AssemblyVersion("1.6.*")]
+[assembly: AssemblyVersion("1.7.*")]
 
 namespace pollock
 {
@@ -126,6 +126,7 @@ namespace pollock
         private static bool in_progress = false;
         private static bool in_on_change = false;
         private static double speed = 0.0f;
+        private static FileSystemWatcher watcher;
 
         /// <summary>
         /// Wait for a key to be pressed.
@@ -929,7 +930,6 @@ namespace pollock
         //
         // Main entrypoint.
         //
-        [STAThread]
         static void Main(string[] args)
         {
             // Fix needed for Windows 7 to download from github SSL
@@ -947,6 +947,15 @@ namespace pollock
             };
             Console.WriteLine($"{app_name} {version_str} - Poedit to rufus.loc conversion utility");
             Console.WriteLine();
+
+            // Microsoft BROKE FileSystemWatcher on non system drives sometime in the past two years
+            // (can't detect any changes if not) so make sure the dir is on the system drive.
+            if (!app_dir.StartsWith(Path.GetPathRoot(Environment.SystemDirectory)))
+            {
+                Console.WriteLine("ERROR: The directory where you run this executable MUST reside somewhere on your C:\\ drive.");
+                Console.WriteLine("This annoying regression is brought to you by the Microsoft .NET team - Thank you Microsoft!");
+                goto Exit;
+            }
 
             string loc_url = "https://github.com/pbatard/rufus/raw/master/res/loc/rufus.loc";
             string ver_url = "https://rufus.ie/Loc.ver";
@@ -1189,15 +1198,16 @@ Retry:
                 goto Exit;
 
             // Watch for file modifications
-            FileSystemWatcher watcher = new FileSystemWatcher();
+            watcher = new FileSystemWatcher();
+            watcher.Error += (s, e) => Console.WriteLine($"FSW Error: {e.GetException()}");
             watcher.Path = app_dir;
-            watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite;
+            watcher.NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.Size;
             watcher.Filter = po_file;
             watcher.Changed += new FileSystemEventHandler(OnChanged);
             watcher.EnableRaisingEvents = true;
 
             // Open the file in PoEdit if we can
-            var poedit = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) + @"\Poedit\Poedit.exe";
+            var poedit = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + @"\Poedit\Poedit.exe";
             if (File.Exists(poedit))
             {
                 Console.WriteLine();
