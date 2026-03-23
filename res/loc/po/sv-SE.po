@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2025-09-23 20:25+0100\n"
-"PO-Revision-Date: 2025-09-23 20:25+0100\n"
+"POT-Creation-Date: 2026-03-23 18:43+0000\n"
+"PO-Revision-Date: 2026-03-23 18:43+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: sv_SE\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Swedish (Svenska)\n"
 "X-Rufus-LCID: 0x041d, 0x081d\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -309,7 +309,7 @@ msgstr ""
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr ""
 
@@ -845,7 +845,7 @@ msgstr "Ej bestående"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "Ställ in den bestående partitionens storlek för live USB-media. Om du ställer in storleken till 0 inaktiveras den bestående partitionen."
 
@@ -887,7 +887,7 @@ msgstr "Ett annat program eller process använder denna enheten Vill du ändå f
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
@@ -1796,6 +1796,14 @@ msgstr ""
 msgid "Unable to open or read '%s'"
 msgstr "Det går inte att öppna eller läsa '%s'"
 
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "Verkställ SkuSiPolicy.p7b vid installationen (se KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "Förbättringar av användarupplevelsen (tvinga inte på Copilot, OneDrive, Outlook, Snabbstart osv.)"
+
 #. • MSG_325
 msgid "Applying Windows customization: %s"
 msgstr "Verkställer Windows-anpassning: %s"
@@ -1919,6 +1927,118 @@ msgstr "Extraherar arkivfiler: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Använd Rufus MBR"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "Använd bootloaders signerade med ’Windows CA 2023’ (kräver en kompatibel mål‑PC)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "Kontrollerar om UEFI‑bootloadern är återkallad..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "Söker efter UEFI‑DBX‑uppdateringar..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "DBX‑uppdatering tillgänglig"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus har hittat en uppdaterad version av de DBX‑filer som används för att utföra UEFI Secure Boot‑återkallelsekontroller. Vill du ladda ned denna uppdatering?\n"
+"- Välj ”Ja” för att ansluta till Internet och ladda ner innehållet\n"
+"- Välj ”Nej” för att avbryta åtgärden\n"
+"\n"
+"Obs: Filerna laddas ner till programmets katalog och återanvänds automatiskt om de redan finns."
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "Radera disken i ⚠TYST LÄGE⚠ och installera:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"Du har valt alternativet ”tyst läge” för Windows‑installationen.\n"
+"\n"
+"Detta är ett avancerat alternativ, avsett för personer som vill skapa installationsmedia som inte visar några dialogrutor under Windows‑installationen och därför OVILLKORLIGT RADERAR den första upptäckta disken på målsystemet. Om du inte är försiktig kan användning av detta alternativ leda till OÅTERKALLELIG FÖRLUST AV DATA!\n"
+"\n"
+"Om detta inte är vad du vill, välj ”Nej” för att gå tillbaka och avmarkera alternativet.\n"
+"Annars, om du väljer ”Ja”, godkänner du att hela ansvaret för eventuell dataförlust ligger på DIG."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "Platsen för avbilden stöds inte"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"Du kan inte använda en avbildning som ligger på målenheten, eftersom den enheten kommer att raderas helt. Det är som att försöka såga av grenen du sitter på!\n"
+"\n"
+"Flytta avbildningen till en annan plats och försök igen."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "Det är säkert att lämna det här alternativet aktiverat även om du har en TPM eller mer RAM, eftersom det endast kringgår installationskraven och inte hindrar Windows från att använda all tillgänglig hårdvara."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "För att det här alternativet ska fungera måste nätverket/Internet vara frånkopplat under installationen!"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Svara automatiskt ’nej’ på Windows‑installationsfrågorna som rör delning av data med Microsoft, i stället för att fråga användaren."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "Du bör lämna det här alternativet aktiverat, om du inte är okej med att ’Windows To Go’ får åtkomst till interna diskar och tyst utför oåterkalleliga filsystemuppgraderingar."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "Skapa automatiskt ett lokalt konto med det angivna användarnamnet, med ett tomt lösenord som måste ändras vid nästa inloggning."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "Duplicera de regionala inställningarna från den här datorn (tangentbord, tidszon, valuta) i stället för att fråga användaren."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "Kryptera inte systemdisken, om det inte uttryckligen begärs av användaren."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "Använd det här alternativet endast om du vet vad S‑läge är och förstår att ditt system kan låsas i S‑läge även efter att du helt har raderat och installerat om Windows."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Använd det här alternativet om systemet du planerar att installera Windows på använder helt uppdaterade Secure Boot‑certifikat. Vid behov kan du använda ’Mosby’ för att uppdatera systemet."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "Använd det här alternativet om du vill återkalla ytterligare potentiellt osäkra Windows‑startprogram, men med risken att även förhindra att standard‑Windowsmedia kan starta."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "Förbättringar för bättre användarupplevelse: Inaktivera de flesta av de oönskade funktioner som Microsoft försöker tvinga på slutanvändare."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "Om du använder det här alternativet måste du se till att koppla bort alla diskar från måldatorn, förutom den du vill installera Windows på, och inte lämna mediet anslutet till någon dator som du inte vill radera."
 
 #. • MSG_900
 #.
