@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-05-14 16:22+0100\n"
-"PO-Revision-Date: 2024-05-14 16:22+0100\n"
+"POT-Creation-Date: 2026-03-23 18:24+0000\n"
+"PO-Revision-Date: 2026-03-23 18:25+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: lv_LV\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Latvian (Latviešu)\n"
 "X-Rufus-LCID: 0x0426\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -308,7 +308,7 @@ msgstr ""
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr ""
 
@@ -846,7 +846,7 @@ msgstr "Nav sadaļas"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "Fiksētās sadaļas apjoma izvēle uz USB nesēja. Ja nav fiksētās sadaļas ievadiet 0."
 
@@ -888,13 +888,13 @@ msgstr "Citai programmai vai procesam ir piekļuve šai ierīcei. Vienalga vēla
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"Rufus noteica, ka mēģinat veidot Windows To Go disku formātā 1809 ISO\n"
+"Rufus noteica, ka mēģinat veidot 'Windows To Go' disku formātā 1809 ISO\n"
 "\n"
 "Atsaucoties uz *MICROSOFT BUG*, šis nesējs var izsaukt Windows ielādes kļūdu (BSOD), šādā gadījumā nepieciešams manuāli samainīt 'WppRecorder.sys' failu uz 1803 versiju.\n"
 "\n"
@@ -1796,6 +1796,14 @@ msgstr ""
 msgid "Unable to open or read '%s'"
 msgstr "Neizdevās atvērt vai izlasīt '%s'"
 
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "Instalēšanas laikā izmantojiet SkuSiPolicy.p7b (skatiet KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "QoL uzlabojumi (attiecas uz Copilot, OneDrive, Outlook, Fast Startup utt.)"
+
 #. • MSG_325
 msgid "Applying Windows customization: %s"
 msgstr "Pielietot Windows kastomizāciju: %s"
@@ -1846,15 +1854,15 @@ msgstr "Pastāvīgs žurnāls"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"Lai instalēt MS-DOS no Microsoft vietnes nepieciešams lejuplādēt papildus failu («diskcopy.dll»):\n"
-"- Izvēlieties «Jā», lai pieslēgties pie Interneta un failu lejuplādēt.\n"
-"- Izvēlieties «Nē», lai atcelt darbību.\n"
+"Lai izmantotu šo funkciju, no Microsoft ir jālejupielādē papildu fails ('%s'):\n"
+"- Izvēlieties 'Jā', lai pieslēgties pie Interneta un failu lejuplādēt.\n"
+"- Izvēlieties 'Nē', lai atcelt darbību.\n"
 "\n"
 "Piezīme. Fails tiks lejuplādēts programmas mapē, ja tas jau eksistē, tiks izmantots atkārtoti."
 
@@ -1919,6 +1927,118 @@ msgstr "Atpakot arhīva failus: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Izmantot Rufus MBR"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "Izmantojiet Windows CA 2023' parakstītus ielādētājus (nepieciešams saderīgs dators)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "Notiek UEFI ielādētāja atsaukšanas pārbaude..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "Notiek UEFI DBX atjauninājumu pārbaude..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "Pieejams DBX atjauninājums"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus ir atradis atjauninātu DBX failu versiju, ko izmanto, lai veiktu UEFI Secure Boot atsaukšanas pārbaudes. Vai vēlaties lejupielādēt šo atjauninājumu?\n"
+"- Izvēlieties 'Jā', lai pieslēgties internetam un lejupielādēt šo saturu\n"
+"- Izvēlieties 'Nē', lai atceltu darbību\n"
+"\n"
+"Piezīme. Faili tiks lejupielādēti programmas direktorijā un ja tādi jau ir, tie tiks automātiski izmantoti atkārtoti."
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠KLUSĀ⚠ diska dzēšana un instalācija:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"Ir izvēlēta \"klusā\" Windows instalēšanas opcija.\n"
+"\n"
+"Šī ir uzlabota opcija, kas paredzēta tiem, kuri vēlas izveidot datu nesēju, kas lietotājam Windows instalēšanas laikā neko neprasa un BEZNOSACĪJUMĀ DZĒŠ pirmo atrasto disku. Ja neesat piesardzīgs, šīs opcijas izmantošana var izraisīt NEATGRIEZENISKU DATU ZAUDĒJUMU!\n"
+"\n"
+"Ja tas nav tas, ko vēlaties, izvēlieties 'Nē', lai atgrieztos un noņemiet atzīmi no opcijas.\n"
+"Pretējā gadījumā, ja izvēlaties 'Jā', tad PIEKRĪTAT atbildībai par iespējamo datu zudumu."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "Neatbalstīta instalācijas atrašanās vieta"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"Nevar izmantot instalāciju, kas atrodas mērķa diskā, jo šis disks tiks pilnībā izdzēsts. Tas ir tas pats, kas mēģināt zāģēt zaru, uz kura sēdi!\n"
+"\n"
+"Pārvietojiet instalāciju uz citu vietu un mēģiniet vēlreiz."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "Šo opciju var atstāt iespējotu pat tad, ja ir TPM vai vairāk RAM, jo šī opcija tikai apiet iestatīšanas prasības un faktiski neliedz OS Windows izmantot visu pieejamo aparatūru."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "Lai šī opcija darbotos, instalēšanas laikā OBLIGĀTI jāatvieno tīkls/internets!"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Automātiski uz Windows iestatīšanas jautājumiem, kas saistīti datu koplietošanai ar Microsoft, atbilde būs 'nē' tā vietā, lai prasīt lietotājam."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "Šī opcija ir jāatstāj iespējota, ja vien 'Windows To Go' nevar piekļūt iekšējiem diskiem un klusi veikt neatgriezeniskus failu sistēmas jauninājumus."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "Automātiski izveidos lokālo kontu ar norādīto lietotājvārdu, izmantojot tukšu paroli, kas būs jāmaina nākamajā pieteikšanās reizē."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "Dublēs reģionālos iestatījumus no šī datora (tastatūra, laika josla, valūta), tā vietā, lai prasīt lietotājam."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "Nešifrēs sistēmas disku, ja vien to neaktivizēs lietotājs."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "Izmantojiet šo opciju tikai tad, ja zināt, kas ir S-Mode, un saprotat, ka sistēma var tikt bloķēta S-režīmā pat pēc pilnīgas Windows dzēšanas un atkārtotas instalēšanas."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Izmantojiet šo opciju, ja sistēma, kurā plānojat instalēt sistēmu Windows, izmanto pilnībā atjauninātus Secure Boot sertifikātus. Ja nepieciešams, sistēmas atjaunināšanai varat izmantot Mosby."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "Izmantojiet šo opciju, ja vēlaties atsaukt papildu potenciāli nedrošos Windows ielādētājus, taču var arī novērst standarta Windows multivides palaišanu."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "\"Quality of Life\" uzlabojumi: Tiks atspējota lielākā daļu nevēlamo funkciju, ko Microsoft mēģina uzspiest lietotājiem."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "Ja izmantojat šo opciju, atvienojiet visus diskus no mērķa datora, izņemot to, kurā vēlaties instalēt OS Windows, kā arī neatstājiet multividi, kuru nevēlaties dzēst, pievienotu nevienam no datoriem."
 
 #. • MSG_900
 #.
