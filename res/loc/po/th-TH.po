@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-04-26 10:51+0700\n"
-"PO-Revision-Date: 2024-04-26 18:32+0700\n"
+"POT-Creation-Date: 2026-03-22 11:42+0700\n"
+"PO-Revision-Date: 2026-03-22 14:37+0700\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: th_TH\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Thai (ไทย)\n"
 "X-Rufus-LCID: 0x041e\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -308,7 +308,7 @@ msgstr ""
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr ""
 
@@ -573,9 +573,9 @@ msgstr ""
 "ซึ่งอาจทำให้เมนูการบูตไม่สามารถแสดงผลได้ถูกต้อง\n"
 "\n"
 "Rufus สามารถดาวน์โหลดเวอร์ชันที่ใหม่กว่าให้คุณได้:\n"
-"- เลือก 'Yes' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
-"- เลือก 'No' เพื่อใช้อิมเมจไฟล์อันเดิม\n"
-"หากไม่รู้จะเลือกวิธีใด ให้เลือก 'Yes'\n"
+"- เลือก 'ใช่ (Yes)' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
+"- เลือก 'ไม่ใช่ (No)' เพื่อใช้อิมเมจไฟล์อันเดิม\n"
+"หากไม่รู้จะเลือกวิธีใด ให้เลือก 'ใช่ (Yes)'\n"
 "\n"
 "หมายเหตุ: ไฟล์ใหม่จะถูกจัดเก็บในโฟลเดอร์ปัจจุบัน และเมื่อไฟล์ '%s มีแล้ว ไฟล์จะถูกเลือกใช้โดยอัตโนมัติ"
 
@@ -700,8 +700,8 @@ msgstr ""
 "เนื่องจากไฟล์นี้มีขนาดใหญ่กว่า 100 KB และพบเจอได้ใน ISO: %s ซึ่งไม่ได้รวมไว้ในโปรแกรม Rufus\n"
 "\n"
 "Rufus สามารถดาวน์โหลดไฟล์ดังกล่าวให้คุณได้:\n"
-"- เลือก 'Yes' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
-"- เลือก 'No' คุณต้องการคัดลอกไฟล์ดังกล่าวด้วยตัวเอง\n"
+"- เลือก 'ใช่ (Yes)' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
+"- เลือก 'ไม่ใช่ (No)' คุณต้องการคัดลอกไฟล์ดังกล่าวด้วยตัวเอง\n"
 "\n"
 "หมายเหตุ: ไฟล์ใหม่จะถูกจัดเก็บในโฟลเดอร์ปัจจุบัน และเมื่อไฟล์ '%s มีแล้ว ไฟล์จะถูกเลือกใช้โดยอัตโนมัติ"
 
@@ -767,8 +767,8 @@ msgstr ""
 "อิมเมจนี้ใช้ Syslinux %s%s แต่โปรแกรมนี้มีเฉพาะไฟล์ติดตั้งของ Syslinux %s%s \n"
 "\n"
 "โดยเวอร์ชันใหม่ของ Syslinux อาจไม่รองรับกับรุ่นที่ต่างกันไปไฟล์จำนวน 2 ไฟล์ต่อไปนี้จะถูกดาวน์โหลดจากอินเทอร์เน็ต ('ldlinux.sys' and 'ldlinux.bss'):\n"
-"- เลือก 'Yes' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
-"- เลือก 'No' เมื่อคุณต้องการคัดลอกไฟล์ดังกล่าวด้วยตัวเอง\n"
+"- เลือก 'ใช่ (Yes)' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
+"- เลือก 'ไม่ใช่ (No)' เมื่อคุณต้องการคัดลอกไฟล์ดังกล่าวด้วยตัวเอง\n"
 "\n"
 "หมายเหตุ: ไฟล์ใหม่จะถูกจัดเก็บในโฟลเดอร์ปัจจุบัน และไฟล์ จะถูกเลือกใช้โดยอัตโนมัติ"
 
@@ -793,9 +793,9 @@ msgstr ""
 "อิมเมจนี้ใช้ Grub %s แต่โปรแกรมนี้มีเฉพาะไฟล์ติดตั้งของ Grub %s \n"
 "\n"
 "โดยเวอร์ชันใหม่ของ Grub อาจไม่รองรับกับรุ่นที่ต่างกันไป Rufus สามารถค้นหาอิมเมจของ Grub เวอร์ชันล่าสุด ('core.img') ที่เข้ากันได้กับอิมเมจไฟล์ที่คุณเลือก:\n"
-"- เลือก 'Yes' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
-"- เลือก 'No' เพื่อใช้เวอร์ชันปัจจุบันที่ติดมากับ Rufus\n"
-"-เลือก 'Cancel' เพื่อยกเลิกการดำเนินการนี้\n"
+"- เลือก 'ใช่ (Yes)' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
+"- เลือก 'ไม่ใช่ (No)' เพื่อใช้เวอร์ชันปัจจุบันที่ติดมากับ Rufus\n"
+"-เลือก 'ยกเลิก (Cancel)' เพื่อยกเลิกการดำเนินการนี้\n"
 "\n"
 "หมายเหตุ: ไฟล์ใหม่จะถูกจัดเก็บในโฟลเดอร์ปัจจุบัน และไฟล์จะถูกเลือกใช้โดยอัตโนมัติหากไม่พบไฟล์ที่ใหม่กว่า ไฟล์เวอร์ชันปัจจุบันจะถูกใช้แทน"
 
@@ -846,7 +846,7 @@ msgstr "ไม่มี Persistent"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "ตั้งค่าขนาดของพาร์ติชันสำหรับ Live USB media (ตั้งขนาดเป็น 0 เพื่อปิดการทำงานของ persistent partition)"
 
@@ -888,7 +888,7 @@ msgstr "ไดรฟ์นี้กำลังถูกใช้งานอย
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
@@ -1796,6 +1796,14 @@ msgstr ""
 msgid "Unable to open or read '%s'"
 msgstr "ไม่สามารถเปิดหรืออ่าน '%s' ได้"
 
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "เปิดใช้งาน SkuSiPolicy.p7b ในการติดตั้ง (ดูที่ KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "การปรับปรุงคุณภาพการใช้งาน/QoL (ยกเลิกการบังคับใช้: Copilot, OneDrive, Outlook, Fast Startup, เป็นต้น)"
+
 #. • MSG_325
 msgid "Applying Windows customization: %s"
 msgstr "ปรับใช้งานการปรับแต่งขั้นตอนการติดตั้ง Windows: %s"
@@ -1846,15 +1854,15 @@ msgstr "Log แบบถาวร"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"มีความจำเป็นต้องดาวน์โหลดไฟล์ ('diskcopy.dll') จาก Microsoft เพื่อติดตั้ง MS-DOS:\n"
-"- เลือก 'Yes' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
-"- เลือก 'No' เพื่อยกเลิก\n"
+"มีความจำเป็นต้องดาวน์โหลดไฟล์ ('%s') จาก Microsoft เพื่อใช้ฟีเจอร์นี้:\n"
+"- เลือก 'ใช่ (Yes)' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
+"- เลือก 'ไม่ใช่ (No)' เพื่อยกเลิก\n"
 "\n"
 "หมายเหตุ: ไฟล์ใหม่จะถูกจัดเก็บในโฟลเดอร์ปัจจุบัน และเมื่อไฟล์ '%s มีแล้ว ไฟล์จะถูกเลือกใช้โดยอัตโนมัติ"
 
@@ -1892,7 +1900,7 @@ msgstr "อิมเมจ VHDX ที่ไม่บีบอัด"
 
 #. • MSG_344
 msgid "Full Flash Update Image"
-msgstr ""
+msgstr "ไฟล์อิมเมจสำหรับ Full Flash Update"
 
 #. • MSG_345
 msgid ""
@@ -1901,8 +1909,8 @@ msgid ""
 "- Select 'No' to cancel the operation"
 msgstr ""
 "มีความจำเป็นต้องดาวน์โหลดข้อมูลเพิ่มเติมจาก Microsoft เพื่อใช้งานฟังก์ชั่นนี้:\n"
-"- เลือก 'Yes' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
-"- เลือก 'No' เพื่อยกเลิก"
+"- เลือก 'ใช่ (Yes)' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
+"- เลือก 'ไม่ใช่ (No)' เพื่อยกเลิก"
 
 #. • MSG_346
 msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
@@ -1919,6 +1927,118 @@ msgstr "กำลังแตกไฟล์: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Rufus MBR"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "ใช้งานบูตโหลดเดอร์ที่รับรองโดย 'Windows CA 2023' (ตัวเครื่องคอมพิวเตอร์ปลายทางต้องรองรับด้วย)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "กำลังตรวจสอบการเพิกถอนสิทธิ์ของบูตโหลดเดอร์แบบ UEFI..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "กำลังตรวจสอบการอัปเดตรายการเพิกถอนสิทธิ์ของ UEFI (DBX)..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "มีการอัปเดตรายการเพิกถอนสิทธิ์ (DBX) พร้อมใช้งานแล้ว"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus ตรวจเจอเวอร์ชั่นอัพเดตที่ใหม่กว่าของไฟล์ DBX ซึ่งใช้สำหรับตรวจสอบการเพิกถอนสิทธิ์ของ UEFI Secure Boot คุณต้องการดาวน์โหลดไฟล์อัพเดตหรือไม่?\n"
+"- เลือก 'ใช่ (Yes)' เพื่อดาวน์โหลดไฟล์ผ่านอินเทอร์เน็ต\n"
+"- เลือก 'ไม่ใช่ (No)' เพื่อยกเลิกการดำเนินการ\n"
+"\n"
+"หมายเหตุ: ไฟล์จะถูกดาวน์โหลดลงในไดเรกทอรีของแอปพลิเคชัน และจะถูกนำกลับมาใช้ใหม่โดยอัตโนมัติหากมีไฟล์อยู่แล้ว"
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠จะไม่มีการถามยืนยันซ้ำ⚠ ลบข้อมูลดิสก์ แล้วติดตั้ง:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"คุณเลือกที่จะใช้งานตัวเลือก การติดตั้ง Windows \"แบบเงียบ\"\n"
+"\n"
+"นี่คือตัวเลือกขั้นสูง ซึ่งสงวนไว้สำหรับผู้ที่ต้องการสร้างสื่อติดตั้งที่จะไม่ถามผู้ใช้ในระหว่างการติดตั้ง Windows ดังนั้นมันจะลบข้อมูลในดิสก์ตัวแรกที่ตรวจพบในระบบปลายทาง **โดยไม่มีเงื่อนไข** หากคุณไม่ระมัดระวัง การใช้ตัวเลือกนี้อาจส่งผลให้ **เกิดการสูญเสียข้อมูลอย่างถาวรและไม่สามารถกู้คืนได้!**\n"
+"\n"
+"หากนี่ไม่ใช่สิ่งที่คุณต้องการ โปรดเลือก 'ไม่ใช่ (No)' เพื่อย้อนกลับและยกเลิกการเลือกตัวเลือกดังกล่าว\n"
+"มิฉะนั้น หากคุณเลือก 'ใช่ (Yes)' คุณยอมรับว่าความรับผิดชอบทั้งหมดต่อการสูญหายของข้อมูลใดๆ จะตกอยู่ที่ตัวคุณแต่เพียงผู้เดียว"
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "ไม่รองรับตำแหน่งที่ตั้งของไฟล์อิมเมจ"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"คุณไม่สามารถใช้ไฟล์อิมเมจที่อยู่ในไดรฟ์เป้าหมายได้ เนื่องจากไดรฟ์นั้นกำลังจะถูกลบข้อมูลทั้งหมด มันก็เหมือนกับการพยายามทำลายที่มั่นตัวเองอยู่นั่นแหละ!\n"
+"\n"
+"โปรดย้ายอิมเมจไปยังตำแหน่งอื่นแล้วลองใหม่อีกครั้ง"
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "การเปิดตัวเลือกนี้ทิ้งไว้มีความปลอดภัย ถึงแม้ว่าคุณจะมี TPM หรือแรมที่มากกว่าก็ตาม ตัวเลือกนี้มีผลแค่การข้าม ข้อกำหนดในการติดตั้ง เท่านั้น ไม่ได้ลดทอนการทำงานของ Windows ในการดึงประสิทธิภาพฮาร์ดแวร์มาใช้อย่างเต็มที่"
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "เพื่อให้ตัวเลือกนี้ทำงานได้ จะต้องปิดการเชื่อมต่อเครือข่าย/อินเทอร์เน็ตขณะทำการติดตั้งก่อน"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "ตอบ 'ไม่ใช่ (no)' โดยอัตโนมัติ สำหรับคำถามในการตั้งค่า Windows ที่เกี่ยวกับการแชร์ข้อมูลให้กับ Microsoft โดยไม่ต้องเด้งถามผู้ใช้"
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "คุณควรจะเปิดตัวเลือกนี้ทิ้งไว้ ยกเว้นว่าคุณจะยอมรับได้หาก 'Windows To Go' เข้าถึงดิสก์ภายในเครื่อง และทำการอัปเกรดระบบไฟล์โดยอัตโนมัติ ซึ่งเป็นการดำเนินการที่ไม่สามารถย้อนกลับได้"
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "สร้างบัญชีผู้ใช้ภายในเครื่อง (Local account) ตามชื่อที่ระบุโดยอัตโนมัติ ซึ่งจะไม่มีรหัสผ่าน และอาจจะต้องเปลี่ยนรหัสเมื่อเข้าสู่ระบบครั้งถัดไป"
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "คัดลอกการตั้งค่าภูมิภาคจากพีซีปัจจุบัน (ภาษาแป้นพิมพ์, โซนเวลา, สกุลเงิน, ฯลฯ) โดยไม่ต้องเด้งถามผู้ใช้"
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "อย่าเข้ารหัสดิสก์ระบบ นอกเหนือจากว่าจะเป็นผู้ใช้งานจะเป็นผู้สั่งให้เข้ารหัสเอง"
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "โปรดใช้ตัวเลือกนี้เฉพาะในกรณีที่คุณทราบว่า S-Mode คืออะไร และเข้าใจว่าระบบของคุณอาจถูกล็อกให้อยู่ใน S-Mode ต่อไป แม้ว่าคุณจะทำการล้างข้อมูลทั้งหมดและติดตั้ง Windows ใหม่แล้วก็ตาม"
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "ใช้ตัวเลือกนี้หากระบบที่คุณต้องการติดตั้ง Windows มีการใช้ใบรับรอง Secure Boot ที่อัปเดตเป็นเวอร์ชันล่าสุดแล้ว หากจำเป็น คุณสามารถศึกษาการใช้เครื่องมือ 'Mosby' เพื่อทำการอัปเดตระบบของคุณได้"
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "ใช้ตัวเลือกนี้หากคุณต้องการเพิกถอนสิทธิ์บูตโหลดเดอร์ของ Windows เพิ่มเติมที่อาจจะไม่ปลอดภัย แต่โปรดทราบว่ามีความเสี่ยงที่จะทำให้สื่อติดตั้ง Windows มาตรฐานทั่วไปไม่สามารถบูตได้ด้วยเช่นกัน"
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "\"การปรับปรุงคุณภาพการใช้งาน (Quality of Life)\": ปิดการใช้งานคุณสมบัติส่วนใหญ่ที่ไม่พึงประสงค์ที่ Microsoft พยายามบังคับให้ผู้ใช้งานทั่วไปต้องใช้"
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "ถ้าหากคุณเลือกตัวเลือกนี้ กรุณาเช็คให้มั่นใจว่าคุณถอดดิสก์ที่เชื่อมกับพีซีเป้าหมาย เหลือไว้เฉพาะดิสก์ที่คุณต้องการจะติดตั้ง Windows เท่านั้น และห้ามเสียบตัวติดตั้ง (เช่น แฟลชไดรฟ์) ทิ้งไว้ในคอมพิวเตอร์เครื่องใดก็ตามที่คุณไม่ต้องการให้ข้อมูลถูกลบ\""
 
 #. • MSG_900
 #.
