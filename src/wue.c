@@ -50,7 +50,7 @@ int unattend_edition_index = 1;
 char *unattend_xml_path = NULL, unattend_username[MAX_USERNAME_LENGTH];
 uint32_t removable_section[2] = { 0, 0 };
 
-extern BOOL validate_md5sum;
+extern BOOL validate_md5sum, bcdboot_supports_ex;
 extern uint64_t md5sum_totalbytes;
 extern StrArray modified_files;
 extern const char* efi_archname[ARCH_MAX];
@@ -957,7 +957,8 @@ out:
 /// <returns>TRUE on success, FALSE on error.</returns>
 BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 {
-	char *ms_efi = NULL, wim_path[4 * MAX_PATH], cmd[MAX_PATH];
+	char *ms_efi = NULL, wim_path[4 * MAX_PATH], cmd[MAX_PATH], path[MAX_PATH];
+	BOOL use_bootex = FALSE;
 	ULONG cluster_size;
 
 	uprintf("Windows To Go mode selected");
@@ -1015,11 +1016,24 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 
 	// We invoke the 'bcdboot' command from the host, as the one from the drive produces problems (#558)
 	// and of course, we couldn't invoke an ARM64 'bcdboot' binary on an x86 host anyway...
-	// Also, since Rufus should (usually) be running as a 32 bit app, on 64 bit systems, we need to use
+	// Also, since Rufus may be running as a 32 bit app, on 64 bit systems, we need to use
 	// 'C:\Windows\Sysnative' and not 'C:\Windows\System32' to invoke bcdboot, as 'C:\Windows\System32'
 	// will get converted to 'C:\Windows\SysWOW64' behind the scenes, and there is no bcdboot.exe there.
+	// Finally, due to the whole _EX mess, we have to detect if the system bcdboot supports the /offline
+	// option, and if it does, whether the target has `Windows\Boot\EFI_EX\` so that we don't let bcdboot
+	// attempt to use the _EX files and fail. See https://github.com/pbatard/rufus/issues/2940.
 	uprintf("Enabling boot using command:");
-	static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /v /f %s /s %s", sysnative_dir, drive_name,
+	// Create the EFI\Microsoft\Boot\ directory on the ESP, since bcdboot is apparently unable to do that!
+	static_sprintf(path, "%s\\EFI\\Microsoft\\Boot", (use_esp) ? ms_efi : drive_name);
+	_mkdirExU(path);
+	// The default of recent bcdboot is to try to use the EX files (even if they don't exist) unless
+	// /offline is specified *without* /bootex, which of course results in an error if, say, we try
+	// to create a Windows 10 Windows To Go drive on an up to date Windows platform.
+	// So we need to specify /offline and /bootex very carefully.
+	static_sprintf(path, "%s\\Windows\\Boot\\EFI_EX", drive_name);
+	use_bootex = (bcdboot_supports_ex && (unattend_xml_flags & UNATTEND_USE_MS2023_BOOTLOADERS) && PathFileExistsU(path));
+	static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /v %s%s/f %s /s %s", sysnative_dir, drive_name,
+		bcdboot_supports_ex ? "/offline " : "", use_bootex ? "/bootex " : "",
 		HAS_BOOTMGR_BIOS(img_report) ? (HAS_BOOTMGR_EFI(img_report) ? "ALL" : "BIOS") : "UEFI",
 		(use_esp) ? ms_efi : drive_name);
 	// I don't believe we can ever have a stray '%' in cmd, but just in case...
@@ -1304,7 +1318,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 		UpdateProgressWithInfoForce(OP_PATCH, MSG_325, 103, PATCH_PROGRESS_TOTAL);
 	}
 
-	if (flags & UNATTEND_USE_MS2023_BOOTLOADERS) {
+	if ((flags & UNATTEND_USE_MS2023_BOOTLOADERS) && !(flags & UNATTEND_WINDOWS_TO_GO)) {
 		if_assert_fails(update_boot_wim)
 			goto out;
 		if (GetTempDirNameU(temp_dir, APPLICATION_NAME, 0, tmp_path[1]) == 0) {

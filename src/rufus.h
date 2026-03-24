@@ -658,11 +658,14 @@ enum WindowsVersion {
 };
 
 typedef struct {
-	DWORD Major;
-	DWORD Minor;
-	DWORD Micro;
-	DWORD Nano;
+	WORD Major;
+	WORD Minor;
+	WORD Micro;
+	WORD Nano;
 } version_t;
+static __inline uint64_t version_to_uint64(version_t* ver) {
+	return (uint64_t)ver->Major << 48 | (uint64_t)ver->Minor << 32 | (uint64_t)ver->Micro << 16 | ver->Nano;
+}
 
 typedef struct {
 	DWORD Version;
