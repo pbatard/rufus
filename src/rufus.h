@@ -513,7 +513,7 @@ typedef struct {
  *   EXT_DECL(my_extensions, "default.std", __VA_GROUP__("*.std", "*.other"), __VA_GROUP__("Standard type", "Other Type"));
  * to define an 'ext_t my_extensions' variable initialized with the relevant attributes.
  */
-typedef struct ext_t {
+typedef struct {
 	size_t count;
 	const char* filename;
 	const char** extension;
@@ -820,8 +820,10 @@ extern BOOL CreateTaskbarList(void);
 extern BOOL SetTaskbarProgressState(TASKBAR_PROGRESS_FLAGS tbpFlags);
 extern BOOL SetTaskbarProgressValue(ULONGLONG ullCompleted, ULONGLONG ullTotal);
 extern INT_PTR CreateAboutBox(void);
-extern BOOL CreateTooltip(HWND hControl, const char* message, int duration);
-extern void DestroyTooltip(HWND hWnd);
+extern BOOL CreateTooltipEx(HWND hDlg, HWND hControl, const char* message, int duration);
+#define CreateTooltip(hControl, message, duration) CreateTooltipEx(hMainDialog, hControl, message, duration)
+extern void PopTooltip(HWND hControl);
+extern void DestroyTooltip(HWND hControl);
 extern void DestroyAllTooltips(void);
 extern int NotificationEx(int type, const char* dont_display_setting, const notification_info* more_info, const char* title, const char* format, ...);
 #define Notification(type, title, ...) NotificationEx(type, NULL, NULL, title, __VA_ARGS__)

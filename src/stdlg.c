@@ -90,6 +90,12 @@ static int update_settings_reposition_ids[] = {
 };
 static const SETTEXTEX friggin_microsoft_unicode_amateurs = { ST_DEFAULT, CP_UTF8 };
 static WNDPROC update_original_proc = NULL;
+static struct {
+	HWND hTip;		// Tooltip handle
+	HWND hCtrl;		// Handle of the control the tooltip belongs to
+	WNDPROC original_proc;
+	LPWSTR wstring;
+} ttlist[MAX_TOOLTIPS] = { 0 };
 
 /*
  * https://blogs.msdn.microsoft.com/oldnewthing/20040802-00/?p=38283/
@@ -922,7 +928,7 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 			}
 			// Set tooltips, if any
 			if (i < (int)selection_data.options->tooltips.Index)
-				CreateTooltip(hCtrl, selection_data.options->tooltips.String[i], -1);
+				CreateTooltipEx(hDlg, hCtrl, selection_data.options->tooltips.String[i], -1);
 		}
 		// If our maximum line's width is greater than the default, set a nonzero delta width
 		dw = (mw <= dw) ? 0 : mw - dw;
@@ -1086,10 +1092,33 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 }
 
 /*
+ * Because we're not in the main dialog thread, we must handle our own tooltip popping
+ * when the mouse switches to a different control, else we get overlapping tooltips due
+ * to Windows not automatically forwarding mouse events to child dialogs.
+ */
+LRESULT CALLBACK SelectionTooltipPopper(int nCode, WPARAM wParam, LPARAM lParam)
+{
+	static HWND hPreviousCtrl = NULL;
+	MOUSEHOOKSTRUCT* mhs;
+
+	// Get the control over which the mouse resides and check if it changed.
+	if (nCode == HC_ACTION && wParam == WM_MOUSEMOVE) {
+		mhs = (MOUSEHOOKSTRUCT*)lParam;
+		if (hPreviousCtrl != mhs->hwnd) {
+			PopTooltip(hPreviousCtrl);
+			hPreviousCtrl = mhs->hwnd;
+		}
+
+	}
+	return CallNextHookEx(NULL, nCode, wParam, lParam);
+}
+
+/*
  * Display an item selection dialog
  */
 int SelectionDialog(char* title, char* message, selection_dialog_options_t* options)
 {
+	HHOOK hook;
 	int ret;
 
 	assert(options != NULL);
@@ -1100,7 +1129,9 @@ int SelectionDialog(char* title, char* message, selection_dialog_options_t* opti
 	if (options->style == 0)
 		options->style = BS_AUTORADIOBUTTON;
 	assert ((options->style == BS_AUTORADIOBUTTON || options->style == BS_AUTOCHECKBOX));
+	hook = SetWindowsHookEx(WH_MOUSE, SelectionTooltipPopper, NULL, GetCurrentThreadId());
 	ret = (int)MyDialogBox(hMainInstance, IDD_SELECTION, hMainDialog, SelectionCallback);
+	UnhookWindowsHookEx(hook);
 	dialog_showing--;
 
 	return ret;
@@ -1114,7 +1145,7 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	LRESULT loc;
 	int i, dh, r  = -1;
 	// Prevent resizing
-	static LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
+	static LRESULT disabled[] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
 		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
 	static HBRUSH background_brush, separator_brush;
 	// To use the system message font
@@ -1190,17 +1221,15 @@ INT_PTR CALLBACK ListCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	case WM_CTLCOLORSTATIC:
 		// Change the background colour for static text and icon
 		SetBkMode((HDC)wParam, TRANSPARENT);
-		if ((HWND)lParam == GetDlgItem(hDlg, IDC_NOTIFICATION_LINE)) {
+		if ((HWND)lParam == GetDlgItem(hDlg, IDC_NOTIFICATION_LINE))
 			return (INT_PTR)separator_brush;
-		}
 		return (INT_PTR)background_brush;
 	case WM_NCHITTEST:
 		// Check coordinates to prevent resize actions
 		loc = DefWindowProc(hDlg, message, wParam, lParam);
-		for (i = 0; i < 9; i++) {
-			if (loc == disabled[i]) {
+		for (i = 0; i < ARRAYSIZE(disabled); i++) {
+			if (loc == disabled[i])
 				return (INT_PTR)TRUE;
-			}
 		}
 		return (INT_PTR)FALSE;
 	case WM_NCDESTROY:
@@ -1233,23 +1262,14 @@ void ListDialog(char* title, char* message, char** items, int size)
 	dialog_showing--;
 }
 
-static struct {
-	HWND hTip;		// Tooltip handle
-	HWND hCtrl;		// Handle of the control the tooltip belongs to
-	WNDPROC original_proc;
-	LPWSTR wstring;
-} ttlist[MAX_TOOLTIPS] = { {0} };
-
-INT_PTR CALLBACK TooltipCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK TooltipCallback(HWND hControl, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	LPNMTTDISPINFOW lpnmtdi;
 	int i = MAX_TOOLTIPS;
 
 	// Make sure we have an original proc
-	for (i=0; i<MAX_TOOLTIPS; i++) {
-		if (ttlist[i].hTip == hDlg) break;
-	}
-	if (i == MAX_TOOLTIPS)
+	for (i = 0; i < MAX_TOOLTIPS && ttlist[i].hTip != hControl; i++);
+	if (i >= MAX_TOOLTIPS)
 		return (INT_PTR)FALSE;
 
 	switch (message) {
@@ -1260,17 +1280,18 @@ INT_PTR CALLBACK TooltipCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			lpnmtdi->lpszText = ttlist[i].wstring;
 			// Don't ask me WHY we need to clear RTLREADING for RTL multiline text to look good
 			lpnmtdi->uFlags &= ~TTF_RTLREADING;
-			SendMessage(hDlg, TTM_SETMAXTIPWIDTH, 0, (LPARAM)(int)(150.0f * fScale));
+			SendMessage(hControl, TTM_SETMAXTIPWIDTH, 0, (LPARAM)(int)(150.0f * fScale));
 			return (INT_PTR)TRUE;
 		}
 		break;
 	}
 #ifdef _DEBUG
-	// comctl32 causes issues if the tooltips are not being manipulated from the same thread as their parent controls
-	if (GetCurrentThreadId() != MainThreadId)
+	// comctl32 causes issues if the tooltips are not being manipulated from the same thread as
+	// their parent controls. See https://github.com/pbatard/rufus/issues/764.
+	if (GetCurrentThreadId() != GetWindowThreadProcessId(hControl, NULL))
 		uprintf("WARNING: Tooltip callback is being called from wrong thread");
 #endif
-	return CallWindowProc(ttlist[i].original_proc, hDlg, message, wParam, lParam);
+	return CallWindowProc(ttlist[i].original_proc, hControl, message, wParam, lParam);
 }
 
 /*
@@ -1278,22 +1299,19 @@ INT_PTR CALLBACK TooltipCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
  * duration sets the duration in ms. Use -1 for default
  * message is an UTF-8 string
  */
-BOOL CreateTooltip(HWND hControl, const char* message, int duration)
+BOOL CreateTooltipEx(HWND hDialog, HWND hControl, const char* message, int duration)
 {
-	TOOLINFOW toolInfo = {0};
+	TOOLINFOW toolInfo = { 0 };
 	int i;
 
-	if ( (hControl == NULL) || (message == NULL) ) {
+	if ( (hControl == NULL) || (message == NULL) )
 		return FALSE;
-	}
 
 	// Destroy existing tooltip if any
 	DestroyTooltip(hControl);
 
 	// Find an empty slot
-	for (i=0; i<MAX_TOOLTIPS; i++) {
-		if (ttlist[i].hTip == NULL) break;
-	}
+	for (i = 0; i < MAX_TOOLTIPS && ttlist[i].hTip != NULL; i++);
 	if (i >= MAX_TOOLTIPS) {
 		uprintf("Maximum number of tooltips reached (%d)\n", MAX_TOOLTIPS);
 		return FALSE;
@@ -1302,12 +1320,11 @@ BOOL CreateTooltip(HWND hControl, const char* message, int duration)
 	// Create the tooltip window
 	ttlist[i].hTip = CreateWindowEx(right_to_left_mode ? WS_EX_LAYOUTRTL : 0,
 		TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
-		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hMainDialog, NULL,
+		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hDialog, NULL,
 		hMainInstance, NULL);
 
-	if (ttlist[i].hTip == NULL) {
+	if (ttlist[i].hTip == NULL)
 		return FALSE;
-	}
 	SetDarkTheme(ttlist[i].hTip);
 	ttlist[i].hCtrl = hControl;
 
@@ -1323,7 +1340,7 @@ BOOL CreateTooltip(HWND hControl, const char* message, int duration)
 	// Associate the tooltip to the control
 	toolInfo.cbSize = sizeof(toolInfo);
 	toolInfo.hwnd = ttlist[i].hTip;	// Set to the tooltip itself to ease up subclassing
-	toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | ((right_to_left_mode)?TTF_RTLREADING:0);
+	toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | ((right_to_left_mode) ? TTF_RTLREADING : 0);
 	// set TTF_NOTBUTTON and TTF_CENTERTIP if it isn't a button
 	if (!(SendMessage(hControl, WM_GETDLGCODE, 0, 0) & DLGC_BUTTON))
 		toolInfo.uFlags |= 0x80000000L | TTF_CENTERTIP;
@@ -1335,16 +1352,30 @@ BOOL CreateTooltip(HWND hControl, const char* message, int duration)
 	return TRUE;
 }
 
-/* Destroy a tooltip. hCtrl = handle of the control the tooltip is associated with */
+/*
+ * "Pop" (stop displaying) the tooltip associated with a specific control.
+ * Does nothing if the control i NULL or doesn't have an associated tooltip.
+ */
+void PopTooltip(HWND hControl)
+{
+	int i;
+	if (hControl == NULL)
+		return;
+	for (i = 0; i < MAX_TOOLTIPS && ttlist[i].hCtrl != hControl; i++);
+	if (i < MAX_TOOLTIPS)
+		SendMessage(ttlist[i].hTip, TTM_POP, 0, 0);
+}
+
+/* Destroy a tooltip. hControl = handle of the control the tooltip is associated with */
 void DestroyTooltip(HWND hControl)
 {
 	int i;
 
-	if (hControl == NULL) return;
-	for (i=0; i<MAX_TOOLTIPS; i++) {
-		if (ttlist[i].hCtrl == hControl) break;
-	}
-	if (i >= MAX_TOOLTIPS) return;
+	if (hControl == NULL)
+		return;
+	for (i = 0; i < MAX_TOOLTIPS && ttlist[i].hCtrl != hControl; i++);
+	if (i >= MAX_TOOLTIPS)
+		return;
 	DestroyWindow(ttlist[i].hTip);
 	safe_free(ttlist[i].wstring);
 	ttlist[i].original_proc = NULL;
@@ -1356,8 +1387,9 @@ void DestroyAllTooltips(void)
 {
 	int i, j;
 
-	for (i=0, j=0; i<MAX_TOOLTIPS; i++) {
-		if (ttlist[i].hTip == NULL) continue;
+	for (i = 0, j = 0; i < MAX_TOOLTIPS; i++) {
+		if (ttlist[i].hTip == NULL)
+			continue;
 		j++;
 		DestroyWindow(ttlist[i].hTip);
 		safe_free(ttlist[i].wstring);
@@ -2134,7 +2166,7 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 	wBuf = (WCHAR*)rcTemplate;
 	wBuf = &wBuf[14];	// Move to class name
 	// Skip class name and title
-	for (i = 0; i<2; i++) {
+	for (i = 0; i < 2; i++) {
 		if (*wBuf == 0xFFFF)
 			wBuf = &wBuf[2];	// Ordinal
 		else
