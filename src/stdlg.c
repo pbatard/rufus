@@ -917,10 +917,10 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 			SetWindowTextU(hCtrl, str);
 			ShowWindow(hCtrl, SW_SHOW);
 			// Compute the maximum line's width (with some extra for the username and edition fields)
-			if (i == selection_data.options->username_index) {
+			if (i == selection_data.options->username_index - 1) {
 				static_sprintf(str, "%s __%s__", selection_data.options->choices.String[i], base_username);
 				mw = max(mw, GetTextSize(hCtrl, str).cx);
-			} else if (i == selection_data.options->edition_index) {
+			} else if (i == selection_data.options->edition_index - 1) {
 				mw = max(mw, GetTextSize(hCtrl, str).cx +
 					GetComboBoxMinWidth(GetDlgItem(hDlg, IDC_SELECTION_EDITION), &edition_name));
 			} else {
@@ -949,10 +949,10 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 		// If required, set up the the username edit box
 		if (selection_data.options->username_index > 0) {
 			unattend_username[0] = 0;
-			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->username_index);
+			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->username_index - 1);
 			GetClientRect(hCtrl, &rc);
 			ResizeMoveCtrl(hDlg, hCtrl, 0, 0,
-				(rc.left - rc.right) + GetTextSize(hCtrl, selection_data.options->choices.String[selection_data.options->username_index]).cx + ddw, 0, 1.0f);
+				(rc.left - rc.right) + GetTextSize(hCtrl, selection_data.options->choices.String[selection_data.options->username_index - 1]).cx + ddw, 0, 1.0f);
 			GetWindowRect(hCtrl, &rc);
 			SetWindowPos(GetDlgItem(hDlg, IDC_SELECTION_USERNAME), hCtrl, rc.left, rc.top, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_USERNAME);
@@ -967,10 +967,10 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 
 		// If required, set up the the edition combo box
 		if (selection_data.options->edition_index > 0 && edition_name.String != NULL && edition_name.Index > 0) {
-			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index);
+			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index - 1);
 			GetClientRect(hCtrl, &rc);
 			ResizeMoveCtrl(hDlg, hCtrl, 0, 0,
-				(rc.left - rc.right) + GetTextSize(hCtrl, selection_data.options->choices.String[selection_data.options->edition_index]).cx + ddw, 0, 1.0f);
+				(rc.left - rc.right) + GetTextSize(hCtrl, selection_data.options->choices.String[selection_data.options->edition_index - 1]).cx + ddw, 0, 1.0f);
 			GetWindowRect(hCtrl, &rc);
 			SetWindowPos(GetDlgItem(hDlg, IDC_SELECTION_EDITION), hCtrl, rc.left, rc.top, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 			hCtrl = GetDlgItem(hDlg, IDC_SELECTION_EDITION);
@@ -1008,10 +1008,10 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 		if (selection_data.options->edition_index > 0 && selection_data.options->username_index > 0 &&
 			selection_data.options->regional_index > 0 && selection_data.options->privacy_index > 0) {
 			// Should be the same condition as the one in WM_COMMAND
-			BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->username_index)) &&
-				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->regional_index)) &&
-				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->privacy_index));
-			EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index), enable);
+			BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->username_index - 1)) &&
+				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->regional_index - 1)) &&
+				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->privacy_index - 1));
+			EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index - 1), enable);
 			EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_EDITION), enable);
 		}
 
@@ -1044,13 +1044,13 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 			// Check if local account + regional settings + data collection checkboxes are clicked and enable/disable the silent install option
 			if (selection_data.options->edition_index > 0 && selection_data.options->username_index > 0 &&
 				selection_data.options->edition_index > 0 && selection_data.options->regional_index > 0 &&
-					(command - IDC_SELECTION_CHOICE1 == selection_data.options->username_index ||
-					 command - IDC_SELECTION_CHOICE1 == selection_data.options->regional_index ||
-					 command - IDC_SELECTION_CHOICE1 == selection_data.options->privacy_index)) {
-				BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->username_index)) &&
-					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->regional_index)) &&
-					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->privacy_index));
-				hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index);
+					(command - IDC_SELECTION_CHOICE1 == selection_data.options->username_index - 1 ||
+					 command - IDC_SELECTION_CHOICE1 == selection_data.options->regional_index - 1 ||
+					 command - IDC_SELECTION_CHOICE1 == selection_data.options->privacy_index - 1)) {
+				BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->username_index - 1)) &&
+					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->regional_index - 1)) &&
+					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->privacy_index - 1));
+				hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index - 1);
 				if (!enable && IsWindowEnabled(hCtrl)) {
 					silent_install_checked = (Button_GetCheck(hCtrl) == BST_CHECKED);
 					Button_SetCheck(hCtrl, FALSE);
@@ -1064,7 +1064,7 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 		case IDOK:
 			// Produce a big scary warning if the silent install option was selected
 			if (selection_data.options->edition_index > 0 &&
-				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index)) &&
+				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data.options->edition_index - 1)) &&
 				Notification(MB_YESNO | MB_ICONWARNING, APPLICATION_NAME, lmprintf(MSG_356)) != IDYES)
 				break;
 			for (r = 0, i = 0, m = 1; i < nDialogItems; i++, m <<= 1)

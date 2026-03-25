@@ -1624,7 +1624,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				}
 				StrArrayAdd(&selection.choices, lmprintf(MSG_333), TRUE);
 				StrArrayAdd(&selection.tooltips, lmprintf(MSG_364), TRUE);
-				selection.username_index = _log2(b);
+				selection.username_index = _log2(b) + 1;
 				MAP_BIT(UNATTEND_SET_USER);
 				StrArrayAdd(&selection.choices, lmprintf(MSG_334), TRUE);
 				StrArrayAdd(&selection.tooltips, lmprintf(MSG_365), TRUE);
@@ -1708,15 +1708,15 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				}
 				StrArrayAdd(&selection.choices, lmprintf(MSG_333), TRUE);
 				StrArrayAdd(&selection.tooltips, lmprintf(MSG_364), TRUE);
-				selection.username_index = _log2(b);
+				selection.username_index = _log2(b) + 1;
 				MAP_BIT(UNATTEND_SET_USER);
 				StrArrayAdd(&selection.choices, lmprintf(MSG_334), TRUE);
 				StrArrayAdd(&selection.tooltips, lmprintf(MSG_365), TRUE);
-				selection.regional_index = _log2(b);
+				selection.regional_index = _log2(b) + 1;
 				MAP_BIT(UNATTEND_DUPLICATE_LOCALE);
 				StrArrayAdd(&selection.choices, lmprintf(MSG_331), TRUE);
 				StrArrayAdd(&selection.tooltips, lmprintf(MSG_362), TRUE);
-				selection.privacy_index = _log2(b);
+				selection.privacy_index = _log2(b) + 1;
 				MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
 				if (IS_WINDOWS_11(img_report)) {
 					StrArrayAdd(&selection.choices, lmprintf(MSG_335), TRUE);
@@ -1727,7 +1727,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					MAP_BIT(UNATTEND_QOL_ENHANCEMENTS);
 					StrArrayAdd(&selection.choices, lmprintf(MSG_355), TRUE);
 					StrArrayAdd(&selection.tooltips, lmprintf(MSG_371), TRUE);
-					selection.edition_index = _log2(b);
+					selection.edition_index = _log2(b) + 1;
 					MAP_BIT(UNATTEND_SILENT_INSTALL);
 					if (img_report.win_version.build >= 26200) {
 						StrArrayAdd(&selection.choices, lmprintf(MSG_350), TRUE);

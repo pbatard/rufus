@@ -45,7 +45,7 @@ jobs:
       run: echo "${{github.workspace}}/cov-analysis-win64/bin" >> $GITHUB_PATH
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
 
     - name: Build with Coverity
       run: | 
