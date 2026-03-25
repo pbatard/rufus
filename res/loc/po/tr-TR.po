@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-04-28 09:05+0300\n"
-"PO-Revision-Date: 2024-04-28 09:32+0300\n"
+"POT-Creation-Date: 2026-03-23 20:10+0300\n"
+"PO-Revision-Date: 2026-03-25 16:24+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: tr_TR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Turkish (Türkçe)\n"
 "X-Rufus-LCID: 0x041F\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -308,7 +308,7 @@ msgstr "TB"
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr "PB"
 
@@ -846,7 +846,7 @@ msgstr "Kalıcı bölüm yok"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "Canlı USB ortamı için kalıcı disk bölümünün boyutunu ayarlayın. Boyutu 0 olarak ayarlamak, kalıcı bölümü devre dışı bırakır."
 
@@ -888,17 +888,17 @@ msgstr "Başka bir program ya da işlem bu sürücüye erişiyor. Yine de biçim
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"Rufus, 1809 ISO tabanlı bir Windows To Go ortamı oluşturmaya çalıştığınızı algıladı.\n"
+"Rufus, 1809 ISO'suna dayalı bir 'Windows To Go' medyası oluşturmaya çalıştığınızı algıladıi.\n"
 "\n"
-"Bir *MICROSOFT HATASI* nedeniyle, 'WppRecorder.sys' dosyasını 1803 sürümüyle el ile değiştirmediğiniz sürece, bu medya Windows açılışında (Ölü Mavi Ekran) çökecektir.\n"
+"*Bir MICROSOFT HATASI* nedeniyle, 'WppRecorder.sys' dosyasının 1803 sürümünündekini el ile değiştirmediğiniz sürece bu medya Windows önyüklemesi sırasında çökecektir (Mavi Ekran Hatası).\n"
 "\n"
-"Ayrıca, Rufus'un bunu sizin için otomatik olarak çözememesinin nedeninin 'WppRecorder.sys' dosyasının Microsoft'un telif hakkı olan bir dosya olduğunu ve bu nedenle dosyanın yasal olarak bir kopyasını uygulamaya koyamayacağımızı unutmayın..."
+"Ayrıca, Rufus'un bunu sizin için otomatik olarak düzeltememesinin nedeni, 'WppRecorder.sys' dosyasının Microsoft'un telif hakkıyla korunan bir dosyası olması ve bu nedenle dosyanın bir kopyasını uygulamaya yasal olarak yerleştiremememizdir..."
 
 #. • MSG_134
 msgid ""
@@ -1795,6 +1795,14 @@ msgstr ""
 msgid "Unable to open or read '%s'"
 msgstr "'%s' açılamıyor veya okunamıyor"
 
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "SkuSiPolicy.p7b yükleme sırasında uygulansın (Bakınız KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "QoL(Yaşam Kalitesi) iyileştirmeleri (Copilot, OneDrive, Outlook, Hızlı Başlat vb. dayatılmasın)"
+
 #. • MSG_325
 msgid "Applying Windows customization: %s"
 msgstr "Windows özelleştirmesi uygulanıyor: %s"
@@ -1845,13 +1853,13 @@ msgstr "Kalıcı günlük"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"MS-DOS'u yüklemek için Microsoft'tan ek bir dosyanın ('diskcopy.dll') indirilmesi gerekir:\n"
+"Bu özelliği kullanmak için Microsoft'tan ek bir dosyanın ('%s') indirilmesi gerekmektedir:\n"
 "- İnternete bağlanıp indirmek için 'Evet'i seçin\n"
 "- İşlemden vazgeçmek için 'Hayır'ı seçin\n"
 "\n"
@@ -1918,6 +1926,118 @@ msgstr "Arşiv dosyaları çıkarılıyor: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Rufus MBR'yi kullanın"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "'Windows CA 2023' imzalı önyükleyicileri kullanılsın (Uyumlu bir hedef bilgisayar gerektirir)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "UEFI önyükleyicisinin etkinlik durumu kontrol ediliyor..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "UEFI DBX güncellemeleri kontrol ediliyor..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "DBX güncellemesi mevcut"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus, UEFI Güvenli Önyükleme etkinlik durum kontrollerini gerçekleştirmek için kullanılan DBX dosyalarının güncellenmiş bir sürümünü buldu. Bu güncellemeyi indirmek ister misiniz?\n"
+"- İnternete bağlanmak ve bu içeriği indirmek için 'Evet'i seçin\n"
+"- İşlemden vazgeçmek için 'Hayır'ı seçin\n"
+"\n"
+"Not: Dosyalar uygulamanın dizinine indirilecek ve mevcutsa otomatik olarak yeniden kullanılacaktır."
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠SESSİZCE⚠ diski silin ve yükleyin:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"\"silent\" Katılımsız Windows kurulum seçeneğini kullanmayı seçtiniz.\n"
+"\n"
+"Bu, Windows kurulumu sırasında kullanıcıya sorulmayan ve bu nedenle hedef sistemdeki ilk algılanan diski KOŞULSUZ OLARAK SİLEN bir ortam oluşturmak isteyenler için ayrılmış gelişmiş bir seçenektir. Dikkatli olmazsanız, bu seçeneği kullanmak GERİ DÖNÜŞÜ OLMAYAN VERİ KAYBINA neden olabilir!\n"
+"\n"
+"Bunu istemiyorsanız, geri dönmek ve seçeneğin işaretini kaldırmak için lütfen 'Hayır'ı seçin.\n"
+"Aksi takdirde, 'Evet'i seçerseniz, herhangi bir veri kaybından doğacak tüm sorumluluğun tamamen SİZDE olacağınıı kabul etmiş olursunuz."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "Desteklenmeyen yansı konumu"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"Hedef sürücüde bulunan bir yansıyı, sürücü tamamen silineceğinden dolayı kullanamazsınız. Bu, oturduğunuz dalı kesmeye çalışmakla aynı şey!\n"
+"\n"
+"Lütfen yansıyı farklı bir konuma taşıyın ve yeniden deneyin."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "TPM veya daha fazla RAM'iniz olsa bile bu seçeneği etkin bırakmak güvenlidir, çünkü bu seçenek yalnızca kurulum gereksinimlerini atlar ve Windows'un mevcut tüm donanımı kullanmasını fiilen engellemez."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "Bu seçeneğin çalışması için kurulum sırasında Ağ/Internet bağlantısının KESİLMESİ GEREKMEKTEDİR!"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Windows kurulumunda Microsoft ile veri paylaşımıyla ilgili sorulara kullanıcıya sormak yerine otomatik olarak 'hayır' yanıtını verilsin."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "'Windows To Go'nun dahili disklere erişmesine ve geri döndürülemez dosya sistemi yükseltmeleri gerçekleştirmesine istemiyorsanız, bu seçeneği etkin bırakmalısınız."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "Belirtilen kullanıcı adıyla otomatik olarak yerel bir hesap oluşturur; bu hesapta, bir sonraki oturum açmada değiştirilmesi gerekecek boş bir parola kullanılacaktır."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "Kullanıcıdan onay istemek yerine, bu bilgisayardaki bölgesel ayarları (klavye, saat dilimi, para birimi) kopyalansın."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "Kullanıcı tarafından özellikle tercih edilmediği sürece sistem diskini şifrelemeyin."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "Bu seçeneği yalnızca S-Modu'nun ne olduğunu biliyorsanız ve Windows'u tamamen silip yeniden yükledikten sonra bile sisteminizin S-Modu'nda kilitli kalabileceğini anlıyorsanız kullanın."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Windows'u kurmayı planladığınız sistemde tamamen güncel Güvenli Önyükleme sertifikaları kullanılıyorsa bu seçeneği kullanın. Gerekirse, sisteminizi güncellemek için 'Mosby'yi kullanmayı düşünebilirsiniz."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "Potansiyel olarak güvenli olmayan ek Windows önyükleme yükleyicilerinden vazgeçmek  istiyorsanız, ancak bu işlem standart Windows medyalarının önyüklemesini de engelleme olasılığı varsa bu seçeneği kullanın."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "\"Yaşam Kalitesi\" iyileştirmeleri: Microsoft'un son kullanıcılara zorla dayatmaya çalıştığı istenmeyen özelliklerin çoğunu devre dışı bırakın."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "Bu seçeneği kullanıyorsanız, lütfen Windows'u kurmak istediğiniz disk dışındaki, hedef bilgisayardaki tüm diskleri çıkarın ve silmek istemediğiniz hiçbir bilgisayara disk takılı bırakmayın."
 
 #. • MSG_900
 #.
