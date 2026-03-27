@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-05-09 13:01+0200\n"
-"PO-Revision-Date: 2024-05-10 10:46+0100\n"
+"POT-Creation-Date: 2026-03-26 23:05+0100\n"
+"PO-Revision-Date: 2026-03-27 00:00+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: hu_HU\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Hungarian (Magyar)\n"
 "X-Rufus-LCID: 0x040e\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -111,7 +111,7 @@ msgstr "A Rufus névjegye"
 
 #. • IDD_ABOUTBOX → IDC_ABOUT_LICENSE
 msgid "License"
-msgstr "Licensz"
+msgstr "Licenc"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
@@ -119,7 +119,7 @@ msgstr ""
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
-msgstr "Rufus Licensz"
+msgstr "Rufus Licenc"
 
 #. • IDD_NOTIFICATION → IDC_MORE_INFO
 msgid "More information"
@@ -309,7 +309,7 @@ msgstr ""
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr ""
 
@@ -847,7 +847,7 @@ msgstr "Kikapcsolva"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "Állítsd be a tartós partíció méretét a Live USB adathordozóhoz. A méret 0-ra állításával letiltod a tartós partíciót."
 
@@ -889,13 +889,13 @@ msgstr "Egy másik alkalmazás vagy folyamat használja ezt az eszközt. Így is
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"A Rufus észlelte, hogy egy 1809-es verziójú ISO alapján kíséreltél meg egy Windows To Go meghajtót készíteni\n"
+"A Rufus észlelte, hogy egy 1809-es verziójú ISO alapján kíséreltél meg egy Windows To Go meghajtót készíteni.\n"
 "\n"
 "Egy *MICROSOFT HIBA* miatt ez a meghajtó a Windows indulása során össze fog omlani (kék halál), hacsak nem cseréled ki manuálisan a 'WppRecorder.sys' fájlt egy 1803-as verzióra.\n"
 "\n"
@@ -1797,6 +1797,14 @@ msgstr ""
 msgid "Unable to open or read '%s'"
 msgstr "Nem lehet megnyitni vagy olvasni ezt: '%s'"
 
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "SkuSiPolicy.p7b alkalmazása a telepítésen (Lásd: KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "QoL fejlesztések (Ne erőltesse ezeket: Copilot, OneDrive, Outlook, Gyors rendszerindítás stb.)"
+
 #. • MSG_325
 msgid "Applying Windows customization: %s"
 msgstr "Windows testreszabás alkalmazása: %s"
@@ -1847,17 +1855,17 @@ msgstr "Tartós naplózás"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"Az MS-DOS telepítéséhez egy további fájlt ('diskcopy.dll') kell letölteni a Microsofttól:\n"
+"A funkció használatához egy további fájlt ('%s') kell letölteni a Microsofttól:\n"
 "- Válaszd az 'Igen' gombot az internethez történő kapcsolódáshoz, és a fájl letöltéséhez\n"
 "- Válaszd a 'Nem' gombot a művelet megszakításához\n"
 "\n"
-"Megjegyzés: A fájl a program mappájába lesz letöltve, és automatikusan újra lesz használva, ha létezik."
+"Megjegyzés: A fájl az alkalmazás mappájába lesz letöltve, és automatikusan újra lesz használva, ha létezik."
 
 #. • MSG_338
 msgid "Revoked UEFI bootloader detected"
@@ -1920,6 +1928,118 @@ msgstr "Archív fájlok kibontása: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Rufus MBR használata"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "A 'Windows CA 2023' tanúsítvánnyal aláírt rendszerbetöltők használata (Kompatibilis célszámítógép szükséges)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "UEFI rendszerbetöltő visszavonásának ellenőrzése..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "UEFI DBX frissítések keresése..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "DBX frissítés elérhető"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"A Rufus talált frissített verziót az UEFI Secure Boot visszavonási ellenőrzéséhez használt DBX fájlokból. Szeretnéd letölteni ezt a frissítést?\n"
+"- Válaszd az 'Igen' gombot az internethez történő kapcsolódáshoz, és a fájlok letöltéséhez\n"
+"- Válaszd a 'Nem' gombot a művelet megszakításához\n"
+"\n"
+"Megjegyzés: A fájlok az alkalmazás mappájába lesznek letöltve, és automatikusan újra lesznek használva, ha léteznek."
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠CSENDESEN⚠ törölje a lemezt és telepítse ezt:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"A \"csendes\" Windows telepítési beállítást választottad.\n"
+"\n"
+"Ez egy haladó szintű beállítás azok számára, akik olyan adathordozót szeretnének készíteni, ami nem tesz fel kérdéseket a Windows telepítése során, ezért FELTÉTEL NÉLKÜL TÖRLI az elsőként észlelt lemezt a célrendszeren. Ha nem vagy elővigyázatos, ennek a beállításnak a használata VISSZAFORDÍTHATATLAN ADATVESZTÉST okozhat!\n"
+"\n"
+"Ha nem ezt szeretnéd, akkor válaszd a 'Nem' gombot a visszalépéshez, és töröld ezt a beállítást.\n"
+"Egyébként, ha az 'Igen' gombot választod, akkor beleegyezel abba, hogy bármilyen adatvesztésért teljes mértékben TÉGED fog terhelni a felelősség."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "Nem támogatott kép hely"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"Nem használhatsz célmeghajtón lévő képet, mivel az a meghajtó teljesen törölve lesz. Ez ugyanaz, mint magad alatt vágni a fát!\n"
+"\n"
+"Kérlek, helyezd át a képet egy másik helyre, és próbáld újra."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "Ezt a beállítást biztonságosan engedélyezve hagyhatod akkor is, ha rendelkezel TPM-mel vagy több RAM-mal, mivel ez a beállítás csak a telepítési követelményeket kerüli meg, és valójában nem akadályozza meg, hogy a Windows az összes elérhető hardvert használja."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "Ezen funkció működéséhez a hálózatot/internetet le KELL választanod a telepítés idejére!"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Automatikus 'nem' válasz a Windows telepítő azon kérdéseire, amelyek az adatok Microsoft számára történő adatmegosztással kapcsolatosak, a felhasználó megkérdezése helyett."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "Hagyd bekapcsolva ezt a beállítást, kivéve, ha beleegyezel abba, hogy a 'Windows To Go' hozzáférjen a belső lemezekhez és csendben visszafordíthatatlan fájlrendszer-frissítéseket hajtson végre."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "Automatikusan létrehoz egy helyi fiókot a megadott felhasználónévvel, üres jelszót használva, amit a következő belépéskor meg kell változtatni."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "A területi beállítások másolása erről a számítógépről (billentyűzet, időzóna, pénznem), a felhasználó megkérdezése helyett."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "Ne titkosítsa a rendszerlemezt amíg a felhasználó kifejezetten nem kéri."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "Csak akkor használd ezt a beállítást, ha tudod, mi az az S mód, és megértetted, hogy a rendszered beragadhat az S módba még a Windows teljes törlése és újratelepítése esetén is."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Használd ezt a beállítást, ha olyan rendszerre szeretnéd telepíteni a Windows-t, ami teljesen naprakész Secure Boot tanúsítványokat használ. Szükség esetén a 'Mosby' segítségével frissítheted a rendszeredet."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "Használd ezt a beállítást, ha szeretnél visszavonni további, potenciálisan nem biztonságos Windows rendszerbetöltőket. Emiatt előfordulhat, hogy a sztenderd Windows adathordozó sem fog elindulni."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "\"Quality of Life\" fejlesztések: Letiltja a legtöbb nem kívánt funkciót, amit a Microsoft próbál ráerőltetni a végfelhasználókra."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "Ha ezt a beállítást használod, győződj meg arról, hogy minden lemezt leválasztottál a célszámítógépről, kivéve azt az egyet, amelyikre a Windows telepítését szeretnéd, és ne hagyd az adathordozót csatlakoztatva olyan számítógéphez, amit nem akarsz törölni."
 
 #. • MSG_900
 #.
