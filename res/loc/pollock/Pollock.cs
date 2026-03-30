@@ -1101,7 +1101,7 @@ Retry:
             else
             {
                 var old_loc_file = $"rufus-{list[index][2]}.loc";
-                Console.WriteLine($"Note: This language is at v{list[index][2]} but the English base it at v{list[0][2]}.");
+                Console.WriteLine($"Note: This language is at v{list[index][2]} but the English base is at v{list[0][2]}.");
                 Console.Write($"Checking for the presence of '{old_loc_file}' to compute the differences... ");
                 if (File.Exists(old_loc_file))
                 {
@@ -1151,7 +1151,7 @@ Retry:
                 //                Console.WriteLine("Please press any key to launch Poedit and edit the PO file.");
                 Console.WriteLine("*************************************************************************************");
                 Console.WriteLine($"* The {list[index][0]} translation file ({list[index][1]}) is now ready to be edited in Poedit.");
-                Console.WriteLine("* Please look for entries highlited in orange - they are the ones requiring an update.");
+                Console.WriteLine("* Please look for entries highlighted in orange: they are the ones requiring an update.");
                 Console.WriteLine("*");
                 Console.WriteLine("* Whenever you save your changes in Poedit, a new 'rufus.loc' will be generated so");
                 Console.WriteLine($"* that you can test it with '{rufus_file}' in the same directory.");

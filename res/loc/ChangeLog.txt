@@ -3,7 +3,7 @@ rufus.loc since its original version.
 
 To edit a translation, please make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translation
-Or simply download https://files.akeo.ie/pollock/pollock-1.6.exe and follow its directions.
+Or simply download https://files.akeo.ie/pollock/pollock-1.8.exe and follow its directions.
 
 o v4.14 (2026.??.??)
   // NB: I used Google translate to update the following message, so please check for accuracy!
