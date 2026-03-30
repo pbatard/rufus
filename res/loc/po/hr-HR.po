@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-05-09 18:57+0200\n"
-"PO-Revision-Date: 2024-05-09 19:30+0200\n"
+"POT-Creation-Date: 2026-03-29 14:57+0200\n"
+"PO-Revision-Date: 2026-03-29 15:44+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: hr_HR\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Croatian (Hrvatski)\n"
 "X-Rufus-LCID: 0x041a, 0x081a, 0x101a\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -306,7 +306,7 @@ msgstr ""
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr ""
 
@@ -844,7 +844,7 @@ msgstr "Bez trajne particije"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "Zadaj veličinu trajne particije za \"live\" USB medij. Ako je zadana veličina 0, isključuje se trajna particija."
 
@@ -886,17 +886,17 @@ msgstr "Drugi program ili proces pristupa pogonu. Da li ipak želiš formatirati
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"Rufus je otkrio da pokušavate kreirati \"Windows To Go\" medij baziran na verziji 1809 ISO.\n"
+"Rufus je otkrio da pokušavate stvoriti 'Windows To Go' medij na temelju 1809 ISO datoteke.\n"
 "\n"
-"Zbog *MICROSOFT BUG-a*, doći će do fatalne greške kod podizanja Windows-a (Blue Screen Of Death), osim ako ne zamijenite datoteku 'WppRecorder.sys' s verzijom 1803.\n"
+"Zbog *MICROSOFTOVE GREŠKE*, ovaj medij će se srušiti tijekom pokretanja sustava Windows (BSOD), osim ako ručno zamijenite datoteku 'WppRecorder.sys' s verzijom 1803.\n"
 "\n"
-"Rufus nije u mogućnosti ispraviti problem jer datoteka 'WppRecorder.sys' podliježe Microsoft \"copyright-u\", tako da bi to bilo ilegalno."
+"Rufus ne može automatski popraviti ovo za vas jer je 'WppRecorder.sys' datoteka zaštićena autorskim pravima tvrtke Microsoft, pa ne možemo legalno ugraditi kopiju datoteke u aplikaciju..."
 
 #. • MSG_134
 msgid ""
@@ -1793,6 +1793,14 @@ msgstr ""
 msgid "Unable to open or read '%s'"
 msgstr "Nije moguće otvoriti ili pročitati '%s'"
 
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "Primijenite SkuSiPolicy.p7b prilikom instalacije (vidi KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "QoL poboljšanja (Nemojte forsirati Copilot, OneDrive, Outlook, Fast Startup, itd.)"
+
 #. • MSG_325
 msgid "Applying Windows customization: %s"
 msgstr "Primjena prilagodbe sustava Windows: %s"
@@ -1843,17 +1851,17 @@ msgstr "Stalni zapisnik"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"Dodatnu datoteku ('diskcopy.dll') potrebno je preuzeti s Microsofta da biste instalirali MS-DOS:\n"
-"- Odaberite 'Da' za spajanje na Internet i preuzimanje\n"
+"Za korištenje ove značajke potrebno je preuzeti dodatnu datoteku ('%s') od Microsofta:\n"
+"- Odaberite 'Da' za povezivanje s internetom i preuzimanje\n"
 "- Odaberite 'Ne' za poništavanje operacije\n"
 "\n"
-"Napomena: Datoteka će se preuzeti u imenik aplikacije i automatski će se ponovno koristiti ako postoji."
+"Napomena: Datoteka će se preuzeti u direktorij aplikacije i automatski će se ponovno koristiti ako postoji."
 
 #. • MSG_338
 msgid "Revoked UEFI bootloader detected"
@@ -1916,6 +1924,118 @@ msgstr "Izdvajanje arhivskih datoteka: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Koristiti Rufus MBR"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "Koristi 'Windows CA 2023' potpisane bootloadere (potrebno je kompatibilno ciljno računalo)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "Provjera za opoziva UEFI bootloadera..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "Provjera ažuriranja za UEFI DBX..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "DBX ažuriranje dostupno"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus je pronašao ažuriranu verziju DBX datoteka koje se koriste za izvođenje provjera opoziva UEFI Secure Boot-a. Želite li preuzeti ovo ažuriranje?\n"
+"- Odaberite 'Da' za povezivanje s internetom i preuzimanje ovog sadržaja\n"
+"- Odaberite 'Ne' za otkazivanje operacije\n"
+"\n"
+"Napomena: Datoteke će se preuzeti u direktorij aplikacije i automatski će se ponovno koristiti ako postoje."
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠TIHO⚠ izbriši disk i instaliraj:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"Odabrali ste korištenje \"tihe\" opcije instalacije sustava Windows.\n"
+"\n"
+"Ovo je napredna opcija, rezervirana za ljude koji žele stvoriti medij koji ne obavještava korisnika tijekom instalacije sustava Windows i stoga BEZUVJETNO BRIŠE prvi otkriveni disk na sustavu. Ako niste oprezni, korištenje ove opcije može rezultirati NEPOVRATNIM GUBITKOM PODATAKA!\n"
+"\n"
+"Ako to ne želite, molim odaberite 'Ne' za povratak i poništite odabir opcije.\n"
+"Suprotno, ako odaberete 'Da', slažete se da će sva odgovornost za bilo kakav gubitak podataka biti isključivo na VAMA."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "Nepodržana lokacija slike"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"Ne možete koristiti sliku koja se nalazi na ciljnom disku, jer će taj disk biti potpuno izbrisan. To je isto kao da pokušavate prepiliti granu na kojoj sjedite!\n"
+"\n"
+"Premjestite sliku na drugu lokaciju i pokušajte ponovno."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "Sigurno je ostaviti ovu opciju omogućenu čak i ako imate TPM ili više RAM-a, jer ova opcija samo zaobilazi zahtjeve za postavljanje i zapravo ne sprječava Windows da koristi sav dostupan hardver."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "Da bi ova opcija radila, mreža/internet MORA biti isključeni tijekom instalacije!"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Automatski odgovori s 'ne' na pitanja tijekom postavljanju sustava Windowsa koja se odnose na dijeljenje podataka s Microsoftom, umjesto da to pita korisnika."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "Ovu opciju biste trebali ostaviti omogućenu, osim ako vam ne smeta da 'Windows To Go' pristupa internim diskovima i tiho izvršava nepovratne nadogradnje datotečnog sustava."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "Automatski stvori lokalni račun s navedenim korisničkim imenom, koristeći praznu lozinku koju će trebati promijeniti pri prvoj prijavi."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "Duplicirajte regionalne postavke s ovog računala (tipkovnica, vremenska zona, valuta), umjesto da pita korisnika."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "Ne šifrirajte sistemski disk, osim ako to korisnik izričito zatraži."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "Koristite ovu opciju samo ako znate što je S-Mode i razumijete da vaš sustav možda bude zaključan u S-Modeu čak i nakon što potpuno izbrišete i ponovno instalirate Windows."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Koristite ovu opciju ako sustav na koji planirate instalirati Windows koristi potpuno ažurirane Secure Boot certifikate. Ako je potrebno, možete pogledati u korištenje 'Mosby' za ažuriranje sustava."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "Koristite ovu opciju ako želite opozvati dodatne potencijalno nesigurne Windows bootloadere, ali s mogućnošću sprječavanja pokretanja standardnih Windows medija."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "\"kvalitete života\" poboljšanja: Onemogućite većinu neželjenih značajki koje Microsoft pokušava forcirati na korisnicima."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "Ako koristite ovu opciju, obavezno odspojite svaki disk od ciljnog računala, osim onog na koji želite instalirati Windows, i ne ostavljajte medij priključen u bilo koj računalo koje ne želite izbrisati."
 
 #. • MSG_900
 #.
