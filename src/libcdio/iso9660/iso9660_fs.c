@@ -88,6 +88,7 @@ struct _iso9660_s {
 			        M2RAW_SECTOR_SIZE (2336).
                             */
   struct {
+    uint8_t type;	    /**< Type of El-Torito bootable image */
     uint32_t lsn;	    /**< Start LSN of an El-Torito bootable image */
     uint32_t num_sectors;   /**< Number of virtual sectors occupied by the
 			        bootable image */
@@ -537,7 +538,8 @@ iso9660_ifs_read_superblock (iso9660_t *p_iso,
 	  for (j = 0, k = 0;
 	       j < (ISO_BLOCKSIZE / sizeof(iso9660_br_t)) && k < MAX_BOOT_IMAGES;
 	       j++) {
-	    if (br[j].boot_id == 0x88 && br[j].media_type == 0) {
+	    if (br[j].boot_id == 0x88 && (br[j].media_type & 0x0F) <= 4) {
+	      p_iso->boot_img[k].type = br[j].media_type & 0x0F;
 	      p_iso->boot_img[k].lsn = uint32_from_le(br[j].image_lsn);
 	      p_iso->boot_img[k++].num_sectors = uint16_from_le(br[j].num_sectors);
 	    }
@@ -1497,15 +1499,16 @@ iso9660_fs_stat_translate (CdIo_t *p_cdio, const char psz_path[])
 iso9660_stat_t *
 iso9660_ifs_stat_translate (iso9660_t *p_iso, const char psz_path[])
 {
-  /* Special case for virtual El-Torito boot images ('/[BOOT]/#-Boot-NoEmul.img') */
+  /* Special case for virtual El-Torito boot images ('/[BOOT]/#-Boot-######.img') */
   if (psz_path && p_iso && p_iso->boot_img[0].lsn != 0) {
     /* Work on a path without leading slash */
     const char* path = (psz_path[0] == '/') ? &psz_path[1] : psz_path;
     if ((_cdio_strnicmp(path, "[BOOT]/", 7) == 0) &&
-	(_cdio_stricmp(&path[8], "-Boot-NoEmul.img") == 0)) {
+	(_cdio_strnicmp(&path[8], "-Boot-", 6) == 0) &&
+	(_cdio_strnicmp(&path[strlen(path) - 4], ".img", 4) == 0)) {
       int index = path[7] - '0';
       iso9660_stat_t* p_stat;
-      if (strlen(path) < 24)
+      if (strlen(path) < 20)
 	return NULL;
       cdio_assert(MAX_BOOT_IMAGES <= 10);
       if ((path[7] < '0') || (path[7] > '0' + MAX_BOOT_IMAGES - 1))
@@ -1679,6 +1682,9 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[])
 CdioISO9660FileList_t *
 iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
 {
+  /* Similar to what 7-zip uses in Archive/Iso/IsoIn.cpp */
+  static const char* const eltorito_media_name[] =
+    { "NoEmul", "1.2M", "1.44M", "2.88M", "HardDisk" };
   int i;
   iso9660_dir_t *p_iso9660_dir;
   iso9660_stat_t *p_iso9660_stat = NULL;
@@ -1701,13 +1707,13 @@ iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
     if (_cdio_strnicmp(path, "[BOOT]", 6) == 0 && (path[6] == '\0' || path[6] == '/')) {
       retval = _cdio_list_new();
       for (i = 0; i < MAX_BOOT_IMAGES && p_iso->boot_img[i].lsn != 0; i++) {
-	p_iso9660_stat = calloc(1, sizeof(iso9660_stat_t) + 18);
+	p_iso9660_stat = calloc(1, sizeof(iso9660_stat_t) + 24);
 	if (!p_iso9660_stat) {
-	  cdio_warn("Couldn't calloc(1, %d)", (int)sizeof(iso9660_stat_t) + 18);
+	  cdio_warn("Couldn't calloc(1, %d)", (int)sizeof(iso9660_stat_t) + 24);
 	  break;
 	}
-	strcpy(p_iso9660_stat->filename, "#-Boot-NoEmul.img");
-	p_iso9660_stat->filename[0] = '0' + i;
+	snprintf(p_iso9660_stat->filename, 24, "%d-Boot-%s.img", i,
+	  eltorito_media_name[p_iso->boot_img[i].type]);
 	p_iso9660_stat->type = _STAT_FILE;
 	p_iso9660_stat->lsn = p_iso->boot_img[i].lsn;
 	p_iso9660_stat->total_size = p_iso->boot_img[i].num_sectors * VIRTUAL_SECTORSIZE;

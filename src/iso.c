@@ -1,7 +1,7 @@
 /*
  * Rufus: The Reliable USB Formatting Utility
  * ISO file extraction
- * Copyright © 2011-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2011-2026 Pete Batard <pete@akeo.ie>
  * Based on libcdio's iso & udf samples:
  * Copyright © 2003-2014 Rocky Bernstein <rocky@gnu.org>
  *
@@ -65,6 +65,9 @@ _Static_assert(256 * KB >= ISO_BLOCKSIZE, "Can't set PROGRESS_THRESHOLD");
 // Set the iso_open_ext() extension mask according to our global options
 #define ISO_EXTENSION_MASK        (ISO_EXTENSION_ALL & (enable_joliet ? ISO_EXTENSION_ALL : ~ISO_EXTENSION_JOLIET) & \
                                   (enable_rockridge ? ISO_EXTENSION_ALL : ~ISO_EXTENSION_ROCK_RIDGE))
+
+// Is an MBR partition type for a FAT12/FAT16/FAT32 partition?
+#define IS_FAT_TYPE(x)            ((x) == 0x01 || (x) == 0x04 || (x) == 0x06 || (x) == 0x0b || (x) == 0x0c || (x) == 0x0e)
 
 // Needed for UDF ISO access
 CdIo_t* cdio_open (const char* psz_source, driver_id_t driver_id) {return NULL;}
@@ -385,6 +388,10 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 		if (!HAS_EFI_IMG(img_report) && (safe_strlen(psz_basename) >= 7) &&
 			(safe_strnicmp(psz_basename, "efi", 3) == 0) &&
 			(safe_stricmp(&psz_basename[strlen(psz_basename) - 4], ".img") == 0))
+			static_strcpy(img_report.efi_img_path, psz_fullpath);
+
+		// Special case for Lenovo UEFI firmware update ISOs, that use emulated El-Torito HDD images
+		if (!HAS_EFI_IMG(img_report) && stricmp(psz_fullpath, "/[BOOT]/0-Boot-HardDisk.img") == 0)
 			static_strcpy(img_report.efi_img_path, psz_fullpath);
 
 		// Check for the EFI boot entries. Note that because of Bazzite maintainers' disregard for end users
@@ -1876,6 +1883,20 @@ BOOL HasEfiImgBootLoaders(void)
 		uprintf("Error reading ISO-9660 file %s at LSN %lu", img_report.efi_img_path, (long unsigned int)p_private->lsn);
 		goto out;
 	}
+	// Try to skip to first FAT partition, if working with an MBR partitioned image
+	if (p_private->buf[0x1fe] == 0x55 && p_private->buf[0x1ff] == 0xaa &&
+		p_private->buf[0x1be] == 0x80 && IS_FAT_TYPE(p_private->buf[0x1c2])) {
+		uint32_t lba = *((uint32_t*)&p_private->buf[0x1c6]);
+		if (lba % 4 != 0) {
+			uprintf("Error: First MBR partition doesn't map to ISO-9660 sector");
+			goto out;
+		}
+		p_private->lsn += lba / 4;
+		if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf, p_private->lsn, ISO_NB_BLOCKS) != ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
+			uprintf("Error reading ISO-9660 file %s at LSN %lu", img_report.efi_img_path, (long unsigned int)p_private->lsn);
+			goto out;
+		}
+	}
 	lf_fs = libfat_open(iso9660_readfat, (intptr_t)p_private);
 	if (lf_fs == NULL) {
 		uprintf("FAT access error");
@@ -1959,6 +1980,15 @@ BOOL DumpFatDir(const char* path, int32_t cluster)
 		if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf, p_private->lsn, ISO_NB_BLOCKS) != ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
 			uprintf("Error reading ISO-9660 file %s at LSN %lu", img_report.efi_img_path, (long unsigned int)p_private->lsn);
 			goto out;
+		}
+		// Try to skip to first FAT partition, if working with an MBR partitioned image
+		if (p_private->buf[0x1fe] == 0x55 && p_private->buf[0x1ff] == 0xaa &&
+			p_private->buf[0x1be] == 0x80 && IS_FAT_TYPE(p_private->buf[0x1c2])) {
+			p_private->lsn += *((uint32_t*)&p_private->buf[0x1c6]) / 4;
+			if (iso9660_iso_seek_read(p_private->p_iso, p_private->buf, p_private->lsn, ISO_NB_BLOCKS) != ISO_NB_BLOCKS * ISO_BLOCKSIZE) {
+				uprintf("Error reading ISO-9660 file %s at LSN %lu", img_report.efi_img_path, (long unsigned int)p_private->lsn);
+				goto out;
+			}
 		}
 		lf_fs = libfat_open(iso9660_readfat, (intptr_t)p_private);
 		if (lf_fs == NULL) {
