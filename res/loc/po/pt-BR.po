@@ -1086,7 +1086,7 @@ msgstr "Versão %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Tradutores:\\line• Tiago Rinaldi <mailto:trinaldi@gmail.com>\\line• Chateaubriand Vieira Moura <mailto:chateaubriand@ifse.com.br>\\line• Maison da Silva <mailto:maisonmdsgreen@hotmail.com>\\line• Marcos Mello <mailto:marcosfrm@gmail.com>"
+msgstr "Tradutores:\\line• Tiago Rinaldi <mailto:trinaldi@gmail.com>\\line• Chateaubriand Vieira Moura <mailto:chateaubriand@ifse.com.br>\\line• Maison da Silva <mailto:maison.dasilva@outlook.com>\\line• Marcos Mello <mailto:marcosfrm@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
