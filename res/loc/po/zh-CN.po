@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-04-28 10:38+0800\n"
-"PO-Revision-Date: 2024-04-28 10:59+0800\n"
+"POT-Creation-Date: 2026-03-31 15:46+0800\n"
+"PO-Revision-Date: 2026-03-31 16:20+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Chinese Simplified (简体中文)\n"
 "X-Rufus-LCID: 0x0804, 0x1004\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.4.4\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -308,7 +308,7 @@ msgstr ""
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr ""
 
@@ -850,7 +850,7 @@ msgstr "无持久分区"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "设置Live USB驱动器的持久分区大小。设置为零将禁用持久分区。"
 
@@ -892,7 +892,7 @@ msgstr "另一程序正在使用此驱动器。您仍然要格式化它吗？"
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
@@ -1801,6 +1801,14 @@ msgstr ""
 msgid "Unable to open or read '%s'"
 msgstr "无法打开或读取 '%s'"
 
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "安装时应用 SkuSiPolicy.p7b（参见 KB5042562）"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "优化使用体验（不强制启用 Copilot、OneDrive、Outlook、快速启动等）"
+
 #. • MSG_325
 msgid "Applying Windows customization: %s"
 msgstr "正在应用 Windows 设置: %s"
@@ -1851,13 +1859,13 @@ msgstr "持久化日志"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"必须从微软下载额外的文件（\"diskcopy.dll\"），以安装 MS-DOS：\n"
+"必须从 Microsoft 下载附加文件（“%s”）才能使用此功能：\n"
 "- 选择 '是' 连接网络并下载这些文件\n"
 "- 选择 '否' 取消此项操作\n"
 "\n"
@@ -1924,6 +1932,118 @@ msgstr "正在解压文件: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "使用 Rufus MBR"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "使用'Windows CA 2023'签名的引导加载程序（需要目标电脑兼容）"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "正在检查 UEFI 引导加载程序吊销状态…"
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "正在检查 UEFI DBX 更新…"
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "有可用的 DBX 更新"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus 发现了 DBX 文件的更新版本（用于检查 UEFI 安全启动吊销情况）。是否下载此更新？\n"
+"- 选择'是'以连接互联网并下载该内容\n"
+"- 选择'否'以取消操作\n"
+"\n"
+"注意：该文件将下载到应用程序所在目录，若文件已存在则会自动复用。"
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠静默⚠擦除磁盘并安装："
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"您已选择使用\"静默\"Windows 安装选项。\n"
+"\n"
+"这是一个高级选项，适用于希望创建在 Windows 安装过程中不提示用户、无条件擦除目标系统上首个检测到磁盘的安装介质的用户。如果操作不慎，使用此选项可能导致不可逆的数据丢失！\n"
+"\n"
+"如果这不是您想要的，请选择'否'返回并取消勾选该选项。\n"
+"否则，如果您选择'是'，即表示您同意承担数据丢失的全部责任。"
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "不支持的映像位置"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"您不能使用位于目标驱动器上的映像，因为该驱动器将被完全擦除。这就好比坐在树枝上锯树枝！\n"
+"\n"
+"请将映像移动到其他位置后重试。"
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "即使您的电脑配备了 TPM 或拥有充足的内存，启用此选项也是安全的，因为该选项仅绕过安装程序的硬件要求检查，并不会阻止 Windows 使用所有可用硬件。"
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "要使此选项生效，安装过程中必须断开网络/互联网连接！"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "自动对 Windows 安装过程中有关与 Microsoft 共享数据的问题回答'否'，而非提示用户手动选择。"
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "建议保持此选项启用，除非您允许 'Windows To Go' 访问内部磁盘并静默执行不可逆的文件系统升级。"
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "使用指定的用户名自动创建本地账户，初始密码为空，用户在下次登录时需要更改密码。"
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "从当前电脑复制区域设置（键盘布局、时区、货币格式），而非提示用户手动选择。"
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "除非用户明确要求，不加密系统磁盘。"
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "仅在您了解什么是 S 模式、并理解即使完全擦除并重新安装 Windows 后系统仍可能被锁定在 S 模式下的情况下，才使用此选项。"
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "如果您计划安装 Windows 的系统已使用完全最新的安全启动证书，请使用此选项。如有需要，您可以考虑使用 'Mosby' 来更新您的系统。"
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "如果您希望吊销更多可能不安全的 Windows 引导加载程序，请使用此选项，但请注意这也可能导致标准 Windows 安装介质无法启动。"
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "优化使用体验：禁用 Microsoft 试图强加给用户的大部分不必要功能。"
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "如果您使用此选项，请务必断开目标电脑上除要安装 Windows 的磁盘以外的所有磁盘，同时不要将该安装介质插在任何您不想被擦除数据的电脑上。"
 
 #. • MSG_900
 #.
