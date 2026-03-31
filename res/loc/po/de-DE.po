@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2025-11-12 17:32+0000\n"
-"PO-Revision-Date: 2025-11-12 17:32+0000\n"
+"POT-Creation-Date: 2026-03-31 16:34+0100\n"
+"PO-Revision-Date: 2026-03-31 16:34+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: German (Deutsch)\n"
 "X-Rufus-LCID: 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -889,7 +889,7 @@ msgstr "Ein anderer Prozess bzw. ein anderes Programm verwendet das Laufwerk ger
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
@@ -1794,7 +1794,15 @@ msgstr ""
 
 #. • MSG_322
 msgid "Unable to open or read '%s'"
-msgstr "'%' kann nicht geöffnet/gelesen werden"
+msgstr "'%s' kann nicht geöffnet/gelesen werden"
+
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "SkuSiPolicy.p7b auf Installation anwenden. (Siehe KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "Komfort-Einstellungen (Copilot, OneDrive, Outlook und Schnellstart nicht aktivieren)"
 
 #. • MSG_325
 msgid "Applying Windows customization: %s"
@@ -1919,6 +1927,120 @@ msgstr "Archivdatei extrahieren: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Rufus MBR verwenden"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "Den \"Windows CA 2023\" signierten Bootloader verwenden. Ein kompatibler Computer ist erforderlich!"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "Auf gesperrte UEFI-Bootloader prüfen..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "Prüfe auf UEFI DBX-Aktualisierungen..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "DBX-Update verfügbar"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus hat eine aktualisierte Version der DBX-Dateien gefunden, die für die Überprüfung der UEFI-Secure-Boot-Widerrufsstatus verwendet werden. Möchten Sie dieses Update herunterladen?\n"
+"- Wählen Sie „Ja“, um eine Verbindung zum Internet herzustellen und diesen Inhalt herunterzuladen.\n"
+"- Wählen Sie „Nein“, um den Vorgang abzubrechen.\n"
+"\n"
+"Hinweis: Die Dateien werden in das Verzeichnis der Anwendung heruntergeladen und bei Vorhandensein automatisch wiederverwendet.\n"
+"\n"
+"Übersetzt mit DeepL.com (kostenlose Version)"
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠AUTOMATISCH⚠ Laufwerk löschen und installieren:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"Sie haben die „automatische“ Windows-Installationsoption ausgewählt.\n"
+"\n"
+"Dies ist eine Option für Fortgeschrittene, die für Benutzer gedacht ist, die ein Installationsmedium erstellen möchten, das den Benutzer während der Windows-Installation nicht auffordert, Eingaben vorzunehmen, und daher die erste erkannte Festplatte auf dem Zielsystem AUTOMATISCH LÖSCHT. Wenn Sie nicht vorsichtig sind, kann die Verwendung dieser Option zu UNWIDERRUFLICHEM DATENVERLUST führen!\n"
+"\n"
+"Wenn Sie dies nicht wollen, wählen Sie bitte „Nein“, um zurückzugehen und die Option zu deaktivieren.\n"
+"Andernfalls erklären Sie sich mit der Auswahl von „Ja“ damit einverstanden, dass die gesamte Verantwortung für etwaige Datenverluste ausschließlich bei IHNEN liegt."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "Nicht unterstützter Abbild-Standort"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"Sie können kein Image verwenden, das sich auf dem Ziellaufwerk befindet, da dieses Laufwerk vollständig gelöscht wird. Das ist so, als würde man versuchen, den Ast abzusägen, auf dem man sitzt!\n"
+"\n"
+"Bitte verschieben Sie das Image an einen anderen Speicherort und versuchen Sie es erneut."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "Sie können diese Option aktiviert lassen, auch wenn Sie über ein TPM oder mehr Arbeitsspeicher verfügen, da diese Option lediglich die Installationsanforderungen umgeht und Windows nicht daran hindert, die gesamte verfügbare Hardware zu nutzen."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "Damit diese Option funktioniert, MUSS die Netzwerk-/Internetverbindung während der Installation unterbrochen sein!"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Beantwortet die Fragen des Windows-Setups bezüglich der Weitergabe von Daten an Microsoft automatisch mit „Nein“, anstatt den Benutzer dazu aufzufordern."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "Sie sollten diese Option aktiviert lassen, es sei denn, Sie haben nichts dagegen, dass „Windows To Go“ auf interne Festplatten zugreift und im Hintergrund irreversible Dateisystem-Upgrades durchführt."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "Erstellt automatisch ein lokales Konto mit dem angegebenen Benutzernamen und einem leeren Passwort, das bei der nächsten Anmeldung geändert werden muss."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "Die regionalen Einstellungen dieses PCs (Tastatur, Zeitzone, Währung) übernehmen, anstatt den Benutzer dazu aufzufordern."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "Nicht die Systemfestplatte verschlüsseln, es sei denn, der Benutzer wünscht dies ausdrücklich."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "Verwenden Sie diese Option nur, wenn Sie wissen, was der S-Modus ist, und sich darüber im Klaren sind, dass Ihr System möglicherweise auch nach einer vollständigen Löschung und Neuinstallation von Windows im S-Modus verbleibt."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Verwenden Sie diese Option, wenn das System, auf dem Sie Windows installieren möchten, über vollständig aktuelle Secure-Boot-Zertifikate verfügt. Bei Bedarf können Sie die Verwendung von „Mosby“ in Betracht ziehen, um Ihr System zu aktualisieren."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "Verwenden Sie diese Option, wenn Sie weitere potenziell unsichere Windows-Bootloader deaktivieren möchten, wobei jedoch die Möglichkeit besteht, dass auch Standard-Windows-Datenträger nicht mehr booten."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "Komfort-Funktion: Deaktiviert die meisten unerwünschten Funktionen, die Microsoft den Endnutzern aufzuzwingen versucht."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "Wenn Sie diese Option verwenden, stellen Sie bitte sicher, dass Sie alle Festplatten vom Ziel-PC trennen, mit Ausnahme derjenigen, auf der Sie Windows installieren möchten, und dass Sie den Datenträger nicht in einem PC stecken lassen, den Sie nicht löschen möchten."
 
 #. • MSG_900
 #.
