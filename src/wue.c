@@ -300,14 +300,20 @@ char* CreateUnattendXml(int arch, int flags)
 			fprintf(fd, "    <component name=\"Microsoft-Windows-Shell-Setup\" processorArchitecture=\"%s\" language=\"neutral\" "
 				"xmlns:wcm=\"http://schemas.microsoft.com/WMIConfig/2002/State\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 				"publicKeyToken=\"31bf3856ad364e35\" versionScope=\"nonSxS\">\n", xml_arch_names[arch]);
-			// https://docs.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-shell-setup-oobe-protectyourpc
-			// It is really super disingenuous of Microsoft to call this option "ProtectYourPC", when it's really only about
-			// data collection. But of course, if it was called "AllowDataCollection", everyone would turn it off...
-			if (flags & UNATTEND_NO_DATA_COLLECTION) {
+			// We should always have UNATTEND_NO_DATA_COLLECTION if UNATTEND_SILENT_INSTALL is set but whatever...
+			if (flags & (UNATTEND_NO_DATA_COLLECTION | UNATTEND_SILENT_INSTALL)) {
 				uprintf("• Disable data collection");
 				fprintf(fd, "      <OOBE>\n");
 				fprintf(fd, "        <HideEULAPage>true</HideEULAPage>\n");
+				// https://docs.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-shell-setup-oobe-protectyourpc
+				// It is really super disingenuous of Microsoft to call this option "ProtectYourPC", when it's really only about
+				// data collection. But of course, if it was called "AllowDataCollection", everyone would turn it off...
 				fprintf(fd, "        <ProtectYourPC>3</ProtectYourPC>\n");
+				// Without these, the "Let's connect you to a network" can appear in silent installs when Ethernet is disconnected.
+				if (flags & UNATTEND_SILENT_INSTALL) {
+					fprintf(fd, "        <HideOnlineAccountScreens>true</HideOnlineAccountScreens>\n");
+					fprintf(fd, "        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>\n");
+				}
 				fprintf(fd, "      </OOBE>\n");
 			}
 			if (flags & UNATTEND_DUPLICATE_LOCALE) {
