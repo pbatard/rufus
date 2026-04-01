@@ -63,6 +63,10 @@
 /* Maximum number of El-Torito boot images we keep an index for */
 #define MAX_BOOT_IMAGES     8
 
+/* El-Torito media types, similar to what 7-zip uses in Archive/Iso/IsoIn.cpp */
+static const char* const eltorito_media_name[] =
+{ "NoEmul", "1.2M", "1.44M", "2.88M", "HardDisk" };
+
 /** Implementation of iso9660_t type */
 struct _iso9660_s {
   cdio_header_t header;     /**< Internal header - MUST come first. */
@@ -561,12 +565,14 @@ iso9660_ifs_read_superblock (iso9660_t *p_iso,
 		next_lsn = p_iso->boot_img[k].lsn;
 	    }
 	    /* If the image has a sector size of 0 or 1 and theres' more than      */
-	    /* 0xffff sectors to the next LSN, assume it needs expansion.          */
+	    /* 0x1000 sectors (8 MB) to the next LSN, assume it needs expansion.    */
 	    if (p_iso->boot_img[j].num_sectors <= 1 &&
-		(next_lsn - p_iso->boot_img[j].lsn) >= 0x4000) {
+		(next_lsn - p_iso->boot_img[j].lsn) >= 0x1000) {
 		p_iso->boot_img[j].num_sectors =
-		    (next_lsn - p_iso->boot_img[j].lsn) * 4;
-//		cdio_warn("Auto-expanding the size of %d-Boot-NoEmul.img", j);
+		  (next_lsn - p_iso->boot_img[j].lsn) * 4;
+		cdio_warn("Auto-expanding the size of %d-Boot-%s.img to %d KB",
+		  j, eltorito_media_name[p_iso->boot_img[j].type],
+		  (next_lsn - p_iso->boot_img[j].lsn) * 2);
 	    }
 	  }
 	}
@@ -1682,9 +1688,6 @@ iso9660_fs_readdir (CdIo_t *p_cdio, const char psz_path[])
 CdioISO9660FileList_t *
 iso9660_ifs_readdir (iso9660_t *p_iso, const char psz_path[])
 {
-  /* Similar to what 7-zip uses in Archive/Iso/IsoIn.cpp */
-  static const char* const eltorito_media_name[] =
-    { "NoEmul", "1.2M", "1.44M", "2.88M", "HardDisk" };
   int i;
   iso9660_dir_t *p_iso9660_dir;
   iso9660_stat_t *p_iso9660_stat = NULL;

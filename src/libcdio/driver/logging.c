@@ -120,7 +120,8 @@ cdio_logv(cdio_log_level_t level, const char format[], va_list args)
 
   vsnprintf(buf, sizeof(buf)-1, format, args);
 
-  _handler(level, buf);
+  if (_handler)
+    _handler(level, buf);
 
   in_recursion = 0;
 }
