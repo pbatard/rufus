@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-05-09 12:54-0300\n"
-"PO-Revision-Date: 2024-05-09 12:58-0300\n"
+"POT-Creation-Date: 2026-04-07 17:57-0300\n"
+"PO-Revision-Date: 2026-04-07 18:56-0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es_ES\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Spanish (Español)\n"
 "X-Rufus-LCID: 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -308,7 +308,7 @@ msgstr ""
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr ""
 
@@ -849,7 +849,7 @@ msgstr "No persistente"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "Establece el tamaño de la partición persistente para el medio USB autoarrancable. Estableciendo un valor 0 deshabilita la partición persistente."
 
@@ -891,17 +891,17 @@ msgstr "Otro programa o proceso está accediendo a esta unidad. ¿Deseas formate
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"Rufus ha detectado que estás intentando crear un medio en Windows To Go basado en la ISO 1809.\n"
+"Rufus ha detectado que estás intentando crear un medio Windows To Go basado en la ISO 1809.\n"
 "\n"
-"Debido a un *FALLO DE MICROSOFT*, este medio no arrancará al iniciar Windows (Pantallazo Azul de la Muerte), a no ser que manualmente reemplaces el fichero 'WppRecorder.sys' con la versión 1803.\n"
+"Debido a un *FALLO DE MICROSOFT*, este medio se bloqueará durante el arranque de Windows (Pantalla Azul de la Muerte), a menos que reemplaces manualmente el archivo 'WppRecorder.sys' con la versión 1803.\n"
 "\n"
-"Ten en cuenta que el motivo por el que Rufus no puede arreglar esto automáticamente es debido a que el fichero 'WppRecorder.sys' es un fichero con copyright, por lo que legalmente no podemos añadir una copia del fichero en la aplicación..."
+"Ten en cuenta que el motivo por el que Rufus no puede corregir esto automáticamente es que 'WppRecorder.sys' es un archivo con derechos de autor de Microsoft, por lo que legalmente no podemos incluir una copia en la aplicación..."
 
 #. • MSG_134
 msgid ""
@@ -1798,6 +1798,14 @@ msgstr ""
 msgid "Unable to open or read '%s'"
 msgstr "No se puede abrir o leer '%s'"
 
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "Aplicar SkuSiPolicy.p7b durante la instalación (ver KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "Mejoras \"QoL\" (no forzar Copilot, OneDrive, Outlook, Inicio rápido, etc.)"
+
 #. • MSG_325
 msgid "Applying Windows customization: %s"
 msgstr "Aplicando personalización de Windows: %s"
@@ -1848,17 +1856,17 @@ msgstr "Registro persistente"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"Se debe descargar un archivo adicional ('diskcopy.dll') de Microsoft para instalar MS-DOS:\n"
+"Se debe descargar un archivo adicional ('%s') de Microsoft para usar esta función:\n"
 "- Seleccione 'Sí' para conectarse a Internet y descargarlo\n"
-"- Seleccione 'No' para cancelar la operación.\n"
+"- Seleccione 'No' para cancelar la operación\n"
 "\n"
-"Nota: El archivo se descargará en el directorio de la aplicación y se reutilizará automáticamente si está presente."
+"Nota: El archivo se descargará en la carpeta de la aplicación y se reutilizará automáticamente si está presente."
 
 #. • MSG_338
 msgid "Revoked UEFI bootloader detected"
@@ -1921,6 +1929,118 @@ msgstr "Extrayendo archivos comprimidos: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Utilice Rufus MBR"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "Usar cargadores de arranque firmados con 'Windows CA 2023' (requiere una PC de destino compatible)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "Comprobando la revocación del cargador de arranque UEFI..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "Comprobando actualizaciones de UEFI DBX..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "Actualización de DBX disponible"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus ha encontrado una versión actualizada de los archivos DBX utilizados para realizar comprobaciones de revocación de Secure Boot en UEFI. ¿Desea descargar esta actualización?\n"
+"- Seleccione 'Sí' para conectarse a Internet y descargar este contenido\n"
+"- Seleccione 'No' para cancelar la operación\n"
+"\n"
+"Nota: Los archivos se descargarán en la carpeta de la aplicación y se reutilizarán automáticamente si están presentes."
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠EN SILENCIO⚠ borrar el disco e instalar:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"Ha seleccionado usar la opción de instalación \"silenciosa\" de Windows.\n"
+"\n"
+"Esta es una opción avanzada, reservada para personas que desean crear un medio que no solicite interacción del usuario durante la instalación de Windows y que, por lo tanto, BORRA INCONDICIONALMENTE el primer disco detectado en el sistema de destino. Si no tiene cuidado, usar esta opción puede resultar en UNA PÉRDIDA DE DATOS IRREVERSIBLE.\n"
+"\n"
+"Si esto no es lo que desea, seleccione 'No' para volver atrás y desmarcar la opción.\n"
+"De lo contrario, si selecciona 'Sí', usted acepta que toda la responsabilidad por cualquier pérdida de datos recaerá únicamente en USTED."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "Ubicación de imagen no compatible"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"No puede usar una imagen que esté ubicada en la unidad de destino, ya que esa unidad va a ser completamente borrada. Es lo mismo que intentar serrar la rama en la que está sentado.\n"
+"\n"
+"Por favor, mueva la imagen a una ubicación diferente e inténtelo de nuevo."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "Es seguro dejar esta opción habilitada incluso si tiene un TPM o más memoria RAM, ya que esta opción solo omite los requisitos de instalación y no impide que Windows utilice todo el hardware disponible."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "Para que esta opción funcione, la red/Internet DEBE estar desconectada durante la instalación."
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Responder automáticamente 'No' a las preguntas de instalación de Windows relacionadas con el uso compartido de datos con Microsoft, en lugar de solicitárselo al usuario."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "Debe dejar esta opción habilitada, a menos que esté de acuerdo con que 'Windows To Go' acceda a los discos internos y realice en silencio actualizaciones irreversibles del sistema de archivos."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "Crear automáticamente una cuenta local con el nombre de usuario especificado, utilizando una contraseña vacía que deberá cambiarse en el próximo inicio de sesión."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "Duplicar la configuración regional de esta PC (teclado, zona horaria, moneda), en lugar de solicitársela al usuario."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "No cifrar el disco del sistema, a menos que el usuario lo solicite explícitamente."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "Use esta opción solo si sabe qué es el Modo S y entiende que su sistema puede quedar bloqueado en Modo S incluso después de borrar completamente e reinstalar Windows."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Use esta opción si el sistema en el que planea instalar Windows utiliza certificados de Secure Boot completamente actualizados. Si es necesario, puede considerar usar 'Mosby' para actualizar su sistema."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "Use esta opción si desea revocar cargadores de arranque adicionales de Windows que puedan ser inseguros, pero con la posibilidad de que también se impida que los medios estándar de Windows arranquen."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "Mejoras de \"Calidad de Vida\": Deshabilitar la mayoría de las funciones no deseadas que Microsoft intenta imponer a los usuarios finales."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "Si usa esta opción, asegúrese de desconectar todos los discos de la PC de destino, excepto aquel en el que desea instalar Windows, así como de no dejar el medio conectado en ninguna PC que no desee borrar."
 
 #. • MSG_900
 #.
