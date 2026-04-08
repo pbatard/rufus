@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-05-09 19:38+0100\n"
-"PO-Revision-Date: 2024-05-09 19:44+0100\n"
+"POT-Creation-Date: 2026-04-07 23:05-0700\n"
+"PO-Revision-Date: 2026-04-07 23:19-0700\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: nb_NO\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Norwegian (Norsk)\n"
 "X-Rufus-LCID: 0x0414\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -308,7 +308,7 @@ msgstr ""
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr ""
 
@@ -846,7 +846,7 @@ msgstr "Ingen varighet"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "Still størrelsen på den vedvarende partisjonen for live USB media. Angir størrelsen til 0 deaktiverer den vedvarende partisjonen."
 
@@ -887,8 +887,9 @@ msgid "Another program or process is accessing this drive. Do you want to format
 msgstr "Et annet program eller en prosess holder tilgang til denne disken. Vil du formatere det uansett?"
 
 #. • MSG_133
+#, fuzzy
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
@@ -1795,6 +1796,14 @@ msgstr ""
 msgid "Unable to open or read '%s'"
 msgstr "Kan ikke åpne eller lese '%s'"
 
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "Bruk SkuSiPolicy.p7b under installasjon (se KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "QoL‑forbedringer (ikke påtving Copilot, OneDrive, Outlook, Hurtig oppstart osv.)"
+
 #. • MSG_325
 msgid "Applying Windows customization: %s"
 msgstr "Utfører tilpasning av Windows: %s"
@@ -1845,14 +1854,14 @@ msgstr "Behold log"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"En ekstra fil ('diskcopy.dll') må lastes ned fra Microsoft for å installere MS-DOS:\n"
-"- Velg \"Ja\" for å koble til Internett og laste den ned\n"
+"En ekstra fil ('%s') må lastes ned fra Microsoft for å bruke denne funksjonen:\n"
+"- Velg 'Ja' for å koble til Internett og laste den ned\n"
 "- Velg 'Nei' for å avbryte operasjonen\n"
 "\n"
 "Merk: Filen vil bli lastet ned i programmets katalog og vil automatisk bli gjenbrukt hvis den er tilstede."
@@ -1891,7 +1900,7 @@ msgstr "Ukomprimert VHD-imaget"
 
 #. • MSG_344
 msgid "Full Flash Update Image"
-msgstr "Full Flash Update Image"
+msgstr ""
 
 #. • MSG_345
 msgid ""
@@ -1918,6 +1927,118 @@ msgstr "Pakker ut arkivfiler: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Bruk Rufus MBR"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "Bruk bootloaders signert med «Windows CA 2023» (krever en kompatibel target‑PC)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "Søker etter tilbakekalling av UEFI‑bootloader…"
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "Søker etter UEFI‑DBX‑oppdateringer..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "UEFI‑DBX‑oppdatering tilgjengelig"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus har funnet en oppdatert versjon av DBX‑filene som brukes til å utføre tilbakekallingssjekk for UEFI Secure Boot. Vil du laste ned denne oppdateringen?\n"
+"– Velg «Ja» for å koble til Internett og laste ned innholdet\n"
+"– Velg «Nei» for å avbryte operasjonen\n"
+"\n"
+"Merk: Filene lastes ned til programmets katalog og vil automatisk bli gjenbrukt hvis de allerede finnes."
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠STILLEMODUS⚠ slett disk og installer:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"Du har valgt alternativet for «stille» Windows‑installasjon.\n"
+"\n"
+"Dette er et avansert alternativ, beregnet for brukere som ønsker å opprette installasjonsmedier som ikke viser noen spørsmål under Windows‑installasjonen, og som derfor UBETINGET SLETTER den første oppdagede disken på målsystemet. Uforsiktig bruk av dette alternativet kan føre til UGJENKALLELIG TAP AV DATA!\n"
+"\n"
+"Hvis dette ikke er det du ønsker, velg «Nei» for å gå tilbake og fjerne avmerkingen for dette alternativet.\n"
+"Hvis du derimot velger «Ja», bekrefter du at alt ansvar for eventuell datatap fullt og helt ligger hos DEG."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "Ugyldig bildelokasjon"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"Du kan ikke bruke et bilde som er lagret på måldisken, siden denne disken vil bli fullstendig slettet. Det tilsvarer å sage av grenen du sitter på!\n"
+"\n"
+"Flytt bildet til en annen plassering og prøv igjen."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "Det er trygt å la dette alternativet være aktivert selv om systemet har TPM eller mer RAM, siden alternativet kun omgår installasjonskravene og ikke hindrer Windows i å bruke all tilgjengelig maskinvare."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "For at dette alternativet skal fungere, MÅ nettverk/Internett være frakoblet under installasjonen!"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Svar automatisk «nei» på Windows‑installasjonsspørsmål som gjelder deling av data med Microsoft, i stedet for å spørre brukeren."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "Dette alternativet bør være aktivert, med mindre du aksepterer at «Windows To Go» får tilgang til interne disker og i stillhet utfører irreversible filsystemoppgraderinger."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "Opprett automatisk en lokal konto med angitt brukernavn og tomt passord, som må endres ved neste pålogging."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "Dupliser regionale innstillinger fra denne PC‑en (tastatur, tidssone, valuta) i stedet for å spørre brukeren."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "Ikke krypter systemdisken, med mindre brukeren uttrykkelig ber om det."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "Bruk dette alternativet kun hvis du vet hva S‑modus er, og forstår at systemet kan forbli låst i S‑modus selv etter full sletting av disken og ny installasjon av Windows."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Bruk dette alternativet dersom systemet du planlegger å installere Windows på, bruker fullt oppdaterte Secure Boot‑sertifikater. Ved behov kan du vurdere å bruke «Mosby» for å oppdatere systemet."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "Bruk dette alternativet hvis du ønsker å tilbakekalle flere potensielt usikre Windows‑bootloaders, men vær oppmerksom på at dette også kan hindre standard Windows‑medier i å starte."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "«Quality of Life»-forbedringer: Deaktiverer de fleste uønskede funksjonene Microsoft forsøker å påtvinge sluttbrukere."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "Hvis du bruker dette alternativet, sørg for å koble fra alle disker fra mål‑PC‑en unntatt den du vil installere Windows på, og pass på at installasjonsmediet ikke er koblet til noen PC du ikke ønsker å slette."
 
 #. • MSG_900
 #.
