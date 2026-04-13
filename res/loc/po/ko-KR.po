@@ -1,11 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2025-08-26 05:39+0900\n"
-"PO-Revision-Date: 2026-01-28 21:33+0000\n"
-"Last-Translator: VenusGirl <venusgirl@outlook.com>\n"
-"Language-Team: 비너스걸 <https://venusgirls.tistory.com/>\n"
+"POT-Creation-Date: 2026-04-12 03:37+0900\n"
+"PO-Revision-Date: 2026-04-12 03:58+0900\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Korean (한국어)\n"
 "X-Rufus-LCID: 0x0412\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -308,7 +308,7 @@ msgstr ""
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr ""
 
@@ -846,7 +846,7 @@ msgstr "영구적 아님"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "라이브 USB 미디어의 영구 파티션 크기를 설정합니다. 크기를 0으로 설정하면 영구 파티션이 비활성화됩니다."
 
@@ -888,17 +888,17 @@ msgstr "다른 프로그램 또는 프로세스가 이 드라이브에 액세스
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"Rufus가 1809 ISO를 기반으로 Windows To Go 미디어를 만들려고 하는 것을 감지했습니다.\n"
+"Rufus에서 현재 1809 버전 ISO를 기반으로 'Windows To Go' 미디어를 생성하려는 것을 감지했습니다.\n"
 "\n"
-"*MICROSOFT BUG*로 인해 수동으로 'WppRecorder.sys' 파일을 1803 버전으로 교체하지 않으면 Windows 부팅 중 이 미디어가 충돌합니다.\n"
+"\"Microsoft의 버그\"로 인해, 사용자가 직접 'WppRecorder.sys' 파일을 1803 버전으로 교체하지 않으면 이 미디어는 Windows 부팅 중에 충돌(블루스크린)을 일으킵니다.\n"
 "\n"
-"또한 Rufus가 이 문제를 자동으로 해결할 수 없는 이유는 'WppRecorder.sys'가 Microsoft의 저작권이 있는 파일이기 때문에 해당 파일의 복사본을 응용 프로그램에 법적으로 포함할 수 없기 때문입니다..."
+"또한 Rufus가 이를 자동으로 수정해 드리지 못하는 이유는 'WppRecorder.sys' 파일이 Microsoft의 저작권 보호를 받는 파일이기 때문입니다. 따라서 법적으로 해당 파일의 복사본을 애플리케이션에 포함할 수 없음을 양해 바랍니다."
 
 #. • MSG_134
 msgid ""
@@ -1795,6 +1795,14 @@ msgstr ""
 msgid "Unable to open or read '%s'"
 msgstr "'%s'을(를) 열거나 읽을 수 없습니다"
 
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "설치 시 SkuSiPolicy.p7b 적용 (KB5042562 참조)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "QoL 개선 사항 (Copilot, OneDrive, Outlook, Fast Startup 등을 강제하지 않음)"
+
 #. • MSG_325
 msgid "Applying Windows customization: %s"
 msgstr "Windows 사용자 지정 적용 중: %s"
@@ -1852,10 +1860,10 @@ msgid ""
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
 "이 기능을 사용하려면 Microsoft에서 추가 파일('%s')을 다운로드해야 합니다:\n"
-"- 인터넷에 연결하여 다운로드하려면 '예'를 선택합니다\n"
-"- 작업을 취소하려면 '아니요'를 선택합니다\n"
+"- 인터넷에 연결하여 다운로드하려면 '예'를 선택하세요.\n"
+"- 작업을 취소하려면 '아니요'를 선택하세요.\n"
 "\n"
-"참고: 해당 파일은 응용 프로그램의 디렉터리에 다운로드되며 존재하는 경우 자동으로 재사용됩니다."
+"참고: 파일은 프로그램 실행 디렉토리에 다운로드되며, 파일이 존재하면 자동으로 재사용됩니다."
 
 #. • MSG_338
 msgid "Revoked UEFI bootloader detected"
@@ -1918,6 +1926,118 @@ msgstr "압축 파일 추출 중: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Rufus MBR 사용"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "'Windows CA 2023' 서명 부트로더 사용 (호환되는 대상 PC 필요)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "UEFI 부트로더 취소 여부 확인 중..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "UEFI DBX 업데이트 확인 중..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "DBX 업데이트 사용 가능"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus가 UEFI 보안 부팅 취소 확인에 사용되는 최신 버전의 DBX 파일을 찾았습니다. 이 업데이트를 다운로드하시겠습니까?\n"
+"- 인터넷에 연결하여 파일을 다운로드하려면 '예'를 선택하세요.\n"
+"- 작업을 취소하려면 '아니오'를 선택하세요.\n"
+"\n"
+"참고: 파일은 프로그램 실행 디렉토리에 다운로드되며, 파일이 존재하면 자동으로 재사용됩니다."
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠경고⚠ 묻지 않고 디스크 삭제 및 설치:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"\"무경고(silent)\" Windows 설치 옵션을 선택하셨습니다.\n"
+"\n"
+"이것은 고급 옵션으로, Windows 설치 중에 사용자에게 확인 과정을 거치지 않고 대상 시스템에서 처음 감지된 디스크를 \"무조건 삭제\"하는 미디어를 만들려는 분들을 위한 기능입니다. 주의하지 않으면 이 옵션 사용으로 인해 \"되돌릴 수 없는 데이터 손실\"이 발생할 수 있습니다!\n"
+"\n"
+"이것을 원치 않으시면 '아니오'를 선택하여 돌아가서 해당 옵션의 체크를 해제하십시오.\n"
+"반대로 '예'를 선택하신다면, 발생하는 모든 데이터 손실에 대한 전적인 책임은 \"사용자 본인\"에게 있음에 동의하는 것으로 간주합니다."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "지원되지 않는 이미지 위치"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"대상 드라이브가 완전히 삭제될 예정이므로, 해당 드라이브에 있는 이미지는 사용할 수 없습니다. 이는 마치 본인이 앉아 있는 나뭇가지를 톱질하는 것과 같습니다!\n"
+"\n"
+"이미지 파일을 다른 위치로 이동한 후 다시 시도해 주세요."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "TPM이나 넉넉한 RAM을 보유하고 있더라도 이 옵션을 활성화된 상태로 두는 것이 안전합니다. 이 옵션은 설치 요구 사항을 우회할 뿐이며, Windows가 사용 가능한 모든 하드웨어를 사용하는 것을 실제로 방해하지는 않기 때문입니다."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "이 옵션이 작동하려면 설치 중에 반드시 네트워크/인터넷 연결을 해제해야 합니다!"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Microsoft와의 데이터 공유에 관한 Windows 설정 질문에 사용자에게 묻는 대신 자동으로 '아니오'라고 응답합니다."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "'Windows To Go'가 내부 디스크에 액세스하여 예고 없이 되돌릴 수 없는 파일 시스템 업그레이드를 수행하는 것에 동의하지 않는다면, 이 옵션을 활성화된 상태로 두어야 합니다."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "지정된 사용자 이름으로 로컬 계정을 자동으로 생성합니다. 암호는 빈 값으로 설정되며 다음 로그온 시 변경해야 합니다."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "사용자에게 묻는 대신 이 PC의 지역 설정(키보드, 시간대, 통화)을 그대로 복제합니다."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "사용자가 명시적으로 요청하지 않는 한 시스템 디스크를 암호화하지 않습니다."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "S-Mode가 무엇인지 알고 있으며, Windows를 완전히 삭제하고 재설치한 후에도 시스템이 S-Mode로 고정될 수 있음을 이해하는 경우에만 이 옵션을 사용하십시오."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Windows를 설치하려는 시스템이 최신 보안 부팅 인증서를 사용 중인 경우 이 옵션을 사용하십시오. 필요한 경우 'Mosby'를 사용하여 시스템을 업데이트할 수 있습니다."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "잠재적으로 안전하지 않은 추가 Windows 부트로더를 차단하려는 경우 이 옵션을 사용하십시오. 단, 표준 Windows 미디어의 부팅도 차단될 가능성이 있습니다."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "\"Quality of Life(QoL)\" 개선 사항: Microsoft가 사용자에게 강제하려는 원치 않는 기능 대부분을 비활성화합니다."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "이 옵션을 사용하는 경우, Windows를 설치할 디스크를 제외한 대상 PC의 모든 디스크를 분해(연결 해제)했는지 확인하십시오. 또한, 데이터 삭제를 원치 않는 PC에는 미디어를 연결된 상태로 두지 마십시오."
 
 #. • MSG_900
 #.
