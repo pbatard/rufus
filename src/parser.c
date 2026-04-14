@@ -1322,6 +1322,25 @@ void filter_chars(char* str, const char* rem, const char rep)
 }
 
 /*
+ * Trim all leadings and trailing whitespaces
+ */
+void trim(char* str)
+{
+	size_t l;
+	char* p;
+
+	if (str == NULL)
+		return;
+	l = strlen(str);
+	if (l < 1)
+		return;
+	while (isspace(str[l - 1]))
+		str[--l] = '\0';
+	for (p = str; *p != '\0' && isspace(*p); p++, l--);
+	memmove(str, p, l + 1);
+}
+
+/*
  * Remove all instances of substring 'sub' form string 'src.
  * The returned string is allocated and must be freed by the caller.
  */

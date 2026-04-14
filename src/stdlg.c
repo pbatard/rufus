@@ -1077,6 +1077,8 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 					if (strchr(username_invalid_chars, unattend_username[i]) != NULL)
 						unattend_username[i] = '_';
 				}
+				// Also remove leading and trailing whitespaces (https://github.com/pbatard/rufus/issues/2950)
+				trim(unattend_username);
 			}
 			if (selection_data.options->edition_index > 0)
 				unattend_edition_index = (int)ComboBox_GetCurItemData(GetDlgItem(hDlg, IDC_SELECTION_EDITION));

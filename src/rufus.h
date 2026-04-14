@@ -876,6 +876,7 @@ extern char* insert_section_data(const char* filename, const char* section, cons
 extern char* replace_in_token_data(const char* filename, const char* token, const char* src, const char* rep, BOOL dos2unix);
 extern char* replace_char(const char* src, const char c, const char* rep);
 extern void filter_chars(char* str, const char* rem, const char rep);
+extern void trim(char* str);
 extern char* remove_substr(const char* src, const char* sub);
 extern void parse_update(char* buf, size_t len);
 extern void* get_data_from_asn1(const uint8_t* buf, size_t buf_len, const char* oid_str, uint8_t asn1_type, size_t* data_len);
