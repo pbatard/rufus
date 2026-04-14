@@ -273,10 +273,16 @@ char* CreateUnattendXml(int arch, int flags)
 				"\"Remove-Item -Path $env:SystemRoot\\SysWOW64\\OneDriveSetup.exe -Force -Confirm:$false;", TRUE);
 			// Remove Outlook. How the frig is forcing Outlook on users legal when MS got pinned for bundling IE with Windows?
 			StrArrayAdd(&commands, "PowerShell -NonInteractive -WindowStyle Hidden -Command "
-				"\"Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -like '*OutlookForWindows*'} |"
+				"\"Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -like '*Outlook*'} |"
 				" Remove-AppxProvisionedPackage -Online\"", TRUE);
 			StrArrayAdd(&commands, "PowerShell -NonInteractive -WindowStyle Hidden -Command "
-				"\"Get-AppxPackage -AllUsers *OutlookForWindows* | Remove-AppxPackage -AllUsers\"", TRUE);
+				"\"Get-AppxPackage -AllUsers *Outlook* | Remove-AppxPackage -AllUsers\"", TRUE);
+			// Same for Teams. Also: "HEY, MICROSOFT, SCREW YOU!!!!"
+			StrArrayAdd(&commands, "PowerShell -NonInteractive -WindowStyle Hidden -Command "
+				"\"Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -like '*Teams*'} |"
+				" Remove-AppxProvisionedPackage -Online\"", TRUE);
+			StrArrayAdd(&commands, "PowerShell -NonInteractive -WindowStyle Hidden -Command "
+				"\"Get-AppxPackage -AllUsers *Teams* | Remove-AppxPackage -AllUsers\"", TRUE);
 		}
 		// Now that we have all the commands to run, create the RunSynchronous section.
 		for (order = 1; order <= (int)commands.Index; order++) {
@@ -377,7 +383,6 @@ char* CreateUnattendXml(int arch, int flags)
 			// through a full Windows Update cycle.
 			if (flags & UNATTEND_APPLY_SKUSIPOLICY) {
 				uprintf("• Apply SkuSiPolicy.p7b");
-				// TODO: Could we hide this using PowerShell?
 				StrArrayAdd(&commands, "cmd /c mountvol S: /S &amp;&amp; "
 					"copy %WINDIR%\\system32\\SecureBootUpdates\\SkuSiPolicy.p7b S:\\EFI\\Microsoft\\Boot &amp;&amp; "
 					"mountvol S: /D", TRUE);
@@ -399,6 +404,11 @@ char* CreateUnattendXml(int arch, int flags)
 				// Disable Windows Phone and similarly pushed unwanted crap
 				StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Policies\\Microsoft\\Windows\\CloudContent\" "
 					"/v DisableWindowsConsumerFeatures /t REG_DWORD /d 1 /f", TRUE);
+				// Disable ads in menu
+				StrArrayAdd(&commands, "reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager\" "
+					"/v SystemPaneSuggestionsEnabled /t REG_DWORD /d 0 /f", TRUE);
+				StrArrayAdd(&commands, "reg add \"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Search\" "
+					"/v BingSearchEnabled /t REG_DWORD /d 0 /f", TRUE);
 				// Disable News
 				StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Policies\\Microsoft\\Dsh\" "
 					"/v AllowNewsAndInterests /t REG_DWORD /d 0 /f", TRUE);
