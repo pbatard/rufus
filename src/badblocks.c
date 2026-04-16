@@ -67,7 +67,7 @@ static errcode_t make_u64_list(int size, int num, uint64_t *list, bb_u64_list *r
 	bb->magic = BB_ET_MAGIC_BADBLOCKS_LIST;
 	bb->size = size ? size : 10;
 	bb->num = num;
-	bb->list = malloc(sizeof(blk64_t) * bb->size);
+	bb->list = calloc(bb->size, sizeof(blk64_t));
 	if (bb->list == NULL) {
 		free(bb);
 		bb = NULL;
