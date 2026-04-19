@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-05-12 10:18+0200\n"
-"PO-Revision-Date: 2024-05-12 10:38+0200\n"
+"POT-Creation-Date: 2026-04-17 06:04+0200\n"
+"PO-Revision-Date: 2026-04-19 10:24+0200\n"
 "Last-Translator: martinco78\n"
 "Language-Team: \n"
 "Language: sk_SK\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Slovak (Slovensky)\n"
 "X-Rufus-LCID: 0x041B\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.6\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -153,7 +153,7 @@ msgstr "Zásady a nastavenia aktualizácií"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
 msgid "Settings"
-msgstr "Nastavenia automatických aktualizácií"
+msgstr "Nastavenia"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
 msgid "Check for updates"
@@ -310,7 +310,7 @@ msgstr "TB"
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr "PB"
 
@@ -852,7 +852,7 @@ msgstr "Bez partície"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "Nastavte veľkosť trvalej partície pre Live USB médium. Nastavením hodnoty na 0 zakážete trvalú partíciu."
 
@@ -894,15 +894,15 @@ msgstr "Prístup k tejto jednotke má iný program alebo proces. Chcete ho napri
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"Program Rufus zistil, že sa pokúšate vytvoriť Windows To Go médium založeného na 1809 ISO.\n"
+"Program Rufus zistil, že sa pokúšate vytvoriť „Windows To Go\" médium založeného na 1809 ISO.\n"
 "\n"
-"Kvôli *MICROSOFT BUG*, toto médium môže zlyhať počas zavádzania systému Windows (modrá obrazovka smrti), pokiaľ manuálne nenahradíte súbor „WppRecorder. sys\" verziou 1803.\n"
+"Kvôli „MICROSOFT BUG*, toto médium môže zlyhať počas zavádzania systému Windows (modrá obrazovka smrti), pokiaľ manuálne nenahradíte súbor „WppRecorder. sys\" verziou 1803.\n"
 "\n"
 "Dôvodom, prečo program Rufus nemôže automaticky toto opraviť to, že súbor „WppRecorder.sys\" je chránený súbor spoločnosti Microsoft, takže nie je legálne vložiť kópiu súboru do aplikácie..."
 
@@ -1093,7 +1093,7 @@ msgstr "Verzia %d.%d (Build %d)"
 
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
-msgstr "Do slovenčiny preložil martinco78 <mailto:martinco78@azet.sk>"
+msgstr "Do slovenčiny preložil martinco78 <mailto:martin.kubanik@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1796,12 +1796,20 @@ msgid ""
 "The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
 "As a result, DD image writing mode will be enforced."
 msgstr ""
-"Obráz, ktorý ste vybrali, je ISOHybrid a nie je kompatibilný s ISO/režim kopírovania súboru.\n"
+"Obraz, ktorý ste vybrali, je ISOHybrid a nie je kompatibilný s ISO/režim kopírovania súboru.\n"
 "V dôsledku toho sa vynúti režim zápisu obrazu DD."
 
 #. • MSG_322
 msgid "Unable to open or read '%s'"
 msgstr "Nedá sa otvoriť alebo prečítať „%s\""
+
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "Použiť SkuSiPolicy.p7b pri inštalácii (pozri KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "QoL vylepšenia (nenúťte Copilot, OneDrive, Outlook, Fast Startup a podobne)"
 
 #. • MSG_325
 msgid "Applying Windows customization: %s"
@@ -1821,11 +1829,11 @@ msgstr "Prajete si prispôsobiť inštaláciu systému Windows?"
 
 #. • MSG_329
 msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
-msgstr "Odstrániť požiadavku pre 4GB+ RAM, Secure Boot a TPM 2.0"
+msgstr "Odstrániť požiadavky pre 4GB+ RAM, Secure Boot a TPM 2.0"
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
-msgstr "Odstrániť požiadavky na online konto Microsoft"
+msgstr "Odstrániť požiadavku na online konto Microsoft"
 
 #. • MSG_331
 msgid "Disable data collection (Skip privacy questions)"
@@ -1853,13 +1861,13 @@ msgstr "Trvalý záznam činností"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"Pre inštaláciu systému MS-DOS je potrebné prevziať od spoločnosti Microsoft ďalší súbor („diskcopy.dll\"):\n"
+"Na použitie tejto funkcie je potrebné prevziať od spoločnosti Microsoft ďalší súbor („%s“):\n"
 "- Výberom možnosti „Áno\" ho stiahnete z internetu\n"
 "- Výberom možnosti „Nie\" zrušíte operáciu\n"
 "\n"
@@ -1926,6 +1934,118 @@ msgstr "Extrahovanie archívnych súborov: %s"
 #. • MSG_349
 msgid "Use Rufus MBR"
 msgstr "Použiť Rufus MBR"
+
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "Použiť podpísané bootloadery „Windows CA 2023\" (vyžaduje kompatibilný cieľový PC)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "Prebieha kontrola zrušenia UEFI zavádzača..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "Prebieha kontrola aktualizácie pre UEFI DBX..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "Dostupná aktualizácia DBX"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus našiel aktualizovanú verziu DBX súborov používaných na kontrolu odvolávania UEFI Secure Boot. Chcete si stiahnuť túto aktualizáciu?\n"
+"- Vyberte „Áno\" ak chcete tieto súbory stiahnuť\n"
+"- Vyberte „Nie\" pre zrušenie operácie\n"
+"\n"
+"Poznámka: Súbory budú stiahnuté do adresára aplikácie a budú automaticky znovu použité, ak budú prítomné."
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠BEZ UPOZORNENIA⚠ vymažte disk a nainštaluje:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes', you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"Vybrali ste možnosť „tichá\" inštalácia Windows.\n"
+"\n"
+"Ide o pokročilú možnosť, vyhradenú pre ľudí, ktorí chcú vytvárať médiá, ktoré počas inštalácie Windows neupozorňujú používateľa a teda BEZPODMIENEČNE VYMAŽÚ prvý zistený disk na cieľovom systéme. Ak nebudete opatrní, pri tejto možnosti môže dôjsť k NEVRATNEJ STRATE DÁT!\n"
+"\n"
+"Ak to nie je to, čo chcete, vyberte prosím „Nie\", aby ste sa vrátili späť a odškrtli túto možnosť.\n"
+"Inak, ak zvolíte „Áno\", súhlasíte, že plná zodpovednosť za akúkoľvek stratu dát bude úplne na VÁS."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "Nepodporované umiestnenie obrazu"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"Nemôžete použiť obraz, ktorý sa nachádza na cieľovom disku, pretože tento disk bude úplne vymazaný. Je to to isté, ako keby ste sa snažili rezať konár, na ktorom sedíte!\n"
+"\n"
+"Prosím, presuňte tento obraz do iného umiestnenia a skúste to znova."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "Je bezpečné nechať túto možnosť zapnutú aj v prípade, že máte TPM alebo viac RAM, pretože táto možnosť len obchádza požiadavky na nastavenie a v skutočnosti nebráni Windows v používaní všetkého dostupného hardvéru."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "Aby táto možnosť fungovala, sieť/internet MUSIA byť počas inštalácie odpojené!"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Automaticky odpovedá „NIE\" na otázky týkajúce sa Windows zdieľania dát s Microsoftom, namiesto toho, aby vyzývali používateľa."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "Túto možnosť by ste mali nechať zapnutú, pokiaľ vám nevadí, že „Windows To Go\" pristupuje k interným diskom a potichu vykonáva nezvratné aktualizácie súborového systému."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "Automaticky vytvorí lokálny účet s určeným používateľským menom s prázdnym heslom, ktoré bude potrebné zmeniť pri ďalšom prihlásení."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "Duplikuje regionálne nastavenia z tohto PC (klávesnica, časové pásmo, mena) namiesto toho, aby výzýval používateľa."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "Nešifrujte systémový disk, pokiaľ to používateľ výslovne nepožiada."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "Použite túto možnosť len vtedy, ak viete, čo je S-Mode a chápete, že váš systém môže byť uzamknutý v S-Mode aj po úplnom vymazaní a preinštalovaní Windows."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Použite túto možnosť, ak systém ktorý plánujete nainštalovať Windows, používa plne aktuálne certifikáty Secure Boot. Ak je to potrebné, môžete zvážiť použitie „Mosby\" na aktualizáciu systému."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "Použite túto možnosť, ak chcete zrušiť ďalšie potenciálne nebezpečné bootloadery Windows, ale zároveň potenciálne zabrániť spusteniu štandardných Windows médií."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "Vylepšenia „kvality života\": Vypne väčšinu nežiaducich funkcií, ktoré sa Microsoft snaží vnútiť koncovým používateľom."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "Ak použijete túto možnosť, uistite sa, že máte odpojené všetky disky od cieľového PC, okrem toho na ktorý chcete nainštalovať systém Windows. Taktiež nenechávajte médium pripojené k žiadnemu PC, ktorý nechcete vymazať."
 
 #. • MSG_900
 #.
