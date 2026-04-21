@@ -2065,7 +2065,6 @@ out:
 	return ret;
 }
 
-// TODO: If we can't get save to ISO from virtdisk, we might as well drop this
 static DWORD WINAPI OpticalDiscSaveImageThread(void* param)
 {
 	BOOL s;

@@ -499,7 +499,6 @@ static DWORD WINAPI VhdSaveImageThread(void* param)
 	// be used as DD images.
 	if (img_save->Type == VIRTUAL_STORAGE_TYPE_DEVICE_VHD)
 		flags |= CREATE_VIRTUAL_DISK_FLAG_FULL_PHYSICAL_ALLOCATION;
-	// TODO: Use CREATE_VIRTUAL_DISK_FLAG_PREVENT_WRITES_TO_SOURCE_DISK?
 
 	overlapped.hEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
 
