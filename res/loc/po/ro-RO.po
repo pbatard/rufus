@@ -1,11 +1,11 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 4.5\n"
+"Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2024-04-25 21:23+0300\n"
-"PO-Revision-Date: 2024-04-25 22:00+0300\n"
+"POT-Creation-Date: 2026-04-27 17:51+0100\n"
+"PO-Revision-Date: 2026-04-27 17:56+0100\n"
 "Last-Translator: \n"
-"Language-Team: \n"
+"Language-Team: Andrei Ilas\n"
 "Language: ro_RO\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,7 +13,7 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Rufus-LanguageName: Romanian (Română)\n"
 "X-Rufus-LCID: 0x0418, 0x0818\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.9\n"
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
@@ -308,7 +308,7 @@ msgstr ""
 
 #. • MSG_025
 #.
-#. *Short* version of the pentabyte size suffix
+#. *Short* version of the petabyte size suffix
 msgid "PB"
 msgstr ""
 
@@ -846,7 +846,7 @@ msgstr "Fără persistență"
 
 #. • MSG_125
 #.
-#. Tooltips used for the peristence size slider and edit control
+#. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
 msgstr "Setați dimensiunea partiției persistente pentru dispozitivul USB live. Setarea mărimii la 0 va dezactiva partiția persistentă."
 
@@ -888,13 +888,13 @@ msgstr "Un alt program sau proces utilizează această unitate. Doriți să o fo
 
 #. • MSG_133
 msgid ""
-"Rufus has detected that you are attempting to create a Windows To Go media based on a 1809 ISO.\n"
+"Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
 "Because of a *MICROSOFT BUG*, this media will crash during Windows boot (Blue Screen Of Death), unless you manually replace the file 'WppRecorder.sys' with a 1803 version.\n"
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"Rufus a observat că încercați să creați un media Windows To Go bazat pe un ISO cu versiunea 1809.\n"
+"Rufus a observat că încercați să creați un media 'Windows To Go' bazat pe un ISO cu versiunea 1809.\n"
 "\n"
 "Din cauza unui *BUG MICROSOFT*, acest media va eșua în timpul pornirii Windows (Blue Screen Of Death), cu excepția cazului în care înlocuiți manual fișierul 'WppRecorder.sys' cu o versiune 1803.\n"
 "\n"
@@ -1793,7 +1793,15 @@ msgstr ""
 
 #. • MSG_322
 msgid "Unable to open or read '%s'"
-msgstr "Nu se poate deschide sau citii '%s'"
+msgstr "Nu se poate deschide sau citi '%s'"
+
+#. • MSG_323
+msgid "Apply SkuSiPolicy.p7b on installation (See KB5042562)"
+msgstr "Aplică SkuSiPolicy.p7b la instalare (Vezi KB5042562)"
+
+#. • MSG_324
+msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
+msgstr "Îmbunătățiri QoL (Fără Copilot, OneDrive, Outlook, pornire rapidă forțată, etc.)"
 
 #. • MSG_325
 msgid "Applying Windows customization: %s"
@@ -1801,7 +1809,7 @@ msgstr "Aplicând modificări la Windows: %s"
 
 #. • MSG_326
 msgid "Applying user options..."
-msgstr "Aplicând optiuni de utilizator..."
+msgstr "Aplicând opțiuni de utilizator..."
 
 #. • MSG_327
 msgid "Windows User Experience"
@@ -1813,7 +1821,7 @@ msgstr "Doriți să modificați instalația de Windows?"
 
 #. • MSG_329
 msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
-msgstr "Elimină necesitatea de 4GB+ RAM, Bootare Securizată si TPM 2.0"
+msgstr "Elimină necesitatea de 4GB+ RAM, Bootare Securizată și TPM 2.0"
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
@@ -1821,7 +1829,7 @@ msgstr "Elimină necesitatea pentru un cont Microsoft"
 
 #. • MSG_331
 msgid "Disable data collection (Skip privacy questions)"
-msgstr "Blochează colectarea de date (Sari peste întrebările de intimitate)"
+msgstr "Dezactivează colectarea de date (Sari peste întrebările de confidențialitate)"
 
 #. • MSG_332
 msgid "Prevent Windows To Go from accessing internal disks"
@@ -1829,11 +1837,11 @@ msgstr "Blochează Windows To Go de la accesarea discurilor interne"
 
 #. • MSG_333
 msgid "Create a local account with username:"
-msgstr "Crează un cont local cu nume de utilizator:"
+msgstr "Creează un cont local cu nume de utilizator:"
 
 #. • MSG_334
 msgid "Set regional options to the same values as this user's"
-msgstr "Serează opțiunile regionale să aibă aceleași valori ca acestui utilizator"
+msgstr "Setează opțiunile regionale să aibă aceleași valori ca ale acestui utilizator"
 
 #. • MSG_335
 msgid "Disable BitLocker automatic device encryption"
@@ -1845,17 +1853,17 @@ msgstr "Logare persistentă"
 
 #. • MSG_337
 msgid ""
-"An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:\n"
+"An additional file ('%s') must be downloaded from Microsoft to use this feature:\n"
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation\n"
 "\n"
 "Note: The file will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"Un fișier adițional ('diskcopy.dll') trebuie să fie descărcat de la Microsoft pentru  a instala MS-DOS:\n"
-"- Selectează 'Da' ca să te conectezi la Internet și să le descarci\n"
-"- Selectează 'Nu' pentru a anula operațiunea\n"
+"Un fișier suplimentar ('%s') trebuie descărcat de la Microsoft pentru a utiliza această funcție:\n"
+"- Selectați 'Da' pentru a vă conecta la Internet și a-l descărca\n"
+"- Selectați 'Nu' pentru a anula operațiunea\n"
 "\n"
-"Notiță: Acest fișier va fi descărcat in aceeași locație cu aplicația și va fi reutilizat automat dacă este prezent."
+"Notă: Fișierul va fi descărcat în directorul aplicației și va fi reutilizat automat dacă este prezent."
 
 #. • MSG_338
 msgid "Revoked UEFI bootloader detected"
@@ -1868,10 +1876,10 @@ msgid ""
 "- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
 "- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
 msgstr ""
-"Rufus a detectat că fișierul ISO care lai selectat conține un bootloader UEFI care nu este permis si ar produce %s, cand Secure Boot este activat pe un system UEFI actualizat.\n"
+"Rufus a detectat că fișierul ISO selectat conține un bootloader UEFI care a fost revocat și care va produce %s, când Secure Boot este activat pe un sistem UEFI complet actualizat.\n"
 "\n"
-"- Dacă ai făcut rost de aceasta imagine ISO de la o sursă de neîncredere, este recomandat să consideri posibilitatea că ar putea conține malware UEFI ce nu ar permite pornirea de la aceasta.\n"
-"- Dacă ai făcut rost de aceasta de la o sursă de încredere, ar putea fi necesară căutarea unei versiuni mai noi, care nu ar produce acest avertisment."
+"- Dacă ați obținut această imagine ISO dintr-o sursă nesigură, luați în considerare posibilitatea că ar putea conține malware UEFI și evitați pornirea de pe aceasta.\n"
+"- Dacă ați obținut-o dintr-o sursă de încredere, încercați să găsiți o versiune mai recentă, care să nu producă acest avertisment."
 
 #. • MSG_340
 msgid "a \"Security Violation\" screen"
@@ -1899,9 +1907,9 @@ msgid ""
 "- Select 'Yes' to connect to the Internet and download it\n"
 "- Select 'No' to cancel the operation"
 msgstr ""
-"Niște date adiționale trebuie descărcate de la Microsoft pentru a folosii această funție:\n"
-"- Selectează 'Da' ca să te conectezi la Internet și să le descarci\n"
-"- Selectează 'Nu' pentru a anula operațiunea"
+"Unele date suplimentare trebuie descărcate de la Microsoft pentru a folosi această funcție:\n"
+"- Selectați 'Da' pentru a vă conecta la Internet și a le descărca\n"
+"- Selectați 'Nu' pentru a anula operațiunea"
 
 #. • MSG_346
 msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
@@ -1919,6 +1927,118 @@ msgstr "Extractând fișiere arhivate: %s"
 msgid "Use Rufus MBR"
 msgstr "Folosește Rufus MBR"
 
+#. • MSG_350
+msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
+msgstr "Folosește bootloadere semnate cu 'Windows CA 2023' (necesită un PC compatibil)"
+
+#. • MSG_351
+msgid "Checking for UEFI bootloader revocation..."
+msgstr "Se verifică revocarea bootloaderului UEFI..."
+
+#. • MSG_352
+msgid "Checking for UEFI DBX updates..."
+msgstr "Se verifică actualizările DBX UEFI..."
+
+#. • MSG_353
+msgid "DBX update available"
+msgstr "Actualizare DBX disponibilă"
+
+#. • MSG_354
+msgid ""
+"Rufus has found an updated version of the DBX files used to perform UEFI Secure Boot revocation checks. Do you want to download this update?\n"
+"- Select 'Yes' to connect to the Internet and download this content\n"
+"- Select 'No' to cancel the operation\n"
+"\n"
+"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
+msgstr ""
+"Rufus a găsit o versiune actualizată a fișierelor DBX folosite pentru verificările de revocare Secure Boot UEFI. Doriți să descărcați această actualizare?\n"
+"- Selectați „Da” pentru a vă conecta la internet și a descărca acest conținut\n"
+"- Selectați „Nu” pentru a anula operațiunea\n"
+"\n"
+"Notă: Fișierele vor fi descărcate în directorul aplicației și vor fi reutilizate automat, dacă există."
+
+#. • MSG_355
+msgid "⚠SILENTLY⚠ erase disk and install:"
+msgstr "⚠ȘTERGE SILENȚIOS⚠ discul și instalează:"
+
+#. • MSG_356
+msgid ""
+"You have selected to use the \"silent\" Windows installation option.\n"
+"\n"
+"This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
+"\n"
+"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
+"Otherwise, if you select 'Yes', you agree that the whole responsibility for any data loss will be entirely with YOU."
+msgstr ""
+"Ați selectat opțiunea de instalare Windows \"silențioasă\".\n"
+"\n"
+"Aceasta este o opțiune avansată, rezervată persoanelor care doresc să creeze suporturi media care nu solicită utilizatorilor informații în timpul instalării Windows și, prin urmare, ȘTERGE NECONDIȚIONAT primul disc detectat pe sistemul țintă. Dacă nu sunteți atenți, utilizarea acestei opțiuni poate duce la PIERDERI IREVERSIBILE DE DATE!\n"
+"\n"
+"Dacă acest lucru nu este ceea ce doriți, selectați „Nu” pentru a reveni și a debifa opțiunea.\n"
+"În caz contrar, dacă selectați „Da”, sunteți de acord că întreaga responsabilitate pentru orice pierdere de date vă va aparține în întregime."
+
+#. • MSG_358
+msgid "Unsupported image location"
+msgstr "Locație imagine neacceptată"
+
+#. • MSG_359
+msgid ""
+"You cannot use an image that is located on the target drive, since that drive is going to be completely erased. It's the same thing as trying to saw the branch you are sitting on!\n"
+"\n"
+"Please move the image to a different location and try again."
+msgstr ""
+"Nu puteți folosi o imagine aflată pe unitatea țintă, deoarece acea unitate va fi complet ștearsă. Este același lucru cu încercarea de a tăia creanga pe care stai!\n"
+"\n"
+"Mută imaginea într-o altă locație și încearcă din nou."
+
+#. • MSG_360
+msgid "It is safe to leave this option enabled even if you have a TPM or more RAM, as this option only bypasses the setup requirements and does not actually prevent Windows from using all the hardware available."
+msgstr "Este sigur să lăsați această opțiune activată chiar dacă aveți un TPM sau mai multă memorie RAM, deoarece aceasta ocolește doar cerințele de configurare și nu împiedică Windows să utilizeze tot hardware-ul disponibil."
+
+#. • MSG_361
+msgid "For this option to work, network/Internet MUST be disconnected during installation!"
+msgstr "Pentru ca această opțiune să funcționeze, rețeaua/Internetul TREBUIE să fie deconectat în timpul instalării!"
+
+#. • MSG_362
+msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
+msgstr "Răspunde automat cu 'Nu' la întrebările de instalare Windows legate de partajarea datelor cu Microsoft, în loc să întrebe utilizatorul."
+
+#. • MSG_363
+msgid "You should leave this option enabled, unless you are okay with 'Windows To Go' accessing internal disks and silently performing irreversible file system upgrades."
+msgstr "Lăsați această opțiune activată dacă nu doriți ca 'Windows To Go' să acceseze discurile interne și să efectueze actualizări ireversibile ale sistemului de fișiere fără avertizare."
+
+#. • MSG_364
+msgid "Automatically create a local account with the specified user name, using an empty password that will need to be changed on next logon."
+msgstr "Creează automat un cont local cu numele de utilizator specificat, folosind o parolă goală care va trebui schimbată la prima autentificare."
+
+#. • MSG_365
+msgid "Duplicate the regional settings from this PC (keyboard, timezone, currency), instead of prompting the user."
+msgstr "Preia setările regionale de pe acest PC (tastatură, fus orar, monedă), în loc să întrebe utilizatorul."
+
+#. • MSG_366
+msgid "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "Nu cripta discul de sistem, cu excepția cazului în care utilizatorul solicită explicit acest lucru."
+
+#. • MSG_367
+msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
+msgstr "Folosiți această opțiune doar dacă știți ce este S-Mode și acceptați că sistemul poate rămâne blocat în S-Mode chiar și după reinstalarea completă a Windows."
+
+#. • MSG_368
+msgid "Use this option if the system you plan to install Windows on is using fully up-to-date Secure Boot certificates. If needed, you can look into using 'Mosby' to update your system."
+msgstr "Folosiți această opțiune dacă sistemul pe care intenționați să instalați Windows utilizează certificate Secure Boot complet actualizate. Dacă este necesar, puteți folosi 'Mosby' pentru a actualiza sistemul."
+
+#. • MSG_369
+msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
+msgstr "Folosiți această opțiune pentru a revoca bootloadere Windows potențial nesigure suplimentare, cu riscul de a împiedica și pornirea suporturilor Windows standard."
+
+#. • MSG_370
+msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
+msgstr "Îmbunătățiri \"Quality of Life\": Dezactivează majoritatea funcțiilor nedorite pe care Microsoft încearcă să le impună utilizatorilor finali."
+
+#. • MSG_371
+msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
+msgstr "Dacă folosiți această opțiune, asigurați-vă că deconectați toate discurile de la computerul țintă, cu excepția celui pe care doriți să instalați Windows, și nu lăsați suportul conectat la niciun computer pe care nu doriți să îl ștergeți."
+
 #. • MSG_900
 #.
 #. The following messages are for the Windows Store listing only and are not used by the application
@@ -1927,11 +2047,11 @@ msgstr "Rufus este un utilitar care ajută la formatarea și crearea de drive-ur
 
 #. • MSG_901
 msgid "Official site: %s"
-msgstr "Site official: %s"
+msgstr "Site oficial: %s"
 
 #. • MSG_902
 msgid "Source Code: %s"
-msgstr "Codul Sursei: %s"
+msgstr "Cod sursă: %s"
 
 #. • MSG_903
 msgid "ChangeLog: %s"
@@ -1945,14 +2065,14 @@ msgid ""
 "This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
 "See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
 msgstr ""
-"Această aplicație este sub liciența și termenii și condițiile ale lui GNU Public License (GPL) versiunea a 3-a.\n"
-"Vazi https://www.gnu.org/licenses/gpl-3.0.en.html pentru detalii."
+"Această aplicație este licențiată conform termenilor GNU Public License (GPL) versiunea 3.\n"
+"Vezi https://www.gnu.org/licenses/gpl-3.0.en.html pentru detalii."
 
 #. • MSG_905
 #.
 #. Keyword for "boot" will be used for search in the Windows Store
 msgid "Boot"
-msgstr "Bootează"
+msgstr ""
 
 #. • MSG_910
 #.
