@@ -1432,6 +1432,7 @@ const struct {int (*fn)(FILE *fp); char* str;} known_mbr[] = {
 	{ is_win7_mbr, "Windows 7" },
 	{ is_rufus_mbr, "Rufus" },
 	{ is_syslinux_mbr, "Syslinux" },
+	{ is_isolinux_mbr, "Isolinux" },
 	{ is_reactos_mbr, "ReactOS" },
 	{ is_kolibrios_mbr, "KolibriOS" },
 	{ is_grub4dos_mbr, "Grub4DOS" },

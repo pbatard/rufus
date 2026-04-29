@@ -158,6 +158,9 @@
     <ClInclude Include="..\src\ms-sys\inc\mbr_msg_rufus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\ms-sys\inc\mbr_isolinux.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\ms-sys\br.c">

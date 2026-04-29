@@ -78,6 +78,10 @@ int is_kolibrios_mbr(FILE *fp);
    FALSE.The file position will change when this function is called! */
 int is_syslinux_mbr(FILE *fp);
 
+/* returns TRUE if the file has an isolinux master boot record, otherwise
+   FALSE.The file position will change when this function is called! */
+int is_isolinux_mbr(FILE* fp);
+
 /* returns TRUE if the file has a syslinux GPT master boot record, otherwise
    FALSE.The file position will change when this function is called! */
 int is_syslinux_gpt_mbr(FILE *fp);

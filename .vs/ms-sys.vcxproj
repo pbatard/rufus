@@ -73,6 +73,7 @@
     <ClInclude Include="..\src\ms-sys\inc\mbr_gpt_syslinux.h" />
     <ClInclude Include="..\src\ms-sys\inc\mbr_grub.h" />
     <ClInclude Include="..\src\ms-sys\inc\mbr_grub2.h" />
+    <ClInclude Include="..\src\ms-sys\inc\mbr_isolinux.h" />
     <ClInclude Include="..\src\ms-sys\inc\mbr_kolibri.h" />
     <ClInclude Include="..\src\ms-sys\inc\mbr_msg_rufus.h" />
     <ClInclude Include="..\src\ms-sys\inc\mbr_reactos.h" />

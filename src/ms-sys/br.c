@@ -210,6 +210,17 @@ int is_syslinux_mbr(FILE *fp)
       is_br(fp);
 } /* is_syslinux_mbr */
 
+int is_isolinux_mbr(FILE* fp)
+{
+#include "mbr_isolinux.h"
+
+    return
+       contains_data(fp, 0x20, &mbr_isolinux_0x0[0], 0x48) &&
+       (contains_data(fp, 0x80, &mbr_isolinux_0x0[0x60], sizeof(mbr_isolinux_0x0) - 0x60) ||
+        contains_data(fp, 0x82, &mbr_isolinux_0x0[0x60], sizeof(mbr_isolinux_0x0) - 0x60)) &&
+       is_br(fp);
+} /* is_isolinux_mbr */
+
 int is_syslinux_gpt_mbr(FILE *fp)
 {
    #include "mbr_gpt_syslinux.h"
