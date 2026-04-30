@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Rufus-LanguageName: Malay (Bahasa Malaysia)\n"
+"X-Rufus-LanguageName: Bahasa Melayu (Malaysia)\n"
 "X-Rufus-LCID: 0x043e, 0x083e\n"
 "X-Generator: Poedit 3.2.2\n"
 
@@ -37,7 +37,7 @@ msgstr "Pilihan Imej"
 
 #. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
 msgid "Partition scheme"
-msgstr "Skema partisyen"
+msgstr "Skema partisi"
 
 #. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
 msgid "Target system"
@@ -92,7 +92,7 @@ msgstr "Cipta label lanjut dan fail ikon"
 
 #. • IDD_DIALOG → IDS_STATUS_TXT
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #. • IDD_DIALOG → IDCANCEL
 #. • IDD_LICENSE → IDCANCEL
@@ -139,7 +139,7 @@ msgstr "Tidak"
 
 #. • IDD_LOG → IDD_LOG
 msgid "Log"
-msgstr ""
+msgstr "Log"
 
 #. • IDD_LOG → IDC_LOG_CLEAR
 msgid "Clear"
@@ -151,7 +151,7 @@ msgstr "Simpan"
 
 #. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
 msgid "Update policy and settings"
-msgstr "Kemaskini dasar dan tetapan"
+msgstr "Polisi kemas kini dan tetapan"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
 msgid "Settings"
@@ -159,7 +159,7 @@ msgstr "Tetapan"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_FREQUENCY_TXT
 msgid "Check for updates"
-msgstr "Semak untuk versi baharu"
+msgstr "Semak versi baharu"
 
 #. • IDD_UPDATE_POLICY → IDS_INCLUDE_BETAS_TXT
 msgid "Include beta versions"
@@ -171,7 +171,7 @@ msgstr "Semak sekarang"
 
 #. • IDD_NEW_VERSION → IDD_NEW_VERSION
 msgid "Check For Updates - Rufus"
-msgstr "Semak untuk versi baharu - Rufus"
+msgstr "Semak versi baharu - Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
 msgid "A newer version is available. Please download the latest version!"
@@ -213,11 +213,11 @@ msgstr ""
 
 #. • MSG_004
 msgid "Rufus update policy"
-msgstr "Dasar kemas kini Rufus"
+msgstr "Polisi kemas kini Rufus"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
-msgstr "Adakah anda mahu membenarkan Rufus menyemak untuk versi baharu dalam talian?"
+msgstr "Adakah anda mahu membenarkan Rufus menyemak versi baharu dalam talian?"
 
 #. • MSG_007
 msgid "Cancel"
@@ -401,7 +401,7 @@ msgstr "%s (Cakera %d) [%s]"
 #.
 #. Used when a drive is detected that contains more than one partition
 msgid "Multiple Partitions"
-msgstr "Beberapa Partisyen"
+msgstr "Beberapa Partisi"
 
 #. • MSG_048
 msgid "Rufus - Flushing buffers"
@@ -485,11 +485,11 @@ msgstr "Media tidak boleh dibuka. Ia mungkin digunakan dalam proses yang lain. S
 
 #. • MSG_068
 msgid "Could not partition drive."
-msgstr "Tidak boleh partition drive."
+msgstr "Tidak boleh partisi cakera."
 
 #. • MSG_069
 msgid "Could not copy files to target drive."
-msgstr "Tidak boleh meyalin fail kepada pemacu."
+msgstr "Tidak boleh menyalin fail kepada pemacu."
 
 #. • MSG_070
 msgid "Cancelled by user."
@@ -543,9 +543,9 @@ msgid ""
 msgstr ""
 "Rufus mengesan bahawa Windows masih lagi menarik penimbal ke dalam peranti USB.\n"
 "\n"
-"Bergantung kepada kelajuan peranti USB anda, operasi ini mungkin mengambil masa yang amat lama.Terutamanya untuk fail besar.\n"
+"Bergantung kepada kelajuan peranti USB anda, operasi ini mungkin mengambil masa yang amat lama, terutamanya untuk fail besar.\n"
 "\n"
-"Kami cadangkan anda biarkan proses Windows untuk tamat dahulu supaya mengelakkan korupsi.Namun, jika anda kesuntukan masa, anda boleh cabutkan peranti anda..."
+"Kami cadangkan anda biarkan proses Windows untuk tamat dahulu supaya mengelakkan korupsi. Namun, jika anda kesuntukan masa, anda boleh cabutkan peranti anda..."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -579,7 +579,7 @@ msgstr ""
 "- Pilih 'Tidak' untuk tidak mengubahsuai fail ISO yang digunakan\n"
 "Jika anda tidak pasti apa yang perlu dilakukan, pilih 'Ya'.\n"
 "\n"
-"Perhatian: Fail yang dimuat turun akan disimpan di dalam direktori bersamaan dengan Rufus dan apabila terdapat '%s' , ia akan digunakan secara automatik."
+"Perhatian: Fail yang dimuat turun akan disimpan di dalam direktori bersamaan dengan Rufus dan apabila terdapat '%s', ia akan digunakan secara automatik."
 
 #. • MSG_085
 msgid "Downloading %s"
@@ -614,7 +614,7 @@ msgstr "ISO tidak disokong"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "Apabila menggunakan jenis sasaran UEFI , hanya imej boot jenis EFI sahaja disokong. Sila pilih ISO boot jenis EFI atau tukarkan jenis sasaran kepada BIOS."
+msgstr "Apabila menggunakan jenis sasaran UEFI, hanya imej boot jenis EFI sahaja disokong. Sila pilih ISO boot jenis EFI atau tukarkan jenis sasaran kepada BIOS."
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -626,13 +626,13 @@ msgid ""
 "\n"
 "This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
 msgstr ""
-"PENTING: PERANTI INI MEMPUNYAI BEBERAPA PARTISYEN!!\n"
+"PENTING: PERANTI INI MEMPUNYAI BEBERAPA PARTISI!!\n"
 "\n"
-"Ini mungkin termasuk partisyen/jilid yang tidak disenaraikan atau tidak boleh dilihat dari Windows. Jika anda mahu meneruskannya, anda bertanggungjawab ke atas kehilangan data dalam partisyen tersebut."
+"Ini mungkin termasuk partisi/jilid yang tidak disenaraikan atau tidak boleh dilihat dari Windows. Jika anda mahu meneruskannya, anda bertanggungjawab ke atas kehilangan data dalam partisi tersebut."
 
 #. • MSG_094
 msgid "Multiple partitions detected"
-msgstr "Beberapa partisyen dikesan"
+msgstr "Beberapa partisi dikesan"
 
 #. • MSG_095
 msgid "DD Image"
@@ -654,11 +654,11 @@ msgid ""
 "\n"
 "Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"PENTING: Anda cuba memasang 'Windows To Go', tetapi pemacu sasaran anda tidak mempunyai atribut 'FIXED'. Disebabkan ini Windows akan berkemungkinan besar sangkut sepanjang but, kerana Microsoft tidak merekanya untuk berfungsi dengan pemacu yang sebaliknya mempunyai atribut 'REMOVABLE'.\n"
+"PENTING: Anda cuba memasang 'Windows To Go', tetapi pemacu sasaran anda tidak mempunyai atribut 'FIXED'. Disebabkan ini Windows berkemungkinan besar akan sangkut semasa but, kerana Microsoft tidak merekanya untuk berfungsi dengan pemacu yang mempunyai atribut 'REMOVABLE'.\n"
 "\n"
 "Adakah anda masih mahu teruskan?\n"
 "\n"
-"Nota: Atribut 'FIXED/REMOVABLE'adalah sifat perkakasan yang hanya boleh ditukar menggunakan alatan tersuai daripada pengilang pemacu. Bagaimanapun alatan tersebut adalah HAMPIR TIDAK AKAN diberikan kepada umum..."
+"Nota: Atribut 'FIXED/REMOVABLE' adalah sifat perkakasan yang hanya boleh ditukar menggunakan alatan tersuai daripada pengilang pemacu. Bagaimanapun alatan tersebut biasanya TIDAK diberikan kepada umum..."
 
 #. • MSG_099
 msgid "Filesystem limitation"
@@ -666,7 +666,7 @@ msgstr "Had sistem fail"
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Imej ISO ini mengandungi fail yang lebih besar daripada 4 GB iaitu saiz maksima yang dibenarkan untuk sistem fail FAT atau FAT32."
+msgstr "Imej ISO ini mengandungi fail yang lebih besar daripada 4 GB iaitu saiz maksimum yang dibenarkan untuk sistem fail FAT atau FAT32."
 
 #. • MSG_101
 msgid "Missing WIM support"
@@ -699,7 +699,7 @@ msgid ""
 "Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
 "%s atau kemudian memerlukan fail '%s' di komputer anda.\n"
-"Oleh sebab fail tersebut lebih besar daripada 100 KB dan sentiasa ada dalam imej %s, Ia tidak termasuk dalam Rufus.\n"
+"Oleh sebab fail tersebut lebih besar daripada 100 KB dan sentiasa ada dalam imej %s, ia tidak termasuk dalam Rufus.\n"
 "\n"
 "Rufus boleh memuat turun fail tersebut untuk anda:\n"
 "- Pilih 'Ya' untuk muat turun fail tersebut\n"
@@ -750,7 +750,7 @@ msgstr "Saiz gugusan tidak sesuai"
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "Pemformatan jilid UDF yang besar mengambil masa yang amat lama. Pada kelajuan USB 2.0, anggaran masa pemformatan adalah %d:%02d, dimana bar kemajuan akan kelihatan seperti ia tidak bergerak. Sila bersabar!"
+msgstr "Pemformatan jilid UDF yang besar mengambil masa yang amat lama. Pada kelajuan USB 2.0, anggaran masa pemformatan adalah %d:%02d, di mana bar kemajuan akan kelihatan seperti ia tidak bergerak. Sila bersabar!"
 
 #. • MSG_113
 msgid "Large UDF volume"
@@ -766,13 +766,13 @@ msgid ""
 "\n"
 "Note: The files will be downloaded in the current application directory and will be reused automatically if present."
 msgstr ""
-"Imej ini menggunakan Syslinux %s%s tetapi aplikasi ini hanya mempunyai fail pemasangan untukSyslinux %s%s.\n"
+"Imej ini menggunakan Syslinux %s%s tetapi aplikasi ini hanya mempunyai fail pemasangan untuk Syslinux %s%s.\n"
 "\n"
-"Oleh kerana versi-versi baharu Syslinux tidak serasi dengan satu sama lain, maka tidakwajar Rufus menyediakan semuanya, dua fail tambahan perlu dimuat turun dariInternet ('ldlinux.sys' dan 'ldlinux.bss'):\n"
+"Oleh kerana versi-versi baharu Syslinux tidak serasi dengan satu sama lain, maka bukanlah menjadi tanggungjawab Rufus untuk menyediakan kesemuanya, dua fail tambahan perlu dimuat turun dari Internet ('ldlinux.sys' dan 'ldlinux.bss'):\n"
 "- Pilih 'Ya' untuk menyambung ke Internet dan memuat turun fail tersebut\n"
 "- Pilih 'Tidak' untuk membatalkan operasi\n"
 "\n"
-"NOTA:Fail akan dimuat turun ke dalam direktori aplikasi ini dan akan digunakan semulasecara automatik sekiranya sedia ada."
+"NOTA: Fail akan dimuat turun ke dalam direktori aplikasi ini dan akan digunakan semula secara automatik sekiranya sudah tersedia."
 
 #. • MSG_115
 msgid "Download required"
@@ -794,7 +794,7 @@ msgid ""
 msgstr ""
 "Imej ini menggunakan Grub %s tetapi aplikasi hanya termasuk fail pemasangan untuk Grub %s.\n"
 "\n"
-"Sepertimana versi Grub berlainan mungkin tidak sesuai antara satu sama lain, dan ianya tidak mungkin untuk memasukkan mereka semua, Rufus akan cuba mengesan versi fail pemasangan Grub ('core.img') yang sepadan dengan salah satu daripada imej anda:\n"
+"Sepertimana versi Grub berlainan mungkin tidak sesuai antara satu sama lain, dan ianya tidak mungkin untuk memasukkan kesemuanya, Rufus akan cuba mengesan versi fail pemasangan Grub ('core.img') yang sepadan dengan salah satu daripada imej anda:\n"
 "- Pilih 'Ya' untuk bersambung ke Internet dan cuba memuat turunnya\n"
 "- Pilih 'Tidak' untuk menggunakan versi lalai dari Rufus\n"
 "- Pilih 'Batal' untuk membatalkan operasi\n"
@@ -836,7 +836,7 @@ msgstr "Sembunyi %s"
 #. To test this feature, please download and select 'casper_test.iso' from:
 #. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
 msgid "Persistent partition size"
-msgstr "Saiz pemetakan berterusan (persistence partition)"
+msgstr "Saiz partisi berterusan (persistence partition)"
 
 #. • MSG_124
 #.
@@ -850,11 +850,11 @@ msgstr "Tidak berterusan"
 #.
 #. Tooltips used for the peristence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "Mengeset saiz pemetakan berterusan (persistent partition) untuk media 'live USB'. Setkan saiz kepada 0 untuk melumpuhkan pemetakan berterusan."
+msgstr "Mengeset saiz partisi berterusan (persistent partition) untuk media 'live USB'. Setkan saiz kepada 0 untuk melumpuhkan partisi berterusan."
 
 #. • MSG_126
 msgid "Set the partition size units."
-msgstr "Set saiz unit pemetakan."
+msgstr "Set saiz unit partisi."
 
 #. • MSG_127
 msgid "Do not show this message again"
@@ -898,7 +898,7 @@ msgid ""
 msgstr ""
 "Rufus telah mengesan bahawa anda sedang mencuba untuk mencipta media Windows To Go berasaskan imej ISO 1809.\n"
 "\n"
-"Memandangkan terdapat pepijat dari MICROSOFT, media ini akan menghadapi masalah (Blue Scree Of Death) semasa memulakan Windows, melainkan anda menukar fail 'WppRecorder.sys' kepada versi 1803.\n"
+"Memandangkan terdapat pepijat dari MICROSOFT, media ini akan menghadapi masalah (Blue Screen Of Death) semasa memulakan Windows, melainkan anda menukar fail 'WppRecorder.sys' kepada versi 1803.\n"
 "\n"
 "Sila ambil perhatian. Rufus tidak akan membaiki masalah ini kerana 'WppRecorder.sys' adalah hak cipta milik Microsoft dan kami tidak dapat menyertakan salinan fail berkenaan bersama-sama aplikasi ini..."
 
@@ -908,7 +908,7 @@ msgid ""
 "\n"
 "Are you sure you want to continue?"
 msgstr ""
-"Memandangkan skema pemetakan MBR telah dipilih, Rufus akan menghasilkan petak storan media dengan saiz maksimum 2 TB, di mana %s ruang cakera adalah tidak tersedia.\n"
+"Memandangkan skema partisi MBR telah dipilih, Rufus akan menghasilkan petak storan media dengan saiz maksimum 2 TB, di mana %s ruang cakera adalah tidak tersedia.\n"
 "\n"
 "Adakah anda pasti ingin meneruskan operasi?"
 
@@ -976,7 +976,7 @@ msgstr "Jenis komputer yang anda merancang untuk menggunakan cakera \"bootable\"
 #.
 #. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
 msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
-msgstr "'UEFI-CSM' bermaksud peranti hanya akan boot di dalam mod emulasi BIOS (juga dikenali sebagai 'Legacy Mode') dibawah UEFI, dan bukan dalam mod asli UEFI."
+msgstr "'UEFI-CSM' bermaksud peranti hanya akan boot di dalam mod emulasi BIOS (juga dikenali sebagai 'Legacy Mode') di bawah UEFI, dan bukan dalam mod asli UEFI."
 
 #. • MSG_152
 msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
@@ -1028,7 +1028,7 @@ msgstr "Nyahtanda kotak ini untuk menggunakan kaedah pemformatan perlahan"
 
 #. • MSG_163
 msgid "Method that will be used to create partitions"
-msgstr "Kaedah yang digunakan untuk mencipta partisyen"
+msgstr "Kaedah yang digunakan untuk mencipta partisi"
 
 #. • MSG_164
 msgid "Method that will be used to make the drive bootable"
@@ -1059,7 +1059,7 @@ msgid ""
 "Create an extra hidden partition and try to align partitions boundaries.\n"
 "This can improve boot detection for older BIOSes."
 msgstr ""
-"Ciptakan partisyen tambahan tersembunyi dan cuba melaraskan sempadan partisyen.\n"
+"Ciptakan partisi tambahan tersembunyi dan cuba melaraskan sempadan partisi.\n"
 "Ini boleh mempertingkatkan pengesanan boot untuk BIOS lama."
 
 #. • MSG_170
@@ -1096,10 +1096,11 @@ msgstr "Versi %d.%d (Build %d)"
 #. • MSG_176
 msgid "English translation: Pete Batard <mailto:pete@akeo.ie>"
 msgstr ""
-"Terjemahan Bahasa Malaysia:\\line\n"
+"Terjemahan Bahasa Melayu:\\line\n"
 "• Muhammad Aman <mailto:aman.tifli@gmail.com>\\line\n"
 "• VGPlayer <mailto:razman90a@yahoo.com.my>\\line\n"
-"• Mohamad Ikhwan bin Kori <mailto:ikhwankori@gmail.com>"
+"• Mohamad Ikhwan bin Kori <mailto:ikhwankori@gmail.com>\\line\n"
+"• Ilya Ignatev <mailto:ignatev.ilya.yt@gmail.com>"
 
 #. • MSG_177
 msgid "Report bugs or request enhancements at:"
@@ -1111,11 +1112,11 @@ msgstr "Hak cipta tambahan:"
 
 #. • MSG_179
 msgid "Update Policy:"
-msgstr "Polisi kemaskini:"
+msgstr "Polisi kemas kini:"
 
 #. • MSG_180
 msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
-msgstr "Jika anda pilih untuk membenarkan perisian ini menyemak untuk aplikasi versi baharu, anda bersetuju untuk membenarkan pelayan kami mengumpulkan maklumat berikut:"
+msgstr "Jika anda pilih untuk membenarkan perisian ini menyemak versi baharu, anda bersetuju untuk membenarkan pelayan kami mengumpulkan maklumat berikut:"
 
 #. • MSG_181
 msgid "Your operating system's architecture and version"
@@ -1131,7 +1132,7 @@ msgstr "Alamat IP anda"
 
 #. • MSG_184
 msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
-msgstr "Untuk tujuan menjana statistik penggunaan peribadi , kami mungkin menyimpan maklumat yang dikumpulkan, \\b untuk sekurang-kurangnya setahun\\b0 . Namun, kami tidak rela untuk mendedahkan maklumat ini kepada mana-mana pihak ketiga."
+msgstr "Untuk tujuan menjana statistik penggunaan peribadi, kami mungkin menyimpan maklumat yang dikumpulkan, \\b untuk sekurang-kurangnya setahun\\b0 . Namun, kami tidak rela untuk mendedahkan maklumat ini kepada mana-mana pihak ketiga."
 
 #. • MSG_185
 msgid "Update Process:"
@@ -1143,7 +1144,7 @@ msgid ""
 "Internet access is of course required when checking for updates."
 msgstr ""
 "Rufus tidak memasang atau menjalankan servis di latar belakang. Oleh itu, semakan kemas kini hanya dijalankan apabila aplikasi utama berjalan.\\line\n"
-"Akses internet diperlukan untuk menyemak untuk versi baru."
+"Akses internet diperlukan untuk menyemak versi baru."
 
 #. • MSG_187
 msgid "Invalid image for selected boot option"
@@ -1151,7 +1152,7 @@ msgstr "Imej tidak sah untuk pilihan boot yang dipilih"
 
 #. • MSG_188
 msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
-msgstr "Imej\ttidak serasi dengan pilihan boot yang dipilih. Sila gunakan imej lain atau pilih pilihan boot lain."
+msgstr "Imej tidak serasi dengan pilihan boot yang dipilih. Sila gunakan imej lain atau pilih pilihan boot lain."
 
 #. • MSG_189
 msgid "This ISO image is not compatible with the selected filesystem"
@@ -1205,7 +1206,7 @@ msgstr "Saiz sektor bukan standard dikesan"
 
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
-msgstr "'Windows To Go' hanya boleh dipasang dalam pemacu berpartisyen GPT jika ia mempunyai set atribut 'FIXED'. Pemacu semasa tidak dikesan sebagai 'FIXED'."
+msgstr "'Windows To Go' hanya boleh dipasang dalam pemacu berpartisi GPT jika ia mempunyai set atribut 'FIXED'. Pemacu semasa tidak dikesan sebagai 'FIXED'."
 
 #. • MSG_199
 msgid "This feature is not available on this platform."
@@ -1352,7 +1353,7 @@ msgstr "Menulis \"Rekod master boot\"..."
 
 #. • MSG_229
 msgid "Writing Partition Boot Record..."
-msgstr "Menulis \"Rekod boot partisyen\"..."
+msgstr "Menulis \"Rekod boot partisi\"..."
 
 #. • MSG_230
 msgid "Copying DOS files..."
@@ -1396,11 +1397,11 @@ msgstr "Blok rosak: Menguji dengan corak 0x%02X"
 #.
 #. Example: "Partitioning (MBR)..."
 msgid "Partitioning (%s)..."
-msgstr "Mempartisyenkan (%s)..."
+msgstr "Mempartisikan (%s)..."
 
 #. • MSG_239
 msgid "Deleting partitions (%s)..."
-msgstr "Memadam partisyen (%s)..."
+msgstr "Memadam partisi (%s)..."
 
 #. • MSG_240
 #.
@@ -1410,7 +1411,7 @@ msgid ""
 "\n"
 "The download will be deleted. Please check the log for more details."
 msgstr ""
-"Tandatangan untuk pengemaskinian telah dimuat turun tidak dapat disahkan. Ini boleh bermakna bahawa sistem anda dikonfigurasi dengan salah untuk pengesahan tandatangan atau menunjukkan fail yang dimuat turun berisi dengan virus\n"
+"Tandatangan untuk kemas kini yang telah dimuat turun tidak dapat disahkan. Ini boleh bermakna bahawa sistem anda dikonfigurasi dengan salah untuk pengesahan tandatangan atau menunjukkan fail yang dimuat turun berisi dengan virus.\n"
 "\n"
 "Fail yang dimuat turun akan dihapuskan. Sila periksa log untuk maklumat lanjut."
 
@@ -1567,7 +1568,7 @@ msgid ""
 "Please select the mode that you want to use to write this image:"
 msgstr ""
 "Imej yang anda telah pilih adalah imej 'ISOHybrid'. Ini bermaksud ia boleh ditulis sama ada dalam %s mod (salinan fail) atau %s mod (imej cakera).\n"
-"Rufus galakkan menggunakan mod %s, jadi anda selalu mempunyai akses penuh ke pemacu selepas menulisnya.\n"
+"Rufus menggalakkan menggunakan mod %s, jadi anda selalu mempunyai akses penuh ke pemacu selepas menulisnya.\n"
 "Bagaimanapun, jika anda menghadapi isu-isu semasa boot, anda boleh cuba menulis imej ini lagi dalam mod %s.\n"
 "\n"
 "Sila pilih mod yang anda mahu guna untuk menulis imej ini:"
@@ -1610,7 +1611,7 @@ msgstr "Tandatangan tidak sah"
 
 #. • MSG_284
 msgid "The downloaded executable is missing a digital signature."
-msgstr "'Executable' yang dimuat turun kehilangan tandatangan digital."
+msgstr "Fail boleh laku yang dimuat turun kehilangan tandatangan digital."
 
 #. • MSG_285
 msgid ""
@@ -1618,7 +1619,7 @@ msgid ""
 "This is not a signature we recognize and could indicate some form of malicious activity...\n"
 "Are you sure you want to run this file?"
 msgstr ""
-"'Executable' yang dimuat turun ditandatangani oleh '%s'.\n"
+"Fail boleh laku yang dimuat turun ditandatangani oleh '%s'.\n"
 "Ini bukannya tandatangan yang kami kenal dan boleh menunjukkan beberapa bentuk aktiviti berniat jahat...\n"
 "Adakah anda pasti anda mahu menjalankan fail ini?"
 
@@ -1672,9 +1673,9 @@ msgid ""
 "\n"
 "Are you sure you want to run it?"
 msgstr ""
-"Versi Rufus ini bukan dibuat oleh pemaju-pemaju rasmi Rufus. \n"
+"Versi Rufus ini bukan dihasilkan oleh pembangun rasmi.\n"
 "\n"
-"Adakan anda yakin ingin menggunakannya?"
+"Adakah anda yakin ingin menggunakannya?"
 
 #. • MSG_297
 msgid "Truncated ISO detected"
@@ -1690,7 +1691,7 @@ msgid ""
 msgstr ""
 "Saiz fail ISO yang anda pilih adalah tidak sama dengan saiz yang diisytiharkan oleh fail ISO ini. %s data telah hilang!\n"
 "\n"
-"Jika fail ini diperolehi dari intenet, anda sepatutnya muat turun semula fail ini dan sahkan bahawa tandatangan MD5 atau SHA adalah sama dengan versi yang rasmi.\n"
+"Jika fail ini diperolehi dari internet, anda sepatutnya muat turun semula fail ini dan sahkan bahawa tandatangan MD5 atau SHA adalah sama dengan versi yang rasmi.\n"
 "\n"
 "Anda boleh dapatkan MD5 atau SHA fail yang dipilih ini dengan menekan butang (✓). Kemudian anda perlu membandingkan dengan MD5 atau SHA daripada fail yang rasmi."
 
@@ -1706,7 +1707,7 @@ msgid ""
 msgstr ""
 "Rufus tidak dapat mengesahkan bahawa kemas kini yang dimuat turun adalah lebih baru daripada aplikasi yang dijalankan sekarang.\n"
 "\n"
-"Untuk mengelakkan daripada senario dimana PC diserang dengan virus, proses kemaskini telah dibatalkan dan fail yang telah dimuat turun akan dipadam. Sila semak log untuk maklumat lanjut."
+"Untuk mengelakkan daripada senario di mana PC diserang dengan virus, proses kemas kini telah dibatalkan dan fail yang telah dimuat turun akan dipadam. Sila semak log untuk maklumat lanjut."
 
 #. • MSG_301
 msgid "Show application settings"
@@ -1753,7 +1754,7 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"ISO yang anda pilih menggunakan UEFI dan cukup kecil untuk ditulis sebagai Partition Sistem EFI (ESP). Menulis kepada ESP, bukannya menulis kepada partition data generik yang menduduki keseluruhan cakera, boleh menjadi lebih baik untuk beberapa jenis pemasangan.\n"
+"ISO yang anda pilih menggunakan UEFI dan cukup kecil untuk ditulis sebagai Partisi Sistem EFI (ESP). Menulis kepada ESP, bukannya menulis kepada partisi data generik yang menduduki keseluruhan cakera, boleh menjadi lebih baik untuk beberapa jenis pemasangan.\n"
 "\n"
 "Sila pilih mod yang anda mahu gunakan untuk menulis imej ini:"
 
@@ -1795,7 +1796,7 @@ msgstr "Abaikan penanda but"
 
 #. • MSG_320
 msgid "Refreshing partition layout (%s)..."
-msgstr "Tataletak partition yang menyegarkan (%s)..."
+msgstr "Tataletak partisi yang menyegarkan (%s)..."
 
 #. • MSG_321
 msgid ""
@@ -1873,7 +1874,7 @@ msgstr "Kod Sumber: %s"
 
 #. • MSG_903
 msgid "ChangeLog: %s"
-msgstr ""
+msgstr "Log Perubahan: %s"
 
 #. • MSG_904
 #.
@@ -1883,14 +1884,14 @@ msgid ""
 "This application is licensed under the terms of the GNU Public License (GPL) version 3.\n"
 "See https://www.gnu.org/licenses/gpl-3.0.en.html for details."
 msgstr ""
-"Permohonan ini dilesenkan di bawah syarat-syarat Lesen Awam GNU (GPL) versi 3.\n"
+"Aplikasi ini dilesenkan di bawah syarat-syarat Lesen Awam GNU (GPL) versi 3.\n"
 "Lihat https://www.gnu.org/licenses/gpl-3.0.html untuk butiran."
 
 #. • MSG_905
 #.
 #. Keyword for "boot" will be used for search in the Windows Store
 msgid "Boot"
-msgstr ""
+msgstr "Boot"
 
 #. • MSG_910
 #.
@@ -1924,7 +1925,7 @@ msgstr "Buat pemacu pemasangan Windows 11 untuk PC yang tidak mempunyai TPM atau
 
 #. • MSG_917
 msgid "Create persistent Linux partitions"
-msgstr "Buat partition Linux berterusan"
+msgstr "Buat partisi Linux berterusan"
 
 #. • MSG_918
 msgid "Create VHD/DD images of the selected drive"
