@@ -14317,6 +14317,8 @@ t MSG_346 "Omejite Windows na S-način (NEZDRUŽLJIVO z obvodom spletnega račun
 t MSG_347 "Strokovni način"
 t MSG_348 "Ekstrahiranje arhivskih datotek: %s"
 t MSG_349 "Uporabite Rufus MBR"
+t MSG_355 "⚠TIHO⚠ izbrišite disk in namestite:"
+t MSG_356 "Izbrali ste možnost \"tihe\" namestitve sistema Windows.\n\nTo je napredna možnost, namenjena uporabnikom, ki želijo ustvariti namestitveni nosilec, ki med namestitvijo sistema Windows ne prikazuje pozivov in zato BREZ POGOJEV IZBRISE prvi zaznan disk v ciljnem sistemu. Če niste previdni, lahko uporaba te možnosti povzroči NEPOPRAVLJIVO IZGUBO PODATKOV!\n\nČe tega ne želite, izberite \"Ne\", da se vrnete nazaj in odkljukate to možnost.\nV nasprotnem primeru, če izberete \"Da\", se strinjate, da boste za morebitno izgubo podatkov v celoti odgovorni VI."
 t MSG_900 "Rufus je program za formatiranje in ustvarjanje zagonskih naprav USB."
 t MSG_901 "Uradna stran: %s"
 t MSG_902 "Šifra vira: %s"

@@ -1,4 +1,4 @@
-o Version 4.14 (2026.04.??)
+o Version 4.14 (2026.04.30)
     Windows User Experience improvements:
       - Add a "Quality of Life" option, to disable Teams, Outlook, Copilot and other Microsoft forced nuisances
       - Add a Silent installation option, that automatically, and WITHOUT PROMPT, installs Windows on the first detected disk
@@ -9,6 +9,7 @@ o Version 4.14 (2026.04.??)
     Improve the UEFI:NTFS partition label to make the install media more explicit during Windows Setup disk partitioning
     Improve support for Bazzite and other Fedora derivatives that don't follow EFI conventions
     Improve detection and exclusion of the new Bitdefender hidden VHDs
+    Improve reporting of GRUB and Isolinux MBRs
     Fix potential errors during creation of Windows To Go media, due to the use of new versions of bcdboot
     Fix errors with local accounts that start or end with whitespaces
 
