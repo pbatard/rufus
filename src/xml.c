@@ -67,8 +67,12 @@ struct ezxml_root {       // additional data for the root tag
 
 char *EZXML_NIL[] = { NULL }; // empty, null terminated array of strings
 
+// Maximum total bytes of entity-expanded text before we bail out.
+// Prevents exponential blowup from nested entity definitions (billion laughs).
+#define EZXML_MAX_ENTITY_EXPANSION  (8 * 1024 * 1024)  // 8 MB
+
 // what realloc should be doing all along
-static inline void* _realloc(void* ptr, unsigned int size) {
+static inline void* _realloc(void* ptr, size_t size) {
     void* old_ptr = ptr;
     ptr = realloc(ptr, size);
     if (ptr == NULL)
@@ -200,7 +204,9 @@ ezxml_t ezxml_err(ezxml_root_t root, char *s, const char *err, ...)
 char *ezxml_decode(char *s, char **ent, char t)
 {
     char *e, *r = s, *m = s;
-    long b, c, d, l;
+    long b, c, d;
+    size_t l;
+    size_t total_expanded = 0; // track total entity expansion to prevent XML bombs
 
     for (; *s; s++) { // normalize line endings
         while (*s == '\r') {
@@ -236,10 +242,19 @@ char *ezxml_decode(char *s, char **ent, char t)
                  b += 2); // find entity in entity list
 
             if (ent[b++]) { // found a match
-                if ((c = (long)strlen(ent[b])) - 1 > (e = strchr(s, ';')) - s) {
-                    l = (d = (long)(s - r)) + c + (long)(e ? strlen(e) : 0); // new length
+                c = (long)strlen(ent[b]);
+                total_expanded += (size_t)c;
+                if (total_expanded > EZXML_MAX_ENTITY_EXPANSION) {
+                    // Entity expansion limit exceeded - abort to prevent
+                    // exponential blowup (billion laughs / XML bomb).
+                    break;
+                }
+
+                if (c - 1 > (e = strchr(s, ';')) - s) {
+                    size_t d_off = (size_t)(s - r);
+                    l = d_off + (size_t)c + (e ? strlen(e) : 0); // new length
                     r = (r == m) ? strcpy(malloc(l), r) : _realloc(r, l);
-                    e = strchr((s = r + d), ';'); // fix up pointers
+                    e = strchr((s = r + d_off), ';'); // fix up pointers
                 }
                 if (!e) return r;
 
@@ -254,7 +269,7 @@ char *ezxml_decode(char *s, char **ent, char t)
 
     if (t == '*') { // normalize spaces for non-cdata attributes
         for (s = r; *s; s++) {
-            if ((l = (long)strspn(s, " "))) memmove(s, s + l, strlen(s + l) + 1);
+            if ((l = (size_t)strspn(s, " "))) memmove(s, s + l, strlen(s + l) + 1);
             while (*s && *s != ' ') s++;
         }
         if (--s >= r && *s == ' ') *s = '\0'; // trim any trailing space
