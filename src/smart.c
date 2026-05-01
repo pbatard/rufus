@@ -142,7 +142,7 @@ BOOL ScsiPassthroughDirect(HANDLE hPhysical, uint8_t* Cdb, size_t CdbLen, uint8_
 	sptdwb.sptd.DataBuffer = DataBuffer;
 	sptdwb.sptd.SenseInfoOffset = offsetof(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER, SenseBuf);
 
-	memcpy(sptdwb.sptd.Cdb, Cdb, CdbLen);
+	memcpy(sptdwb.sptd.Cdb, Cdb, min(CdbLen, sizeof(sptdwb.sptd.Cdb)));
 
 	r = DeviceIoControl(hPhysical, IOCTL_SCSI_PASS_THROUGH_DIRECT, &sptdwb, size, &sptdwb, size, &size, FALSE);
 	if ((r) && (sptdwb.sptd.ScsiStatus == 0)) {
