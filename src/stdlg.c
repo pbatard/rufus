@@ -1002,7 +1002,7 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 		// Set the default selection
 		for (i = 0, m = 1; i < nDialogItems; i++, m <<= 1)
 			Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i),
-				(selection_data.options->mask == 0 && i == 0) ||
+				(selection_data.options->style == BS_AUTORADIOBUTTON && selection_data.options->mask == 0 && i == 0) ||
 				(selection_data.options->mask != 0 && (m & selection_data.options->mask) ? BST_CHECKED : BST_UNCHECKED));
 		// Set the default state of the silent install option if available
 		if (selection_data.options->edition_index > 0 && selection_data.options->username_index > 0 &&
