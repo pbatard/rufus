@@ -70,6 +70,11 @@ badblocks_report report = { 0 };
 static float format_percent = 0.0f;
 static int task_number = 0, actual_fs_type;
 static unsigned int sec_buf_pos = 0;
+// Aligned bounce buffer state for compressed-image writes.
+static size_t sec_buf_size = 0;
+static uint64_t compressed_target_size = 0;
+static uint64_t compressed_output_pos = 0;
+static BOOL compressed_extra_data_ignored = FALSE;
 extern const int nb_steps[FS_MAX];
 extern const char* md5sum_name[2];
 extern uint32_t dur_mins, dur_secs;
@@ -1074,8 +1079,10 @@ BOOL WritePBR(HANDLE hLogicalVolume)
 
 static void update_progress(const uint64_t processed_bytes)
 {
-	UpdateProgressWithInfo(OP_FORMAT, MSG_261, processed_bytes, img_report.image_size);
-	uprint_progress(processed_bytes, img_report.image_size);
+	uint64_t progress_total = img_report.image_size;
+	uint64_t progress_value = MIN(processed_bytes, progress_total);
+	UpdateProgressWithInfo(OP_FORMAT, MSG_261, progress_value, progress_total);
+	uprint_progress(progress_value, progress_total);
 }
 
 // Some compressed images use streams that aren't multiple of the sector
@@ -1084,8 +1091,12 @@ static void update_progress(const uint64_t processed_bytes)
 static int sector_write(int fd, const void* _buf, unsigned int count)
 {
 	const uint8_t* buf = (const uint8_t*)_buf;
+	unsigned int original_count = count;
+	unsigned int accepted_count;
+	const uint8_t* full_sector_buf;
 	unsigned int sec_size = (unsigned int)SelectedDrive.SectorSize;
-	int written, fill_size = 0;
+	int v, written, fill_size = 0;
+	uint32_t sec_num, remaining, total_full_written = 0;
 
 	if (sec_size == 0)
 		sec_size = 512;
@@ -1094,10 +1105,34 @@ static int sector_write(int fd, const void* _buf, unsigned int count)
 	if_assert_fails(count <= 1 * GB)
 		return -1;
 
+	// Ignore any trailing data once we've reached the intended output size.
+	if (compressed_output_pos >= compressed_target_size) {
+		if (!compressed_extra_data_ignored) {
+			uprintf("Notice: Ignoring trailing compressed image data beyond target size (%s).",
+				SizeToHumanReadable(compressed_target_size, FALSE, FALSE));
+			compressed_extra_data_ignored = TRUE;
+		}
+		return (int)original_count;
+	}
+	// Clamp this callback to the remaining payload size.
+	accepted_count = (unsigned int)MIN((uint64_t)count, compressed_target_size - compressed_output_pos);
+	count = accepted_count;
+	if ((count != original_count) && (!compressed_extra_data_ignored)) {
+		uprintf("Notice: Ignoring trailing compressed image data beyond target size (%s).",
+			SizeToHumanReadable(compressed_target_size, FALSE, FALSE));
+		compressed_extra_data_ignored = TRUE;
+	}
+
 	// If we are on a sector boundary and count is multiple of the
 	// sector size, just issue a regular write
-	if ((sec_buf_pos == 0) && (count % sec_size == 0))
-		return _write(fd, buf, count);
+	if ((sec_buf_pos == 0) && (count % sec_size == 0)) {
+		written = _write(fd, buf, count);
+		if (written == (int)count)
+			compressed_output_pos += count;
+		if ((written == (int)count) && (count != original_count))
+			return (int)original_count;
+		return written;
+	}
 
 	// If we have an existing partial sector, fill and write it
 	if (sec_buf_pos > 0) {
@@ -1108,26 +1143,57 @@ static int sector_write(int fd, const void* _buf, unsigned int count)
 		sec_buf_pos += fill_size;
 		// If we don't have a full sector just buffer it for next call
 		if (sec_buf_pos < sec_size)
-			return (int)count;
+		{
+			compressed_output_pos += count;
+			return (int)original_count;
+		}
 		sec_buf_pos = 0;
 		written = _write(fd, sec_buf, sec_size);
-		if (written != sec_size)
+		if (written != sec_size) {
 			return written;
+		}
 	}
 
-	// Now write as many full sectors as we can
-	uint32_t sec_num = (count - fill_size) / sec_size;
-	written = _write(fd, &buf[fill_size], sec_num * sec_size);
-	if (written < 0)
-		return written;
-	if (written != sec_num * sec_size) {
-		// Detect overflows
-		// coverity[overflow]
-		int v = fill_size + written;
-		if_assert_fails(v >= fill_size)
+	sec_num = (count - fill_size) / sec_size;
+	full_sector_buf = &buf[fill_size];
+	remaining = sec_num * sec_size;
+	// Some raw-disk writes reject sector-sized transfers unless the source
+	// buffer is also sector-aligned, so bounce unaligned decompressor output
+	// through our aligned scratch buffer.
+	if ((remaining != 0) && (((uintptr_t)full_sector_buf % sec_size) != 0)) {
+		if_assert_fails(sec_buf_size >= sec_size)
 			return -1;
-		else
+		while (remaining != 0) {
+			// Keep each bounced write sector-sized and within the aligned buffer.
+			unsigned int chunk = (unsigned int)MIN((size_t)remaining, sec_buf_size - (sec_buf_size % sec_size));
+			if_assert_fails(chunk >= sec_size)
+				return -1;
+			memcpy(sec_buf, &full_sector_buf[total_full_written], chunk);
+			written = _write(fd, sec_buf, chunk);
+			if (written < 0) {
+				return (total_full_written == 0) ? written : fill_size + total_full_written;
+			}
+			if (written != chunk) {
+				v = fill_size + total_full_written + written;
+				if_assert_fails(v >= fill_size)
+					return -1;
+				return v;
+			}
+			total_full_written += written;
+			remaining -= written;
+		}
+		written = total_full_written;
+	} else {
+		written = _write(fd, full_sector_buf, remaining);
+		if (written < 0) {
+			return written;
+		}
+		if ((unsigned int)written != remaining) {
+			v = fill_size + written;
+			if_assert_fails(v >= fill_size)
+				return -1;
 			return v;
+		}
 	}
 	sec_buf_pos = count - fill_size - written;
 	if_assert_fails(sec_buf_pos < sec_size)
@@ -1136,6 +1202,9 @@ static int sector_write(int fd, const void* _buf, unsigned int count)
 	// Keep leftover bytes, if any, in the sector buffer
 	if (sec_buf_pos != 0)
 		memcpy(sec_buf, &buf[fill_size + written], sec_buf_pos);
+	compressed_output_pos += count;
+	if (count != original_count)
+		return (int)original_count;
 	return (int)count;
 }
 
@@ -1279,7 +1348,9 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 			ErrorStatus = RUFUS_ERROR(ERROR_OPEN_FAILED);
 			goto out;
 		}
-		sec_buf = (uint8_t*)_mm_malloc(SelectedDrive.SectorSize, SelectedDrive.SectorSize);
+		// Allocate an aligned bounce buffer for compressed-image writes.
+		sec_buf_size = MAX((size_t)SelectedDrive.SectorSize, (size_t)(256 * KB));
+		sec_buf = (uint8_t*)_mm_malloc(sec_buf_size, SelectedDrive.SectorSize);
 		if (sec_buf == NULL) {
 			ErrorStatus = RUFUS_ERROR(ERROR_NOT_ENOUGH_MEMORY);
 			uprintf("Could not allocate disk write buffer");
@@ -1287,6 +1358,14 @@ static BOOL WriteDrive(HANDLE hPhysicalDrive, BOOL bZeroDrive)
 		}
 		if_assert_fails((uintptr_t)sec_buf% SelectedDrive.SectorSize == 0)
 			goto out;
+		// img_report.projected_size falls back to the archive size when the real
+		// payload size is unknown, so only clamp when image analysis positively
+		// identified a VHD payload size.
+		compressed_target_size = (uint64_t)SelectedDrive.DiskSize;
+		if (img_report.is_vhd && (img_report.projected_size != 0))
+			compressed_target_size = MIN((uint64_t)SelectedDrive.DiskSize, img_report.projected_size);
+		compressed_output_pos = 0;
+		compressed_extra_data_ignored = FALSE;
 		sec_buf_pos = 0;
 		update_progress(0);
 		bled_init(256 * KB, uprintf, NULL, sector_write, update_progress, NULL, &ErrorStatus);
