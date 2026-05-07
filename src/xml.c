@@ -42,8 +42,9 @@
 #endif
 
 #define EZXML_NOMMAP
-#define EZXML_WS   "\t\r\n "  // whitespace
-#define EZXML_ERRL 256        // maximum error string length
+#define EZXML_WS     "\t\r\n "  // whitespace
+#define EZXML_ERRL   256        // maximum error string length
+#define EZXML_MAXEXP (8 * MB)   // max entity expansion (to prevent "billion laughs" blowup)
 
 #ifdef _MSC_VER
 #pragma warning(disable:6011)
@@ -68,7 +69,7 @@ struct ezxml_root {       // additional data for the root tag
 char *EZXML_NIL[] = { NULL }; // empty, null terminated array of strings
 
 // what realloc should be doing all along
-static inline void* _realloc(void* ptr, unsigned int size) {
+static inline void* _realloc(void* ptr, size_t size) {
     void* old_ptr = ptr;
     ptr = realloc(ptr, size);
     if (ptr == NULL)
@@ -200,7 +201,8 @@ ezxml_t ezxml_err(ezxml_root_t root, char *s, const char *err, ...)
 char *ezxml_decode(char *s, char **ent, char t)
 {
     char *e, *r = s, *m = s;
-    long b, c, d, l;
+    ssize_t b, c, d;
+    size_t l, o, x = 0;
 
     for (; *s; s++) { // normalize line endings
         while (*s == '\r') {
@@ -214,8 +216,8 @@ char *ezxml_decode(char *s, char **ent, char t)
 
         if (! *s) break;
         else if (t != 'c' && ! strncmp(s, "&#", 2)) { // character reference
-            if (s[2] == 'x') c = strtol(s + 3, &e, 16); // base 16
-            else c = strtol(s + 2, &e, 10); // base 10
+            if (s[2] == 'x') c = (ssize_t)strtoull(s + 3, &e, 16); // base 16
+            else c = (ssize_t)strtoull(s + 2, &e, 10); // base 10
             if (! c || *e != ';') { s++; continue; } // not a character ref
 
             if (c < 0x80) *(s++) = (char)c; // US-ASCII subset
@@ -236,10 +238,14 @@ char *ezxml_decode(char *s, char **ent, char t)
                  b += 2); // find entity in entity list
 
             if (ent[b++]) { // found a match
-                if ((c = (long)strlen(ent[b])) - 1 > (e = strchr(s, ';')) - s) {
-                    l = (d = (long)(s - r)) + c + (long)(e ? strlen(e) : 0); // new length
+                c = strlen(ent[b]);
+                x += c;
+                if (x > EZXML_MAXEXP) break;
+                if ((e = strchr(s, ';')) && c - 1 > e - s) {
+                    o = s - r;
+                    l = o + c + (e ? strlen(e) : 0); // new length
                     r = (r == m) ? strcpy(malloc(l), r) : _realloc(r, l);
-                    e = strchr((s = r + d), ';'); // fix up pointers
+                    e = strchr((s = r + o), ';'); // fix up pointers
                 }
                 if (!e) return r;
 
@@ -254,7 +260,7 @@ char *ezxml_decode(char *s, char **ent, char t)
 
     if (t == '*') { // normalize spaces for non-cdata attributes
         for (s = r; *s; s++) {
-            if ((l = (long)strspn(s, " "))) memmove(s, s + l, strlen(s + l) + 1);
+            if ((l = strspn(s, " "))) memmove(s, s + l, strlen(s + l) + 1);
             while (*s && *s != ' ') s++;
         }
         if (--s >= r && *s == ' ') *s = '\0'; // trim any trailing space
@@ -310,17 +316,25 @@ ezxml_t ezxml_close_tag(ezxml_root_t root, char *name, char *s)
 
 // checks for circular entity references, returns non-zero if no circular
 // references are found, zero otherwise
-int ezxml_ent_ok(char *name, char *s, char **ent)
+static int ezxml_ent_ok_r(char *name, char *s, char **ent, int depth)
 {
     int i;
+
+    if (depth <= 0) return 0; // treat deep nesting as circular
 
     for (; ; s++) {
         while (*s && *s != '&') s++; // find next entity reference
         if (! *s) return 1;
         if (! strncmp(s + 1, name, strlen(name))) return 0; // circular ref.
         for (i = 0; ent[i] && strncmp(ent[i], s + 1, strlen(ent[i])); i += 2);
-        if (ent[i] && ! ezxml_ent_ok(name, ent[i + 1], ent)) return 0;
+        if (ent[i] && ! ezxml_ent_ok_r(name, ent[i + 1], ent, depth - 1))
+            return 0;
     }
+}
+
+int ezxml_ent_ok(char *name, char *s, char **ent)
+{
+    return ezxml_ent_ok_r(name, s, ent, 20);
 }
 
 // called when the parser finds a processing instruction
