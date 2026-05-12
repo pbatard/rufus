@@ -3,7 +3,7 @@
 
 /* ADV information */
 #define ADV_SIZE	512	/* Total size */
-#define ADV_LEN		(ADV_SIZE-3*4)	/* Usable data size */
+#define ADV_LEN		(ADV_SIZE-3*4)	/* usable data size */
 
 extern unsigned char syslinux_adv[2 * ADV_SIZE];
 
