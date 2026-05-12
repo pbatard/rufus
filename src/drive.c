@@ -2000,7 +2000,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 		SelectedDrive.PartitionStyle = PARTITION_STYLE_GPT;
 		suprintf("Partition type: GPT, NB Partitions: %d", DriveLayout->PartitionCount);
 		suprintf("Disk GUID: %s", GuidToString(&DriveLayout->Gpt.DiskId, TRUE));
-		suprintf("Max parts: %d, Start Offset: %" PRIi64 ", Usable = %" PRIi64 " bytes",
+		suprintf("Max parts: %d, Start Offset: %" PRIi64 ", usable = %" PRIi64 " bytes",
 			DriveLayout->Gpt.MaxPartitionCount, DriveLayout->Gpt.StartingUsableOffset.QuadPart, DriveLayout->Gpt.UsableLength.QuadPart);
 		for (i = 0; i < DriveLayout->PartitionCount; i++) {
 			if (i < MAX_PARTITIONS) {
