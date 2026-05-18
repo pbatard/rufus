@@ -44,6 +44,7 @@
 #include "wimlib.h"
 #include "registry.h"
 #include "bled/bled.h"
+#include "bled/zstd.h"
 
 extern char* save_image_type;
 extern BOOL ignore_boot_marker, has_ffu_support;
@@ -76,6 +77,31 @@ static comp_assoc file_assoc[] = {
 	{ ".vhdx", BLED_COMPRESSION_MAX + 2 },
 };
 
+static uint64_t GetCompressedContentSize(const char* path, uint8_t type)
+{
+	FILE* fd;
+	uint8_t header[18];
+	size_t header_size;
+	unsigned long long content_size;
+
+	if (type != BLED_COMPRESSION_ZSTD)
+		return 0;
+
+	fd = fopenU(path, "rb");
+	if (fd == NULL)
+		return 0;
+	header_size = fread(header, 1, sizeof(header), fd);
+	fclose(fd);
+	if (header_size == 0)
+		return 0;
+
+	content_size = ZSTD_getFrameContentSize(header, header_size);
+	if ((content_size == ZSTD_CONTENTSIZE_ERROR) || (content_size == ZSTD_CONTENTSIZE_UNKNOWN))
+		return 0;
+
+	return (uint64_t)content_size;
+}
+
 // Look for a boot marker in the MBR area of the image
 static int8_t IsCompressedBootableImage(const char* path)
 {
@@ -85,6 +111,7 @@ static int8_t IsCompressedBootableImage(const char* path)
 	FILE* fd = NULL;
 	BOOL r = 0;
 	int64_t dc = 0;
+	uint64_t content_size;
 
 	img_report.compression_type = BLED_COMPRESSION_NONE;
 	if (safe_strlen(path) > 4)
@@ -145,6 +172,16 @@ static int8_t IsCompressedBootableImage(const char* path)
 			if (dc != MBR_SIZE) {
 				free(buf);
 				return FALSE;
+			}
+			if ((img_report.compression_type == BLED_COMPRESSION_ZSTD) &&
+				(safe_strlen(path) > safe_strlen(".vhd.zst")) &&
+				(safe_stricmp(&path[safe_strlen(path) - safe_strlen(".vhd.zst")], ".vhd.zst") == 0) &&
+				(buf[0x1FE] == 0x55) && (buf[0x1FF] == 0xAA)) {
+				content_size = GetCompressedContentSize(path, img_report.compression_type);
+				if (content_size > 512) {
+					img_report.is_vhd = TRUE;
+					img_report.projected_size = content_size - 512;
+				}
 			}
 			if ((buf[0x1FE] == 0x55) && (buf[0x1FF] == 0xAA))
 				r = 1;
