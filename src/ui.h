@@ -46,13 +46,16 @@
 #define DARKMODE_NORMAL_CONTROL_EDGE_COLOR			RGB(0x64, 0x64, 0x64)
 #define DARKMODE_HOT_CONTROL_EDGE_COLOR				RGB(0x9B, 0x9B, 0x9B)
 
-// Toolbar default style
+// Toolbar default style. TBSTYLE_TRANSPARENT lets the parent paint the
+// toolbar background, which is required for the Mica chroma-key compositor
+// to show through; without Mica it falls back to COLOR_3DFACE, matching the
+// previous appearance.
 #define TOOLBAR_STYLE						( WS_CHILD | WS_TABSTOP | WS_VISIBLE | \
 											  WS_CLIPSIBLINGS | WS_CLIPCHILDREN  | \
 											  CCS_NOPARENTALIGN | CCS_NODIVIDER  | \
 											  TBSTYLE_FLAT | TBSTYLE_BUTTON      | \
 											  TBSTYLE_AUTOSIZE | TBSTYLE_LIST    | \
-											  TBSTYLE_TOOLTIPS )
+											  TBSTYLE_TRANSPARENT | TBSTYLE_TOOLTIPS )
 
 // Types of update progress we report
 enum update_progress_type {

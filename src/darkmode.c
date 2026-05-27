@@ -41,6 +41,7 @@ PF_TYPE_DECL(WINAPI, VOID, FlushMenuThemes, (VOID));
 PF_TYPE_DECL(WINAPI, BOOL, SetWindowCompositionAttribute, (HWND, WINDOWCOMPOSITIONATTRIBDATA*));
 
 BOOL is_darkmode_enabled = FALSE;
+BOOL is_mica_enabled = FALSE;
 
 static COLORREF color_accent = TOOLBAR_ICON_COLOR;
 
@@ -202,6 +203,7 @@ void SetMicaBackdrop(HWND hWnd)
 	DwmExtendFrameIntoClientArea(hWnd, &margins);
 	if (!GetWindowSubclass(hWnd, MicaBackgroundSubclass, (UINT_PTR)MicaBackgroundSubclassID, NULL))
 		SetWindowSubclass(hWnd, MicaBackgroundSubclass, (UINT_PTR)MicaBackgroundSubclassID, 0);
+	is_mica_enabled = TRUE;
 	InvalidateRect(hWnd, NULL, TRUE);
 }
 
@@ -741,7 +743,10 @@ static LRESULT DarkToolBarNotifyCustomDraw(HWND hWnd, UINT uMsg, WPARAM wParam, 
 	case CDDS_PREPAINT:
 		if (IsAtLeastWin11())
 			roundness = 5;
-		FillRect(lpnmtbcd->nmcd.hdc, &lpnmtbcd->nmcd.rc, GetDlgBackgroundBrush());
+		// Use chroma-key black when Mica is active so the toolbar background
+		// participates in DWM's compositor instead of painting solid dark
+		FillRect(lpnmtbcd->nmcd.hdc, &lpnmtbcd->nmcd.rc,
+			is_mica_enabled ? (HBRUSH)GetStockObject(BLACK_BRUSH) : GetDlgBackgroundBrush());
 		return CDRF_NOTIFYITEMDRAW;
 
 	case CDDS_ITEMPREPAINT:

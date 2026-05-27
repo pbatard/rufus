@@ -23,6 +23,7 @@
 #include <uxtheme.h>
 
 extern BOOL is_darkmode_enabled;
+extern BOOL is_mica_enabled;
 
 typedef enum _WindowsBuild {
 	WIN10_1809 = 17763, // first build to support dark mode
