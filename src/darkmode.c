@@ -169,8 +169,20 @@ static LRESULT CALLBACK MicaBackgroundSubclass(HWND hWnd, UINT uMsg, WPARAM wPar
 
 	case WM_ERASEBKGND:
 		hdc = (HDC)wParam;
-		GetClientRect(hWnd, &rc);
-		FillRect(hdc, &rc, (HBRUSH)GetStockObject(BLACK_BRUSH));
+		GetClipBox(hdc, &rc);
+		// Use buffered paint with alpha=0 so DWM composites the region as
+		// truly transparent in a single atomic blit, instead of relying on
+		// chroma-key scanning of black pixels. Eliminates the visible flash
+		// during window resize.
+		HDC hdcBuffer = NULL;
+		HPAINTBUFFER hpb = BeginBufferedPaint(hdc, &rc, BPBF_TOPDOWNDIB, NULL, &hdcBuffer);
+		if (hpb != NULL && hdcBuffer != NULL) {
+			FillRect(hdcBuffer, &rc, (HBRUSH)GetStockObject(BLACK_BRUSH));
+			BufferedPaintSetAlpha(hpb, NULL, 0);
+			EndBufferedPaint(hpb, TRUE);
+		} else {
+			FillRect(hdc, &rc, (HBRUSH)GetStockObject(BLACK_BRUSH));
+		}
 		return TRUE;
 
 	case WM_CTLCOLORDLG:

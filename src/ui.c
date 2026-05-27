@@ -599,6 +599,11 @@ void ToggleAdvancedDeviceOptions(BOOL enable)
 	TBBUTTONINFO button_info;
 	int i, shift = advanced_device_section_height;
 
+	// Freeze redraw across all reposition/show-hide/resize calls so the user
+	// only sees the final state instead of intermediate frames; this is what
+	// removes the Mica chroma-key black flash during expand/collapse
+	SetWindowRedraw(hMainDialog, FALSE);
+
 	if (!enable)
 		shift = -shift;
 	section_vpos[1] += shift;
@@ -634,8 +639,8 @@ void ToggleAdvancedDeviceOptions(BOOL enable)
 	// Resize the main dialog and log window
 	ResizeDialogs(shift);
 
-	// Never hurts to force Windows' hand
-	InvalidateRect(hMainDialog, NULL, TRUE);
+	SetWindowRedraw(hMainDialog, TRUE);
+	RedrawWindow(hMainDialog, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
 }
 
 void ToggleAdvancedFormatOptions(BOOL enable)
@@ -644,6 +649,8 @@ void ToggleAdvancedFormatOptions(BOOL enable)
 	SIZE sz;
 	TBBUTTONINFO button_info;
 	int i, shift = advanced_format_section_height;
+
+	SetWindowRedraw(hMainDialog, FALSE);
 
 	if (!enable)
 		shift = -shift;
@@ -674,8 +681,8 @@ void ToggleAdvancedFormatOptions(BOOL enable)
 	// Resize the main dialog and log window
 	ResizeDialogs(shift);
 
-	// Never hurts to force Windows' hand
-	InvalidateRect(hMainDialog, NULL, TRUE);
+	SetWindowRedraw(hMainDialog, TRUE);
+	RedrawWindow(hMainDialog, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
 }
 
 // Toggle the display of persistence unit dropdown and resize the size field
