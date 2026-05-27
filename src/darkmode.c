@@ -209,9 +209,15 @@ void SetMicaBackdrop(HWND hWnd)
 	enum DWM_SYSTEMBACKDROP_TYPE backdrop = DWMSBT_MAINWINDOW;
 	MARGINS margins = { -1, -1, -1, -1 };
 
-	if (!IsAtLeastWin11_22H2())
+	if (!IsAtLeastWin11_22H2() || ReadSetting32(SETTING_MICA) != 1)
 		return;
 	DwmSetWindowAttribute(hWnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop, sizeof(backdrop));
+	// Light-mode GDI text is naturally dark; ClearType edges drift toward
+	// pure black which DWM's chroma-key then erases, making labels vanish.
+	// Skip the client-area extension in light mode so only the title bar
+	// gets Mica - matching how most first-party Win11 apps behave.
+	if (!is_darkmode_enabled)
+		return;
 	DwmExtendFrameIntoClientArea(hWnd, &margins);
 	if (!GetWindowSubclass(hWnd, MicaBackgroundSubclass, (UINT_PTR)MicaBackgroundSubclassID, NULL))
 		SetWindowSubclass(hWnd, MicaBackgroundSubclass, (UINT_PTR)MicaBackgroundSubclassID, 0);

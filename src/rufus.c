@@ -4221,6 +4221,17 @@ extern int TestHashes(void);
 				PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0);
 				continue;
 			}
+			// Ctrl-Alt-M => Toggle Mica backdrop and restart (Win11 22H2+ only).
+			// As with dark mode, once enabled, Rufus forces the mode until the
+			// registry key is removed manually.
+			if ((msg.message == WM_KEYDOWN) && (msg.wParam == 'M') &&
+				(GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {
+				WriteSetting32(SETTING_MICA, is_mica_enabled ? 0 : 1);
+				selected_fs = (int)ComboBox_GetCurItemData(hFileSystem);
+				relaunch = TRUE;
+				PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0);
+				continue;
+			}
 			// Ctrl-Alt-E => Expert Mode
 			if ((msg.message == WM_KEYDOWN) && (msg.wParam == 'E') &&
 				(GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {

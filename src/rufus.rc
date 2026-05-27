@@ -207,7 +207,7 @@ BEGIN
     LTEXT           "List 16",IDC_LIST_ITEMMAX,35,172,269,10,SS_PATHELLIPSIS | NOT WS_VISIBLE
 END
 
-IDD_UPDATE_POLICY DIALOGEX 0, 0, 287, 198
+IDD_UPDATE_POLICY DIALOGEX 0, 0, 287, 213
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Update policy and settings"
 FONT 9, "Segoe UI Symbol", 400, 0, 0x0
@@ -222,6 +222,7 @@ BEGIN
     GROUPBOX        "",IDS_CHECK_NOW_GRP,210,145,71,46
     PUSHBUTTON      "Check Now",IDC_CHECK_NOW,221,158,50,11
     DEFPUSHBUTTON   "Close",IDCANCEL,221,173,50,11,WS_GROUP
+    AUTOCHECKBOX    "Enable Mica backdrop (dark mode only, requires restart)",IDC_ENABLE_MICA,45,196,236,10
 END
 
 IDD_NEW_VERSION DIALOGEX 0, 0, 384, 268
@@ -430,7 +431,7 @@ BEGIN
             VALUE "FileDescription", "Rufus"
             VALUE "FileVersion", "4.15.2382"
             VALUE "InternalName", "Rufus"
-            VALUE "LegalCopyright", "© 2011-2026 Pete Batard (GPL v3)"
+            VALUE "LegalCopyright", "ï¿½ 2011-2026 Pete Batard (GPL v3)"
             VALUE "LegalTrademarks", "https://www.gnu.org/licenses/gpl-3.0.html"
             VALUE "OriginalFilename", "rufus-4.15.exe"
             VALUE "ProductName", "Rufus"

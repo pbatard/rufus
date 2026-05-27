@@ -1610,6 +1610,10 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, lmprintf(MSG_008)));
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, lmprintf(MSG_009)));
 		IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, (ReadSettingBool(SETTING_INCLUDE_BETAS) && is_x86_64) ? 0 : 1));
+		// Mica backdrop is only available on Windows 11 22H2+ (build 22621)
+		CheckDlgButton(hDlg, IDC_ENABLE_MICA,
+			(ReadSetting32(SETTING_MICA) == 1) ? BST_CHECKED : BST_UNCHECKED);
+		EnableWindow(GetDlgItem(hDlg, IDC_ENABLE_MICA), WindowsVersion.BuildNumber >= 22621);
 		hPolicy = GetDlgItem(hDlg, IDC_POLICY);
 		SendMessage(hPolicy, EM_AUTOURLDETECT, 1, 0);
 		static_sprintf(update_policy_text, update_policy, lmprintf(MSG_179|MSG_RTF),
@@ -1634,6 +1638,9 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			ResizeMoveCtrl(hDlg, hPolicy, 0, 0, 0, -dy, 1.0f);
 			for (i = 2; i < ARRAYSIZE(update_settings_reposition_ids); i++)
 				ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, update_settings_reposition_ids[i]), 0, -dy, 0, 0, 1.0f);
+			// Mica checkbox sits below the existing reposition list, so move
+			// it up by the same dy to stay aligned with the Settings group
+			ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_ENABLE_MICA), 0, -dy, 0, 0, 1.0f);
 		}
 		break;
 	case WM_COMMAND:
@@ -1657,6 +1664,12 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			WriteSettingBool(SETTING_INCLUDE_BETAS, ComboBox_GetCurSel(hBeta) == 0);
+			return (INT_PTR)TRUE;
+		case IDC_ENABLE_MICA:
+			if (HIWORD(wParam) != BN_CLICKED)
+				break;
+			WriteSetting32(SETTING_MICA,
+				(IsDlgButtonChecked(hDlg, IDC_ENABLE_MICA) == BST_CHECKED) ? 1 : 0);
 			return (INT_PTR)TRUE;
 		}
 		break;

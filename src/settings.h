@@ -34,6 +34,7 @@ extern char* ini_file;
 #define SETTING_COMM_CHECK                  "CommCheck64"
 #define SETTING_DEFAULT_THREAD_PRIORITY     "DefaultThreadPriority"
 #define SETTING_DARK_MODE                   "DarkMode"
+#define SETTING_MICA                        "Mica"
 #define SETTING_DISABLE_FAKE_DRIVES_CHECK   "DisableFakeDrivesCheck"
 #define SETTING_DISABLE_LGP                 "DisableLGP"
 #define SETTING_DISABLE_RUFUS_MBR           "DisableRufusMBR"

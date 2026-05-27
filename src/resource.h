@@ -193,6 +193,7 @@
 #define IDC_LIST_ITEM14                 1116
 #define IDC_LIST_ITEM15                 1117
 #define IDC_LIST_ITEMMAX                1118
+#define IDC_ENABLE_MICA                 1119
 #define IDS_DEVICE_TXT                  2000
 #define IDS_PARTITION_TYPE_TXT          2001
 #define IDS_FILE_SYSTEM_TXT             2002
