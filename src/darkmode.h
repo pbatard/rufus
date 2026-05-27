@@ -39,7 +39,8 @@ typedef enum _SubclassID {
 	StatusBarSubclassID,
 	ProgressBarSubclassID,
 	StaticTextSubclassID,
-	WindowCtlColorSubclassID
+	WindowCtlColorSubclassID,
+	MicaBackgroundSubclassID
 } SubclassID;
 
 typedef enum _PreferredAppMode {

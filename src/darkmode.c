@@ -149,17 +149,60 @@ void SetDarkTheme(HWND hWnd)
 	SetWindowTheme(hWnd, is_darkmode_enabled ? L"DarkMode_Explorer" : NULL, NULL);
 }
 
-// Mica system backdrop (Win11 22H2+). DWM blends desktop wallpaper through the
-// non-client area; the client area only shows Mica where the window does not
-// paint over it, so Rufus's solid dark/light brushes will limit the effect to
-// the title bar. Safe to call on any Windows version.
+// Extend Mica into the client area via DWM frame extension + chroma-key.
+// Within the extended frame, pure black (RGB 0,0,0) is composed as transparent
+// so DWM's Mica backdrop shows through. We fill every dialog/static background
+// with BLACK_BRUSH and draw text in TRANSPARENT mode so only glyph pixels
+// remain opaque over the Mica.
+static LRESULT CALLBACK MicaBackgroundSubclass(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,
+	UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
+	HDC hdc;
+	RECT rc;
+	(void)dwRefData;
+
+	switch (uMsg) {
+	case WM_NCDESTROY:
+		RemoveWindowSubclass(hWnd, MicaBackgroundSubclass, uIdSubclass);
+		break;
+
+	case WM_ERASEBKGND:
+		hdc = (HDC)wParam;
+		GetClientRect(hWnd, &rc);
+		FillRect(hdc, &rc, (HBRUSH)GetStockObject(BLACK_BRUSH));
+		return TRUE;
+
+	case WM_CTLCOLORDLG:
+		return (LRESULT)GetStockObject(BLACK_BRUSH);
+
+	case WM_CTLCOLORSTATIC:
+		hdc = (HDC)wParam;
+		SetBkMode(hdc, TRANSPARENT);
+		// Light-mode text uses RGB(1,1,1) instead of pure black to avoid being
+		// chroma-keyed transparent by DWM along with the background
+		SetTextColor(hdc, is_darkmode_enabled ? DARKMODE_NORMAL_TEXT_COLOR : RGB(1, 1, 1));
+		return (LRESULT)GetStockObject(BLACK_BRUSH);
+	}
+	return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+}
+
+// Mica system backdrop (Win11 22H2+). Combines DWMSBT_MAINWINDOW (Mica behind
+// the non-client area) with DwmExtendFrameIntoClientArea (-1 margins) so the
+// entire window participates in DWM's chroma-key compositing. The subclass
+// then paints black where Mica should show. Safe to call on any Windows
+// version - older builds return early before any DWM work.
 void SetMicaBackdrop(HWND hWnd)
 {
 	enum DWM_SYSTEMBACKDROP_TYPE backdrop = DWMSBT_MAINWINDOW;
+	MARGINS margins = { -1, -1, -1, -1 };
 
 	if (!IsAtLeastWin11_22H2())
 		return;
 	DwmSetWindowAttribute(hWnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop, sizeof(backdrop));
+	DwmExtendFrameIntoClientArea(hWnd, &margins);
+	if (!GetWindowSubclass(hWnd, MicaBackgroundSubclass, (UINT_PTR)MicaBackgroundSubclassID, NULL))
+		SetWindowSubclass(hWnd, MicaBackgroundSubclass, (UINT_PTR)MicaBackgroundSubclassID, 0);
+	InvalidateRect(hWnd, NULL, TRUE);
 }
 
 /*
