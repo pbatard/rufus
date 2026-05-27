@@ -67,6 +67,11 @@ static inline BOOL IsAtLeastWin11(void)
 	return IsAtLeastWin10Build(WIN11_21H2);
 }
 
+static inline BOOL IsAtLeastWin11_22H2(void)
+{
+	return IsAtLeastWin10Build(WIN11_22H2);
+}
+
 static inline BOOL IsHighContrast(void)
 {
 	HIGHCONTRASTW highContrast = { 0 };
@@ -142,6 +147,19 @@ out:
 void SetDarkTheme(HWND hWnd)
 {
 	SetWindowTheme(hWnd, is_darkmode_enabled ? L"DarkMode_Explorer" : NULL, NULL);
+}
+
+// Mica system backdrop (Win11 22H2+). DWM blends desktop wallpaper through the
+// non-client area; the client area only shows Mica where the window does not
+// paint over it, so Rufus's solid dark/light brushes will limit the effect to
+// the title bar. Safe to call on any Windows version.
+void SetMicaBackdrop(HWND hWnd)
+{
+	enum DWM_SYSTEMBACKDROP_TYPE backdrop = DWMSBT_MAINWINDOW;
+
+	if (!IsAtLeastWin11_22H2())
+		return;
+	DwmSetWindowAttribute(hWnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop, sizeof(backdrop));
 }
 
 /*

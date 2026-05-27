@@ -29,6 +29,7 @@ typedef enum _WindowsBuild {
 	WIN10_1903 = 18362,
 	WIN10_22H2 = 19045,
 	WIN11_21H2 = 22000,
+	WIN11_22H2 = 22621, // first build to support Mica via DWMWA_SYSTEMBACKDROP_TYPE
 } WindowsBuild;
 
 typedef enum _SubclassID {
@@ -121,6 +122,7 @@ typedef struct {
 BOOL GetDarkModeFromRegistry(void);
 void InitDarkMode(HWND hWnd);
 void SetDarkTitleBar(HWND hWnd);
+void SetMicaBackdrop(HWND hWnd);
 void SetDarkTheme(HWND hWnd);
 BOOL InitAccentColor(void);
 BOOL ChangeIconColor(HICON* hIcon, COLORREF newColor);
@@ -137,6 +139,8 @@ static __inline void SetDarkModeForDlg(HWND hWnd)
 		SetDarkTitleBar(hWnd);
 		SubclassCtlColor(hWnd);
 	}
+	// Mica follows the system theme and is independent of the app's dark mode setting
+	SetMicaBackdrop(hWnd);
 }
 
 static __inline void InitAndSetDarkModeForMainDlg(HWND hWnd)
@@ -147,5 +151,7 @@ static __inline void InitAndSetDarkModeForMainDlg(HWND hWnd)
 		InitAccentColor();
 		SetDarkModeForDlg(hWnd);
 		SubclassNotifyCustomDraw(hWnd);
+	} else {
+		SetMicaBackdrop(hWnd);
 	}
 }
