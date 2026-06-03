@@ -36,6 +36,7 @@
 
 #include "rufus.h"
 #include "ntdll.h"
+#include "winio.h"
 #include "missing.h"
 #include "settings.h"
 #include "resource.h"
@@ -614,28 +615,23 @@ HANDLE CreateFileWithTimeout(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwS
 BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWrite,
 	LPDWORD lpNumberOfBytesWritten, DWORD nNumRetries)
 {
-	DWORD nTry;
-	BOOL readFilePointer;
-	LARGE_INTEGER liFilePointer, liZero = { { 0,0 } };
-	DWORD NumberOfBytesWritten;
+	static const LARGE_INTEGER liZero = { { 0,0 } };
+	DWORD nTry, NumberOfBytesWritten;
+	NOW_THATS_WHAT_I_CALL_AN_OVERLAPPED overlapped = { 0 };
 
 	if (lpNumberOfBytesWritten == NULL)
 		lpNumberOfBytesWritten = &NumberOfBytesWritten;
 
-	// Need to get the current file pointer in case we need to retry
-	readFilePointer = SetFilePointerEx(hFile, liZero, &liFilePointer, FILE_CURRENT);
-	if (!readFilePointer)
-		uprintf("WARNING: Could not read file pointer %s", WindowsErrorString());
+	// Need to get the current file pointer for retry
+	if (!SetFilePointerEx(hFile, liZero, (PLARGE_INTEGER)&overlapped.Offset, FILE_CURRENT)) {
+		uprintf("ERROR: Could not set file offset %s", WindowsErrorString());
+		return FALSE;
+	}
 
 	if (nNumRetries == 0)
 		nNumRetries = 1;
-	for (nTry = 1; nTry <= nNumRetries; nTry++) {
-		// Need to rewind our file position on retry - if we can't even do that, just give up
-		if ((nTry > 1) && (!SetFilePointerEx(hFile, liFilePointer, NULL, FILE_BEGIN))) {
-			uprintf("Could not set file pointer - Aborting");
-			break;
-		}
-		if (WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, NULL)) {
+	for (nTry = 1; nTry <= nNumRetries && (HRESULT_CODE(ErrorStatus) != ERROR_CANCELLED); nTry++) {
+		if (WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, (LPOVERLAPPED)&overlapped)) {
 			LastWriteError = 0;
 			if (nNumberOfBytesToWrite == *lpNumberOfBytesWritten)
 				return TRUE;
@@ -648,18 +644,15 @@ BOOL WriteFileWithRetry(HANDLE hFile, LPCVOID lpBuffer, DWORD nNumberOfBytesToWr
 		} else {
 			uprintf("Write error %s", WindowsErrorString());
 			LastWriteError = RUFUS_ERROR(GetLastError());
-			if (LastWriteError == RUFUS_ERROR(ERROR_DISK_FULL))
+			if (LastWriteError == RUFUS_ERROR(ERROR_DISK_FULL) || HRESULT_CODE(ErrorStatus) == ERROR_CANCELLED)
 				break;
 		}
-		// If we can't reposition for the next run, just abort
-		if (!readFilePointer)
-			break;
 		if (nTry < nNumRetries) {
 			uprintf("Retrying in %d seconds...", WRITE_TIMEOUT / 1000);
 			Sleep(WRITE_TIMEOUT);
 		}
 	}
-	if (SCODE_CODE(GetLastError()) == ERROR_SUCCESS)
+	if (SCODE_CODE(GetLastError()) == ERROR_SUCCESS && HRESULT_CODE(ErrorStatus) != ERROR_CANCELLED)
 		SetLastError(RUFUS_ERROR(ERROR_WRITE_FAULT));
 	return FALSE;
 }
