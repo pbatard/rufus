@@ -347,9 +347,7 @@ char* CreateUnattendXml(int arch, int flags)
 					uprintf("WARNING: '%s' is not allowed as local account name - Option ignored", unattend_username);
 				} else if (unattend_username[0] != 0) {
 					char* org_username = safe_strdup(unattend_username);
-					// Per https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-shell-setup-useraccounts-localaccounts-localaccount-name
-					// Add '.' to the list because some folks also reported an issue with local accounts that have dots...
-					filter_chars(unattend_username, "/\\[]:|<>+=;,?*%@.", '_');
+					filter_chars(unattend_username, USERNAME_INVALID_CHARS, '_');
 					uprintf("• Use '%s' for local account name", unattend_username);
 					if (strcmp(org_username, unattend_username) != 0)
 						uprintf("WARNING: Local account name contained unallowed characters and has been sanitized");

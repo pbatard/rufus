@@ -845,8 +845,7 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 {
 	// This "Mooo" is designed to give us enough space for a regular username length
 	static const char* base_username = "MOOOOOOOOOOO";	// 🐮
-	// https://learn.microsoft.com/en-us/previous-versions/cc722458(v=technet.10)#user-name-policies
-	static const char* username_invalid_chars = "/\\[]:;|=,+*?<>\"";
+	static const char* username_invalid_chars = USERNAME_INVALID_CHARS;
 	// Prevent resizing
 	static const LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
 		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
