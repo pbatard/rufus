@@ -1454,7 +1454,6 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		}
 		UpdateImage(dont_display_image_name);
 		ToggleImageOptions();
-		EnableControls(TRUE, FALSE);
 		// Set Target and FS accordingly
 		if (img_report.is_iso || img_report.is_windows_img) {
 			IGNORE_RETVAL(ComboBox_SetCurSel(hBootType, image_index));
@@ -1467,6 +1466,7 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 			SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE_INTERNAL << 16) | IDC_FILE_SYSTEM,
 				ComboBox_GetCurSel(hFileSystem));
 		}
+		EnableControls(TRUE, FALSE);
 		// Lose the focus on the select ISO (but place it on Close)
 		SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)FALSE, 0);
 		// Lose the focus from Close and set it back to Start
