@@ -1578,7 +1578,7 @@ int sanitize_label(char* label)
 	// Remove all leading '-'
 	for (i = 0; i < len && label[i] == '-'; i++);
 	if (i != 0)
-		memmove(label, &label[i], len - i);
+		memmove(label, &label[i], len - i + 1);
 	len = strlen(label);
 	if (len <= 1)
 		return -1;
@@ -1603,7 +1603,7 @@ int sanitize_label(char* label)
 	for (i = 0; i < ARRAYSIZE(remove); i++) {
 		s = strstr(label, remove[i]);
 		if (s != NULL)
-			strcpy(s, &s[strlen(remove[i])]);
+			memmove(s, &s[strlen(remove[i])], strlen(&s[strlen(remove[i])]) + 1);
 	}
 
 	return 0;
