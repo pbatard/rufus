@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2026-03-17 22:51+0000\n"
-"PO-Revision-Date: 2026-03-17 23:06+0000\n"
+"POT-Creation-Date: 2026-06-15 16:25+0100\n"
+"PO-Revision-Date: 2026-06-15 23:57+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
@@ -1827,7 +1827,7 @@ msgid "Disable data collection (Skip privacy questions)"
 msgstr "Désactiver la collecte de données (Supprime les questions de confidentialité)"
 
 #. • MSG_332
-msgid "Prevent 'Windows To Go' from accessing internal disks"
+msgid "Prevent Windows To Go from accessing internal disks"
 msgstr "Empêcher 'Windows To Go' d'accéder aux disques internes"
 
 #. • MSG_333
@@ -1954,7 +1954,7 @@ msgstr ""
 
 #. • MSG_355
 msgid "⚠SILENTLY⚠ erase disk and install:"
-msgstr "Effacera le disque ⚠SILENCIEUSEMENT⚠ et installera:"
+msgstr "Effacer le disque ⚠SILENCIEUSEMENT⚠ et installer:"
 
 #. • MSG_356
 msgid ""
@@ -1962,15 +1962,13 @@ msgid ""
 "\n"
 "This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
 "\n"
-"If this is not what you want, please select 'No'to go back and uncheck the option.\n"
-"Otherwise, if you select 'Yes, you agree that the whole responsibility for any data loss will be entirely with YOU."
+"You MUST read and accept all of the following propositions to proceed:"
 msgstr ""
 "Vous avez sélectionné l'option d'installation de Windows dite \"silencieuse\".\n"
 "\n"
 "Il s'agit d'une option avancée, réservée à ceux qui souhaitent créer un média d'installation qui ne posera aucune question à l'utilisateur pendant l'installation de Windows et qui EFFACERA SANS CONDITION le premier disque détecté sur le système cible. Si vous n'y prenez pas garde, l'utilisation de cette option peut résulter en une PERTE DE DONNÉES IRREVERSIBLE !\n"
 "\n"
-"Si cela n'est pas ce que vous souhaitez veuillez sélectionner 'Non' pour revenir en arrière et désélectionner cette option.\n"
-"Sinon, si vous sélectionnez 'Oui', vous indiquez que toute perte de donnée en résultant sera entièrement VOTRE responsabilité."
+"VOUS DEVEZ lire et accepter toutes les propositions suivantes afin de procéder :"
 
 #. • MSG_358
 msgid "Unsupported image location"
@@ -2033,6 +2031,18 @@ msgstr "Améliorations \"Quality of Life\" : Désactive la plupart des fonctionn
 #. • MSG_371
 msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
 msgstr "Si vous utilisez cette option, veuillez-vous assurer que tous les disques, sauf celui sur lequel vous voulez installer Windows, est déconnecté du PC cible, et aussi que vous ne laisserez pas le média connecté sur un PC que vous ne voulez pas réinstaller."
+
+#. • MSG_372
+msgid "I WILL ensure that all disks, except the one I want to install Windows on, are disconnected."
+msgstr "JE VEILLERAI à déconnecter tout les disques, sauf celui où j'installe Windows."
+
+#. • MSG_373
+msgid "I WILL ensure that I don't leave this media plugged on a PC I do not plan to erase."
+msgstr "JE VEILLERAI de ne pas laisser ce media connecté à un PC que je ne compte pas effacer."
+
+#. • MSG_374
+msgid "I AGREE that any data loss resulting from the use of this option lies entirely with me."
+msgstr "J'ACCEPTE que toute perte de données liée à cette option m'incombe entièrement."
 
 #. • MSG_900
 #.

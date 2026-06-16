@@ -5,7 +5,14 @@ To edit a translation, please make sure to follow:
 https://github.com/pbatard/rufus/wiki/Localization#Editing_an_existing_translation
 Or simply download https://files.akeo.ie/pollock/pollock-1.8.exe and follow its directions.
 
-o v4.14 (2026.??.??)
+o v?.??
+  // NB: AI was used to update/translate the following 4 message, so please check for accuracy!
+  - *UPDATED*  MSG_356 "(...) If this is not what you want, please select 'No' (...)" -> "(...) You MUST read and accept all of the following propositions to proceed:"
+  - *NEW*      MSG_372 "I WILL ensure that all disks, except the one I want to install Windows on, are disconnected."
+  - *NEW*      MSG_373 "I WILL ensure that I don't leave this media plugged on a PC I do not plan to erase."
+  - *NEW*      MSG_374 "I AGREE that any data loss resulting from the use of this option lies entirely with me."
+
+o v4.14 (2026.04.30)
   // NB: I used Google translate to update the following message, so please check for accuracy!
   - *UPDATED*  MSG_337 "An additional file ('diskcopy.dll') must be downloaded from Microsoft to install MS-DOS:" -> "An additional file ('%s') must be downloaded from Microsoft to use this feature:"
   // From the WUE dialog with tooltip at MSG_369. Indicates that once installed, Windows will copy a file (SkuSiPolicy.p7b) to the EFI partition. KB5042562 refers to https://support.microsoft.com/kb/5042562.

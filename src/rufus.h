@@ -745,9 +745,12 @@ extern void StrArrayDestroy(StrArray* arr);
 #define IsStrArrayEmpty(arr) (arr.Index == 0)
 
 // Options for the custom selection dialog
+#define SELECTION_NEEDS_ALL_TO_PROCEED 1
+#define SELECTION_USE_WARNING_ICON     2
 typedef struct {
 	int style;
 	int mask;
+	int flags;
 	int username_index;
 	int edition_index;
 	int regional_index;

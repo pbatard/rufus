@@ -1719,16 +1719,16 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				selection.privacy_index = _log2(b) + 1;
 				MAP_BIT(UNATTEND_NO_DATA_COLLECTION);
 				if (IS_WINDOWS_11(img_report)) {
+					StrArrayAdd(&selection.choices, lmprintf(MSG_355), TRUE);
+					StrArrayAdd(&selection.tooltips, lmprintf(MSG_371), TRUE);
+					selection.edition_index = _log2(b) + 1;
+					MAP_BIT(UNATTEND_SILENT_INSTALL);
 					StrArrayAdd(&selection.choices, lmprintf(MSG_335), TRUE);
 					StrArrayAdd(&selection.tooltips, lmprintf(MSG_366), TRUE);
 					MAP_BIT(UNATTEND_DISABLE_BITLOCKER);
 					StrArrayAdd(&selection.choices, lmprintf(MSG_324), TRUE);
 					StrArrayAdd(&selection.tooltips, lmprintf(MSG_370), TRUE);
 					MAP_BIT(UNATTEND_QOL_ENHANCEMENTS);
-					StrArrayAdd(&selection.choices, lmprintf(MSG_355), TRUE);
-					StrArrayAdd(&selection.tooltips, lmprintf(MSG_371), TRUE);
-					selection.edition_index = _log2(b) + 1;
-					MAP_BIT(UNATTEND_SILENT_INSTALL);
 					if (img_report.win_version.build >= 26200) {
 						StrArrayAdd(&selection.choices, lmprintf(MSG_350), TRUE);
 						StrArrayAdd(&selection.tooltips, lmprintf(MSG_368), TRUE);

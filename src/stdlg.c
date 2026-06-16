@@ -58,12 +58,12 @@ static struct {
 	char **szDialogItem;
 	int nDialogItems;
 } list_data = { 0 };
-// The selection dialog can be re-entered so we need two data instances + an index
+// The selection dialog can be re-entered so we need multiple instances + an index
 static struct {
 	char* szMessageText;
 	char* szMessageTitle;
 	selection_dialog_options_t* options;
-} selection_data[2] = { 0 };
+} selection_data[3] = { 0 };
 static int s = -1;
 static struct {
 	HICON hMessageIcon;
@@ -838,6 +838,23 @@ static int GetComboBoxMinWidth(HWND hCtrl, StrArray* array)
 	return max_width + arrow_width + padding;
 }
 
+static VOID ShowSilentOption(HWND hDlg, int s, BOOL show)
+{
+	int i, dh;
+	RECT rc1, rc2;
+
+	ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->edition_index - 1), show ? SW_SHOW : SW_HIDE);
+	ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_EDITION), show ? SW_SHOW : SW_HIDE);
+	GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), &rc1);
+	GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), &rc2);
+	dh = show ? (rc2.top - rc1.top) : (rc1.top - rc2.top);
+	for (i = selection_data[s].options->edition_index; i < (int)selection_data[s].options->choices.Index; i++)
+		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, 0, 0, 1.0f);
+	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDOK), 0, dh, 0, 0, 1.0f);
+	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, dh, 0, 0, 1.0f);
+	ResizeMoveCtrl(hDlg, hDlg, 0, 0, 0, dh, 1.0f);
+}
+
 /*
  * Custom dialog for radio button selection dialog
  */
@@ -906,7 +923,8 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 			r = GetEditions(&edition_name, &edition_index);
 
 		// Change the default icon and set the text
-		Static_SetIcon(GetDlgItem(hDlg, IDC_SELECTION_ICON), LoadIcon(NULL, IDI_QUESTION));
+		Static_SetIcon(GetDlgItem(hDlg, IDC_SELECTION_ICON), (selection_data[s].options->flags & SELECTION_USE_WARNING_ICON) ?
+			FixWarningIcon(LoadIcon(NULL, IDI_WARNING)) : LoadIcon(NULL,  IDI_QUESTION));
 		SetWindowTextU(hDlg, selection_data[s].szMessageTitle);
 		SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), lmprintf(MSG_007));
 		SetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_TEXT), selection_data[s].szMessageText);
@@ -996,6 +1014,8 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDOK), dw, dh, 0, 0, 1.0f);
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), dw, dh, 0, 0, 1.0f);
 		ResizeButtonHeight(hDlg, IDOK);
+		if (selection_data[s].options->flags & SELECTION_NEEDS_ALL_TO_PROCEED)
+			EnableWindow(GetDlgItem(hDlg, IDOK), FALSE);
 		ResizeButtonHeight(hDlg, IDCANCEL);
 
 		// Set the default selection
@@ -1003,15 +1023,12 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 			Button_SetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i),
 				(selection_data[s].options->style == BS_AUTORADIOBUTTON && selection_data[s].options->mask == 0 && i == 0) ||
 				(selection_data[s].options->mask != 0 && (m & selection_data[s].options->mask) ? BST_CHECKED : BST_UNCHECKED));
-		// Set the default state of the silent install option if available
-		if (selection_data[s].options->edition_index > 0 && selection_data[s].options->username_index > 0 &&
-			selection_data[s].options->regional_index > 0 && selection_data[s].options->privacy_index > 0) {
-			// Should be the same condition as the one in WM_COMMAND
-			BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->username_index - 1)) &&
-				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->regional_index - 1)) &&
-				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->privacy_index - 1));
-			EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->edition_index - 1), enable);
-			EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_EDITION), enable);
+		// Hide the silent option if any of the username/regional/privacy checkboxes are unchecked
+		if (selection_data[s].options->edition_index > 0) {
+			if (!Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->username_index - 1)) ||
+				!Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->regional_index - 1)) ||
+				!Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->privacy_index - 1)))
+				ShowSilentOption(hDlg, s, FALSE);
 		}
 
 		SetDarkModeForChild(hDlg);
@@ -1037,35 +1054,47 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 			safe_delete_object(hDlgFont);
 		break;
 	case WM_COMMAND:
+		BOOL enable = TRUE;
 		BOOL silent_install_checked = FALSE;
 		WORD command = LOWORD(wParam);
 		if (command >= IDC_SELECTION_CHOICE1 && command < IDC_SELECTION_CHOICEMAX) {
-			// Check if local account + regional settings + data collection checkboxes are clicked and enable/disable the silent install option
-			if (selection_data[s].options->edition_index > 0 && selection_data[s].options->username_index > 0 &&
+			if (selection_data[s].options->flags & SELECTION_NEEDS_ALL_TO_PROCEED) {
+				// Check if all the currently displayed checkboxes are displayed to enable/disable the OK button
+				for (i = 0; i < nDialogItems; i++)
+					enable = enable && Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i));
+				EnableWindow(GetDlgItem(hDlg, IDOK), enable);
+			} else if (selection_data[s].options->edition_index > 0 && selection_data[s].options->username_index > 0 &&
+				// Check if local account + regional settings + data collection checkboxes are clicked and show/hide the silent install option
 				selection_data[s].options->edition_index > 0 && selection_data[s].options->regional_index > 0 &&
 					(command - IDC_SELECTION_CHOICE1 == selection_data[s].options->username_index - 1 ||
 					 command - IDC_SELECTION_CHOICE1 == selection_data[s].options->regional_index - 1 ||
 					 command - IDC_SELECTION_CHOICE1 == selection_data[s].options->privacy_index - 1)) {
-				BOOL enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->username_index - 1)) &&
+				enable = Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->username_index - 1)) &&
 					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->regional_index - 1)) &&
 					Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->privacy_index - 1));
 				hCtrl = GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->edition_index - 1);
-				if (!enable && IsWindowEnabled(hCtrl)) {
-					silent_install_checked = (Button_GetCheck(hCtrl) == BST_CHECKED);
-					Button_SetCheck(hCtrl, FALSE);
-				} else if (enable && !IsWindowEnabled(hCtrl)) {
-					Button_SetCheck(hCtrl, silent_install_checked);
-				}
-				EnableWindow(hCtrl, enable);
-				EnableWindow(GetDlgItem(hDlg, IDC_SELECTION_EDITION), enable);
+				if (enable && !IsWindowVisible(hCtrl))
+					ShowSilentOption(hDlg, s, TRUE);
+				else if (!enable && IsWindowVisible(hCtrl))
+					ShowSilentOption(hDlg, s, FALSE);
 			}
 		} else switch (LOWORD(wParam)) {
 		case IDOK:
 			// Produce a big scary warning if the silent install option was selected
 			if (selection_data[s].options->edition_index > 0 &&
-				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->edition_index - 1)) &&
-				Notification(MB_YESNO | MB_ICONWARNING, APPLICATION_NAME, lmprintf(MSG_356)) != IDYES)
-				break;
+				Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->edition_index - 1))) {
+				selection_dialog_options_t selection = { 0 };
+				selection.style = BS_AUTOCHECKBOX;
+				selection.flags = SELECTION_NEEDS_ALL_TO_PROCEED | SELECTION_USE_WARNING_ICON;
+				StrArrayCreate(&selection.choices, 4);
+				StrArrayAdd(&selection.choices, lmprintf(MSG_372), FALSE);
+				StrArrayAdd(&selection.choices, lmprintf(MSG_373), FALSE);
+				StrArrayAdd(&selection.choices, lmprintf(MSG_374), FALSE);
+				i = SelectionDialog(APPLICATION_NAME, lmprintf(MSG_356), &selection);
+				safe_free(selection.choices.String);
+				if (i != 7)
+					break;
+			}
 			for (r = 0, i = 0, m = 1; i < nDialogItems; i++, m <<= 1)
 				if (Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)) == BST_CHECKED)
 					r += m;
