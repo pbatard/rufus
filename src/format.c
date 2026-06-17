@@ -74,7 +74,7 @@ extern const int nb_steps[FS_MAX];
 extern const char* md5sum_name[2];
 extern uint32_t dur_mins, dur_secs;
 extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, fast_zeroing, enable_file_indexing;
-extern BOOL write_as_image, use_vds, write_as_esp, is_vds_available, has_ffu_support, use_rufus_mbr;
+extern BOOL write_as_image, use_vds, write_as_esp, is_vds_available, has_ffu_support, use_rufus_mbr, append_silent;
 extern char* archive_path;
 uint8_t *grub2_buf = NULL, *sec_buf = NULL;
 long grub2_len;
@@ -1781,6 +1781,9 @@ try_clear:
 	}
 
 	GetWindowTextU(hLabel, label, sizeof(label));
+	// Append a " (SILENT)" suffix to the label for fully unattended silent installation media.
+	if (append_silent && strstr(label, " (SILENT)") == NULL)
+		static_strcat(label, " (SILENT)");
 	if (fs_type < FS_EXT2)
 		ToValidLabel(label, (fs_type == FS_FAT16) || (fs_type == FS_FAT32) || (fs_type == FS_EXFAT));
 	ClusterSize = (DWORD)ComboBox_GetCurItemData(hClusterSize);

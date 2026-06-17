@@ -131,7 +131,7 @@ BOOL usb_debug, use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALS
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
 BOOL write_as_image = FALSE, write_as_esp = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE, save_image = FALSE;
 BOOL appstore_version = FALSE, is_vds_available = TRUE, persistent_log = FALSE, has_ffu_support = FALSE;
-BOOL expert_mode = FALSE, use_rufus_mbr = TRUE, bcdboot_supports_ex = FALSE;
+BOOL expert_mode = FALSE, use_rufus_mbr = TRUE, bcdboot_supports_ex = FALSE, append_silent = FALSE;
 float fScale = 1.0f;
 int dialog_showing = 0, selection_default = BT_IMAGE, persistence_unit_selection = -1, imop_win_sel = 0;
 int default_fs, fs_type, boot_type, partition_type, target_type;
@@ -1506,6 +1506,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	safe_free(grub2_buf);
+	append_silent = FALSE;
 
 	if (ComboBox_GetCurSel(hDeviceList) == CB_ERR)
 		goto out;
@@ -1751,6 +1752,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				if (i < 0)
 					goto out;
 				i = remap16(i, map, TRUE);
+				append_silent = (i & UNATTEND_SILENT_INSTALL);
 				unattend_xml_path = CreateUnattendXml(arch, i);
 				// Remember the user preferences for the current session.
 				unattend_xml_mask &= ~(remap16(UNATTEND_FULL_MASK, map, TRUE));
