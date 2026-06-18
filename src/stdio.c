@@ -967,9 +967,15 @@ static void print_extracted_file(const char* file_path, uint64_t file_length)
 	PrintStatus(0, MSG_000, str);	// MSG_000 is "%s"
 }
 
-static void update_progress(const uint64_t processed_bytes)
+static void update_progress(const int64_t processed_bytes)
 {
-	UpdateProgressWithInfo(OP_EXTRACT_ZIP, MSG_348, processed_bytes, archive_size);
+	static uint64_t total_bytes = 0;
+
+	if (processed_bytes < 0) {
+		total_bytes = -processed_bytes;
+		UpdateProgressWithInfo(OP_EXTRACT_ZIP, MSG_348, 0, total_bytes);
+	} else
+		UpdateProgressWithInfo(OP_EXTRACT_ZIP, MSG_348, processed_bytes, total_bytes);
 }
 
 // Extract content from a zip archive onto the designated directory or drive

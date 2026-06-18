@@ -94,7 +94,8 @@ am__v_AR_1 =
 libbled_a_AR = $(AR) $(ARFLAGS)
 libbled_a_LIBADD =
 am_libbled_a_OBJECTS = libbled_a-bled.$(OBJEXT) \
-	libbled_a-crc32.$(OBJEXT) libbled_a-data_align.$(OBJEXT) \
+	libbled_a-bled_size.$(OBJEXT) libbled_a-crc32.$(OBJEXT) \
+	libbled_a-data_align.$(OBJEXT) \
 	libbled_a-data_extract_all.$(OBJEXT) \
 	libbled_a-data_skip.$(OBJEXT) \
 	libbled_a-decompress_bunzip2.$(OBJEXT) \
@@ -276,7 +277,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libbled.a
-libbled_a_SOURCES = bled.c crc32.c data_align.c data_extract_all.c data_skip.c decompress_bunzip2.c \
+libbled_a_SOURCES = bled.c bled_size.c crc32.c data_align.c data_extract_all.c data_skip.c decompress_bunzip2.c \
   decompress_gunzip.c decompress_uncompress.c decompress_unlzma.c decompress_unxz.c decompress_unzip.c \
   decompress_unzstd.c decompress_vtsi.c filter_accept_all.c filter_accept_list.c filter_accept_reject_list.c \
   find_list_entry.c fse_decompress.c  header_list.c header_skip.c header_verbose_list.c huf_decompress.c \
@@ -345,6 +346,12 @@ libbled_a-bled.o: bled.c
 
 libbled_a-bled.obj: bled.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-bled.obj `if test -f 'bled.c'; then $(CYGPATH_W) 'bled.c'; else $(CYGPATH_W) '$(srcdir)/bled.c'; fi`
+
+libbled_a-bled_size.o: bled_size.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-bled_size.o `test -f 'bled_size.c' || echo '$(srcdir)/'`bled_size.c
+
+libbled_a-bled_size.obj: bled_size.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-bled_size.obj `if test -f 'bled_size.c'; then $(CYGPATH_W) 'bled_size.c'; else $(CYGPATH_W) '$(srcdir)/bled_size.c'; fi`
 
 libbled_a-crc32.o: crc32.c
 	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libbled_a_CFLAGS) $(CFLAGS) -c -o libbled_a-crc32.o `test -f 'crc32.c' || echo '$(srcdir)/'`crc32.c

@@ -49,7 +49,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_xz_stream(transformer_state_t *xstate
 		bb_error_msg_and_err("memory allocation error");
 
 	in = xmalloc(XZ_BUFSIZE);
-	out = xmalloc(XZ_BUFSIZE);
+	out = aligned_xmalloc(XZ_BUFSIZE);
 
 	b.in = in;
 	b.in_pos = 0;
@@ -129,7 +129,7 @@ out:
 err:
 	xz_dec_end(s);
 	free(in);
-	free(out);
+	aligned_free(out);
 	if (ret == XZ_OK)
 		return n;
 	else if (ret == XZ_BUF_FULL)

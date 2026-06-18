@@ -1532,7 +1532,6 @@ BOOL HashFile(const unsigned type, const char* path, uint8_t* hash)
 	HASH_CONTEXT hash_ctx = { {0} };
 	HANDLE h = INVALID_HANDLE_VALUE;
 	DWORD rs = 0;
-	uint64_t rb;
 	uint8_t buf[4096];
 
 	if ((type >= HASH_MAX) || (path == NULL) || (hash == NULL))
@@ -1546,7 +1545,7 @@ BOOL HashFile(const unsigned type, const char* path, uint8_t* hash)
 	}
 
 	hash_init[type](&hash_ctx);
-	for (rb = 0; ; rb += rs) {
+	while(1) {
 		CHECK_FOR_USER_CANCEL;
 		if (!ReadFile(h, buf, sizeof(buf), &rs, NULL)) {
 			ErrorStatus = RUFUS_ERROR(ERROR_READ_FAULT);

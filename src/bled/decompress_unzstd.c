@@ -27,8 +27,8 @@ unpack_zstd_stream_inner(transformer_state_t *xstate,
 	ZSTD_DStream *dctx, void *out_buff)
 {
 	const U32 zstd_magic = ZSTD_MAGIC;
-	const size_t in_allocsize = roundupsize(ZSTD_DStreamInSize(), 1024),
-		out_allocsize = roundupsize(ZSTD_DStreamOutSize(), 1024);
+	const size_t in_allocsize = roundupsize(ZSTD_DStreamInSize(), SECTOR_ALIGNMENT),
+		out_allocsize = roundupsize(ZSTD_DStreamOutSize(), SECTOR_ALIGNMENT);
 
 	IF_DESKTOP(long long int total = 0;)
 	size_t last_result = ZSTD_error_maxCode + 1;
@@ -132,10 +132,10 @@ unpack_zstd_stream(transformer_state_t *xstate)
 		bb_error_msg_and_die("memory exhausted");
 	}
 
-	out_buff = xmalloc(in_allocsize + out_allocsize);
+	out_buff = aligned_xmalloc(in_allocsize + out_allocsize);
 
 	result = unpack_zstd_stream_inner(xstate, dctx, out_buff);
-	free(out_buff);
+	aligned_free(out_buff);
 	ZSTD_freeDStream(dctx);
 	return result;
 }

@@ -768,7 +768,7 @@ unpack_bz2_stream(transformer_state_t *xstate)
 	if (check_signature16(xstate, BZIP2_MAGIC))
 		return -1;
 
-	outbuf = xmalloc(IOBUF_SIZE);
+	outbuf = aligned_xmalloc(IOBUF_SIZE);
 	if (outbuf == NULL)
 		return -1;
 	len = 0;
@@ -834,7 +834,7 @@ unpack_bz2_stream(transformer_state_t *xstate)
 
  release_mem:
 	dealloc_bunzip(bd);
-	free(outbuf);
+	aligned_free(outbuf);
 
 	return i ? i : IF_DESKTOP(total_written) + 0;
 }

@@ -838,17 +838,17 @@ static int GetComboBoxMinWidth(HWND hCtrl, StrArray* array)
 	return max_width + arrow_width + padding;
 }
 
-static VOID ShowSilentOption(HWND hDlg, int s, BOOL show)
+static VOID ShowSilentOption(HWND hDlg, int index, BOOL show)
 {
 	int i, dh;
 	RECT rc1, rc2;
 
-	ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[s].options->edition_index - 1), show ? SW_SHOW : SW_HIDE);
+	ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + selection_data[index].options->edition_index - 1), show ? SW_SHOW : SW_HIDE);
 	ShowWindow(GetDlgItem(hDlg, IDC_SELECTION_EDITION), show ? SW_SHOW : SW_HIDE);
 	GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1), &rc1);
 	GetWindowRect(GetDlgItem(hDlg, IDC_SELECTION_CHOICE2), &rc2);
 	dh = show ? (rc2.top - rc1.top) : (rc1.top - rc2.top);
-	for (i = selection_data[s].options->edition_index; i < (int)selection_data[s].options->choices.Index; i++)
+	for (i = selection_data[index].options->edition_index; i < (int)selection_data[index].options->choices.Index; i++)
 		ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i), 0, dh, 0, 0, 1.0f);
 	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDOK), 0, dh, 0, 0, 1.0f);
 	ResizeMoveCtrl(hDlg, GetDlgItem(hDlg, IDCANCEL), 0, dh, 0, 0, 1.0f);
@@ -1055,7 +1055,6 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 		break;
 	case WM_COMMAND:
 		BOOL enable = TRUE;
-		BOOL silent_install_checked = FALSE;
 		WORD command = LOWORD(wParam);
 		if (command >= IDC_SELECTION_CHOICE1 && command < IDC_SELECTION_CHOICEMAX) {
 			if (selection_data[s].options->flags & SELECTION_NEEDS_ALL_TO_PROCEED) {
@@ -1417,12 +1416,11 @@ void DestroyTooltip(HWND hControl)
 
 void DestroyAllTooltips(void)
 {
-	int i, j;
+	int i;
 
-	for (i = 0, j = 0; i < MAX_TOOLTIPS; i++) {
+	for (i = 0; i < MAX_TOOLTIPS; i++) {
 		if (ttlist[i].hTip == NULL)
 			continue;
-		j++;
 		DestroyWindow(ttlist[i].hTip);
 		safe_free(ttlist[i].wstring);
 		ttlist[i].original_proc = NULL;

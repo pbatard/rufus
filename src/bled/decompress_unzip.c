@@ -399,7 +399,7 @@ static void unzip_set_xstate(transformer_state_t* xstate, zip_header_t* zip)
 	zip64_t* zip64;
 
 	/* Set the default sizes for non ZIP64 content */
-	xstate->dst_size = zip->fmt.ucmpsize;
+	xstate->bytes_total = zip->fmt.ucmpsize;
 	xstate->bytes_in = zip->fmt.cmpsize;
 
 	/* Set the filename */
@@ -440,7 +440,7 @@ static void unzip_set_xstate(transformer_state_t* xstate, zip_header_t* zip)
 					zip64->fmt.cmpsize,
 					zip64->fmt.ucmpsize
 				);
-				xstate->dst_size = zip64->fmt.ucmpsize;
+				xstate->bytes_total = zip64->fmt.ucmpsize;
 				xstate->bytes_in = zip64->fmt.cmpsize;
 			}
 		}
@@ -457,10 +457,10 @@ unzip_extract(zip_header_t* zip, transformer_state_t* xstate)
 
 	if (zip->fmt.method == 0) {
 		/* Method 0 - stored (not compressed) */
-		if (xstate->dst_size) {
-			bb_copyfd_exact_size(xstate->src_fd, xstate->dst_fd, xstate->dst_size);
+		if (xstate->bytes_total) {
+			bb_copyfd_exact_size(xstate->src_fd, xstate->dst_fd, xstate->bytes_total);
 		}
-		return xstate->dst_size;
+		return xstate->bytes_total;
 	}
 
 	if (zip->fmt.method == 8) {
@@ -507,7 +507,7 @@ unzip_extract(zip_header_t* zip, transformer_state_t* xstate)
 	}
 
 	/* Validate decompression - size */
-	if (n != -ENOSPC && xstate->dst_size != xstate->bytes_out) {
+	if (n != -ENOSPC && xstate->bytes_total != xstate->bytes_out) {
 		/* Don't die. Who knows, maybe len calculation
 		 * was botched somewhere. After all, crc matched! */
 		bb_simple_error_msg("bad length");

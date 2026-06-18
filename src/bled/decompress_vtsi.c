@@ -62,7 +62,7 @@ typedef struct {
 
 extern int __static_assert__[sizeof(VTSI_FOOTER) == 512 ? 1 : -1];
 
-#define MAX_READ_BUF	(8 * 1024 * 1024)
+#define MAX_READ_BUF	BB_BUFSIZE
 
 static int check_vtsi_footer(VTSI_FOOTER* footer)
 {
@@ -140,13 +140,13 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_vtsi_stream(transformer_state_t* xsta
 		goto err;
 
 	if (xstate->mem_output_size_max == 512)
-		max_buflen = 1024;
+		max_buflen = SECTOR_ALIGNMENT;
 
-	segment = xmalloc(footer.segment_num * sizeof(VTSI_SEGMENT) + max_buflen);
-	if (!segment)
+	buf = aligned_xmalloc(max_buflen + footer.segment_num * sizeof(VTSI_SEGMENT));
+	if (!buf)
 		bb_error_msg_and_err("Failed to alloc segment buffer %u", footer.segment_num);
 
-	buf = (uint8_t*)segment + footer.segment_num * sizeof(VTSI_SEGMENT);
+	segment = (VTSI_SEGMENT*)&buf[max_buflen];
 
 	lseek(src_fd, footer.segment_offset, SEEK_SET);
 	safe_read(src_fd, segment, footer.segment_num * sizeof(VTSI_SEGMENT));
@@ -182,8 +182,7 @@ IF_DESKTOP(long long) int FAST_FUNC unpack_vtsi_stream(transformer_state_t* xsta
 	n = tot;
 
 err:
-	if (segment)
-		free(segment);
+	aligned_free(buf);
 
 	return n;
 }

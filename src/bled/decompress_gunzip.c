@@ -1012,7 +1012,7 @@ inflate_unzip_internal(STATE_PARAM transformer_state_t *xstate)
 	ssize_t nwrote;
 
 	/* Allocate all global buffers (for DYN_ALLOC option) */
-	gunzip_window = xzalloc(GUNZIP_WSIZE);
+	gunzip_window = aligned_xzalloc(GUNZIP_WSIZE);
 	gunzip_outbuf_count = 0;
 	gunzip_bytes_out = 0;
 	gunzip_src_fd = xstate->src_fd;
@@ -1068,7 +1068,7 @@ inflate_unzip_internal(STATE_PARAM transformer_state_t *xstate)
 	}
  ret:
 	/* Cleanup */
-	free(gunzip_window);
+	aligned_free(gunzip_window);
 	free(gunzip_crc_table);
 	return n;
 }

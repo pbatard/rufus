@@ -117,6 +117,9 @@
     <ClCompile Include="..\src\bled\zstd_ddict.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\bled\bled_size.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\bled\bb_archive.h">

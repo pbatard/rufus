@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\bled\bled.c" />
+    <ClCompile Include="..\src\bled\bled_size.c" />
     <ClCompile Include="..\src\bled\crc32.c" />
     <ClCompile Include="..\src\bled\data_align.c" />
     <ClCompile Include="..\src\bled\data_extract_all.c" />

@@ -1,7 +1,7 @@
 /*
  * Bled (Base Library for Easy Decompression)
  *
- * Copyright © 2014-2024 Pete Batard <pete@akeo.ie>
+ * Copyright © 2014-2026 Pete Batard <pete@akeo.ie>
  *
  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  */
@@ -16,7 +16,7 @@
 #endif
 
 typedef void (*printf_t) (const char* format, ...);
-typedef void (*progress_t) (const uint64_t read_bytes);
+typedef void (*progress_t) (const int64_t read_bytes);
 typedef int (*read_t)(int fd, void* buf, unsigned int count);
 typedef int (*write_t)(int fd, const void* buf, unsigned int count);
 typedef void (*switch_t)(const char* filename, const uint64_t size);
@@ -34,6 +34,9 @@ typedef enum {
 	BLED_COMPRESSION_ZSTD,		// .zst
 	BLED_COMPRESSION_MAX
 } bled_compression_type;
+
+/* (Where possible) get the uncompressed size of file 'src', compressed using 'type' */
+int64_t bled_get_uncompressed_size(const char* src, int type);
 
 /* Uncompress file 'src', compressed using 'type', to file 'dst' */
 int64_t bled_uncompress(const char* src, const char* dst, int type);

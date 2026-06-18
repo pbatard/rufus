@@ -263,8 +263,8 @@ unpack_lzma_stream(transformer_state_t *xstate)
 	if (header.dict_size == 0)
 		header.dict_size++;
 
-	buffer_size = (uint32_t)MIN(header.dst_size, header.dict_size);
-	buffer = xmalloc(buffer_size);
+	buffer_size = (uint32_t)MAX(SECTOR_ALIGNMENT, MIN(header.dst_size, header.dict_size));
+	buffer = aligned_xmalloc(buffer_size);
 
 	{
 		int num_probs;
@@ -528,7 +528,7 @@ unpack_lzma_stream(transformer_state_t *xstate)
 		}
 		rc_free(rc);
 		free(p);
-		free(buffer);
+		aligned_free(buffer);
 		return total_written;
 	}
 }

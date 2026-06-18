@@ -235,17 +235,19 @@ typedef struct transformer_state_t {
 	int      dst_fd;
 	const char *dst_dir;            /* if non-NULL, extract to dir */
 	char     *dst_name;
-	uint64_t dst_size;
+	int64_t  src_size;              /* size of the source archive */
+	int64_t  dst_size;              /* size of the uncompressed data, if available */
 	size_t   mem_output_size_max;   /* if non-zero, decompress to RAM instead of fd */
 	size_t   mem_output_size;
 	char     *mem_output_buf;
 
+	uint64_t bytes_total;           /* used in unzip code only, for directory extraction */
 	uint64_t bytes_out;
-	uint64_t bytes_in;  /* used in unzip code only: needs to know packed size */
+	uint64_t bytes_in;              /* used in unzip code only: needs to know packed size */
 	uint32_t crc32;
-	time_t   mtime;     /* gunzip code may set this on exit */
+	time_t   mtime;                 /* gunzip code may set this on exit */
 
-	union {             /* if we read magic, it's saved here */
+	union {                         /* if we read magic, it's saved here */
 		uint8_t b[8];
 		uint16_t b16[4];
 		uint32_t b32[2];
@@ -276,7 +278,7 @@ static inline int transformer_switch_file(transformer_state_t* xstate)
 			last_slash = i;
 	}
 	if (bled_switch != NULL)
-		bled_switch(dst, xstate->dst_size);
+		bled_switch(dst, xstate->bytes_total);
 	dst[last_slash] = 0;
 	bb_make_directory(dst, 0, 0);
 	dst[last_slash] = '/';

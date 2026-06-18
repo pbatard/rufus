@@ -104,7 +104,7 @@ unpack_Z_stream(transformer_state_t *xstate)
 		return -1;
 
 	inbuf = xzalloc(IBUFSIZ + 64);
-	outbuf = xzalloc(OBUFSIZ + 2048);
+	outbuf = aligned_xzalloc(OBUFSIZ + 2048);
 	htab = xzalloc(HSIZE);  /* wasn't zeroed out before, maybe can xmalloc? */
 	codetab = xzalloc(HSIZE * sizeof(codetab[0]));
 
@@ -311,7 +311,7 @@ unpack_Z_stream(transformer_state_t *xstate)
 	retval = IF_DESKTOP(total_written) + 0;
  err:
 	free(inbuf);
-	free(outbuf);
+	aligned_free(outbuf);
 	free(htab);
 	free(codetab);
 	return retval;
