@@ -7,10 +7,10 @@ This image, which can be mounted as a FAT file system or opened in 7-zip,
 contains the following data:
 
 o Secure Boot signed NTFS UEFI drivers, derived from ntfs-3g [1].
-  These drivers are the exact same as the read-only binaries from release 1.8,
+  These drivers are the exact same as the read-only binaries from release 1.9,
   except for the addition of Microsoft's Secure Boot signature.
 
-o Non Secure Boot signed exFAT (and ARM NTFS) UEFI drivers from EfiFs [2].
+o Non Secure Boot signed exFAT (and ARM/RISC NTFS) UEFI drivers from EfiFs [2].
   These drivers are the exact same as the binaries from EfiFs release 1.12 but,
   because they are licensed under GPLv3, cannot be Secure Boot signed.
 
