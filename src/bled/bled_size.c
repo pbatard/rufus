@@ -15,8 +15,6 @@
 #include "bb_archive.h"
 #include "bled.h"
 
-typedef int64_t(*get_uncompressed_size_t)(int fd);
-
 /* -------------------------------------------------------------------------
  * Internal helpers
  * ---------------------------------------------------------------------- */
@@ -702,6 +700,61 @@ static int64_t get_uncompress_size_zstd(int fd)
 	return (int64_t)size;
 }
 
+#if defined(BLED_EXPECT_DISK_IMAGE)
+extern progress_t bled_progress;
+extern unpacker_t unpacker[BLED_COMPRESSION_MAX];
+int64_t get_uncompressed_size_from_disk_image(int fd, int type)
+{
+	progress_t old_bled_progress = bled_progress;
+	int64_t size = DECOMP_SIZE_UNKNOWN;
+	uint8_t buf[8192];
+	transformer_state_t xstate;
+
+	bled_progress = NULL;	/* Can't have progress on this operation */
+	init_transformer_state(&xstate);
+	xstate.src_fd = fd;
+	xstate.dst_fd = -1;
+	xstate.mem_output_buf = buf;
+	xstate.mem_output_size = 0;
+	xstate.mem_output_size_max = sizeof(buf);
+
+	if (setjmp(bb_error_jmp))
+		goto out;
+
+	lseek(fd, 0, SEEK_SET);
+	size = unpacker[type](&xstate);
+	if (size != sizeof(buf) || buf[0x1fe] != 0x55 || buf[0x1ff] != 0xaa) {
+		size = DECOMP_SIZE_UNKNOWN;
+		goto out;
+	}
+	if (buf[0x1c2] == 0xee) {
+		/* Protective EFI MBR => look for the primary GPT, which'll also give us the sector size */
+		if (memcmp("EFI PART", &buf[0x200], 8) == 0) {
+			/* The address of the backup GPT is assumed to be the last LBA for the disk */
+			size = get_le64(&buf[0x220]) * 512;
+			goto out;
+		}
+		if (memcmp("EFI PART", &buf[0x1000], 8) == 0) {
+			size = get_le64(&buf[0x1020]) * 8192;
+			goto out;
+		}
+	}
+	if (buf[0x1be] == 0x80) {
+		/* Regular bootable MBR => compute the max LBA (using primary partitions only) */
+		uint32_t max_lba = 1;
+		for (int i = 0; i < 4; i++)
+			max_lba = MAX(max_lba, get_le32(&buf[0x1be + 0x10 * i + 8]) + get_le32(&buf[0x1be + 0x10 * i + 0xc]));
+		size = max_lba * 512;	/* assume 512-byte sectors for anything MBR based */
+		if (size < 8192)
+			size = DECOMP_SIZE_UNKNOWN;
+	}
+
+out:
+	bled_progress = old_bled_progress;
+	return size;
+}
+#endif
+
 static get_uncompressed_size_t _get_uncompressed_size[BLED_COMPRESSION_MAX] = {
 	get_uncompress_size_none,
 	get_uncompress_size_zip,
@@ -718,13 +771,11 @@ static get_uncompressed_size_t _get_uncompressed_size[BLED_COMPRESSION_MAX] = {
 /* Get the decompressed size of file 'fd', compressed using 'type' */
 int64_t get_uncompressed_size(int fd, int type)
 {
-	int64_t size = -1;
-
-	if ((type < 0) || (type >= BLED_COMPRESSION_MAX)) {
-		bb_error_msg("Unsupported compression format");
-		return -1;
-	}
-	size = _get_uncompressed_size[type](fd);
+	int64_t size = _get_uncompressed_size[type](fd);
+#if defined(BLED_EXPECT_DISK_IMAGE)
+	if (size < 0)
+		size = get_uncompressed_size_from_disk_image(fd, type);
+#endif
 
 	/* Make sure to reset our file pointer */
 	lseek(fd, 0, SEEK_SET);

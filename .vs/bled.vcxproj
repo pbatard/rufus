@@ -162,7 +162,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLED_EXPECT_DISK_IMAGE;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
@@ -181,7 +181,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLED_EXPECT_DISK_IMAGE;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -200,7 +200,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLED_EXPECT_DISK_IMAGE;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
@@ -217,7 +217,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLED_EXPECT_DISK_IMAGE;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
@@ -238,7 +238,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLED_EXPECT_DISK_IMAGE;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -257,7 +257,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BLED_EXPECT_DISK_IMAGE;_OFF_T_DEFINED;_off_t=__int64;off_t=_off_t;_FILE_OFFSET_BITS=64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>..\src</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>

@@ -7,4 +7,4 @@ libbled_a_SOURCES = bled.c bled_size.c crc32.c data_align.c data_extract_all.c d
   init_handle.c open_transformer.c seek_by_jump.c seek_by_read.c xz_dec_bcj.c xz_dec_lzma2.c xz_dec_stream.c \
   xxhash.c zstd_common.c zstd_decompress.c zstd_decompress_block.c zstd_ddict.c zstd_entropy_common.c \
   zstd_error_private.c
-libbled_a_CFLAGS = $(AM_CFLAGS) -I$(srcdir)/.. -Wno-undef -Wno-strict-aliasing
+libbled_a_CFLAGS = $(AM_CFLAGS) -I$(srcdir)/.. -DBLED_EXPECT_DISK_IMAGE -Wno-undef -Wno-strict-aliasing

@@ -1391,6 +1391,8 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 				(img_report.compression_type != BLED_COMPRESSION_NONE && img_report.compression_type < BLED_COMPRESSION_MAX) ?
 				"compressed " : "", img_report.is_vhd ? "VHD" : "disk");
 		selection_default = BT_IMAGE;
+		if (img_report.projected_size > 0)
+			uprintf("  Size: %s (Projected)", SizeToHumanReadable(img_report.projected_size, FALSE, FALSE));
 	}
 
 	if (img_report.is_iso) {
@@ -1525,7 +1527,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_358), lmprintf(MSG_359));
 			goto out;
 		}
-		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize)) {
+		/* Add 4 KB extra margin for VHD footers and so on */
+		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize) + 4 * KB) {
 			// This ISO image is too big for the selected target
 			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_088), lmprintf(MSG_089));
 			goto out;

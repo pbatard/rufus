@@ -15,9 +15,6 @@
 #include "bb_archive.h"
 #include "bled.h"
 
-typedef int64_t(*unpacker_t)(transformer_state_t *xstate);
-extern int64_t get_uncompressed_size(int fd, int type);
-
 /* Globals */
 smallint bb_got_signal;
 uint64_t bb_total_rb, bb_total_wb;
@@ -300,6 +297,34 @@ int64_t bled_uncompress_from_buffer_to_buffer(const char* src, const size_t src_
 	bb_virtual_len = 0;
 	bb_virtual_fd = -1;
 
+	return ret;
+}
+
+/* Get the decompressed size of file 'src', compressed using 'type' */
+int64_t bled_get_uncompressed_size(const char* src, int type)
+{
+	int fd = -1;
+	int64_t ret = -1;
+
+	if (!bled_initialized) {
+		bb_error_msg("The library has not been initialized");
+		return -1;
+	}
+
+	if ((type < 0) || (type >= BLED_COMPRESSION_MAX)) {
+		bb_error_msg("Unsupported compression format");
+		goto err;
+	}
+
+	fd = _openU(src, _O_RDONLY | _O_BINARY, 0);
+	if (fd < 0)
+		return -1;
+
+	ret = get_uncompressed_size(fd, type);
+
+err:
+	if (fd > 0)
+		_close(fd);
 	return ret;
 }
 

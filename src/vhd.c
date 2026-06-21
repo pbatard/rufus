@@ -99,6 +99,9 @@ static int8_t IsCompressedBootableImage(const char* path)
 			ErrorStatus = 0;
 			if (img_report.compression_type < BLED_COMPRESSION_MAX) {
 				bled_init(0, uprintf, NULL, NULL, NULL, NULL, &ErrorStatus);
+				dc = bled_get_uncompressed_size(path, file_assoc[i].type);
+				if (dc > 0)
+					img_report.projected_size = dc;
 				dc = bled_uncompress_to_buffer(path, (char*)buf, MBR_SIZE, file_assoc[i].type);
 				bled_exit();
 			} else if (img_report.compression_type == BLED_COMPRESSION_MAX) {

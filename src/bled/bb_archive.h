@@ -254,6 +254,9 @@ typedef struct transformer_state_t {
 	} magic;
 } transformer_state_t;
 
+typedef int64_t(*unpacker_t)(transformer_state_t* xstate);
+typedef int64_t(*get_uncompressed_size_t)(int fd);
+int64_t get_uncompressed_size(int fd, int type);
 void init_transformer_state(transformer_state_t *xstate) FAST_FUNC;
 ssize_t transformer_write(transformer_state_t *xstate, const void *buf, size_t bufsize) FAST_FUNC;
 ssize_t xtransformer_write(transformer_state_t *xstate, const void *buf, size_t bufsize) FAST_FUNC;
