@@ -119,8 +119,8 @@ unpack_zstd_stream_inner(transformer_state_t *xstate,
 IF_DESKTOP(long long) int FAST_FUNC
 unpack_zstd_stream(transformer_state_t *xstate)
 {
-	const size_t in_allocsize = roundupsize(ZSTD_DStreamInSize(), 1024),
-		   out_allocsize = roundupsize(ZSTD_DStreamOutSize(), 1024);
+	const size_t in_allocsize = roundupsize(ZSTD_DStreamInSize(), SECTOR_ALIGNMENT),
+		   out_allocsize = roundupsize(ZSTD_DStreamOutSize(), SECTOR_ALIGNMENT);
 
 	IF_DESKTOP(long long) int result;
 	void *out_buff;

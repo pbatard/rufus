@@ -727,25 +727,24 @@ int64_t get_uncompressed_size_from_disk_image(int fd, int type)
 		size = DECOMP_SIZE_UNKNOWN;
 		goto out;
 	}
-	if (buf[0x1c2] == 0xee) {
-		/* Protective EFI MBR => look for the primary GPT, which'll also give us the sector size */
-		if (memcmp("EFI PART", &buf[0x200], 8) == 0) {
-			/* The address of the backup GPT is assumed to be the last LBA for the disk */
-			size = get_le64(&buf[0x220]) * 512;
-			goto out;
-		}
-		if (memcmp("EFI PART", &buf[0x1000], 8) == 0) {
-			size = get_le64(&buf[0x1020]) * 8192;
-			goto out;
-		}
-	}
-	if (buf[0x1be] == 0x80) {
+	if (buf[0x1be] == 0x00 && buf[0x1c2] == 0xee) {
+		/* 
+		 * Protective EFI MBR => look for the primary GPT, which'll also give us the sector size
+		 * The address of the backup GPT is assumed to be the last LBA for the disk
+		 */
+		if (memcmp("EFI PART", &buf[0x200], 8) == 0)
+			size = (get_le64(&buf[0x220]) + 1) * 512;
+		else if (memcmp("EFI PART", &buf[0x1000], 8) == 0)
+			size = (get_le64(&buf[0x1020]) + 1) * 4096;
+		else
+			bb_error_msg("Could not locate primary GPT");
+	} else if (buf[0x1be] == 0x80) {
 		/* Regular bootable MBR => compute the max LBA (using primary partitions only) */
 		uint32_t max_lba = 1;
 		for (int i = 0; i < 4; i++)
 			max_lba = MAX(max_lba, get_le32(&buf[0x1be + 0x10 * i + 8]) + get_le32(&buf[0x1be + 0x10 * i + 0xc]));
-		size = max_lba * 512;	/* assume 512-byte sectors for anything MBR based */
-		if (size < 8192)
+		size = (max_lba + 1) * 512;	/* assume 512-byte sectors for anything MBR based */
+		if (size < 4096)
 			size = DECOMP_SIZE_UNKNOWN;
 	}
 

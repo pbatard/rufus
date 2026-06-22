@@ -1528,7 +1528,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			goto out;
 		}
 		/* Add 4 KB extra margin for VHD footers and so on */
-		if ((size_check) && (img_report.projected_size > (uint64_t)SelectedDrive.DiskSize) + 4 * KB) {
+		if ((size_check) && (img_report.projected_size > ((uint64_t)SelectedDrive.DiskSize + 4 * KB))) {
 			// This ISO image is too big for the selected target
 			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_088), lmprintf(MSG_089));
 			goto out;
