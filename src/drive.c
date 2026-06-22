@@ -1507,24 +1507,19 @@ BOOL AnalyzePBR(HANDLE hLogicalVolume)
 
 /*
  * This call returns the offset of the first ESP partition found
- * on the relevant drive, or 0ULL if no ESP was found.
+ * on the relevant drive, or -1 if no ESP was found.
  */
-uint64_t GetEspOffset(DWORD DriveIndex)
+int64_t GetEspOffset(HANDLE hPhysical)
 {
-	uint64_t ret = 0ULL;
+	int64_t ret = -1;
 	BOOL r;
-	HANDLE hPhysical;
 	DWORD size, i;
 	BYTE layout[4096] = { 0 };
 	PDRIVE_LAYOUT_INFORMATION_EX DriveLayout = (PDRIVE_LAYOUT_INFORMATION_EX)(void*)layout;
 
-	hPhysical = GetPhysicalHandle(DriveIndex, FALSE, TRUE, TRUE);
-	if (hPhysical == INVALID_HANDLE_VALUE)
-		return FALSE;
-
 	r = DeviceIoControl(hPhysical, IOCTL_DISK_GET_DRIVE_LAYOUT_EX, NULL, 0, layout, sizeof(layout), &size, NULL);
 	if (!r || size <= 0) {
-		uprintf("Could not get layout for drive 0x%02x: %s", DriveIndex, WindowsErrorString());
+		uprintf("Could not get drive layout: %s", WindowsErrorString());
 		goto out;
 	}
 
@@ -1537,7 +1532,6 @@ uint64_t GetEspOffset(DWORD DriveIndex)
 	}
 
 out:
-	safe_closehandle(hPhysical);
 	return ret;
 }
 

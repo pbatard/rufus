@@ -1444,7 +1444,7 @@ out:
  */
 DWORD WINAPI FormatThread(void* param)
 {
-	int r;
+	int i, r;
 	BOOL ret, windows_to_go, actual_lock_drive = lock_drive, write_as_ext = FALSE;
 	// Windows 11 and VDS (which I suspect is what fmifs.dll's FormatEx() is now calling behind the scenes)
 	// require us to unlock the physical drive to format the drive, else access denied is returned.
@@ -1517,7 +1517,9 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 	// Unassign all drives letters
-	drive_name[0] = RemoveDriveLetters(DriveIndex, TRUE, FALSE);
+	// For raw images, keep the primary partition on the earliest prior letter
+	// so we don't steal the secondary partition's former mountpoint.
+	drive_name[0] = RemoveDriveLetters(DriveIndex, !((boot_type == BT_IMAGE) && write_as_image), FALSE);
 	if (drive_name[0] == 0) {
 		uprintf("Unable to find a drive letter to use");
 		ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_ASSIGN_LETTER));
@@ -2042,18 +2044,25 @@ out:
 		PrintInfo(0, MSG_320, lmprintf(MSG_307));
 		Sleep(200);
 		VdsRescan(VDS_RESCAN_REFRESH, 0, TRUE);
-		// Trying to mount accessible partitions after writing an image leads to the
-		// creation of the infamous 'System Volume Information' folder on ESPs, which
-		// in turn leads to checksum errors for Ubuntu's boot/grub/efi.img (that maps
-		// to the Ubuntu ESP). So we only call the code below if there are no ESPs or
-		// if we're running a Ventoy image.
-		if ((GetEspOffset(DriveIndex) == 0) || (img_report.compression_type == BLED_COMPRESSION_VTSI)) {
-			WaitForLogical(DriveIndex, 0);
-			if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE)) {
-				volume_name = GetLogicalName(DriveIndex, 0, TRUE, TRUE);
-				if ((volume_name != NULL) && (MountVolume(drive_name, volume_name)))
-					uprintf("Remounted %s as %c:", volume_name, toupper(drive_name[0]));
+		// Try to remount the first non ESP partition we see with a file system that Windows supports
+		hPhysicalDrive = GetPhysicalHandle(DriveIndex, FALSE, TRUE, TRUE);
+		if (hPhysicalDrive != INVALID_HANDLE_VALUE) {
+			int64_t esp_offset = GetEspOffset(hPhysicalDrive);
+			for (i = 0; i < SelectedDrive.nPartitions; i++) {
+				LARGE_INTEGER li = { .QuadPart = SelectedDrive.Partition[partition_index[i]].Offset };
+				if (li.QuadPart == esp_offset)	// Skip any ESP
+					continue;
+				const char* fs = GetFsName(hPhysicalDrive, li);
+				if (fs != NULL && (strcmp(fs, "NTFS") == 0 || strcmp(fs, "exFAT") == 0 ||
+					strcmp(fs, "ReFS") == 0 || strncmp(fs, "FAT", 3) == 0)) {
+					WaitForLogical(DriveIndex, li.QuadPart);
+					volume_name = GetLogicalName(DriveIndex, li.QuadPart, TRUE, TRUE);
+					if ((volume_name != NULL) && (MountVolume(drive_name, volume_name)))
+						uprintf("Remounted %s as %c:", volume_name, toupper(drive_name[0]));
+					break;
+				}
 			}
+			safe_closehandle(hPhysicalDrive);
 		}
 	}
 	if (IS_ERROR(ErrorStatus)) {
