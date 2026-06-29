@@ -1,79 +1,40 @@
-# Проект «Резервный код»
+﻿## Rufus: Надежная утилита форматирования USB
+==========================================
 
+[![Статус сборки VS2022](https://img.shields.io/github/actions/workflow/status/pbatard/rufus/vs2022.yml?branch=master&style=flat-square&label=VS2022%20Build)](https://github.com/pbatard/rufus/actions/workflows/vs2022.yml)
+[![Статус сборки MinGW](https://img.shields.io/github/actions/workflow/status/pbatard/rufus/mingw.yml?branch=master&style=flat-square&label=MinGW%20Build)](https://github.com/pbatard/rufus/actions/workflows/mingw.yml)
+[![Статус анализа Coverity](https://img.shields.io/coverity/scan/2172.svg?style=flat-square&label=Coverity%20Analysis)](https://scan.coverity.com/projects/pbatard-rufus)  
+[![Последняя версия](https://img.shields.io/github/release-pre/pbatard/rufus.svg?style=flat-square&label=Latest%20Release)](https://github.com/pbatard/rufus/releases)
+[![Лицензия](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square&label=License)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![Статистика загрузок](https://img.shields.io/github/downloads/pbatard/rufus/total.svg?label=Downloads&style=flat-square)](https://github.com/pbatard/rufus/releases)
+[![Участники](https://img.shields.io/github/contributors/pbatard/rufus.svg?style=flat-square&label=Contributors)](https://github.com/pbatard/rufus/graphs/contributors)
 
-## О проекте
+![Логотип Rufus](https://raw.githubusercontent.com/pbatard/rufus/master/res/icons/rufus-128.png)
 
-Проект «Резервный код» обеспечивает создание резервных копий и перенос программных проектов с платформы **GitHub** на российскую платформу **Gitflick**.
+Rufus — это утилита для форматирования и создания загрузочных USB-накопителей.
 
-**Цель:** обеспечение доступности кода в условиях возможного ограничения доступа к GitHub.
+### Возможности
 
-## Как это работает
+* Форматирование USB-накопителей, карт памяти и виртуальных дисков в FAT/FAT32/NTFS/UDF/exFAT/ReFS/ext2/ext3
+* Создание загрузочных USB-накопителей DOS с использованием [FreeDOS](https://www.freedos.org) или MS-DOS
+* Создание загрузочных накопителей для BIOS или UEFI, включая [UEFI-загрузочные NTFS](https://github.com/pbatard/uefi-ntfs)
+* Создание загрузочных накопителей из загрузочных ISO-файлов (Windows, Linux и др.)
+* Создание загрузочных накопителей из образов дисков, включая сжатые
+* Создание установочных накопителей Windows 11 для компьютеров без TPM или Secure Boot
+* Создание [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) накопителей
+* Создание образов VHD/DD, VHDX и FFU существующего диска
+* Создание постоянных разделов Linux
+* Вычисление контрольных сумм MD5, SHA-1, SHA-256 и SHA-512 выбранного образа
+* Проверка работоспособности UEFI-загрузочных носителей
+* Улучшение процесса установки Windows путем автоматической настройки параметров OOBE (локальная учетная запись, параметры конфиденциальности и т.д.)
+* Проверка на наличие поврежденных блоков, включая обнаружение "поддельных" флеш-накопителей
+* Загрузка официальных ISO-файлов Microsoft Windows 8, Windows 10 или Windows 11
+* Загрузка [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISO-файлов
+* Современный и понятный интерфейс с [родной поддержкой 38 языков](https://github.com/pbatard/rufus/wiki/FAQ#What_languages_are_natively_supported_by_Rufus)
+* Компактный размер. Не требует установки.
+* Портативность. Совместимость с Secure Boot.
+* 100% [Свободное программное обеспечение](https://www.gnu.org/philosophy/free-sw) ([GPL v3](https://www.gnu.org/licenses/gpl-3.0))
 
-1. Мы находим публичные репозитории на GitHub, соответствующие критериям отбора.
-2. Создаём форк (копию) репозитория в нашем пользовательском аккаунте на GitHub.
-3. Автоматизированно переносим данные на Gitflick.
-4. Размещаем проект как отдельный репозиторий в нашем пользовательском аккаунте на Gitflick.
-5. Сохраняем все метаданные: авторство, дата создания, исходная лицензия.
+### Компиляция
 
-## Критерии отбора проектов для переноса
-
-**Переносим:**
-* Свободное ПО (open‑source) с лицензиями MIT, GPL, Apache, BSD и аналогичными.
-* Несвободное ПО, если лицензия:
-  * разрешает создание резервных копий;
-  * не запрещает форки/копирование;
-  * относится к freeware/shareware с разрешением резервного копирования.
-* ПО в общественном достоянии (public domain).
-
-**Не переносим:**
-* проекты с явным запретом на копирование в лицензии;
-* ПО с DRM‑защитой (нарушение ст. 1299 ГК РФ);
-* коммерческие продукты с жёсткими ограничениями на резервное копирование;
-* проекты, нарушающие законодательство РФ.
-
-## Условия использования
-
-**Проект «Резервный код»:**
-* сохраняет исходную лицензию и атрибуцию авторов;
-* вносит изменения в код только если это минимально необходимо для переноса;
-* размещает предупреждение: *«Резервная копия. Исходный репозиторий: [ссылка на GitHub]»*;
-* не гарантирует синхронизацию с оригиналом после переноса;
-* не берёт на себя обязательств по поддержке или обновлению.
-
-**Правообладатель:**
-* сохраняет все права на исходный код;
-* вправе потребовать удаления копии — для этого нужно направить запрос на email: **[proekt.rezervnyi.kod@yandex.ru](mailto:proekt.rezervnyi.kod@yandex.ru)**;
-* несёт ответственность за корректность условий лицензии.
-
-## Ограничения
-
-Перенесённые проекты:
-* предназначены исключительно для архивных и резервных целей;
-* нельзя использовать в коммерческих целях, если это запрещено лицензией;
-* нельзя модифицировать без согласия правообладателя (для несвободного ПО).
-
-## Ответственность
-
-Проект «Резервный код»:
-* не несёт ответственности за нарушения лицензии, возникшие до переноса;
-* обязуется удалить копию в течение **10 рабочих дней** после получения обоснованного требования правообладателя;
-* не гарантирует работоспособность перенесённого ПО.
-
-## Разрешение споров
-
-
-1. Сначала — переговоры.
-2. Если не удалось договориться — спор решается в порядке, установленном законодательством РФ.
-
-## Контакты
-
-**Для правообладателей (запросы на удаление):** [proekt.rezervnyi.kod@yandex.ru](mailto:proekt.rezervnyi.kod@yandex.ru)  
-
-**Официальная страница проекта на Gitflick:** [https://gitflic.ru/user/proekt-rezervnyi-kod](https://gitflic.ru/project/proekt-rezervnyi-kod)  
-
-**Ссылка на соглашение:**  
-[Читать Соглашение](https://gitflic.ru/project/proekt-rezervnyi-kod/dokumentaciya-proekta-rezervnyi-kod/blob?file=Соглашение+проекта+«Резервный+код».md&branch=master&mode=markdownВАША_ССЫЛКА_СЮДА)
-
-
-**Дата публикации соглашения:** 12.06.2026
-
+Используйте Visual Studio 2022 или MinGW, затем запустите `.sln` или `configure`/`make` соответственно.
