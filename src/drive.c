@@ -1765,11 +1765,15 @@ const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 	if (buf == NULL)
 		goto out;
 
-	// 1. Try to detect ISO9660/FAT/exFAT/NTFS/ReFS through the 512 bytes superblock at offset 0
+	// 1. Try to detect ISO9660/FAT/exFAT/NTFS/ReFS/SquashFS through the 512 bytes superblock at offset 0
 	if (!SetFilePointerEx(hPhysical, StartingOffset, NULL, FILE_BEGIN))
 		goto out;
 	if (!ReadFile(hPhysical, buf, sector_size, &size, NULL) || size != sector_size)
 		goto out;
+	if (memcmp("hsqs", buf, 4) == 0) {
+		ret = "SquashFS";
+		goto out;
+	}
 	if (strncmp("CD001", &buf[0x01], 5) == 0) {
 		ret = "ISO9660";
 		goto out;

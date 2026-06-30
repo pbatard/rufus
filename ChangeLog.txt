@@ -1,12 +1,12 @@
-o Version 4.15 (2026.06.??)
+o Version 4.15 (2026.06.30)
     Add RISC-V 64 support to UEFI:NTFS
-    Improve the guards for using the "silent" option
+    Improve the guards for using the "silent" Windows installation option
     Improve the ability to cancel during write retries
     Improve progress reporting for compressed image extraction
     Fix unrestricted XML entity expansion and integer overflow in ezxml parser (courtesy of Eric Sadowski)
     Fix "silent" Windows installation failing at 75% in most cases
     Fix a crash during boot when using UEFI:NTFS on Snapdragon X based ARM64 platforms
-    Fix the first WUE option always being checked by default
+    Fix first WUE option always being checked by default
     Fix an infinite loop when using Windows ISOs that contain multiple WIMs
     Fix "Enable runtime UEFI media validation" checkbox not always being properly enabled
     Other WUE improvements/fixes for OneDrive removal and username validation (with thanks to @christian8641)
