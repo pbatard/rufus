@@ -3197,8 +3197,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETPOS, MAX_PROGRESS, 0);
 			SetTaskbarProgressState(TASKBAR_NOPROGRESS);
 			PrintInfo(0, MSG_210);
+			uprintf("Operation complete (%s)", szTimer);
 			MessageBeep(MB_OK);
 			FlashTaskbar(dialog_handle);
+			Notification(MB_ICONINFORMATION | MB_OK, APPLICATION_NAME, "%s (%s)", lmprintf(MSG_050), szTimer);
 		} else if (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
