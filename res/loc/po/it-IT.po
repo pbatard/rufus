@@ -792,7 +792,7 @@ msgstr ""
 "Questa immagine utilizza Grub %s, ma l'applicazione include solo i file di installazione per Grub %s.\n"
 "\n"
 "Poiché le diverse versioni di Grub potrebbero non essere compatibili tra loro e non è possibile includerle tutte, Rufus tenterà di individuare una versione del file di installazione di Grub (\"core.img\") che corrisponda a quella presente nella tua immagine:\n"
-"- Seleziona “Sì” per connetterti a Internet e tentare di scaricarlo\n"
+"- Seleziona “Sì” per connetterti a internet e tentare di scaricarlo\n"
 "- Seleziona “No” per utilizzare la versione predefinita di Rufus\n"
 "- Seleziona “Annulla” per interrompere l'operazione\n"
 "\n"
@@ -1955,11 +1955,11 @@ msgid ""
 "\n"
 "Note: The files will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"Rufus ha trovato una verzione aggiornamentato dei fili DBX usati per eseguire la verifica di revoca per UEFI Secure Boot. Vuoi scaricare questo aggiornamento?\n"
-"- Seleziona \"Sì\" per connettere all'Internet e scaricare questo contenuto\n"
+"Rufus ha trovato una versione aggiornata dei file DBX usati per eseguire la verifica di revoca per UEFI Secure Boot. Vuoi scaricare questo aggiornamento?\n"
+"- Seleziona \"Sì\" per connetterti a internet e scaricare questo contenuto\n"
 "- Seleziona \"No\" per cancellare l'operazione\n"
 "\n"
-"Nota: "
+"Nota: I file saranno scaricati nella directory dell'applicazione e verranno riutilizzati automaticamente se disponibili"
 
 #. • MSG_355
 msgid "⚠SILENTLY⚠ erase disk and install:"
@@ -2001,7 +2001,7 @@ msgstr "È consigliabile lasciare questa opzione attivata anche se si dispone di
 
 #. • MSG_361
 msgid "For this option to work, network/Internet MUST be disconnected during installation!"
-msgstr "Affinché questa opzione funzioni, è NECESSARIO disconnettere la rete/Internet durante l'installazione!"
+msgstr "Affinché questa opzione funzioni, è NECESSARIO disconnettere la rete/internet durante l'installazione!"
 
 #. • MSG_362
 msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
