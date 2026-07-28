@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
-"POT-Creation-Date: 2026-04-18 11:43-0700\n"
-"PO-Revision-Date: 2026-04-18 13:50-0700\n"
+"POT-Creation-Date: 2026-08-24 12:47+0100\n"
+"PO-Revision-Date: 2026-08-24 12:48+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: it_IT\n"
@@ -115,7 +115,7 @@ msgstr "Licenza"
 
 #. • IDD_ABOUTBOX → IDOK
 msgid "OK"
-msgstr "OK"
+msgstr ""
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
@@ -133,7 +133,7 @@ msgstr "Sì"
 #. • IDD_NOTIFICATION → IDNO
 #. • MSG_009
 msgid "No"
-msgstr "No"
+msgstr ""
 
 #. • IDD_LOG → IDD_LOG
 msgid "Log"
@@ -286,31 +286,31 @@ msgstr "byte"
 #.
 #. *Short* version of the kilobyte size suffix
 msgid "KB"
-msgstr "KB"
+msgstr ""
 
 #. • MSG_022
 #.
 #. *Short* version of the megabyte size suffix
 msgid "MB"
-msgstr "MB"
+msgstr ""
 
 #. • MSG_023
 #.
 #. *Short* version of the gigabyte size suffix
 msgid "GB"
-msgstr "GB"
+msgstr ""
 
 #. • MSG_024
 #.
 #. *Short* version of the terabyte size suffix
 msgid "TB"
-msgstr "TB"
+msgstr ""
 
 #. • MSG_025
 #.
 #. *Short* version of the petabyte size suffix
 msgid "PB"
-msgstr "PB"
+msgstr ""
 
 #. • MSG_027
 msgid "kilobytes"
@@ -792,7 +792,7 @@ msgstr ""
 "Questa immagine utilizza Grub %s, ma l'applicazione include solo i file di installazione per Grub %s.\n"
 "\n"
 "Poiché le diverse versioni di Grub potrebbero non essere compatibili tra loro e non è possibile includerle tutte, Rufus tenterà di individuare una versione del file di installazione di Grub (\"core.img\") che corrisponda a quella presente nella tua immagine:\n"
-"- Seleziona “Sì” per connetterti a Internet e tentare di scaricarlo\n"
+"- Seleziona “Sì” per connetterti a internet e tentare di scaricarlo\n"
 "- Seleziona “No” per utilizzare la versione predefinita di Rufus\n"
 "- Seleziona “Annulla” per interrompere l'operazione\n"
 "\n"
@@ -808,7 +808,7 @@ msgstr "Installazione Windows standard"
 #. http://en.wikipedia.org/wiki/Windows_To_Go in your language.
 #. Otherwise, you may add a parenthesis eg. "Windows To Go (<hint at what it does>)"
 msgid "Windows To Go"
-msgstr "Windows To Go"
+msgstr ""
 
 #. • MSG_119
 msgid "advanced drive properties"
@@ -1955,11 +1955,11 @@ msgid ""
 "\n"
 "Note: The files will be downloaded in the application's directory and will be reused automatically if present."
 msgstr ""
-"Rufus ha trovato una verzione aggiornamentato dei fili DBX usati per eseguire la verifica di revoca per UEFI Secure Boot. Vuoi scaricare questo aggiornamento?\n"
-"- Seleziona \"Sì\" per connettere all'Internet e scaricare questo contenuto\n"
+"Rufus ha trovato una versione aggiornata dei file DBX usati per eseguire la verifica di revoca per UEFI Secure Boot. Vuoi scaricare questo aggiornamento?\n"
+"- Seleziona \"Sì\" per connetterti a internet e scaricare questo contenuto\n"
 "- Seleziona \"No\" per cancellare l'operazione\n"
 "\n"
-"Nota: "
+"Nota: I file saranno scaricati nella directory dell'applicazione e verranno riutilizzati automaticamente se disponibili"
 
 #. • MSG_355
 msgid "⚠SILENTLY⚠ erase disk and install:"
@@ -1971,15 +1971,13 @@ msgid ""
 "\n"
 "This is an advanced option, reserved for people who want to create media that does not prompt the user during Windows installation and therefore UNCONDITIONALLY ERASES the first detected disk on the target system. If you are not careful, using this option can result in IRREVERSIBLE DATA LOSS!\n"
 "\n"
-"If this is not what you want, please select 'No' to go back and uncheck the option.\n"
-"Otherwise, if you select 'Yes', you agree that the whole responsibility for any data loss will be entirely with YOU."
+"You MUST read and accept all of the following propositions to proceed:"
 msgstr ""
 "Hai scelto di utilizzare l'opzione di installazione “silenziosa” di Windows.\n"
 "\n"
 "Si tratta di un'opzione avanzata, riservata a chi desidera creare un supporto che non richieda l'intervento dell'utente durante l'installazione di Windows e che, di conseguenza, CANCELLI INCONDIZIONATAMENTE il primo disco rilevato sul sistema di destinazione. Se non presti la dovuta attenzione, l'utilizzo di questa opzione può causare una PERDITA IRREVERSIBILE DI DATI!\n"
 "\n"
-"Se non è questo ciò che desideri, seleziona “No” per tornare indietro e deselezionare l'opzione.\n"
-"Altrimenti, selezionando “Sì”, accetti che l'intera responsabilità per qualsiasi perdita di dati ricada interamente su di TE."
+"DEVI leggere e accettare tutte le seguenti dichiarazioni per continuare:"
 
 #. • MSG_358
 msgid "Unsupported image location"
@@ -2001,7 +1999,7 @@ msgstr "È consigliabile lasciare questa opzione attivata anche se si dispone di
 
 #. • MSG_361
 msgid "For this option to work, network/Internet MUST be disconnected during installation!"
-msgstr "Affinché questa opzione funzioni, è NECESSARIO disconnettere la rete/Internet durante l'installazione!"
+msgstr "Affinché questa opzione funzioni, è NECESSARIO disconnettere la rete/internet durante l'installazione!"
 
 #. • MSG_362
 msgid "Automatically answer 'no' to the Windows setup questions relating to the sharing of data with Microsoft, instead of prompting the user."
@@ -2021,7 +2019,7 @@ msgstr "Duplica le impostazioni regionali di questo PC (tastiera, fuso orario, v
 
 #. • MSG_366
 msgid "Don't encrypt the system disk, unless explicitly requested by the user."
-msgstr "Don't encrypt the system disk, unless explicitly requested by the user."
+msgstr "Non crittografare il disco di sistema, a meno che non sia esplicitamente richiesto dall'utente."
 
 #. • MSG_367
 msgid "Use this option only if you know what S-Mode is and understand that your system may be locked into S-Mode even after you completely erase and reinstall Windows."
@@ -2042,6 +2040,18 @@ msgstr "Miglioramenti alla “QoL”: disattiva la maggior parte delle funzional
 #. • MSG_371
 msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
 msgstr "Se si utilizza questa opzione, assicurarsi di scollegare tutti i dischi dal PC di destinazione, tranne quello su cui si desidera installare Windows, e di non lasciare il supporto collegato a nessun PC che non si desidera cancellare."
+
+#. • MSG_372
+msgid "I WILL ensure that all disks, except the one I want to install Windows on, are disconnected."
+msgstr "MI ASSICURERÒ che tutti i dischi, tranne quello per Windows, siano scollegati."
+
+#. • MSG_373
+msgid "I WILL ensure that I don't leave this media plugged on a PC I do not plan to erase."
+msgstr "MI ASSICURERÒ di non lasciare questo supporto collegato a un PC che non intendo cancellare."
+
+#. • MSG_374
+msgid "I AGREE that any data loss resulting from the use of this option lies entirely with me."
+msgstr "ACCETTO che qualsiasi perdita di dati derivante da questa opzione sia a mio esclusivo carico."
 
 #. • MSG_900
 #.
