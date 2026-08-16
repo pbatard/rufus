@@ -77,12 +77,17 @@ typedef char cregex_char_class[(UCHAR_MAX + CHAR_BIT - 1) / CHAR_BIT];
 static inline int cregex_char_class_contains(const cregex_char_class klass,
                                              int ch)
 {
-    return klass[ch / CHAR_BIT] & (1 << ch % CHAR_BIT);
+    /* ch is derived from a plain (signed on most platforms) char, so bytes
+     * >= 0x80 sign-extend to a negative int. Cast to unsigned char first or
+     * this indexes klass[] out of bounds and shifts by a negative amount. */
+    unsigned char uch = (unsigned char)ch;
+    return klass[uch / CHAR_BIT] & (1 << uch % CHAR_BIT);
 }
 
 static inline int cregex_char_class_add(cregex_char_class klass, int ch)
 {
-    klass[ch / CHAR_BIT] |= 1 << (ch % CHAR_BIT);
+    unsigned char uch = (unsigned char)ch;
+    klass[uch / CHAR_BIT] |= 1 << (uch % CHAR_BIT);
     return ch;
 }
 
