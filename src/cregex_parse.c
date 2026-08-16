@@ -247,7 +247,10 @@ static cregex_node_t *parse_context(regex_parse_context *context, int depth)
 
 static inline int estimate_nodes(const char *pattern)
 {
-    return (int)strlen(pattern) * 2;
+    /* +1 so that an empty pattern ("") still gets a non-zero allocation:
+     * parse_context() always pushes at least one (EPSILON) node via
+     * concatenate(), even when nothing was parsed. */
+    return (int)strlen(pattern) * 2 + 1;
 }
 
 /* Parse a pattern (using a previously allocated buffer of at least
