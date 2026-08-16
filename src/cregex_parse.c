@@ -72,11 +72,13 @@ static cregex_node_t *parse_char_class(regex_parse_context *context)
                             .type = type, .from = from, .to = context->sp - 1});
         case '\\':
             ch = *context->sp++;
+            if (ch == '\0')
+                return NULL;
             /* fall-through */
         default:
         CHARACTER:
             if (*context->sp == '-' && context->sp[1] != ']') {
-                if (context->sp[1] < ch)
+                if ((unsigned char)context->sp[1] < (unsigned char)ch)
                     /* empty range in character class */
                     return NULL;
                 context->sp += 2;
