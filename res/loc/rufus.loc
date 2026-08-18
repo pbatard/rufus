@@ -641,6 +641,8 @@ t MSG_371 "If you use this option, please make sure to disconnect every disk fro
 t MSG_372 "I WILL ensure that all disks, except the one I want to install Windows on, are disconnected."
 t MSG_373 "I WILL ensure that I don't leave this media plugged on a PC I do not plan to erase."
 t MSG_374 "I AGREE that any data loss resulting from the use of this option lies entirely with me."
+t MSG_375 "%s — %s (hidden)"
+t MSG_376 "To use this drive, enable the 'List USB Hard Drives' option in Advanced drive properties."
 
 # The following messages are for the Windows Store listing only and are not used by the application
 t MSG_900 "Rufus is a utility that helps format and create bootable USB flash drives, such as USB keys/pendrives, memory sticks, etc."

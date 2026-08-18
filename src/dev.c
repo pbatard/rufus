@@ -475,13 +475,13 @@ BOOL GetDevices(DWORD devnum)
 	const char* windows_sandbox_vhd_label = "PortableBaseLayer";
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
 	htab_table htab_devid = HTAB_EMPTY;
-	StrArray dev_if_path = { 0 };
+	StrArray dev_if_path = { 0 }, hidden_drives = { 0 };
 	char letter_name[] = " (?:)";
 	char drive_name[] = "?:\\";
 	char setting_name[32];
 	char uefi_togo_check[] = "?:\\EFI\\Rufus\\ntfs_x64.efi";
 	char scsi_card_name_copy[16];
-	BOOL r = FALSE, found = FALSE, post_backslash;
+	BOOL r = FALSE, found = FALSE, post_backslash, hide_drive;
 	HDEVINFO dev_info = NULL;
 	SP_DEVINFO_DATA dev_info_data;
 	SP_DEVICE_INTERFACE_DATA devint_data;
@@ -502,6 +502,7 @@ BOOL GetDevices(DWORD devnum)
 	IGNORE_RETVAL(ComboBox_ResetContent(hDeviceList));
 	ClearDrives();
 	StrArrayCreate(&dev_if_path, 128);
+	StrArrayCreate(&hidden_drives, 8);
 	// Add a dummy for string index zero, as this is what non matching hashes will point to
 	StrArrayAdd(&dev_if_path, "", TRUE);
 
@@ -858,6 +859,7 @@ BOOL GetDevices(DWORD devnum)
 		devint_detail_data = NULL;
 		for (j = 0; ; j++) {
 			safe_free(devint_detail_data);
+			hide_drive = FALSE;
 
 			if (!SetupDiEnumDeviceInterfaces(dev_info, &dev_info_data, &GUID_DEVINTERFACE_DISK, j, &devint_data)) {
 				if(GetLastError() != ERROR_NO_MORE_ITEMS) {
@@ -940,19 +942,18 @@ BOOL GetDevices(DWORD devnum)
 				}
 				if ((!enable_HDDs) && (!props.is_VHD) && (!props.is_CARD) &&
 					((score = IsHDD(drive_index, (uint16_t)props.vid, (uint16_t)props.pid, buffer)) > 0)) {
-					uprintf("Device eliminated because it was detected as a Hard Drive or SSD (score %d > 0)", score);
+					uprintf("Device hidden because it was detected as a Hard Drive or SSD (score %d > 0)", score);
 					if (!list_non_usb_removable_drives)
 						uprintf("If this device is not a Hard Drive or SSD, please e-mail the author of this application");
 					uprintf("NOTE: You can enable the listing of Hard Drives under 'advanced drive properties'");
-					safe_free(devint_detail_data);
-					break;
+					hide_drive = TRUE;
 				} else if ((!enable_HDDs) && (props.is_CARD) && (drive_size > MAX_DEFAULT_LIST_CARD_SIZE)) {
-					uprintf("Device eliminated because it was detected as a card larger than %s",
+					uprintf("Device hidden because it was detected as a card larger than %s",
 						SizeToHumanReadable(MAX_DEFAULT_LIST_CARD_SIZE, FALSE, FALSE));
 					uprintf("To use such a card, check 'List USB Hard Drives' under 'advanced drive properties'");
-					safe_free(devint_detail_data);
-					break;
-				} else if (props.is_VHD && IsMsDevDrive(drive_index)) {
+					hide_drive = TRUE;
+				}
+				if (props.is_VHD && IsMsDevDrive(drive_index)) {
 					uprintf("Device eliminated because it was detected as a Microsoft Dev Drive");
 					safe_free(devint_detail_data);
 					break;
@@ -1019,6 +1020,13 @@ BOOL GetDevices(DWORD devnum)
 						SizeToHumanReadable(drive_size, FALSE, use_fake_units));
 					display_name = display_msg;
 				}
+				if (hide_drive) {
+					static_sprintf(str, "%s", display_name);
+					static_sprintf(buffer, "%s", lmprintf(MSG_375, buffer, str));
+					StrArrayAdd(&hidden_drives, buffer, TRUE);
+					safe_free(devint_detail_data);
+					break;
+				}
 
 				rufus_drive[num_drives].index = drive_index;
 				rufus_drive[num_drives].id = safe_strdup(device_instance_id);
@@ -1066,7 +1074,14 @@ BOOL GetDevices(DWORD devnum)
 		IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList, ComboBox_AddStringU(hDeviceList, rufus_drive[u].display_name), rufus_drive[u].index));
 		maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, rufus_drive[u].display_name));
 	}
-	// Adjust the Dropdown width to the maximum text size
+	// Add informational rows for devices that require the explicit HDD opt-in.
+	for (u = 0; u < (int)hidden_drives.Index; u++) {
+		IGNORE_RETVAL(ComboBox_SetItemData(hDeviceList,
+			ComboBox_AddStringU(hDeviceList, hidden_drives.String[u]), 0));
+		maxwidth = max(maxwidth, GetEntryWidth(hDeviceList, hidden_drives.String[u]));
+	}
+	// Adjust the Dropdown width to the maximum text size, plus room for borders and a scrollbar
+	maxwidth += GetSystemMetrics(SM_CXVSCROLL) + GetSystemMetrics(SM_CXEDGE) * 4 + 8;
 	SendMessage(hDeviceList, CB_SETDROPPEDWIDTH, (WPARAM)maxwidth, 0);
 
 	if (devnum >= DRIVE_INDEX_MIN) {
@@ -1078,7 +1093,7 @@ BOOL GetDevices(DWORD devnum)
 		}
 	}
 	if (!found)
-		i = 0;
+		i = (num_drives == 0) ? CB_ERR : 0;
 	IGNORE_RETVAL(ComboBox_SetCurSel(hDeviceList, i));
 	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE<<16) | IDC_DEVICE, 0);
 	r = TRUE;
@@ -1088,6 +1103,7 @@ out:
 	SendMessage(hMainDialog, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hMainDialog, IDC_START), TRUE);
 	safe_free(devid_list);
 	StrArrayDestroy(&dev_if_path);
+	StrArrayDestroy(&hidden_drives);
 	htab_destroy(&htab_devid);
 	return r;
 }

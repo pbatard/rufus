@@ -901,6 +901,27 @@ void EnableControls(BOOL enable, BOOL remove_checkboxes)
 
 // Populate the UI main dropdown properties.
 // This should be called on device or boot type change.
+static BOOL IsSelectableDevice(int combo_index)
+{
+	DWORD drive_index;
+
+	if ((combo_index < 0) || (combo_index >= ComboBox_GetCount(hDeviceList)))
+		return FALSE;
+	drive_index = (DWORD)ComboBox_GetItemData(hDeviceList, combo_index);
+	return (drive_index >= DRIVE_INDEX_MIN) && (drive_index < DRIVE_INDEX_MAX);
+}
+
+static int GetSelectableDeviceCount(void)
+{
+	int i, count = 0;
+
+	for (i = 0; i < ComboBox_GetCount(hDeviceList); i++) {
+		if (IsSelectableDevice(i))
+			count++;
+	}
+	return count;
+}
+
 static BOOL PopulateProperties(void)
 {
 	char* device_tooltip;
@@ -2482,7 +2503,27 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		case IDC_DEVICE:
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
-			nb_devices = ComboBox_GetCount(hDeviceList);
+			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
+			if ((nDeviceIndex != CB_ERR) && !IsSelectableDevice(nDeviceIndex)) {
+				for (i = 0; i < ComboBox_GetCount(hDeviceList); i++) {
+					if (IsSelectableDevice(i) &&
+						((DWORD)ComboBox_GetItemData(hDeviceList, i) == DeviceNum))
+						break;
+				}
+				IGNORE_RETVAL(ComboBox_SetCurSel(hDeviceList,
+					(i < ComboBox_GetCount(hDeviceList)) ? i : CB_ERR));
+				ComboBox_ShowDropdown(hDeviceList, FALSE);
+				if (!advanced_mode_device) {
+					CheckDlgButton(hMainDialog, IDC_ADVANCED_DRIVE_PROPERTIES, BST_CHECKED);
+					SendMessage(hMainDialog, WM_COMMAND,
+						(BN_CLICKED << 16) | IDC_ADVANCED_DRIVE_PROPERTIES, 0);
+				}
+				Notification(MB_OK | MB_ICONINFORMATION, APPLICATION_NAME, lmprintf(MSG_376));
+				SendMessage(hMainDialog, WM_NEXTDLGCTL,
+					(WPARAM)GetDlgItem(hMainDialog, IDC_LIST_USB_HDD), TRUE);
+				break;
+			}
+			nb_devices = GetSelectableDeviceCount();
 			PrintStatusDebug(0, (nb_devices == 1) ? MSG_208 : MSG_209, nb_devices);
 			PopulateProperties();
 			nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
@@ -3161,7 +3202,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if (queued_hotplug_event)
 			SendMessage(hDlg, UM_MEDIA_CHANGE, 0, 0);
 		if (wParam == BOOTCHECK_CANCEL) {
-			nb_devices = ComboBox_GetCount(hDeviceList);
+			nb_devices = GetSelectableDeviceCount();
 			PrintStatus(0, (nb_devices == 1) ? MSG_208 : MSG_209, nb_devices);
 			PrintStatus(5000, MSG_041);
 			if (unattend_xml_path != NULL) {

@@ -11,6 +11,9 @@ o v?.??
   - *NEW*      MSG_372 "I WILL ensure that all disks, except the one I want to install Windows on, are disconnected."
   - *NEW*      MSG_373 "I WILL ensure that I don't leave this media plugged on a PC I do not plan to erase."
   - *NEW*      MSG_374 "I AGREE that any data loss resulting from the use of this option lies entirely with me."
+  // These messages identify drives hidden by the default USB hard-drive filter and explain how to enable them.
+  - *NEW*      MSG_375 "%s — %s (hidden)"
+  - *NEW*      MSG_376 "To use this drive, enable the 'List USB Hard Drives' option in Advanced drive properties."
 
 o v4.14 (2026.04.30)
   // NB: I used Google translate to update the following message, so please check for accuracy!
