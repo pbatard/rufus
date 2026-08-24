@@ -1517,7 +1517,9 @@ DWORD WINAPI FormatThread(void* param)
 	}
 
 	// Unassign all drives letters
-	drive_name[0] = RemoveDriveLetters(DriveIndex, TRUE, FALSE);
+	// For raw images, keep the primary partition on the earliest prior letter
+	// so we don't steal the secondary partition's former mountpoint.
+	drive_name[0] = RemoveDriveLetters(DriveIndex, !((boot_type == BT_IMAGE) && write_as_image), FALSE);
 	if (drive_name[0] == 0) {
 		uprintf("Unable to find a drive letter to use");
 		ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_ASSIGN_LETTER));
@@ -2048,9 +2050,11 @@ out:
 		// to the Ubuntu ESP). So we only call the code below if there are no ESPs or
 		// if we're running a Ventoy image.
 		if ((GetEspOffset(DriveIndex) == 0) || (img_report.compression_type == BLED_COMPRESSION_VTSI)) {
-			WaitForLogical(DriveIndex, 0);
 			if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE)) {
-				volume_name = GetLogicalName(DriveIndex, 0, TRUE, TRUE);
+				// Use the refreshed main-partition offset here rather than offset 0,
+				// which can resolve to whichever volume Windows exposes first.
+				WaitForLogical(DriveIndex, SelectedDrive.Partition[partition_index[PI_MAIN]].Offset);
+				volume_name = GetLogicalName(DriveIndex, SelectedDrive.Partition[partition_index[PI_MAIN]].Offset, TRUE, TRUE);
 				if ((volume_name != NULL) && (MountVolume(drive_name, volume_name)))
 					uprintf("Remounted %s as %c:", volume_name, toupper(drive_name[0]));
 			}
