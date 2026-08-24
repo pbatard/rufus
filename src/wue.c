@@ -417,6 +417,9 @@ char* CreateUnattendXml(int arch, int flags)
 					"/v SystemPaneSuggestionsEnabled /t REG_DWORD /d 0 /f", TRUE);
 				StrArrayAdd(&commands, "reg add \"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Search\" "
 					"/v BingSearchEnabled /t REG_DWORD /d 0 /f", TRUE);
+				// Disable auto installation of manufacturer's crappy apps when plugging new hardware
+				StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Policies\\Microsoft\\Windows\\Device Metadata\" "
+					"/v PreventDeviceMetadataFromNetwork /t REG_DWORD /d 1 /f", TRUE);
 				// Disable News
 				StrArrayAdd(&commands, "reg add \"HKLM\\Software\\Policies\\Microsoft\\Dsh\" "
 					"/v AllowNewsAndInterests /t REG_DWORD /d 0 /f", TRUE);
@@ -444,6 +447,10 @@ char* CreateUnattendXml(int arch, int flags)
 					"\"Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Start' "
 					"-Name 'VisiblePlaces' -Value $([convert]::FromBase64String('ztU0LVr6Q0WC8iLm6vd3PC+zZ+PeiVVDv85h83sYqTe8JIo"
 					"UDNaJQqCAbtm7okiCRIF1/g0IrkKL2jTtl7ZjlEqwvXRK+WhPi9ZDmAcdqLyGCHNSqlFDQp97J3ZYRlnU')) -Type 'Binary'\"", TRUE);
+				// Restore the classic right click context menu
+				uprintf("• QoL: Restore classic context menu");
+				StrArrayAdd(&commands, "reg add \"HKCU\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32\" "
+					"/ve /t REG_SZ /d \"\" /f", TRUE);
 			}
 			// Now that we have all the commands to run, create the FirstLogonCommands section.
 			for (order = 1; order <= (int)commands.Index; order++) {
