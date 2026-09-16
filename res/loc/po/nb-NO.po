@@ -2047,7 +2047,7 @@ msgstr "Rufus er et verktøy som hjelper til med å formatere og lage oppstartba
 
 #. • MSG_901
 msgid "Official site: %s"
-msgstr "Offisiellt nettsted: %s"
+msgstr "Offisielt nettsted: %s"
 
 #. • MSG_902
 msgid "Source Code: %s"
