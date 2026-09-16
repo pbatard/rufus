@@ -2288,7 +2288,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 	// Go for a 260 MB sized ESP by default to keep everyone happy, including 4K sector users:
 	// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions
 	// and folks using MacOS: https://github.com/pbatard/rufus/issues/979
-	LONGLONG esp_size = 260 * MB;
+	LONGLONG esp_size = 260 * MB, main_size;
 	LONGLONG ClusterSize = (LONGLONG)ComboBox_GetCurItemData(hClusterSize);
 
 	PrintInfoDebug(0, MSG_238, PartitionTypeName[partition_style]);
@@ -2406,9 +2406,12 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 		last_offset = SelectedDrive.Partition[i].Offset;
 	}
 
-	// With the above, Compute the main partition size (which we align to a track)
-	assert(last_offset > SelectedDrive.Partition[mi].Offset);
-	SelectedDrive.Partition[mi].Size = FLOOR_ALIGN(last_offset - SelectedDrive.Partition[mi].Offset, bytes_per_track);
+	// With the above, compute the main partition size (which we align to a track)
+	main_size = last_offset - SelectedDrive.Partition[mi].Offset;
+	assert(main_size > 0);
+	if (write_as_esp)
+		main_size = min(main_size, MAX_ISO_TO_ESP_SIZE);
+	SelectedDrive.Partition[mi].Size = FLOOR_ALIGN(main_size, bytes_per_track);
 	// Try to make sure that the main partition size is a multiple of the cluster size
 	// This can be especially important when trying to capture an NTFS partition as FFU, as, when
 	// the NTFS partition is aligned to cluster size, the FFU capture parses the NTFS allocated
