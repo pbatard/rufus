@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: 4.14\n"
 "Report-Msgid-Bugs-To: pete@akeo.ie\n"
 "POT-Creation-Date: 2026-04-07 23:05-0700\n"
-"PO-Revision-Date: 2026-04-07 23:19-0700\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2026-09-16 09:05+0200\n"
+"Last-Translator: Imre Eilertsen <imreeil42@gmail.com>\n"
 "Language-Team: \n"
 "Language: nb_NO\n"
 "MIME-Version: 1.0\n"
@@ -17,7 +17,7 @@ msgstr ""
 
 #. • IDD_DIALOG → IDS_DRIVE_PROPERTIES_TXT
 msgid "Drive Properties"
-msgstr "Stasjons rettigheter"
+msgstr "Stasjonsegenskaper"
 
 #. • IDD_DIALOG → IDS_DEVICE_TXT
 msgid "Device"
@@ -37,7 +37,7 @@ msgstr "Bildevalg"
 
 #. • IDD_DIALOG → IDS_PARTITION_TYPE_TXT
 msgid "Partition scheme"
-msgstr "Partisjonskjema"
+msgstr "Partisjonsskjema"
 
 #. • IDD_DIALOG → IDS_TARGET_SYSTEM_TXT
 msgid "Target system"
@@ -45,20 +45,20 @@ msgstr "Målsystem"
 
 #. • IDD_DIALOG → IDC_LIST_USB_HDD
 msgid "List USB Hard Drives"
-msgstr "Før opp USB harddisker"
+msgstr "Vis USB-harddisker"
 
 #. • IDD_DIALOG → IDC_OLD_BIOS_FIXES
 #.
 #. It is acceptable to drop the parenthesis () if you are running out of space
 #. as there is a tooltip (MSG_169) providing these details.
 msgid "Add fixes for old BIOSes (extra partition, align, etc.)"
-msgstr "Legger til fiks for gamle BIOSer (ekstra partisjon, etc.)"
+msgstr "Legger til fiks for gamle BIOS-er (ekstra partisjon, osv.)"
 
 #. • IDD_DIALOG → IDC_UEFI_MEDIA_VALIDATION
 #.
 #. It is acceptable to drop the "runtime" if you are running out of space
 msgid "Enable runtime UEFI media validation"
-msgstr "Aktiver runtime UEFI-medievalidering"
+msgstr "Aktiver kjøretids-UEFI-medievalidering"
 
 #. • IDD_DIALOG → IDS_FORMAT_OPTIONS_TXT
 msgid "Format Options"
@@ -70,7 +70,7 @@ msgstr "Filsystem"
 
 #. • IDD_DIALOG → IDS_CLUSTER_SIZE_TXT
 msgid "Cluster size"
-msgstr "Cluster-størrelse"
+msgstr "Klyngestørrelse"
 
 #. • IDD_DIALOG → IDS_LABEL_TXT
 msgid "Volume label"
@@ -86,7 +86,7 @@ msgstr "Sjekk enhet for dårlige blokker"
 
 #. • IDD_DIALOG → IDC_EXTENDED_LABEL
 msgid "Create extended label and icon files"
-msgstr "Lager utvidet merke og ikon-filer"
+msgstr "Opprett utvidet merke og ikonfiler"
 
 #. • IDD_DIALOG → IDS_STATUS_TXT
 msgid "Status"
@@ -119,7 +119,7 @@ msgstr ""
 
 #. • IDD_LICENSE → IDD_LICENSE
 msgid "Rufus License"
-msgstr "Rufus Lisens"
+msgstr "Rufus sin lisens"
 
 #. • IDD_NOTIFICATION → IDC_MORE_INFO
 msgid "More information"
@@ -149,7 +149,7 @@ msgstr "Lagre"
 
 #. • IDD_UPDATE_POLICY → IDD_UPDATE_POLICY
 msgid "Update policy and settings"
-msgstr "Oppdateringspolitikk og innstillinger"
+msgstr "Oppdateringsretningslinjer og -innstillinger"
 
 #. • IDD_UPDATE_POLICY → IDS_UPDATE_SETTINGS_GRP
 msgid "Settings"
@@ -169,7 +169,7 @@ msgstr "Sjekk nå"
 
 #. • IDD_NEW_VERSION → IDD_NEW_VERSION
 msgid "Check For Updates - Rufus"
-msgstr "Sjekker for oppdateringer - Rufus"
+msgstr "Se etter oppdateringer - Rufus"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_AVAIL_TXT
 msgid "A newer version is available. Please download the latest version!"
@@ -177,7 +177,7 @@ msgstr "En ny versjon er tilgjengelig. Vennligst last ned den nyeste versjonen!"
 
 #. • IDD_NEW_VERSION → IDC_WEBSITE
 msgid "Click here to go to the website"
-msgstr "Klikk her for å gå til nettsiden"
+msgstr "Klikk her for å gå til nettstedet"
 
 #. • IDD_NEW_VERSION → IDS_NEW_VERSION_NOTES_GRP
 msgid "Release Notes"
@@ -198,24 +198,24 @@ msgid ""
 "Another Rufus application is running.\n"
 "Please close the first application before running another one."
 msgstr ""
-"Annen Rufus-utgave kjører.\n"
-"Vennligst lukk den første utgaven, før du åpner en ny."
+"Et annet Rufus-program kjører.\n"
+"Vennligst lukk det første programmet før du åpner en ny."
 
 #. • MSG_003
 msgid ""
 "WARNING: ALL DATA ON DEVICE '%s' WILL BE DESTROYED.\n"
 "To continue with this operation, click OK. To quit click CANCEL."
 msgstr ""
-"ADVARSEL: ALLE DATA PÅ STASJONEN '%s' VIL BLI OVERSKREVET.\n"
-"For å fortsette denne operasjonen, klikk OK. For å avslutte klikk Avbryt."
+"ADVARSEL: ALLE DATA PÅ '%s'-STASJONEN VIL BLI OVERSKREVET.\n"
+"For å fortsette denne operasjonen, klikk OK. For å avslutte, klikk Avbryt."
 
 #. • MSG_004
 msgid "Rufus update policy"
-msgstr "Rufus oppdateringspolitikk"
+msgstr "Rufus-oppdateringsretningslinjer"
 
 #. • MSG_005
 msgid "Do you want to allow Rufus to check for application updates online?"
-msgstr "Vil du tillate at Rufus ser etter oppdateringer online?"
+msgstr "Vil du tillate at Rufus ser etter oppdateringer på nettet?"
 
 #. • MSG_007
 msgid "Cancel"
@@ -233,9 +233,9 @@ msgid ""
 "  %d corruption error(s)"
 msgstr ""
 "Sjekk fullført: %d dårlig(e) blokke(r) funnet\n"
-"  %d Lese feil\n"
-"  %d Skrivefeil\n"
-"  %d Korrupte feil"
+"  %d lesefeil\n"
+"  %d skrivefeil\n"
+"  %d korrumperingsfeil"
 
 #. • MSG_012
 #.
@@ -246,7 +246,7 @@ msgid ""
 "%s"
 msgstr ""
 "%s\n"
-"A Mer detaljert rapport kan finnes her:\n"
+"En mer detaljert rapport kan finnes her:\n"
 "%s"
 
 #. • MSG_013
@@ -275,7 +275,7 @@ msgstr "Din versjon: %d.%d (Utgave %d)"
 
 #. • MSG_019
 msgid "Latest version: %d.%d (Build %d)"
-msgstr "Siste versjon: %d.%d (Utgave %d)"
+msgstr "Nyeste versjon: %d.%d (Utgave %d)"
 
 #. • MSG_020
 #. • MSG_026
@@ -346,14 +346,14 @@ msgstr "BIOS eller UEFI"
 #.
 #. Number of bad block check passes (singular for 1 pass)
 msgid "%d pass"
-msgstr "%d Passering"
+msgstr "%d passering"
 
 #. • MSG_035
 #.
 #. Number of bad block check passes (plural for 2 or more passes).
 #. See MSG_087 for the message that %s gets replaced with.
 msgid "%d passes %s"
-msgstr "%d Passeringer %s"
+msgstr "%d passeringer %s"
 
 #. • MSG_036
 msgid "ISO Image"
@@ -385,7 +385,7 @@ msgstr "Feil: %s"
 
 #. • MSG_044
 msgid "File download"
-msgstr "Fil-nedlasting"
+msgstr "Filnedlasting"
 
 #. • MSG_045
 msgid "USB Storage Device (Generic)"
@@ -419,7 +419,7 @@ msgstr "Ubestemmelig feil under formateringen."
 
 #. • MSG_052
 msgid "Cannot use the selected file system for this media."
-msgstr "Kan ikke bruke det valgte filsystem for dette mediet."
+msgstr "Kan ikke bruke det valgte filsystemet for dette mediet."
 
 #. • MSG_053
 msgid "Access to the device is denied."
@@ -447,7 +447,7 @@ msgstr "Enhetshåndteringen er ugyldig."
 
 #. • MSG_059
 msgid "The selected cluster size is not valid for this device."
-msgstr "Den valgte cluster-størrelsen er ikke gyldig for denne enheten."
+msgstr "Den valgte klyngestørrelsen er ikke gyldig for denne enheten."
 
 #. • MSG_060
 msgid "The volume size is invalid."
@@ -491,7 +491,7 @@ msgstr "Kunne ikke kopiere filer til målstasjonen."
 
 #. • MSG_070
 msgid "Cancelled by user."
-msgstr "Brukeravbrutt."
+msgstr "Avbrutt av brukeren."
 
 #. • MSG_071
 #.
@@ -501,19 +501,19 @@ msgstr "Ikke mulig å starte tråd."
 
 #. • MSG_072
 msgid "Bad blocks check didn't complete."
-msgstr "Dårlig blokk-kontroll ikke fullført."
+msgstr "Kontroll av dårlige blokker ble ikke fullført."
 
 #. • MSG_073
 msgid "ISO image scan failure."
-msgstr "ISO-bilde skanningsfeil."
+msgstr "ISO-bildeskanningsfeil."
 
 #. • MSG_074
 msgid "ISO image extraction failure."
-msgstr "ISO-bilde utpakkingsfeil."
+msgstr "ISO-bildeutpakkingsfeil."
 
 #. • MSG_075
 msgid "Unable to remount volume."
-msgstr "Ikke mulig å igjen-innkoble volum."
+msgstr "Ikke mulig å gjenmontere volumet."
 
 #. • MSG_076
 msgid "Unable to patch/setup files for boot."
@@ -525,7 +525,7 @@ msgstr "Ikke mulig å tildele en stasjonsbokstav."
 
 #. • MSG_078
 msgid "Can't mount GUID volume."
-msgstr "Kan ikke montere GUID stasjon."
+msgstr "Kan ikke montere GUID-volum."
 
 #. • MSG_079
 msgid "The device is not ready."
@@ -543,7 +543,7 @@ msgstr ""
 "\n"
 "Avhengig av hastigheten på din USB-enhet, vil muligens denne operasjonen ta lang til å fullføre, spesielt for store filer.\n"
 "\n"
-"Vi anbefaler at du lar Windows fullføre, slik at feil unngås. Men blir du lei av og vente..., kan du koble fra enheten..."
+"Vi anbefaler at du lar Windows fullføre, slik at feil unngås. Men blir du lei av og vente, kan du koble fra enheten..."
 
 #. • MSG_081
 msgid "Unsupported image"
@@ -555,7 +555,7 @@ msgstr "Dette ISO-bildet er enten ikke oppstartbar, eller så bruker den en opps
 
 #. • MSG_083
 msgid "Replace %s?"
-msgstr "Bytte ut %s?"
+msgstr "Vil du bytte ut %s?"
 
 #. • MSG_084
 msgid ""
@@ -577,7 +577,7 @@ msgstr ""
 "- Velg 'Nei' for å bruke den eksisterende ISO-filen\n"
 "Hvis du ikke vet hva du skal gjøre, bør du velge 'Ja'.\n"
 "\n"
-"OBS: Den nye filen vil bli lastet ned i den gjeldende mappen, og når'%s' er der, vil den bli brukt automatisk."
+"OBS: Den nye filen vil bli lastet ned i den gjeldende mappen, og når '%s' er der vil den bli brukt automatisk."
 
 #. • MSG_085
 msgid "Downloading %s"
@@ -608,11 +608,11 @@ msgstr "Bildet er for stort for det valgte målet."
 
 #. • MSG_090
 msgid "Unsupported ISO"
-msgstr "Ikke støttet ISO"
+msgstr "Ustøttet ISO"
 
 #. • MSG_091
 msgid "When using UEFI Target Type, only EFI bootable ISO images are supported. Please select an EFI bootable ISO or set the Target Type to BIOS."
-msgstr "Når UEFI måltype blir brukt, er kun EFI oppstartbar ISO-bilde støttet. Vennligst velg en EFI oppstartbar ISO-fil eller sett måltype i BIOS."
+msgstr "Når UEFI-måltype blir brukt, er kun EFI-oppstartbare ISO-bilder støttet. Vennligst velg en EFI-oppstartbar ISO-fil eller sett måltypen til BIOS."
 
 #. • MSG_092
 msgid "Unsupported filesystem"
@@ -624,9 +624,9 @@ msgid ""
 "\n"
 "This may include partitions/volumes that aren't listed or even visible from Windows. Should you wish to proceed, you are responsible for any data loss on these partitions."
 msgstr ""
-"VIKTIGT: DENNE STASJONEN INNEHOLDER FLERE PARTISJONER!!\n"
+"VIKTIG: DENNE STASJONEN INNEHOLDER FLERE PARTISJONER!!\n"
 "\n"
-"Denne inneholder kanskje partisjoner/volumer som ikke er listet, og muligens ikke er synlig i Windows. Hvis du ønsker å fortsette, er du selv ansvarlig for evt. tapte data på disse partisjonene."
+"Denne inneholder kanskje partisjoner/volumer som ikke er oppført, eller sågar muligens ikke synlige i Windows. Hvis du ønsker å fortsette, er du selv ansvarlig for evt. tapte data på disse partisjonene."
 
 #. • MSG_094
 msgid "Multiple partitions detected"
@@ -638,7 +638,7 @@ msgstr "DD-bilde"
 
 #. • MSG_096
 msgid "The file system currently selected can not be used with this type of ISO. Please select a different file system or use a different ISO."
-msgstr "Filsystemet som er valgt kan ikke brukes med denne type ISOVennligst velg ett annet filsystem, eller bruk en annen ISO."
+msgstr "Filsystemet som er valgt kan ikke brukes med denne type ISO. Vennligst velg et annet filsystem, eller bruk en annen ISO."
 
 #. • MSG_097
 msgid "'%s' can only be applied if the file system is NTFS."
@@ -652,19 +652,19 @@ msgid ""
 "\n"
 "Note: The 'FIXED/REMOVABLE' attribute is a hardware property that can only be changed using custom tools from the drive manufacturer. However those tools are ALMOST NEVER provided to the public..."
 msgstr ""
-"VIKTIGT: Du prøver å installere 'Windows To Go', med målstasjonen ikke harden rette beskrivelsen. P.g.a dette vil Windows sannsynligvis stoppe opp under oppstarten, da Microsoft ikke har designet den til å virke med stasjoner som er 'FLYTTBAR'. \n"
+"VIKTIG: Du prøver å installere 'Windows To Go', men målstasjonen har ikke den rette beskrivelsen. P.g.a. dette vil Windows sannsynligvis stoppe opp under oppstarten, da Microsoft ikke har designet den til å virke med stasjoner som er 'FLYTTBAR'. \n"
 "\n"
 "Ønsker du å fortsette?\n"
 "\n"
-"OBS:'FAST/FLYTTBAR' er et hardware-valg som kun kan endres ved å bruke spesialutstyr fra stasjonsprodusenten. Uansett er dette verktøyet NESTEN ALDRI tilgjengelig for publikum..."
+"Bemerk: 'FAST/FLYTTBAR'-attributten er en maskinvareegenskap som kun kan endres ved å bruke spesialutstyr fra stasjonsprodusenten. Uansett er de verktøyene NESTEN ALDRI tilgjengelig for publikum..."
 
 #. • MSG_099
 msgid "Filesystem limitation"
-msgstr "Filsystem begrensning"
+msgstr "Filsystembegrensning"
 
 #. • MSG_100
 msgid "This ISO image contains a file larger than 4 GB, which is more than the maximum size allowed for a FAT or FAT32 file system."
-msgstr "Dette ISO-bildet inneholder filer større enn 4 GB, som er mer enn den maksimalt tillate størrelsen for FAT eller FAT32 fil-systemet."
+msgstr "Dette ISO-bildet inneholder filer større enn 4 GB, som er mer enn den maksimalt tillate størrelsen for FAT- eller FAT32-filsystemene."
 
 #. • MSG_101
 msgid "Missing WIM support"
@@ -675,8 +675,8 @@ msgid ""
 "Your platform cannot extract files from WIM archives. WIM extraction is required to create EFI bootable Windows 7 and Windows Vista USB drives. You can fix that by installing a recent version of 7-Zip.\n"
 "Do you want to visit the 7-zip download page?"
 msgstr ""
-"Din plattform kan ikke pakke ut filer fra WIM-arkiver. WIM-utpakking er påkrevd for å lage EFI oppstartbar Windows 7 og Windows Vista USB-stasjoner. Du kan fikse det ved å installere siste versjon av 7-Zip.\n"
-"Vil du besøke 7-zip nedlastingssiden?"
+"Din plattform kan ikke pakke ut filer fra WIM-arkiver. WIM-utpakking er påkrevd for å lage EFI-oppstartbare Windows 7- og Windows Vista-USB-stasjoner. Du kan fikse det ved å installere en nyere versjon av 7-Zip.\n"
+"Vil du besøke 7-Zip-nedlastingssiden?"
 
 #. • MSG_103
 msgid "Download %s?"
@@ -696,8 +696,8 @@ msgid ""
 "\n"
 "Note: The file will be downloaded in the current directory and once a '%s' exists there, it will be reused automatically."
 msgstr ""
-"%s eller senere er påkrevd for at '%s' filen kan bli innstallert.\n"
-"P.g.a. filen er mer enn 100 KB i størrelse, og er alltid tilstede i %s ISO-bilder, og den ikke er innebygd i Rufus.\n"
+"%s eller senere er påkrevd for at '%s'-filen kan bli installert.\n"
+"Fordi filen er mer enn 100 KB i størrelse, og alltid er tilstede i %s-ISO-bilder, er den ikke innebygd i Rufus.\n"
 "\n"
 "Rufus kan laste den den manglende filen for deg:\n"
 "- Velg 'Ja' for å koble til internett og laste ned filen\n"
@@ -710,8 +710,8 @@ msgid ""
 "Cancelling may leave the device in an UNUSABLE state.\n"
 "If you are sure you want to cancel, click YES. Otherwise, click NO."
 msgstr ""
-"Å avbryte, vil enheten være i en USTABIL tilstand.\n"
-"Hvis du er sikker på at du vil avbryte, klikk JA. Ellers klikk NEI."
+"Å avbryte, kan etterlate enheten i en USTABIL tilstand.\n"
+"Hvis du er sikker på at du vil avbryte, klikk JA. Ellers, klikk NEI."
 
 #. • MSG_106
 msgid "Please select folder"
@@ -723,7 +723,7 @@ msgstr "Alle filer"
 
 #. • MSG_108
 msgid "Rufus log"
-msgstr "Rufus logg"
+msgstr "Rufus-logg"
 
 #. • MSG_109
 msgid "0x%02X (Disk %d)"
@@ -737,18 +737,18 @@ msgid ""
 "MS-DOS cannot boot from a drive using a 64 kilobytes Cluster size.\n"
 "Please change the Cluster size or use FreeDOS."
 msgstr ""
-"MS-DOS kan ikke boote fra en stasjon som brukeren 64 kilobytes Cluster størrelse.\n"
-"Vennligst bytt Cluster-størrelse eller bruk FreeDOS."
+"MS-DOS kan ikke starte opp fra en stasjon som bruker 64-kilobytes klyngestørrelse.\n"
+"Vennligst bytt klyngestørrelse eller bruk FreeDOS."
 
 #. • MSG_111
 msgid "Incompatible Cluster size"
-msgstr "Inkompatibelt Cluster-størrelse"
+msgstr "Inkompatibel klyngestørrelse"
 
 #. • MSG_112
 #.
 #. "%d:%02d" is a duration (mins:secs)
 msgid "Formatting a large UDF volumes can take a lot of time. At USB 2.0 speeds, the estimated formatting duration is %d:%02d, during which the progress bar will appear frozen. Please be patient!"
-msgstr "Formatere et stort UDF-volum kan ta lang tid. Ved å bruke USB 2.0 hastighet, den estimerte formateringstiden er %d:%02d, under denne tiden vil framgangslinjen virke frossen. Vennligst vær tålmodig!"
+msgstr "Formatere et stort UDF-volum kan ta lang tid. Ved å bruke USB 2.0-hastighet, er den anslåtte formateringstiden %d:%02d, under denne tiden vil fremgangslinjen se frossen ut. Vennligst vær tålmodig!"
 
 #. • MSG_113
 msgid "Large UDF volume"
@@ -766,8 +766,8 @@ msgid ""
 msgstr ""
 "Dette bildet bruker Syslinux %s%s men dette programmet inkluderer kun installsjonsfiler for Syslinux %s%s.\n"
 "\n"
-"Nye versjoner av Syslinux er ikke kompatible med hverandre, og dermed ikke mulig for Rufus å inkludere alle, 2 ekstra filer må lastes ned fra Internett ('ldlinux.sys' og 'ldlinux.bss'):\n"
-"- Velg 'Ja' For å koble til internett og laste ned disse filene\n"
+"Siden nye versjoner av Syslinux ikke er kompatible med hverandre, og det dermed ikke er mulig for Rufus å inkludere alle, må 2 ekstra filer lastes ned fra Internett ('ldlinux.sys' og 'ldlinux.bss'):\n"
+"- Velg 'Ja' for å koble til internett og laste ned disse filene\n"
 "- Velg 'Nei' for å avbryte\n"
 "\n"
 "OBS: Filene vil bli lastet ned i det aktuelle programmets mappe og vil bli brukt automatisk hvis de er tilstede."
@@ -792,16 +792,16 @@ msgid ""
 msgstr ""
 "Dette bildet bruker Grub %s, men programmet inkluderer kun installasjonsfiler forGrub %s.\n"
 "\n"
-"Forskjellige versjoner av Grub er muligens ikke kompatible med hverandre, og er ikke mulig å inkludere dem alle, Rufus vil prøve å finne en versjon av Grub installasjonfilen ('core.img') som passer til ditt bilde:\n"
+"Siden forskjellige versjoner av Grub muligens ikke er kompatible med hverandre, og det ikke er mulig å inkludere dem alle, vil Rufus vil prøve å finne en versjon av Grub-installasjonfilen ('core.img') som passer til ditt bilde:\n"
 "- Velg 'Ja' for å koble til internett og forsøke å laste den ned\n"
 "- Velg 'Nei' for å bruke den innebygde versjonen uansett\n"
 "- Velg 'Avbryt' for å avbryte\n"
 "\n"
-"OBS: Filen vil bli lastet ned i den aktuelle program-mappen og vil bli brukt automatisk hvis tilgjengelig. Hvis ingen treff kan bli funnet, den innebygde versjonen vil bli brukt."
+"OBS: Filen vil bli lastet ned i den aktuelle program-mappen og vil bli brukt automatisk hvis tilgjengelig. Hvis ingen treff kan bli funnet, vil den innebygde versjonen bli brukt."
 
 #. • MSG_117
 msgid "Standard Windows installation"
-msgstr "Standard Windows installasjon"
+msgstr "Standard Windows-installasjon"
 
 #. • MSG_118
 #.
@@ -834,7 +834,7 @@ msgstr "Skjul %s"
 #. To test this feature, please download and select 'casper_test.iso' from:
 #. https://github.com/pbatard/rufus/raw/master/res/loc/test/casper_test.iso
 msgid "Persistent partition size"
-msgstr "Vedvarende partisjon størrelse"
+msgstr "Vedvarende partisjonsstørrelse"
 
 #. • MSG_124
 #.
@@ -848,11 +848,11 @@ msgstr "Ingen varighet"
 #.
 #. Tooltips used for the persistence size slider and edit control
 msgid "Set the size of the persistent partition for live USB media. Setting the size to 0 disables the persistent partition."
-msgstr "Still størrelsen på den vedvarende partisjonen for live USB media. Angir størrelsen til 0 deaktiverer den vedvarende partisjonen."
+msgstr "Sett størrelsen på den vedvarende partisjonen for »Live USB»-media. Å sette størrelsen til 0 deaktiverer den vedvarende partisjonen."
 
 #. • MSG_126
 msgid "Set the partition size units."
-msgstr "Sett partisjonens størrelse enheter."
+msgstr "Sett partisjonens størrelsesenheter."
 
 #. • MSG_127
 msgid "Do not show this message again"
@@ -867,27 +867,26 @@ msgid ""
 "You have just created a media that uses the UEFI:NTFS bootloader. Please remember that, to boot this media, YOU MUST DISABLE SECURE BOOT.\n"
 "For details on why this is necessary, see the 'More Information' button below."
 msgstr ""
-"Du har nettopp opprettet et medie som bruker UEFI: NTFS bootloader. Husk at, for å starte dette mediet, må du deaktivere SECURE BOOT.\n"
-"For detaljer om hvorfor dette er nødvendig, se \"Mer informasjon\" knappen nedenfor."
+"Du har nettopp opprettet et medie som bruker »UEFI:NTFS»-bootloaderen. Husk at for å starte dette mediet MÅ DU SKRU AV «SECURE BOOT».\n"
+"For detaljer om hvorfor dette er nødvendig, se \"Mer informasjon\"-knappen nedenfor."
 
 #. • MSG_130
 msgid "Windows image selection"
-msgstr "Windows image-valg"
+msgstr "Windows-bildevalg"
 
 #. • MSG_131
 msgid ""
 "This ISO contains multiple Windows images.\n"
 "Please select the image you wish to use for this installation:"
 msgstr ""
-"Denne ISO inneholder flere Windows-imager.\n"
-"Vennligst velg image du vil bruke til denne installasjonen:"
+"Denne ISO-en inneholder flere Windows-bilder.\n"
+"Vennligst velg bildet du vil bruke til denne installasjonen:"
 
 #. • MSG_132
 msgid "Another program or process is accessing this drive. Do you want to format it anyway?"
-msgstr "Et annet program eller en prosess holder tilgang til denne disken. Vil du formatere det uansett?"
+msgstr "Et annet program eller en prosess holder tilgang til denne disken. Vil du formatere den uansett?"
 
 #. • MSG_133
-#, fuzzy
 msgid ""
 "Rufus has detected that you are attempting to create a 'Windows To Go' media based on a 1809 ISO.\n"
 "\n"
@@ -895,9 +894,9 @@ msgid ""
 "\n"
 "Also note that the reason Rufus cannot automatically fix this for you is that 'WppRecorder.sys' is a Microsoft copyrighted file, so we cannot legally embed a copy of the file in the application..."
 msgstr ""
-"Rufus har oppdaget at du forsøker å lage et Windows To Go-medie basert på en 1809 ISO.\n"
+"Rufus har oppdaget at du forsøker å lage et Windows To Go-medie basert på en 1809-ISO.\n"
 "\n"
-"På grunn av en *MICROSOFT BUG*, vil dette mediet krasje under Windows boot (Blue Screen Of Death), med mindre du manuelt erstatter filen 'WppRecorder.sys' med en 1803-versjon.\n"
+"På grunn av en *MICROSOFT-BUG*, vil dette mediet krasje under Windows-oppstart (Blue Screen Of Death), med mindre du manuelt erstatter filen 'WppRecorder.sys' med en 1803-versjon.\n"
 "\n"
 "Vær også oppmerksom på at grunnen til at Rufus ikke automatisk kan fikse dette for deg, er at 'WppRecorder.sys' er en opphavsrettslig beskyttet fil fra Microsoft, slik at vi ikke lovlig kan legge inn en kopi av filen i programmet..."
 
@@ -949,7 +948,7 @@ msgstr "Last ned ved hjelp av en nettleser"
 
 #. • MSG_144
 msgid "Download of Windows ISOs is unavailable due to Microsoft having altered their website to prevent it."
-msgstr "Nedlasting av Windows ISO fra Microsoft er ikke tilgjengelig. Microsoft har endret websiden for å forhindre nedlastinger på denne måten."
+msgstr "Nedlasting av Windows-ISO-er fra Microsoft er ikke tilgjengelig. Microsoft har endret nettstedet sitt for å forhindre nedlastinger på denne måten."
 
 #. • MSG_145
 msgid "PowerShell 3.0 or later is required to run this script."
@@ -957,7 +956,7 @@ msgstr "PowerShell 3.0 eller nyere kreves for å kjøre dette skriptet."
 
 #. • MSG_146
 msgid "Do you want to go online and download it?"
-msgstr "Ønsker du å gå online og laste den ned?"
+msgstr "Ønsker du å gå på nettet og laste den ned?"
 
 #. • MSG_148
 msgid "Running download script..."
@@ -965,21 +964,21 @@ msgstr "Kjører nedlastingskript..."
 
 #. • MSG_149
 msgid "Download ISO Image"
-msgstr "Last ned ISO-image"
+msgstr "Last ned ISO-bilde"
 
 #. • MSG_150
 msgid "Type of computer you plan to use this bootable drive with. It is your responsibility to determine whether your target is of BIOS or UEFI type before you start creating the drive, as it may fail to boot otherwise."
-msgstr "Datamaskin typen du planlegger å bruke denne oppstartbare stasjonen med. Det er ditt ansvar å avgjøre om målet ditt er av BIOS eller UEFI-typen før du begynner å lage stasjonen, da det kan mislykkes å starte opp ellers."
+msgstr "Datamaskintypen du planlegger å bruke denne oppstartbare stasjonen med. Det er ditt ansvar å avgjøre om målet ditt er av BIOS- eller UEFI-typen før du begynner å lage stasjonen, da det kan mislykkes å starte opp ellers."
 
 #. • MSG_151
 #.
 #. You shouldn't translate 'Legacy Mode' as this is an option that usually appears in English in the UEFI settings.
 msgid "'UEFI-CSM' means that the device will only boot in BIOS emulation mode (also known as 'Legacy Mode') under UEFI, and not in native UEFI mode."
-msgstr "'UEFI-CSM' betyr at enheten bare starter opp i BIOS-emuleringsmodus (også kjent som 'Legacy Mode') under UEFI, og ikke i innebygde UEFI-modus."
+msgstr "'UEFI-CSM' betyr at enheten bare starter opp i BIOS-emuleringsmodus (også kjent som 'Legacy Mode') under UEFI, og ikke i innebygd UEFI-modus."
 
 #. • MSG_152
 msgid "'non CSM' means that the device will only boot in native UEFI mode, and not in BIOS emulation mode (also known as 'Legacy Mode')."
-msgstr "'ikke-CSM' betyr at enheten bare starter opp i innebygde UEFI-modus, og ikke i BIOS-emuleringsmodus (også kjent som 'Legacy Mode')."
+msgstr "'ikke-CSM' betyr at enheten bare starter opp i innebygd UEFI-modus, og ikke i BIOS-emuleringsmodus (også kjent som 'Legacy Mode')."
 
 #. • MSG_153
 msgid "Test pattern: 0x%02X"
@@ -1003,7 +1002,7 @@ msgstr "Setter målfilsystemet"
 
 #. • MSG_158
 msgid "Minimum size that a block of data will occupy in the filesystem"
-msgstr "Minimum størrelse en datablokk vil okkupere i filsystemet"
+msgstr "Minimum størrelse som en datablokk vil okkupere i filsystemet"
 
 #. • MSG_159
 msgid ""
@@ -1039,11 +1038,11 @@ msgstr "Klikk for å velge et bilde..."
 
 #. • MSG_166
 msgid "Check this box to allow the display of international labels and set a device icon (creates an autorun.inf)"
-msgstr "Merk denne boksen for å tillate visning av internasjonal merkelapp og lage et stasjonsikon (lager en autorun.inf)"
+msgstr "Merk denne boksen for å tillate visning av internasjonale merkelapper og sette et stasjonsikon (lager en autorun.inf)"
 
 #. • MSG_167
 msgid "Install a UEFI bootloader, that will perform MD5Sum file validation of the media"
-msgstr "Installer en UEFI bootloader, som vil utføre MD5Sum-filvalidering av media"
+msgstr "Installer en UEFI-bootloader, som vil utføre MD5Sum-filvalidering av mediet"
 
 #. • MSG_169
 msgid ""
@@ -1051,11 +1050,11 @@ msgid ""
 "This can improve boot detection for older BIOSes."
 msgstr ""
 "Opprett en ekstra skjult partisjon og forsøk å justere partisjonsgrenser.\n"
-"Dette kan gjøre det lettere å oppdage for eldre BIOSer."
+"Dette kan gjøre det lettere å oppdage for eldre BIOS-er."
 
 #. • MSG_170
 msgid "Enable the listing of USB Hard Drive enclosures. USE AT YOUR OWN RISKS!!!"
-msgstr "Aktivere listen av USB-harddisk-kabinetter. BRUKES PÅ EGEN RISIKO!!!"
+msgstr "Aktiver oppføringen av USB-harddiskkabinetter. BRUKES PÅ EGEN RISIKO!!!"
 
 #. • MSG_171
 msgid ""
@@ -1063,14 +1062,14 @@ msgid ""
 "This will DESTROY any data on the target!"
 msgstr ""
 "Starter formateringsoperasjonen.\n"
-"Dette vil SLETTE data på målstasjonen!"
+"Dette vil SLETTE alle data på målstasjonen!"
 
 #. • MSG_172
 #.
 #. As of Rufus 3.2, *ALL* downloads from the servers are digitally signed, and their signature is validated using the
 #. public key that is embedded in the application. This message appears in an error dialog if the validation fails.
 msgid "Invalid download signature"
-msgstr "Ugyldig nedlastings signatur"
+msgstr "Ugyldig nedlastningssignatur"
 
 #. • MSG_173
 msgid "Click to select..."
@@ -1094,7 +1093,7 @@ msgstr "Rapporter feil, og forespør forbedringer på:"
 
 #. • MSG_178
 msgid "Additional Copyrights:"
-msgstr "Tilleggs Copyright:"
+msgstr "Ytterligere opphavsrettigheter:"
 
 #. • MSG_179
 msgid "Update Policy:"
@@ -1102,7 +1101,7 @@ msgstr "Oppdateringspolitikk:"
 
 #. • MSG_180
 msgid "If you choose to allow this program to check for application updates, you agree that the following information may be collected on our server(s):"
-msgstr "Hvis du ønsker å tillate at programmet skal sjekke for oppdateringer, du tillater da følgende informasjon å bli samlet inn til vår server(e):"
+msgstr "Hvis du ønsker å tillate at programmet skal sjekke for oppdateringer, tillater du da at følgende informasjon blir samlet inn til vår server(e):"
 
 #. • MSG_181
 msgid "Your operating system's architecture and version"
@@ -1118,7 +1117,7 @@ msgstr "Din IP-adresse"
 
 #. • MSG_184
 msgid "For the purpose of generating private usage statistics, we may keep the information collected, \\b for at most a year\\b0 . However, we will not willingly disclose any of this individual data to third parties."
-msgstr "For muligheten å lage privat bruksstatistikk, vil vi lagre informasjonen for senere bruk, \\b for det meste opp mot ett år\\b0 . Men vi vil ikke frivillig avsløre noen av personens data til tredjepart."
+msgstr "For å kunne opprette privat bruksstatistikk, vil vi lagre informasjonen for senere bruk, \\b for det meste opp mot ett år\\b0 . Men vi vil ikke frivillig avsløre noen av personens data til tredjepart."
 
 #. • MSG_185
 msgid "Update Process:"
@@ -1134,11 +1133,11 @@ msgstr ""
 
 #. • MSG_187
 msgid "Invalid image for selected boot option"
-msgstr "Ugyldig bilde for valgt oppstartsløsning"
+msgstr "Ugyldig bilde for den valgte oppstartsløsningen"
 
 #. • MSG_188
 msgid "The current image doesn't match the boot option selected. Please use a different image or choose a different boot option."
-msgstr "Det nåværende bilde passer ikke det valgte oppstartsvalget. Vennligst velg et annet bilde, eller velg et annet oppstartsvalg."
+msgstr "Det nåværende bildet passer ikke det valgte oppstartsvalget. Vennligst velg et annet bilde, eller velg et annet oppstartsvalg."
 
 #. • MSG_189
 msgid "This ISO image is not compatible with the selected filesystem"
@@ -1146,7 +1145,7 @@ msgstr "Dette ISO-bildet er ikke kompatibelt med det valgte filsystemet"
 
 #. • MSG_190
 msgid "Incompatible drive detected"
-msgstr "Ikke kompatibel stasjon oppdaget"
+msgstr "Inkompatibel stasjon oppdaget"
 
 #. • MSG_191
 #.
@@ -1172,7 +1171,7 @@ msgstr "Kunne ikke laste ned %s"
 #.
 #. Example: "Using embedded version of Grub2 file(s)"
 msgid "Using embedded version of %s file(s)"
-msgstr "Bruker innebygget versjon av %s fil(er)"
+msgstr "Bruker innebygget versjon av %s-fil(er)"
 
 #. • MSG_196
 msgid ""
@@ -1181,18 +1180,18 @@ msgid ""
 "Conventional drives use a 512-byte sector size but this drive uses a %d-byte one. In many cases, this means that you will NOT be able to boot from this drive.\n"
 "Rufus can try to create a bootable drive, but there is NO WARRANTY that it will work."
 msgstr ""
-"VIKTIGT: DENNE STASJONEN BRUKER IKKE STANDARD SEKTORSTØRRELSE!!\n"
+"VIKTIG: DENNE STASJONEN BRUKER IKKE STANDARD SEKTORSTØRRELSE!!\n"
 "\n"
-"Konvensjonelle stasjoner bruker en 512-byte sektorstørrelse, mens denne stasjonen bruker en %d-byte. I mange tilfeller betyr dette at du IKKE vil kunne starte fra denne stasjonen.\n"
+"Konvensjonelle stasjoner bruker en 512-byte sektorstørrelse, mens denne stasjonen bruker en %d-byte. I mange tilfeller betyr dette at du IKKE vil kunne starte opp fra denne stasjonen.\n"
 "Rufus kan fortsatt prøve å lage en oppstartbar stasjon, men det er INGEN GARANTI for at det vil fungere."
 
 #. • MSG_197
 msgid "Nonstandard sector size detected"
-msgstr "Ikke standard sektorstørrelse oppdaget"
+msgstr "Ikke-standard sektorstørrelse oppdaget"
 
 #. • MSG_198
 msgid "'Windows To Go' can only be installed on a GPT partitioned drive if it has the FIXED attribute set. The current drive was not detected as FIXED."
-msgstr "'Windows To Go' kan kun installeres på en GPT-partisjonert stasjon hvis den er FAST stasjonstype. Den aktuelle stasjonen ble ikke oppdaget som FAST."
+msgstr "'Windows To Go' kan kun installeres på en GPT-partisjonert stasjon hvis den har «Fixed»-attributtsettet. Den aktuelle stasjonen ble ikke oppdaget som sådan."
 
 #. • MSG_199
 msgid "This feature is not available on this platform."
@@ -1301,7 +1300,7 @@ msgstr "NTFS opprettet: %d%% fullført"
 #. Example: "Formatting (UDF) - Estimated duration 3:21..."
 #. If "estimated duration" is too long, just use "estimated" or an abbreviation
 msgid "Formatting (%s) - estimated duration %d:%02d..."
-msgstr "Formaterer (%s) - estimeret varighet %d:%02d..."
+msgstr "Formaterer (%s) - anslått varighet %d:%02d..."
 
 #. • MSG_221
 msgid "Setting label (%s)..."
@@ -1351,7 +1350,7 @@ msgstr "Kopierer ISO-filer: %s"
 
 #. • MSG_232
 msgid "Win7 EFI boot setup (%s)..."
-msgstr "Win7 EFI oppstartsoppsett (%s)..."
+msgstr "Win7 EFI-oppstartsoppsett (%s)..."
 
 #. • MSG_233
 msgid "Finalizing, please wait..."
@@ -1427,7 +1426,7 @@ msgstr "En ny versjon av Rufus er tilgjengelig!"
 
 #. • MSG_247
 msgid "No new version of Rufus was found"
-msgstr "Ingen ny versjon av Rufus er funnet"
+msgstr "Ingen ny versjon av Rufus ble funnet"
 
 #. • MSG_248
 msgid "Application registry keys successfully deleted"
@@ -1449,7 +1448,7 @@ msgstr "%s deaktivert"
 
 #. • MSG_252
 msgid "Size checks"
-msgstr "Størrelse kontrollert"
+msgstr "Størrelsessjekker"
 
 #. • MSG_253
 msgid "Hard disk detection"
@@ -1497,7 +1496,7 @@ msgstr "ISO-støtte"
 #.
 #. Cheat mode to force legacy size units, where 1 KB is 1024 bytes and NOT that fake 1000 bytes abomination!
 msgid "Use PROPER size units"
-msgstr "Bruk SKIKKELIG størrelsesenhet"
+msgstr "Bruk SKIKKELIGE størrelsesenheter"
 
 #. • MSG_264
 msgid "Deleting directory '%s'"
@@ -1505,11 +1504,11 @@ msgstr "Sletter mappe '%s'"
 
 #. • MSG_265
 msgid "VMWare disk detection"
-msgstr "VMWare-disk oppdagelse"
+msgstr "VMWare-diskoppdaging"
 
 #. • MSG_266
 msgid "Dual UEFI/BIOS mode"
-msgstr "Dobbel UEFI/BIOS-innstilling"
+msgstr "Kombinert UEFI/BIOS-modus"
 
 #. • MSG_267
 msgid "Applying Windows image: %s"
@@ -1521,7 +1520,7 @@ msgstr "Legger til Windows-bilde..."
 
 #. • MSG_269
 msgid "Preserve timestamps"
-msgstr "Bevarer tidskode"
+msgstr "Bevarer tidsstempler"
 
 #. • MSG_270
 msgid "USB debug"
@@ -1533,7 +1532,7 @@ msgstr "Regner ut bilde-sjekksummer: %s"
 
 #. • MSG_272
 msgid "Compute the MD5, SHA1 and SHA256 checksums for the selected image"
-msgstr "Regner ut MD5, SHA1 og SHA256-sjekksummer for det valgte bilde"
+msgstr "Regner ut MD5-, SHA1- og SHA256-sjekksummer for det valgte bildet"
 
 #. • MSG_273
 msgid "Change the application language"
@@ -1553,23 +1552,23 @@ msgid ""
 "\n"
 "Please select the mode that you want to use to write this image:"
 msgstr ""
-"Bildet du har valgt er et 'ISOHybrid'-bilde. Dette betyr det enten kan bli skrevet i %s (filkopi) -modus eller %s (bildefil) -modus.\n"
-"Rufus anbefaler å bruke %s -modus, slik at du har full tilgang til stasjonen etter at du har skrevet til den.\n"
-"Hvis du skulle få problemer under oppstart, kan du prøve å skrive bildet igjen i %s -modus.\n"
+"Bildet du har valgt er et 'ISOHybrid'-bilde. Dette betyr det enten kan bli skrevet i %s (filkopi)-modus eller %s (bildefil)-modus.\n"
+"Rufus anbefaler å bruke %s-modus, slik at du har full tilgang til stasjonen etter at du har skrevet til den.\n"
+"Hvis du skulle få problemer under oppstart, kan du prøve å skrive bildet igjen i %s-modus.\n"
 "\n"
-"Vennligst velg modus du ønsker å skrive dette bildet i:"
+"Vennligst velg modusen du ønsker å skrive dette bildet i:"
 
 #. • MSG_276
 #.
 #. '%s' will be replaced with your translation for MSG_036 ("ISO Image")
 msgid "Write in %s mode (Recommended)"
-msgstr "Skriv i %s -modus (anbefalt)"
+msgstr "Skriv i %s-modus (anbefalt)"
 
 #. • MSG_277
 #.
 #. '%s' will be replaced with your translation for MSG_095 ("DD Image")
 msgid "Write in %s mode"
-msgstr "Skriv i %s -modus"
+msgstr "Skriv i %s-modus"
 
 #. • MSG_278
 msgid "Checking for conflicting processes..."
@@ -1581,7 +1580,7 @@ msgstr "Ikke oppstartbar"
 
 #. • MSG_280
 msgid "Disk or ISO image"
-msgstr "Disk eller ISO bilde"
+msgstr "Disk- eller ISO-bilde"
 
 #. • MSG_281
 msgid "%s (Please select)"
@@ -1589,7 +1588,7 @@ msgstr "%s (Vennligst velg)"
 
 #. • MSG_282
 msgid "Exclusive USB drive locking"
-msgstr "Utelat USB stasjonslås"
+msgstr "Eksklusiv USB-stasjonslåsing"
 
 #. • MSG_283
 msgid "Invalid signature"
@@ -1597,7 +1596,7 @@ msgstr "Ugyldig signatur"
 
 #. • MSG_284
 msgid "The downloaded executable is missing a digital signature."
-msgstr "Den nedlastede programfil mangler en digital signatur."
+msgstr "Den nedlastede programfilen mangler en digital signatur."
 
 #. • MSG_285
 msgid ""
@@ -1605,7 +1604,7 @@ msgid ""
 "This is not a signature we recognize and could indicate some form of malicious activity...\n"
 "Are you sure you want to run this file?"
 msgstr ""
-"Den nedlastede programfil er signert av '%s'.\n"
+"Den nedlastede programfilen er signert av '%s'.\n"
 "Dette er en signatur vi ikke gjenkjenner, og kan indikere en form for skadelig aktivitet...\n"
 "Er du sikker på at du vil kjøre denne filen?"
 
@@ -1683,7 +1682,7 @@ msgstr ""
 
 #. • MSG_299
 msgid "Timestamp validation error"
-msgstr "Tidspunkt bekreftelses feil"
+msgstr "Tidsstempelsbekreftelsesfeil"
 
 #. • MSG_300
 msgid ""
@@ -1713,14 +1712,14 @@ msgstr "Opprett et diskbilde av den valgte enheten"
 
 #. • MSG_305
 msgid "Use this option to indicate if you plan to install Windows to a different disk, or if you want to run Windows directly from this drive (Windows To Go)."
-msgstr "Bruk dette alternativet for å angi om du vil bruke denne enheten til å installere Windows på en annen disk, eller hvis du vil kjøre Windows direkte fra denne stasjonen (Windows To Go)."
+msgstr "Bruk dette alternativet for å indikere at du planlegger å bruke denne enheten til å installere Windows på en annen disk, eller hvis du vil kjøre Windows direkte fra denne stasjonen (Windows To Go)."
 
 #. • MSG_306
 #.
 #. You can see this status message by pressing <Ctrl>-<Alt>-<Z> and then selecting START.
 #. It's the same as MSG_286 but with a process that *may* be faster, hence the name.
 msgid "Fast-zeroing drive: %s"
-msgstr "Hurtig nullstilling av disken: %s"
+msgstr "Hurtignullstilling av disken: %s"
 
 #. • MSG_307
 msgid "this may take a while"
@@ -1728,7 +1727,7 @@ msgstr "dette kan ta litt tid"
 
 #. • MSG_308
 msgid "VHD detection"
-msgstr "VHD deteksjon"
+msgstr "VHD-oppdaging"
 
 #. • MSG_309
 msgid "Compressed archive"
@@ -1746,7 +1745,7 @@ msgstr ""
 
 #. • MSG_311
 msgid "Use %s (in the main application window) to enable."
-msgstr "Bruk %s i hoved applikasjonsvinduet til å slå på."
+msgstr "Bruk %s (i hovedapplikasjonsvinduet) for å slå på."
 
 #. • MSG_312
 msgid "Extra hashes (SHA512)"
@@ -1766,11 +1765,11 @@ msgstr "Flere knapper"
 
 #. • MSG_316
 msgid "Number of passes"
-msgstr "Antall pasninger"
+msgstr "Antall passeringer"
 
 #. • MSG_317
 msgid "Disk ID"
-msgstr ""
+msgstr "Disk-ID"
 
 #. • MSG_318
 msgid "Default thread priority: %d"
@@ -1782,14 +1781,14 @@ msgstr "Ignorer oppstartsmarkør"
 
 #. • MSG_320
 msgid "Refreshing partition layout (%s)..."
-msgstr "Forfriskende partisjonsoppsett (%s)..."
+msgstr "Oppfrisker partisjonsoppsett (%s)..."
 
 #. • MSG_321
 msgid ""
 "The image you have selected is an ISOHybrid, but its creators have not made it compatible with ISO/File copy mode.\n"
 "As a result, DD image writing mode will be enforced."
 msgstr ""
-"Bildet du har valgt er en ISOHybrid, men skaperne har ikke gjort det kompatibelt med ISO / File copy modus.\n"
+"Bildet du har valgt er en ISOHybrid, men skaperne har ikke gjort den kompatibel med ISO-/filkopieringsmodus.\n"
 "Som et resultat vil DD-skrivemodus bli håndhevet."
 
 #. • MSG_322
@@ -1802,7 +1801,7 @@ msgstr "Bruk SkuSiPolicy.p7b under installasjon (se KB5042562)"
 
 #. • MSG_324
 msgid "QoL improvements (Don't force Copilot, OneDrive, Outlook, Fast Startup, etc.)"
-msgstr "QoL‑forbedringer (ikke påtving Copilot, OneDrive, Outlook, Hurtig oppstart osv.)"
+msgstr "QoL‑forbedringer (ikke påtving Copilot, OneDrive, Outlook, Hurtig oppstart, osv.)"
 
 #. • MSG_325
 msgid "Applying Windows customization: %s"
@@ -1814,11 +1813,11 @@ msgstr "Aktiverer brukertilpasninger..."
 
 #. • MSG_327
 msgid "Windows User Experience"
-msgstr "Windows brukeropplevelse"
+msgstr "Windows-brukeropplevelse"
 
 #. • MSG_328
 msgid "Customize Windows installation?"
-msgstr "Tilpasse Windows installasjonen?"
+msgstr "Vil du tilpasse Windows-installasjonen?"
 
 #. • MSG_329
 msgid "Remove requirement for 4GB+ RAM, Secure Boot and TPM 2.0"
@@ -1826,7 +1825,7 @@ msgstr "Fjern krav om 4GB+ RAM, Secure Boot og TPM 2.0"
 
 #. • MSG_330
 msgid "Remove requirement for an online Microsoft account"
-msgstr "Fjern krav om en Microsoft konto"
+msgstr "Fjern krav om en Microsoft-konto"
 
 #. • MSG_331
 msgid "Disable data collection (Skip privacy questions)"
@@ -1846,7 +1845,7 @@ msgstr "Sett regionale innstillinger til det samme som den aktive brukerkontoen"
 
 #. • MSG_335
 msgid "Disable BitLocker automatic device encryption"
-msgstr "Deaktiver BitLocker kryptering av enheten"
+msgstr "Deaktiver BitLocker-kryptering av enheten"
 
 #. • MSG_336
 msgid "Persistent log"
@@ -1868,7 +1867,7 @@ msgstr ""
 
 #. • MSG_338
 msgid "Revoked UEFI bootloader detected"
-msgstr "Opphevet UEFI bootloader oppdaget"
+msgstr "Tilbakekalt UEFI-bootloader oppdaget"
 
 #. • MSG_339
 msgid ""
@@ -1877,9 +1876,9 @@ msgid ""
 "- If you obtained this ISO image from a non reputable source, you should consider the possibility that it might contain UEFI malware and avoid booting from it.\n"
 "- If you obtained it from a trusted source, you should try to locate a more up to date version, that will not produce this warning."
 msgstr ""
-"Rufus oppdaget at ISO-en du har valgt inneholder en UEFI-oppstartslaster som har blitt tilbakekalt og som vil produsere %s, når sikker oppstart er aktivert på et fullstendig oppdatert UEFI-system.\n"
+"Rufus oppdaget at ISO-en du har valgt inneholder en UEFI-oppstartslaster som har blitt tilbakekalt og som vil produsere %s, når sikker oppstart er aktivert på et fullt oppdatert UEFI-system.\n"
 "\n"
-"- Hvis du har fått dette ISO-bildet fra en ikke-anerkjent kilde, bør du vurdere muligheten for at det kan inneholde UEFI-malware og unngå å starte opp fra det.\n"
+"- Hvis du har fått dette ISO-bildet fra en ikke-anerkjent kilde, bør du vurdere muligheten for at det kan inneholde UEFI-skadevare og unngå å starte opp fra det.\n"
 "- Hvis du har fått det fra en pålitelig kilde, bør du prøve å finne en mer oppdatert versjon, som ikke vil gi denne advarselen."
 
 #. • MSG_340
@@ -1892,11 +1891,11 @@ msgstr "en Windows-gjenopprettingsskjerm (BSOD) med '%s'"
 
 #. • MSG_342
 msgid "Compressed VHDX Image"
-msgstr "Komprimert VHDX-imaget"
+msgstr "Komprimert VHDX-bilde"
 
 #. • MSG_343
 msgid "Uncompressed VHD Image"
-msgstr "Ukomprimert VHD-imaget"
+msgstr "Ukomprimert VHD-bilde"
 
 #. • MSG_344
 msgid "Full Flash Update Image"
@@ -1914,11 +1913,11 @@ msgstr ""
 
 #. • MSG_346
 msgid "Restrict Windows to S-Mode (INCOMPATIBLE with online account bypass)"
-msgstr "Begrens Windows til S-modus (INKOMPATIBEL med online kontoomgåelse)"
+msgstr "Begrens Windows til S-modus (INKOMPATIBEL med nettkontoomgåelse)"
 
 #. • MSG_347
 msgid "Expert Mode"
-msgstr "Ekspert modus"
+msgstr "Ekspertmodus"
 
 #. • MSG_348
 msgid "Extracting archive files: %s"
@@ -1926,11 +1925,11 @@ msgstr "Pakker ut arkivfiler: %s"
 
 #. • MSG_349
 msgid "Use Rufus MBR"
-msgstr "Bruk Rufus MBR"
+msgstr "Bruk Rufus-MBR"
 
 #. • MSG_350
 msgid "Use 'Windows CA 2023' signed bootloaders (Requires a compatible target PC)"
-msgstr "Bruk bootloaders signert med «Windows CA 2023» (krever en kompatibel target‑PC)"
+msgstr "Bruk bootloadere signert med «Windows CA 2023» (krever en kompatibel mål‑PC)"
 
 #. • MSG_351
 msgid "Checking for UEFI bootloader revocation..."
@@ -1960,7 +1959,7 @@ msgstr ""
 
 #. • MSG_355
 msgid "⚠SILENTLY⚠ erase disk and install:"
-msgstr "⚠STILLEMODUS⚠ slett disk og installer:"
+msgstr "⚠I STILLHET⚠ slett disk og installer:"
 
 #. • MSG_356
 msgid ""
@@ -1980,7 +1979,7 @@ msgstr ""
 
 #. • MSG_358
 msgid "Unsupported image location"
-msgstr "Ugyldig bildelokasjon"
+msgstr "Ustøttet bildeplassering"
 
 #. • MSG_359
 msgid ""
@@ -2030,7 +2029,7 @@ msgstr "Bruk dette alternativet dersom systemet du planlegger å installere Wind
 
 #. • MSG_369
 msgid "Use this option if you want to revoke additional potentially unsafe Windows bootloaders, but with the potential of also preventing standard Windows media from booting."
-msgstr "Bruk dette alternativet hvis du ønsker å tilbakekalle flere potensielt usikre Windows‑bootloaders, men vær oppmerksom på at dette også kan hindre standard Windows‑medier i å starte."
+msgstr "Bruk dette alternativet hvis du ønsker å tilbakekalle flere potensielt usikre Windows‑bootloadere, men vær oppmerksom på at dette også kan hindre vanlige Windows‑medier i å starte."
 
 #. • MSG_370
 msgid "\"Quality of Life\" enhancements: Disable most of the unwanted features Microsoft is trying to force onto end users."
@@ -2038,7 +2037,7 @@ msgstr "«Quality of Life»-forbedringer: Deaktiverer de fleste uønskede funksj
 
 #. • MSG_371
 msgid "If you use this option, please make sure to disconnect every disk from the target PC, except the one you want to install Windows on, as well as not leave the media plugged into any PC you don't want to erase."
-msgstr "Hvis du bruker dette alternativet, sørg for å koble fra alle disker fra mål‑PC‑en unntatt den du vil installere Windows på, og pass på at installasjonsmediet ikke er koblet til noen PC du ikke ønsker å slette."
+msgstr "Hvis du bruker dette alternativet, sørg for å koble fra alle disker fra mål‑PC‑en bortsett fra den du vil installere Windows på, og pass på at installasjonsmediet ikke er koblet til en PC du ikke ønsker å slette."
 
 #. • MSG_900
 #.
@@ -2048,7 +2047,7 @@ msgstr "Rufus er et verktøy som hjelper til med å formatere og lage oppstartba
 
 #. • MSG_901
 msgid "Official site: %s"
-msgstr "Offisiell webside: %s"
+msgstr "Offisielt nettsted: %s"
 
 #. • MSG_902
 msgid "Source Code: %s"
@@ -2083,23 +2082,23 @@ msgstr "Formater USB, minnekort og virtuelle disker til FAT/FAT32/NTFS/UDF/exFAT
 
 #. • MSG_911
 msgid "Create FreeDOS bootable USB drives"
-msgstr "Lag FreeDos oppstartbar USB stick"
+msgstr "Lag FreeDOS-oppstartbare USB-stasjoner"
 
 #. • MSG_912
 msgid "Create bootable drives from bootable ISOs (Windows, Linux, etc.)"
-msgstr "Lag oppstartabar enhet/disk fra ISOer (Windows, Linux, etc.)"
+msgstr "Lag oppstartbar enhet/disk fra ISOer (Windows, Linux, osv.)"
 
 #. • MSG_913
 msgid "Create bootable drives from bootable disk images, including compressed ones"
-msgstr "Lag oppstartbare disker fra images, inkludert komprimerte sådan"
+msgstr "Lag oppstartbare disker fra oppstartbare bilder, inkludert komprimerte sådan"
 
 #. • MSG_914
 msgid "Create BIOS or UEFI bootable drives, including UEFI bootable NTFS"
-msgstr "Lag BIOS eller UEFI oppstartbare disker, inkludert UEFI oppstartbar NTFS"
+msgstr "Lag BIOS- eller UEFI-oppstartbare disker, inkludert UEFI-oppstartbar NTFS"
 
 #. • MSG_915
 msgid "Create 'Windows To Go' drives"
-msgstr "Lag 'Windows To Go' disker"
+msgstr "Lag 'Windows To Go'-disker"
 
 #. • MSG_916
 msgid "Create Windows 11 installation drives for PCs that don't have TPM or Secure Boot"
@@ -2107,24 +2106,24 @@ msgstr "Lag oppstartsmedia for Windows 11 som ikke krever TPM eller Secure Boot"
 
 #. • MSG_917
 msgid "Create persistent Linux partitions"
-msgstr "Lag persistente Linux partisjoner"
+msgstr "Lag persistente Linux-partisjoner"
 
 #. • MSG_918
 msgid "Create VHD/DD images of the selected drive"
-msgstr "Lag VHD/DD speilinger av valgt disk"
+msgstr "Lag VHD-/DD-speilinger av den valgte disken"
 
 #. • MSG_919
 msgid "Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image"
-msgstr "Kalkuler MD5, SHA-1, SHA-256 og SHA-512 sjekksummer fra valgt speiling"
+msgstr "Beregn MD5-, SHA-1-, SHA-256- og SHA-512-sjekksummene til det valgte bildet"
 
 #. • MSG_920
 msgid "Perform bad blocks checks, including detection of \"fake\" flash drives"
-msgstr "Utfør sjekk for dårlige sektorer, inkludert sjekk for forfalskede flash disker"
+msgstr "Utfør sjekk for dårlige sektorer, inkludert sjekk for forfalskede flash-disker"
 
 #. • MSG_921
 msgid "Download official Microsoft Windows retail ISOs"
-msgstr "Last ned offisielle Windows ISOer"
+msgstr "Last ned offisielle Windows-ISO-er"
 
 #. • MSG_922
 msgid "Download UEFI Shell ISOs"
-msgstr "Last ned UEFI kommandolinje ISOer"
+msgstr "Last ned UEFI-ledetekst-ISO-er"
