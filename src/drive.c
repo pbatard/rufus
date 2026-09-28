@@ -1725,10 +1725,33 @@ out:
 }
 
 // This is a crude attempt at detecting file systems through their superblock magic.
-// Note that we only attempt to detect the file systems that Rufus can format as
-// well as a couple other maintsream ones.
 const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 {
+	typedef struct {
+		const char* name;
+		const uint8_t magic[4];
+	} magic_type;
+	const magic_type magic_types[] = {
+		{ "SquashFS", { 'h', 's', 'q', 's' } },
+		{ "CramFS", { 0x45, 0x3D, 0xCD, 0x28 } },
+		{ "XFS", { 'X', 'F', 'S', 'B' } },
+		{ "LUKS", { 'L', 'U', 'K', 'S' } },
+		{ "MD RAID", { 0xFC, 0x4E, 0x2B, 0xA9 } },
+		{ "U-Boot Legacy uImage", { 0x27, 0x05, 0x19, 0x56 } },
+		{ "Device Tree/U-Boot FIT", { 0xD0, 0x0D, 0xFE, 0xED } },
+		{ "Device Tree Overlay", { 0xD7, 0xB7, 0xAB, 0x1E } },
+		{ "Android Sparse Image", { 0x3A, 0xFF, 0x26, 0xED } },
+		{ "Android Verified Boot", { 'A', 'V', 'B', '0' } },
+		{ "Qualcomm Device Tree", { 'Q', 'C', 'D', 'T' } },
+		{ "Rockchip Resource Image", { 'R', 'S', 'C', 'E' } },
+		{ "Rockchip Kernel Image", { 'K', 'R', 'N', 'L' } },
+		{ "Rockchip Parameter Image", { 'P', 'A', 'R', 'M' } },
+		{ "Rockchip Firmware Image", { 'R', 'K', 'F', 'W' } },
+		{ "Amlogic Image", { '@', 'A', 'M', 'L' } },
+		{ "Allwinner Image", { 'e', 'G', 'O', 'N' } },
+		{ "Mediatek Image", { 0x88, 0x16, 0x88, 0x58 } },
+		{ "Mediatek Extension", { 0x88, 0x16, 0x89, 0x58 } },
+	};
 	typedef struct {
 		const char* name;
 		const uint8_t magic[8];
@@ -1753,23 +1776,28 @@ const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 		{ 0x00000013, 0x0000004C, 0x0003F780 }
 	};
 	const char* ext_names[] = { "ext", "ext2", "ext3", "ext4" };
+	const uint8_t erofs_magic[4] = { 0xE2, 0xE1, 0xF5, 0xE0 };
+	const uint8_t f2fs_magic[4] = { 0x10, 0x20, 0xF5, 0xF2 };
 	const char* ret = "(Unrecognized)";
 	DWORD i, j, offset, size, sector_size = 512;
 	uint8_t* buf = calloc(sector_size, 1);
 	if (buf == NULL)
 		goto out;
 
-	// 1. Try to detect ISO9660/FAT/exFAT/NTFS/ReFS/SquashFS through the 512 bytes superblock at offset 0
+	// 1. Detect magic-based file systems through the 512 bytes superblock at offset 0
 	if (!SetFilePointerEx(hPhysical, StartingOffset, NULL, FILE_BEGIN))
 		goto out;
 	if (!ReadFile(hPhysical, buf, sector_size, &size, NULL) || size != sector_size)
 		goto out;
-	if (memcmp("hsqs", buf, 4) == 0) {
-		ret = "SquashFS";
-		goto out;
-	}
 	if (strncmp("CD001", &buf[0x01], 5) == 0) {
 		ret = "ISO9660";
+		goto out;
+	}
+	for (i = 0; i < ARRAYSIZE(magic_types); i++)
+		if (memcmp(buf, magic_types[i].magic, 4) == 0)
+			break;
+	if (i < ARRAYSIZE(magic_types)) {
+		ret = magic_types[i].name;
 		goto out;
 	}
 
@@ -1819,8 +1847,8 @@ const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 		goto out;
 	}
 
-	// 3. Try to detect ext2/ext3/ext4 through the 512 bytes superblock at offset 1024
-	// We're already at the right offset
+	// 3. Try to detect ext2/ext3/ext4/EROFS/F2FS through the 512 bytes superblock at
+	// offset 1024 (which StartingOffset already points to)
 	if (!SetFilePointerEx(hPhysical, StartingOffset, NULL, FILE_BEGIN))
 		goto out;
 	if (!ReadFile(hPhysical, buf, sector_size, &size, NULL) || size != sector_size)
@@ -1837,6 +1865,14 @@ const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 		assert(rev < ARRAYSIZE(ext_names));
 		if (rev < ARRAYSIZE(ext_names))
 			ret = ext_names[rev];
+		goto out;
+	}
+	if (memcmp(buf, erofs_magic, 4) == 0) {
+		ret = "EROFS";
+		goto out;
+	}
+	if (memcmp(buf, f2fs_magic, 4) == 0) {
+		ret = "F2FS";
 		goto out;
 	}
 
