@@ -81,7 +81,7 @@ jobs:
     - name: Build
       run: |
         ./configure --disable-debug ${{ steps.set_alpha.outputs.option }} ${{ steps.set_beta.outputs.option }}
-        make -j4 ACLOCAL=: AUTOMAKE=: AUTOCONF=: AUTOHEADER=:
+        make -j4
         mv ./src/rufus.exe ./${{ matrix.exe }}
         strip ./${{ matrix.exe }}
         upx --lzma --best ./${{ matrix.exe }}
