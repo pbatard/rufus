@@ -35,6 +35,7 @@ jobs:
         include:
           - { sys: mingw64, env: x86_64, exe: rufus.exe }
           - { sys: mingw32, env: i686, exe: rufus_x86.exe }
+          - { sys: ucrt64,  env: ucrt-x86_64, exe: rufus_ucrt.exe }
 
     defaults:
       run:
@@ -80,7 +81,7 @@ jobs:
     - name: Build
       run: |
         ./configure --disable-debug ${{ steps.set_alpha.outputs.option }} ${{ steps.set_beta.outputs.option }}
-        make -j4
+        make -j4 ACLOCAL=: AUTOMAKE=: AUTOCONF=: AUTOHEADER=:
         mv ./src/rufus.exe ./${{ matrix.exe }}
         strip ./${{ matrix.exe }}
         upx --lzma --best ./${{ matrix.exe }}

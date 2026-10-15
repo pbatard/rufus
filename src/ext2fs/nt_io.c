@@ -277,7 +277,7 @@ static PCSTR _NormalizeDeviceName(IN PCSTR Device, IN PSTR NormalizedDeviceNameB
 			return Device;
 		// Handle custom paths of the form "<Physical> <Offset> <Size>" used by Rufus to
 		// enable multi-partition access on removable devices, for pre 1703 platforms.
-		if (sscanf(Device, "%s %I64u %I64u", NormalizedDeviceNameBuffer, Offset, Size) < 1)
+		if (sscanf(Device, "%s %llu %llu", NormalizedDeviceNameBuffer, Offset, Size) < 1)
 			return NULL;
 		if ((NormalizedDeviceNameBuffer[1] == '\\') || (NormalizedDeviceNameBuffer[1] == '.'))
 			NormalizedDeviceNameBuffer[1] = '?';
