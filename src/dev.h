@@ -21,19 +21,22 @@
 #include <cfgmgr32.h>
 
 #define USB_SPEED_UNKNOWN			0
-#define USB_SPEED_LOW				1
-#define USB_SPEED_FULL				2
-#define USB_SPEED_HIGH				3
-#define USB_SPEED_SUPER				4
-#define USB_SPEED_SUPER_PLUS		5
-#define USB_SPEED_MAX				6
+#define USB_SPEED_LOW_1_5M			1	// USB 1.0
+#define USB_SPEED_FULL_12M			2	// USB 1.1
+#define USB_SPEED_HIGH_480M			3	// USB 2.0
+#define USB_SPEED_SUPER_5G			4	// USB 3.0
+#define USB_SPEED_SUPER_10G			5	// USB 3.1
+#define USB_SPEED_SUPER_20G			6	// USB 3.2
+#define USB_SPEED_SUPER_40G			7	// USB 4.0
+#define USB_SPEED_SUPER_80G			8	// USB 4.1
+#define USB_SPEED_MAX				9
 
 /* List of the properties we are interested in */
 typedef struct usb_device_props {
 	int32_t  vid;
 	int32_t  pid;
-	uint32_t  speed;
-	uint32_t  lower_speed;
+	uint32_t  current_speed;
+	uint32_t  max_speed;
 	uint32_t  port;
 	BOOLEAN   is_USB;
 	BOOLEAN   is_SCSI;
@@ -145,3 +148,47 @@ const GUID GUID_DEVINTERFACE_USB_HUB =
 	{ 0xf18a0e88L, 0xc30c, 0x11d0, {0x88, 0x15, 0x00, 0xa0, 0xc9, 0x06, 0xbe, 0xd8} };
 
 #define DEVID_HTAB_SIZE		257
+
+#ifndef FILE_DEVICE_USB
+#define FILE_DEVICE_USB FILE_DEVICE_UNKNOWN
+#endif
+
+typedef struct _USB_DESCRIPTOR_REQUEST {
+	ULONG ConnectionIndex;
+	struct {
+		UCHAR bmRequest;
+		UCHAR bRequest;
+		USHORT wValue;
+		USHORT wIndex;
+		USHORT wLength;
+	} SetupPacket;
+	UCHAR Data[0];
+} USB_DESCRIPTOR_REQUEST, * PUSB_DESCRIPTOR_REQUEST;
+
+#ifndef USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION
+#define USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION 260
+#endif
+
+#ifndef IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION
+#define IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION CTL_CODE \
+	(FILE_DEVICE_USB, USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#endif
+
+#ifndef USB_GET_NODE_CONNECTION_SUPERSPEEDPLUS_INFORMATION
+#define USB_GET_NODE_CONNECTION_SUPERSPEEDPLUS_INFORMATION 289
+#endif
+
+#ifndef IOCTL_USB_GET_NODE_CONNECTION_SUPERSPEEDPLUS_INFORMATION
+#define IOCTL_USB_GET_NODE_CONNECTION_SUPERSPEEDPLUS_INFORMATION CTL_CODE\
+	(FILE_DEVICE_USB, USB_GET_NODE_CONNECTION_SUPERSPEEDPLUS_INFORMATION, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#endif
+
+typedef struct {
+	ULONG ConnectionIndex;
+	ULONG Length;
+	ULONG RxSuperSpeedPlus;
+	ULONG RxLaneCount;
+	ULONG TxSuperSpeedPlus;
+	ULONG TxLaneCount;
+} MY_USB_NODE_CONNECTION_SUPERSPEEDPLUS_INFORMATION;
+

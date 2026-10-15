@@ -49,18 +49,83 @@ extern RUFUS_DRIVE rufus_drive[MAX_DRIVES];
 extern BOOL enable_HDDs, enable_VHDs, use_fake_units, enable_vmdk, usb_debug;
 extern BOOL list_non_usb_removable_drives, its_a_me_mario;
 
+static inline uint64_t ssp_to_bps(uint32_t v)
+{
+	static const uint64_t scale[4] = { 1ULL, 1000ULL, 1000000ULL, 1000000000ULL };
+	return (uint64_t)(v >> 16) * scale[(v >> 4) & 0x3];
+}
+
+static uint64_t get_max_bps(const uint8_t* bos, uint32_t len)
+{
+	uint8_t l, min_rx_lanes, min_tx_lanes;
+	uint32_t i, n, ssp, offset, attr, avail;
+	uint64_t bps, max_bps = 0;
+
+	if (len < 5 || bos[0] < 5 || bos[1] != 0x0F)
+		return 0;
+	offset = bos[0];	// skip the BOS header
+
+	while (offset + 3 <= len) {
+		l = bos[offset];
+		if (l < 3 || offset + l > len)
+			break;
+		// Look for the SUPERSPEED_PLUS (0x0A) Device Capability descriptor (0x10)
+		if (bos[offset + 1] == 0x10 && bos[offset + 2] == 0x0A && l >= 12) {
+			// Get the bmAttributes field
+			memcpy(&attr, &bos[offset + 4], sizeof(attr));
+			// Get the min lanes from the wFunctionalitySupport field
+			min_rx_lanes = bos[offset + 9] & 0x0F;
+			min_tx_lanes = bos[offset + 9] >> 4;
+			n = (attr & 0x1F) + 1;	// Number of Sublink Speed Attributes
+			avail = (l - 12) / 4;
+			if (n > avail)
+				n = avail;
+			for (i = 0; i < n; i++) {
+				memcpy(&ssp, &bos[offset + 12 + 4 * i], sizeof(ssp));
+				bps = ssp_to_bps(ssp) * ((ssp & 0x80) ? min_tx_lanes : min_rx_lanes);
+				if (bps > max_bps)
+					max_bps = bps;
+			}
+		}
+		// Next descriptor
+		offset += l;
+	}
+	return max_bps;
+}
+
+static uint32_t version_to_speed(uint16_t usb_version) {
+	switch (usb_version) {
+	case 0x0100: return USB_SPEED_LOW_1_5M;
+	case 0x0110: return USB_SPEED_FULL_12M;
+	case 0x0200:
+	case 0x0201:
+	case 0x0210: return USB_SPEED_HIGH_480M;
+	case 0x0300: return USB_SPEED_SUPER_5G;
+	case 0x0310: return USB_SPEED_SUPER_10G;
+	case 0x0320: return USB_SPEED_SUPER_20G;
+	case 0x0400: return USB_SPEED_SUPER_40G;
+	case 0x0410: return USB_SPEED_SUPER_80G;
+	default: return USB_SPEED_UNKNOWN;
+	}
+}
+
 /*
  * Get the VID, PID and current device speed
  */
 static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_props* props)
 {
+	int pass;
 	BOOL r = FALSE;
 	CONFIGRET cr;
 	HANDLE handle = INVALID_HANDLE_VALUE;
-	DWORD size;
 	DEVINST device_inst;
 	USB_NODE_CONNECTION_INFORMATION_EX conn_info;
 	USB_NODE_CONNECTION_INFORMATION_EX_V2 conn_info_v2;
+	MY_USB_NODE_CONNECTION_SUPERSPEEDPLUS_INFORMATION ssp;
+	uint8_t buf[sizeof(USB_DESCRIPTOR_REQUEST) + 512] = { 0 };
+	uint8_t* bos = &buf[sizeof(USB_DESCRIPTOR_REQUEST)];
+	USB_DESCRIPTOR_REQUEST* req = (USB_DESCRIPTOR_REQUEST*)buf;
+	DWORD size, header_size = offsetof(USB_DESCRIPTOR_REQUEST, Data);
 
 	if ((parent_path == NULL) || (device_id == NULL) || (props == NULL))
 		goto out;
@@ -99,26 +164,92 @@ static BOOL GetUSBProperties(char* parent_path, char* device_id, usb_device_prop
 	if ((conn_info.DeviceDescriptor.idVendor != 0) || (conn_info.DeviceDescriptor.idProduct != 0)) {
 		props->vid = conn_info.DeviceDescriptor.idVendor;
 		props->pid = conn_info.DeviceDescriptor.idProduct;
-		props->speed = conn_info.Speed + 1;
+		// Not exactly accurate since a USB 3.x device connected to a USB 2.0 port will use the
+		// 2.0 lanes and report a 2.0 device descriptor there, which means that, despite being
+		// able to operate at 3.0 speeds, we only see a max speed of 2.0. Our additional checks
+		// below should however be able to take care of detecting the max speed.
+		props->max_speed = version_to_speed(conn_info.DeviceDescriptor.bcdUSB);
+		props->current_speed = conn_info.Speed + 1;
 		r = TRUE;
 	}
 
 	// The USB speed report of modern Windows is a complete mess
+	size = sizeof(ssp);
+	memset(&ssp, 0, size);
+	ssp.ConnectionIndex = (ULONG)props->port;
+	ssp.Length = size;
 	size = sizeof(conn_info_v2);
 	memset(&conn_info_v2, 0, size);
 	conn_info_v2.ConnectionIndex = (ULONG)props->port;
 	conn_info_v2.Length = size;
 	conn_info_v2.SupportedUsbProtocols.Usb300 = 1;
+	// Requires Windows 11 24H2 or later
+	if (DeviceIoControl(handle, IOCTL_USB_GET_NODE_CONNECTION_SUPERSPEEDPLUS_INFORMATION, &ssp, sizeof(ssp), &ssp, sizeof(ssp), &size, NULL)) {
+		uint64_t cur_bps = max(ssp_to_bps(ssp.RxSuperSpeedPlus) * (ssp.RxLaneCount + 1), ssp_to_bps(ssp.TxSuperSpeedPlus) * (ssp.TxLaneCount + 1));
+		if (cur_bps >= 80000000000ULL)
+			props->current_speed = USB_SPEED_SUPER_80G;
+		else if (cur_bps >= 40000000000ULL)
+			props->current_speed = USB_SPEED_SUPER_40G;
+		else if (cur_bps >= 20000000000ULL)
+			props->current_speed = USB_SPEED_SUPER_20G;
+		else if (cur_bps >= 10000000000ULL)
+			props->current_speed = USB_SPEED_SUPER_10G;
+		else if (cur_bps >= 5000000000ULL)
+			props->current_speed = USB_SPEED_SUPER_5G;
+		else
+			goto next;
+		props->max_speed = props->current_speed;
+
+		// Read the BOS to compare with the advertised speed
+		size = 5;
+		for (pass = 0; pass < 2; pass++) {
+			req->ConnectionIndex = (ULONG)props->port;
+			req->SetupPacket.bmRequest = 0x80;
+			req->SetupPacket.bRequest = 0x06;
+			req->SetupPacket.wValue = (0x0F << 8);
+			req->SetupPacket.wIndex = 0;
+			req->SetupPacket.wLength = (USHORT)size;
+			if (!DeviceIoControl(handle, IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION, req, header_size + size, req, header_size + size, &size, NULL) ||
+				size < header_size + 5)
+				break;
+			if (pass == 0) {
+				size = req->Data[2] | (req->Data[3] << 8);
+				if (size < 5 || size > 512)
+					break;
+			}
+		}
+		if (pass == 2) {
+			// Now the problem is that the max bps from the BOS is for *single* lane only, and the
+			// USB Forum *STUPIDLY* defined a minimum amount of lanes in the BOS but NOT a maximum
+			// or a preferred, which means we can not actually get the max speed of a USB 3.2 (2 x
+			// 10G lanes) if it's operating at USB 3.1 speed (1 x 10G lane). Somebody *REALLY*
+			// doesn't want users to find out if they are being screwed on USB speeds...
+			uint64_t max_bps = get_max_bps(bos, size);
+			if (max_bps >= 80000000000ULL)
+				props->max_speed = USB_SPEED_SUPER_80G;
+			else if (max_bps >= 40000000000ULL)
+				props->max_speed = USB_SPEED_SUPER_40G;
+			else if (max_bps >= 20000000000ULL)
+				props->max_speed = USB_SPEED_SUPER_20G;
+			else if (max_bps >= 10000000000ULL)
+				props->max_speed = USB_SPEED_SUPER_10G;
+			else if (max_bps >= 5000000000ULL)
+				props->max_speed = USB_SPEED_SUPER_5G;
+		}
+		goto out;
+	}
+
+next:
 	if (!DeviceIoControl(handle, IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX_V2, &conn_info_v2, size, &conn_info_v2, size, &size, NULL)) {
 		uprintf("Could not get node connection information (V2) for device '%s': %s", device_id, WindowsErrorString());
 	} else if (conn_info_v2.Flags.DeviceIsOperatingAtSuperSpeedPlusOrHigher) {
-		props->speed = USB_SPEED_SUPER_PLUS;
+		props->current_speed = USB_SPEED_SUPER_10G;
 	} else if (conn_info_v2.Flags.DeviceIsOperatingAtSuperSpeedOrHigher) {
-		props->speed = USB_SPEED_SUPER;
+		props->current_speed = USB_SPEED_SUPER_5G;
 	} else if (conn_info_v2.Flags.DeviceIsSuperSpeedPlusCapableOrHigher) {
-		props->lower_speed = 2;
+		props->max_speed = USB_SPEED_SUPER_10G;
 	} else if (conn_info_v2.Flags.DeviceIsSuperSpeedCapableOrHigher) {
-		props->lower_speed = 1;
+		props->max_speed = USB_SPEED_SUPER_5G;
 	}
 
 out:
@@ -471,7 +602,12 @@ BOOL GetDevices(DWORD devnum)
 	const char* scsi_card_name[] = {
 		"_SD_", "_SDHC_", "_SDXC_", "_MMC_", "_MS_", "_MSPro_", "_xDPicture_", "_O2Media_"
 	};
-	const char* usb_speed_name[USB_SPEED_MAX] = { "USB", "USB 1.0", "USB 1.1", "USB 2.0", "USB 3.0", "USB 3.1" };
+	const char* usb_version[USB_SPEED_MAX] = {
+		"USB", "USB 1.0", "USB 1.1", "USB 2.1", "USB 3.0", "USB 3.1", "USB 3.2", "USB 4.0", "USB 4.1"
+	};	// See, USB Forum, it *REALLY* isn't that hard!!!
+	const char* usb_speed[USB_SPEED_MAX] = {
+		"???", "1.5 Mbps", "12 Mbps", "480 Mbps", "5 Gbps", "10 Gbps", "20 Gbps", "40 Gbps", "80 Gbps"
+	};
 	const char* windows_sandbox_vhd_label = "PortableBaseLayer";
 	// Hash table and String Array used to match a Device ID with the parent hub's Device Interface Path
 	htab_table htab_devid = HTAB_EMPTY;
@@ -847,12 +983,13 @@ BOOL GetDevices(DWORD devnum)
 				if (s < ARRAYSIZE(ignore_vid_pid))
 					continue;
 			}
-			if (props.speed >= USB_SPEED_MAX)
-				props.speed = 0;
+			if (props.current_speed >= USB_SPEED_MAX)
+				props.current_speed = 0;
 			uprintf("Found %s%s%s device '%s' (%s) %s", props.is_UASP ? "UAS (" : "",
-				usb_speed_name[props.speed], props.is_UASP ? ")" : "", buffer, str, method_str);
-			if (props.lower_speed)
-				uprintf("NOTE: This device is a USB 3.%c device operating at lower speed...", '0' + props.lower_speed - 1);
+				usb_version[props.current_speed], props.is_UASP ? ")" : "", buffer, str, method_str);
+			if (props.max_speed > props.current_speed)
+				uprintf("NOTE: This a %s (%s) device operating at %s speed (%s)...", usb_version[props.max_speed],
+					usb_speed[props.max_speed], usb_version[props.current_speed], usb_speed[props.current_speed]);
 		}
 		devint_data.cbSize = sizeof(devint_data);
 		devint_detail_data = NULL;
