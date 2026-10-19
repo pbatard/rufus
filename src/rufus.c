@@ -73,6 +73,16 @@ static BOOL existing_key = FALSE;	// For LGP set/restore
 static BOOL size_check = TRUE;
 static BOOL log_displayed = FALSE;
 static BOOL img_provided = FALSE;
+static BOOL automation_mode = FALSE;
+static BOOL automation_yes = FALSE;
+static BOOL automation_quiet = FALSE;
+static BOOL automation_dry_run = FALSE;
+static BOOL automation_force = FALSE;
+static BOOL automation_list_disks = FALSE;
+static BOOL automation_start_queued = FALSE;
+static int automation_exit_code = 0;
+static char automation_disk_selector[MAX_PATH] = "";
+static char automation_label[128] = "";
 static BOOL user_notified = FALSE;
 static BOOL relaunch = FALSE;
 static BOOL dont_display_image_name = FALSE;
@@ -150,6 +160,12 @@ const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
 RUFUS_DRIVE rufus_drive[MAX_DRIVES] = { 0 };
 sbat_entry_t* sbat_entries = NULL;
 thumbprint_list_t *sb_active_certs = NULL, *sb_revoked_certs = NULL;
+
+static BOOL AutomationLoadConfig(const char* path);
+static void AutomationSetOption(const char* key, const char* value);
+static void AutomationListDisks(void);
+static BOOL AutomationSelectDrive(void);
+static void AutomationQueueStart(void);
 
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
 // localization_data.sh and the .rc when the year changes!
@@ -1337,10 +1353,14 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 	if ((ErrorStatus == RUFUS_ERROR(ERROR_CANCELLED)) || (img_report.image_size == 0) ||
 		(!img_report.is_iso && (img_report.is_bootable_img <= 0) && !img_report.is_windows_img)) {
 		// Failed to scan image
-		if (img_report.is_bootable_img < 0)
-			Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_042), lmprintf(MSG_322, image_path));
-		else
-			Notification(MB_OK | MB_ICONINFORMATION, lmprintf(MSG_081), lmprintf(MSG_082));
+		if (!automation_mode) {
+			if (img_report.is_bootable_img < 0)
+				Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_042), lmprintf(MSG_322, image_path));
+			else
+				Notification(MB_OK | MB_ICONINFORMATION, lmprintf(MSG_081), lmprintf(MSG_082));
+		} else {
+			uprintf("Automation image validation failed");
+		}
 		// Make sure to relinquish image_path before we call UpdateImage
 		// otherwise the boot selection dropdown won't be properly reset.
 		safe_free(image_path);
@@ -1441,7 +1461,10 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 		// No boot method that we support
 		PrintInfo(0, MSG_081);
 		safe_free(image_path);
-		Notification(MB_OK | MB_ICONINFORMATION, lmprintf(MSG_081), lmprintf(MSG_082));
+		if (!automation_mode)
+			Notification(MB_OK | MB_ICONINFORMATION, lmprintf(MSG_081), lmprintf(MSG_082));
+		else
+			uprintf("Automation image is not bootable or otherwise unsupported");
 		PrintStatus(0, MSG_086);
 		EnableControls(TRUE, FALSE);
 	} else {
@@ -1484,6 +1507,15 @@ out:
 	dont_display_image_name = FALSE;
 	dont_process_dbt_devnodes = FALSE;
 	PrintInfo(0, MSG_210);
+	if (automation_mode && !automation_start_queued) {
+		if (image_path != NULL && !IS_ERROR(ErrorStatus))
+			AutomationQueueStart();
+		else {
+			uprintf("Automation failed: image analysis did not produce a usable image");
+			automation_exit_code = 1;
+			PostMessage(hMainDialog, WM_COMMAND, IDCANCEL, 0);
+		}
+	}
 	ExitThread(0);
 }
 
@@ -2860,6 +2892,14 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		hLogDialog = MyCreateDialog(hMainInstance, IDD_LOG, hDlg, (DLGPROC)LogCallback);
 		InitDialog(hDlg);
 		GetDevices(0);
+		if (automation_list_disks) {
+			AutomationListDisks();
+			PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0);
+		} else if (automation_mode && !AutomationSelectDrive()) {
+			printf("Automation aborted: target disk was not found\n");
+			automation_exit_code = 1;
+			PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0);
+		}
 		EnableControls(TRUE, FALSE);
 		UpdateImage(FALSE);
 		// The AppStore version does not need the internal check for updates
@@ -3013,7 +3053,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 				wbuffer = calloc(MAX_PATH, sizeof(wchar_t));
 				if (wbuffer == NULL) {
 					uprintf("Failed to alloc buffer for drag-n-drop");
-						break;
+					break;
 				}
 			DragQueryFileW(droppedFileInfo, 0, wbuffer, MAX_PATH);
 				safe_free(image_path);
@@ -3098,7 +3138,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		wParam = BOOTCHECK_CANCEL;
 		save_image = FALSE;
 
-		if ((partition_type == PARTITION_STYLE_MBR) && (SelectedDrive.DiskSize > 2 * TB)) {
+		if ((!automation_mode || !automation_yes) && (partition_type == PARTITION_STYLE_MBR) && (SelectedDrive.DiskSize > 2 * TB)) {
 			if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_128, "MBR"),
 				lmprintf(MSG_134, SizeToHumanReadable(SelectedDrive.DiskSize - 2 * TB, FALSE, FALSE))) != IDYES)
 				goto aborted_start;
@@ -3124,19 +3164,21 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if (GetProcessSearch(SEARCH_PROCESS_TIMEOUT, 0x06, TRUE)) {
 			char title[128];
 			ComboBox_GetTextU(hDeviceList, title, sizeof(title));
-			if (Notification(MB_ICONWARNING | MB_YESNO, title, lmprintf(MSG_132)) != IDYES)
+			if ((!automation_mode || !automation_yes) && Notification(MB_ICONWARNING | MB_YESNO, title, lmprintf(MSG_132)) != IDYES)
 				goto aborted_start;
 		}
 		PrintStatus(0, MSG_142);
 
 		GetWindowTextU(hDeviceList, tmp, ARRAYSIZE(tmp));
-		if (Notification(MB_OKCANCEL | MB_ICONWARNING, APPLICATION_NAME, lmprintf(MSG_003, tmp)) != IDOK)
+		if ((!automation_mode || !automation_yes) && Notification(MB_OKCANCEL | MB_ICONWARNING, APPLICATION_NAME, lmprintf(MSG_003, tmp)) != IDOK)
 			goto aborted_start;
-		if ((SelectedDrive.nPartitions > 1) && (Notification(MB_OKCANCEL | MB_ICONWARNING, lmprintf(MSG_094), lmprintf(MSG_093)) != IDOK))
+		if ((!automation_mode || !automation_yes) && (SelectedDrive.nPartitions > 1) && (Notification(MB_OKCANCEL | MB_ICONWARNING, lmprintf(MSG_094), lmprintf(MSG_093)) != IDOK))
 			goto aborted_start;
-		if ((!zero_drive) && (boot_type != BT_NON_BOOTABLE) && (SelectedDrive.SectorSize != 512) &&
+		if ((!automation_mode || !automation_yes) && (!zero_drive) && (boot_type != BT_NON_BOOTABLE) && (SelectedDrive.SectorSize != 512) &&
 			(Notification(MB_OKCANCEL | MB_ICONWARNING, lmprintf(MSG_197), lmprintf(MSG_196, SelectedDrive.SectorSize)) != IDOK))
 			goto aborted_start;
+		if (automation_mode && automation_yes)
+			uprintf("Automation confirmations accepted for selected target");
 
 		nDeviceIndex = ComboBox_GetCurSel(hDeviceList);
 		DeviceNum = (DWORD)ComboBox_GetItemData(hDeviceList, nDeviceIndex);
@@ -3202,57 +3244,66 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_PAUSED, 0);
 			SetTaskbarProgressState(TASKBAR_PAUSED);
 			PrintInfo(0, MSG_211);
-			Notification(MB_ICONINFORMATION | MB_CLOSE, lmprintf(MSG_211), lmprintf(MSG_041));
+			if (!automation_mode)
+				Notification(MB_ICONINFORMATION | MB_CLOSE, lmprintf(MSG_211), lmprintf(MSG_041));
 		} else {
 			SendMessage(hProgress, PBM_SETSTATE, (WPARAM)PBST_ERROR, 0);
 			SetTaskbarProgressState(TASKBAR_ERROR);
 			PrintInfo(0, MSG_212);
 			MessageBeep(MB_ICONERROR);
 			FlashTaskbar(dialog_handle);
-			GetProcessSearch(0, 0x07, TRUE);
-			// TODO: Fix/Improve this
-			if (BlockingProcessList.Index > 0) {
-				ListDialog(lmprintf(MSG_042), lmprintf(MSG_055), BlockingProcessList.String, BlockingProcessList.Index);
+			if (automation_mode) {
+				uprintf("Automation flash failed: %s", StrError(ErrorStatus, FALSE));
 			} else {
-				if (WindowsVersion.Version >= WINDOWS_10) {
-					// Try to detect if 'Controlled Folder Access' is enabled on Windows 10 or later. See also:
-					// http://www.winhelponline.com/blog/use-controlled-folder-access-windows-10-windows-defender
-					char cmdline[256];
-					static const char* ps_cmd[2] = {
-						// Return 1 if the 'Get-MpPreference' PowerShell cmdlet exists
-						"If (Get-Command -Commandtype Function Get-MpPreference -ErrorAction SilentlyContinue) { Exit 1 } Else { Exit 0 }",
-						// Return 1 if Controlled Folder Access is enabled
-						"Exit (Get-MpPreference).EnableControlledFolderAccess" };
-					switch (SCODE_CODE(ErrorStatus)) {
-					case ERROR_PARTITION_FAILURE:
-					case ERROR_WRITE_FAULT:
-						// Find if PowerShell is available at its expected location
-						static_sprintf(tmp, "%s\\WindowsPowerShell\\v1.0\\powershell.exe", system_dir);
-						if (PathFileExistsU(tmp)) {
-							for (i = 0; i < ARRAYSIZE(ps_cmd); i++) {
-								// Run the PowerShell commands
-								static_sprintf(cmdline, "%s -NonInteractive -NoProfile -Command %s", tmp, ps_cmd[i]);
-								if (RunCommand(cmdline, app_data_dir, TRUE) != 1)
-									break;
+				GetProcessSearch(0, 0x07, TRUE);
+				// TODO: Fix/Improve this
+				if (BlockingProcessList.Index > 0) {
+					ListDialog(lmprintf(MSG_042), lmprintf(MSG_055), BlockingProcessList.String, BlockingProcessList.Index);
+				} else {
+					if (WindowsVersion.Version >= WINDOWS_10) {
+						// Try to detect if 'Controlled Folder Access' is enabled on Windows 10 or later. See also:
+						// http://www.winhelponline.com/blog/use-controlled-folder-access-windows-10-windows-defender
+						char cmdline[256];
+						static const char* ps_cmd[2] = {
+							// Return 1 if the 'Get-MpPreference' PowerShell cmdlet exists
+							"If (Get-Command -Commandtype Function Get-MpPreference -ErrorAction SilentlyContinue) { Exit 1 } Else { Exit 0 }",
+							// Return 1 if Controlled Folder Access is enabled
+							"Exit (Get-MpPreference).EnableControlledFolderAccess" };
+						switch (SCODE_CODE(ErrorStatus)) {
+						case ERROR_PARTITION_FAILURE:
+						case ERROR_WRITE_FAULT:
+							// Find if PowerShell is available at its expected location
+							static_sprintf(tmp, "%s\\WindowsPowerShell\\v1.0\\powershell.exe", system_dir);
+							if (PathFileExistsU(tmp)) {
+								for (i = 0; i < ARRAYSIZE(ps_cmd); i++) {
+									// Run the PowerShell commands
+									static_sprintf(cmdline, "%s -NonInteractive -NoProfile -Command %s", tmp, ps_cmd[i]);
+									if (RunCommand(cmdline, app_data_dir, TRUE) != 1)
+										break;
+								}
+								if (i == ARRAYSIZE(ps_cmd)) {
+									uprintf("\r\nWARNING: 'Controlled Folder Access' appears to be enabled on this system");
+									uprintf("You may need to disable this feature, or add an exception, for Rufus to to work...\n");
+								}
 							}
-							if (i == ARRAYSIZE(ps_cmd)) {
-								uprintf("\r\nWARNING: 'Controlled Folder Access' appears to be enabled on this system");
-								uprintf("You may need to disable this feature, or add an exception, for Rufus to to work...\n");
-							}
+							break;
 						}
-						break;
 					}
-				}
-				if (SCODE_CODE(ErrorStatus) == ERROR_NOT_READY) {
-					// A port cycle usually helps with a device not ready
-					int index = ComboBox_GetCurSel(hDeviceList);
-					if (index >= 0) {
-						uprintf("Device not ready → Trying to cycle port...");
-						CyclePort(index);
+					if (SCODE_CODE(ErrorStatus) == ERROR_NOT_READY) {
+						// A port cycle usually helps with a device not ready
+						int index = ComboBox_GetCurSel(hDeviceList);
+						if (index >= 0) {
+							uprintf("Device not ready → Trying to cycle port...");
+							CyclePort(index);
+						}
 					}
+					Notification(MB_ICONERROR | MB_CLOSE, lmprintf(MSG_042), lmprintf(MSG_043, StrError(ErrorStatus, FALSE)));
 				}
-				Notification(MB_ICONERROR | MB_CLOSE, lmprintf(MSG_042), lmprintf(MSG_043, StrError(ErrorStatus, FALSE)));
 			}
+		}
+		if (automation_mode) {
+			automation_exit_code = (wParam && !IS_ERROR(ErrorStatus)) ? 0 : 1;
+			PostMessage(hDlg, WM_COMMAND, IDCANCEL, 0);
 		}
 		ErrorStatus = 0;
 		LastWriteError = 0;
@@ -3262,18 +3313,248 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 	return (INT_PTR)FALSE;
 }
 
+static BOOL AutomationParseBool(const char* value, BOOL* result)
+{
+	if (safe_stricmp(value, "1") == 0 || safe_stricmp(value, "true") == 0 ||
+		safe_stricmp(value, "yes") == 0 || safe_stricmp(value, "on") == 0) {
+		*result = TRUE;
+		return TRUE;
+	}
+	if (safe_stricmp(value, "0") == 0 || safe_stricmp(value, "false") == 0 ||
+		safe_stricmp(value, "no") == 0 || safe_stricmp(value, "off") == 0) {
+		*result = FALSE;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+static BOOL AutomationSetImage(const char* path)
+{
+	DWORD attributes;
+
+	safe_free(image_path);
+	image_path = (char*)calloc(1, MAX_PATH);
+	if (image_path == NULL)
+		return FALSE;
+	IGNORE_RETVAL(GetFullPathNameU(path, MAX_PATH, image_path, NULL));
+	attributes = GetFileAttributesU(image_path);
+	if ((attributes == INVALID_FILE_ATTRIBUTES) || (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
+		printf("Could not find image '%s'\n", image_path);
+		safe_free(image_path);
+		return FALSE;
+	}
+	img_provided = TRUE;
+	return TRUE;
+}
+
+static void AutomationSetOption(const char* key, const char* value)
+{
+	BOOL bool_value;
+	int i;
+
+	if ((key == NULL) || (value == NULL) || (key[0] == 0))
+		return;
+	if ((safe_stricmp(key, "image") == 0) || (safe_stricmp(key, "iso") == 0)) {
+		(void)AutomationSetImage(value);
+	} else if (safe_stricmp(key, "disk") == 0) {
+		safe_sprintf(automation_disk_selector, ARRAYSIZE(automation_disk_selector), "%s", value);
+	} else if ((safe_stricmp(key, "auto") == 0) || (safe_stricmp(key, "automate") == 0)) {
+		if (AutomationParseBool(value, &bool_value))
+			automation_mode = bool_value;
+	} else if ((safe_stricmp(key, "yes") == 0) || (safe_stricmp(key, "no-confirm") == 0)) {
+		if (AutomationParseBool(value, &bool_value))
+			automation_yes = bool_value;
+	} else if (safe_stricmp(key, "quiet") == 0) {
+		if (AutomationParseBool(value, &bool_value))
+			automation_quiet = bool_value;
+	} else if ((safe_stricmp(key, "dry-run") == 0) || (safe_stricmp(key, "dry_run") == 0)) {
+		if (AutomationParseBool(value, &bool_value))
+			automation_dry_run = bool_value;
+	} else if (safe_stricmp(key, "force") == 0) {
+		if (AutomationParseBool(value, &bool_value)) {
+			automation_force = bool_value;
+			if (bool_value) {
+				enable_HDDs = TRUE;
+				size_check = FALSE;
+			}
+		}
+	} else if ((safe_stricmp(key, "list-fixed") == 0) || (safe_stricmp(key, "list_fixed") == 0)) {
+		if (AutomationParseBool(value, &bool_value) && bool_value)
+			enable_HDDs = TRUE;
+	} else if ((safe_stricmp(key, "list-disks") == 0) || (safe_stricmp(key, "list_disks") == 0)) {
+		if (AutomationParseBool(value, &bool_value))
+			automation_list_disks = bool_value;
+	} else if (safe_stricmp(key, "mode") == 0) {
+		if (safe_stricmp(value, "dd") == 0) {
+			enable_iso = FALSE;
+			ignore_boot_marker = TRUE;
+		} else if (safe_stricmp(value, "iso") == 0) {
+			enable_iso = TRUE;
+		} else {
+			uprintf("Unknown automation mode '%s'", value);
+		}
+	} else if (safe_stricmp(key, "label") == 0) {
+		safe_sprintf(automation_label, ARRAYSIZE(automation_label), "%s", value);
+	} else if (safe_stricmp(key, "filesystem") == 0) {
+		if (isdigitU(value[0]))
+			preselected_fs = (int)strtol(value, NULL, 0);
+		else {
+			for (i = 0; i < ARRAYSIZE(FileSystemLabel); i++) {
+				if (safe_stricmp(value, FileSystemLabel[i]) == 0) {
+					preselected_fs = i;
+					break;
+				}
+			}
+		}
+		if ((preselected_fs < FS_UNKNOWN) || (preselected_fs >= FS_MAX))
+			preselected_fs = FS_UNKNOWN;
+		selected_fs = preselected_fs;
+	} else {
+		uprintf("Ignoring unknown automation setting '%s'", key);
+	}
+}
+
+static BOOL AutomationLoadConfig(const char* path)
+{
+	static const char* const keys[] = {
+		"image", "iso", "disk", "auto", "automate", "yes", "no-confirm", "quiet",
+		"dry-run", "dry_run", "force", "list-disks", "list_disks", "list-fixed", "list_fixed",
+		"mode", "label", "filesystem"
+	};
+	FILE* fd;
+	char* value;
+	size_t i;
+
+	// Use the existing INI/token parser so automation config files follow the
+	// same encoding and key=value rules as the rest of Rufus.
+	fd = fopenU(path, "rb");
+	if (fd == NULL) {
+		printf("Could not open automation config '%s'\n", path);
+		return FALSE;
+	}
+	fclose(fd);
+	for (i = 0; i < ARRAYSIZE(keys); i++) {
+		value = get_token_data_file(keys[i], path);
+		if (value != NULL) {
+			AutomationSetOption(keys[i], value);
+			safe_free(value);
+		}
+	}
+	return TRUE;
+}
+
+static void AutomationListDisks(void)
+{
+	int i, j;
+
+	printf("PhysicalDrive\tlabel\tmodel\tsize_bytes\n");
+	for (i = 0; i < ComboBox_GetCount(hDeviceList); i++) {
+		DWORD drive_number = (DWORD)ComboBox_GetItemData(hDeviceList, i);
+		for (j = 0; j < MAX_DRIVES && rufus_drive[j].size != 0; j++) {
+			if (rufus_drive[j].index == drive_number) {
+				printf("PhysicalDrive%lu\t%s\t%s\t%" PRIu64 "\n", drive_number,
+					rufus_drive[j].label, rufus_drive[j].name, rufus_drive[j].size);
+				break;
+			}
+		}
+	}
+	fflush(stdout);
+}
+
+static BOOL AutomationSelectDrive(void)
+{
+	char selector_buf[MAX_PATH];
+	const char* selector;
+	const char* physical;
+	char* end;
+	unsigned long value;
+	int i;
+	DWORD drive_number;
+
+	static_sprintf(selector_buf, "%s", automation_disk_selector);
+	trim(selector_buf);
+	selector = selector_buf;
+	physical = StrStrIA(selector, "PhysicalDrive");
+	if (selector[0] == 0)
+		return FALSE;
+	if (physical != NULL)
+		selector = physical + strlen("PhysicalDrive");
+	value = strtoul(selector, &end, 0);
+	trim(end);
+	if ((end == selector) || (end[0] != 0) || (value > (DRIVE_INDEX_MAX - DRIVE_INDEX_MIN))) {
+		uprintf("Invalid automation disk selector '%s'", automation_disk_selector);
+		return FALSE;
+	}
+	drive_number = (DWORD)value + DRIVE_INDEX_MIN;
+	for (i = 0; i < ComboBox_GetCount(hDeviceList); i++) {
+		if ((DWORD)ComboBox_GetItemData(hDeviceList, i) == drive_number)
+			break;
+	}
+	if (i == ComboBox_GetCount(hDeviceList)) {
+		uprintf("Automation disk '%s' was not found in the Rufus device list", automation_disk_selector);
+		return FALSE;
+	}
+	ComboBox_SetCurSel(hDeviceList, i);
+	SendMessage(hMainDialog, WM_COMMAND, (CBN_SELCHANGE << 16) | IDC_DEVICE, 0);
+	uprintf("Automation selected \\.\\PhysicalDrive%lu", value);
+	return TRUE;
+}
+
+static void AutomationQueueStart(void)
+{
+	if (!automation_mode || automation_start_queued)
+		return;
+	if (automation_label[0] != 0) {
+		SetWindowTextU(hLabel, automation_label);
+		user_changed_label = TRUE;
+	}
+	if (automation_dry_run) {
+		uprintf("Automation dry-run validation succeeded; no data was written");
+		automation_start_queued = TRUE;
+		automation_exit_code = 0;
+		PostMessage(hMainDialog, WM_COMMAND, IDCANCEL, 0);
+		return;
+	}
+	automation_start_queued = TRUE;
+	uprintf("Automation starting the flash operation");
+	PostMessage(hMainDialog, WM_COMMAND, IDC_START, 0);
+}
+
 static void PrintUsage(char* appname)
 {
 	char fname[_MAX_FNAME];
 
 	_splitpath(appname, NULL, NULL, fname, NULL);
 	printf("\nUsage: %s [-x] [-g] [-h] [-f FILESYSTEM] [-i PATH] [-l LOCALE] [-w TIMEOUT]\n", fname);
+	printf("       %s --auto --image PATH --disk N --yes [automation options]\n", fname);
 	printf("  -x, --extra-devs\n");
 	printf("     List extra devices, such as USB HDDs\n");
 	printf("  -g, --gui\n");
 	printf("     Start in GUI mode (disable the 'rufus.com' commandline hogger)\n");
 	printf("  -i PATH, --iso=PATH\n");
 	printf("     Select the ISO image pointed by PATH to be used on startup\n");
+	printf("      --image=PATH\n");
+	printf("     Alias for --iso; select an image for startup or automation\n");
+	printf("  -A, --auto, --automate\n");
+	printf("     Automatically validate and start one flash operation\n");
+	printf("  -D, --list-disks\n");
+	printf("     List the disks visible to Rufus as tab-separated records and exit\n");
+	printf("  -d SELECTOR, --disk=SELECTOR\n");
+	printf("     Select a physical disk number (for example 3 or PhysicalDrive3)\n");
+	printf("  -c PATH, --config=PATH\n");
+	printf("     Load automation settings from a key=value configuration file\n");
+	printf("  -y, --yes\n");
+	printf("     Accept destructive automation confirmations; required for --auto\n");
+	printf("  -q, --quiet\n");
+	printf("     Hide the GUI while automation is running\n");
+	printf("  -n, --dry-run\n");
+	printf("     Validate image and target selection without writing\n");
+	printf("  -F, --force\n");
+	printf("     Include fixed USB disks and disable the image size guard\n");
+	printf("  -m MODE, --mode=MODE\n");
+	printf("     Select image mode: iso or dd\n");
+	printf("  -L LABEL, --label=LABEL\n");
+	printf("     Set the target volume label in automation mode\n");
 	printf("  -l LOCALE, --locale=LOCALE\n");
 	printf("     Select the locale to be used on startup\n");
 	printf("  -f FILESYSTEM, --filesystem=FILESYSTEM\n");
@@ -3283,6 +3564,7 @@ static void PrintUsage(char* appname)
 	printf("     Used when launching a newer version of " APPLICATION_NAME " from a running application.\n");
 	printf("  -h, --help\n");
 	printf("     This usage guide.\n");
+	printf("\nAutomation config keys: image, disk, auto, yes, quiet, dry-run, force, list-disks, mode, filesystem, label.\n");
 }
 
 static HANDLE SetHogger(void)
@@ -3377,7 +3659,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{"extra-devs", no_argument,       NULL, 'x'},
 		{"gui",        no_argument,       NULL, 'g'},
 		{"help",       no_argument,       NULL, 'h'},
+		{"auto",       no_argument,       NULL, 'A'},
+		{"automate",   no_argument,       NULL, 'A'},
+		{"list-disks", no_argument,       NULL, 'D'},
 		{"iso",        required_argument, NULL, 'i'},
+		{"image",      required_argument, NULL, 'i'},
+		{"disk",       required_argument, NULL, 'd'},
+		{"config",     required_argument, NULL, 'c'},
+		{"yes",        no_argument,       NULL, 'y'},
+		{"quiet",      no_argument,       NULL, 'q'},
+		{"dry-run",    no_argument,       NULL, 'n'},
+		{"force",      no_argument,       NULL, 'F'},
+		{"mode",       required_argument, NULL, 'm'},
+		{"label",      required_argument, NULL, 'L'},
 		{"locale",     required_argument, NULL, 'l'},
 		{"filesystem", required_argument, NULL, 'f'},
 		{"wait",       required_argument, NULL, 'w'},
@@ -3545,6 +3839,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					goto skip_args_processing;
 				}
 			}
+			// Load configuration files before parsing command line options so explicit
+			// command line values always take precedence over the config file.
+			for (i = 1; i < argc; i++) {
+				const char* config = NULL;
+				if (((strcmp(argv[i], "-c") == 0) || (strcmp(argv[i], "--config") == 0)) && (i + 1 < argc)) {
+					config = argv[++i];
+				} else if (strncmp(argv[i], "--config=", 9) == 0) {
+					config = &argv[i][9];
+				} else if ((strcmp(argv[i], "-A") == 0) || (strcmp(argv[i], "--auto") == 0) ||
+					(strcmp(argv[i], "--automate") == 0)) {
+					automation_mode = TRUE;
+				} else if ((strcmp(argv[i], "-D") == 0) || (strcmp(argv[i], "--list-disks") == 0)) {
+					automation_list_disks = TRUE;
+				}
+				if (config != NULL) {
+					if (!AutomationLoadConfig(config)) {
+						automation_exit_code = 2;
+						goto out;
+					}
+				}
+			}
+			if (automation_mode || automation_list_disks)
+				disable_hogger = TRUE;
 			// If our application name contains a 'p' (for "portable") create a 'rufus.ini'
 			// NB: argv[0] is populated in the previous loop
 			tmp = &argv[0][strlen(argv[0]) - 1];
@@ -3568,8 +3885,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					hogmutex = SetHogger();
 				}
 			}
+			if ((automation_mode || automation_list_disks) && getenv("SHELL") == NULL && AttachConsole(ATTACH_PARENT_PROCESS) != 0) {
+				attached_console = TRUE;
+				IGNORE_RETVAL(freopen("CONIN$", "r", stdin));
+				IGNORE_RETVAL(freopen("CONOUT$", "w", stdout));
+				IGNORE_RETVAL(freopen("CONOUT$", "w", stderr));
+				_flushall();
+			}
 
-			while ((opt = getopt_long(argc, argv, "ghxf:i:l:w:z:", long_options, &option_index)) != EOF) {
+			while ((opt = getopt_long(argc, argv, "ghxAi:Dd:c:yqnFm:L:l:w:z:", long_options, &option_index)) != EOF) {
 				switch (opt) {
 				case 'x':
 					enable_HDDs = TRUE;
@@ -3579,18 +3903,41 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					// No need to reprocess that option
 					break;
 				case 'i':
-					safe_free(image_path);
-					image_path = calloc(1, MAX_PATH);
-					if (image_path == NULL)
-						break;
-					IGNORE_RETVAL(GetFullPathNameU(optarg, MAX_PATH, image_path, NULL));
-					// FILE_ATTRIBUTE_DIRECTORY is set for both dir and access error
-					if (GetFileAttributesU(image_path) & FILE_ATTRIBUTE_DIRECTORY) {
-						printf("Could not find image '%s'\n", image_path);
-						safe_free(image_path);
-						break;
-					}
-					img_provided = TRUE;
+					(void)AutomationSetImage(optarg);
+					break;
+				case 'A':
+					automation_mode = TRUE;
+					disable_hogger = TRUE;
+					break;
+				case 'D':
+					automation_list_disks = TRUE;
+					disable_hogger = TRUE;
+					break;
+				case 'd':
+					safe_sprintf(automation_disk_selector, ARRAYSIZE(automation_disk_selector), "%s", optarg);
+					break;
+				case 'c':
+					// The config was already loaded in the pre-scan above.
+					break;
+				case 'y':
+					automation_yes = TRUE;
+					break;
+				case 'q':
+					automation_quiet = TRUE;
+					break;
+				case 'n':
+					automation_dry_run = TRUE;
+					break;
+				case 'F':
+					automation_force = TRUE;
+					enable_HDDs = TRUE;
+					size_check = FALSE;
+					break;
+				case 'm':
+					AutomationSetOption("mode", optarg);
+					break;
+				case 'L':
+					AutomationSetOption("label", optarg);
 					break;
 				case 'l':
 					if (isdigitU(optarg[0])) {
@@ -3643,6 +3990,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 skip_args_processing:
+	if (automation_force) {
+		enable_HDDs = TRUE;
+		size_check = FALSE;
+	}
+	if (automation_mode) {
+		if (!automation_dry_run && !automation_yes) {
+			printf("--auto requires --yes (or use --dry-run for validation only)\n");
+			automation_exit_code = 2;
+			goto out;
+		}
+		if ((image_path == NULL) || (automation_disk_selector[0] == 0)) {
+			printf("--auto requires both --image PATH and --disk SELECTOR\n");
+			automation_exit_code = 2;
+			goto out;
+		}
+	}
 	if (appstore_version)
 		uprintf("AppStore version detected");
 
@@ -3894,7 +4257,7 @@ relaunch:
 	if (!SetAlertPromptHook())
 		uprintf("WARNING: Could not set alert prompt hook");
 
-	ShowWindow(hDlg, SW_SHOWNORMAL);
+	ShowWindow(hDlg, (automation_quiet || automation_list_disks) ? SW_HIDE : SW_SHOWNORMAL);
 	UpdateWindow(hDlg);
 
 	// Do our own event processing and process "magic" commands
@@ -4342,7 +4705,7 @@ out:
 	_CrtDumpMemoryLeaks();
 #endif
 
-	return 0;
+	return automation_exit_code;
 }
 
 /*
