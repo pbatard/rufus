@@ -3084,10 +3084,10 @@ overwrite_wim_inplace(WIMStruct *wim, int write_flags, unsigned num_threads)
 
 		/* In-place compaction  */
 
-		WARNING("The WIM file \"%"TS"\" is being compacted in place.\n"
-			"          Do *not* interrupt the operation, or else "
-			"the WIM file will be\n"
-			"          corrupted!", wim->filename);
+//		WARNING("The WIM file \"%"TS"\" is being compacted in place.\n"
+//			"          Do *not* interrupt the operation, or else "
+//			"the WIM file will be\n"
+//			"          corrupted!", wim->filename);
 		wim->being_compacted = 1;
 		old_wim_end = WIM_HEADER_DISK_SIZE;
 

@@ -152,9 +152,8 @@
 #define DEFAULT_ESP_MOUNT_POINT     "S:\\"
 // Per https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-shell-setup-useraccounts-localaccounts-localaccount-name
 // and https://learn.microsoft.com/en-us/previous-versions/cc722458(v=technet.10)#user-name-policies
-// Add '.' to the list because some folks also reported an issue with local accounts that have dots.
 // Also add '&', even as it could be escaped, as it's just not worth the trouble...
-#define USERNAME_INVALID_CHARS      "/\\[]:;|=.,+*?<>%@&\""
+#define USERNAME_INVALID_CHARS      "/\\[]:;|=,+*?<>%@&\""
 #define IS_POWER_OF_2(x)            ((x != 0) && (((x) & ((x) - 1)) == 0))
 #define IGNORE_RETVAL(expr)         do { (void)(expr); } while(0)
 #ifndef ARRAYSIZE
@@ -715,12 +714,12 @@ typedef struct {
 #define LIST_DIR_TYPE_RECURSIVE		0x80
 
 /* Hash tables */
-typedef struct htab_entry {
+typedef struct {
 	uint32_t used;
 	char* str;
 	void* data;
 } htab_entry;
-typedef struct htab_table {
+typedef struct {
 	htab_entry* table;
 	uint32_t size;
 	uint32_t filled;

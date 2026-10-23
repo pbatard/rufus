@@ -862,7 +862,6 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 {
 	// This "Mooo" is designed to give us enough space for a regular username length
 	static const char* base_username = "MOOOOOOOOOOO";	// 🐮
-	static const char* username_invalid_chars = USERNAME_INVALID_CHARS;
 	// Prevent resizing
 	static const LRESULT disabled[9] = { HTLEFT, HTRIGHT, HTTOP, HTBOTTOM, HTSIZE,
 		HTTOPLEFT, HTTOPRIGHT, HTBOTTOMLEFT, HTBOTTOMRIGHT };
@@ -1098,16 +1097,8 @@ static INT_PTR CALLBACK SelectionCallback(HWND hDlg, UINT message, WPARAM wParam
 				if (Button_GetCheck(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)) == BST_CHECKED &&
 					IsWindowVisible(GetDlgItem(hDlg, IDC_SELECTION_CHOICE1 + i)))
 					r += m;
-			if (selection_data[s].options->username_index > 0) {
+			if (selection_data[s].options->username_index > 0)
 				GetWindowTextU(GetDlgItem(hDlg, IDC_SELECTION_USERNAME), unattend_username, MAX_USERNAME_LENGTH);
-				// Perform string sanitization (NB: GetWindowTextU always terminates the string)
-				for (i = 0; unattend_username[i] != 0; i++) {
-					if (strchr(username_invalid_chars, unattend_username[i]) != NULL)
-						unattend_username[i] = '_';
-				}
-				// Also remove leading and trailing whitespaces (https://github.com/pbatard/rufus/issues/2950)
-				trim(unattend_username);
-			}
 			if (selection_data[s].options->edition_index > 0)
 				unattend_edition_index = (int)ComboBox_GetCurItemData(GetDlgItem(hDlg, IDC_SELECTION_EDITION));
 			// Fall through

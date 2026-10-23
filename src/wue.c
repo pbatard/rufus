@@ -342,6 +342,8 @@ char* CreateUnattendXml(int arch, int flags)
 				}
 			}
 			if (flags & UNATTEND_SET_USER) {
+				// Remove leading and trailing whitespaces (https://github.com/pbatard/rufus/issues/2950)
+				trim(unattend_username);
 				for (i = 0; (i < ARRAYSIZE(unallowed_account_names)) && (stricmp(unattend_username, unallowed_account_names[i]) != 0); i++);
 				if (i < ARRAYSIZE(unallowed_account_names)) {
 					uprintf("WARNING: '%s' is not allowed as local account name - Option ignored", unattend_username);
@@ -350,7 +352,7 @@ char* CreateUnattendXml(int arch, int flags)
 					filter_chars(unattend_username, USERNAME_INVALID_CHARS, '_');
 					uprintf("• Use '%s' for local account name", unattend_username);
 					if (strcmp(org_username, unattend_username) != 0)
-						uprintf("WARNING: Local account name contained unallowed characters and has been sanitized");
+						uprintf("WARNING: Local account name '%s' contained unallowed characters and has been sanitized", org_username);
 					free(org_username);
 					// If we create a local account in unattend.xml, then we can get Windows 11
 					// 22H2 to skip MSA even if the network is connected during installation.
@@ -1432,7 +1434,13 @@ out:
 	if (update_boot_wim) {
 		uprintf("Updating '%s[%d]'...", boot_wim_path, wim_index);
 		if (wimlib_update_image(wim, wim_index, wuc, wuc_index, 0) != 0 ||
-			wimlib_overwrite(wim, WIMLIB_WRITE_FLAG_RECOMPRESS, 0) != 0) {
+			// We use WIMLIB_WRITE_FLAG_UNSAFE_COMPACT unconditionally because, due to the
+			// AMI NTFS driver bug that may produce false positives for MD5, we want to
+			// have an unfragmented boot.wim after it is updated (one VNC), just as the
+			// original boot.wim was written to disk, and our changes are such that wimlib
+			// should be able to carry them all out within the existing file cluster area,
+			// without needing to allocate new cluster ranges (and thus break our file).
+			wimlib_overwrite(wim, WIMLIB_WRITE_FLAG_UNSAFE_COMPACT, 0) != 0) {
 			uprintf("Error: Failed to update %s", boot_wim_path);
 			r = FALSE;
 		}
