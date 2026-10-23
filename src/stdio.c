@@ -693,132 +693,32 @@ DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds)
 	return res;
 }
 
-#define STATUS_SUCCESS					((NTSTATUS)0x00000000L)
-#define STATUS_PROCEDURE_NOT_FOUND		((NTSTATUS)0xC000007AL)
-#define FILE_ATTRIBUTE_VALID_FLAGS		0x00007FB7
-#define NtCurrentPeb()					(NtCurrentTeb()->ProcessEnvironmentBlock)
-#define RtlGetProcessHeap()				(NtCurrentPeb()->Reserved4[1]) // NtCurrentPeb()->ProcessHeap, mangled due to deficiencies in winternl.h
-
-PF_TYPE_DECL(NTAPI, BOOLEAN, RtlDosPathNameToNtPathNameW, (PCWSTR, PUNICODE_STRING, PWSTR*, PVOID));
-PF_TYPE_DECL(NTAPI, VOID, RtlSetLastWin32ErrorAndNtStatusFromNtStatus, (NTSTATUS));
-
+// This creates a *contiguous* preallocated file on file systems such as NTFS.
+// The contiguousness is something we want due to the *OBNOXIOUS* AMI NTFS driver
+// but that makes their UEFI NTFS driver read data from the wrong clusters when
+// an NTFS file that has multiple Runs (contiguous cluster sections) happens to
+// be issued a read that matches the size of a Run exactly. Because of this, our
+// UEFI media validation reports files that are corrupted (because the Ami driver
+// fed us garbage data) whereas the data on the NTFS file system is absolutely
+// fine. Therefore, to work around this bug and make sure our NTFS files have
+// only one Run (i.e. have contiguous data), we add a call to SetEndOfFile().
+// See https://github.com/pbatard/AmiNtfsBug for more details.
+// This *should* also pre-allocate the file on disk...
 HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
 	DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
-	DWORD dwFlagsAndAttributes, LONGLONG fileSize)
+	DWORD dwFlagsAndAttributes, LONGLONG llFileSize)
 {
-	HANDLE fileHandle = INVALID_HANDLE_VALUE;
-	OBJECT_ATTRIBUTES objectAttributes;
-	IO_STATUS_BLOCK ioStatusBlock;
-	UNICODE_STRING ntPath;
-	ULONG fileAttributes, flags = 0;
-	LARGE_INTEGER allocationSize;
-	NTSTATUS status = STATUS_SUCCESS;
-
-	PF_INIT_OR_SET_STATUS(RtlDosPathNameToNtPathNameW, Ntdll);
-	PF_INIT_OR_SET_STATUS(RtlSetLastWin32ErrorAndNtStatusFromNtStatus, Ntdll);
-
-	if (!NT_SUCCESS(status)) {
-		return CreateFileU(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes,
-			dwCreationDisposition, dwFlagsAndAttributes, NULL);
-	}
-
-	wconvert(lpFileName);
-
-	// Determine creation disposition and flags
-	switch (dwCreationDisposition) {
-	case CREATE_NEW:
-		dwCreationDisposition = FILE_CREATE;
-		break;
-	case CREATE_ALWAYS:
-		dwCreationDisposition = FILE_OVERWRITE_IF;
-		break;
-	case OPEN_EXISTING:
-		dwCreationDisposition = FILE_OPEN;
-		break;
-	case OPEN_ALWAYS:
-		dwCreationDisposition = FILE_OPEN_IF;
-		break;
-	case TRUNCATE_EXISTING:
-		dwCreationDisposition = FILE_OVERWRITE;
-		break;
-	default:
-		SetLastError(ERROR_INVALID_PARAMETER);
+	HANDLE h = CreateFileU(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes,
+		dwCreationDisposition, dwFlagsAndAttributes, NULL);
+	// No big deal if either of the following 2 calls fail...
+	if (SetFilePointerEx(h, (LARGE_INTEGER) { .QuadPart = llFileSize }, NULL, FILE_BEGIN))
+		SetEndOfFile(h);
+	// ...however, if we can't reset the file pointer to the beginning, we have a problem
+	if (!SetFilePointerEx(h, (LARGE_INTEGER) { .QuadPart = 0ULL }, NULL, FILE_BEGIN)) {
+		CloseHandle(h);
 		return INVALID_HANDLE_VALUE;
 	}
-
-	if ((dwFlagsAndAttributes & FILE_FLAG_OVERLAPPED) == 0)
-		flags |= FILE_SYNCHRONOUS_IO_NONALERT;
-
-	if ((dwFlagsAndAttributes & FILE_FLAG_WRITE_THROUGH) != 0)
-		flags |= FILE_WRITE_THROUGH;
-
-	if ((dwFlagsAndAttributes & FILE_FLAG_NO_BUFFERING) != 0)
-		flags |= FILE_NO_INTERMEDIATE_BUFFERING;
-
-	if ((dwFlagsAndAttributes & FILE_FLAG_RANDOM_ACCESS) != 0)
-		flags |= FILE_RANDOM_ACCESS;
-
-	if ((dwFlagsAndAttributes & FILE_FLAG_SEQUENTIAL_SCAN) != 0)
-		flags |= FILE_SEQUENTIAL_ONLY;
-
-	if ((dwFlagsAndAttributes & FILE_FLAG_DELETE_ON_CLOSE) != 0) {
-		flags |= FILE_DELETE_ON_CLOSE;
-		dwDesiredAccess |= DELETE;
-	}
-
-	if ((dwFlagsAndAttributes & FILE_FLAG_BACKUP_SEMANTICS) != 0) {
-		if ((dwDesiredAccess & GENERIC_ALL) != 0)
-			flags |= (FILE_OPEN_FOR_BACKUP_INTENT | FILE_OPEN_REMOTE_INSTANCE);
-		else {
-			if ((dwDesiredAccess & GENERIC_READ) != 0)
-				flags |= FILE_OPEN_FOR_BACKUP_INTENT;
-
-			if ((dwDesiredAccess & GENERIC_WRITE) != 0)
-				flags |= FILE_OPEN_REMOTE_INSTANCE;
-		}
-	} else {
-		flags |= FILE_NON_DIRECTORY_FILE;
-	}
-
-	if ((dwFlagsAndAttributes & FILE_FLAG_OPEN_REPARSE_POINT) != 0)
-		flags |= FILE_OPEN_REPARSE_POINT;
-
-	if ((dwFlagsAndAttributes & FILE_FLAG_OPEN_NO_RECALL) != 0)
-		flags |= FILE_OPEN_NO_RECALL;
-
-	fileAttributes = dwFlagsAndAttributes & (FILE_ATTRIBUTE_VALID_FLAGS & ~FILE_ATTRIBUTE_DIRECTORY);
-
-	dwDesiredAccess |= (SYNCHRONIZE | FILE_READ_ATTRIBUTES);
-
-	// Convert DOS path to NT format
-	if (!pfRtlDosPathNameToNtPathNameW(wlpFileName, &ntPath, NULL, NULL)) {
-		wfree(lpFileName);
-		SetLastError(ERROR_FILE_NOT_FOUND);
-		return INVALID_HANDLE_VALUE;
-	}
-
-	InitializeObjectAttributes(&objectAttributes, &ntPath, 0, NULL, NULL);
-
-	if (lpSecurityAttributes != NULL) {
-		if (lpSecurityAttributes->bInheritHandle)
-			objectAttributes.Attributes |= OBJ_INHERIT;
-		objectAttributes.SecurityDescriptor = lpSecurityAttributes->lpSecurityDescriptor;
-	}
-
-	if ((dwFlagsAndAttributes & FILE_FLAG_POSIX_SEMANTICS) == 0)
-		objectAttributes.Attributes |= OBJ_CASE_INSENSITIVE;
-
-	allocationSize.QuadPart = fileSize;
-
-	// Call NtCreateFile
-	status = NtCreateFile(&fileHandle, dwDesiredAccess, &objectAttributes, &ioStatusBlock,
-		&allocationSize, fileAttributes, dwShareMode, dwCreationDisposition, flags, NULL, 0);
-
-	RtlFreeHeap(RtlGetProcessHeap(), 0, ntPath.Buffer);
-	wfree(lpFileName);
-	pfRtlSetLastWin32ErrorAndNtStatusFromNtStatus(status);
-
-	return fileHandle;
+	return h;
 }
 
 // The following calls are used to resolve the addresses of DLL function calls

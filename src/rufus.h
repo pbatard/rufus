@@ -933,7 +933,7 @@ extern DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMillisecond
 extern HICON CreateMirroredIcon(HICON hiconOrg);
 extern HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
 	DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
-	DWORD dwFlagsAndAttributes, LONGLONG fileSize);
+	DWORD dwFlagsAndAttributes, LONGLONG llFileSize);
 extern uint32_t ResolveDllAddress(dll_resolver_t* resolver);
 extern sbat_entry_t* GetSbatEntries(char* sbatlevel);
 extern thumbprint_list_t* GetThumbprintEntries(char* thumbprints_txt);
