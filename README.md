@@ -58,6 +58,54 @@ easily accessible log, or through the [Windows debug facility](https://docs.micr
 * [FAQ](https://github.com/pbatard/rufus/wiki/FAQ)
 * [Security and safety measures](https://github.com/pbatard/rufus/wiki/Security)
 
+Automation command line mode
+----------------------------
+
+This change adds an explicit, opt-in automation mode for unattended image
+flashing. Normal GUI operation and the existing `-i/--iso` startup behavior are
+unchanged. Automation requires an explicit target disk and `--yes`; use
+`--dry-run` to validate the image and target without writing.
+
+Example (run from an elevated command prompt):
+
+```text
+rufus.exe --auto --image C:\\images\\bootstrap.img.gz --disk 3 --yes --mode dd --label ALPINE-STD
+```
+
+The disk selector is a physical disk number, so `3` selects
+`\\.\PhysicalDrive3`. Fixed USB disks are excluded by default; add `--force`
+when the target is not presented as removable. `--force` also disables the
+image-size guard and should only be used with a verified target selector.
+
+Before selecting a target, `rufus.exe --list-disks` prints the disks currently
+visible to Rufus as tab-separated records containing the physical-drive name,
+label, model, and size in bytes. Use `--force --list-disks` when fixed disks
+must also be included.
+
+For repeatable jobs, use a UTF-8 `key=value` file:
+
+```text
+image=C:\\images\\bootstrap.img.gz
+disk=3
+auto=true
+yes=true
+mode=dd
+filesystem=fat32
+label=ALPINE-STD
+quiet=true
+```
+
+Run it with `rufus.exe --config flash.conf`. Supported keys are `image`,
+`disk`, `auto`, `yes`, `quiet`, `dry-run`, `force`, `list-disks`, `mode` (`iso`
+or `dd`), `filesystem`, and `label`. Command-line options override values
+loaded from the configuration file. Automation returns zero on successful
+completion or dry-run validation, one on a flash/validation failure, and two
+on invalid automation arguments. `--list-disks` exits after printing the
+inventory and does not modify any disk.
+
+The command-line and configuration interfaces are specified in
+[`docs/automation-cli.md`](docs/automation-cli.md).
+
 Enhancements/Bugs
 -----------------
 
