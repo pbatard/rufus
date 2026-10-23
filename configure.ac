@@ -6,8 +6,6 @@ AM_SILENT_RULES([yes])
 
 AC_PREREQ([2.73])
 AC_PROG_CC
-# autoconf 2.61 doesn't have AC_PROG_AR, but 2.63 has it
-AC_DEFUN([AC_PROG_AR], [AC_CHECK_TOOL(AR, ar, :)])
 AC_PROG_AR
 AC_PROG_RANLIB
 AC_PROG_SED

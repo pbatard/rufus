@@ -1,10 +1,8 @@
 This directory contains the Grub 2.0 boot records that are used by Rufus
 
-* boot.img and core.img were created from https://ftp.gnu.org/gnu/grub/grub-2.14.tar.xz
-  with https://github.com/gentoo/gentoo/raw/d51cbeb087dbbe979ff29af645f32071cce2834d/sys-boot/grub/files/grub-2.14-revert-image-base.patch
-  applied (since GRUB are apparently unable to perform BASIC testing of their releases)
+* boot.img and core.img were created from:
+  https://gitlab.freedesktop.org/api/v4/projects/26558/packages/generic/source-assets/grub-2.16/grub-2.16.tar.xz
   on a Debian 13 x64 system using the commands:
-    patch -p1 < grub-2.14-revert-image-base.patch
     ./autogen.sh
     # --enable-boot-time for Manjaro Linux
     ./configure --disable-nls --enable-boot-time
