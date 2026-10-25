@@ -710,6 +710,8 @@ HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
 {
 	HANDLE h = CreateFileU(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes,
 		dwCreationDisposition, dwFlagsAndAttributes, NULL);
+	if (h == INVALID_HANDLE_VALUE)
+		return h;
 	// No big deal if either of the following 2 calls fail...
 	if (SetFilePointerEx(h, (LARGE_INTEGER) { .QuadPart = llFileSize }, NULL, FILE_BEGIN))
 		SetEndOfFile(h);
