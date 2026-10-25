@@ -26,6 +26,9 @@ on:
       - '**.txt'
       - '**.xml'
 
+permissions:
+  contents: read
+
 env:
   SOLUTION_FILE_PATH: ./rufus.sln
   BUILD_CONFIGURATION: Release
