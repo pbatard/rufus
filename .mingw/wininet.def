@@ -9,5 +9,6 @@ EXPORTS
   InternetGetConnectedState@8
   InternetGetLastResponseInfoA@12
   InternetOpenA@20
+  InternetQueryOptionA@16
   InternetReadFile@16
   InternetSetOptionA@16

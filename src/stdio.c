@@ -882,7 +882,7 @@ uint32_t ResolveDllAddress(dll_resolver_t* resolver)
 	if (Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_115), lmprintf(MSG_345)) != IDYES)
 		goto out;
 	static_sprintf(path, "%s\\%s", temp_dir, info->PdbName);
-	static_sprintf(url, "http://msdl.microsoft.com/download/symbols/%s/%s%x/%s",
+	static_sprintf(url, "https://msdl.microsoft.com/download/symbols/%s/%s%x/%s",
 		info->PdbName, GuidToString(&info->Guid, FALSE), (int)info->Age, info->PdbName);
 	if (DownloadToFileOrBufferEx(url, path, SYMBOL_SERVER_USER_AGENT, NULL, hMainDialog, FALSE) < 200 * KB)
 		goto out;

@@ -157,6 +157,22 @@ out:
 	return hSession;
 }
 
+// WinINet silently follows HTTPS to HTTP redirects when INTERNET_FLAG_NO_UI is set (regardless
+// of INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP), so we must check for a downgrade ourselves.
+static BOOL IsDowngradedRequest(HINTERNET hRequest, INTERNET_SCHEME nScheme)
+{
+	char url[INTERNET_MAX_URL_LENGTH];
+	DWORD dwSize = sizeof(url);
+
+	if (nScheme != INTERNET_SCHEME_HTTPS)
+		return FALSE;
+	if (InternetQueryOptionA(hRequest, INTERNET_OPTION_URL, url, &dwSize) && (_strnicmp(url, "https://", 8) == 0))
+		return FALSE;
+	uprintf("Refusing to follow a redirect from HTTPS to a non HTTPS URL");
+	SetLastError(ERROR_INTERNET_HTTPS_TO_HTTP_ON_REDIR);
+	return TRUE;
+}
+
 /*
  * Download a file or fill a buffer from an URL
  * Mostly taken from http://support.microsoft.com/kb/234913
@@ -225,7 +241,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	}
 
 	hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
-		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
+		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
 		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_HYPERLINK |
 		((UrlParts.nScheme == INTERNET_SCHEME_HTTPS) ? INTERNET_FLAG_SECURE : 0), (DWORD_PTR)NULL);
 	if (hRequest == NULL) {
@@ -243,6 +259,8 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	// This is needed for GitHub as the Microsoft HTTP APIs can't seem to read content-length for
 	// compressed content from GitHub, and using "identity" disables compression.
 	HttpSendRequestA(hRequest, "Accept-Encoding: identity", -1L, NULL, 0);
+	if (IsDowngradedRequest(hRequest, UrlParts.nScheme))
+		goto out;
 
 	// Get the file size
 	dwSize = sizeof(DownloadStatus);
@@ -280,6 +298,11 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 			uprintf("No buffer pointer provided for download");
 			goto out;
 		}
+		// Don't let a bogus Content-Length wrap the allocation size around
+		if (total_size > SIZE_MAX - 2) {
+			uprintf("Invalid file length for download: %lld bytes", total_size);
+			goto out;
+		}
 		// Allocate one extra byte, so that caller can rely on NUL-terminated text if needed
 		*buffer = calloc((size_t)total_size + 2, 1);
 		if (*buffer == NULL) {
@@ -306,6 +329,13 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 				goto out;
 			}
 		} else {
+			// WinINet does not enforce Content-Length (e.g. when chunked encoding is also used)
+			// so we must make sure that we don't receive more data than we allocated for.
+			if (dwDownloaded > total_size - size) {
+				uprintf("Received more data than the expected %lld bytes - Aborting", total_size);
+				SetLastError(ERROR_INVALID_DATA);
+				goto out;
+			}
 			memcpy(&(*buffer)[size], buf, dwDownloaded);
 		}
 		size += dwDownloaded;
@@ -662,7 +692,7 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		for (i = 0; i < ARRAYSIZE(verpos); i++) {
 			vvuprintf("Trying %s", UrlParts.lpszUrlPath);
 			hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
-				INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
+				INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
 				INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_HYPERLINK |
 				((UrlParts.nScheme == INTERNET_SCHEME_HTTPS) ? INTERNET_FLAG_SECURE : 0), (DWORD_PTR)NULL);
 			if (hRequest == NULL) {
@@ -671,6 +701,8 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 			}
 			// Must use "Accept-Encoding: identity" to get the file size
 			HttpSendRequestA(hRequest, "Accept-Encoding: identity", -1L, NULL, 0);
+			if (IsDowngradedRequest(hRequest, UrlParts.nScheme))
+				goto out;
 
 			// Ensure that we get a text file
 			dwSize = sizeof(dwStatus);
@@ -715,6 +747,9 @@ static DWORD WINAPI CheckForUpdatesThread(LPVOID param)
 		if (!HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH|HTTP_QUERY_FLAG_NUMBER, (LPVOID)&dwTotalSize, &dwSize, NULL))
 			goto out;
 
+		// Version files are small, and we don't want 'dwTotalSize + 1' to wrap around
+		if (dwTotalSize >= 1 * MB)
+			goto out;
 		// Make sure the file is NUL terminated
 		buf = (char*)calloc(dwTotalSize + 1, 1);
 		if (buf == NULL)
@@ -1040,7 +1075,7 @@ BOOL IsDownloadable(const char* url)
 		goto out;
 
 	hRequest = HttpOpenRequestA(hConnection, "GET", UrlParts.lpszUrlPath, NULL, NULL, accept_types,
-		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
+		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
 		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_HYPERLINK |
 		((UrlParts.nScheme == INTERNET_SCHEME_HTTPS) ? INTERNET_FLAG_SECURE : 0), (DWORD_PTR)NULL);
 	if (hRequest == NULL)
@@ -1048,6 +1083,8 @@ BOOL IsDownloadable(const char* url)
 
 	// Must use "Accept-Encoding: identity" to get the file size
 	HttpSendRequestA(hRequest, "Accept-Encoding: identity", -1L, NULL, 0);
+	if (IsDowngradedRequest(hRequest, UrlParts.nScheme))
+		goto out;
 
 	// Get the file size
 	dwSize = sizeof(DownloadStatus);
