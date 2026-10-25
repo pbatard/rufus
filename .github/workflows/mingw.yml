@@ -26,6 +26,9 @@ on:
       - '**.txt'
       - '**.xml'
 
+permissions:
+  contents: read
+
 jobs:
   MinGW-Build:
     runs-on: windows-latest

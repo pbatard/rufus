@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
     branches: [ master ]
 
+permissions:
+  contents: read
+
 env:
   SOLUTION_FILE_PATH: ./res/setup/setup.sln
   BUILD_CONFIGURATION: Release
