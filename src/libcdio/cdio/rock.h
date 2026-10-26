@@ -1,7 +1,7 @@
 /*
-    Copyright (C) 2005, 2006 2008, 2012 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2005, 2006 2008, 2012, 2025 Rocky Bernstein <rocky@gnu.org>
 
-    See also rock.c by Eric Youngdale (1993) from GNU/Linux 
+    See also rock.c by Eric Youngdale (1993) from GNU/Linux
     This is Copyright 1993 Yggdrasil Computing, Incorporated
 
     This program is free software: you can redistribute it and/or modify
@@ -17,11 +17,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-/*!
-   \file rock.h 
+/**
+   \file rock.h
    \brief Things related to the Rock Ridge Interchange Protocol (RRIP)
 
-   Applications will probably not include this directly but via 
+   Applications will probably not include this directly but via
    the iso9660.h header.
 */
 
@@ -35,7 +35,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/*! An enumeration for some of the ISO_ROCK_* \#defines below. This isn't
+/** An enumeration for some of the ISO_ROCK_* \#defines below. This isn't
   really an enumeration one would really use in a program it is to
   be helpful in debuggers where wants just to refer to the ISO_ROCK_*
   names and get something.
@@ -91,18 +91,18 @@ extern enum iso_rock_enums {
 
 PRAGMA_BEGIN_PACKED
 
-/*! The next two structs are used by the system-use-sharing protocol
+/** The next two structs are used by the system-use-sharing protocol
    (SUSP), in which the Rock Ridge extensions are embedded.  It is
    quite possible that other extensions are present on the disk, and
    this is fine as long as they all use SUSP. */
 
-/*! system-use-sharing protocol */
+/** system-use-sharing protocol */
 typedef struct iso_su_sp_s{
   uint8_t       magic[2];
   uint8_t       skip;
 } GNUC_PACKED iso_su_sp_t;
 
-/*! system-use extension record */
+/** system-use extension record */
 typedef struct iso_su_er_s {
   iso711_t      len_id;  /**< Identifier length. Value 10?. */
   uint8_t       len_des;
@@ -117,19 +117,19 @@ typedef struct iso_su_ce_s {
   iso733_t      size;
 } GNUC_PACKED iso_su_ce_t;
 
-/*! POSIX file attributes, PX. See Rock Ridge Section 4.1.2 */
+/** POSIX file attributes, PX. See Rock Ridge Section 4.1.2 */
 typedef struct iso_rock_px_s {
-  iso733_t st_mode;       /*! file mode permissions; same as st_mode 
+  iso733_t st_mode;       /** file mode permissions; same as st_mode
                             of POSIX:5.6.1 */
-  iso733_t st_nlinks;     /*! number of links to file; same as st_nlinks
+  iso733_t st_nlinks;     /** number of links to file; same as st_nlinks
                             of POSIX:5.6.1 */
-  iso733_t st_uid;        /*! user id owner of file; same as st_uid
+  iso733_t st_uid;        /** user id owner of file; same as st_uid
                             of POSIX:5.6.1 */
-  iso733_t st_gid;        /*! group id of file; same as st_gid of 
+  iso733_t st_gid;        /** group id of file; same as st_gid of
                             of POSIX:5.6.1 */
 } GNUC_PACKED iso_rock_px_t ;
 
-/*! POSIX device number, PN. A PN is mandatory if the file type
+/** POSIX device number, PN. A PN is mandatory if the file type
   recorded in the "PX" File Mode field for a Directory Record
   indicates a character or block device (ISO_ROCK_ISCHR |
   ISO_ROCK_ISBLK).  This entry is ignored for other (non-Direcotry)
@@ -144,7 +144,7 @@ typedef struct iso_rock_pn_s {
                             7.2.3 encoded */
 } GNUC_PACKED iso_rock_pn_t ;
 
-/*! These are the bits and their meanings for flags in the SL structure. */
+/** These are the bits and their meanings for flags in the SL structure. */
 typedef enum {
   ISO_ROCK_SL_CONTINUE = 1,
   ISO_ROCK_SL_CURRENT  = 2,
@@ -163,15 +163,15 @@ typedef struct iso_rock_sl_part_s {
   char text[EMPTY_ARRAY_SIZE];
 } GNUC_PACKED iso_rock_sl_part_t ;
 
-/*! Symbolic link. See Rock Ridge Section 4.1.3 */
+/** Symbolic link. See Rock Ridge Section 4.1.3 */
 typedef struct iso_rock_sl_s {
   uint8_t flags;
   iso_rock_sl_part_t link;
 } GNUC_PACKED iso_rock_sl_t ;
 
-/*! Alternate name. See Rock Ridge Section 4.1.4 */
+/** Alternate name. See Rock Ridge Section 4.1.4 */
 
-/*! These are the bits and their meanings for flags in the NM structure. */
+/** These are the bits and their meanings for flags in the NM structure. */
 typedef enum {
   ISO_ROCK_NM_CONTINUE = 1,
   ISO_ROCK_NM_CURRENT  = 2,
@@ -188,17 +188,17 @@ typedef struct iso_rock_nm_s {
   char name[EMPTY_ARRAY_SIZE];
 } GNUC_PACKED iso_rock_nm_t ;
 
-/*! Child link. See Section 4.1.5.1 */
+/** Child link. See Section 4.1.5.1 */
 typedef struct iso_rock_cl_s {
   iso733_t location;
 } GNUC_PACKED iso_rock_cl_t ;
 
-/*! Parent link. See Section 4.1.5.2 */
+/** Parent link. See Section 4.1.5.2 */
 typedef struct iso_rock_pl_s {
   iso733_t location;
 } GNUC_PACKED iso_rock_pl_t ;
 
-/*! These are the bits and their meanings for flags in the TF structure. */
+/** These are the bits and their meanings for flags in the TF structure. */
 typedef enum {
   ISO_ROCK_TF_CREATE     =  1,
   ISO_ROCK_TF_MODIFY     =  2,
@@ -220,10 +220,10 @@ typedef enum {
 #define ISO_ROCK_TF_EFFECTIVE  64
 #define ISO_ROCK_TF_LONG_FORM 128
 
-/*! Time stamp(s) for a file. See Rock Ridge Section 4.1.6 */
+/** Time stamp(s) for a file. See Rock Ridge Section 4.1.6 */
 typedef struct iso_rock_tf_s {
   uint8_t flags; /**< See ISO_ROCK_TF_* bits above. */
-  uint8_t time_bytes[EMPTY_ARRAY_SIZE]; /**< A homogenious array of
+  uint8_t time_bytes[EMPTY_ARRAY_SIZE]; /**< A homogeneous array of
                                            iso9660_ltime_t or
                                            iso9660_dtime_t entries
                                            depending on flags &
@@ -236,7 +236,7 @@ typedef struct iso_rock_tf_s {
                                            extraction.  */
 } GNUC_PACKED iso_rock_tf_t ;
 
-/*! File data in sparse format. See Rock Ridge Section 4.1.7 */
+/** File data in sparse format. See Rock Ridge Section 4.1.7 */
 typedef struct iso_rock_sf_s {
   iso733_t virtual_size_high; /**< high-order 32 bits of virtual size */
   iso733_t virtual_size_low;  /**< low-order 32 bits of virtual size */
@@ -245,10 +245,10 @@ typedef struct iso_rock_sf_s {
 
 typedef struct iso_extension_record_s {
   char signature[2];   /**< signature word; either 'SP', 'CE', 'ER', 'RR',
-                          'PX', 'PN', 'SL', 'NM', 'CL', 'PL', 'TF', or 
+                          'PX', 'PN', 'SL', 'NM', 'CL', 'PL', 'TF', or
                           'ZF' */
   iso711_t len;        /**< length of system-user area - 44 for PX
-                          20 for PN, 5+strlen(text) for SL, 21 for 
+                          20 for PN, 5+strlen(text) for SL, 21 for
                           SF, etc. */
   iso711_t version;    /**< version number - value 1 */
   union {
@@ -288,11 +288,11 @@ typedef struct iso_extension_record_s {
                              ISO_ROCK_SUF_SF)
 
 typedef struct iso_rock_time_s {
-  bool          b_used;     /**< If true, field has been set and  is valid. 
-                               Otherwise remaning fields are meaningless. */
-  bool          b_longdate;  /**< If true date format is a iso9660_ltime_t. 
+  bool          b_used;     /**< If true, field has been set and  is valid.
+                               Otherwise remaining fields are meaningless. */
+  bool          b_longdate;  /**< If true date format is a iso9660_ltime_t.
                                Otherwise date is iso9660_dtime_t */
-  union 
+  union
   {
     iso9660_ltime_t ltime;
     iso9660_dtime_t dtime;
@@ -300,7 +300,7 @@ typedef struct iso_rock_time_s {
 } GNUC_PACKED iso_rock_time_t;
 
 typedef struct iso_rock_statbuf_s {
-  bool_3way_t   b3_rock;              /**< has Rock Ridge extension. 
+  bool_3way_t   b3_rock;              /**< has Rock Ridge extension.
                                          If "yep", then the fields
                                          are used.
                                       */
@@ -315,18 +315,18 @@ typedef struct iso_rock_statbuf_s {
                                          of pointed to file.  */
   iso_rock_time_t create;             /**< create time See ISO 9660:9.5.4. */
   iso_rock_time_t modify;             /**< time of last modification
-                                         ISO 9660:9.5.5. st_mtime field of 
+                                         ISO 9660:9.5.5. st_mtime field of
                                          POSIX:5.6.1. */
-  iso_rock_time_t access;             /**< time of last file access st_atime 
+  iso_rock_time_t access;             /**< time of last file access st_atime
                                          field of POSIX:5.6.1. */
   iso_rock_time_t attributes;         /**< time of last attribute change.
                                          st_ctime field of POSIX:5.6.1. */
   iso_rock_time_t backup;             /**< time of last backup. */
-  iso_rock_time_t expiration;         /**< time of expiration; See ISO 
+  iso_rock_time_t expiration;         /**< time of expiration; See ISO
                                          9660:9.5.6. */
   iso_rock_time_t effective;          /**< Effective time; See ISO 9660:9.5.7.
                                        */
-  uint32_t        i_rdev;             /**< the upper 16-bits is major device 
+  uint32_t        i_rdev;             /**< the upper 16-bits is major device
                                          number, the lower 16-bits is the
                                          minor device number */
   uint32_t        u_su_fields;        /**< System Use field attributes */
@@ -335,7 +335,7 @@ typedef struct iso_rock_statbuf_s {
 
 PRAGMA_END_PACKED
 
-/*! return length of name field; 0: not found, -1: to be ignored */
+/** return length of name field; 0: not found, -1: to be ignored */
 int get_rock_ridge_filename(iso9660_dir_t * de,
                             /*in*/ void * p_iso,
                             /*out*/ char * retname,
@@ -344,29 +344,29 @@ int get_rock_ridge_filename(iso9660_dir_t * de,
 int parse_rock_ridge_stat(iso9660_dir_t *de,
                           /*out*/ iso9660_stat_t *p_stat);
 
-  /*!
+  /**
     Returns POSIX mode bitstring for a given file.
   */
-  mode_t 
+  mode_t
   iso9660_get_posix_filemode_from_rock(const iso_rock_statbuf_t *rr);
 
-/*!
-  Returns a string which interpreting the POSIX mode st_mode. 
+/**
+  Returns a string which interpreting the POSIX mode st_mode.
   For example:
   \verbatim
   drwxrws---
   -rw---Sr--
   lrwxrwxrwx
   \endverbatim
-  
+
   A description of the characters in the string follows
   The 1st character is either "d" if the entry is a directory, "l" is
   a symbolic link or "-" if neither.
-  
+
   The 2nd to 4th characters refer to permissions for a user while the
-  the 5th to 7th characters refer to permissions for a group while, and 
-  the 8th to 10h characters refer to permissions for everyone. 
-  
+  the 5th to 7th characters refer to permissions for a group while, and
+  the 8th to 10h characters refer to permissions for everyone.
+
   In each of these triplets the first character (2, 5, 8) is "r" if
   the entry is allowed to be read.
 
@@ -386,7 +386,7 @@ int parse_rock_ridge_stat(iso9660_dir_t *de,
 const char *iso9660_get_rock_attr_str(posix_mode_t st_mode);
 
 /** These variables are not used, but are defined to facilatate debugging
-    by letting us use enumerations values (which also correspond to 
+    by letting us use enumerations values (which also correspond to
     \#define's inside a debugged program.
  */
 extern iso_rock_nm_flag_t iso_rock_nm_flag;
@@ -399,7 +399,7 @@ extern iso_rock_tf_flag_t iso_rock_tf_flag;
 
 #endif /* CDIO_ROCK_H_ */
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003, 2004, 2005, 2008, 2011, 2012
+  Copyright (C) 2003, 2004, 2005, 2008, 2011, 2012, 2025
   Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -34,7 +34,7 @@
 
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
-#endif 
+#endif
 
 #define ISO_VERSION             1
 
@@ -53,7 +53,7 @@ typedef struct iso_volume_descriptor_s {
 
 /*
  * XXX JS: The next structure has an odd length!
- * Some compilers (e.g. on Sun3/mc68020) padd the structures to even length.
+ * Some compilers (e.g. on Sun3/mc68020) pad the structures to even length.
  * For this reason, we cannot use sizeof (struct iso_path_table) or
  * sizeof (struct iso_directory_record) to compute on disk sizes.
  * Instead, we use offsetof(..., name) and add the name size.
@@ -78,7 +78,7 @@ PRAGMA_END_PACKED
 #endif /* CDIO_ISO0660_ISO9660_PRIVATE_H_ */
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

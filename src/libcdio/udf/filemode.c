@@ -25,7 +25,7 @@
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif 
+#endif
 
 #include <cdio/udf.h>
 #include "filemode.h"
@@ -81,7 +81,7 @@ setst (mode_t bits, char *chars)
    'l' for symbolic links
    's' for sockets
    'p' for fifos
-   'C' for contigous data files
+   'C' for contiguous data files
    '-' for regular files
    '?' for any other file type.  */
 
@@ -145,7 +145,7 @@ ftypelet (mode_t bits)
   return '?';
 }
 
-/*! udf_mode_string - fill in string STR with an ls-style ASCII
+/** udf_mode_string - fill in string STR with an ls-style ASCII
    representation of the st_mode field of file stats block STATP.
    10 characters are stored in STR; no terminating null is added.
    The characters stored in STR are:

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008, 2012 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2008, 2012, 2026 Rocky Bernstein <rocky@gnu.org>
                   2001, 2004, 2005 Herbert Valerio Riedel <hvr@gnu.org>
                   2001 Sven Ottemann <ac-logic@freenet.de>
 
@@ -16,12 +16,12 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-/** \file bytesex_asm.h 
- *  \brief  Assembly code to handle byte-swapping.
 
-    Note: this header will is slated to get removed and libcdio will use 
-    glib.h routines instead. 
+/** @file bytesex_asm.h
+ *  @brief  Assembly code to handle byte-swapping.
+
+    Note: this header will is slated to get removed and libcdio will use
+    glib.h routines instead.
 */
 
 #ifndef CDIO_BYTESEX_ASM_H_
@@ -44,26 +44,18 @@
 
 #if defined(__powerpc__) && defined(__GNUC__)
 
-static CDIO_INLINE
-uint32_t uint32_swap_le_be_asm(const uint32_t a)
-{
+static CDIO_INLINE uint32_t uint32_swap_le_be_asm(const uint32_t a) {
   uint32_t b;
 
-  __asm__ ("lwbrx %0,0,%1"
-           :"=r"(b)
-           :"r"(&a), "m"(a));
+  __asm__("lwbrx %0,0,%1" : "=r"(b) : "r"(&a), "m"(a));
 
   return b;
 }
 
-static CDIO_INLINE
-uint16_t uint16_swap_le_be_asm(const uint16_t a)
-{
+static CDIO_INLINE uint16_t uint16_swap_le_be_asm(const uint16_t a) {
   uint32_t b;
 
-  __asm__ ("lhbrx %0,0,%1"
-           :"=r"(b)
-           :"r"(&a), "m"(a));
+  __asm__("lhbrx %0,0,%1" : "=r"(b) : "r"(&a), "m"(a));
 
   return b;
 }
@@ -71,28 +63,22 @@ uint16_t uint16_swap_le_be_asm(const uint16_t a)
 #define UINT16_SWAP_LE_BE uint16_swap_le_be_asm
 #define UINT32_SWAP_LE_BE uint32_swap_le_be_asm
 
-#elif defined(__mc68000__) &&  defined(__STORMGCC__)
+#elif defined(__mc68000__) && defined(__STORMGCC__)
 
-static CDIO_INLINE
-uint32_t uint32_swap_le_be_asm(uint32_t a __asm__("d0"))
-{
+static CDIO_INLINE uint32_t uint32_swap_le_be_asm(uint32_t a __asm__("d0")) {
   /* __asm__("rolw #8,%0; swap %0; rolw #8,%0" : "=d" (val) : "0" (val)); */
 
   __asm__("move.l %1,d0;rol.w #8,d0;swap d0;rol.w #8,d0;move.l d0,%0"
-          :"=r"(a)
-          :"r"(a));
+          : "=r"(a)
+          : "r"(a));
 
-  return(a);
+  return (a);
 }
 
-static CDIO_INLINE
-uint16_t uint16_swap_le_be_asm(uint16_t a __asm__("d0"))
-{
-  __asm__("move.l %1,d0;rol.w #8,d0;move.l d0,%0"
-          :"=r"(a)
-          :"r"(a));
-  
-  return(a);
+static CDIO_INLINE uint16_t uint16_swap_le_be_asm(uint16_t a __asm__("d0")) {
+  __asm__("move.l %1,d0;rol.w #8,d0;move.l d0,%0" : "=r"(a) : "r"(a));
+
+  return (a);
 }
 
 #define UINT16_SWAP_LE_BE uint16_swap_le_be_asm
@@ -100,26 +86,22 @@ uint16_t uint16_swap_le_be_asm(uint16_t a __asm__("d0"))
 
 #elif 0 && defined(__i386__) && defined(__GNUC__)
 
-static CDIO_INLINE
-uint32_t uint32_swap_le_be_asm(uint32_t a)
-{
-  __asm__("xchgb %b0,%h0\n\t"     /* swap lower bytes     */
-          "rorl $16,%0\n\t"       /* swap words           */
-          "xchgb %b0,%h0"         /* swap higher bytes    */
-          :"=q" (a)
-          : "0" (a));
+static CDIO_INLINE uint32_t uint32_swap_le_be_asm(uint32_t a) {
+  __asm__("xchgb %b0,%h0\n\t" /* swap lower bytes     */
+          "rorl $16,%0\n\t"   /* swap words           */
+          "xchgb %b0,%h0"     /* swap higher bytes    */
+          : "=q"(a)
+          : "0"(a));
 
-  return(a);
+  return (a);
 }
 
-static CDIO_INLINE
-uint16_t uint16_swap_le_be_asm(uint16_t a)
-{
-  __asm__("xchgb %b0,%h0"         /* swap bytes           */ 
-          : "=q" (a) 
-          :  "0" (a));
-  
-  return(a);
+static CDIO_INLINE uint16_t uint16_swap_le_be_asm(uint16_t a) {
+  __asm__("xchgb %b0,%h0" /* swap bytes           */
+          : "=q"(a)
+          : "0"(a));
+
+  return (a);
 }
 
 #define UINT16_SWAP_LE_BE uint16_swap_le_be_asm
@@ -130,8 +112,7 @@ uint16_t uint16_swap_le_be_asm(uint16_t a)
 #endif /* !defined(DISABLE_ASM_OPTIMIZE) */
 #endif /* CDIO_BYTESEX_ASM_H_ */
 
-
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

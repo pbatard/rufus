@@ -22,7 +22,7 @@
 
 #include "_cdio_stream.h"
 
-/*!
+/**
   Initialize a new stdio stream reading from pathname.
   A pointer to the stream is returned or NULL if there was an error.
 
@@ -31,7 +31,7 @@
  */
 CdioDataSource_t * cdio_stdio_new(const char psz_path[]);
 
-/*!
+/**
   Deallocate resources assocaited with obj. After this obj is unusable.
 */
 void cdio_stdio_destroy(CdioDataSource_t *p_obj);
@@ -40,7 +40,7 @@ void cdio_stdio_destroy(CdioDataSource_t *p_obj);
 #endif /* CDIO_STDIO_H_ */
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

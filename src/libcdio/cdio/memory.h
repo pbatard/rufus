@@ -1,4 +1,4 @@
-/*  
+/*
     Copyright (C) 2014 Robert Kausch <robert.kausch@freac.org>
 
     This program is free software: you can redistribute it and/or modify
@@ -15,8 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*!
- * \file memory.h 
+/**
+ * \file memory.h
  *
  * \brief memory management utility functions.
  *
@@ -29,7 +29,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-  /*!
+  /**
     Free the passed pointer.
   */
   void cdio_free(void *p_memory);

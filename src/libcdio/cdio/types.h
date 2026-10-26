@@ -183,7 +183,7 @@ typedef uint8_t ubyte;
   /** our own offsetof()-like macro */
 #define __cd_offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 
-  /*!
+  /**
     \brief MSF (minute/second/frame) structure
 
     One CD-ROMs addressing scheme especially used in audio formats
@@ -207,7 +207,7 @@ typedef uint8_t ubyte;
 
 #define msf_t_SIZEOF 3
 
-  /*!
+  /**
     \brief UTF-8 char definition
 
     Type to denote UTF-8 strings.
@@ -233,14 +233,14 @@ typedef uint8_t ubyte;
   typedef uint8_t bitfield_t;
 #endif
 
-  /*! The type of a Logical Block Address. We allow for an lba to be
+  /** The type of a Logical Block Address. We allow for an lba to be
     negative to be consistent with an lba, although I'm not sure this
     this is possible.
 
    */
   typedef int32_t lba_t;
 
-  /*! The type of a Logical Sector Number. Note that an lba can be negative
+  /** The type of a Logical Sector Number. Note that an lba can be negative
     and the MMC3 specs allow for a conversion of a negative lba.
 
     @see msf_t
@@ -254,48 +254,48 @@ typedef uint8_t ubyte;
     lba_t       lba;
   };
 
-  /*! The type of a track number 0..99. */
+  /** The type of a track number 0..99. */
   typedef uint8_t track_t;
 
-  /*! The type of a session number 0..99. */
+  /** The type of a session number 0..99. */
   typedef uint8_t session_t;
 
-  /*!
+  /**
     Constant for invalid session number
   */
 #define CDIO_INVALID_SESSION   0xFF
 
-  /*!
+  /**
     Constant for invalid LBA. It is 151 less than the most negative
     LBA -45150. This provide slack for the 150-frame offset in
     LBA to LSN 150 conversions
   */
 #define CDIO_INVALID_LBA    -45301
 
-  /*!
+  /**
     Constant for invalid LSN
   */
 #define CDIO_INVALID_LSN    CDIO_INVALID_LBA
 
-  /*!
+  /**
     Number of ASCII bytes in a media catalog number (MCN).
     We include an extra 0 byte so these can be used as C strings.
   */
 #define CDIO_MCN_SIZE       13
 
-  /*!
+  /**
     Type to hold ASCII bytes in a media catalog number (MCN).
     We include an extra 0 byte so these can be used as C strings.
   */
   typedef char cdio_mcn_t[CDIO_MCN_SIZE+1];
 
 
-  /*!
+  /**
     Number of ASCII bytes in International Standard Recording Codes (ISRC)
   */
 #define CDIO_ISRC_SIZE       12
 
-  /*!
+  /**
     Type to hold ASCII bytes in a ISRC.
     We include an extra 0 byte so these can be used as C strings.
   */
@@ -303,7 +303,7 @@ typedef uint8_t ubyte;
 
   typedef int cdio_fs_anal_t;
 
-  /*!
+  /**
     track flags
     Q Sub-channel Control Field (4.2.3.3)
   */

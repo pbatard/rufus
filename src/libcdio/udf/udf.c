@@ -42,13 +42,13 @@ icbtag_flag_enum_t       debug_flag_enum;
 ecma_167_enum1_t         debug_ecma_167_enum1;
 ecma_167_timezone_enum_t debug_ecma_167_timezone_enum;
 udf_enum1_t              debug_udf_enum1;
-  
 
-/*!
+
+/**
   Returns POSIX mode bitstring for a given file.
 */
-mode_t 
-udf_get_posix_filemode(const udf_dirent_t *p_udf_dirent) 
+mode_t
+udf_get_posix_filemode(const udf_dirent_t *p_udf_dirent)
 {
   udf_file_entry_t udf_fe;
   mode_t mode = 0;
@@ -65,13 +65,13 @@ udf_get_posix_filemode(const udf_dirent_t *p_udf_dirent)
     if (i_perms & FE_PERM_U_READ)  mode |= S_IRUSR;
     if (i_perms & FE_PERM_U_WRITE) mode |= S_IWUSR;
     if (i_perms & FE_PERM_U_EXEC)  mode |= S_IXUSR;
-    
+
 #ifdef S_IRGRP
     if (i_perms & FE_PERM_G_READ)  mode |= S_IRGRP;
     if (i_perms & FE_PERM_G_WRITE) mode |= S_IWGRP;
     if (i_perms & FE_PERM_G_EXEC)  mode |= S_IXGRP;
 #endif
-    
+
 #ifdef S_IROTH
     if (i_perms & FE_PERM_O_READ)  mode |= S_IROTH;
     if (i_perms & FE_PERM_O_WRITE) mode |= S_IWOTH;
@@ -79,7 +79,7 @@ udf_get_posix_filemode(const udf_dirent_t *p_udf_dirent)
 #endif
 
     switch (udf_fe.icb_tag.file_type) {
-    case ICBTAG_FILE_TYPE_DIRECTORY: 
+    case ICBTAG_FILE_TYPE_DIRECTORY:
       mode |= S_IFDIR;
       break;
     case ICBTAG_FILE_TYPE_REGULAR:
@@ -103,20 +103,20 @@ udf_get_posix_filemode(const udf_dirent_t *p_udf_dirent)
       break;
     default: ;
     };
-  
+
 #ifdef S_ISUID
     if (i_flags & ICBTAG_FLAG_SETUID) mode |= S_ISUID;
     if (i_flags & ICBTAG_FLAG_SETGID) mode |= S_ISGID;
     if (i_flags & ICBTAG_FLAG_STICKY) mode |= S_ISVTX;
 #endif
   }
-  
+
   return mode;
-  
+
 }
 
-/*!
-  Return the partition number of the the opened udf handle. -1 
+/**
+  Return the partition number of the the opened udf handle. -1
   Is returned if we have an error.
 */
 int16_t udf_get_part_number(const udf_t *p_udf)
@@ -124,4 +124,3 @@ int16_t udf_get_part_number(const udf_t *p_udf)
   if (!p_udf) return -1;
   return p_udf->i_partition;
 }
-

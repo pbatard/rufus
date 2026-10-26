@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2005, 2006, 2008, 2012 Rocky Bernstein <rocky@gnu.org>
+    Copyright (C) 2005, 2006, 2008, 2012, 2025 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-  /*! Printable tags for track_format_t enumeration.  */
+  /** Printable tags for track_format_t enumeration.  */
   extern const char *track_format2str[6];
 
   typedef enum  {
@@ -46,7 +46,7 @@ extern "C" {
     CDIO_TRACK_FLAG_UNKNOWN
   } track_flag_t;
 
-  /*! \brief Structure containing attributes associated with a track */
+  /** \brief Structure containing attributes associated with a track */
   typedef struct {
     track_flag_t preemphasis; /**< Linear preemphasis on an audio track */
     track_flag_t copy_permit; /**< Whether copying is permitted */
@@ -55,14 +55,14 @@ extern "C" {
                               */
   } track_flags_t;
 
-  /*! The leadout track is always 0xAA, regardless of # of tracks on
+  /** The leadout track is always 0xAA, regardless of # of tracks on
     disc, or what value may be used internally. For example although
     OS X uses a different value for the lead-out track internally than
     given below, programmers should use CDIO_CDROM_LEADOUT_TRACK and
     not worry about this.
   */
 
-  /*! An enumeration for some of the CDIO_CDROM_* \#defines below. This
+  /** An enumeration for some of the CDIO_CDROM_* \#defines below. This
     isn't really an enumeration one would really use in a program; it
     is to be helpful in debuggers where wants just to refer to the
     CDIO_CDROM_* names and get something.
@@ -82,8 +82,8 @@ extern "C" {
 
 #define CDIO_CD_MIN_TRACK_NO  1 /**< Smallest CD track number */
 
-  /*! track modes (Table 350)
-    reference: MMC-3 draft revsion - 10g
+  /** track modes (Table 350)
+    reference: MMC-3 draft revision - 10g
   */
   typedef enum {
     AUDIO,                      /**< 2352 byte block length */
@@ -96,7 +96,7 @@ extern "C" {
     MODE2_RAW                   /**< 2352 byte block length */
   } trackmode_t;
 
-  /*!
+  /**
     Get the number of the first track.
 
     @return the track number or CDIO_INVALID_TRACK
@@ -104,14 +104,14 @@ extern "C" {
   */
   track_t cdio_get_first_track_num(const CdIo_t *p_cdio);
 
-  /*!
+  /**
     Return the last track number.
     CDIO_INVALID_TRACK is returned on error.
   */
   track_t cdio_get_last_track_num (const CdIo_t *p_cdio);
 
 
-  /*! Find the track which contains lsn.
+  /** Find the track which contains lsn.
     CDIO_INVALID_TRACK is returned if the lsn outside of the CD or
     if there was some error.
 
@@ -120,24 +120,24 @@ extern "C" {
   */
   track_t cdio_get_track(const CdIo_t *p_cdio, lsn_t lsn);
 
-  /*! Return number of channels in track: 2 or 4; -2 if not
+  /** Return number of channels in track: 2 or 4; -2 if not
       implemented or -1 for error.
       Not meaningful if track is not an audio track.
   */
   int cdio_get_track_channels(const CdIo_t *p_cdio, track_t i_track);
 
-  /*! Return copy protection status on a track. Is this meaningful
+  /** Return copy protection status on a track. Is this meaningful
       if not an audio track?
    */
   track_flag_t cdio_get_track_copy_permit(const CdIo_t *p_cdio,
                                           track_t i_track);
 
-  /*!
+  /**
     Get the format (audio, mode2, mode1) of track.
   */
   track_format_t cdio_get_track_format(const CdIo_t *p_cdio, track_t i_track);
 
-  /*!
+  /**
     Return true if we have XA data (green, mode2 form1) or
     XA data (green, mode2 form2). That is track begins:
     sync - header - subheader
@@ -147,13 +147,13 @@ extern "C" {
   */
   bool cdio_get_track_green(const CdIo_t *p_cdio, track_t i_track);
 
-  /*!
+  /**
     Return the ending LSN for track number
     i_track in cdio.  CDIO_INVALID_LSN is returned on error.
   */
   lsn_t cdio_get_track_last_lsn(const CdIo_t *p_cdio, track_t i_track);
 
-  /*!
+  /**
     Get the starting LBA for track number
     i_track in p_cdio.  Track numbers usually start at something
     greater than 0, usually 1.
@@ -167,7 +167,7 @@ extern "C" {
   */
   lba_t cdio_get_track_lba(const CdIo_t *p_cdio, track_t i_track);
 
-  /*!
+  /**
     Return the starting LSN for track number
     i_track in p_cdio.  Track numbers usually start at something
     greater than 0, usually 1.
@@ -181,7 +181,7 @@ extern "C" {
   */
   lsn_t cdio_get_track_lsn(const CdIo_t *p_cdio, track_t i_track);
 
-  /*!
+  /**
     Return the starting LBA for the pregap for track number
     i_track in p_cdio.  Track numbers usually start at something
     greater than 0, usually 1.
@@ -192,7 +192,7 @@ extern "C" {
   */
   lba_t cdio_get_track_pregap_lba(const CdIo_t *p_cdio, track_t i_track);
 
-  /*!
+  /**
     Return the starting LSN for the pregap for track number
     i_track in p_cdio.  Track numbers usually start at something
     greater than 0, usually 1.
@@ -203,7 +203,7 @@ extern "C" {
   */
   lsn_t cdio_get_track_pregap_lsn(const CdIo_t *p_cdio, track_t i_track);
 
-  /*!
+  /**
     Get the International Standard Recording Code (ISRC) for track number
     i_track in p_cdio.  Track numbers usually start at something
     greater than 0, usually 1.
@@ -217,7 +217,7 @@ extern "C" {
   */
   char * cdio_get_track_isrc (const CdIo_t *p_cdio, track_t i_track);
 
-  /*!
+  /**
     Return the starting MSF (minutes/secs/frames) for track number
     i_track in p_cdio.  Track numbers usually start at something
     greater than 0, usually 1.
@@ -230,13 +230,13 @@ extern "C" {
   bool cdio_get_track_msf(const CdIo_t *p_cdio, track_t i_track,
                           /*out*/ msf_t *msf);
 
-  /*! Get linear preemphasis status on an audio track
+  /** Get linear preemphasis status on an audio track
       This is not meaningful if not an audio track?
    */
   track_flag_t cdio_get_track_preemphasis(const CdIo_t *p_cdio,
                                           track_t i_track);
 
-  /*!
+  /**
     Get the number of sectors between this track an the next.  This
     includes any pregap sectors before the start of the next track.
     Track numbers usually start at something

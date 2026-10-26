@@ -14,8 +14,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-/*!
- * \file posix.h 
+/**
+ * \file posix.h
  *
  * \brief various POSIX definitions.
 */
@@ -32,7 +32,7 @@ typedef uint16_t unicode16_t;
 #endif /* CDIO_POSIX_H_ */
 
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

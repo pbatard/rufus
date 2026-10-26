@@ -3709,6 +3709,9 @@ skip_args_processing:
 	}
 	// We want above normal priority by default, so we offset the value.
 	default_thread_priority = ReadSetting32(SETTING_DEFAULT_THREAD_PRIORITY) + THREAD_PRIORITY_ABOVE_NORMAL;
+	// Set the log handler for libcdio
+	extern void libcdio_log_handler(cdio_log_level_t level, const char* message);
+	cdio_log_set_handler(libcdio_log_handler);
 
 	// Initialize the global scaling, in case we need it before we initialize the dialog
 	hDC = GetDC(NULL);

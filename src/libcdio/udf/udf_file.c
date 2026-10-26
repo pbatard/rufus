@@ -56,7 +56,7 @@ udf_get_file_entry(const udf_dirent_t *p_udf_dirent,
   return true;
 }
 
-/*!
+/**
   Return the file id descriptor of the given file.
 */
 bool udf_get_fileid_descriptor(const udf_dirent_t *p_udf_dirent,
@@ -73,7 +73,7 @@ bool udf_get_fileid_descriptor(const udf_dirent_t *p_udf_dirent,
 }
 
 
-/*!
+/**
   Return the number of hard links of the file. Return 0 if error.
 */
 uint16_t udf_get_link_count(const udf_dirent_t *p_udf_dirent)
@@ -84,7 +84,7 @@ uint16_t udf_get_link_count(const udf_dirent_t *p_udf_dirent)
   return 0; /* Error. Non-error case handled above. */
 }
 
-/*!
+/**
   Return the file length the file. Return 2147483647L if error.
 */
 uint64_t udf_get_file_length(const udf_dirent_t *p_udf_dirent)
@@ -95,7 +95,7 @@ uint64_t udf_get_file_length(const udf_dirent_t *p_udf_dirent)
   return 2147483647L; /* Error. Non-error case handled above. */
 }
 
-/*!
+/**
   Return true if the file is a directory.
 */
 bool
@@ -117,6 +117,15 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
     &p_udf_dirent->fe;
   const udf_icbtag_t *p_icb_tag = &p_udf_fe->icb_tag;
   const uint16_t strat_type= uint16_from_le(p_icb_tag->strat_type);
+  const uint32_t i_extended_attr =
+    uint32_from_le(p_udf_fe->u_extended_attr);
+  const uint32_t i_alloc_descs = uint32_from_le(p_udf_fe->u_alloc_descs);
+
+  if (i_extended_attr > UDF_BLOCKSIZE - UDF_FENTRY_SIZE
+      || i_alloc_descs > UDF_BLOCKSIZE - UDF_FENTRY_SIZE - i_extended_attr) {
+    cdio_warn("File entry allocation descriptors out of bounds");
+    return CDIO_INVALID_LBA;
+  }
 
   if (i_offset < 0) {
     cdio_warn("Negative offset value");
@@ -147,7 +156,9 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 	  do {
 	    i_offset -= icblen;
 	    ad_offset = sizeof(udf_short_ad_t) * ad_num;
-	    if (ad_offset > uint32_from_le(p_udf_fe->u_alloc_descs)) {
+	    if (ad_offset > uint32_from_le(p_udf_fe->u_alloc_descs)
+		|| sizeof(udf_short_ad_t) >
+		   uint32_from_le(p_udf_fe->u_alloc_descs) - ad_offset) {
 	      cdio_warn("File offset out of bounds");
 	      return CDIO_INVALID_LBA;
 	    }
@@ -174,7 +185,9 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 	  do {
 	    i_offset -= icblen;
 	    ad_offset = sizeof(udf_long_ad_t) * ad_num;
-	    if (ad_offset > uint32_from_le(p_udf_fe->u_alloc_descs)) {
+	    if (ad_offset > uint32_from_le(p_udf_fe->u_alloc_descs)
+		|| sizeof(udf_long_ad_t) >
+		   uint32_from_le(p_udf_fe->u_alloc_descs) - ad_offset) {
 	      cdio_warn("File offset out of bounds");
 	      return CDIO_INVALID_LBA;
 	    }
@@ -221,9 +234,9 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
 }
 
 /**
-  Attempts to read up to count bytes from UDF directory entry
-  p_udf_dirent into the buffer starting at buf. buf should be a
-  multiple of UDF_BLOCKSIZE bytes. Reading continues after the point
+  Attempts to read up to count blocks from UDF directory entry
+  p_udf_dirent into the buffer starting at buf. buf must be large enough
+  to store count * UDF_BLOCKSIZE bytes. Reading continues after the point
   at which we last read or from the beginning the first time.
 
   If count is zero, read() returns zero and has no other results. If
@@ -232,8 +245,8 @@ offset_to_lba(const udf_dirent_t *p_udf_dirent, off_t i_offset,
   It is the caller's responsibility to ensure that count is less
   than the number of blocks recorded via p_udf_dirent.
 
-  If there is an error, cast the result to driver_return_code_t for
-  the specific error code.
+  On success, returns the number of bytes read. If there is an error,
+  cast the result to driver_return_code_t for the specific error code.
 */
 ssize_t
 udf_read_block(const udf_dirent_t *p_udf_dirent, void * buf, size_t count)

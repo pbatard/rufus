@@ -1,4 +1,4 @@
-/* 
+/*
   Copyright (C) 2005, 2008, 2011 Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 
@@ -25,7 +25,7 @@
 
        10/04/98: added new table-based lookup after seeing how ugly the
                  gnu code is
-  
+
    blf 09/27/99: ripped out all the old code and inserted new table from
                  John Brockmeyer (without leap second corrections)
                  rewrote udf_stamp_to_time and fixed timezone
@@ -63,7 +63,7 @@ enum {
   SECS_PER_HOUR	   = (60 * SECS_PER_MINUTE),
   SECS_PER_DAY	   = SECS_PER_HOUR * HOURS_PER_DAY
 } debug_udf_time_enum;
-  
+
 #ifndef __isleap
 /* Nonzero if YEAR is a leap year (every 4 years,
    except every 100th isn't, and every 400th is).  */
@@ -83,23 +83,23 @@ static const unsigned short int __mon_yday[2][13] =
 #define SPY(y,l,s) (SECS_PER_DAY * (DAYS_PER_YEAR*y+l)+s) /* Seconds per year */
 
 static time_t year_seconds[MAX_YEAR_SECONDS]= {
-  /*1970*/ SPY( 0, 0,0), SPY( 1, 0,0), SPY( 2, 0,0), SPY( 3, 1,0), 
-  /*1974*/ SPY( 4, 1,0), SPY( 5, 1,0), SPY( 6, 1,0), SPY( 7, 2,0), 
-  /*1978*/ SPY( 8, 2,0), SPY( 9, 2,0), SPY(10, 2,0), SPY(11, 3,0), 
-  /*1982*/ SPY(12, 3,0), SPY(13, 3,0), SPY(14, 3,0), SPY(15, 4,0), 
-  /*1986*/ SPY(16, 4,0), SPY(17, 4,0), SPY(18, 4,0), SPY(19, 5,0), 
-  /*1990*/ SPY(20, 5,0), SPY(21, 5,0), SPY(22, 5,0), SPY(23, 6,0), 
-  /*1994*/ SPY(24, 6,0), SPY(25, 6,0), SPY(26, 6,0), SPY(27, 7,0), 
-  /*1998*/ SPY(28, 7,0), SPY(29, 7,0), SPY(30, 7,0), SPY(31, 8,0), 
-  /*2002*/ SPY(32, 8,0), SPY(33, 8,0), SPY(34, 8,0), SPY(35, 9,0), 
-  /*2006*/ SPY(36, 9,0), SPY(37, 9,0), SPY(38, 9,0), SPY(39,10,0), 
-  /*2010*/ SPY(40,10,0), SPY(41,10,0), SPY(42,10,0), SPY(43,11,0), 
-  /*2014*/ SPY(44,11,0), SPY(45,11,0), SPY(46,11,0), SPY(47,12,0), 
-  /*2018*/ SPY(48,12,0), SPY(49,12,0), SPY(50,12,0), SPY(51,13,0), 
-  /*2022*/ SPY(52,13,0), SPY(53,13,0), SPY(54,13,0), SPY(55,14,0), 
-  /*2026*/ SPY(56,14,0), SPY(57,14,0), SPY(58,14,0), SPY(59,15,0), 
-  /*2030*/ SPY(60,15,0), SPY(61,15,0), SPY(62,15,0), SPY(63,16,0), 
-  /*2034*/ SPY(64,16,0), SPY(65,16,0), SPY(66,16,0), SPY(67,17,0), 
+  /*1970*/ SPY( 0, 0,0), SPY( 1, 0,0), SPY( 2, 0,0), SPY( 3, 1,0),
+  /*1974*/ SPY( 4, 1,0), SPY( 5, 1,0), SPY( 6, 1,0), SPY( 7, 2,0),
+  /*1978*/ SPY( 8, 2,0), SPY( 9, 2,0), SPY(10, 2,0), SPY(11, 3,0),
+  /*1982*/ SPY(12, 3,0), SPY(13, 3,0), SPY(14, 3,0), SPY(15, 4,0),
+  /*1986*/ SPY(16, 4,0), SPY(17, 4,0), SPY(18, 4,0), SPY(19, 5,0),
+  /*1990*/ SPY(20, 5,0), SPY(21, 5,0), SPY(22, 5,0), SPY(23, 6,0),
+  /*1994*/ SPY(24, 6,0), SPY(25, 6,0), SPY(26, 6,0), SPY(27, 7,0),
+  /*1998*/ SPY(28, 7,0), SPY(29, 7,0), SPY(30, 7,0), SPY(31, 8,0),
+  /*2002*/ SPY(32, 8,0), SPY(33, 8,0), SPY(34, 8,0), SPY(35, 9,0),
+  /*2006*/ SPY(36, 9,0), SPY(37, 9,0), SPY(38, 9,0), SPY(39,10,0),
+  /*2010*/ SPY(40,10,0), SPY(41,10,0), SPY(42,10,0), SPY(43,11,0),
+  /*2014*/ SPY(44,11,0), SPY(45,11,0), SPY(46,11,0), SPY(47,12,0),
+  /*2018*/ SPY(48,12,0), SPY(49,12,0), SPY(50,12,0), SPY(51,13,0),
+  /*2022*/ SPY(52,13,0), SPY(53,13,0), SPY(54,13,0), SPY(55,14,0),
+  /*2026*/ SPY(56,14,0), SPY(57,14,0), SPY(58,14,0), SPY(59,15,0),
+  /*2030*/ SPY(60,15,0), SPY(61,15,0), SPY(62,15,0), SPY(63,16,0),
+  /*2034*/ SPY(64,16,0), SPY(65,16,0), SPY(66,16,0), SPY(67,17,0),
   /*2038*/ SPY(68,17,0)
 };
 
@@ -108,13 +108,13 @@ extern long timezone;
 #endif
 
 time_t *
-udf_stamp_to_time(time_t *dest, long int *dest_usec, 
+udf_stamp_to_time(time_t *dest, long int *dest_usec,
 		  const udf_timestamp_t src)
 {
   int yday;
   uint8_t type = src.type_tz >> 12;
   int16_t offset;
-  
+
   if (type == 1) {
     offset = src.type_tz << 4;
     /* sign extent offset */
@@ -124,7 +124,7 @@ udf_stamp_to_time(time_t *dest, long int *dest_usec,
   }
   else
     offset = 0;
-  
+
   if ((src.year < EPOCH_YEAR) ||
       (src.year >= EPOCH_YEAR+MAX_YEAR_SECONDS))
     {
@@ -134,10 +134,10 @@ udf_stamp_to_time(time_t *dest, long int *dest_usec,
     }
   *dest = year_seconds[src.year - EPOCH_YEAR];
   *dest -= offset * SECS_PER_MINUTE;
-  
+
   yday = ((__mon_yday[__isleap (src.year)]
 	   [src.month-1]) + (src.day-1));
-  *dest += src.second + 
+  *dest += src.second +
     ( SECS_PER_MINUTE *
       ( ( (yday* HOURS_PER_DAY) + src.hour ) * 60 + src.minute ) );
 
@@ -148,7 +148,7 @@ udf_stamp_to_time(time_t *dest, long int *dest_usec,
 }
 
 #ifdef HAVE_STRUCT_TIMESPEC
-/*!
+/**
   Convert a UDF timestamp to a time_t. If microseconds are desired,
   use dest_usec. The return value is the same as dest. */
 udf_timestamp_t *
@@ -159,15 +159,15 @@ udf_timespec_to_stamp(const struct timespec ts, udf_timestamp_t *dest)
   int16_t offset = 0;
   int16_t tv_sec;
 
-#ifdef HAVE_TIMEZONE_VAR  
+#ifdef HAVE_TIMEZONE_VAR
   offset = -timezone;
 #endif
-  
+
   if (!dest)
     return dest;
-  
+
   dest->type_tz = 0x1000 | (offset & 0x0FFF);
-  
+
   tv_sec       = ts.tv_sec + (offset * SECS_PER_MINUTE);
   days         = tv_sec / SECS_PER_DAY;
   rem          = tv_sec % SECS_PER_DAY;
@@ -176,13 +176,13 @@ udf_timespec_to_stamp(const struct timespec ts, udf_timestamp_t *dest)
   dest->minute = rem / SECS_PER_MINUTE;
   dest->second = rem % SECS_PER_MINUTE;
   y            = EPOCH_YEAR;
-  
+
 #define DIV(a,b) ((a) / (b) - ((a) % (b) < 0))
 #define LEAPS_THRU_END_OF(y) (DIV (y, 4) - DIV (y, 100) + DIV (y, 400))
-  
+
   while (days < 0 || days >= (__isleap(y) ? DAYS_PER_YEAR+1 : DAYS_PER_YEAR)) {
     long int yg = y + days / DAYS_PER_YEAR - (days % DAYS_PER_YEAR < 0);
-    
+
     /* Adjust DAYS and Y to match the guessed year.  */
     days -= ((yg - y) * DAYS_PER_YEAR
 	     + LEAPS_THRU_END_OF (yg - 1)
@@ -196,18 +196,18 @@ udf_timespec_to_stamp(const struct timespec ts, udf_timestamp_t *dest)
   days -= ip[y];
   dest->month = y + 1;
   dest->day   = days + 1;
-  
+
   dest->centiseconds = ts.tv_nsec / 10000000;
   dest->hundreds_of_microseconds = ( (ts.tv_nsec / 1000)
 				     - (dest->centiseconds * 10000) ) / 100;
-  dest->microseconds = ( (ts.tv_nsec / 1000) 
+  dest->microseconds = ( (ts.tv_nsec / 1000)
 			 - (dest->centiseconds * 10000)
 			 - (dest->hundreds_of_microseconds * 100) );
   return dest;
 }
 #endif
 
-/*!
+/**
   Return the modification time of the file.
  */
 time_t
@@ -222,7 +222,7 @@ udf_get_modification_time(const udf_dirent_t *p_udf_dirent)
   return 0;
 }
 
-/*!
+/**
   Return the access time of the file.
  */
 time_t
@@ -237,7 +237,7 @@ udf_get_access_time(const udf_dirent_t *p_udf_dirent)
   return 0;
 }
 
-/*!
+/**
   Return the attribute (most recent create or access) time of the file
  */
 time_t
@@ -251,4 +251,3 @@ udf_get_attribute_time(const udf_dirent_t *p_udf_dirent)
   }
   return 0;
 }
-

@@ -143,19 +143,6 @@ _cdio_strdup_upper (const char str[])
 }
 
 int
-_cdio_stricmp (const char str1[], const char str2[])
-{
-  if (str1 && str2) {
-    int c1, c2;
-    do {
-      c1 = tolower((unsigned char)*str1++);
-      c2 = tolower((unsigned char)*str2++);
-    } while (c1 == c2 && c1 != '\0');
-    return c1 - c2;
-  } else return (str1 != str2);
-}
-
-int
 _cdio_strnicmp(const char str1[], const char str2[], size_t count)
 {
     if (str1 && str2) {

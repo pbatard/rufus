@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2005, 2008-2009, 2011-2012, 2016-2017
+  Copyright (C) 2003-2005, 2008-2009, 2011-2012, 2016-2017, 2025
   Rocky Bernstein <rocky@gnu.org>
 
   This program is free software: you can redistribute it and/or modify
@@ -59,14 +59,14 @@ static inline char *libcdio_strndup(const char *s, size_t n)
 }
 #endif /*HAVE_STRNDUP*/
 
-  /*!
+  /**
     Get directory name from file name.
 
     Callers must free return value after use.
    */
   extern char *cdio_dirname(const char *fname);
 
-  /*!
+  /**
     Construct an absolute file name from path and file name.
 
     Callers must free return value after use.
@@ -90,7 +90,7 @@ extern "C" {
 
   typedef struct {
 
-    /*!
+    /**
       Get volume of an audio CD.
 
       @param p_env the CD object to be acted upon.
@@ -99,14 +99,14 @@ extern "C" {
     driver_return_code_t (*audio_get_volume)
          (void *p_env,  /*out*/ cdio_audio_volume_t *p_volume);
 
-    /*!
+    /**
       Pause playing CD through analog output
 
       @param p_env the CD object to be acted upon.
     */
     driver_return_code_t (*audio_pause) (void *p_env);
 
-    /*!
+    /**
       Playing CD through analog output
 
       @param p_env the CD object to be acted upon.
@@ -115,7 +115,7 @@ extern "C" {
                                              msf_t *p_start_msf,
                                              msf_t *p_end_msf );
 
-    /*!
+    /**
       Playing CD through analog output
 
       @param p_env the CD object to be acted upon.
@@ -123,7 +123,7 @@ extern "C" {
     driver_return_code_t (*audio_play_track_index)
          ( void *p_env, cdio_track_index_t *p_track_index );
 
-    /*!
+    /**
       Get subchannel information.
 
       @param p_env the CD object to be acted upon.
@@ -131,7 +131,7 @@ extern "C" {
     driver_return_code_t (*audio_read_subchannel)
          ( void *p_env, cdio_subchannel_t *subchannel );
 
-    /*!
+    /**
       Resume playing an audio CD.
 
       @param p_env the CD object to be acted upon.
@@ -139,7 +139,7 @@ extern "C" {
     */
     driver_return_code_t (*audio_resume) ( void *p_env );
 
-    /*!
+    /**
       Set volume of an audio CD.
 
       @param p_env the CD object to be acted upon.
@@ -148,7 +148,7 @@ extern "C" {
     driver_return_code_t (*audio_set_volume)
          ( void *p_env,  cdio_audio_volume_t *p_volume );
 
-    /*!
+    /**
       Stop playing an audio CD.
 
       @param p_env the CD object to be acted upon.
@@ -156,7 +156,7 @@ extern "C" {
     */
     driver_return_code_t (*audio_stop) ( void *p_env );
 
-    /*!
+    /**
       Eject media in CD drive. If successful, as a side effect we
       also free p_env.
 
@@ -165,23 +165,23 @@ extern "C" {
     */
     driver_return_code_t (*eject_media) ( void *p_env );
 
-    /*!
+    /**
       Release and free resources associated with cd.
     */
     void (*free) (void *p_env);
 
-    /*!
+    /**
       Return the value associated with the key "arg".
     */
     const char * (*get_arg) (void *p_env, const char key[]);
 
-    /*!
-      Get the block size for subsequest read requests, via a SCSI MMC
+    /**
+      Get the block size for subsequent read requests, via a SCSI MMC
       MODE_SENSE 6 command.
     */
     int (*get_blocksize) ( void *p_env );
 
-    /*!
+    /**
       Get cdtext information for a CdIo object.
 
       @param obj the CD object that may contain CD-TEXT information.
@@ -190,7 +190,7 @@ extern "C" {
     */
     cdtext_t * (*get_cdtext) ( void *p_env );
 
-    /*!
+    /**
       Get raw cdtext information as on the disc for a CdIo object
 
       @param obj the CD object that may contain CD-TEXT information.
@@ -201,7 +201,16 @@ extern "C" {
     */
     uint8_t * (*get_cdtext_raw) ( void *p_env );
 
-    /*!
+    /**
+      Return the underlying device file descriptor.
+
+      @param obj the CD object.
+      @return the file descriptor or DRIVER_OP_UNSUPPORTED if the device
+      does not use file descriptors.
+    */
+    int (*get_device_fd) ( void *p_env );
+
+    /**
       Return an array of device names. if CdIo is NULL (we haven't
       initialized a specific device driver), then find a suitable device
       driver.
@@ -210,7 +219,7 @@ extern "C" {
     */
     char ** (*get_devices) ( void );
 
-    /*!
+    /**
       Get the default CD device.
 
       @return a string containing the default CD device or NULL is
@@ -222,18 +231,18 @@ extern "C" {
     */
     char * (*get_default_device) ( void );
 
-    /*!
+    /**
       Return the size of the CD in logical block address (LBA) units.
       @return the lsn. On error 0 or CDIO_INVALD_LSN.
     */
     lsn_t (*get_disc_last_lsn) ( void *p_env );
 
-    /*!
+    /**
       Get disc mode associated with cd_obj.
     */
     discmode_t (*get_discmode) ( void *p_env );
 
-    /*!
+    /**
       Return the what kind of device we've got.
 
       See cd_types.h for a list of bitmasks for the drive type;
@@ -242,20 +251,20 @@ extern "C" {
                            cdio_drive_read_cap_t  *p_read_cap,
                            cdio_drive_write_cap_t *p_write_cap,
                            cdio_drive_misc_cap_t  *p_misc_cap);
-    /*!
+    /**
       Return the number of of the first track.
       CDIO_INVALID_TRACK is returned on error.
     */
     track_t (*get_first_track_num) ( void *p_env );
 
-    /*!
+    /**
       Get the CD-ROM hardware info via a SCSI MMC INQUIRY command.
       False is returned if we had an error getting the information.
     */
     bool (*get_hwinfo)
          ( const CdIo_t *p_cdio, /* out*/ cdio_hwinfo_t *p_hw_info );
 
-    /*! Get the LSN of the first track of the last session of
+    /** Get the LSN of the first track of the last session of
       on the CD.
 
        @param p_cdio the CD object to be acted upon.
@@ -264,7 +273,7 @@ extern "C" {
     driver_return_code_t (*get_last_session)
          ( void *p_env, /*out*/ lsn_t *i_last_session );
 
-    /*!
+    /**
       Find out if media has changed since the last call.
       @param p_env the CD object to be acted upon.
       @return 1 if media has changed since last call, 0 if not. Error
@@ -272,31 +281,31 @@ extern "C" {
     */
     int (*get_media_changed) ( const void *p_env );
 
-    /*!
+    /**
       Return the media catalog number MCN from the CD or NULL if
       there is none or we don't have the ability to get it.
     */
     char * (*get_mcn) ( const void *p_env );
 
-    /*!
+    /**
       Return the number of tracks in the current medium.
       CDIO_INVALID_TRACK is returned on error.
     */
     track_t (*get_num_tracks) ( void *p_env );
 
-    /*! Return number of channels in track: 2 or 4; -2 if not
+    /** Return number of channels in track: 2 or 4; -2 if not
       implemented or -1 for error.
       Not meaningful if track is not an audio track.
     */
     int (*get_track_channels) ( const void *p_env, track_t i_track );
 
-    /*! Return 0 if track is copy protected, 1 if not, or -1 for error
-      or -2 if not implimented (yet). Is this meaningful if not an
+    /** Return 0 if track is copy protected, 1 if not, or -1 for error
+      or -2 if not implemented (yet). Is this meaningful if not an
       audio track?
     */
     track_flag_t (*get_track_copy_permit) ( void *p_env, track_t i_track );
 
-    /*!
+    /**
       Return the starting LBA for track number
       i_track in p_env.  Tracks numbers start at 1.
       The "leadout" track is specified either by
@@ -305,14 +314,14 @@ extern "C" {
     */
     lba_t (*get_track_lba) ( void *p_env, track_t i_track );
 
-    /*!
+    /**
       Return the starting LBA for the pregap for track number
       i_track in p_env.  Tracks numbers start at 1.
       CDIO_INVALID_LBA is returned on error.
     */
     lba_t (*get_track_pregap_lba) ( const void *p_env, track_t i_track );
 
-    /*!
+    /**
       Return the International Standard Recording Code (ISRC) for track number
       i_track in p_cdio.  Track numbers start at 1.
 
@@ -321,12 +330,12 @@ extern "C" {
     */
     char * (*get_track_isrc) ( const void *p_env, track_t i_track );
 
-    /*!
+    /**
       Get format of track.
     */
     track_format_t (*get_track_format) ( void *p_env, track_t i_track );
 
-    /*!
+    /**
       Return true if we have XA data (green, mode2 form1) or
       XA data (green, mode2 form2). That is track begins:
       sync - header - subheader
@@ -336,7 +345,7 @@ extern "C" {
     */
     bool (*get_track_green) ( void *p_env, track_t i_track );
 
-    /*!
+    /**
       Return the starting MSF (minutes/secs/frames) for track number
       i_track in p_env.  Tracks numbers start at 1.
       The "leadout" track is specified either by
@@ -345,35 +354,35 @@ extern "C" {
     */
     bool (*get_track_msf) ( void *p_env, track_t i_track, msf_t *p_msf );
 
-    /*! Return 1 if track has pre-emphasis, 0 if not, or -1 for error
-      or -2 if not implimented (yet). Is this meaningful if not an
+    /** Return 1 if track has pre-emphasis, 0 if not, or -1 for error
+      or -2 if not implemented (yet). Is this meaningful if not an
       audio track?
     */
     track_flag_t (*get_track_preemphasis)
          ( const void  *p_env, track_t i_track );
 
-    /*!
+    /**
       lseek - reposition read/write file offset
       Returns (off_t) -1 on error.
       Similar to libc's lseek()
     */
     off_t (*lseek) ( void *p_env, off_t offset, int whence );
 
-    /*!
+    /**
       Reads into buf the next size bytes.
       Returns -1 on error.
       Similar to libc's read()
     */
     ssize_t (*read) ( void *p_env, void *p_buf, size_t i_size );
 
-    /*!
+    /**
       Reads a single mode2 sector from cd device into buf starting
       from lsn. Returns 0 if no error.
     */
     int (*read_audio_sectors) ( void *p_env, void *p_buf, lsn_t i_lsn,
                                 unsigned int i_blocks );
 
-    /*!
+    /**
       Read a data sector
 
       @param p_env environment to read from
@@ -394,14 +403,14 @@ extern "C" {
          ( void *p_env, void *p_buf, lsn_t i_lsn, uint16_t i_blocksize,
            uint32_t i_blocks );
 
-    /*!
+    /**
       Reads a single mode2 sector from cd device into buf starting
       from lsn. Returns 0 if no error.
     */
     int (*read_mode2_sector)
          ( void *p_env, void *p_buf, lsn_t i_lsn, bool b_mode2_form2 );
 
-    /*!
+    /**
       Reads i_blocks of mode2 sectors from cd device into data starting
       from lsn.
       Returns 0 if no error.
@@ -410,14 +419,14 @@ extern "C" {
          ( void *p_env, void *p_buf, lsn_t i_lsn, bool b_mode2_form2,
            unsigned int i_blocks );
 
-    /*!
+    /**
       Reads a single mode1 sector from cd device into buf starting
       from lsn. Returns 0 if no error.
     */
     int (*read_mode1_sector)
          ( void *p_env, void *p_buf, lsn_t i_lsn, bool mode1_form2 );
 
-    /*!
+    /**
       Reads i_blocks of mode1 sectors from cd device into data starting
       from lsn.
       Returns 0 if no error.
@@ -428,7 +437,7 @@ extern "C" {
 
     bool (*read_toc) ( void *p_env ) ;
 
-    /*!
+    /**
       Run a SCSI MMC command.
 
       cdio              CD structure set by cdio_open().
@@ -446,18 +455,18 @@ extern "C" {
     */
     mmc_run_cmd_fn_t run_mmc_cmd;
 
-    /*!
+    /**
       Set the arg "key" with "value" in the source device.
     */
     int (*set_arg) ( void *p_env, const char key[], const char value[] );
 
-    /*!
+    /**
       Set the blocksize for subsequent reads.
     */
     driver_return_code_t (*set_blocksize) ( void *p_env,
                                             uint16_t i_blocksize );
 
-    /*!
+    /**
       Set the drive speed.
 
       @return 0 if everything went okay, -1 if we had an error. is -2
@@ -477,7 +486,7 @@ extern "C" {
 
 #define CDIO_HEADER_FLAGS_DISABLE_RR_DD 0x0001
 
-  /*! Implementation of CdIo type */
+  /** Implementation of CdIo type */
   struct _CdIo {
     cdio_header_t header;    /**< Internal header - MUST come first. */
     driver_id_t   driver_id; /**< Particular driver opened. */
@@ -520,7 +529,7 @@ extern "C" {
      on a particular host. */
   extern CdIo_driver_t CdIo_driver[];
 
-  /* The last valid entry of Cdio_driver. -1 means uninitialzed. -2
+  /* The last valid entry of Cdio_driver. -1 means uninitialized. -2
      means some sort of error.
    */
   extern int CdIo_last_driver;
@@ -529,7 +538,7 @@ extern "C" {
      on a particular host. */
   extern CdIo_driver_t CdIo_all_drivers[];
 
-  /*!
+  /**
     Add/allocate a drive to the end of drives.
     Use cdio_free_device_list() to free this device_list.
   */
@@ -548,7 +557,7 @@ extern "C" {
   CdIo_t * cdio_open_netbsd (const char *psz_source);
   char * cdio_get_default_device_netbsd(void);
   char **cdio_get_devices_netbsd(void);
-  /*! Set up CD-ROM for reading using the NetBSD driver. The device_name is
+  /** Set up CD-ROM for reading using the NetBSD driver. The device_name is
       the some sort of device name.
 
      NULL is returned on error or there is no FreeBSD driver.
@@ -558,45 +567,45 @@ extern "C" {
   CdIo_t * cdio_open_am_netbsd (const char *psz_source,
                                 const char *psz_access_mode);
 
-  /*! DEPRICATED: use cdio_have_driver().
+  /** DEPRECATED: use cdio_have_driver().
     True if AIX driver is available. */
   bool cdio_have_aix    (void);
 
-  /*! DEPRICATED: use cdio_have_driver().
+  /** DEPRECATED: use cdio_have_driver().
     True if BSDI driver is available. */
   bool cdio_have_bsdi    (void);
 
-  /*! DEPRICATED: use cdio_have_driver().
+  /** DEPRECATED: use cdio_have_driver().
     True if FreeBSD driver is available. */
   bool cdio_have_freebsd (void);
 
-  /*! DEPRICATED: use cdio_have_driver().
+  /** DEPRECATED: use cdio_have_driver().
     True if GNU/Linux driver is available. */
   bool cdio_have_linux   (void);
 
-  /*! DEPRICATED: use cdio_have_driver().
+  /** DEPRECATED: use cdio_have_driver().
     True if Sun Solaris driver is available. */
   bool cdio_have_solaris (void);
 
-  /*! DEPRICATED: use cdio_have_driver().
+  /** DEPRECATED: use cdio_have_driver().
     True if IBM OS2 driver is available. */
   bool cdio_have_os2     (void);
 
-  /*! DEPRICATED: use cdio_have_driver().
+  /** DEPRECATED: use cdio_have_driver().
     True if Apple OSX driver is available. */
   bool cdio_have_osx     (void);
 
-  /*! DEPRICATED: use cdio_have_driver().
+  /** DEPRECATED: use cdio_have_driver().
     True if Microsoft Windows driver is available. */
   bool cdio_have_win32   (void);
 
-  /*! True if Nero driver is available. */
+  /** True if Nero driver is available. */
   bool cdio_have_nrg     (void);
 
-  /*! True if BIN/CUE driver is available. */
+  /** True if BIN/CUE driver is available. */
   bool cdio_have_bincue  (void);
 
-  /*! True if cdrdao CDRDAO driver is available. */
+  /** True if cdrdao CDRDAO driver is available. */
   bool cdio_have_cdrdao  (void);
 
 #ifdef __cplusplus

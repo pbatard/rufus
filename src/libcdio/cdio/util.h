@@ -20,7 +20,7 @@
 #ifndef CDIO_UTIL_H_
 #define CDIO_UTIL_H_
 
-/*!
+/**
    \file util.h
    \brief Miscellaneous utility functions.
 
@@ -66,7 +66,7 @@ _cdio_len2blocks (uint32_t i_len, uint16_t i_blocksize)
 }
 
 
-/*! free() and NULL out p_obj it is not already null. */
+/** free() and NULL out p_obj it is not already null. */
 #define CDIO_FREE_IF_NOT_NULL(p_obj) \
   if (NULL != p_obj) { free(p_obj); p_obj=NULL; };
 
@@ -106,12 +106,9 @@ char *
 _cdio_strdup_upper (const char str[]);
 
 int
-_cdio_stricmp(const char str1[], const char str2[]);
-
-int
 _cdio_strnicmp(const char str1[], const char str2[], size_t count);
 
-/*! Duplicate path and make it platform compliant. Typically needed for
+/** Duplicate path and make it platform compliant. Typically needed for
     MinGW/MSYS where a "/c/..." path must be translated to "c:/..." for
     use with fopen(), etc. Returned string must be freed by the caller
     using cdio_free(). */
@@ -130,7 +127,7 @@ _cdio_strsplit(const char str[], char delim);
 uint8_t cdio_to_bcd8(uint8_t n);
 uint8_t cdio_from_bcd8(uint8_t p);
 
-/*!  cdio_realpath() same as POSIX.1-2001 realpath if that's
+/**  cdio_realpath() same as POSIX.1-2001 realpath if that's
 around. If not we do poor-man's simulation of that behavior.  */
 char *cdio_realpath (const char *psz_src, char *psz_dst);
 

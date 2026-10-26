@@ -38,7 +38,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-  /*!
+  /**
     Things common to private device structures. Even though not all
     devices may have some of these fields, by listing common ones
     we facilitate writing generic routines and even cut-and-paste
@@ -89,13 +89,13 @@ extern "C" {
     char *scsi_tuple;
   } generic_img_private_t;
 
-  /*!
+  /**
     Bogus eject media when there is no ejectable media, e.g. a disk image
     We always return 2. Should we also free resources?
   */
   driver_return_code_t cdio_generic_unimplemented_eject_media (void *p_env);
 
-  /*!
+  /**
     Set the blocksize for subsequent reads.
 
     @return -2 since it's not implemented.
@@ -104,7 +104,7 @@ extern "C" {
   cdio_generic_unimplemented_set_blocksize (void *p_user_data,
                                             uint16_t i_blocksize);
 
-  /*!
+  /**
     Set the drive speed.
 
     @return -2 since it's not implemented.
@@ -112,68 +112,68 @@ extern "C" {
   driver_return_code_t cdio_generic_unimplemented_set_speed (void *p_user_data,
                                                              int i_speed);
 
-  /*!
+  /**
     Release and free resources associated with cd.
   */
   void cdio_generic_free (void *p_env);
 
-  /*!
+  /**
     Initialize CD device.
   */
   bool cdio_generic_init (void *p_env, int open_mode);
 
-  /*!
+  /**
     Reads into buf the next size bytes.
     Returns -1 on error.
     Is in fact libc's read().
   */
   off_t cdio_generic_lseek (void *p_env, off_t offset, int whence);
 
-  /*!
+  /**
     Reads into buf the next size bytes.
     Returns -1 on error.
     Is in fact libc's read().
   */
   ssize_t cdio_generic_read (void *p_env, void *p_buf, size_t size);
 
-  /*!
+  /**
     Reads a single form1 sector from cd device into data starting
     from lsn. Returns 0 if no error.
   */
   int cdio_generic_read_form1_sector (void * user_data, void *data,
                                       lsn_t lsn);
 
-  /*!
+  /**
     Release and free resources associated with stream or disk image.
   */
   void cdio_generic_stdio_free (void *env);
 
-  /*!
+  /**
     Return true if source_name could be a device containing a CD-ROM on
     Win32
   */
   bool cdio_is_device_win32(const char *source_name);
 
-  /*!
+  /**
     Return true if source_name could be a device containing a CD-ROM on
     OS/2
   */
   bool cdio_is_device_os2(const char *source_name);
 
 
-  /*!
+  /**
     Return true if source_name could be a device containing a CD-ROM on
     most Unix servers with block and character devices.
   */
   bool cdio_is_device_generic(const char *source_name);
 
 
-  /*!
+  /**
     Like above, but don't give a warning device doesn't exist.
   */
   bool cdio_is_device_quiet_generic(const char *source_name);
 
-  /*!
+  /**
     Get cdtext information for a CdIo object .
 
     @param obj the CD object that may contain CD-TEXT information.
@@ -182,40 +182,40 @@ extern "C" {
   */
   cdtext_t *get_cdtext_generic (void *p_user_data);
 
-  /*!
+  /**
     Return the number of of the first track.
     CDIO_INVALID_TRACK is returned on error.
   */
   track_t get_first_track_num_generic(void *p_user_data);
 
-  /*!
+  /**
     Return the number of tracks in the current medium.
   */
   track_t get_num_tracks_generic(void *p_user_data);
 
-  /*!
+  /**
     Get disc type associated with cd object.
   */
   discmode_t get_discmode_generic (void *p_user_data );
 
-  /*!
+  /**
     Same as above but only handles CD cases
   */
   discmode_t get_discmode_cd_generic (void *p_user_data );
 
-  /*! Return number of channels in track: 2 or 4; -2 if not
+  /** Return number of channels in track: 2 or 4; -2 if not
     implemented or -1 for error.
     Not meaningful if track is not an audio track.
   */
   int  get_track_channels_generic(const void *p_user_data, track_t i_track);
 
-  /*! Return 1 if copy is permitted on the track, 0 if not, or -1 for error.
+  /** Return 1 if copy is permitted on the track, 0 if not, or -1 for error.
     Is this meaningful if not an audio track?
   */
   track_flag_t get_track_copy_permit_generic(void *p_user_data,
                                              track_t i_track);
 
-  /*! Return 1 if track has pre-emphasis, 0 if not, or -1 for error.
+  /** Return 1 if track has pre-emphasis, 0 if not, or -1 for error.
     Is this meaningful if not an audio track?
 
     pre-emphasis is a non linear frequency response.
@@ -223,7 +223,13 @@ extern "C" {
   track_flag_t get_track_preemphasis_generic(const void *p_user_data,
                                              track_t i_track);
 
-  /*!
+  /**
+    Return the underlying device file descriptor.
+   */
+  int
+  get_device_fd_generic(void *p_user_data);
+
+  /**
     Read cdtext information for a CdIo object .
 
     return true on success, false on error or CD-Text information does
@@ -233,7 +239,7 @@ extern "C" {
 
   void set_track_flags(track_flags_t *p_track_flag, uint8_t flag);
 
-  /*! Read mode 1 or mode2 sectors (using cooked mode).  */
+  /** Read mode 1 or mode2 sectors (using cooked mode).  */
   driver_return_code_t read_data_sectors_generic (void *p_user_data,
                                                   void *p_buf, lsn_t i_lsn,
                                                   uint16_t i_blocksize,

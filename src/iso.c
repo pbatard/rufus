@@ -133,6 +133,7 @@ static uint32_t md5sum_size = 0;
 static BOOL scan_only = FALSE;
 static StrArray config_path, isolinux_path, grub_filesystems;
 static char symlinked_syslinux[MAX_PATH], *md5sum_data = NULL, *md5sum_pos = NULL;
+static iso_extension_mask_t iso_extension_mask = ISO_EXTENSION_ALL;
 
 // Ensure filenames do not contain invalid FAT32 or NTFS characters
 static __inline char* sanitize_filename(char* filename, BOOL* is_identical)
@@ -160,9 +161,10 @@ static __inline char* sanitize_filename(char* filename, BOOL* is_identical)
 	return ret;
 }
 
-static void log_handler (cdio_log_level_t level, const char *message)
+void libcdio_log_handler(cdio_log_level_t level, const char *message)
 {
-	uprintf("libcdio: %s", message);
+	if (usb_debug || !scan_only)
+		uprintf("libcdio: %s", message);
 }
 
 // Returns TRUE if a path appears in md5sum.txt
@@ -1216,6 +1218,33 @@ void GetEfiBootInfo(char* buf, size_t buf_size, const char* source)
 	}
 }
 
+// We need to make sure we use the same extension mask for scanning and for extracting bootloaders
+// during scan, else the case sensitiveness of the mask may prevent us from accessing the relevant
+// bootloader (if say, we recorded '/efi/boot/bootx64.efi' during the scan without Joliet, but the
+// file is actually '/EFI/boot/bootx64.efi' when Joliet extensions are on). So we set a static global
+// extension mask, called from ExtractISO(), so that subsequent calls to ReadISOFileToBuffer() or
+// ExtractISOFile() can work with the same case-sensitive paths. And the reason we need to do this
+// whole dance with the extension mask is that we want to perform our first scan with Joliet disabled
+// (if Rock Ridge is enabled), so that we can find if there exists a Rock Ridge file with a name
+// greater than 64 chars in length or if there are symlinks. If that is the case, then we want to
+// disable Joliet during the extract phase, as it is incompatible with those RR extensions.
+static void set_iso_extension_mask(void) {
+	iso_extension_mask = ISO_EXTENSION_ALL;
+	if (!enable_rockridge)
+		// Disable Rock Ridge unconditionally if the feature was disabled by the user
+		iso_extension_mask &= ~ISO_EXTENSION_ROCK_RIDGE;
+	else if (scan_only)
+		// Disable Joliet for scanning *if* Rock Ridge is enabled
+		iso_extension_mask &= ~ISO_EXTENSION_JOLIET;
+	else if (img_report.has_long_filename || img_report.has_symlinks == SYMLINKS_RR)
+		// Disable Joliet for extracting *if* Rock Ridge is enabled and we have RR
+		// extensions conflicting with Joliet
+		iso_extension_mask &= ~ISO_EXTENSION_JOLIET;
+	if (!enable_joliet)
+		// Disable Joliet unconditionally if the feature was disabled by the user
+		iso_extension_mask &= ~ISO_EXTENSION_JOLIET;
+}
+
 BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 {
 	const char* basedir[] = { "i386", "amd64", "minint" };
@@ -1230,7 +1259,6 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	iso9660_pvd_t pvd;
 	udf_t* p_udf = NULL;
 	udf_dirent_t* p_udf_root;
-	iso_extension_mask_t iso_extension_mask = ISO_EXTENSION_ALL;
 
 	if ((!enable_iso) || (src_iso == NULL) || (dest_dir == NULL))
 		return FALSE;
@@ -1238,7 +1266,6 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	scan_only = scan;
 	if (!scan_only)
 		spacing = "";
-	cdio_log_set_handler((scan_only && !usb_debug) ? NULL : log_handler);
 	psz_extract_dir = dest_dir;
 	// Change progress style to marquee for scanning
 	if (scan_only) {
@@ -1301,17 +1328,7 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 	goto out;
 
 try_iso:
-	// Perform our first scan with Joliet disabled (if Rock Ridge is enabled), so that we can find if
-	// there exists a Rock Ridge file with a name > 64 chars or if there are symlinks. If that is the
-	// case then we also disable Joliet during the extract phase.
-	if ((!enable_joliet) || (enable_rockridge && (scan_only || img_report.has_long_filename ||
-		(img_report.has_symlinks == SYMLINKS_RR)))) {
-		iso_extension_mask &= ~ISO_EXTENSION_JOLIET;
-	}
-	if (!enable_rockridge) {
-		iso_extension_mask &= ~ISO_EXTENSION_ROCK_RIDGE;
-	}
-
+	set_iso_extension_mask();
 	p_iso = iso9660_open_ext(src_iso, iso_extension_mask);
 	if (p_iso == NULL) {
 		uprintf("%s'%s' doesn't look like an ISO image", spacing, src_iso);
@@ -1609,6 +1626,7 @@ out:
 	udf_close(p_udf);
 	if ((r != 0) && (ErrorStatus == 0))
 		ErrorStatus = RUFUS_ERROR(APPERR(scan_only ? ERROR_ISO_SCAN : ERROR_ISO_EXTRACT));
+	scan_only = FALSE;
 	return (r == 0);
 }
 
@@ -1669,7 +1687,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 try_iso:
 	// Make sure to enable extensions, else we may not match the name of the file we are looking
 	// for since Rock Ridge may be needed to translate something like 'I386_PC' into 'i386-pc'...
-	p_iso = iso9660_open_ext(iso, ISO_EXTENSION_MASK);
+	p_iso = iso9660_open_ext(iso, iso_extension_mask);
 	if (p_iso == NULL) {
 		uprintf("Unable to open image '%s'", iso);
 		goto out;
@@ -1724,7 +1742,6 @@ uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** bu
 	iso9660_stat_t* p_statbuf = NULL;
 
 	*buf = NULL;
-	cdio_loglevel_default = CDIO_LOG_WARN;
 
 	// First try to open as UDF - fallback to ISO if it failed
 	p_udf = udf_open(iso);
@@ -1763,7 +1780,7 @@ uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** bu
 try_iso:
 	// Make sure to enable extensions, else we may not match the name of the file we are looking
 	// for since Rock Ridge may be needed to translate something like 'I386_PC' into 'i386-pc'...
-	p_iso = iso9660_open_ext(iso, ISO_EXTENSION_MASK);
+	p_iso = iso9660_open_ext(iso, iso_extension_mask);
 	if (p_iso == NULL) {
 		uprintf("Unable to open image '%s'", iso);
 		goto out;
@@ -1798,7 +1815,6 @@ out:
 	udf_dirent_free(p_udf_file);
 	iso9660_close(p_iso);
 	udf_close(p_udf);
-	cdio_loglevel_default = usb_debug ? CDIO_LOG_INFO : CDIO_LOG_WARN;
 	if (ret == 0)
 		safe_free(*buf);
 	return ret;

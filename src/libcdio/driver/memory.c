@@ -28,10 +28,10 @@
 #include <cdio/memory.h>
 #include <cdio/types.h>
 
-/*! 
+/**
   Free the passed pointer.
-  
-  @param p_memory a pointer to memory allocated by a libcdio funtion.
+
+  @param p_memory a pointer to memory allocated by a libcdio function.
 */
 void
 cdio_free (void *p_memory)

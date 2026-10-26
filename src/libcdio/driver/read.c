@@ -74,7 +74,7 @@
     }                                                                    \
   }
 
-/*!
+/**
   lseek - reposition read/write file offset
   Returns (off_t) -1 on error.
   Similar to (if not the same as) libc's lseek()
@@ -89,7 +89,7 @@ cdio_lseek (const CdIo_t *p_cdio, off_t offset, int whence)
   return DRIVER_OP_UNSUPPORTED;
 }
 
-/*!  Reads into buf the next size bytes.  Similar to (if not the
+/**  Reads into buf the next size bytes.  Similar to (if not the
   same as) libc's read(). This is a "cooked" read, or one handled by
   the OS. It probably won't work on audio data. For that use
   cdio_read_audio_sector(s).
@@ -111,7 +111,7 @@ cdio_read (const CdIo_t *p_cdio, void *p_buf, size_t i_size)
   return DRIVER_OP_UNSUPPORTED;
 }
 
-/*!
+/**
   Reads an audio sector from cd device into data starting
   from lsn. Returns DRIVER_OP_SUCCESS if no error.
 */
@@ -124,7 +124,7 @@ cdio_read_audio_sector (const CdIo_t *p_cdio, void *p_buf, lsn_t i_lsn)
   return DRIVER_OP_UNSUPPORTED;
 }
 
-/*!
+/**
   Reads audio sectors from cd device into data starting
   from lsn. Returns DRIVER_OP_SUCCESS if no error.
 */
@@ -145,7 +145,7 @@ cdio_read_audio_sectors (const CdIo_t *p_cdio, void *p_buf, lsn_t i_lsn,
   return DRIVER_OP_UNSUPPORTED;
 }
 
-/*!
+/**
   Reads an audio sector from cd device into data starting
   from lsn. Returns DRIVER_OP_SUCCESS if no error.
 */
@@ -171,7 +171,7 @@ cdio_read_data_sectors (const CdIo_t *p_cdio, void *p_buf, lsn_t i_lsn,
 #define SEEK_SET 0
 #endif
 
-/*!
+/**
    Reads a single mode1 form1 or form2  sector from cd device
    into data starting from lsn. Returns DRIVER_OP_SUCCESS if no error.
  */
@@ -198,7 +198,7 @@ cdio_read_mode1_sector (const CdIo_t *p_cdio, void *p_buf, lsn_t i_lsn,
   return DRIVER_OP_UNSUPPORTED;
 }
 
-/*!
+/**
   Reads mode 1 sectors
 
   @param p_cdio object to read from
@@ -222,7 +222,7 @@ cdio_read_mode1_sectors (const CdIo_t *p_cdio, void *p_buf, lsn_t i_lsn,
   return DRIVER_OP_UNSUPPORTED;
 }
 
-/*!
+/**
   Reads a mode 2 sector
 
   @param p_cdio object to read from
@@ -245,7 +245,7 @@ cdio_read_mode2_sector (const CdIo_t *p_cdio, void *p_buf, lsn_t i_lsn,
   return DRIVER_OP_UNSUPPORTED;
 }
 
-/*!
+/**
   Reads mode 2 sectors
 
   @param p_cdio object to read from
@@ -281,7 +281,7 @@ cdio_read_sector(const CdIo_t *p_cdio, void *p_buf, lsn_t i_lsn,
   return cdio_read_sectors(p_cdio, p_buf, i_lsn, read_mode, 1);
 }
 
-/*!
+/**
   Reads a number of sectors (AKA blocks).
 
   @param p_buf place to read data into. The caller should make sure

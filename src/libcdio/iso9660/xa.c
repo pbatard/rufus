@@ -30,7 +30,7 @@
 #include <sys/stat.h>
 #endif
 
-/*! String inside frame which identifies XA attributes.  Note should
+/** String inside frame which identifies XA attributes.  Note should
     come *before* public headers which does a #define of
     this name.
 */
@@ -61,7 +61,7 @@ _getbuf (void)
 {
   static char _buf[BUF_COUNT][BUF_SIZE];
   static int _num = -1;
-  
+
   _num++;
   _num %= BUF_COUNT;
 
@@ -70,8 +70,8 @@ _getbuf (void)
   return _buf[_num];
 }
 
-/*!
-  Returns a string which interpreting the extended attribute xa_attr. 
+/**
+  Returns a string which interpreting the extended attribute xa_attr.
   For example:
   \verbatim
   d---1xrxrxr
@@ -89,14 +89,14 @@ _getbuf (void)
    is you will either see "2-" or "-1" in the 4th & 5th positions.
 
   The 6th and 7th characters refer to permissions for a user while the
-  the 8th and 9th characters refer to permissions for a group while, and 
-  the 10th and 11th characters refer to permissions for a others. 
- 
-  In each of these pairs the first character (6, 8, 10) is "x" if the 
+  the 8th and 9th characters refer to permissions for a group while, and
+  the 10th and 11th characters refer to permissions for a others.
+
+  In each of these pairs the first character (6, 8, 10) is "x" if the
   entry is executable. For a directory this means the directory is
   allowed to be listed or "searched".
   The second character of a pair (7, 9, 11) is "r" if the entry is allowed
-  to be read. 
+  to be read.
 */
 
 const char *
@@ -118,9 +118,8 @@ iso9660_get_xa_attr_str (uint16_t xa_attr)
   result[ 7] = (xa_attr & XA_PERM_XGRP) ? 'x' : '-';
   result[ 8] = (xa_attr & XA_PERM_RGRP) ? 'r' : '-';
 
-  /* Hack alert: wonder if this should be ROTH and XOTH? */
-  result[ 9] = (xa_attr & XA_PERM_XSYS) ? 'x' : '-';
-  result[10] = (xa_attr & XA_PERM_RSYS) ? 'r' : '-';
+  result[ 9] = (xa_attr & XA_PERM_XOTH) ? 'x' : '-';
+  result[10] = (xa_attr & XA_PERM_ROTH) ? 'r' : '-';
 
   result[11] = '\0';
 
@@ -128,11 +127,11 @@ iso9660_get_xa_attr_str (uint16_t xa_attr)
 }
 
 iso9660_xa_t *
-iso9660_xa_init (iso9660_xa_t *_xa, uint16_t uid, uint16_t gid, uint16_t attr, 
+iso9660_xa_init (iso9660_xa_t *_xa, uint16_t uid, uint16_t gid, uint16_t attr,
 	      uint8_t filenum)
 {
   cdio_assert (_xa != NULL);
-  
+
   _xa->user_id = uint16_to_be (uid);
   _xa->group_id = uint16_to_be (gid);
   _xa->attributes = uint16_to_be (attr);
@@ -142,10 +141,10 @@ iso9660_xa_init (iso9660_xa_t *_xa, uint16_t uid, uint16_t gid, uint16_t attr,
 
   _xa->filenum = filenum;
 
-  _xa->reserved[0] 
-    = _xa->reserved[1] 
-    = _xa->reserved[2] 
-    = _xa->reserved[3] 
+  _xa->reserved[0]
+    = _xa->reserved[1]
+    = _xa->reserved[2]
+    = _xa->reserved[3]
     = _xa->reserved[4] = 0x00;
 
   return _xa;
@@ -158,33 +157,32 @@ iso9660_xa_free (iso9660_xa_t *_xa)
     free(_xa);
 }
 
-/*!
+/**
   Returns POSIX mode bitstring for a given file.
 */
-posix_mode_t 
-iso9660_get_posix_filemode_from_xa(uint16_t i_perms) 
+posix_mode_t
+iso9660_get_posix_filemode_from_xa(uint16_t i_perms)
 {
   posix_mode_t mode = 0;
-  
+
   if (i_perms & XA_PERM_RUSR)  mode |= S_IRUSR;
   if (i_perms & XA_PERM_XUSR)  mode |= S_IXUSR;
-  
+
 #ifdef S_IRGRP
   if (i_perms & XA_PERM_RGRP)  mode |= S_IRGRP;
 #endif
 #ifdef S_IXGRP
   if (i_perms & XA_PERM_XGRP)  mode |= S_IXGRP;
 #endif
-  
+
 #ifdef S_IROTH
   if (i_perms & XA_PERM_ROTH)  mode |= S_IROTH;
 #endif
 #ifdef S_IXOTH
   if (i_perms & XA_PERM_XOTH)  mode |= S_IXOTH;
 #endif
-  
+
   if (i_perms & XA_ATTR_DIRECTORY)  mode |= S_IFDIR;
-  
+
   return mode;
 }
-

@@ -1,4 +1,4 @@
-/*  
+/*
     Copyright (C) 2005, 2006, 2008, 2010 Rocky Bernstein <rocky@gnu.org>
 
     This program is free software: you can redistribute it and/or modify
@@ -15,8 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*!
- * \file udf.h 
+/**
+ * \file udf.h
  *
  * \brief The top-level interface header for libudf: UDF filesystem
  * library; applications include this.
@@ -24,7 +24,7 @@
 */
 
 #ifndef UDF_H
-#define UDF_H 
+#define UDF_H
 
 #include <cdio/cdio.h>
 #include <cdio/ecma_167.h>
@@ -33,7 +33,7 @@
 typedef uint16_t partition_num_t;
 
 /** Opaque structures. */
-typedef struct udf_s udf_t; 
+typedef struct udf_s udf_t;
 typedef struct udf_file_s udf_file_t;
 
 typedef struct udf_dirent_s {
@@ -48,7 +48,7 @@ typedef struct udf_dirent_s {
     uint64_t           dir_left;
     uint8_t           *sector;
     udf_fileid_desc_t *fid;
-    
+
     /* This field has to come last because it is variable in length. */
     udf_file_entry_t   fe;
 } udf_dirent_t;
@@ -61,7 +61,7 @@ typedef struct udf_dirent_s {
 */
 typedef enum {
   UDF_BLOCKSIZE       = 2048
-} udf_enum1_t; 
+} udf_enum1_t;
 
 /** This variable is trickery to force the above enum symbol value to
     be recorded in debug symbol tables. It is used to allow one refer
@@ -73,35 +73,35 @@ extern udf_enum1_t debug_udf_enum1;
 extern "C" {
 #endif /* __cplusplus */
 
-  /*!
+  /**
     Close UDF and free resources associated with p_udf.
   */
   bool udf_close (udf_t *p_udf);
-  
-  /*!  
+
+  /**
     Seek to a position i_start and then read i_blocks. Number of
     blocks read is returned. One normally expects the return to be
     equal to i_blocks.
   */
 
-  driver_return_code_t udf_read_sectors (const udf_t *p_udf, void *ptr, 
+  driver_return_code_t udf_read_sectors (const udf_t *p_udf, void *ptr,
                                          lsn_t i_start,  long int i_blocks);
 
-  /*!
+  /**
     Open an UDF for reading. Maybe in the future we will have
     a mode. NULL is returned on error.
-    
+
     Caller must free result - use udf_close for that.
   */
   udf_t *udf_open (const char *psz_path);
-  
-  /*!
-    Return the partition number of the the opened udf handle. -1 
+
+  /**
+    Return the partition number of the the opened udf handle. -1
     Is returned if we have an error.
   */
   int16_t udf_get_part_number(const udf_t *p_udf);
 
-  /*!
+  /**
     Get the root in p_udf. If b_any_partition is false then
     the root must be in the given partition.
     NULL is returned if the partition is not found or a root is not found or
@@ -109,23 +109,23 @@ extern "C" {
 
     Caller must free result - use udf_file_free for that.
   */
-  udf_dirent_t *udf_get_root (udf_t *p_udf, bool b_any_partition, 
+  udf_dirent_t *udf_get_root (udf_t *p_udf, bool b_any_partition,
                               partition_num_t i_partition);
-  
+
   /**
    * Gets the Volume Identifier string, in 8bit unicode (latin-1)
    * psz_volid, place to put the string
    * i_volid, size of the buffer psz_volid points to
    * returns the size of buffer needed for all data
    */
-  int udf_get_volume_id(udf_t *p_udf, /*out*/ char *psz_volid,  
+  int udf_get_volume_id(udf_t *p_udf, /*out*/ char *psz_volid,
                         unsigned int i_volid);
-  
+
   /**
    * Gets the Volume Set Identifier, as a 128-byte dstring (not decoded)
    * WARNING This is not a null terminated string
    * volsetid, place to put the data
-   * i_volsetid, size of the buffer psz_volsetid points to 
+   * i_volsetid, size of the buffer psz_volsetid points to
    * the buffer should be >=128 bytes to store the whole volumesetidentifier
    * returns the size of the available volsetid information (128)
    * or 0 on error
@@ -140,20 +140,20 @@ extern "C" {
    * returns the size of buffer needed for all data
    * A call to udf_get_root() should have been issued before this call
    */
-  int udf_get_logical_volume_id(udf_t *p_udf, /*out*/ char *psz_logvolid,  
+  int udf_get_logical_volume_id(udf_t *p_udf, /*out*/ char *psz_logvolid,
                         unsigned int i_logvolid);
 
-  /*!
-    Return a file pointer matching psz_name. 
+  /**
+    Return a file pointer matching psz_name.
   */
   udf_dirent_t *udf_fopen(udf_dirent_t *p_udf_root, const char *psz_name);
-  
-  /*! udf_mode_string - fill in string PSZ_STR with an ls-style ASCII
+
+  /** udf_mode_string - fill in string PSZ_STR with an ls-style ASCII
     representation of the i_mode. PSZ_STR is returned.
 
     10 characters are stored in PSZ_STR; a terminating null byte is added.
     The characters stored in PSZ_STR are:
-    
+
     0   File type.  'd' for directory, 'c' for character
         special, 'b' for block special, 'm' for multiplex,
         'l' for symbolic link, 's' for socket, 'p' for fifo,
@@ -187,7 +187,7 @@ extern "C" {
 
     char *udf_mode_string (mode_t i_mode, char *psz_str);
 
-    bool udf_get_lba(const udf_file_entry_t *p_udf_fe, 
+    bool udf_get_lba(const udf_file_entry_t *p_udf_fe,
                      /*out*/ uint32_t *start, /*out*/ uint32_t *end);
 
     /**

@@ -37,7 +37,7 @@
 
 #include <ctype.h>
 
-/*! String of bytes used to identify the beginning of a Mode 1 or
+/** String of bytes used to identify the beginning of a Mode 1 or
   Mode 2 sector. */
 const uint8_t CDIO_SECTOR_SYNC_HEADER[CDIO_CD_SYNC_SIZE] =
   {0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0};
@@ -89,7 +89,7 @@ cdio_lsn_to_msf (lsn_t lsn, msf_t *msf)
   msf->f = cdio_to_bcd8 (f);
 }
 
-/*!
+/**
   Convert an LBA into a string representation of the MSF.
   \warning cdio_lba_to_msf_str returns new allocated string */
 char *
@@ -106,7 +106,7 @@ cdio_lba_to_msf_str (lba_t lba)
   }
 }
 
-/*!
+/**
   Convert an LSN into the corresponding LBA.
   CDIO_INVALID_LBA is returned if there is an error.
 */
@@ -117,7 +117,7 @@ cdio_lsn_to_lba (lsn_t lsn)
   return lsn + CDIO_PREGAP_SECTORS;
 }
 
-/*!
+/**
   Convert an LBA into the corresponding MSF.
 */
 void
@@ -127,7 +127,7 @@ cdio_lba_to_msf (lba_t lba, msf_t *msf)
   cdio_lsn_to_msf(cdio_lba_to_lsn(lba), msf);
 }
 
-/*!
+/**
   Convert a MSF into the corresponding LBA.
   CDIO_INVALID_LBA is returned if there is an error.
 */
@@ -149,7 +149,7 @@ cdio_msf_to_lba (const msf_t *msf)
   return lba;
 }
 
-/*!
+/**
   Convert a MSF into the corresponding LSN.
   CDIO_INVALID_LSN is returned if there is an error.
 */
@@ -159,7 +159,7 @@ cdio_msf_to_lsn (const msf_t *msf)
   return cdio_lba_to_lsn(cdio_msf_to_lba (msf));
 }
 
-/*!
+/**
   Convert an LBA into a string representation of the MSF.
   \warning cdio_lba_to_msf_str returns new allocated string */
 char *
@@ -171,7 +171,7 @@ cdio_msf_to_str (const msf_t *msf)
   return strdup (buf);
 }
 
-/*!
+/**
   Convert a MSF - broken out as 3 integer components into the
   corresponding LBA.
   CDIO_INVALID_LBA is returned if there is an error.
@@ -184,7 +184,7 @@ cdio_msf3_to_lba (unsigned int minutes, unsigned int seconds,
 	  + frames);
 }
 
-/*!
+/**
   Convert a string of the form MM:SS:FF into the corresponding LBA.
   CDIO_INVALID_LBA is returned if there is an error.
 */

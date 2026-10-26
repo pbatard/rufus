@@ -1,9 +1,9 @@
 /*
-    Copyright (C) 2003, 2004, 2005, 2006, 2008, 2012
+    Copyright (C) 2003, 2004, 2005, 2006, 2008, 2012, 2025
     Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2000 Herbert Valerio Riedel <hvr@gnu.org>
 
-    See also iso9660.h by Eric Youngdale (1993) and in cdrtools. These are 
+    See also iso9660.h by Eric Youngdale (1993) and in cdrtools. These are
 
     Copyright 1993 Yggdrasil Computing, Incorporated
     Copyright (c) 1999,2000 J. Schilling
@@ -21,11 +21,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-/*!
-   \file xa.h 
+/**
+   \file xa.h
    \brief Things related to the ISO-9660 XA (Extended Attributes) format
 
-   Applications will probably not include this directly but via 
+   Applications will probably not include this directly but via
    the iso9660.h header.
 */
 
@@ -37,46 +37,50 @@
 extern "C" {
 #endif /* __cplusplus */
 
-  /*! An enumeration for some of the XA_* \#defines below. This isn't
+  /** An enumeration for some of the XA_* \#defines below. This isn't
     really an enumeration one would really use in a program it is to
     be helpful in debuggers where wants just to refer to the XA_*
     names and get something.
+    Source: https://psx-spx.consoledev.net/cdromformat/#format-of-a-directory-record
   */
   typedef enum {
     ISO_XA_MARKER_OFFSET =   1024,
-    XA_PERM_RSYS =         0x0001,  /**< System Group Read */
-    XA_PERM_XSYS =         0x0004,  /**< System Group Execute */
-    
-    XA_PERM_RUSR =         0x0010,  /**< User (owner) Read */
-    XA_PERM_XUSR =         0x0040,  /**< User (owner) Execute */
-    
-    XA_PERM_RGRP =         0x0100,  /**< Group Read */
-    XA_PERM_XGRP =         0x0400,  /**< Group Execute */
-    
-    XA_PERM_ROTH =         0x1000,  /**< Other (world) Read */
-    XA_PERM_XOTH =         0x4000,  /**< Other (world) Execute */
-    
+
+  /* The SYS variants are retained for backwards compatibility. They
+    have the same values as USR */
+    XA_PERM_RSYS        =   (1 << 0),  /**< Same as User (owner) Read */
+    XA_PERM_XSYS        =   (1 << 2),  /**< Same as User (owner) Execute */
+
+    XA_PERM_RUSR        =   (1 << 0),  /**< User (owner) Read */
+    XA_PERM_XUSR        =   (1 << 2),  /**< User (owner) Execute */
+
+    XA_PERM_RGRP        =   (1 << 4),  /**< Group Read */
+    XA_PERM_XGRP        =   (1 << 6),  /**< Group Execute */
+
+    XA_PERM_ROTH        =   (1 << 8),  /**< Other (world) Read */
+    XA_PERM_XOTH        =   (1 << 10),  /**< Other (world) Execute */
+
     XA_ATTR_MODE2FORM1  =   (1 << 11),
     XA_ATTR_MODE2FORM2  =   (1 << 12),
     XA_ATTR_INTERLEAVED =   (1 << 13),
     XA_ATTR_CDDA        =   (1 << 14),
     XA_ATTR_DIRECTORY   =   (1 << 15),
-    
-    XA_PERM_ALL_READ    =   (XA_PERM_RUSR | XA_PERM_RSYS | XA_PERM_RGRP),
-    XA_PERM_ALL_EXEC    =   (XA_PERM_XUSR | XA_PERM_XSYS | XA_PERM_XGRP),
+
+    XA_PERM_ALL_READ    =   (XA_PERM_RUSR | XA_PERM_RGRP | XA_PERM_ROTH),
+    XA_PERM_ALL_EXEC    =   (XA_PERM_XUSR | XA_PERM_XGRP | XA_PERM_XOTH),
     XA_PERM_ALL_ALL     =   (XA_PERM_ALL_READ | XA_PERM_ALL_EXEC),
-    
+
     XA_FORM1_DIR  = (XA_ATTR_DIRECTORY | XA_ATTR_MODE2FORM1 | XA_PERM_ALL_ALL),
     XA_FORM1_FILE =  (XA_ATTR_MODE2FORM1 | XA_PERM_ALL_ALL),
     XA_FORM2_FILE =  (XA_ATTR_MODE2FORM2 | XA_PERM_ALL_ALL)
   } xa_misc_enum_t;
-  
+
 extern const char ISO_XA_MARKER_STRING[sizeof("CD-XA001")-1];
 
 #define ISO_XA_MARKER_STRING    "CD-XA001"
 
-/*! \brief "Extended Architecture" according to the Philips Yellow Book.
- 
+/** \brief "Extended Architecture" according to the Philips Yellow Book.
+
 CD-ROM EXtended Architecture is a modification to the CD-ROM
 specification that defines two new types of sectors.  CD-ROM XA was
 developed jointly by Sony, Philips, and Microsoft, and announced in
@@ -93,7 +97,7 @@ The data written on a CD-XA is consistent with and can be in ISO-9660
 file system format and therefore be readable by ISO-9660 file system
 translators. But also a CD-I player can also read CD-XA discs even if
 its own `Green Book' file system only resembles ISO 9660 and isn't
-fully compatible. 
+fully compatible.
 
  Note structure is big-endian.
 */
@@ -101,27 +105,27 @@ typedef struct iso9660_xa_s
 {
   uint16_t group_id;      /**< 0 */
   uint16_t user_id;       /**< 0 */
-  uint16_t attributes;    /**< XA_ATTR_ */ 
+  uint16_t attributes;    /**< XA_ATTR_ */
   char     signature[2];  /**< { 'X', 'A' } */
   uint8_t  filenum;       /**< file number, see also XA subheader */
   uint8_t  reserved[5];   /**< zero */
 } GNUC_PACKED iso9660_xa_t;
-  
-  
-  /*!
+
+
+  /**
     Returns POSIX mode bitstring for a given file.
   */
   posix_mode_t iso9660_get_posix_filemode_from_xa(uint16_t i_perms);
 
-/*!
-  Returns a string interpreting the extended attribute xa_attr. 
+/**
+  Returns a string interpreting the extended attribute xa_attr.
   For example:
   \verbatim
   d---1xrxrxr
   ---2--r-r-r
   -a--1xrxrxr
   \endverbatim
-  
+
   A description of the characters in the string follows.
   The 1st character is either "d" if the entry is a directory, or "-" if not
   The 2nd character is either "a" if the entry is CDDA (audio), or "-" if not
@@ -130,31 +134,31 @@ typedef struct iso9660_xa_s
   The 5th character is either "1" if the entry is mode2 form1 or "-" if not
   Note that an entry will either be in mode2 form1 or mode form2. That
   is you will either see "2-" or "-1" in the 4th & 5th positions.
-  
+
   The 6th and 7th characters refer to permissions for a user while the
-  the 8th and 9th characters refer to permissions for a group while, and 
-  the 10th and 11th characters refer to permissions for everyone. 
-  
-  In each of these pairs the first character (6, 8, 10) is "x" if the 
+  the 8th and 9th characters refer to permissions for a group while, and
+  the 10th and 11th characters refer to permissions for everyone.
+
+  In each of these pairs the first character (6, 8, 10) is "x" if the
   entry is executable. For a directory this means the directory is
   allowed to be listed or "searched".
   The second character of a pair (7, 9, 11) is "r" if the entry is allowed
-  to be read. 
+  to be read.
 */
 const char *
 iso9660_get_xa_attr_str (uint16_t xa_attr);
-  
-/*! 
-  Allocates and initalizes a new iso9600_xa_t variable and returns
+
+/**
+  Allocates and initializes a new iso9600_xa_t variable and returns
   it. The caller must free the returned result using iso9660_xa_free().
 
   @see iso9660_xa
 */
 iso9660_xa_t *
-iso9660_xa_init (iso9660_xa_t *_xa, uint16_t uid, uint16_t gid, uint16_t attr, 
+iso9660_xa_init (iso9660_xa_t *_xa, uint16_t uid, uint16_t gid, uint16_t attr,
                  uint8_t filenum);
 
-/*! 
+/**
   Frees the passed iso9600_xa_t structure.
 
   @see iso9660_xa
@@ -172,12 +176,12 @@ iso9660_xa_free (iso9660_xa_t *_xa);
 */
 extern xa_misc_enum_t debugger_xa_misc_enum;
 
-  
+
 #endif /* __cplusplus */
 
 #endif /* CDIO_XA_H_ */
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  tab-width: 8

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2005, 2008, 2011-2013
+  Copyright (C) 2003-2005, 2008, 2011-2013, 2025
   Rocky Bernstein <rocky@gnu.org>
   Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -16,7 +16,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-/*! Track-related routines. */
+/** Track-related routines. */
 
 
 #ifdef HAVE_CONFIG_H
@@ -39,7 +39,7 @@ const char *track_format2str[6] =
 /* Variables to hold debugger-helping enumerations */
 enum cdio_track_enums;
 
-/*!
+/**
   Return the number of the first track.
   CDIO_INVALID_TRACK is returned on error.
 */
@@ -59,7 +59,7 @@ cdio_get_first_track_num(const CdIo_t *p_cdio)
   }
 }
 
-/*!
+/**
   Return the last track number.
   CDIO_INVALID_TRACK is returned on error.
 */
@@ -82,7 +82,7 @@ cdio_get_last_track_num (const CdIo_t *p_cdio)
   }
 }
 
-/*! Return number of channels in track: 2 or 4; -2 if not
+/** Return number of channels in track: 2 or 4; -2 if not
   implemented or -1 for error.
   Not meaningful if track is not an audio track.
 */
@@ -107,7 +107,7 @@ cdio_get_track_channels(const CdIo_t *p_cdio, track_t u_track)
   }
 }
 
-/*! Return copy protection status on a track. Is this meaningful
+/** Return copy protection status on a track. Is this meaningful
   if not an audio track?
 */
 track_flag_t
@@ -120,7 +120,7 @@ cdio_get_track_copy_permit(const CdIo_t *p_cdio, track_t u_track)
   }
 }
 
-/*!
+/**
   Get format of track.
 */
 track_format_t
@@ -134,7 +134,7 @@ cdio_get_track_format(const CdIo_t *p_cdio, track_t u_track)
     return TRACK_FORMAT_ERROR;
   }
 }
-/*!
+/**
   Return the Joliet level recognized for p_cdio.
 */
 uint8_t
@@ -148,7 +148,7 @@ cdio_get_joliet_level(const CdIo_t *p_cdio)
   }
 }
 
-/*!
+/**
   Return the number of tracks in the current medium.
   CDIO_INVALID_TRACK is returned on error.
 */
@@ -164,7 +164,7 @@ cdio_get_num_tracks (const CdIo_t *p_cdio)
   }
 }
 
-/*! Find the track which contans lsn.
+/** Find the track which contains lsn.
     CDIO_INVALID_TRACK is returned if the lsn outside of the CD or
     if there was some error.
 
@@ -178,7 +178,6 @@ cdio_get_track(const CdIo_t *p_cdio, lsn_t lsn)
 
   {
     track_t i_low_track   = cdio_get_first_track_num(p_cdio);
-    // coverity[overflow_const]
     track_t i_high_track  = cdio_get_last_track_num(p_cdio)+1;
     track_t i_lead_track  = i_high_track;
 
@@ -209,7 +208,7 @@ cdio_get_track(const CdIo_t *p_cdio, lsn_t lsn)
   }
 }
 
-/*!
+/**
   Return true if we have XA data (green, mode2 form1) or
   XA data (green, mode2 form2). That is track begins:
   sync - header - subheader
@@ -231,7 +230,7 @@ cdio_get_track_green(const CdIo_t *p_cdio, track_t u_track)
   }
 }
 
-/*!
+/**
   Return the starting LBA for track number
   track_num in cdio.  Tracks numbers start at 1.
   The "leadout" track is specified either by
@@ -257,7 +256,7 @@ cdio_get_track_lba(const CdIo_t *p_cdio, track_t u_track)
   }
 }
 
-/*!
+/**
   Return the starting LSN for track number
   u_track in cdio.  Tracks numbers start at 1.
   The "leadout" track is specified either by
@@ -291,7 +290,7 @@ cdio_get_track_lsn(const CdIo_t *p_cdio, track_t u_track)
   }
 }
 
-/*!
+/**
   Return the International Standard Recording Code (ISRC) for track number
   u_track in p_cdio.  Track numbers start at 1.
 
@@ -321,7 +320,7 @@ cdio_get_track_isrc (const CdIo_t *p_cdio, track_t u_track)
   }
 }
 
-/*!
+/**
   Return the starting LBA for the pregap for track number
   u_track in cdio.  Track numbers start at 1.
   CDIO_INVALID_LBA is returned on error.
@@ -341,7 +340,7 @@ cdio_get_track_pregap_lba(const CdIo_t *p_cdio, track_t u_track)
   }
 }
 
-/*!
+/**
   Return the starting LSN for the pregap for track number
   u_track in cdio.  Track numbers start at 1.
   CDIO_INVALID_LSN is returned on error.
@@ -352,7 +351,7 @@ cdio_get_track_pregap_lsn(const CdIo_t *p_cdio, track_t u_track)
   return cdio_lba_to_lsn(cdio_get_track_pregap_lba(p_cdio, u_track));
 }
 
-/*!
+/**
   Return the ending LSN for track number
   u_track in cdio.  CDIO_INVALID_LSN is returned on error.
 */
@@ -366,7 +365,7 @@ cdio_get_track_last_lsn(const CdIo_t *p_cdio, track_t u_track)
   return lsn - 1;
 }
 
-/*!
+/**
   Return the starting MSF (minutes/secs/frames) for track number
   u_track in cdio.  Track numbers start at 1.
   The "leadout" track is specified either by
@@ -390,7 +389,7 @@ cdio_get_track_msf(const CdIo_t *p_cdio, track_t u_track, /*out*/ msf_t *msf)
   }
 }
 
-/*! Return copy protection status on a track. Is this meaningful
+/** Return copy protection status on a track. Is this meaningful
   if not an audio track?
 */
 track_flag_t
@@ -403,7 +402,7 @@ cdio_get_track_preemphasis(const CdIo *p_cdio, track_t u_track)
   }
 }
 
-/*!
+/**
   Return the number of sectors between this track an the next.  This
   includes any pregap sectors before the start of the next track.
   Tracks start at 1.
@@ -413,9 +412,28 @@ unsigned int
 cdio_get_track_sec_count(const CdIo_t *p_cdio, track_t u_track)
 {
   const track_t u_tracks = cdio_get_num_tracks(p_cdio);
+  lba_t start_lba, next_lba;
 
-  if (u_track >=1 && u_track <= u_tracks)
-    return ( cdio_get_track_lba(p_cdio, u_track+1)
-             - cdio_get_track_lba(p_cdio, u_track) );
-  return 0;
+  if (u_track < 1 || u_track > u_tracks)
+    return 0;
+
+  start_lba = cdio_get_track_lba(p_cdio, u_track);
+  if (start_lba == CDIO_INVALID_LBA)
+    return 0;
+
+  /* For the last track, use the leadout track to calculate sector count */
+  if (u_track == u_tracks) {
+    next_lba = cdio_get_track_lba(p_cdio, CDIO_CDROM_LEADOUT_TRACK);
+  } else {
+    next_lba = cdio_get_track_lba(p_cdio, u_track + 1);
+  }
+
+  if (next_lba == CDIO_INVALID_LBA)
+    return 0;
+
+  /* Ensure we don't get a negative result due to invalid data */
+  if (next_lba <= start_lba)
+    return 0;
+
+  return (unsigned int)(next_lba - start_lba);
 }

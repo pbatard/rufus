@@ -51,4 +51,20 @@
 # define drand48()   (rand() / (double)RAND_MAX)
 #endif
 
+#if defined(_MSC_VER)
+# define THREAD_LOCAL static __declspec(thread)
+#elif defined(__GNUC__) || defined(__clang__)
+# define THREAD_LOCAL static __thread
+#else
+# define THREAD_LOCAL
+#endif
+
+#if !defined(HAVE_STRTOK_R)
+# if defined(_MSC_VER)
+#  define strtok_r(s, delim, saveptr)  strtok_s((s), (delim), (saveptr))
+# else
+# define strtok_r(s, delim, saveptr) ((void)(saveptr), strtok((s), (delim)))
+# endif
+#endif /* HAVE_STRTOK_R */
+
 #endif /* CDIO_DRIVER_PORTABLE_H_ */

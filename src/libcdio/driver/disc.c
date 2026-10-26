@@ -25,37 +25,37 @@
 
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
-#endif 
+#endif
 
 #include <cdio/cdio.h>
 #include "cdio_private.h"
 
 /* Must match discmode enumeration */
 const char *discmode2str[] = {
-  "CD-DA", 
-  "CD-DATA (Mode 1)", 
-  "CD DATA (Mode 2)", 
+  "CD-DA",
+  "CD-DATA (Mode 1)",
+  "CD DATA (Mode 2)",
   "CD-ROM Mixed",
-  "DVD-ROM", 
-  "DVD-RAM", 
-  "DVD-R", 
-  "DVD-RW", 
+  "DVD-ROM",
+  "DVD-RAM",
+  "DVD-R",
+  "DVD-RW",
   "HD DVD ROM",
-  "HD_DVD RAM", 
-  "HD DVD-R", 
+  "HD_DVD RAM",
+  "HD DVD-R",
   "DVD+R",
-  "DVD+RW", 
-  "DVD+RW DL", 
-  "DVD+R DL", 
-  "Unknown/unclassified DVD", 
+  "DVD+RW",
+  "DVD+RW DL",
+  "DVD+R DL",
+  "Unknown/unclassified DVD",
   "No information",
   "Error in getting information",
-  "CD-i" 
+  "CD-i"
 };
 
-/*! 
+/**
   Get cdtext information for a CdIo object .
-  
+
   @param obj the CD object that may contain CD-TEXT information.
   @return the CD-TEXT object or NULL if obj is NULL
   or CD-TEXT information does not exist.
@@ -64,7 +64,7 @@ cdtext_t *
 cdio_get_cdtext (CdIo *obj)
 {
   if (obj == NULL) return NULL;
-  
+
   if (NULL != obj->op.get_cdtext) {
     return obj->op.get_cdtext (obj->env);
   } else {
@@ -72,9 +72,9 @@ cdio_get_cdtext (CdIo *obj)
   }
 }
 
-/*! 
+/**
   Get binary cdtext information for a CdIo object .
-  
+
   @param obj the CD object that may contain CD-TEXT information.
   @return pointer to allocated memory area holding the raw CD-TEXT
   or NULL if obj is NULL or CD-TEXT does not exist. Return value
@@ -92,27 +92,27 @@ cdio_get_cdtext_raw (CdIo *obj)
   }
 }
 
-/*!
+/**
   Get the size of the CD in logical block address (LBA) units.
-  
+
   @param p_cdio the CD object queried
   @return the lsn. On error 0 or CDIO_INVALD_LSN.
 */
-lsn_t 
+lsn_t
 cdio_get_disc_last_lsn(const CdIo_t *p_cdio)
 {
   if (!p_cdio) return CDIO_INVALID_LSN;
   return p_cdio->op.get_disc_last_lsn (p_cdio->env);
 }
 
-/*! 
+/**
   Get medium associated with cd_obj.
 */
 discmode_t
 cdio_get_discmode (CdIo_t *cd_obj)
 {
   if (!cd_obj) return CDIO_DISC_MODE_ERROR;
-  
+
   if (cd_obj->op.get_discmode) {
     return cd_obj->op.get_discmode (cd_obj->env);
   } else {
@@ -120,13 +120,13 @@ cdio_get_discmode (CdIo_t *cd_obj)
   }
 }
 
-/*!
+/**
   Return a string containing the name of the driver in use.
-  if CdIo is NULL (we haven't initialized a specific device driver), 
+  if CdIo is NULL (we haven't initialized a specific device driver),
   then return NULL.
 */
 char *
-cdio_get_mcn (const CdIo_t *p_cdio) 
+cdio_get_mcn (const CdIo_t *p_cdio)
 {
   if (p_cdio && p_cdio->op.get_mcn) {
     return p_cdio->op.get_mcn (p_cdio->env);
@@ -136,7 +136,7 @@ cdio_get_mcn (const CdIo_t *p_cdio)
 }
 
 bool
-cdio_is_discmode_cdrom(discmode_t discmode) 
+cdio_is_discmode_cdrom(discmode_t discmode)
 {
   switch (discmode) {
   case CDIO_DISC_MODE_CD_DA:
@@ -151,7 +151,7 @@ cdio_is_discmode_cdrom(discmode_t discmode)
 }
 
 bool
-cdio_is_discmode_dvd(discmode_t discmode) 
+cdio_is_discmode_dvd(discmode_t discmode)
 {
   switch (discmode) {
     case CDIO_DISC_MODE_DVD_ROM:

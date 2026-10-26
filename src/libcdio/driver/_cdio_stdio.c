@@ -142,7 +142,7 @@ _stdio_free(void *user_data)
   free(ud);
 }
 
-/*!
+/**
   Like fseek/fseeko(3) and in fact may be the same.
 
   This  function sets the file position indicator for the stream
@@ -187,7 +187,7 @@ _stdio_stat(void *p_user_data)
   return ud->st_size;
 }
 
-/*!
+/**
   Like fread(3) and in fact is about the same.
 
   DESCRIPTION:
@@ -238,8 +238,8 @@ _stdio_read(void *user_data, void *buf, size_t count)
   return read_count;
 }
 
-/*!
-  Deallocate resources assocaited with obj. After this obj is unusable.
+/**
+  Deallocate resources associated with obj. After this obj is unusable.
 */
 void
 cdio_stdio_destroy(CdioDataSource_t *p_obj)

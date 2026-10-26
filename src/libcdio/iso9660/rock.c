@@ -113,6 +113,7 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
     if (cont_offset >= ISO_BLOCKSIZE) FAIL;	\
     cont_size = from_733(rr->u.CE.size);	\
     if (cont_size >= ISO_BLOCKSIZE) FAIL;	\
+    if (cont_size > ISO_BLOCKSIZE - cont_offset) FAIL;\
   }
 
 #define SETUP_ROCK_RIDGE(DE, CHR, LEN)				\
@@ -139,11 +140,15 @@ realloc_symlink(/*in/out*/ iso9660_stat_t *p_stat, uint8_t i_grow)
     p_stat->rr.TIME_FIELD.b_longdate =				\
       (0 != (rr->u.TF.flags & ISO_ROCK_TF_LONG_FORM));		\
     if (p_stat->rr.TIME_FIELD.b_longdate) {			\
+      if ((size_t) cnt + sizeof(iso9660_ltime_t) > rr->len - 5) \
+        goto out;						\
       memcpy(&(p_stat->rr.TIME_FIELD.t.ltime),			\
 	     &(rr->u.TF.time_bytes[cnt]),			\
 	     sizeof(iso9660_ltime_t));				\
       cnt += sizeof(iso9660_ltime_t);				\
     } else {							\
+      if ((size_t) cnt + sizeof(iso9660_dtime_t) > rr->len - 5) \
+        goto out;						\
       memcpy(&(p_stat->rr.TIME_FIELD.t.dtime),			\
 	     &(rr->u.TF.time_bytes[cnt]),			\
 	     sizeof(iso9660_dtime_t));				\
@@ -160,7 +165,7 @@ is_rr_dd_enabled(void * p_image) {
   return !(p_header->u_flags & CDIO_HEADER_FLAGS_DISABLE_RR_DD);
 }
 
-/*!
+/**
   Get
   @return length of name field; 0: not found, -1: to be ignored
 */
@@ -188,9 +193,10 @@ repeat:
     int sig;
     int rootflag;
 
-    // coverity[tainted_data]
     while (len > 1){ /* There may be one byte for padding somewhere */
       rr = (iso_extension_record_t *) chr;
+      if (len < 4 || rr->len < 4 || rr->len > len)
+        goto out;
       sig = *chr+(*(chr+1) << 8);
 
       /* We used to check for some valid values of SIG, specifically
@@ -206,6 +212,8 @@ repeat:
 
       switch(sig) {
       case SIG('S','P'):
+	if (rr->len < 4 + sizeof(rr->u.SP))
+	  goto out;
 	CHECK_SP({cdio_warn("Invalid Rock Ridge SP field"); goto out;});
 	p_stat->rr.u_su_fields |= ISO_ROCK_SUF_SP;
 	break;
@@ -217,6 +225,8 @@ repeat:
 	  if ('\1' == p_iso9660_dir->filename.str[1] && 1 == i_fname)
 	    break;
 	}
+	if (rr->len < 4 + sizeof(rr->u.CE))
+	  goto out;
 	CHECK_CE({cdio_warn("Invalid Rock Ridge CE field"); goto out;});
 	p_stat->rr.u_su_fields |= ISO_ROCK_SUF_CE;
 	/* Though no mastering utility in its right mind would produce anything
@@ -225,6 +235,8 @@ repeat:
 	*/
 	break;
       case SIG('E','R'):
+	if (rr->len < 8 || rr->u.ER.len_id > rr->len - 8)
+	  goto out;
 	cdio_debug("ISO 9660 Extensions: ");
 	{
 	  int p;
@@ -234,16 +246,35 @@ repeat:
 	break;
       case SIG('N','M'):
 	/* Alternate name */
+	if (rr->len < 5)
+	  goto out;
 	p_stat->rr.u_su_fields |= ISO_ROCK_SUF_NM;
 	if (truncate)
 	  break;
 	if (rr->u.NM.flags & ISO_ROCK_NM_PARENT) {
-	  i_namelen = sizeof("..");
-	  strncat(psz_name, "..", i_namelen);
+	  if ((strlen(psz_name) + sizeof("..") - 1) >= 254) {
+	    truncate = 1;
+	    break;
+	  }
+	  {
+	    size_t i_name_len = strlen(psz_name);
+	    psz_name[i_name_len] = '.';
+	    psz_name[i_name_len + 1] = '.';
+	    psz_name[i_name_len + 2] = '\0';
+	  }
+	  i_namelen += sizeof("..") - 1;
 	  break;
 	} else if (rr->u.NM.flags & ISO_ROCK_NM_CURRENT) {
-	  i_namelen = sizeof(".");
-	  strncat(psz_name, ".", i_namelen);
+	  if ((strlen(psz_name) + sizeof(".") - 1) >= 254) {
+	    truncate = 1;
+	    break;
+	  }
+	  {
+	    size_t i_name_len = strlen(psz_name);
+	    psz_name[i_name_len] = '.';
+	    psz_name[i_name_len + 1] = '\0';
+	  }
+	  i_namelen += sizeof(".") - 1;
 	  break;
 	}
 
@@ -260,6 +291,8 @@ repeat:
 	break;
       case SIG('P','X'):
 	/* POSIX file attributes */
+	if (rr->len < 4 + sizeof(rr->u.PX))
+	  goto out;
 	p_stat->rr.st_mode   = from_733(rr->u.PX.st_mode);
 	p_stat->rr.st_nlinks = from_733(rr->u.PX.st_nlinks);
 	p_stat->rr.st_uid    = from_733(rr->u.PX.st_uid);
@@ -272,30 +305,38 @@ repeat:
 	  uint8_t slen;
 	  iso_rock_sl_part_t * p_sl;
 	  iso_rock_sl_part_t * p_oldsl;
+	  if (rr->len < 5)
+	    goto out;
 	  slen = rr->len - 5;
 	  p_sl = &rr->u.SL.link;
 	  p_stat->rr.i_symlink = symlink_len;
 	  p_stat->rr.u_su_fields |= ISO_ROCK_SUF_SL;
 	  while (slen > 1){
 	    rootflag = 0;
+	    if (p_sl->len > slen - 2)
+	      goto out;
 	    switch(p_sl->flags &~1){
 	    case 0:
-	      realloc_symlink(p_stat, p_sl->len);
+	      if (!realloc_symlink(p_stat, p_sl->len))
+		goto out;
 	      memcpy(&(p_stat->rr.psz_symlink[p_stat->rr.i_symlink]),
 		     p_sl->text, p_sl->len);
 	      p_stat->rr.i_symlink += p_sl->len;
 	      break;
 	    case 4:
-	      realloc_symlink(p_stat, 1);
+	      if (!realloc_symlink(p_stat, 1))
+		goto out;
 	      p_stat->rr.psz_symlink[p_stat->rr.i_symlink++] = '.';
 	      /* continue into next case. */
 	    case 2:
-	      realloc_symlink(p_stat, 1);
+	      if (!realloc_symlink(p_stat, 1))
+		goto out;
 	      p_stat->rr.psz_symlink[p_stat->rr.i_symlink++] = '.';
 	      break;
 	    case 8:
 	      rootflag = 1;
-	      realloc_symlink(p_stat, 1);
+	      if (!realloc_symlink(p_stat, 1))
+		goto out;
 	      p_stat->rr.psz_symlink[p_stat->rr.i_symlink++] = '/';
 	      break;
 	    default:
@@ -315,19 +356,23 @@ repeat:
 	     * If this component record isn't continued, then append a '/'.
 	     */
 	    if (!rootflag && (p_oldsl->flags & 1) == 0) {
-	      realloc_symlink(p_stat, 1);
+	      if (!realloc_symlink(p_stat, 1))
+		goto out;
 	      p_stat->rr.psz_symlink[p_stat->rr.i_symlink++] = '/';
 	    }
 	  }
 	}
 	symlink_len = p_stat->rr.i_symlink;
-	realloc_symlink(p_stat, 1);
+	if (!realloc_symlink(p_stat, 1))
+	  goto out;
 	p_stat->rr.psz_symlink[symlink_len]='\0';
 	break;
       case SIG('T','F'):
 	/* Time stamp(s) for a file */
 	{
 	  int cnt = 0;
+	  if (rr->len < 5)
+	    goto out;
 	  add_time(ISO_ROCK_TF_CREATE,     create);
 	  add_time(ISO_ROCK_TF_MODIFY,     modify);
 	  add_time(ISO_ROCK_TF_ACCESS,     access);
@@ -340,6 +385,8 @@ repeat:
 	}
       case SIG('C','L'):
 	/* Child Link for a deep directory */
+	if (rr->len < 4 + sizeof(rr->u.CL))
+	  goto out;
 	if (!is_rr_dd_enabled(p_image))
 	  break;
 	{
@@ -420,7 +467,7 @@ _getbuf (void)
   return _buf[_i];
 }
 
-/*!
+/**
   Returns a string which interpreting the POSIX mode st_mode.
   For example:
   \verbatim
@@ -501,7 +548,7 @@ iso9660_get_rock_attr_str(posix_mode_t st_mode)
   return result;
 }
 
-/*!
+/**
   Returns POSIX mode bitstring for a given file.
 */
 mode_t

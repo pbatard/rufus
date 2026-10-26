@@ -1,5 +1,5 @@
 /* -*- c -*-
-    Copyright (C) 2003, 2004, 2005, 2008, 2009, 2014
+    Copyright (C) 2003, 2004, 2005, 2008, 2009, 2014, 2026
     Rocky Bernstein <rocky@gnu.org>
     Copyright (C) 2001 Herbert Valerio Riedel <hvr@gnu.org>
 
@@ -17,13 +17,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/** \file cdio.h
+/** @file cdio.h
  *
- *  \brief The top-level header for libcdio: the CD Input and Control
+ *  @brief The top-level header for libcdio: the CD Input and Control
  *  library. Applications include this for anything regarding libcdio.
  */
 
-
 #ifndef __CDIO_H__
 #define __CDIO_H__
 
@@ -43,8 +42,8 @@ extern "C" {
 /* For compatibility. */
 #define CdIo CdIo_t
 
-  /** This is an opaque structure for the CD object. */
-  typedef struct _CdIo CdIo_t;
+/** This is an opaque structure for the CD object. */
+typedef struct _CdIo CdIo_t;
 
 #ifdef __cplusplus
 }
