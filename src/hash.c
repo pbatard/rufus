@@ -2487,10 +2487,15 @@ void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name)
 	if (md5_size == 0)
 		return;
 
+	// Assume a case insensitive file system and perform a case insensitive comparison
+	for (i = 0; i < md5_size; i++)
+		md5_data[i] = (char)tolower(md5_data[i]);
 	for (i = 0; i < modified_files.Index; i++) {
-		for (j = 0; j < (uint32_t)strlen(modified_files.String[i]); j++)
+		for (j = 0; j < (uint32_t)strlen(modified_files.String[i]); j++) {
+			modified_files.String[i][j] = (char)tolower(modified_files.String[i][j]);
 			if (modified_files.String[i][j] == '\\')
 				modified_files.String[i][j] = '/';
+		}
 		str_pos = strstr(md5_data, &modified_files.String[i][2]);
 		if (str_pos == NULL)
 			// File is not listed in md5 sums

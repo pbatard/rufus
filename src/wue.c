@@ -1379,10 +1379,18 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			for (i = 0; i < (int)files.Index; i++) {
 				static_sprintf(path, "%c:\\efi\\microsoft\\boot%s", drive_letter, &files.String[i][len]);
 				rep = remove_substr(path, "_EX");
-				if (!CopyFileU(files.String[i], rep, FALSE))
+				if (validate_md5sum)
+					md5sum_totalbytes -= _filesizeU(rep);
+				// TODO: Could we get fragmented data from CopyFile() that may trigger the AMI bug?
+				if (!CopyFileU(files.String[i], rep, FALSE)) {
 					uprintf("WARNING: Could not copy '%s': %s", path, WindowsErrorString());
-				else
+				} else {
 					num_replaced++;
+					if (validate_md5sum) {
+						md5sum_totalbytes += _filesizeU(files.String[i]);
+						StrArrayAdd(&modified_files, rep, TRUE);
+					}
+				}
 				safe_free(rep);
 			}
 			StrArrayDestroy(&files);
@@ -1394,10 +1402,17 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 				static_sprintf(path, "%c:\\efi\\boot\\boot%s.efi", drive_letter, efi_archname[i]);
 				if (!PathFileExistsA(path))
 					continue;
-				if (!CopyFileU(tmp_path[1], path, FALSE))
+				if (validate_md5sum)
+					md5sum_totalbytes -= _filesizeU(path);
+				if (!CopyFileU(tmp_path[1], path, FALSE)) {
 					uprintf("WARNING: Could not replace 'boot%s.efi': %s", efi_archname[i], WindowsErrorString());
-				else
+				} else {
 					num_replaced++;
+					if (validate_md5sum) {
+						md5sum_totalbytes += _filesizeU(tmp_path[1]);
+						StrArrayAdd(&modified_files, path, TRUE);
+					}
+				}
 				break;
 			}
 
@@ -1405,10 +1420,18 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			*tmp_dir_end = '\0';
 			static_strcat(tmp_path[1], "\\EFI_EX\\bootmgr_EX.efi");
 			static_sprintf(path, "%c:\\bootmgr.efi", drive_letter);
-			if (!CopyFileU(tmp_path[1], path, FALSE))
-				uprintf("WARNING: Could not replace 'bootmgr.efi': %s", WindowsErrorString());
-			else
-				num_replaced++;
+			if (PathFileExistsA(tmp_path[1])) {	// 26H2 doesn't have a bootmgr.efi in EFI_EX
+				if (!CopyFileU(tmp_path[1], path, FALSE)) {
+					uprintf("WARNING: Could not replace 'bootmgr.efi': %s", WindowsErrorString());
+				} else {
+					num_replaced++;
+					if (validate_md5sum) {
+						md5sum_totalbytes -= _filesizeU(tmp_path[1]);
+						md5sum_totalbytes += _filesizeU(path);
+						StrArrayAdd(&modified_files, path, TRUE);
+					}
+				}
+			}
 			if (num_replaced != 0) {
 				uprintf("Replaced %d EFI bootloader files with 'Windows UEFI CA 2023' compatible versions.", num_replaced);
 				uprintf("Note that to boot this media, you must have a system where the 'Windows UEFI CA 2023'");
@@ -1436,7 +1459,7 @@ out:
 		if (wimlib_update_image(wim, wim_index, wuc, wuc_index, 0) != 0 ||
 			// We use WIMLIB_WRITE_FLAG_UNSAFE_COMPACT unconditionally because, due to the
 			// AMI NTFS driver bug that may produce false positives for MD5, we want to
-			// have an unfragmented boot.wim after it is updated (one VNC), just as the
+			// have an unfragmented boot.wim after it is updated (one VCN), just as the
 			// original boot.wim was written to disk, and our changes are such that wimlib
 			// should be able to carry them all out within the existing file cluster area,
 			// without needing to allocate new cluster ranges (and thus break our file).
