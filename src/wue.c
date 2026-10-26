@@ -116,7 +116,7 @@ char* CreateUnattendXml(int arch, int flags)
 	static char path[MAX_PATH], tmp[MAX_PATH];
 	char* tzstr;
 	FILE* fd;
-	TIME_ZONE_INFORMATION tz_info;
+	DYNAMIC_TIME_ZONE_INFORMATION dtz_info;
 	int i, order;
 	unattend_xml_flags = flags;
 	StrArray commands = { 0 };
@@ -333,8 +333,9 @@ char* CreateUnattendXml(int arch, int flags)
 				fprintf(fd, "      </OOBE>\n");
 			}
 			if (flags & UNATTEND_DUPLICATE_LOCALE) {
-				if ((GetTimeZoneInformation(&tz_info) == TIME_ZONE_ID_INVALID) ||
-					((tzstr = wchar_to_utf8(tz_info.StandardName)) == NULL)) {
+				if ((GetDynamicTimeZoneInformation(&dtz_info) == TIME_ZONE_ID_INVALID) ||
+					// Can't use StandardName, which is localized. Use TimeZoneKeyName instead.
+					((tzstr = wchar_to_utf8(dtz_info.TimeZoneKeyName)) == NULL)) {
 					uprintf("WARNING: Could not retrieve current timezone: %s", WindowsErrorString());
 				} else {
 					fprintf(fd, "      <TimeZone>%s</TimeZone>\n", tzstr);
