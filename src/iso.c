@@ -220,19 +220,16 @@ static BOOL is_in_md5sum(char* path)
 
 static void _print_extracted_file(char* psz_fullpath, uint64_t file_length, BOOL split)
 {
-	size_t nul_pos;
+	char psz_display[MAX_PATH + 24];
 
 	if (psz_fullpath == NULL)
 		return;
 	// Replace slashes with backslashes and append the size to the path for UI display
 	to_windows_path(psz_fullpath);
-	nul_pos = strlen(psz_fullpath);
-	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, TRUE, FALSE));
-	uprintf(split ? "Splitting: %s" : "Extracting: %s", psz_fullpath);
-	safe_sprintf(&psz_fullpath[nul_pos], 24, " (%s)", SizeToHumanReadable(file_length, FALSE, FALSE));
-	PrintStatus(0, MSG_000, psz_fullpath);	// MSG_000 is "%s"
-	// Remove the appended size for extraction
-	psz_fullpath[nul_pos] = 0;
+	static_sprintf(psz_display, "%s (%s)", psz_fullpath, SizeToHumanReadable(file_length, TRUE, FALSE));
+	uprintf(split ? "Splitting: %s" : "Extracting: %s", psz_display);
+	static_sprintf(psz_display, "%s (%s)", psz_fullpath, SizeToHumanReadable(file_length, FALSE, FALSE));
+	PrintStatus(0, MSG_000, psz_display);
 	// ISO9660 cannot handle backslashes
 	to_unix_path(psz_fullpath);
 	// Update md5sum_totalbytes as needed
@@ -2013,8 +2010,8 @@ BOOL DumpFatDir(void* iso, const char* path, int32_t cluster)
 				props.is_conf = ((len > 4) && (stricmp(&name[len - 5], ".conf") == 0));
 				uprintf("Extracting: %s (from '%s', %s)", target, img_report.efi_img_path,
 					SizeToHumanReadable(diritem.size, FALSE, FALSE));
-				handle = CreateFileU(target, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
-					NULL, CREATE_ALWAYS, diritem.attributes, NULL);
+				handle = CreatePreallocatedFile(target, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
+					NULL, CREATE_ALWAYS, diritem.attributes, diritem.size);
 				if (handle == INVALID_HANDLE_VALUE) {
 					uprintf("Could not create '%s': %s", target, WindowsErrorString());
 					continue;
