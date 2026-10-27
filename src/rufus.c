@@ -88,7 +88,7 @@ static RECT relaunch_rc = { -65536, -65536, 0, 0};
 static HWND hSelectImage = NULL, hStart = NULL;
 static char szTimer[12] = "00:00:00";
 static unsigned int timer;
-static char uppercase_select[2][64], uppercase_start[64], uppercase_close[64], uppercase_cancel[64];
+static char uppercase_select[3][64], uppercase_start[64], uppercase_close[64], uppercase_cancel[64];
 
 extern HANDLE update_check_thread;
 extern HIMAGELIST hUpImageList, hDownImageList;
@@ -2104,9 +2104,14 @@ static void InitDialog(HWND hDlg)
 	SetWindowTextU(GetDlgItem(hDlg, IDCANCEL), uppercase_close);
 	GetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select[0], sizeof(uppercase_select[0]));
 	static_strcpy(uppercase_select[1], lmprintf(MSG_040));
+	static_strcpy(uppercase_select[2], "LINUX ISO");
 	CharUpperBuffU(uppercase_select[0], sizeof(uppercase_select[0]));
 	CharUpperBuffU(uppercase_select[1], sizeof(uppercase_select[1]));
+	CharUpperBuffU(uppercase_select[2], sizeof(uppercase_select[2]));
 	SetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select[0]);
+	SetWindowLongPtr(GetDlgItem(hDlg, IDC_SELECT), GWL_STYLE,
+		GetWindowLongPtr(GetDlgItem(hDlg, IDC_SELECT), GWL_STYLE) | BS_SPLITBUTTON);
+	RedrawWindow(GetDlgItem(hDlg, IDC_SELECT), NULL, NULL, RDW_ALLCHILDREN | RDW_UPDATENOW);
 	static_strcpy(uppercase_cancel, lmprintf(MSG_007));
 	CharUpperBuffU(uppercase_cancel, sizeof(uppercase_cancel));
 
@@ -2632,6 +2637,10 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			if (select_index == 1) {
 				EnableControls(FALSE, FALSE);
 				DownloadISO();
+			} else if (select_index == 2) {
+				EnableControls(FALSE, FALSE);
+				if (!DownloadLinuxISO())
+					EnableControls(TRUE, FALSE);
 			} else {
 				if (img_provided) {
 					uprintf("\r\nImage provided: '%s'", image_path);
@@ -2750,6 +2759,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			break;
 		case IDM_SELECT:
 		case IDM_DOWNLOAD:
+		case IDM_DOWNLOAD_LINUX:
 			select_index = LOWORD(wParam) - IDM_SELECT;
 			SetWindowTextU(GetDlgItem(hDlg, IDC_SELECT), uppercase_select[select_index]);
 			break;
@@ -2992,7 +3002,9 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 			ClientToScreen(pDropDown->hdr.hwndFrom, &Point);
 			hMenu = CreatePopupMenu();
 			InsertMenuU(hMenu, -1, MF_BYPOSITION | ((select_index == 0) ? MF_CHECKED : 0), IDM_SELECT, uppercase_select[0]);
-			InsertMenuU(hMenu, -1, MF_BYPOSITION | ((select_index == 1) ? MF_CHECKED : 0), IDM_DOWNLOAD, uppercase_select[1]);
+			if (InterlockedCompareExchange(&fido_download_available, 0, 0) != 0)
+				InsertMenuU(hMenu, -1, MF_BYPOSITION | ((select_index == 1) ? MF_CHECKED : 0), IDM_DOWNLOAD, uppercase_select[1]);
+			InsertMenuU(hMenu, -1, MF_BYPOSITION | ((select_index == 2) ? MF_CHECKED : 0), IDM_DOWNLOAD_LINUX, uppercase_select[2]);
 			TrackPopupMenuEx(hMenu, TPM_LEFTALIGN | TPM_TOPALIGN, Point.x, Point.y, hMainDialog, NULL);
 			DestroyMenu(hMenu);
 			break;

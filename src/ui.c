@@ -185,6 +185,9 @@ void GetMainButtonsWidth(HWND hDlg)
 	static_strcpy(download, lmprintf(MSG_040));
 	CharUpperBuffU(download, sizeof(download));
 	bw = max(bw, GetTextSize(GetDlgItem(hDlg, IDC_SELECT), download).cx + (3 * cbw) / 2);
+	static_strcpy(download, "LINUX ISO");
+	CharUpperBuffU(download, sizeof(download));
+	bw = max(bw, GetTextSize(GetDlgItem(hDlg, IDC_SELECT), download).cx + (3 * cbw) / 2);
 }
 
 // The following goes over the data that gets populated into the half-width dropdowns

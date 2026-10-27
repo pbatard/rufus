@@ -46,6 +46,7 @@
 #include "darkmode.h"
 
 /* Globals */
+volatile LONG fido_download_available = FALSE;
 extern BOOL is_x86_64, appstore_version;
 extern char unattend_username[MAX_USERNAME_LENGTH], *sbat_level_txt, *sb_active_txt, *sb_revoked_txt;
 extern int unattend_edition_index;
@@ -1701,6 +1702,7 @@ static DWORD WINAPI CheckForFidoThread(LPVOID param)
 	if (is_active)
 		return -1;
 	is_active = TRUE;
+	InterlockedExchange(&fido_download_available, FALSE);
 	safe_free(fido_url);
 	safe_free(sbat_entries);
 	safe_free(sbat_level_txt);
@@ -1751,6 +1753,7 @@ static DWORD WINAPI CheckForFidoThread(LPVOID param)
 		goto out;
 	}
 	if (IsDownloadable(fido_url)) {
+		InterlockedExchange(&fido_download_available, TRUE);
 		hCtrl = GetDlgItem(hMainDialog, IDC_SELECT);
 		style = GetWindowLongPtr(hCtrl, GWL_STYLE);
 		style |= BS_SPLITBUTTON;
@@ -1767,6 +1770,7 @@ out:
 
 void SetFidoCheck(void)
 {
+	InterlockedExchange(&fido_download_available, FALSE);
 	// Detect if we can use Fido, which depends on:
 	// - Powershell being installed
 	// - Rufus running in AppStore mode or update check being enabled

@@ -89,6 +89,7 @@
 #define IDR_DBX_LOONGARCH64             707
 #define IDM_SELECT                      901
 #define IDM_DOWNLOAD                    902
+#define IDM_DOWNLOAD_LINUX              903
 #define IDC_DEVICE                      1001
 #define IDC_FILE_SYSTEM                 1002
 #define IDC_START                       1003

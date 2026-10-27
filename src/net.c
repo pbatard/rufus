@@ -996,6 +996,188 @@ BOOL DownloadISO()
 	return TRUE;
 }
 
+/*
+ * Small, pinned Linux ISO catalogue for the initial downloader implementation.
+ * SHA-256 values are taken from the distributions' published checksum files.
+ * Update these entries together whenever a release is superseded.
+ */
+typedef struct {
+	const char* name;
+	const char* url;
+	const char* filename;
+	const char* sha256;
+} linux_iso_entry_t;
+
+static const linux_iso_entry_t linux_iso_catalog[] = {
+	{
+		"Linux Mint 22.3 Cinnamon (64-bit)",
+		"https://mirrors.edge.kernel.org/linuxmint/stable/22.3/linuxmint-22.3-cinnamon-64bit.iso",
+		"linuxmint-22.3-cinnamon-64bit.iso",
+		"a081ab202cfda17f6924128dbd2de8b63518ac0531bcfe3f1a1b88097c459bd4"
+	},
+	{
+		"Ubuntu 26.04.1 LTS Desktop (64-bit)",
+		"https://releases.ubuntu.com/26.04/ubuntu-26.04.1-desktop-amd64.iso",
+		"ubuntu-26.04.1-desktop-amd64.iso",
+		"601e30fbf5d97759367c632e2c33630665039b7e2158fd068403da3ccf1bda1f"
+	},
+	{
+		"Debian 13.7 Netinst (64-bit)",
+		"https://cdimage.debian.org/debian-cd/13.7.0/amd64/iso-cd/debian-13.7.0-amd64-netinst.iso",
+		"debian-13.7.0-amd64-netinst.iso",
+		"a7ef94ac2fb9a7fec454552abd629b7cc9d5155c886165a45649f5ce6167e355"
+	},
+	{
+		"Fedora Workstation 44 (x86_64)",
+		"https://download.fedoraproject.org/pub/fedora/linux/releases/44/Workstation/x86_64/iso/Fedora-Workstation-Live-44-1.7.x86_64.iso",
+		"Fedora-Workstation-Live-44-1.7.x86_64.iso",
+		"1620295f6a00c27c3208f0c00b8ece4eab1ec69b9002152d97488bf26a426ddf"
+	}
+};
+
+typedef struct {
+	const linux_iso_entry_t* entry;
+	char* path;
+} linux_iso_download_context_t;
+
+static DWORD WINAPI DownloadLinuxISOThread(LPVOID param)
+{
+	static const char hex[] = "0123456789abcdef";
+	linux_iso_download_context_t* context = (linux_iso_download_context_t*)param;
+	uint8_t digest[32];
+	char actual_sha256[65];
+	char* selected_path;
+	uint64_t downloaded_size;
+	unsigned int i;
+	DWORD thread_status = 1;
+
+	dialog_showing++;
+	IGNORE_RETVAL(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
+	uprintf("Downloading Linux ISO: %s", context->entry->name);
+	SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
+	ErrorStatus = 0;
+	SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
+
+	downloaded_size = DownloadToFileOrBuffer(context->entry->url, context->path, NULL, hMainDialog, TRUE);
+	if (downloaded_size == 0) {
+		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
+		DeleteFileU(context->path);
+		if (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
+			uprintf("Linux ISO download cancelled");
+			Notification(MB_ICONINFORMATION | MB_CLOSE, APPLICATION_NAME, "Linux ISO download was cancelled.");
+		} else {
+			uprintf("Linux ISO download failed: %s", WindowsErrorString());
+			Notification(MB_ICONERROR | MB_CLOSE, APPLICATION_NAME,
+				"Linux ISO download failed. Check the log and your network connection.");
+		}
+		goto out;
+	}
+
+	if (!HashFile(HASH_SHA256, context->path, digest)) {
+		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
+		DeleteFileU(context->path);
+		if (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
+			Notification(MB_ICONINFORMATION | MB_CLOSE, APPLICATION_NAME, "Linux ISO verification was cancelled; the file was deleted.");
+		} else {
+			Notification(MB_ICONERROR | MB_CLOSE, APPLICATION_NAME, "Unable to calculate SHA-256; the downloaded file was deleted.");
+		}
+		goto out;
+	}
+	for (i = 0; i < ARRAYSIZE(digest); i++) {
+		actual_sha256[2 * i] = hex[digest[i] >> 4];
+		actual_sha256[2 * i + 1] = hex[digest[i] & 0x0f];
+	}
+	actual_sha256[64] = '\0';
+	if (strcmp(actual_sha256, context->entry->sha256) != 0) {
+		uprintf("FATAL: SHA-256 mismatch for %s (expected %s, got %s)",
+			context->entry->filename, context->entry->sha256, actual_sha256);
+		ErrorStatus = RUFUS_ERROR(ERROR_INVALID_DATA);
+		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
+		DeleteFileU(context->path);
+		Notification(MB_ICONERROR | MB_CLOSE, APPLICATION_NAME,
+			"The downloaded ISO failed SHA-256 verification and was deleted.");
+		goto out;
+	}
+
+	uprintf("SHA-256 verification passed: %s", context->entry->filename);
+	selected_path = safe_strdup(context->path);
+	if (selected_path == NULL) {
+		ErrorStatus = RUFUS_ERROR(ERROR_NOT_ENOUGH_MEMORY);
+		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
+		Notification(MB_ICONERROR | MB_CLOSE, APPLICATION_NAME,
+			"The ISO was downloaded and verified, but Rufus could not select it because memory allocation failed.");
+		goto out;
+	}
+	safe_free(image_path);
+	image_path = selected_path;
+	SendMessage(hMainDialog, UM_PROGRESS_EXIT, 1, 0);
+	PostMessage(hMainDialog, UM_SELECT_ISO, 0, 0);
+	thread_status = 0;
+
+out:
+	SendMessage(hMainDialog, UM_ENABLE_CONTROLS, 0, 0);
+	safe_free(context->path);
+	free(context);
+	dialog_showing--;
+	CoUninitialize();
+	ExitThread(thread_status);
+	return thread_status;
+}
+
+BOOL DownloadLinuxISO(void)
+{
+	selection_dialog_options_t options = { 0 };
+	const char* patterns[] = { "*.iso" };
+	const char* descriptions[] = { "ISO image" };
+	ext_t image_ext;
+	linux_iso_download_context_t* context;
+	const linux_iso_entry_t* entry;
+	HANDLE thread;
+	char* path;
+	int choice, index;
+	unsigned int i;
+
+	StrArrayCreate(&options.choices, ARRAYSIZE(linux_iso_catalog));
+	for (i = 0; i < ARRAYSIZE(linux_iso_catalog); i++)
+		StrArrayAdd(&options.choices, linux_iso_catalog[i].name, TRUE);
+	choice = SelectionDialog("Linux ISO Downloader", "Select a Linux distribution to download:", &options);
+	StrArrayDestroy(&options.choices);
+	if (choice <= 0)
+		return FALSE;
+	index = _log2((uint32_t)choice);
+	if ((index < 0) || ((unsigned int)index >= ARRAYSIZE(linux_iso_catalog)))
+		return FALSE;
+	entry = &linux_iso_catalog[index];
+
+	image_ext.count = ARRAYSIZE(patterns);
+	image_ext.filename = entry->filename;
+	image_ext.extension = patterns;
+	image_ext.description = descriptions;
+	path = FileDialog(TRUE, NULL, &image_ext, NULL);
+	if (path == NULL)
+		return FALSE;
+
+	context = (linux_iso_download_context_t*)calloc(1, sizeof(*context));
+	if (context == NULL) {
+		safe_free(path);
+		ErrorStatus = RUFUS_ERROR(ERROR_NOT_ENOUGH_MEMORY);
+		uprintf("Unable to allocate Linux ISO download context");
+		return FALSE;
+	}
+	context->entry = entry;
+	context->path = path;
+	thread = CreateThread(NULL, 0, DownloadLinuxISOThread, context, 0, NULL);
+	if (thread == NULL) {
+		uprintf("Unable to start Linux ISO download thread");
+		ErrorStatus = RUFUS_ERROR(APPERR(ERROR_CANT_START_THREAD));
+		safe_free(context->path);
+		free(context);
+		return FALSE;
+	}
+	CloseHandle(thread);
+	return TRUE;
+}
+
 BOOL IsDownloadable(const char* url)
 {
 	DWORD dwSize, dwTotalSize = 0;
