@@ -875,7 +875,9 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (is_symlink)
 				img_report.has_symlinks = SYMLINKS_RR;
 		} else {
-			iso9660_name_translate_ext(p_statbuf->filename, psz_basename, joliet_level);
+			assert(strlen(p_statbuf->filename) <= sizeof(target_path));
+			iso9660_name_translate_ext(p_statbuf->filename, target_path, joliet_level);
+			safe_strcpy(psz_basename, sizeof(psz_fullpath) - length - 1, target_path);
 		}
 		if (p_statbuf->type == _STAT_DIR) {
 			if (!scan_only) {
