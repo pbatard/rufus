@@ -1736,7 +1736,7 @@ out:
 uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** buf)
 {
 	ssize_t read_size;
-	int64_t file_length;
+	uint64_t file_length;
 	uint32_t ret = 0, nblocks;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL;
@@ -1765,6 +1765,7 @@ uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** bu
 		goto out;
 	}
 	nblocks = (uint32_t)((file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
+	assert(nblocks < UINT32_MAX / UDF_BLOCKSIZE);
 	*buf = malloc(nblocks * UDF_BLOCKSIZE + 1);
 	if (*buf == NULL) {
 		uprintf("Could not allocate buffer for file %s", iso_file);
