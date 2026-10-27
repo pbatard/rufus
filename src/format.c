@@ -2045,11 +2045,11 @@ out:
 		Sleep(200);
 		VdsRescan(VDS_RESCAN_REFRESH, 0, TRUE);
 		// Try to remount the first non ESP partition we see with a file system that Windows supports
-		hPhysicalDrive = GetPhysicalHandle(DriveIndex, FALSE, TRUE, TRUE);
-		if (hPhysicalDrive != INVALID_HANDLE_VALUE) {
+		if (GetDrivePartitionData(SelectedDrive.DeviceNumber, fs_name, sizeof(fs_name), TRUE) && 
+			(hPhysicalDrive = GetPhysicalHandle(DriveIndex, FALSE, TRUE, TRUE)) != INVALID_HANDLE_VALUE) {
 			int64_t esp_offset = GetEspOffset(hPhysicalDrive);
-			for (i = 0; i < SelectedDrive.nPartitions; i++) {
-				LARGE_INTEGER li = { .QuadPart = SelectedDrive.Partition[partition_index[i]].Offset };
+			for (i = 0; i < min(SelectedDrive.nPartitions, MAX_PARTITIONS); i++) {
+				LARGE_INTEGER li = { .QuadPart = SelectedDrive.Partition[i].Offset };
 				if (li.QuadPart == esp_offset)	// Skip any ESP
 					continue;
 				const char* fs = GetFsName(hPhysicalDrive, li);
@@ -2059,6 +2059,7 @@ out:
 					volume_name = GetLogicalName(DriveIndex, li.QuadPart, TRUE, TRUE);
 					if ((volume_name != NULL) && (MountVolume(drive_name, volume_name)))
 						uprintf("Remounted %s as %c:", volume_name, toupper(drive_name[0]));
+					free(volume_name);
 					break;
 				}
 			}
