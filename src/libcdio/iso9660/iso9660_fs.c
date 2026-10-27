@@ -977,6 +977,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
   /* Test for gaps between extents. Important: Use previous .total_size */
   extent_lsn = from_733 (p_iso9660_dir->extent);
   if (p_stat->total_size > 0) {
+    cdio_utf8_t* p_psz_out = NULL;
     /* This is a follow-up extent. Check for a gap. */
     if (p_stat->lsn + p_stat->total_size / ISO_BLOCKSIZE != extent_lsn
 	|| p_stat->total_size % ISO_BLOCKSIZE) {
@@ -984,6 +985,15 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
       cdio_warn("Non-contiguous data extents with '%s'", p_stat->filename);
       goto fail;
     }
+    /* Extent name is different. Throw error. This also prevents the
+       p_stat->filename string copy further down from overflowing. */
+    if (!_iso9660_recname_to_cstring(&p_iso9660_dir->filename.str[1], i_fname,
+	&p_psz_out, NULL, u_joliet_level) || strcmp(p_psz_out, p_stat->filename)) {
+      cdio_warn("Data extent name '%s' does not match original name '%s'", p_psz_out, p_stat->filename);
+      free(p_psz_out);
+      goto fail;
+    }
+    free(p_psz_out);
   } else if (first_extent) {
     p_stat->lsn = extent_lsn;
   }
