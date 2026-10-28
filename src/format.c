@@ -77,7 +77,7 @@ extern BOOL force_large_fat32, enable_ntfs_compression, lock_drive, zero_drive, 
 extern BOOL write_as_image, use_vds, write_as_esp, is_vds_available, has_ffu_support, use_rufus_mbr, append_silent;
 extern char* archive_path;
 uint8_t *grub2_buf = NULL, *sec_buf = NULL;
-long grub2_len;
+uint32_t grub2_len;
 
 /*
  * Convert the fmifs outputs messages (that use an OEM code page) to UTF-8
@@ -936,7 +936,7 @@ static BOOL WriteSBR(HANDLE hPhysicalDrive)
 			uprintf("Writing Grub 2.0 SBR (from download) %s",
 				IsBufferInDB(grub2_buf, grub2_len)?"✓":"✗");
 			buf = grub2_buf;
-			size = (DWORD)grub2_len;
+			size = grub2_len;
 		} else {
 			uprintf("Writing Grub 2.0 SBR (from embedded)");
 			buf = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_GR_GRUB2_CORE_IMG), _RT_RCDATA, "core.img", &size, FALSE);
@@ -1940,8 +1940,8 @@ try_clear:
 			grub4dos_dst[0] = drive_name[0];
 			IGNORE_RETVAL(_chdirU(app_data_dir));
 			uprintf("Installing: %s (Grub4DOS loader) %s", grub4dos_dst,
-				IsFileInDB(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr")?"✓":"✗");
-			if (!CopyFileU(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr", grub4dos_dst, FALSE))
+				IsFileInDB(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr") ? "✓" : "✗");
+			if (!copy_signed_file(FILES_DIR "\\grub4dos-" GRUB4DOS_VERSION "\\grldr", grub4dos_dst))
 				uprintf("Failed to copy file: %s", WindowsErrorString());
 		} else if ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso || img_report.is_windows_img)) {
 			UpdateProgress(OP_FILE_COPY, 0.0f);

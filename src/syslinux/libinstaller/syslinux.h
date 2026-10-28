@@ -26,18 +26,14 @@
 #endif
 
 /* The standard boot sector and ldlinux image */
-extern unsigned char* syslinux_ldlinux[2];
-extern unsigned long syslinux_ldlinux_len[2];
+extern uint8_t* syslinux_ldlinux_buf[2];
+extern uint32_t syslinux_ldlinux_len[2];
 extern const int syslinux_ldlinux_mtime[2];
 
-#define boot_sector	syslinux_ldlinux[1]
+#define boot_sector	syslinux_ldlinux_buf[1]
 #define boot_sector_len syslinux_ldlinux_len[1]
-#define boot_image	syslinux_ldlinux[0]
+#define boot_image	syslinux_ldlinux_buf[0]
 #define boot_image_len	syslinux_ldlinux_len[0]
-
-extern unsigned char syslinux_mbr[];
-extern const unsigned int syslinux_mbr_len;
-extern const int syslinux_mbr_mtime;
 
 /* Sector size variables are defined externally for 4K support */
 extern uint32_t SECTOR_SHIFT;

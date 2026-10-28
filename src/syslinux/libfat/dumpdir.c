@@ -98,8 +98,9 @@ int libfat_dumpdir(struct libfat_filesystem *fs, libfat_dirpos_t *dp,
 	if ((j >= 0) && (i != j - 1))
 	    return -3;
 	j = i;
-	if (i > ARRAYSIZE(di->name) - 13)
-	    i = ARRAYSIZE(di->name) - 13;
+	/* Validate that a maliciously crafted sequence number can't overflow our buffer */
+	if ((i < 0) || (13 * (i + 1) > (int)ARRAYSIZE(di->name)))
+	    return -3;  /* Invalid sequence number */
 	fill_utf16(&di->name[13 * i], dep->name);
 	dep = get_next_dirent(fs, &dp->sector, &dp->offset);
 	if (!dep)

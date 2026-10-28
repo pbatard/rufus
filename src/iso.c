@@ -709,8 +709,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			for (i = 0; i < NB_OLD_C32; i++) {
 				if (props.is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
-					if (CopyFileU(tmp, psz_fullpath, FALSE)) {
-						uprintf("  Replaced with local version %s", IsFileInDB(tmp)?"✓":"✗");
+					if (copy_signed_file(tmp, psz_fullpath)) {
+						uprintf("  Replaced with local version %s", IsFileInDB(tmp) ? "✓" : "✗");
 						break;
 					}
 					uprintf("  Could not replace file: %s", WindowsErrorString());
@@ -875,7 +875,9 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (is_symlink)
 				img_report.has_symlinks = SYMLINKS_RR;
 		} else {
-			iso9660_name_translate_ext(p_statbuf->filename, psz_basename, joliet_level);
+			assert(strlen(p_statbuf->filename) <= sizeof(target_path));
+			iso9660_name_translate_ext(p_statbuf->filename, target_path, joliet_level);
+			safe_strcpy(psz_basename, sizeof(psz_fullpath) - length - 1, target_path);
 		}
 		if (p_statbuf->type == _STAT_DIR) {
 			if (!scan_only) {
@@ -917,8 +919,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			for (i = 0; i < NB_OLD_C32; i++) {
 				if (props.is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
-					if (CopyFileU(tmp, psz_fullpath, FALSE)) {
-						uprintf("  Replaced with local version %s", IsFileInDB(tmp)?"✓":"✗");
+					if (copy_signed_file(tmp, psz_fullpath)) {
+						uprintf("  Replaced with local version %s", IsFileInDB(tmp) ? "✓" : "✗");
 						break;
 					}
 					uprintf("  Could not replace file: %s", WindowsErrorString());
@@ -1734,7 +1736,7 @@ out:
 uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** buf)
 {
 	ssize_t read_size;
-	int64_t file_length;
+	uint64_t file_length;
 	uint32_t ret = 0, nblocks;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL;
@@ -1763,6 +1765,7 @@ uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** bu
 		goto out;
 	}
 	nblocks = (uint32_t)((file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
+	assert(nblocks < UINT32_MAX / UDF_BLOCKSIZE);
 	*buf = malloc(nblocks * UDF_BLOCKSIZE + 1);
 	if (*buf == NULL) {
 		uprintf("Could not allocate buffer for file %s", iso_file);

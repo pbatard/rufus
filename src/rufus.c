@@ -96,7 +96,9 @@ extern BOOL enable_iso, enable_joliet, enable_rockridge, enable_extra_hashes;
 extern BOOL validate_md5sum, cpu_has_sha1_accel, cpu_has_sha256_accel, toggle_dark_mode;
 extern BYTE* fido_script;
 extern uint8_t* grub2_buf;
-extern long grub2_len;
+extern uint32_t grub2_len;
+extern uint8_t* syslinux_ldlinux_buf[2];
+extern uint32_t syslinux_ldlinux_len[2];
 extern char* szStatusMessage;
 extern const char* old_c32_name[NB_OLD_C32];
 extern const char* cert_name[3];
@@ -1491,7 +1493,6 @@ out:
 static DWORD WINAPI BootCheckThread(LPVOID param)
 {
 	int i, r;
-	FILE *fd;
 	uint32_t len;
 	WPARAM ret = BOOTCHECK_CANCEL;
 	BOOL in_files_dir = FALSE, esp_already_asked = FALSE;
@@ -1507,6 +1508,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	safe_free(grub2_buf);
+	safe_free(syslinux_ldlinux_buf[0]);
+	safe_free(syslinux_ldlinux_buf[1]);
 	append_silent = FALSE;
 
 	if (ComboBox_GetCurSel(hDeviceList) == CB_ERR)
@@ -1789,24 +1792,12 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 			IGNORE_RETVAL(_mkdir(FILES_DIR));
 			IGNORE_RETVAL(_chdir(FILES_DIR));
 			static_sprintf(tmp, "%s-%s/%s", grub, img_report.grub2_version, core_img);
-			fd = fopen(tmp, "rb");
-			if (fd != NULL) {
-				// If a file already exists in the current directory, use that one
+			grub2_len = read_signed_file(tmp, &grub2_buf);
+			if (grub2_len > 0) {
+				// If a file already exists in the current directory, and the signature's good, use that one
 				to_windows_path(tmp);
 				uprintf("Will reuse '%s' from '%s\\%s\\%s-%s\\' for Grub 2.x installation",
 					core_img, app_data_dir, FILES_DIR, grub, img_report.grub2_version);
-				fseek(fd, 0, SEEK_END);
-				grub2_len = ftell(fd);
-				fseek(fd, 0, SEEK_SET);
-				if (grub2_len > 0)
-					grub2_buf = malloc(grub2_len);
-
-				// grub2_buf was set to NULL at the beginning of this call
-				if ((grub2_buf == NULL) || (fread(grub2_buf, 1, (size_t)grub2_len, fd) != (size_t)grub2_len)) {
-					uprintf("Failed to read existing '%s' data - will use embedded version", core_img);
-					safe_free(grub2_buf);
-				}
-				fclose(fd);
 			} else {
 				r = Notification(MB_YESNOCANCEL | MB_ICONWARNING, lmprintf(MSG_115),
 					lmprintf(MSG_116, img_report.grub2_version, GRUB2_PACKAGE_VERSION));
@@ -1818,28 +1809,25 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 					IGNORE_RETVAL(_chdir(tmp));
 					// The following loops through the grub2 version (which may have the ISO label appended)
 					// and breaks it according to '.' or '-' until it finds a match on the server.
-					for (i = (int)strlen(img_report.grub2_version), grub2_len = 0; i > 0 && grub2_len <= 0; i--) {
+					for (i = (int)strlen(img_report.grub2_version), grub2_len = 0; i > 0 && grub2_len == 0; i--) {
 						c = img_report.grub2_version[i];
 						if (c != 0 && c != '.' && c != '-')
 							continue;
 						img_report.grub2_version[i] = 0;
 						static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, img_report.grub2_version, core_img);
-						grub2_len = (long)DownloadSignedFile(tmp, core_img, hMainDialog, FALSE);
+						grub2_len = DownloadSignedFile(tmp, core_img, hMainDialog, FALSE);
 						img_report.grub2_version[i] = c;
 					}
-					if (grub2_len <= 0) {
+					if (grub2_len == 0) {
 						PrintInfo(0, MSG_195, "Grub2");
 						uprintf("%s was not found - will use embedded version", tmp);
 					} else {
 						PrintInfo(0, MSG_193, tmp);
-						fd = fopen(core_img, "rb");
-						grub2_buf = malloc(grub2_len);
-						if ((fd == NULL) || (grub2_buf == NULL) || (fread(grub2_buf, 1, (size_t)grub2_len, fd) != (size_t)grub2_len)) {
+						grub2_len = read_signed_file(core_img, &grub2_buf);
+						if (grub2_len == 0) {
 							uprintf("Failed to read '%s' data - will use embedded version", core_img);
-							safe_free(grub2_buf);
+							grub2_buf = NULL;
 						}
-						if (fd != NULL)
-							fclose(fd);
 					}
 				}
 			}
@@ -1856,12 +1844,11 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 							in_files_dir = TRUE;
 						}
 						static_sprintf(tmp, "%s-%s/%s", syslinux, embedded_sl_version_str[0], old_c32_name[i]);
-						fd = fopen(tmp, "rb");
-						if (fd != NULL) {
+						len = read_signed_file(tmp, NULL);
+						if (len > 0) {
 							// If a file already exists in the current directory, use that one
 							uprintf("Will replace obsolete '%s' from ISO with the one found in '%s\\%s\\%s'",
 								old_c32_name[i], app_data_dir, FILES_DIR, tmp);
-							fclose(fd);
 							use_own_c32[i] = TRUE;
 						} else {
 							PrintInfo(0, MSG_204, old_c32_name[i]);
@@ -1889,14 +1876,9 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				IGNORE_RETVAL(_chdir(FILES_DIR));
 				for (i = 0; i < 2; i++) {
 					// Check if we already have the relevant ldlinux_v#.##.sys & ldlinux_v#.##.bss files
-					static_sprintf(tmp, "%s-%s%s\\%s.%s", syslinux, img_report.sl_version_str,
+					static_sprintf(tmp, "%s-%s%s/%s.%s", syslinux, img_report.sl_version_str,
 						img_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
-					fd = fopen(tmp, "rb");
-					if (fd != NULL) {
-						fseek(fd, 0, SEEK_END);
-						syslinux_ldlinux_len[i] = (DWORD)ftell(fd);
-						fclose(fd);
-					}
+					syslinux_ldlinux_len[i] = read_signed_file(tmp, &syslinux_ldlinux_buf[i]);
 				}
 				if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
 					to_windows_path(img_report.sl_version_ext);
@@ -1904,6 +1886,8 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 						ldlinux, ldlinux_ext[0], ldlinux, ldlinux_ext[1], app_data_dir, FILES_DIR, syslinux,
 						img_report.sl_version_str, img_report.sl_version_ext);
 				} else {
+					safe_free(syslinux_ldlinux_buf[0]);
+					safe_free(syslinux_ldlinux_buf[1]);
 					r = Notification(MB_YESNO | MB_ICONWARNING, lmprintf(MSG_115),
 						lmprintf(MSG_114, img_report.sl_version_str, img_report.sl_version_ext,
 							embedded_sl_version_str[1], embedded_sl_version_ext[1]));
@@ -1929,12 +1913,18 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 							syslinux_ldlinux_len[i] = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)],
 								hMainDialog, (*img_report.sl_version_ext == 0));
 							if (syslinux_ldlinux_len[i] != 0) {
-								// Duplicate the file so that the user won't be prompted to download again
+								// Duplicate the file (and signature) so that the user won't be prompted to download again
 								static_sprintf(tmp, "%s-%s\\%s.%s", syslinux, img_report.sl_version_str, ldlinux, ldlinux_ext[i]);
 								static_sprintf(tmp2, "%s-%s\\%s\\%s.%s", syslinux, img_report.sl_version_str,
 									&img_report.sl_version_ext[1], ldlinux, ldlinux_ext[i]);
 								CopyFileA(tmp, tmp2, FALSE);
+								static_sprintf(tmp, "%s-%s\\%s.%s.sig", syslinux, img_report.sl_version_str, ldlinux, ldlinux_ext[i]);
+								static_sprintf(tmp2, "%s-%s\\%s\\%s.%s.sig", syslinux, img_report.sl_version_str,
+									&img_report.sl_version_ext[1], ldlinux, ldlinux_ext[i]);
+								CopyFileA(tmp, tmp2, FALSE);
 							}
+							static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[i]);
+							syslinux_ldlinux_len[i] = read_signed_file(tmp, &syslinux_ldlinux_buf[i]);
 						}
 						if (syslinux_ldlinux_len[i] == 0) {
 							// If the version matches our embedded one, try to use that as a last ditch effort
@@ -1955,11 +1945,10 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		IGNORE_RETVAL(_mkdir(FILES_DIR));
 		IGNORE_RETVAL(_chdir(FILES_DIR));
 		static_sprintf(tmp, "%s-%s/%s.%s", syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
-		fd = fopenU(tmp, "rb");
-		if (fd != NULL) {
+		len = read_signed_file(tmp, NULL);
+		if (len > 0) {
 			to_windows_path(tmp);
 			uprintf("Will reuse '%s\\%s\\%s' for Syslinux installation", app_data_dir, FILES_DIR, tmp);
-			fclose(fd);
 		} else {
 			static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[2]);
 			PrintInfo(0, MSG_206, tmp);
@@ -2003,11 +1992,10 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 		IGNORE_RETVAL(_mkdir(FILES_DIR));
 		IGNORE_RETVAL(_chdir(FILES_DIR));
 		static_sprintf(tmp, "grub4dos-%s/grldr", GRUB4DOS_VERSION);
-		fd = fopenU(tmp, "rb");
-		if (fd != NULL) {
+		len = read_signed_file(tmp, NULL);
+		if (len > 0) {
 			to_windows_path(tmp);
 			uprintf("Will reuse '%s\\%s\\%s' for Grub4DOS installation", app_data_dir, FILES_DIR, tmp);
-			fclose(fd);
 		} else {
 			static_sprintf(tmp, "grldr");
 			PrintInfo(0, MSG_206, tmp);
@@ -4326,6 +4314,8 @@ out:
 	safe_free(update.download_url);
 	safe_free(update.release_notes);
 	safe_free(grub2_buf);
+	safe_free(syslinux_ldlinux_buf[0]);
+	safe_free(syslinux_ldlinux_buf[1]);
 	safe_free(fido_url);
 	safe_free(fido_script);
 	safe_free(pe256ssp);

@@ -2206,6 +2206,8 @@ static BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 		sbat[i++] = '\0';
 		version_str = &sbat[i];
 		for (; sbat[i] != ',' && sbat[i] != '\0' && sbat[i] != '\n'; i++);
+		if (sbat[i] == '\0')
+			break;
 		sbat[i++] = '\0';
 		entry.version = atoi(version_str);
 		uuprintf("  SBAT: %s,%d", entry.product, entry.version);
