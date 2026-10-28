@@ -1055,6 +1055,23 @@ typedef struct {
 	char* path;
 } linux_iso_download_context_t;
 
+#define LINUX_ISO_MAX_ATTEMPTS 3
+
+static BOOL IsRetryableLinuxISODownloadError(DWORD error_code)
+{
+  switch (error_code) {
+  case ERROR_HTTP_INVALID_SERVER_RESPONSE:
+  case ERROR_INTERNET_CONNECTION_RESET:
+  case ERROR_INTERNET_CONNECTION_ABORTED:
+  case ERROR_INTERNET_TIMEOUT:
+  case ERROR_INTERNET_CANNOT_CONNECT:
+  case ERROR_INTERNET_NAME_NOT_RESOLVED:
+    return TRUE;
+  default:
+    return FALSE;
+  }
+}
+
 static DWORD WINAPI DownloadLinuxISOThread(LPVOID param)
 {
 	static const char hex[] = "0123456789abcdef";
@@ -1063,7 +1080,8 @@ static DWORD WINAPI DownloadLinuxISOThread(LPVOID param)
 	char actual_sha256[65];
 	char* selected_path;
 	uint64_t downloaded_size;
-	unsigned int i;
+	unsigned int i, attempt;
+	DWORD download_error;
 	DWORD thread_status = 1;
 
 	dialog_showing++;
@@ -1073,7 +1091,26 @@ static DWORD WINAPI DownloadLinuxISOThread(LPVOID param)
 	ErrorStatus = 0;
 	SendMessage(hMainDialog, UM_TIMER_START, 0, 0);
 
-	downloaded_size = DownloadToFileOrBuffer(context->entry->url, context->path, NULL, hMainDialog, TRUE);
+	for (attempt = 1; attempt <= LINUX_ISO_MAX_ATTEMPTS; attempt++) {
+	  downloaded_size = DownloadToFileOrBuffer(context->entry->url, context->path, NULL, hMainDialog, TRUE);
+	  if (downloaded_size != 0)
+	    break;
+
+	  download_error = GetLastError();
+	  if (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED ||
+	      attempt == LINUX_ISO_MAX_ATTEMPTS ||
+	      !IsRetryableLinuxISODownloadError(download_error))
+	    break;
+
+	  SetLastError(download_error);
+	  uprintf("Temporary network error downloading %s: %s (0x%08lX). Retrying (%u/%u)...",
+	    context->entry->name, WindowsErrorString(), (unsigned long)download_error,
+	    attempt + 1, LINUX_ISO_MAX_ATTEMPTS);
+	  SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
+	  ErrorStatus = 0;
+	  Sleep(1000 * attempt);
+	  SendMessage(hMainDialog, UM_PROGRESS_INIT, 0, 0);
+	}
 	if (downloaded_size == 0) {
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
 		if (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
