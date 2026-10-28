@@ -1188,7 +1188,7 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 				md5sum_path[0] = drive_letter;
 				dwSize = read_file(setup_exe, &buf);
 				if (dwSize != 0) {
-					setup_arch = GetPeArch(buf);
+					setup_arch = GetPeArch(buf, dwSize);
 					safe_free(buf);
 					if (setup_arch != IMAGE_FILE_MACHINE_AMD64 && setup_arch != IMAGE_FILE_MACHINE_ARM64) {
 						uprintf("WARNING: Unsupported arch 0x%x -- in-place upgrade wrapper will not be added", setup_arch);

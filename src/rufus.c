@@ -1272,6 +1272,14 @@ void GetBootladerInfo(void)
 			uprintf("  Warning: Failed to extract '%s' to check for UEFI Secure Boot info", img_report.efi_boot_entry[i].path);
 			continue;
 		}
+		// Even with UKIs (Unified Kernel Images), if your UEFI bootloader is larger than
+		// what we consider to be a reasonable maximum size, you *are* asking for trouble
+		// as you are going to run out of ESP space on user's machines!
+		if (len > MAX_PE_SIZE) {
+			uprintf("  Warning: Ignoring '%s' (%s) for UEFI Secure Boot info", img_report.efi_boot_entry[i].path,
+				SizeToHumanReadable(len, FALSE, FALSE));
+			continue;
+		}
 		sb_signed = IsSignedBySecureBootAuthority(buf, len);
 		if (sb_signed)
 			img_report.has_secureboot_bootloader |= 1;

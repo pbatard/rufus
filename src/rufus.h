@@ -88,6 +88,7 @@
 #define MAX_ISO_TO_ESP_SIZE         (1 * GB)	// Maximum size we allow for the ISO → ESP option
 #define MAX_DEFAULT_LIST_CARD_SIZE  (500 * GB)	// Size above which we don't list a card without enable HDD or Alt-F
 #define MAX_SECTORS_TO_CLEAR        (8 * MB / 512)	// Sectors to zap when clearing the MBR/GPT (must be >34)
+#define MAX_PE_SIZE                 (256 * MB)	// Maximum size of any PE file (UEFI bootloader) we want to process
 #define MAX_USERNAME_LENGTH         128			// Maximum size we'll accept for a WUE specified username
 #define MAX_WININST                 4			// Max number of install[.wim|.esd] we can handle on an image
 #define MAX_MARKER                  80.0f		// Max number of '+' signs we display for progress
@@ -937,10 +938,10 @@ extern HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAcce
 extern uint32_t ResolveDllAddress(dll_resolver_t* resolver);
 extern sbat_entry_t* GetSbatEntries(char* sbatlevel);
 extern thumbprint_list_t* GetThumbprintEntries(char* thumbprints_txt);
-extern uint16_t GetPeArch(uint8_t* buf);
-extern uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len);
-extern uint8_t* GetPeSignatureData(uint8_t* buf);
-extern uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva);
+extern uint16_t GetPeArch(uint8_t* buf, uint32_t buf_len);
+extern uint8_t* GetPeSection(uint8_t* buf, uint32_t buf_len, const char* name, uint32_t* len);
+extern uint8_t* GetPeSignatureData(uint8_t* buf, uint32_t buf_len);
+extern uint8_t* RvaToPhysical(uint8_t* buf, uint32_t buf_len, uint32_t rva);
 extern uint32_t FindResourceRva(const wchar_t* name, uint8_t* root, uint8_t* dir, uint32_t* len);
 extern DWORD ListDirectoryContent(StrArray* arr, char* dir, uint8_t type);
 extern BOOL TakeOwnership(LPCSTR lpszOwnFile);

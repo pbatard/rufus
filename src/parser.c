@@ -1738,51 +1738,74 @@ thumbprint_list_t* GetThumbprintEntries(char* thumbprints_txt)
  * PE parsing functions
  */
 
-// Return the arch of a PE executable buffer
-uint16_t GetPeArch(uint8_t* buf)
+// Validate the DOS and NT headers, as well as the section table, of a PE buffer against
+// the buffer length. Return the NT header (and optionally the section table along with
+// the number of sections) or NULL if the headers are invalid or don't fit in the buffer.
+static IMAGE_NT_HEADERS32* GetPeHeader(uint8_t* buf, uint32_t buf_len,
+	IMAGE_SECTION_HEADER** section_header, uint32_t* nb_sections)
 {
 	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
 	IMAGE_NT_HEADERS32* pe_header;
+	uint32_t header_size;
 
-	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
-		return IMAGE_FILE_MACHINE_UNKNOWN;
+	// We should have filtered out overly large executables already.
+	// If that is not the case, make sure we do get user reports about it.
+	if_assert_fails(buf_len < MAX_PE_SIZE)
+		return NULL;
+
+	if (buf == NULL || buf_len < sizeof(IMAGE_DOS_HEADER) || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
+		return NULL;
+	if (dos_header->e_lfanew < 0 || dos_header->e_lfanew >= MAX_PE_SIZE || dos_header->e_lfanew + sizeof(IMAGE_NT_HEADERS32) > buf_len)
+		return NULL;
 
 	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
 	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
+		return NULL;
+	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM)
+		header_size = sizeof(IMAGE_NT_HEADERS32);
+	else
+		header_size = sizeof(IMAGE_NT_HEADERS64);
+	// The section table immediately follows the NT headers
+	// Our MAX_PE_SIZE check is also designed to prevent 32-bit arithmetic overflows
+	if (dos_header->e_lfanew + header_size +
+		pe_header->FileHeader.NumberOfSections * sizeof(IMAGE_SECTION_HEADER) > buf_len)
+		return NULL;
+
+	if (section_header != NULL)
+		*section_header = (IMAGE_SECTION_HEADER*)&buf[dos_header->e_lfanew + header_size];
+	if (nb_sections != NULL)
+		*nb_sections = pe_header->FileHeader.NumberOfSections;
+	return pe_header;
+}
+
+// Return the arch of a PE executable buffer
+uint16_t GetPeArch(uint8_t* buf, uint32_t buf_len)
+{
+	IMAGE_NT_HEADERS32* pe_header = GetPeHeader(buf, buf_len, NULL, NULL);
+
+	if (pe_header == NULL)
 		return IMAGE_FILE_MACHINE_UNKNOWN;
 	return pe_header->FileHeader.Machine;
 }
 
 // Return the address and (optionally) the length of a PE section from a PE buffer
-uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len)
+uint8_t* GetPeSection(uint8_t* buf, uint32_t buf_len, const char* name, uint32_t* len)
 {
 	char section_name[IMAGE_SIZEOF_SHORT_NAME] = { 0 };
 	uint32_t i, nb_sections;
-	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
-	IMAGE_NT_HEADERS32* pe_header;
-	IMAGE_NT_HEADERS64* pe64_header;
 	IMAGE_SECTION_HEADER* section_header;
+
+	if (name == NULL || GetPeHeader(buf, buf_len, &section_header, &nb_sections) == NULL)
+		return NULL;
 
 	static_strcpy(section_name, name);
 
-	if (buf == NULL || name == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
-		return NULL;
-
-	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
-	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
-		return NULL;
-	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
-		section_header = (IMAGE_SECTION_HEADER*)(&pe_header[1]);
-		nb_sections = pe_header->FileHeader.NumberOfSections;
-	} else {
-		pe64_header = (IMAGE_NT_HEADERS64*)pe_header;
-		section_header = (IMAGE_SECTION_HEADER*)(&pe64_header[1]);
-		nb_sections = pe64_header->FileHeader.NumberOfSections;
-	}
 	for (i = 0; i < nb_sections; i++) {
 		if (memcmp(section_header[i].Name, section_name, sizeof(section_name)) == 0) {
+			if ((uint64_t)section_header[i].PointerToRawData + section_header[i].SizeOfRawData > buf_len)
+				return NULL;
 			if (len != NULL)
-				*len = section_header->SizeOfRawData;
+				*len = section_header[i].SizeOfRawData;
 			return &buf[section_header[i].PointerToRawData];
 		}
 	}
@@ -1790,37 +1813,28 @@ uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len)
 }
 
 // Convert an RVA address to a physical address from a PE buffer
-uint8_t* RvaToPhysical(uint8_t* buf, uint32_t rva)
+uint8_t* RvaToPhysical(uint8_t* buf, uint32_t buf_len, uint32_t rva)
 {
 	uint32_t i, nb_sections;
-	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
-	IMAGE_NT_HEADERS32* pe_header;
-	IMAGE_NT_HEADERS64* pe64_header;
+	uint64_t offset;
 	IMAGE_SECTION_HEADER* section_header;
 
-	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
+	if (GetPeHeader(buf, buf_len, &section_header, &nb_sections) == NULL)
 		return NULL;
-
-	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
-	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
-		return NULL;
-	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
-		section_header = (IMAGE_SECTION_HEADER*)(pe_header + 1);
-		nb_sections = pe_header->FileHeader.NumberOfSections;
-	} else {
-		pe64_header = (IMAGE_NT_HEADERS64*)pe_header;
-		section_header = (IMAGE_SECTION_HEADER*)(pe64_header + 1);
-		nb_sections = pe64_header->FileHeader.NumberOfSections;
-	}
 
 	for (i = 0; i < nb_sections; i++) {
-		if ((section_header[i].VirtualAddress <= rva && rva < (section_header[i].VirtualAddress + section_header[i].Misc.VirtualSize)))
+		offset = section_header[i].VirtualAddress;
+		if (offset <= (uint64_t)rva && (uint64_t)rva < (offset + section_header[i].Misc.VirtualSize))
 			break;
 	}
 	if (i >= nb_sections)
 		return NULL;
 
-	return &buf[section_header[i].PointerToRawData + (rva - section_header[i].VirtualAddress)];
+	offset = section_header[i].PointerToRawData;
+	offset += rva - section_header[i].VirtualAddress;
+	if (offset >= buf_len - sizeof(uint32_t))
+		return NULL;
+	return &buf[offset];
 }
 
 // Using the MS APIs to poke the resources of the EFI bootloaders is simply TOO. DAMN. SLOW.
@@ -1863,19 +1877,15 @@ uint32_t FindResourceRva(const wchar_t* name, uint8_t* root, uint8_t* dir, uint3
 	return 0;
 }
 
-uint8_t* GetPeSignatureData(uint8_t* buf)
+uint8_t* GetPeSignatureData(uint8_t* buf, uint32_t buf_len)
 {
-	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
 	IMAGE_NT_HEADERS32* pe_header;
 	IMAGE_NT_HEADERS64* pe64_header;
 	IMAGE_DATA_DIRECTORY sec_dir;
 	WIN_CERTIFICATE* cert;
 
-	if (buf == NULL || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
-		return NULL;
-
-	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
-	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
+	pe_header = GetPeHeader(buf, buf_len, NULL, NULL);
+	if (pe_header == NULL)
 		return NULL;
 
 	if (pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386 || pe_header->FileHeader.Machine == IMAGE_FILE_MACHINE_ARM) {
@@ -1884,11 +1894,16 @@ uint8_t* GetPeSignatureData(uint8_t* buf)
 		pe64_header = (IMAGE_NT_HEADERS64*)pe_header;
 		sec_dir = pe64_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY];
 	}
-	if (sec_dir.VirtualAddress == 0 || sec_dir.Size == 0)
+	if (sec_dir.VirtualAddress == 0 || sec_dir.VirtualAddress >= MAX_PE_SIZE || sec_dir.Size == 0 || sec_dir.Size >= MAX_PE_SIZE)
+		return NULL;
+	// For the security directory, VirtualAddress is a file offset rather than an RVA
+	if (sec_dir.VirtualAddress + sec_dir.Size > buf_len || sec_dir.Size < offsetof(WIN_CERTIFICATE, bCertificate))
 		return NULL;
 
 	cert = (WIN_CERTIFICATE*)&buf[sec_dir.VirtualAddress];
-	if (cert->dwLength == 0 || cert->wCertificateType != WIN_CERT_TYPE_PKCS_SIGNED_DATA)
+	// dwLength includes the WIN_CERTIFICATE header and must fit in the security directory
+	if (cert->dwLength <= offsetof(WIN_CERTIFICATE, bCertificate) || cert->dwLength > sec_dir.Size ||
+		cert->wCertificateType != WIN_CERT_TYPE_PKCS_SIGNED_DATA)
 		return NULL;
 
 	return (uint8_t*)cert;

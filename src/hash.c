@@ -2190,7 +2190,7 @@ static BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 		return FALSE;
 
 	// Look for a .sbat section
-	sbat = GetPeSection(buf, ".sbat", &sbat_len);
+	sbat = GetPeSection(buf, len, ".sbat", &sbat_len);
 	if (sbat == NULL || sbat < (char*)buf || sbat >= (char*)buf + len)
 		return FALSE;
 
@@ -2238,7 +2238,7 @@ static BOOL IsRevokedByDbx(uint8_t* hash, uint8_t* buf, uint32_t len)
 	char dbx_name[32], path[MAX_PATH];
 	uint32_t i, fluff_size, nb_entries;
 
-	i = MachineToArch(GetPeArch(buf));
+	i = MachineToArch(GetPeArch(buf, len));
 	if (i == ARCH_UNKNOWN)
 		goto out;
 
@@ -2318,13 +2318,13 @@ static BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 			img_data_dir = pe64_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE];
 		}
 
-		root = RvaToPhysical(buf, img_data_dir.VirtualAddress);
+		root = RvaToPhysical(buf, len, img_data_dir.VirtualAddress);
 		rsrc_rva = FindResourceRva(rsrc_name, root, root, &rsrc_len);
 		safe_free(rsrc_name);
 		if (rsrc_rva != 0) {
 			if (rsrc_len == sizeof(uint32_t)) {
-				svn_ver = (uint32_t*)RvaToPhysical(buf, rsrc_rva);
-				if (svn_ver != NULL) {
+				svn_ver = (uint32_t*)RvaToPhysical(buf, len, rsrc_rva);
+				if (svn_ver != NULL && (uintptr_t)svn_ver + sizeof(uint32_t) <= (uintptr_t)buf + len) {
 					uuprintf("  SVN version: %d.%d", *svn_ver >> 16, *svn_ver & 0xffff);
 					if (*svn_ver < sbat_entries[i].version) {
 						uprintf("  SVN version %d.%d is lower than required minimum SVN version %d.%d!",
@@ -2376,7 +2376,7 @@ BOOL IsSignedBySecureBootAuthority(uint8_t* buf, uint32_t len)
 		return FALSE;
 
 	// Get the signer/issuer info
-	cert = GetPeSignatureData(buf);
+	cert = GetPeSignatureData(buf, len);
 	// Secure Boot Authority is always an issuer
 	if (GetIssuerCertificateInfo(cert, &info) != 2)
 		return FALSE;
@@ -2410,12 +2410,16 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 
 	if (buf == NULL || len < 0x100 || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
 		return -2;
+	// IsRevokedBySvn() accesses the NT headers directly, so make sure they fit in the buffer
+	if (dos_header->e_lfanew < 0 || dos_header->e_lfanew > MAX_PE_SIZE ||
+		dos_header->e_lfanew + sizeof(IMAGE_NT_HEADERS64) > len)
+		return -2;
 	pe_header = (IMAGE_NT_HEADERS32*)&buf[dos_header->e_lfanew];
 	if (pe_header->Signature != IMAGE_NT_SIGNATURE)
 		return -2;
 
 	// Get the signer/issuer info
-	cert = GetPeSignatureData(buf);
+	cert = GetPeSignatureData(buf, len);
 	r = GetIssuerCertificateInfo(cert, &info);
 	if (r == 0) {
 		uprintf("  (Unsigned Bootloader)");
