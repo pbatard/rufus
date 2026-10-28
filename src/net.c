@@ -174,7 +174,7 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	const char* short_name;
 	unsigned char buf[DOWNLOAD_BUFFER_SIZE];
 	char hostname[64], urlpath[128], strsize[32], *bak_file = NULL;
-	BOOL r = FALSE;
+	BOOL r = FALSE, file_size_known = FALSE;
 	DWORD dwSize, dwWritten, dwDownloaded;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
@@ -255,10 +255,17 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	}
 	dwSize = sizeof(strsize);
 	if (!HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH, (LPVOID)strsize, &dwSize, NULL)) {
-		uprintf("Unable to retrieve file length: %s", WindowsErrorString());
-		goto out;
+		if (file == NULL) {
+			uprintf("Unable to retrieve file length: %s", WindowsErrorString());
+			goto out;
+		}
+		uprintf("Unable to retrieve file length; continuing as a streamed download: %s", WindowsErrorString());
+		total_size = 0;
+		SetLastError(ERROR_SUCCESS);
+	} else {
+		total_size = strtoull(strsize, NULL, 10);
+		file_size_known = TRUE;
 	}
-	total_size = strtoull(strsize, NULL, 10);
 	if (hProgressDialog != NULL) {
 		char msg[128];
 		uprintf("File length: %s", SizeToHumanReadable(total_size, FALSE, FALSE));
@@ -293,9 +300,13 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 		// User may have cancelled the download
 		if (IS_ERROR(ErrorStatus))
 			goto out;
-		if (!InternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded) || (dwDownloaded == 0))
+		if (!InternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded)) {
+			uprintf("Unable to read download data: %s", WindowsErrorString());
+			goto out;
+		}
+		if (dwDownloaded == 0)
 			break;
-		if (hProgressDialog != NULL)
+		if ((hProgressDialog != NULL) && file_size_known)
 			UpdateProgressWithInfo(OP_NOOP, MSG_241, size, total_size);
 		if (file != NULL) {
 			if (!WriteFile(hFile, buf, dwDownloaded, &dwWritten, NULL)) {
@@ -311,15 +322,19 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 		size += dwDownloaded;
 	}
 
-	if (size != total_size) {
-		uprintf("Could not download complete file - read: %lld bytes, expected: %lld bytes", size, total_size);
+	if ((file_size_known && (size != total_size)) || (size == 0)) {
+		if (file_size_known)
+			uprintf("Could not download complete file - read: %lld bytes, expected: %lld bytes", size, total_size);
+		else
+			uprintf("No data was downloaded from '%s'", url);
 		ErrorStatus = RUFUS_ERROR(ERROR_WRITE_FAULT);
 		goto out;
 	} else {
 		DownloadStatus = 200;
 		r = TRUE;
 		if (hProgressDialog != NULL) {
-			UpdateProgressWithInfo(OP_NOOP, MSG_241, total_size, total_size);
+			if (file_size_known)
+				UpdateProgressWithInfo(OP_NOOP, MSG_241, total_size, total_size);
 			uprintf("Successfully downloaded '%s'", short_name);
 		}
 	}
@@ -1061,7 +1076,6 @@ static DWORD WINAPI DownloadLinuxISOThread(LPVOID param)
 	downloaded_size = DownloadToFileOrBuffer(context->entry->url, context->path, NULL, hMainDialog, TRUE);
 	if (downloaded_size == 0) {
 		SendMessage(hMainDialog, UM_PROGRESS_EXIT, 0, 0);
-		DeleteFileU(context->path);
 		if (SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
 			uprintf("Linux ISO download cancelled");
 			Notification(MB_ICONINFORMATION | MB_CLOSE, APPLICATION_NAME, "Linux ISO download was cancelled.");
