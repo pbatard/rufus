@@ -893,6 +893,13 @@ BOOL ValidateOpensslSignature(BYTE* pbBuffer, DWORD dwBufferLen, BYTE* pbSignatu
 		uprintf("Signature validation failed: %s", WinPKIErrorString());
 	}
 
+	// Un-reverse the signature bytes, so we can save it for reuse
+	for (i = 0, j = dwSigLen - 1; i < j; i++, j--) {
+		t = pbSignature[i];
+		pbSignature[i] = pbSignature[j];
+		pbSignature[j] = t;
+	}
+
 out:
 	if (hHash)
 		CryptDestroyHash(hHash);

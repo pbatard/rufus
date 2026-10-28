@@ -158,9 +158,13 @@ void uprint_progress(uint64_t cur_value, uint64_t max_value)
 
 uint32_t read_file(const char* path, uint8_t** buf)
 {
+	if_assert_fails(safe_strlen(path) > 0 && buf != NULL)
+		return 0;
+
+	*buf = NULL;
 	FILE* fd = fopenU(path, "rb");
 	if (fd == NULL) {
-		uprintf("Error: Can't open file '%s'", path);
+		uprintf("Can't open file '%s'", path);
 		return 0;
 	}
 
@@ -171,12 +175,12 @@ uint32_t read_file(const char* path, uint8_t** buf)
 	// +1 so we can add an extra NUL
 	*buf = malloc(size + 1);
 	if (*buf == NULL) {
-		uprintf("Error: Can't allocate %d bytes buffer for file '%s'", size, path);
+		uprintf("Can't allocate %d bytes buffer for file '%s'", size, path);
 		size = 0;
 		goto out;
 	}
 	if (fread(*buf, 1, size, fd) != size) {
-		uprintf("Error: Can't read '%s'", path);
+		uprintf("Can't read '%s'", path);
 		size = 0;
 	}
 	// Always NUL terminate the file
@@ -191,19 +195,83 @@ out:
 	return size;
 }
 
+/*
+ * Read and validate a local signed file against its signature.
+ * buf can be NULL in which case only validation is performed (returns nonzero size if valid)
+ * 
+ */
+uint32_t read_signed_file(const char* path, uint8_t** buf)
+{
+	char* sig_path = NULL;
+	uint8_t *sig = NULL, *_buf = NULL;
+	uint32_t size = 0;
+	size_t len;
+
+	if_assert_fails(safe_strlen(path) > 0)
+		return 0;
+
+	len = strlen(path) + 5;
+	sig_path = malloc(len);
+	if (sig_path == NULL) {
+		uprintf("Can't allocate '%s.sig' name", path);
+		return 0;
+	}
+	safe_sprintf(sig_path, len, "%s.sig", path);
+	size = read_file(sig_path, &sig);
+	safe_free(sig_path);
+	if (size != RSA_SIGNATURE_SIZE) {
+		safe_free(sig);
+		uprintf("Signature for local '%s' is missing or corrupted", path);
+		return 0;
+	}
+
+	size = read_file(path, buf ? buf : &_buf);
+	if (!ValidateOpensslSignature(buf ? *buf : _buf, size, sig, RSA_SIGNATURE_SIZE)) {
+		safe_free(sig);
+		if (buf)
+			safe_free(*buf);
+		else
+			free(_buf);
+		uprintf("Signature for local '%s' is invalid ✗", path);
+		return 0;
+	}
+
+	safe_free(_buf);
+	safe_free(sig);
+	uprintf("Signature for local '%s' is valid ✓", path);
+	return size;
+}
+
 uint32_t write_file(const char* path, const uint8_t* buf, const uint32_t size)
 {
 	uint32_t written;
+
+	if_assert_fails(safe_strlen(path) > 0 && buf != NULL)
+		return 0;
+
 	FILE* fd = fopenU(path, "wb");
 	if (fd == NULL) {
-		uprintf("Error: Can't create '%s'", path);
+		uprintf("Can't create '%s'", path);
 		return 0;
 	}
 	written = (uint32_t)fwrite(buf, 1, size, fd);
 	if (written != size)
-		uprintf("Error: Can't write '%s'", path);
+		uprintf("Can't write '%s'", path);
 	fclose(fd);
 	return written;
+}
+
+BOOL copy_signed_file(const char* src, const char* dst)
+{
+	BOOL ret = FALSE;
+	uint8_t* buf = NULL;
+	uint32_t len;
+	len = read_signed_file(src, &buf);
+	if (len == 0)
+		return FALSE;
+	ret = (write_file(dst, buf, len) == len);
+	free(buf);
+	return ret;
 }
 
 // Prints a bitstring of a number of any size, with or without leading zeroes.

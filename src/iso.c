@@ -709,8 +709,8 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			for (i = 0; i < NB_OLD_C32; i++) {
 				if (props.is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
-					if (CopyFileU(tmp, psz_fullpath, FALSE)) {
-						uprintf("  Replaced with local version %s", IsFileInDB(tmp)?"✓":"✗");
+					if (copy_signed_file(tmp, psz_fullpath)) {
+						uprintf("  Replaced with local version %s", IsFileInDB(tmp) ? "✓" : "✗");
 						break;
 					}
 					uprintf("  Could not replace file: %s", WindowsErrorString());
@@ -919,8 +919,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			for (i = 0; i < NB_OLD_C32; i++) {
 				if (props.is_old_c32[i] && use_own_c32[i]) {
 					static_sprintf(tmp, "%s/syslinux-%s/%s", FILES_DIR, embedded_sl_version_str[0], old_c32_name[i]);
-					if (CopyFileU(tmp, psz_fullpath, FALSE)) {
-						uprintf("  Replaced with local version %s", IsFileInDB(tmp)?"✓":"✗");
+					if (copy_signed_file(tmp, psz_fullpath)) {
+						uprintf("  Replaced with local version %s", IsFileInDB(tmp) ? "✓" : "✗");
 						break;
 					}
 					uprintf("  Could not replace file: %s", WindowsErrorString());

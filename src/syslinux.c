@@ -40,10 +40,10 @@
 #include "setadv.h"
 #include "ntfssect.h"
 
-unsigned char* syslinux_ldlinux[2] = { NULL, NULL };
-unsigned long syslinux_ldlinux_len[2];
-unsigned char* syslinux_mboot = NULL;
-unsigned long syslinux_mboot_len;
+uint8_t* syslinux_ldlinux_buf[2] = { NULL, NULL };
+uint32_t syslinux_ldlinux_len[2];
+uint8_t* syslinux_mboot = NULL;
+uint32_t syslinux_mboot_len;
 
 /* Workaround for 4K support */
 uint32_t SECTOR_SHIFT = 9;
@@ -94,7 +94,6 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	S_NTFSSECT_EXTENT extent;
 	BOOL r = FALSE;
 	FILE* fd;
-	size_t length;
 
 	static unsigned char* sectbuf = NULL;
 	static char* resource[2][2] = {
@@ -163,32 +162,18 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
 		IGNORE_RETVAL(_chdirU(app_data_dir));
 		for (i = 0; i < 2; i++) {
-			syslinux_ldlinux[i] = (unsigned char*) malloc(syslinux_ldlinux_len[i]);
-			if (syslinux_ldlinux[i] == NULL)
-				goto out;
 			static_sprintf(path, "%s\\%s-%s%s\\%s.%s", FILES_DIR, syslinux, img_report.sl_version_str,
 				img_report.sl_version_ext, ldlinux, i==0?"sys":"bss");
-			fd = fopen(path, "rb");
-			if (fd == NULL) {
-				uprintf("Could not open %s\\%s", app_data_dir, path);
-				goto out;
-			}
-			length = fread(syslinux_ldlinux[i], 1, (size_t)syslinux_ldlinux_len[i], fd);
-			fclose(fd);
-			if (length != (size_t)syslinux_ldlinux_len[i]) {
-				uprintf("Could not read %s\\%s", app_data_dir, path);
-				goto out;
-			}
 			uprintf("Using existing '%s\\%s' %s", app_data_dir, path,
-				IsBufferInDB(syslinux_ldlinux[i], (size_t)syslinux_ldlinux_len[i])?"✓":"✗");
+				IsBufferInDB(syslinux_ldlinux_buf[i], (size_t)syslinux_ldlinux_len[i])?"✓":"✗");
 		}
 	} else {
 		for (i = 0; i < 2; i++) {
 		static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[i]);
 		syslinux_ldlinux_len[i] = 0;
-		syslinux_ldlinux[i] = GetResource(hMainInstance, resource[use_v5?1:0][i],
-			_RT_RCDATA, tmp, &syslinux_ldlinux_len[i], TRUE);
-		if (syslinux_ldlinux[i] == NULL)
+		syslinux_ldlinux_buf[i] = GetResource(hMainInstance, resource[use_v5?1:0][i],
+			_RT_RCDATA, tmp, (DWORD*)&syslinux_ldlinux_len[i], TRUE);
+		if (syslinux_ldlinux_buf[i] == NULL)
 			goto out;
 		}
 	}
@@ -207,7 +192,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	}
 
 	/* Write ldlinux.sys file */
-	if (!WriteFileWithRetry(f_handle, (const char _force *)syslinux_ldlinux[0],
+	if (!WriteFileWithRetry(f_handle, (const char _force *)syslinux_ldlinux_buf[0],
 		   syslinux_ldlinux_len[0], NULL, WRITE_RETRIES)) {
 		uprintf("Could not write '%s': %s", &path[3], WindowsErrorString());
 		goto out;
@@ -301,7 +286,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 
 	/* Rewrite the file */
 	if (!SetFilePointerEx(f_handle, liZero, NULL, FILE_BEGIN) ||
-		!WriteFileWithRetry(f_handle, syslinux_ldlinux[0], syslinux_ldlinux_len[0], NULL, WRITE_RETRIES)) {
+		!WriteFileWithRetry(f_handle, syslinux_ldlinux_buf[0], syslinux_ldlinux_len[0], NULL, WRITE_RETRIES)) {
 		uprintf("Could not rewrite '%s': %s\n", &path[3], WindowsErrorString());
 		goto out;
 	}
@@ -342,9 +327,9 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 			uprintf("Caution: No '%s' was provided. The target will be missing a required Syslinux file!", &path[3]);
 		} else {
 			fclose(fd);
-			if (CopyFileU(&path[3], path, TRUE)) {
+			if (copy_signed_file(&path[3], path)) {
 				uprintf("Created '%s' (from '%s\\%s\\%s-%s\\%s') %s", path, app_data_dir, FILES_DIR, syslinux,
-					embedded_sl_version_str[1], &path[3], IsFileInDB(&path[3])?"✓":"✗");
+					embedded_sl_version_str[1], &path[3], IsFileInDB(&path[3]) ? "✓" : "✗");
 			} else {
 				uprintf("Failed to create '%s': %s", path, WindowsErrorString());
 			}
@@ -352,7 +337,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 	} else if (HAS_REACTOS(img_report)) {
 		uprintf("Setting up ReactOS...");
 		syslinux_mboot = GetResource(hMainInstance, MAKEINTRESOURCEA(IDR_SL_MBOOT_C32),
-			_RT_RCDATA, "mboot.c32", &syslinux_mboot_len, FALSE);
+			_RT_RCDATA, "mboot.c32", (DWORD*)&syslinux_mboot_len, FALSE);
 		if (syslinux_mboot == NULL) {
 			goto out;
 		}
@@ -389,8 +374,8 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 
 out:
 	safe_mm_free(sectbuf);
-	safe_free(syslinux_ldlinux[0]);
-	safe_free(syslinux_ldlinux[1]);
+	safe_free(syslinux_ldlinux_buf[0]);
+	safe_free(syslinux_ldlinux_buf[1]);
 	safe_free(sectors);
 	safe_unlockclose(d_handle);
 	safe_closehandle(f_handle);

@@ -783,7 +783,6 @@ extern windows_version_t WindowsVersion;
 extern sbat_entry_t* sbat_entries;
 extern thumbprint_list_t *sb_active_certs, *sb_revoked_certs;
 extern int dialog_showing, force_update, fs_type, boot_type, partition_type, target_type;
-extern unsigned long syslinux_ldlinux_len[2];
 extern char ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
 extern char szFolderPath[MAX_PATH], app_dir[MAX_PATH], temp_dir[MAX_PATH], system_dir[MAX_PATH];
 extern char sysnative_dir[MAX_PATH], app_data_dir[MAX_PATH], *image_path, *fido_url;
@@ -874,7 +873,9 @@ extern BOOL DownloadISO(void);
 extern BOOL IsDownloadable(const char* url);
 extern BOOL IsShown(HWND hDlg);
 extern uint32_t read_file(const char* path, uint8_t** buf);
+extern uint32_t read_signed_file(const char* path, uint8_t** buf);
 extern uint32_t write_file(const char* path, const uint8_t* buf, const uint32_t size);
+extern BOOL copy_signed_file(const char* src, const char* dst);
 extern char* get_token_data_file_indexed(const char* token, const char* filename, int index);
 #define get_token_data_file(token, filename) get_token_data_file_indexed(token, filename, 1)
 extern char* set_token_data_file(const char* token, const char* data, const char* filename);

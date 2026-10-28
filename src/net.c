@@ -355,26 +355,27 @@ out:
 // Download and validate a signed file. The file must have a corresponding '.sig' on the server.
 DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError)
 {
-	char* url_sig = NULL;
+	char* sig_path = NULL;
 	BYTE *buf = NULL, *sig = NULL;
 	DWORD buf_len = 0, sig_len = 0;
 	DWORD ret = 0;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 
-	assert(url != NULL);
+	if_assert_fails(url != NULL && file != NULL)
+		goto out;
 
-	url_sig = malloc(strlen(url) + 5);
-	if (url_sig == NULL) {
+	sig_path = malloc(strlen(url) + 5);
+	if (sig_path == NULL) {
 		uprintf("Could not allocate signature URL");
 		goto out;
 	}
-	strcpy(url_sig, url);
-	strcat(url_sig, ".sig");
+	strcpy(sig_path, url);
+	strcat(sig_path, ".sig");
 
 	buf_len = (DWORD)DownloadToFileOrBuffer(url, NULL, &buf, hProgressDialog, FALSE);
 	if (buf_len == 0)
 		goto out;
-	sig_len = (DWORD)DownloadToFileOrBuffer(url_sig, NULL, &sig, NULL, FALSE);
+	sig_len = (DWORD)DownloadToFileOrBuffer(sig_path, NULL, &sig, NULL, FALSE);
 	if ((sig_len != RSA_SIGNATURE_SIZE) || (!ValidateOpensslSignature(buf, buf_len, sig, sig_len))) {
 		uprintf("FATAL: Download signature is invalid ✗");
 		DownloadStatus = 403;	// Forbidden
@@ -385,6 +386,19 @@ DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog
 	}
 
 	uprintf("Download signature is valid ✓");
+
+	// Save the signature
+	free(sig_path);
+	sig_path = malloc(strlen(file) + 5);
+	if (sig_path == NULL) {
+		uprintf("Could not allocate signature path");
+		goto out;
+	}
+	strcpy(sig_path, file);
+	strcat(sig_path, ".sig");
+	if (write_file(sig_path, sig, sig_len) != sig_len)
+		goto out;
+
 	DownloadStatus = 206;	// Partial content
 	hFile = CreateFileU(file, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
@@ -411,7 +425,7 @@ out:
 		Notification(MB_OK | MB_ICONERROR, lmprintf(MSG_044), IS_ERROR(ErrorStatus) ? StrError(ErrorStatus, FALSE) : WindowsErrorString());
 	}
 	safe_closehandle(hFile);
-	free(url_sig);
+	free(sig_path);
 	free(buf);
 	free(sig);
 	return ret;
