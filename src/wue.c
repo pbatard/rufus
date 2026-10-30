@@ -1373,8 +1373,8 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			len = (uint32_t)strlen(tmp_path[1]);
 			tmp_dir_end = &tmp_path[1][len];
 
-			// Copy/override the Font files
-			static_strcat(tmp_path[1], "\\Fonts_EX");
+			// Copy/override the Font files (and make sure the "fonts" part is lowercase, like the dest)
+			static_strcat(tmp_path[1], "\\fonts_EX");
 			StrArrayCreate(&files, 64);
 			ListDirectoryContent(&files, tmp_path[1], LIST_DIR_TYPE_FILE);
 			for (i = 0; i < (int)files.Index; i++) {

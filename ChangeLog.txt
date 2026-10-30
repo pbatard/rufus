@@ -1,5 +1,5 @@
 o Version 4.16 (2026.11.??)
-    Finally work around the AMI NTFS driver bug, so that runtime UEFI media validation can run on the millions of PCs that AMI screwed up
+    Finally work around the AMI NTFS driver bug, so that runtime UEFI media validation can work on the millions of PCs that AMI screwed up
     Finally report USB 3.2+ devices (USB 3.2 = 20 Gbps, USB 4.0 = 40 Gpbs, USB 4.1 = 80 Gbps - See, USB Forum, it's really NOT that hard!)
     Fix the CA 2023 updated files not being taken into account during runtime UEFI media validation
     Fix the "Silent" installation option being potentially applied even when all dependencies aren't met
