@@ -3,7 +3,7 @@ o Version 4.16 (2026.11.??)
     Finally report USB 3.2+ devices (USB 3.2 = 20 Gbps, USB 4.0 = 40 Gpbs, USB 4.1 = 80 Gbps - See, USB Forum, it's really NOT that hard!)
     Fix the CA 2023 updated files not being taken into account during runtime UEFI media validation
     Fix the "Silent" installation option being potentially applied even when all dependencies aren't met
-    Fix the a regression where "Write as ESP" used the whole drive, instead of the expected 1 GB partition
+    Fix a regression where "Write as ESP" used the whole drive, instead of the expected 1 GB partition
     Fix WUE timezone duplication for non English locales and reinstate the use of dots in local usernames
     Add classic right click context menu restoration to the QoL improvements option (courtesy of Frédéric Lachapelle)
     Drop the ever problematic use of Group Policies when disabling the "Do you want to format this drive?" prompt
@@ -11,7 +11,7 @@ o Version 4.16 (2026.11.??)
     Update embedded GRUB to version 2.16
     Update libcdio to latest
     Update the official DBX URLs, since they were changed by Microsoft
-    Address multiple vulnerabilities, courtesy of @indep-arg, Andreas Fehlner, Adam Korczynski and Ramesh Adhikari
+    Address multiple vulnerabilities, courtesy of @indep-arg, Andreas Fehlner, Adam Korczynski, Ramesh Adhikari and Holden Han
 
 o Version 4.15 (2026.06.30)
     Add RISC-V 64 support to UEFI:NTFS

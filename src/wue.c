@@ -1071,7 +1071,8 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		HAS_BOOTMGR_BIOS(img_report) ? (HAS_BOOTMGR_EFI(img_report) ? "ALL" : "BIOS") : "UEFI",
 		(use_esp) ? ms_efi : drive_name);
 	// I don't believe we can ever have a stray '%' in cmd, but just in case...
-	assert(strchr(cmd, '%') == NULL);
+	if_assert_fails(strchr(cmd, '%') == NULL)
+		return FALSE;
 	uprintf(cmd);
 	if (RunCommand(cmd, sysnative_dir, usb_debug) != 0) {
 		// Try to continue... but report a failure
@@ -1089,9 +1090,9 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	if (unattend_xml_flags & UNATTEND_OFFLINE_INTERNAL_DRIVES) {
 		uprintf("Setting the target's internal drives offline using command:");
 		// This applies the "offlineServicing" section of the unattend.xml (while ignoring the other sections)
-		static_sprintf(cmd, "dism /Image:%s\\ /Apply-Unattend:%s", drive_name, unattend_xml_path);
+		static_sprintf(cmd, "%s\\dism.exe /Image:%s\\ /Apply-Unattend:%s", sysnative_dir, drive_name, unattend_xml_path);
 		uprintf(cmd);
-		RunCommand(cmd, NULL, usb_debug);
+		RunCommand(cmd, sysnative_dir, usb_debug);
 	}
 
 	uprintf("Disabling use of the Windows Recovery Environment using command:");

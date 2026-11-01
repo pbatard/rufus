@@ -1600,8 +1600,10 @@ out:
 				}
 			}
 		} else if (HAS_BOOTMGR(img_report) && enable_ntfs_compression) {
+			char cmdline[256];
 			// bootmgr might need to be uncompressed: https://github.com/pbatard/rufus/issues/1381
-			RunCommand("compact /u bootmgr* efi/boot/*.efi", dest_dir, TRUE);
+			static_sprintf(cmdline, "%s\\compact.exe /u bootmgr* efi/boot/*.efi", sysnative_dir);
+			RunCommand(cmdline, dest_dir, TRUE);
 		}
 		// Exception for Slax Syslinux UEFI bootloaders...
 		// ...that don't appear to work anyway as of slax-64bit-slackware-15.0.3.iso
