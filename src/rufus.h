@@ -202,11 +202,7 @@ static __inline void safe_strcp(char* dst, const size_t dst_max, const char* src
 #define safe_atoi(str) ((((char*)(str))==NULL) ? 0 : atoi(str))
 #define safe_strlen(str) ((((char*)(str))==NULL) ? 0 : strlen(str))
 #define safe_strdup(str) ((((char*)(str))==NULL) ? NULL : _strdup(str))
-#if defined(_MSC_VER)
 #define safe_vsnprintf(buf, size, format, arg) _vsnprintf_s(buf, size, _TRUNCATE, format, arg)
-#else
-#define safe_vsnprintf vsnprintf
-#endif
 #define safe_strtolower(str) do { if (str != NULL) CharLowerA(str); } while(0)
 #define safe_strtoupper(str) do { if (str != NULL) CharUpperA(str); } while(0)
 static __inline void static_repchr(char* p, char s, char r) {

@@ -2490,7 +2490,7 @@ void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name)
 
 	static_sprintf(md5_path, "%s\\%s", dest_dir, md5sum_name);
 	md5_size = read_file(md5_path, (uint8_t**)&md5_data);
-	if (md5_size == 0)
+	if (md5_size == 0 || md5_size > 64 * MB)
 		return;
 
 	for (i = 0; i < modified_files.Index; i++) {
@@ -2511,7 +2511,12 @@ void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name)
 		HashFile(HASH_MD5, modified_files.String[i], sum);
 		while ((pos > 0) && (md5_data[pos - 1] != '\n'))
 			pos--;
-		assert(IS_HEXASCII(md5_data[pos]));
+		// The line must start with 32 hex characters that we can overwrite
+		for (j = 0; (j < 2 * MD5_HASHSIZE) && (pos + j < md5_size) && IS_HEXASCII(md5_data[pos + j]); j++);
+		if (j < 2 * MD5_HASHSIZE) {
+			uprintf("  Invalid MD5 sum entry - Ignored");
+			continue;
+		}
 		for (j = 0; j < 16; j++) {
 			md5_data[pos + 2 * j] = ((sum[j] >> 4) < 10) ? ('0' + (sum[j] >> 4)) : ('a' - 0xa + (sum[j] >> 4));
 			md5_data[pos + 2 * j + 1] = ((sum[j] & 15) < 10) ? ('0' + (sum[j] & 15)) : ('a' - 0xa + (sum[j] & 15));

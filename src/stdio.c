@@ -75,12 +75,13 @@ void uprintf(const char *format, ...)
 	int n;
 
 	va_start(args, format);
-	n = safe_vsnprintf(p, sizeof(buf)-3, format, args); // buf-3 is room for CR/LF/NUL
+	n = safe_vsnprintf(p, sizeof(buf) - 3, format, args); // buf - 3 is room for CR/LF/NUL
 	va_end(args);
 
-	p += (n < 0)?sizeof(buf)-3:n;
+	// safe_vsnprintf() translates to _vsnprintf_s() for all toolchains and returns negative on truncation
+	p += (n < 0) ? sizeof(buf) - 3 : n;
 
-	while((p>buf) && (isspaceU(p[-1])))
+	while((p > buf) && (isspaceU(p[-1])))
 		*--p = '\0';
 
 	*p++ = '\r';

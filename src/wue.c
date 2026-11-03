@@ -606,7 +606,12 @@ BOOL SetupWinPE(char drive_letter)
 		uprintf("Could not get size for file %s: %s\n", dst, WindowsErrorString());
 		goto out;
 	}
-	buffer = (char*)malloc(size);
+	if (size < 64) {
+		uprintf("File %s is too small to patch\n", dst);
+		goto out;
+	}
+	// +1 so that the '%s' in the log messages below can't read past the end of the buffer
+	buffer = (char*)calloc(1, size + 1);
 	if (buffer == NULL)
 		goto out;
 	if ((!ReadFile(handle, buffer, size, &read_size, NULL)) || (size != read_size)) {
