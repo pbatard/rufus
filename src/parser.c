@@ -1625,10 +1625,11 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
 
 	num_entries = 1;
 	for (i = 0; sbatlevel[i] != '\0'; i++) {
-		if (sbatlevel[i] == '\n')
-			num_entries++;
 		if (sbatlevel[i] == '\r')
 			sbatlevel[i] = '\n';
+		// Convert CR before counting, so that CR-only line endings are counted too
+		if (sbatlevel[i] == '\n')
+			num_entries++;
 	}
 
 	sbat_list = calloc(num_entries + 1, sizeof(sbat_entry_t));
