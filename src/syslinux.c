@@ -160,6 +160,7 @@ BOOL InstallSyslinux(DWORD drive_index, char drive_letter, int file_system)
 
 	/* Access a copy of the ldlinux.sys & ldlinux.bss resources (downloaded or embedded) */
 	if ((syslinux_ldlinux_len[0] != 0) && (syslinux_ldlinux_len[1] != 0)) {
+		assert(syslinux_ldlinux_buf[0] != NULL && syslinux_ldlinux_buf[1] != NULL);
 		IGNORE_RETVAL(_chdirU(app_data_dir));
 		for (i = 0; i < 2; i++) {
 			static_sprintf(path, "%s\\%s-%s%s\\%s.%s", FILES_DIR, syslinux, img_report.sl_version_str,

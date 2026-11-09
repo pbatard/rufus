@@ -211,6 +211,9 @@ uint32_t read_signed_file(const char* path, uint8_t** buf)
 	if_assert_fails(safe_strlen(path) > 0)
 		return 0;
 
+	// If the file doesn't exist, just return
+	if (_accessU(path, 0) == -1)
+		return 0;
 	len = strlen(path) + 5;
 	sig_path = malloc(len);
 	if (sig_path == NULL) {

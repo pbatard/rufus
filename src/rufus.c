@@ -1931,10 +1931,13 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 									&img_report.sl_version_ext[1], ldlinux, ldlinux_ext[i]);
 								CopyFileA(tmp, tmp2, FALSE);
 							}
-							static_sprintf(tmp, "%s.%s", ldlinux, ldlinux_ext[i]);
-							syslinux_ldlinux_len[i] = read_signed_file(tmp, &syslinux_ldlinux_buf[i]);
 						}
-						if (syslinux_ldlinux_len[i] == 0) {
+						// If we got anything, even through fallback, then at least one copy should exist as the full version file
+						if (syslinux_ldlinux_len[i] != 0) {
+							static_sprintf(tmp, "%s-%s%s\\%s.%s", syslinux, img_report.sl_version_str,
+								img_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
+							syslinux_ldlinux_len[i] = read_signed_file(tmp, &syslinux_ldlinux_buf[i]);
+						} else {
 							// If the version matches our embedded one, try to use that as a last ditch effort
 							if (img_report.sl_version == embedded_sl_version[1]) {
 								uprintf("Could not download the file - will try to use embedded %s version instead", img_report.sl_version_str);
