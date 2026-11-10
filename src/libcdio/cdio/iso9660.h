@@ -598,6 +598,7 @@ struct iso9660_stat_s { /* big endian!! */
   iso9660_xa_t       xa;              /**< XA attributes */
   enum { _STAT_FILE = 1, _STAT_DIR = 2 } type;
   bool               b_xa;
+  int16_t            max_filename_size;
   char               filename[EMPTY_ARRAY_SIZE];    /**< filename */
 };
 

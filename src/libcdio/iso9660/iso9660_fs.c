@@ -985,8 +985,12 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
       cdio_warn("Non-contiguous data extents with '%s'", p_stat->filename);
       goto fail;
     }
-    /* Extent name is different. Throw error. This also prevents the
-       p_stat->filename string copy further down from overflowing. */
+    if (from_733(p_iso9660_dir->size) == 0) {
+      /* Subsequent extent with a size of 0. Throw error. */
+      cdio_warn("Zero sized extent found for '%s'", p_stat->filename);
+      goto fail;
+    }
+    /* Extent name is different. Throw error. */
     if (!_iso9660_recname_to_cstring(&p_iso9660_dir->filename.str[1], i_fname,
 	&p_psz_out, NULL, u_joliet_level) || strcmp(p_psz_out, p_stat->filename)) {
       cdio_warn("Data extent name '%s' does not match original name '%s'", p_psz_out, p_stat->filename);
@@ -996,6 +1000,7 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
     free(p_psz_out);
   } else if (first_extent) {
     p_stat->lsn = extent_lsn;
+    p_stat->max_filename_size = stat_len - sizeof(iso9660_stat_t);
   }
   /* Only now update .total_size */
   p_stat->total_size += from_733(p_iso9660_dir->size);
@@ -1048,10 +1053,13 @@ _iso9660_dir_to_statbuf (iso9660_dir_t *p_iso9660_dir,
 	  goto fail;
 	}
 	memcpy(p_stat_new, p_stat, stat_len);
+	p_stat_new->max_filename_size = i_rr_fname+1;
 	free(p_stat);
 	p_stat = p_stat_new;
       }
-      strncpy(p_stat->filename, rr_fname, i_rr_fname+1);
+      /* Use p_stat->max_filename_size to prevent overflow. Also, we calloc'd
+         extra NULs so we should be fine with strncpy() and termination. */
+      strncpy(p_stat->filename, rr_fname, MIN(i_rr_fname+1, p_stat->max_filename_size));
     } else {
       if ('\0' == p_iso9660_dir->filename.str[1] && 1 == i_fname) {
 	strncpy (p_stat->filename, ".", strlen(".")+1);
