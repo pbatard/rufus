@@ -86,6 +86,9 @@ RUFUS_IMG_REPORT img_report;
 FILE* fd_md5sum = NULL;
 int64_t iso_blocking_status = -1;
 uint64_t total_blocks, extra_blocks, nb_blocks, last_nb_blocks;
+#ifdef VALIDATE_SAME_VOLUME
+char target_volume[64] = { 0 };
+#endif
 
 extern uint64_t md5sum_totalbytes;
 extern BOOL preserve_timestamps, enable_ntfs_compression, validate_md5sum;
@@ -722,7 +725,7 @@ static int udf_extract_files(udf_t *p_udf, udf_dirent_t *p_udf_dirent, const cha
 			if (!is_identical)
 				uprintf("  File name sanitized to '%s'", psz_sanpath);
 			file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
-				FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
+				FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, file_length);
 			if (file_handle == INVALID_HANDLE_VALUE) {
 				err = GetLastError();
 				uprintf("  Unable to create file: %s", WindowsErrorString());
@@ -938,8 +941,16 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 					static_sprintf(target_path, "%s/%s", psz_path, p_statbuf->rr.psz_symlink);
 					iso9660_stat_t* p_statbuf2 = iso9660_ifs_stat_translate(p_iso, target_path);
 					if (p_statbuf2 != NULL) {
+						create_file = FALSE;
 						to_windows_path(psz_fullpath);
 						to_windows_path(p_statbuf->rr.psz_symlink);
+						// Sanitization to prevent symlink creation outside the target drive. And I'm going
+						// to make the creator of any malicious ISO pay very dearly for it, with full blown
+						// end of operations and scary alert report so that they do get reported by the user.
+						if_assert_fails(p_statbuf->rr.psz_symlink[0] != '\\' &&
+							strchr(p_statbuf->rr.psz_symlink, '?') == NULL &&
+							strchr(p_statbuf->rr.psz_symlink, ':') == NULL)
+							goto out;
 						uprintf("Symlinking: %s%s ➔ %s", psz_fullpath,
 							(p_statbuf2->type == _STAT_DIR) ? "\\" : "", p_statbuf->rr.psz_symlink);
 						if (!CreateSymbolicLinkU(psz_fullpath, p_statbuf->rr.psz_symlink,
@@ -948,7 +959,6 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 						to_unix_path(p_statbuf->rr.psz_symlink);
 						to_unix_path(psz_fullpath);
 						iso9660_stat_free(p_statbuf2);
-						create_file = FALSE;
 					}
 				} else if (file_length == 0) {
 					if ((safe_stricmp(p_statbuf->filename, "syslinux") == 0) &&
@@ -984,7 +994,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			}
 			if (create_file) {
 				file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
-					FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
+					FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, file_length);
 				if (file_handle == INVALID_HANDLE_VALUE && GetLastError() == ERROR_PATH_NOT_FOUND) {
 					// Some folks (umbrelos) managed to master their ISOs in a manner where some
 					// directories don't exist (or don't have _STAT_DIR) but still have files,
@@ -997,7 +1007,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 						_mkdirExU(psz_sanpath);
 						*last_slash = '/';
 						file_handle = CreatePreallocatedFile(psz_sanpath, GENERIC_READ | GENERIC_WRITE,
-							FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, file_length);
+							FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, file_length);
 					}
 				}
 				if (file_handle == INVALID_HANDLE_VALUE) {
@@ -1283,6 +1293,12 @@ BOOL ExtractISO(const char* src_iso, const char* dest_dir, BOOL scan)
 		PrintInfo(0, MSG_202);
 	} else {
 		uprintf("Extracting files...");
+#ifdef VALIDATE_SAME_VOLUME
+		if (!GetVolumeNameForVolumeMountPointU(dest_dir, target_volume, sizeof(target_volume))) {
+			uprintf("Could not get target volume GUID");
+			return FALSE;
+		}
+#endif
 		IGNORE_RETVAL(_chdirU(app_data_dir));
 		if (total_blocks == 0) {
 			uprintf("Error: ISO has not been properly scanned.");
@@ -2032,7 +2048,7 @@ BOOL DumpFatDir(void* iso, const char* path, int32_t cluster)
 				uprintf("Extracting: %s (from '%s', %s)", target, img_report.efi_img_path,
 					SizeToHumanReadable(diritem.size, FALSE, FALSE));
 				handle = CreatePreallocatedFile(target, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
-					NULL, CREATE_ALWAYS, diritem.attributes, diritem.size);
+					NULL, CREATE_NEW, diritem.attributes, diritem.size);
 				if (handle == INVALID_HANDLE_VALUE) {
 					uprintf("Could not create '%s': %s", target, WindowsErrorString());
 					continue;

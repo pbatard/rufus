@@ -765,6 +765,20 @@ DWORD WaitForSingleObjectWithMessages(HANDLE hHandle, DWORD dwMilliseconds)
 	return res;
 }
 
+#ifdef VALIDATE_SAME_VOLUME
+extern char target_volume[64];
+// Validates that a file handle resides on the same volume as our target volume
+static BOOL ValidateVolumeGUID(HANDLE h)
+{
+	char path[MAX_PATH + 64];
+	DWORD size = GetFinalPathNameByHandleA(h, path, sizeof(path), FILE_NAME_NORMALIZED | VOLUME_NAME_GUID);
+	if (size < 49 || size >= sizeof(path))
+		return FALSE;
+
+	return (_strnicmp(path, target_volume, 49) == 0);
+}
+#endif
+
 // This creates a *contiguous* preallocated file on file systems such as NTFS.
 // The contiguousness is something we want due to the *OBNOXIOUS* AMI NTFS driver
 // but that makes their UEFI NTFS driver read data from the wrong clusters when
@@ -784,6 +798,15 @@ HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAccess,
 		dwCreationDisposition, dwFlagsAndAttributes, NULL);
 	if (h == INVALID_HANDLE_VALUE)
 		return h;
+
+#ifdef VALIDATE_SAME_VOLUME
+	// Double check that the files we create are on our expected target volume
+	if_assert_fails(ValidateVolumeGUID(h)) {
+		CloseHandle(h);
+		return INVALID_HANDLE_VALUE;
+	}
+#endif
+
 	// No big deal if either of the following 2 calls fail...
 	if (SetFilePointerEx(h, (LARGE_INTEGER) { .QuadPart = llFileSize }, NULL, FILE_BEGIN))
 		SetEndOfFile(h);

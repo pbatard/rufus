@@ -1445,6 +1445,19 @@ static __inline BOOL GetVolumeInformationU(LPCSTR lpRootPathName, LPSTR lpVolume
 	return ret;
 }
 
+// Not gonna spend my life fighting against poorly designed Windows APIs
+static __inline BOOL GetVolumeNameForVolumeMountPointU(LPCSTR lpszVolumeMountPoint,
+	LPSTR lpszVolumeName, DWORD cchBufferLength)
+{
+	char drive_name[4] = "?:\\";
+	if (lpszVolumeMountPoint == NULL) {
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+	drive_name[0] = *lpszVolumeMountPoint;
+	return GetVolumeNameForVolumeMountPointA(drive_name, lpszVolumeName, cchBufferLength);
+}
+
 #ifdef __cplusplus
 }
 #endif

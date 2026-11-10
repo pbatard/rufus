@@ -2556,7 +2556,7 @@ void UpdateMD5Sum(const char* dest_dir, const char* md5sum_name)
 			}
 			uprintf("Renamed: %s → %s", path1, path2);
 			hFile = CreatePreallocatedFile(path1, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL,
-				CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, res_size);
+				CREATE_NEW, FILE_ATTRIBUTE_NORMAL, res_size);
 			if ((hFile == NULL) || (hFile == INVALID_HANDLE_VALUE)) {
 				uprintf("Could not create '%s': %s.", path1, WindowsErrorString());
 				MoveFileU(path2, path1);
