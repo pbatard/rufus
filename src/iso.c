@@ -185,7 +185,8 @@ static BOOL is_in_md5sum(char* path)
 		return FALSE;
 
 	// We should have a "X:/xyz" path
-	assert(path[1] == ':' && path[2] == '/');
+	if_assert_fails(path[1] == ':' && path[2] == '/')
+		return FALSE;
 
 	// Modify the path to have " ./xyz"
 	c[0] = path[0];
@@ -312,7 +313,8 @@ static BOOL check_iso_props(const char* psz_dirname, int64_t file_length, const 
 						dst[strlen(dst) - 3] = 's';
 						dst[strlen(dst) - 2] = 'w';
 						dst[strlen(dst) - 1] = 'm';
-						assert(safe_strlen(image_path) + safe_strlen(psz_dirname) + safe_strlen(psz_basename) + 2 < ARRAYSIZE(wim_path));
+						if_assert_fails(safe_strlen(image_path) + safe_strlen(psz_dirname) + safe_strlen(psz_basename) + 2 < ARRAYSIZE(wim_path))
+							return FALSE;
 						static_sprintf(wim_path, "%s|%s/%s", image_path, psz_dirname, psz_basename);
 						WimSplitFile(wim_path, dst);
 						free(dst);
@@ -810,7 +812,7 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 	BOOL is_symlink, is_identical, create_file, free_p_statbuf = FALSE;
 	int length, r = 1;
 	char psz_fullpath[MAX_PATH], *psz_basename = NULL, *psz_sanpath = NULL;
-	char tmp[128], target_path[256], *last_slash;
+	char tmp[128], target_path[384], *last_slash;
 	const char *psz_iso_name = &psz_fullpath[strlen(psz_extract_dir)];
 	_Static_assert(ISO_BUFFER_SIZE % ISO_BLOCKSIZE == 0,
 		"ISO_BUFFER_SIZE is not a multiple of ISO_BLOCKSIZE");
@@ -878,7 +880,8 @@ static int iso_extract_files(iso9660_t* p_iso, const char *psz_path)
 			if (is_symlink)
 				img_report.has_symlinks = SYMLINKS_RR;
 		} else {
-			assert(strlen(p_statbuf->filename) <= sizeof(target_path));
+			if_assert_fails(strlen(p_statbuf->filename) < sizeof(target_path))
+				continue;
 			iso9660_name_translate_ext(p_statbuf->filename, target_path, joliet_level);
 			safe_strcpy(psz_basename, sizeof(psz_fullpath) - length - 1, target_path);
 		}
@@ -1481,9 +1484,10 @@ out:
 		}
 		if (HAS_WININST(img_report)) {
 			char wim_path[4 * MAX_PATH];
-			assert(safe_strlen(image_path) + safe_strlen(&img_report.wininst_path[0][2]) + 2 < ARRAYSIZE(wim_path));
-			static_sprintf(wim_path, "%s|%s", image_path, &img_report.wininst_path[0][2]);
-			img_report.wininst_version = GetWimVersion(wim_path);
+			if_assert_succeeds(safe_strlen(image_path) + safe_strlen(&img_report.wininst_path[0][2]) + 2 < ARRAYSIZE(wim_path)) {
+				static_sprintf(wim_path, "%s|%s", image_path, &img_report.wininst_path[0][2]);
+				img_report.wininst_version = GetWimVersion(wim_path);
+			}
 		}
 		if (img_report.has_grub2) {
 			char grub_path[128];
@@ -1783,7 +1787,8 @@ uint32_t ReadISOFileToBuffer(const char* iso, const char* iso_file, uint8_t** bu
 		goto out;
 	}
 	nblocks = (uint32_t)((file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
-	assert(nblocks < UINT32_MAX / UDF_BLOCKSIZE);
+	if_assert_fails(nblocks < UINT32_MAX / UDF_BLOCKSIZE)
+		goto out;
 	*buf = malloc(nblocks * UDF_BLOCKSIZE + 1);
 	if (*buf == NULL) {
 		uprintf("Could not allocate buffer for file %s", iso_file);

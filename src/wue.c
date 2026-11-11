@@ -1095,7 +1095,7 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	if (unattend_xml_flags & UNATTEND_OFFLINE_INTERNAL_DRIVES) {
 		uprintf("Setting the target's internal drives offline using command:");
 		// This applies the "offlineServicing" section of the unattend.xml (while ignoring the other sections)
-		static_sprintf(cmd, "%s\\dism.exe /Image:%s\\ /Apply-Unattend:%s", sysnative_dir, drive_name, unattend_xml_path);
+		static_sprintf(cmd, "%s\\dism.exe /Image:%s\\ /Apply-Unattend:\"%s\"", sysnative_dir, drive_name, unattend_xml_path);
 		uprintf(cmd);
 		RunCommand(cmd, sysnative_dir, usb_debug);
 	}

@@ -11,7 +11,7 @@ o Version 4.16 (2026.11.??)
     Update embedded GRUB to version 2.16
     Update libcdio to latest
     Update the official DBX URLs, since they were changed by Microsoft
-    Address multiple vulnerabilities, courtesy of @indep-arg, Andreas Fehlner, Adam Korczynski, Ramesh Adhikari and Holden Han
+    Address vulnerabilities, courtesy of @indep-arg, Andreas Fehlner, Adam Korczynski, Ramesh Adhikari, Holden Han and Abi Kasparov
 
 o Version 4.15 (2026.06.30)
     Add RISC-V 64 support to UEFI:NTFS

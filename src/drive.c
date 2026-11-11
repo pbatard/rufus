@@ -2040,7 +2040,7 @@ BOOL GetDrivePartitionData(DWORD DriveIndex, char* FileSystemName, DWORD FileSys
 			if (i < MAX_PARTITIONS) {
 				SelectedDrive.Partition[i].Offset = DriveLayout->PartitionEntry[i].StartingOffset.QuadPart;
 				SelectedDrive.Partition[i].Size = DriveLayout->PartitionEntry[i].PartitionLength.QuadPart;
-				wcscpy(SelectedDrive.Partition[i].Name, DriveLayout->PartitionEntry[i].Gpt.Name);
+				wcsncpy_s(SelectedDrive.Partition[i].Name, 36, DriveLayout->PartitionEntry[i].Gpt.Name, _TRUNCATE);
 			}
 			SelectedDrive.nPartitions++;
 			isUefiNtfs = (wcscmp(DriveLayout->PartitionEntry[i].Gpt.Name, L"UEFI:NTFS") == 0);
@@ -2526,7 +2526,7 @@ BOOL CreatePartition(HANDLE hDrive, int partition_style, int file_system, BOOL m
 			else
 				DriveLayoutEx.PartitionEntry[i].Gpt.PartitionType = PARTITION_MICROSOFT_DATA;
 			IGNORE_RETVAL(CoCreateGuid(&DriveLayoutEx.PartitionEntry[i].Gpt.PartitionId));
-			wcscpy(DriveLayoutEx.PartitionEntry[i].Gpt.Name, SelectedDrive.Partition[i].Name);
+			wcsncpy_s(DriveLayoutEx.PartitionEntry[i].Gpt.Name, 36, SelectedDrive.Partition[i].Name, _TRUNCATE);
 		}
 	}
 
