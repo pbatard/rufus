@@ -1823,7 +1823,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 							continue;
 						img_report.grub2_version[i] = 0;
 						static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, grub, img_report.grub2_version, core_img);
-						grub2_len = DownloadSignedFile(tmp, core_img, hMainDialog, FALSE);
+						grub2_len = DownloadSignedFile(tmp, core_img, hMainDialog, FALSE, TRUE);
 						img_report.grub2_version[i] = c;
 					}
 					if (grub2_len == 0) {
@@ -1865,7 +1865,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 								static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[0]);
 								IGNORE_RETVAL(_mkdir(tmp));
 								static_sprintf(tmp, "%s/%s-%s/%s", FILES_URL, syslinux, embedded_sl_version_str[0], old_c32_name[i]);
-								len = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE);
+								len = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE, TRUE);
 								if (len == 0) {
 									uprintf("Could not download file - cancelling");
 									ret = BOOTCHECK_DOWNLOAD_ERROR;
@@ -1912,14 +1912,14 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 						static_sprintf(tmp, "%s/%s-%s%s/%s.%s", FILES_URL, syslinux, img_report.sl_version_str,
 							img_report.sl_version_ext, ldlinux, ldlinux_ext[i]);
 						syslinux_ldlinux_len[i] = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)],
-							hMainDialog, (*img_report.sl_version_ext == 0));
+							hMainDialog, (*img_report.sl_version_ext == 0), TRUE);
 						if ((syslinux_ldlinux_len[i] == 0) && (DownloadStatus == 404) && (*img_report.sl_version_ext != 0)) {
 							// Couldn't locate the file on the server => try to download without the version extra
 							uprintf("Extended version was not found, trying main version...");
 							static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, img_report.sl_version_str,
 								ldlinux, ldlinux_ext[i]);
 							syslinux_ldlinux_len[i] = DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)],
-								hMainDialog, (*img_report.sl_version_ext == 0));
+								hMainDialog, (*img_report.sl_version_ext == 0), TRUE);
 							if (syslinux_ldlinux_len[i] != 0) {
 								// Duplicate the file (and signature) so that the user won't be prompted to download again
 								static_sprintf(tmp, "%s-%s\\%s.%s", syslinux, img_report.sl_version_str, ldlinux, ldlinux_ext[i]);
@@ -1972,7 +1972,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				static_sprintf(tmp, "%s-%s", syslinux, embedded_sl_version_str[1]);
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/%s-%s/%s.%s", FILES_URL, syslinux, embedded_sl_version_str[1], ldlinux, ldlinux_ext[2]);
-				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE) == 0) {
+				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE, TRUE) == 0) {
 					ret = BOOTCHECK_DOWNLOAD_ERROR;
 					goto out;
 				}
@@ -2018,7 +2018,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				static_sprintf(tmp, "grub4dos-%s", GRUB4DOS_VERSION);
 				IGNORE_RETVAL(_mkdir(tmp));
 				static_sprintf(tmp, "%s/grub4dos-%s/grldr", FILES_URL, GRUB4DOS_VERSION);
-				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE) == 0) {
+				if (DownloadSignedFile(tmp, &tmp[sizeof(FILES_URL)], hMainDialog, TRUE, TRUE) == 0) {
 					ret = BOOTCHECK_DOWNLOAD_ERROR;
 					goto out;
 				}

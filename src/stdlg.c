@@ -2035,7 +2035,7 @@ INT_PTR CALLBACK NewVersionCallback(HWND hDlg, UINT message, WPARAM wParam, LPAR
 				}
 				// Opening the File Dialog will make us lose tabbing focus - set it back
 				SendMessage(hDlg, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(hDlg, IDC_DOWNLOAD), TRUE);
-				hThread = DownloadSignedFileThreaded(update.download_url, filepath, hDlg, TRUE);
+				hThread = DownloadSignedFileThreaded(update.download_url, filepath, hDlg, TRUE, FALSE);
 				break;
 			}
 			return (INT_PTR)TRUE;

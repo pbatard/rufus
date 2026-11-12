@@ -859,8 +859,8 @@ extern uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, cons
 	BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress);
 #define DownloadToFileOrBuffer(url, file, buffer, hProgressDialog, bTaskBarProgress) \
 	DownloadToFileOrBufferEx(url, file, NULL, buffer, hProgressDialog, bTaskBarProgress)
-extern DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog, BOOL PromptOnError);
-extern HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError);
+extern DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError, BOOL bSaveSig);
+extern HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError, BOOL bSaveSig);
 extern INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 extern void SetFidoCheck(void);
 extern BOOL SetUpdateCheck(void);

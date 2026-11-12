@@ -383,7 +383,7 @@ out:
 }
 
 // Download and validate a signed file. The file must have a corresponding '.sig' on the server.
-DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError)
+DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError, BOOL bSaveSig)
 {
 	char* sig_path = NULL;
 	BYTE *buf = NULL, *sig = NULL;
@@ -417,17 +417,19 @@ DWORD DownloadSignedFile(const char* url, const char* file, HWND hProgressDialog
 
 	uprintf("Download signature is valid ✓");
 
-	// Save the signature
-	free(sig_path);
-	sig_path = malloc(strlen(file) + 5);
-	if (sig_path == NULL) {
-		uprintf("Could not allocate signature path");
-		goto out;
+	// Save the signature if requested
+	if (bSaveSig) {
+		free(sig_path);
+		sig_path = malloc(strlen(file) + 5);
+		if (sig_path == NULL) {
+			uprintf("Could not allocate signature path");
+			goto out;
+		}
+		strcpy(sig_path, file);
+		strcat(sig_path, ".sig");
+		if (write_file(sig_path, sig, sig_len) != sig_len)
+			goto out;
 	}
-	strcpy(sig_path, file);
-	strcat(sig_path, ".sig");
-	if (write_file(sig_path, sig, sig_len) != sig_len)
-		goto out;
 
 	DownloadStatus = 206;	// Partial content
 	hFile = CreateFileU(file, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -467,21 +469,23 @@ typedef struct {
 	const char* file;
 	HWND hProgressDialog;
 	BOOL bPromptOnError;
+	BOOL bSaveSig;
 } DownloadSignedFileThreadArgs;
 
 static DWORD WINAPI DownloadSignedFileThread(LPVOID param)
 {
 	DownloadSignedFileThreadArgs* args = (DownloadSignedFileThreadArgs*)param;
-	ExitThread(DownloadSignedFile(args->url, args->file, args->hProgressDialog, args->bPromptOnError));
+	ExitThread(DownloadSignedFile(args->url, args->file, args->hProgressDialog, args->bPromptOnError, args->bSaveSig));
 }
 
-HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError)
+HANDLE DownloadSignedFileThreaded(const char* url, const char* file, HWND hProgressDialog, BOOL bPromptOnError, BOOL bSaveSig)
 {
 	static DownloadSignedFileThreadArgs args;
 	args.url = url;
 	args.file = file;
 	args.hProgressDialog = hProgressDialog;
 	args.bPromptOnError = bPromptOnError;
+	args.bSaveSig = bSaveSig;
 	return CreateThread(NULL, 0, DownloadSignedFileThread, &args, 0, NULL);
 }
 
