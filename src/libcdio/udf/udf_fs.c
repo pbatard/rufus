@@ -553,6 +553,7 @@ udf_get_logical_volume_id(udf_t *p_udf, /*out*/ char *psz_logvolid, unsigned int
   logical_vol_desc_t *p_logvol = (logical_vol_desc_t *) &data;
   char* r;
   int logvolid_len;
+  unsigned int u_len;
 
   /* clear the output to empty string */
   if (psz_logvolid != NULL)
@@ -561,7 +562,13 @@ udf_get_logical_volume_id(udf_t *p_udf, /*out*/ char *psz_logvolid, unsigned int
   if (DRIVER_OP_SUCCESS != udf_read_sectors (p_udf, p_logvol, p_udf->lvd_lba, 1) )
     return 0;
 
-  r = unicode16_decode((uint8_t *) p_logvol->logvol_id, p_logvol->logvol_id[127]);
+  /* The last byte of the dstring holds its used length. udf_dstring is
+     a plain char, so read it unsigned and keep it within the field. */
+  u_len = (uint8_t)p_logvol->logvol_id[sizeof(p_logvol->logvol_id) - 1];
+  if (u_len > sizeof(p_logvol->logvol_id) - 1)
+      u_len = sizeof(p_logvol->logvol_id) - 1;
+
+  r = unicode16_decode((uint8_t*)p_logvol->logvol_id, u_len);
   if (r == NULL)
     return 0;
 
