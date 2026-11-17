@@ -1692,9 +1692,12 @@ thumbprint_list_t* GetThumbprintEntries(char* thumbprints_txt)
 		return NULL;
 
 	num_entries = 1;
-	for (i = 0; thumbprints_txt[i] != '\0'; i++)
+	for (i = 0; thumbprints_txt[i] != '\0'; i++) {
+		if (thumbprints_txt[i] == '\r')
+			thumbprints_txt[i] = '\n';
 		if (thumbprints_txt[i] == '\n')
 			num_entries++;
+	}
 
 	thumbprints = calloc(sizeof(thumbprint_list_t) + num_entries * SHA1_HASHSIZE, 1);
 	if (thumbprints == NULL)

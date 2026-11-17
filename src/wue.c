@@ -1428,12 +1428,13 @@ BOOL ApplyWindowsCustomization(char drive_letter, int flags)
 			static_strcat(tmp_path[1], "\\EFI_EX\\bootmgr_EX.efi");
 			static_sprintf(path, "%c:\\bootmgr.efi", drive_letter);
 			if (PathFileExistsA(tmp_path[1])) {	// 26H2 doesn't have a bootmgr.efi in EFI_EX
+				if (validate_md5sum)
+					md5sum_totalbytes -= _filesizeU(path);
 				if (!CopyFileU(tmp_path[1], path, FALSE)) {
 					uprintf("WARNING: Could not replace 'bootmgr.efi': %s", WindowsErrorString());
 				} else {
 					num_replaced++;
 					if (validate_md5sum) {
-						md5sum_totalbytes -= _filesizeU(tmp_path[1]);
 						md5sum_totalbytes += _filesizeU(path);
 						StrArrayAdd(&modified_files, path, TRUE);
 					}

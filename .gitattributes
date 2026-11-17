@@ -1,6 +1,7 @@
 *.sh            eol=lf
 *.ac            eol=lf
 *.am            eol=lf
+*.csv           eol=lf
 *.in            eol=lf
 *.m4            eol=lf
 missing         eol=lf

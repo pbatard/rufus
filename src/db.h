@@ -159,4 +159,4 @@ static const char db_sbat_level_txt[] =
 	"shim,4\n"
 	"grub,5\n"
 	"grub.proxmox,2\n"
-	"BOOTMGRSECURITYVERSIONNUMBER,0x70000";
+	"BOOTMGRSECURITYVERSIONNUMBER,0xB0000";
