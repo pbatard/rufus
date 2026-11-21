@@ -84,22 +84,22 @@ uint32_t grub2_len;
  */
 static void OutputUTF8Message(const char* src)
 {
-	int len;
+	int len, wlen;
 	wchar_t* wdst = NULL;
 
 	if (src == NULL)
 		goto out;
 	len = (int)safe_strlen(src);
-	while ((len > 0) && ((src[len-1] == 0x0A) || (src[len-1] == 0x0D) || (src[len-1] == ' ')))
+	while ((len > 0) && ((src[len - 1] == 0x0A) || (src[len - 1] == 0x0D) || (src[len - 1] == ' ')))
 		len--;
 	if (len == 0)
 		goto out;
 
-	len = MultiByteToWideChar(CP_OEMCP, 0, src, len, NULL, 0);
-	if (len == 0)
+	wlen = MultiByteToWideChar(CP_OEMCP, 0, src, len, NULL, 0);
+	if (wlen == 0)
 		goto out;
-	wdst = (wchar_t*)calloc(len+1, sizeof(wchar_t));
-	if ((wdst == NULL) || (MultiByteToWideChar(CP_OEMCP, 0, src, len, wdst, len+1) == 0))
+	wdst = (wchar_t*)calloc(wlen + 1, sizeof(wchar_t));
+	if ((wdst == NULL) || (MultiByteToWideChar(CP_OEMCP, 0, src, len, wdst, wlen + 1) == 0))
 		goto out;
 	uprintf("%S", wdst);
 
@@ -1458,7 +1458,7 @@ DWORD WINAPI FormatThread(void* param)
 	char *bb_msg, *volume_name = NULL;
 	char drive_name[] = "?:\\";
 	char drive_letters[27], fs_name[32], label[64];
-	char logfile[MAX_PATH], *userdir;
+	char path[MAX_PATH], *userdir;
 	char efi_dst[] = "?:\\efi\\boot\\bootx64.efi";
 	char kolibri_dst[] = "?:\\MTLD_F32";
 	char grub4dos_dst[] = "?:\\grldr";
@@ -1622,13 +1622,13 @@ try_clear:
 			// create a log file for bad blocks report. Since %USERPROFILE% may
 			// have localized characters, we use the UTF-8 API.
 			userdir = getenvU("USERPROFILE");
-			static_strcpy(logfile, userdir);
+			static_strcpy(path, userdir);
 			safe_free(userdir);
 			GetLocalTime(&lt);
-			safe_sprintf(&logfile[strlen(logfile)], sizeof(logfile) - strlen(logfile) - 1,
+			safe_sprintf(&path[strlen(path)], sizeof(path) - strlen(path) - 1,
 				"\\rufus_%04d%02d%02d_%02d%02d%02d.log",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
-			log_fd = fopenU(logfile, "w+");
+			log_fd = fopenU(path, "w+");
 			if (log_fd == NULL) {
 				uprintf("Error: Could not create log file for bad blocks check");
 				goto out;
@@ -1644,7 +1644,7 @@ try_clear:
 					ErrorStatus = RUFUS_ERROR(APPERR(ERROR_BADBLOCKS_FAILURE));
 				ClearMBRGPT(hPhysicalDrive, SelectedDrive.DiskSize, SelectedDrive.SectorSize);
 				fclose(log_fd);
-				DeleteFileU(logfile);
+				DeleteFileU(path);
 				goto out;
 			}
 			uprintf("Bad Blocks: Check completed, %d bad block%s found. (%d/%d/%d errors)",
@@ -1659,11 +1659,11 @@ try_clear:
 				fprintf(log_fd, APPLICATION_NAME " bad blocks check ended on: %04d.%02d.%02d %02d:%02d:%02d",
 				lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond);
 				fclose(log_fd);
-				r = Notification(MB_ABORTRETRYIGNORE | MB_ICONWARNING, lmprintf(MSG_010), lmprintf(MSG_012, bb_msg, logfile));
+				r = Notification(MB_ABORTRETRYIGNORE | MB_ICONWARNING, lmprintf(MSG_010), lmprintf(MSG_012, bb_msg, path));
 			} else {
 				// We didn't get any errors => delete the log file
 				fclose(log_fd);
-				DeleteFileU(logfile);
+				DeleteFileU(path);
 			}
 		} while (r == IDRETRY);
 		if (r == IDABORT) {
@@ -2013,11 +2013,12 @@ try_clear:
 		RemountVolume(drive_name, TRUE);
 		// NTFS fixup (WinPE/AIK images don't seem to boot without an extra checkdisk)
 		if ((boot_type == BT_IMAGE) && (img_report.is_iso) && (fs_type == FS_NTFS)) {
-			// Try to ensure that all messages from Checkdisk will be in English
+			// If possible, ensure that all messages from CheckDisk are in English
 			if (PRIMARYLANGID(GetThreadUILanguage()) != LANG_ENGLISH) {
 				SetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
-				if (PRIMARYLANGID(GetThreadUILanguage()) != LANG_ENGLISH)
-					uprintf("Note: CheckDisk messages may be localized");
+				static_sprintf(path, "%s\\en-US\\ulib.dll.mui", system_dir);
+				if (PRIMARYLANGID(GetThreadUILanguage()) != LANG_ENGLISH || !PathFileExistsU(path))
+					uprintf("Note: Checkdisk messages may be localized");
 			}
 			CheckDisk(drive_name[0]);
 			UpdateProgress(OP_FINALIZE, -1.0f);

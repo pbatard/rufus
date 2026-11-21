@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <locale.h>
 #include <math.h>
 #include <time.h>
 #include <winioctl.h>
@@ -3409,6 +3410,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// though this *STILL* does not prevent the Windows default of looking for DLLs in the
 	// current directories.
 	SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
+
+	// Set our locale to UTF-8 so that uprintf("%S") properly converts UTF-16 to UTF-8.
+	// Note that this requires UCRT being used instead of MSVCRT.
+	setlocale(LC_ALL, ".UTF-8");
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 	its_a_me_mario = GetUserNameA((char*)(uintptr_t)&u, &size) && (u == 7104878);
