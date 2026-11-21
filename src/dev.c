@@ -1089,6 +1089,20 @@ BOOL GetDevices(DWORD devnum)
 					uprintf("To use such a card, check 'List USB Hard Drives' under 'advanced drive properties'");
 					safe_free(devint_detail_data);
 					break;
+				} else if (props.is_VHD && GetDriveLetters(drive_index, drive_letters)) {
+                    // Don't try to access the system or application drive, as that will cause Rufus to hang
+					for (p = drive_letters; *p; p++) {
+						if ((*p == PathGetDriveNumberU(system_dir) + 'A') ||
+							(*p == PathGetDriveNumberU(app_dir) + 'A')) {
+							break;
+						}
+					}
+					if (*p) {
+						uprintf("Removing VHD drive from the list: This is the %s disk!",
+							(*p == PathGetDriveNumberU(system_dir) + 'A') ? "system" : "application");
+						safe_free(devint_detail_data);
+						break;
+					}
 				} else if (props.is_VHD && IsMsDevDrive(drive_index)) {
 					uprintf("Device eliminated because it was detected as a Microsoft Dev Drive");
 					safe_free(devint_detail_data);
