@@ -84,7 +84,7 @@ uint32_t grub2_len;
  */
 static void OutputUTF8Message(const char* src)
 {
-	int len;
+	int len, wlen;
 	wchar_t* wdst = NULL;
 
 	if (src == NULL)
@@ -95,11 +95,11 @@ static void OutputUTF8Message(const char* src)
 	if (len == 0)
 		goto out;
 
-	len = MultiByteToWideChar(CP_OEMCP, 0, src, len, NULL, 0);
-	if (len == 0)
+	wlen = MultiByteToWideChar(CP_OEMCP, 0, src, len, NULL, 0);
+	if (wlen == 0)
 		goto out;
-	wdst = (wchar_t*)calloc(len+1, sizeof(wchar_t));
-	if ((wdst == NULL) || (MultiByteToWideChar(CP_OEMCP, 0, src, len, wdst, len+1) == 0))
+	wdst = (wchar_t*)calloc(wlen+1, sizeof(wchar_t));
+	if ((wdst == NULL) || (MultiByteToWideChar(CP_OEMCP, 0, src, len, wdst, wlen+1) == 0))
 		goto out;
 	uprintf("%S", wdst);
 
