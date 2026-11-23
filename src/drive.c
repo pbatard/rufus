@@ -1876,7 +1876,7 @@ const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 		goto out;
 	}
 
-	// 4. Try to detect UDF through by looking for a "BEA01\0" string at offset 0xC001
+	// 4. Try to detect UDF by looking for a "BEA01\0" string at offset 0xC001
 	// NB: This is not thorough UDF detection but good enough for our purpose.
 	// For the full specs see: http://www.osta.org/specs/pdf/udf260.pdf
 	memset(buf, 0, sector_size);
@@ -1887,6 +1887,18 @@ const char* GetFsName(HANDLE hPhysical, LARGE_INTEGER StartingOffset)
 		goto out;
 	if (strncmp("BEA01", &buf[1], 5) == 0) {
 		ret = "UDF";
+		goto out;
+	}
+
+	// 5. Try to detect Btrfs by looking for a "_BHRfS_M" 8-byte magic at offset 0x10040
+	memset(buf, 0, sector_size);
+	StartingOffset.QuadPart += 0x8000ULL;
+	if (!SetFilePointerEx(hPhysical, StartingOffset, NULL, FILE_BEGIN))
+		goto out;
+	if (!ReadFile(hPhysical, buf, sector_size, &size, NULL) || size != sector_size)
+		goto out;
+	if (memcmp("_BHRfS_M", &buf[0x40], 8) == 0) {
+		ret = "Btrfs";
 		goto out;
 	}
 
